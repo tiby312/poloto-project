@@ -27,13 +27,26 @@ pub struct SPlot<'a>{
     plots:Vec<Plot<'a>>,
 }
 
+
+pub struct Color{
+    pub back:u32,
+    pub fore:u32,
+    plots:[u32;10]
+}
+
+pub const DEFAULT_COLOR:Color=Color{
+    back:0,
+    fore:0,
+    plots:[0;10]
+};
+
 impl<'a> SPlot<'a>{
     pub fn lines<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:String,plots:I)
     {
         self.plots.push(Plot::Lines{name,plots:Box::new(Wrapper(plots))})
     }
 
-    pub fn render(mut self){
+    pub fn render(mut self,color:&Color){
         let mut data=Data::new();
 
         for plot in self.plots.into_iter(){
