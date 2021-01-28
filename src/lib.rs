@@ -17,41 +17,50 @@ trait Hay{
 }
 
 
-struct Line<'a>{
-    name:String,
-    plots:Box<dyn Hay+'a>
+enum Plot<'a>{
+    Lines{name:String,plots:Box<dyn Hay+'a>},
+    Scatter{name:String,plots:Box<dyn Hay+'a>},
+    Histo{name:String,plots:Box<dyn Hay+'a>}
 }
 
 pub struct SPlot<'a>{
-    lines:Vec<Line<'a>>
+    plots:Vec<Plot<'a>>,
 }
 
 impl<'a> SPlot<'a>{
-    pub fn line<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:String,plots:I)
+    pub fn lines<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:String,plots:I)
     {
-        self.lines.push(Line{name,plots:Box::new(Wrapper(plots))})
+        self.plots.push(Plot::Lines{name,plots:Box::new(Wrapper(plots))})
     }
 
     pub fn render(mut self){
         let mut data=Data::new();
 
-        for Line{name,plots} in self.lines.into_iter(){
-            let [minx,maxx,miny,maxy]=if let Some(m)=find_bounds(plots.ref_iter()){
-                m
-            }else{
-                return;
-            };
-
-            
-            let mut it=plots.ref_iter();
-            if let Some(k)=it.next(){
-                data=data.move_to((k[0],k[1]));
+        for plot in self.plots.into_iter(){
+            match plot{
+                Plot::Lines{name,plots}=>{
+                    let [minx,maxx,miny,maxy]=if let Some(m)=find_bounds(plots.ref_iter()){
+                        m
+                    }else{
+                        return;
+                    };
         
-                for [x,y] in it{
-                    data=data.line_by((x,y));
-                }   
+                    
+                    let mut it=plots.ref_iter();
+                    if let Some(k)=it.next(){
+                        data=data.move_to((k[0],k[1]));
+                
+                        for [x,y] in it{
+                            data=data.line_by((x,y));
+                        }   
+                    }
+                    data=data.close();
+                },
+                _=>{
+
+                }
             }
-            data=data.close();
+            
         }
     }
 }
