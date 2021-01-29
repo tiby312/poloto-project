@@ -36,6 +36,9 @@ struct Plot<'a>{
 }
 
 pub struct Splot<'a>{
+    title:String,
+    xname:String,
+    yname:String,
     plots:Vec<Plot<'a>>,
 }
 
@@ -53,8 +56,8 @@ pub const DEFAULT_COLOR:Color=Color{
 };
 
 impl<'a> Splot<'a>{
-    pub fn new()->Splot<'a>{
-        Splot{plots:Vec::new()}
+    pub fn new(title:impl ToString,xname:impl ToString,yname:impl ToString)->Splot<'a>{
+        Splot{title:title.to_string(),plots:Vec::new(),xname:xname.to_string(),yname:yname.to_string()}
     }
     ///iterator will be iterated through twice by doing one call to clone().
     ///once to find min max bounds, second to construct plot
@@ -66,15 +69,13 @@ impl<'a> Splot<'a>{
     pub fn render(mut self){
         let width=800.0;
         let height=600.0;
-        let padding=90.0;
+        let padding=150.0;
         
         let mut document = Document::new()
         .set("width",width)
         .set("height",height)
         .set("viewBox", (0,0, width, height));
-        //.set("style","background-color:green");
-        
-        //<rect x="0" y="0" width="600" height="480" fill="#e1e1db"/>
+
         use svg::node::element::Rectangle;
         
         document=document.add(
@@ -85,6 +86,27 @@ impl<'a> Splot<'a>{
             .set("width",format!("{}",width))
             .set("height",format!("{}",height))
         );
+
+        let data=svg::node::Text::new(format!("{}",self.title));
+        let k=svg::node::element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/4.0)); 
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("font-size","x-large");
+        document=document.add(k);
+
+        let data=svg::node::Text::new(format!("X:  {}",self.xname));
+        let k=svg::node::element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/2.0)); 
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("font-size","large");
+        document=document.add(k);
+
+
+        let data=svg::node::Text::new(format!("Y:  {}",self.yname));
+        let k=svg::node::element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/1.5)); 
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("font-size","large");
+        document=document.add(k);
+
+
 
         let [minx,maxx,miny,maxy]=if let Some(m)=find_bounds(self.plots.iter().flat_map(|a|a.plots.ref_iter())){
             m
@@ -97,63 +119,45 @@ impl<'a> Splot<'a>{
         let scaley=(height-padding*2.0)/(maxy-miny);
 
         dbg!(minx,maxx,miny,maxy,scalex,scaley);
-        /*
-        {
-            let diff=maxx-minx;
-            let segment=diff/5;  //5 units.
-            
-            for a in foo{
-                let data=svg::node::Text::new("hay");
-                let k=svg::node::element::Text::new().add(data).set("x","40").set("y","40"); 
-            }
-        }
-        */
         
+
+        //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
         {
-            let num_steps=20;
-            let text_padding=padding*0.5;
+            let num_steps=10;
+            let texty_padding=padding*0.2;
+            let textx_padding=padding*0.4;
+            
             let (xstep_num,xstep_power,xstep)=find_good_step(num_steps,(maxx-minx));
             let (ystep_num,ystep_power,ystep)=find_good_step(num_steps,(maxy-miny));
             dbg!(xstep,xstep_num,ystep,ystep_num,xstep_power,ystep_power);
 
             
-            //text-anchor="middle"
             for a in 0..xstep_num{
                 let p=(a as f32)*xstep;
-                let data=svg::node::Text::new(format!("{}",p));
-                let k=svg::node::element::Text::new().add(data).set("x",format!("{}",p*scalex+padding)).set("y",format!("{}",height-padding+text_padding)); 
-                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
-                
+                let precision=1+xstep_power as usize;
+                let data=svg::node::Text::new(format!("{0:.1$}",p,precision));
+                let k=svg::node::element::Text::new().add(data).set("x",format!("{}",p*scalex+padding)).set("y",format!("{}",height-padding+textx_padding)); 
+                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");                
                 document=document.add(k);
-
             }
 
 
             for a in 0..ystep_num{
                 let p=(a as f32)*ystep;
-                let data=svg::node::Text::new(format!("{}",p));
-                let k=svg::node::element::Text::new().add(data).set("x",format!("{}",padding-text_padding)).set("y",format!("{}",height-p*scaley-padding)); 
-                let k=k.set("alignment-baseline","middle").set("text-anchor","start").set("font-family","Arial");
-
+                let precision=1+ystep_power as usize;
+                let data=svg::node::Text::new(format!("{0:.1$}",p,precision));
+                let k=svg::node::element::Text::new().add(data).set("x",format!("{}",padding-texty_padding)).set("y",format!("{}",height-p*scaley-padding)); 
+                let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("font-family","Arial");
                 document=document.add(k);
-
             }
 
         }
 
-        /*
-        use svg::node::element::Line;
-        //draw grid
-        let vert_line=Line::new().set("stroke","black").set("x1","10").set("y1","10").set("x2","10").set("y2","590");
-        let hoz_line=Line::new().set("stroke","black").set("x1","10").set("y1","10").set("x2","10").set("y2","590");
-        */
-        
         let data = Data::new()
         .move_to((padding, padding))
         .line_to((padding,height-padding))
         .line_to((width-padding,height-padding));
-        //.close();
-    
+        
         let vert_line = Path::new()
         .set("fill", "none")
         .set("stroke", "black")
@@ -175,22 +179,10 @@ impl<'a> Splot<'a>{
                     write!(&mut points,"{},{}\n",padding+x*scalex,height-padding-y*scaley);
                 }   
             }
-            //dbg!(&points);
             data=data.set("points",points);
-            //data=data.close();
-
-            /*
-            let path = Path::new()
-            .set("fill", "blue")
-            .set("stroke", "black")
-            .set("stroke-width", 3)
-            .set("d", data);
-*/
-            document=document.add(data);
-
-        
-            
+            document=document.add(data);    
         }
+
         svg::save("image.svg", &document).unwrap();
     
     }
@@ -214,28 +206,6 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
 
     let step=good_normalized_step/ step_power;
 
-    /*
-    //accepts 0.01,0.002,0.005,500,1000,
-    
-
-
-    // Normalize rough step to find the normalized one that fits best
-    decimal stepPower = (decimal)Math.Pow(10, -Math.Floor(Math.Log10((double)Math.Abs(roughStep))));
-    var normalizedStep = roughStep * stepPower;
-    var goodNormalizedStep = goodNormalizedSteps.First(n => n >= normalizedStep);
-    decimal step = goodNormalizedStep / stepPower;
-
-    // Determine the scale limits based on the chosen step.
-    decimal scaleMax = Math.Ceiling(max / step) * step;
-    decimal scaleMin = Math.Floor(min / step) * step;
-
-    return new Tuple<decimal, decimal, decimal>(scaleMin, scaleMax, step);
-    */
-    /*
-    let multiple=10.0;
-    ((number + multiple/2.0) / multiple) * multiple
-    */
-    //step*x=range;
 
     let new_step=if range%step!=0.0{
         (range/step) as usize+1
@@ -243,8 +213,10 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
         (range/step) as usize
     };
     
-    (new_step+1,step_power,step)
+    (new_step+1,step_power.log10(),step)
 }
+
+
 fn main() {
     dbg!(find_good_step(10,0.15));
     dbg!(find_good_step(10,2.15));
@@ -252,33 +224,13 @@ fn main() {
     dbg!(find_good_step(10,5467.0));
 
 
-    let mut s=Splot::new();
-    s.lines("yo", (0..50).map(|x|x as f32).map(|x|x*0.5).map(|x|[x,x.sin()+1.0]) );
+    let mut s=Splot::new("Testing testing one two three","this is x","this is y");
+    //s.lines("yo", (0..50).map(|x|x as f32).map(|x|x*0.5).map(|x|[x,x.sin()+1.0]) );
+    s.lines("yo", (0..500).map(|x|x as f32).map(|x|x).map(|x|[x*0.000002,x*0.000002]) );
+    
     s.render();
-    /*
-    let data = Data::new()
-        .move_to((10, 10))
-        .line_by((0, 50))
-        .line_by((50, 0))
-        .line_by((0, -50))
-        .close();
     
-    let path = Path::new()
-        .set("fill", "blue")
-        .set("stroke", "black")
-        .set("stroke-width", 3)
-        .set("d", data);
-    
-    let data=svg::node::Text::new("hay");
-    let k=svg::node::element::Text::new().add(data).set("x","40").set("y","40"); 
 
-    let document = Document::new()
-        .set("viewBox", (-10, -10, 90, 90))
-        .add(path)
-        .add(k);
-    
-    svg::save("image.svg", &document).unwrap();
-    */
 }
 
 
