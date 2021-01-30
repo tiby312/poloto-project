@@ -198,7 +198,7 @@ impl<'a> Splot<'a>{
         ];
 
         for (i,Plot{name,mut plots}) in self.plots.into_iter().enumerate(){
-            let color=COLOR_TABLE[i%(COLOR_TABLE.len()-1)];
+            let color=COLOR_TABLE[i%(COLOR_TABLE.len())];
             println!("{:x}",color);
             //Draw legend
 
@@ -280,6 +280,8 @@ fn main() {
     
     s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,x.sin()*0.1]) );
     s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.sin()*0.2]) );
+    
+    s.lines("testing lol long", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.cos()*0.2]) );
     
     s.render();
     
