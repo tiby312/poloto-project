@@ -3,6 +3,8 @@ use svg::node::element::Polyline;
 use svg::Document;
 use svg::node::element::Path;
 use core::marker::PhantomData;
+use svg::node;
+use svg::node::element;
 
 struct Wrapper<'a,I:Iterator<Item=[f32;2]>+Clone+'a>(Option<I>,PhantomData<&'a I>);
 
@@ -24,11 +26,7 @@ trait PlotTrait<'a>{
     fn into_iter(&mut self)->Box<dyn Iterator<Item=[f32;2]>+'a>;
 }
 
-/*
-enum Plot<'a>{
-    Lines{name:String,plots:Box<dyn PlotTrait<'a>+'a>},
-}
-*/
+
 struct Plot<'a>{
     name:String,
     plots:Box<dyn PlotTrait<'a>+'a>,
@@ -46,7 +44,7 @@ pub struct Splot<'a>{
 pub struct Color{
     pub back:u32,
     pub fore:u32,
-    plots:[u32;10]
+    pub plots:[u32;10]
 }
 
 pub const DEFAULT_COLOR:Color=Color{
@@ -54,6 +52,7 @@ pub const DEFAULT_COLOR:Color=Color{
     fore:0,
     plots:[0;10]
 };
+
 
 impl<'a> Splot<'a>{
     pub fn new(title:impl ToString,xname:impl ToString,yname:impl ToString)->Splot<'a>{
@@ -66,16 +65,7 @@ impl<'a> Splot<'a>{
         self.plots.push(Plot{name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
     }
 
-    pub fn render(mut self){
-        let width=800.0;
-        let height=600.0;
-        let padding=150.0;
-        
-        let mut document = Document::new()
-        .set("width",width)
-        .set("height",height)
-        .set("viewBox", (0,0, width, height));
-
+    fn setup_axis(&self,mut document:Document,width:f32,height:f32,padding:f32)->Document{
         use svg::node::element::Rectangle;
         
         document=document.add(
@@ -86,80 +76,43 @@ impl<'a> Splot<'a>{
             .set("width",format!("{}",width))
             .set("height",format!("{}",height))
         );
-
-        let data=svg::node::Text::new(format!("{}",self.title));
-        let k=svg::node::element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/4.0)); 
+    
+        
+        let data=node::Text::new(format!("{}",self.title));
+        let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/4.0)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
         let k=k.set("font-size","x-large");
         document=document.add(k);
-
-        let data=svg::node::Text::new(format!("X:  {}",self.xname));
-        let k=svg::node::element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/2.0)); 
+    
+        let data=node::Text::new(format!("X:  {}",self.xname));
+        let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/2.0)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
         let k=k.set("font-size","large");
         document=document.add(k);
-
-
-        let data=svg::node::Text::new(format!("Y:  {}",self.yname));
-        let k=svg::node::element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/1.5)); 
+    
+    
+        let data=node::Text::new(format!("Y:  {}",self.yname));
+        let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/1.5)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
         let k=k.set("font-size","large");
         document=document.add(k);
+    
 
+        let data=node::Text::new("X");
+        let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",height-padding/5.)); 
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("font-size","large");
+        document=document.add(k);
+    
 
+        let data=node::Text::new("Y");
+        let k=element::Text::new().add(data).set("x",format!("{}",padding/5.0)).set("y",format!("{}",height/2.)); 
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("font-size","large");
+        document=document.add(k);
+    
 
-        let [minx,maxx,miny,maxy]=if let Some(m)=find_bounds(self.plots.iter().flat_map(|a|a.plots.ref_iter())){
-            m
-        }else{
-            return;
-        };
-
-        
-        let scalex=(width-padding*2.0)/(maxx-minx);
-        let scaley=(height-padding*2.0)/(maxy-miny);
-
-        dbg!(minx,maxx,miny,maxy,scalex,scaley);
-        
-
-        //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
-        {
-            let num_steps=10;
-            let texty_padding=padding*0.2;
-            let textx_padding=padding*0.4;
-            
-            let (xstep_num,xstep_power,xstep)=find_good_step(num_steps,(maxx-minx));
-            let (ystep_num,ystep_power,ystep)=find_good_step(num_steps,(maxy-miny));
-
-            let minx_fixed=(minx/xstep).ceil()*xstep;
-            let miny_fixed=(miny/ystep).ceil()*ystep;
-            dbg!(xstep,xstep_num,ystep,ystep_num,xstep_power,ystep_power);
-
-            
-            for a in 0..xstep_num{
-                let p=(a as f32)*xstep;
-                
-                let precision=(1.0+xstep_power).max(0.0) as usize;
-                //TODO if step power is sufficiently big, ignore decimal completely.
-                let data=svg::node::Text::new(format!("{0:.1$}",p+minx_fixed,precision));
-                let k=svg::node::element::Text::new().add(data).set("x",format!("{}",p*scalex+padding)).set("y",format!("{}",height-padding+textx_padding)); 
-                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");                
-                document=document.add(k);
-            }
-
-
-            for a in 0..ystep_num{
-                let p = (a as f32) * ystep;
-                
-                dbg!(p,miny,miny_fixed,p+miny_fixed);
-                let precision=(1.0+ystep_power).max(0.0) as usize;
-                let data=svg::node::Text::new(format!("{0:.1$}",p+miny_fixed,precision));
-                let k=svg::node::element::Text::new().add(data).set("x",format!("{}",padding-texty_padding)).set("y",format!("{}",height-p*scaley-padding)); 
-                let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("font-family","Arial");
-                document=document.add(k);
-            }
-
-        }
-
+    
         let data = Data::new()
         .move_to((padding, padding))
         .line_to((padding,height-padding))
@@ -172,20 +125,86 @@ impl<'a> Splot<'a>{
         .set("d", data);
         
         document=document.add(vert_line);
+    
+    
+        document
+    }
+
+    pub fn render(self){
+        let width=800.0;
+        let height=600.0;
+        let padding=150.0;
+        
+        let mut document = Document::new()
+        .set("width",width)
+        .set("height",height)
+        .set("viewBox", (0,0, width, height));
+
+        document=self.setup_axis(document,width,height,padding);
+
+
+        let [minx,maxx,miny,maxy]=if let Some(m)=find_bounds(self.plots.iter().flat_map(|a|a.plots.ref_iter())){
+            m
+        }else{
+            return; //No plots at all. dont need to draw anything
+        };
+        
+        let scalex=(width-padding*2.0)/(maxx-minx);
+        let scaley=(height-padding*2.0)/(maxy-miny);
+
+        {//Draw step lines
+            //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
+            
+            let num_steps=10;
+            let texty_padding=padding*0.2;
+            let textx_padding=padding*0.4;
+            
+            let (xstep_num,xstep_power,xstep)=find_good_step(num_steps,maxx-minx);
+            let (ystep_num,ystep_power,ystep)=find_good_step(num_steps,maxy-miny);
+
+            let minx_fixed=(minx/xstep).ceil()*xstep;
+            let miny_fixed=(miny/ystep).ceil()*ystep;
+            dbg!(xstep,xstep_num,ystep,ystep_num,xstep_power,ystep_power);
+
+            
+            for a in 0..xstep_num{
+                let p=(a as f32)*xstep;
+                
+                let precision=(1.0+xstep_power).max(0.0) as usize;
+                let data=node::Text::new(format!("{0:.1$}",p+minx_fixed,precision));
+                let k=element::Text::new().add(data).set("x",format!("{}",p*scalex+padding)).set("y",format!("{}",height-padding+textx_padding)); 
+                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");                
+                document=document.add(k);
+            }
+
+
+            for a in 0..ystep_num{
+                let p = (a as f32) * ystep;
+                
+                dbg!(p,miny,miny_fixed,p+miny_fixed);
+                let precision=(1.0+ystep_power).max(0.0) as usize;
+                let data=node::Text::new(format!("{0:.1$}",p+miny_fixed,precision));
+                let k=element::Text::new().add(data).set("x",format!("{}",padding-texty_padding)).set("y",format!("{}",height-p*scaley-padding)); 
+                let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("font-family","Arial");
+                document=document.add(k);
+            }
+        }
+
+
+        
 
         for Plot{name,mut plots} in self.plots.into_iter(){
             
             let mut data=Polyline::new().set("fill","none").set("stroke","#0074d9").set("stroke-width",3);
             
-            let mut it=plots.into_iter();
+            let it=plots.into_iter();
 
             use std::fmt::Write;
             let mut points=String::new();
-            if let Some([x,y])=it.next(){
-                for [x,y] in it{
-                    write!(&mut points,"{},{}\n",padding+(x-minx)*scalex,height-padding-(y-miny)*scaley).unwrap();
-                }   
-            }
+            for [x,y] in it{
+                write!(&mut points,"{},{}\n",padding+(x-minx)*scalex,height-padding-(y-miny)*scaley).unwrap();
+            }   
+        
             data=data.set("points",points);
             document=document.add(data);    
         }
@@ -243,7 +262,7 @@ fn main() {
 
 
 
-fn find_bounds(mut it:impl IntoIterator<Item=[f32;2]>)->Option<[f32;4]>{
+fn find_bounds(it:impl IntoIterator<Item=[f32;2]>)->Option<[f32;4]>{
     let mut ii=it.into_iter();
     if let Some([x,y])=ii.next(){
         let mut val=[x,x,y,y];
