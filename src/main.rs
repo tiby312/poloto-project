@@ -191,11 +191,34 @@ impl<'a> Splot<'a>{
         }
 
 
+        const COLOR_TABLE:[usize;3]=[
+            0xFF0000,
+            0x00FF00,
+            0x0000FF
+        ];
+
+        for (i,Plot{name,mut plots}) in self.plots.into_iter().enumerate(){
+            let color=COLOR_TABLE[i%(COLOR_TABLE.len()-1)];
+            println!("{:x}",color);
+            //Draw legend
+
+            let spacing=padding/3.0;
+            let data=node::Text::new(name);
+            let k=element::Text::new().add(data).set("x",format!("{}",width-padding/1.2)).set("y",format!("{}",padding+(i as f32)*spacing)); 
+            let k=k.set("alignment-baseline","middle").set("text-anchor","start").set("font-family","Arial");
+            let k=k.set("font-size","large");
+            document=document.add(k);
+
+            dbg!(format!("#{:08x?}",color));
+            let k=element::Circle::new()
+                .set("fill",format!("#{:06x?}",color))
+                .set("cx",format!("{}",width-padding/1.2+padding/30.0))
+                .set("cy",format!("{}",padding-padding/8.0+(i as f32)*spacing))
+                .set("r",format!("{}",padding/30.0));
+            document=document.add(k);
         
 
-        for Plot{name,mut plots} in self.plots.into_iter(){
-            
-            let mut data=Polyline::new().set("fill","none").set("stroke","#0074d9").set("stroke-width",3);
+            let mut data=Polyline::new().set("fill","none").set("stroke",format!("#{:06x?}",color)).set("stroke-width",3);
             
             let it=plots.into_iter();
 
@@ -253,7 +276,10 @@ fn main() {
 
     let mut s=Splot::new("Testing testing one two three","this is x","this is y");
     //s.lines("yo", (0..50).map(|x|x as f32).map(|x|x*0.5).map(|x|[x,x.sin()+1.0]) );
-    s.lines("yo", (0..500).map(|x|x as f32).map(|x|x).map(|x|[x*2000.0,x*0.000002]) );
+    //s.lines("yo", (0..500).map(|x|x as f32).map(|x|x).map(|x|[x*2000.0,x*0.000002]) );
+    
+    s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,x.sin()*0.1]) );
+    s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.sin()*0.2]) );
     
     s.render();
     
