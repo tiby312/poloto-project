@@ -129,13 +129,18 @@ impl<'a> Splot<'a>{
             
             let (xstep_num,xstep_power,xstep)=find_good_step(num_steps,(maxx-minx));
             let (ystep_num,ystep_power,ystep)=find_good_step(num_steps,(maxy-miny));
+
+            let minx_fixed=(minx/xstep).ceil()*xstep;
+            let miny_fixed=(miny/ystep).ceil()*ystep;
             dbg!(xstep,xstep_num,ystep,ystep_num,xstep_power,ystep_power);
 
             
             for a in 0..xstep_num{
                 let p=(a as f32)*xstep;
-                let precision=1+xstep_power as usize;
-                let data=svg::node::Text::new(format!("{0:.1$}",p,precision));
+                
+                let precision=(1.0+xstep_power).max(0.0) as usize;
+                //TODO if step power is sufficiently big, ignore decimal completely.
+                let data=svg::node::Text::new(format!("{0:.1$}",p+minx_fixed,precision));
                 let k=svg::node::element::Text::new().add(data).set("x",format!("{}",p*scalex+padding)).set("y",format!("{}",height-padding+textx_padding)); 
                 let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");                
                 document=document.add(k);
@@ -143,9 +148,11 @@ impl<'a> Splot<'a>{
 
 
             for a in 0..ystep_num{
-                let p=(a as f32)*ystep;
-                let precision=1+ystep_power as usize;
-                let data=svg::node::Text::new(format!("{0:.1$}",p,precision));
+                let p = (a as f32) * ystep;
+                
+                dbg!(p,miny,miny_fixed,p+miny_fixed);
+                let precision=(1.0+ystep_power).max(0.0) as usize;
+                let data=svg::node::Text::new(format!("{0:.1$}",p+miny_fixed,precision));
                 let k=svg::node::element::Text::new().add(data).set("x",format!("{}",padding-texty_padding)).set("y",format!("{}",height-p*scaley-padding)); 
                 let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("font-family","Arial");
                 document=document.add(k);
@@ -176,7 +183,7 @@ impl<'a> Splot<'a>{
             let mut points=String::new();
             if let Some([x,y])=it.next(){
                 for [x,y] in it{
-                    write!(&mut points,"{},{}\n",padding+x*scalex,height-padding-y*scaley);
+                    write!(&mut points,"{},{}\n",padding+(x-minx)*scalex,height-padding-(y-miny)*scaley).unwrap();
                 }   
             }
             data=data.set("points",points);
@@ -218,15 +225,16 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
 
 
 fn main() {
+    /*
     dbg!(find_good_step(10,0.15));
     dbg!(find_good_step(10,2.15));
     dbg!(find_good_step(10,12556.15));
     dbg!(find_good_step(10,5467.0));
-
+    */
 
     let mut s=Splot::new("Testing testing one two three","this is x","this is y");
     //s.lines("yo", (0..50).map(|x|x as f32).map(|x|x*0.5).map(|x|[x,x.sin()+1.0]) );
-    s.lines("yo", (0..500).map(|x|x as f32).map(|x|x).map(|x|[x*0.000002,x*0.000002]) );
+    s.lines("yo", (0..500).map(|x|x as f32).map(|x|x).map(|x|[x*2000.0,x*0.000002]) );
     
     s.render();
     
