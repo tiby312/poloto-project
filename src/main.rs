@@ -70,7 +70,7 @@ impl<'a> Splot<'a>{
         
         document=document.add(
             Rectangle::new()
-            .set("fill","#e1e1db")
+            .set("class","pbackground")
             .set("x","0")
             .set("y","0")
             .set("width",format!("{}",width))
@@ -81,50 +81,69 @@ impl<'a> Splot<'a>{
         let data=node::Text::new(format!("{}",self.title));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/4.0)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
-        let k=k.set("font-size","x-large");
+        let k=k.set("font-size","x-large").set("class","ptext");
         document=document.add(k);
     
         let data=node::Text::new(format!("X:  {}",self.xname));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/2.0)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
-        let k=k.set("font-size","large");
+        let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
     
         let data=node::Text::new(format!("Y:  {}",self.yname));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/1.5)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
-        let k=k.set("font-size","large");
+        let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
 
         let data=node::Text::new("X");
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",height-padding/5.)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
-        let k=k.set("font-size","large");
+        let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
 
         let data=node::Text::new("Y");
         let k=element::Text::new().add(data).set("x",format!("{}",padding/5.0)).set("y",format!("{}",height/2.)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
-        let k=k.set("font-size","large");
+        let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
 
     
+        /*
         let data = Data::new()
         .move_to((padding, padding))
         .line_to((padding,height-padding))
         .line_to((width-padding,height-padding));
         
         let vert_line = Path::new()
-        .set("fill", "none")
+        .set("fill", "none !important")
         .set("stroke", "black")
         .set("stroke-width", 3)
-        .set("d", data);
+        .set("d", data).set("class","ptext");
+        */
         
-        document=document.add(vert_line);
+        let vert_line=element::Line::new()
+            .set("x1",format!("{}",padding))
+            .set("x2",format!("{}",padding))
+            .set("y1",format!("{}",padding))
+            .set("y2",format!("{}",height-padding))
+            .set("stroke","black")
+            .set("stroke-width",6).set("class","pline");
+
+        let hoz_line=element::Line::new()
+        .set("x1",format!("{}",padding))
+        .set("x2",format!("{}",width-padding))
+        .set("y1",format!("{}",height-padding))
+        .set("y2",format!("{}",height-padding))
+        .set("stroke","black")
+            .set("stroke-width",6).set("class","pline");
+
+
+        document=document.add(vert_line).add(hoz_line);
     
     
         document
@@ -139,6 +158,32 @@ impl<'a> Splot<'a>{
         .set("width",width)
         .set("height",height)
         .set("viewBox", (0,0, width, height));
+
+        
+        let text_color="black";
+        let background_color="grey";
+        let colors=["green","yellow","purple"];
+
+        let s=element::Style::new(format!("
+        /*color of text*/
+        .ptext{{fill: {0}  }}
+        /*color of vertical and horizontal line*/
+        .pline{{stroke: {0}}}
+        /*color of background*/
+        .pbackground{{fill: {1} }}
+        /*colors of plots*/
+        .plot0color{{stroke:  {2} }}
+        .plot1color{{stroke:  {3} }}
+        .plot2color{{stroke:  {4} }}
+
+        .plot0fill{{fill: {2}}}
+        .plot1fill{{fill:{3}}}
+        .plot2fill{{fill:{4}}}
+        ",text_color,background_color,colors[0],colors[1],colors[2]));
+
+        
+        document=document.add(s);
+
 
         document=self.setup_axis(document,width,height,padding);
 
@@ -173,7 +218,7 @@ impl<'a> Splot<'a>{
                 let precision=(1.0+xstep_power).max(0.0) as usize;
                 let data=node::Text::new(format!("{0:.1$}",p+minx_fixed,precision));
                 let k=element::Text::new().add(data).set("x",format!("{}",p*scalex+padding)).set("y",format!("{}",height-padding+textx_padding)); 
-                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");                
+                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial").set("class","ptext");                
                 document=document.add(k);
             }
 
@@ -185,7 +230,7 @@ impl<'a> Splot<'a>{
                 let precision=(1.0+ystep_power).max(0.0) as usize;
                 let data=node::Text::new(format!("{0:.1$}",p+miny_fixed,precision));
                 let k=element::Text::new().add(data).set("x",format!("{}",padding-texty_padding)).set("y",format!("{}",height-p*scaley-padding)); 
-                let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("font-family","Arial");
+                let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("font-family","Arial").set("class","ptext");
                 document=document.add(k);
             }
         }
@@ -206,7 +251,7 @@ impl<'a> Splot<'a>{
             let data=node::Text::new(name);
             let k=element::Text::new().add(data).set("x",format!("{}",width-padding/1.2)).set("y",format!("{}",padding+(i as f32)*spacing)); 
             let k=k.set("alignment-baseline","middle").set("text-anchor","start").set("font-family","Arial");
-            let k=k.set("font-size","large");
+            let k=k.set("font-size","large").set("class","ptext");
             document=document.add(k);
 
             dbg!(format!("#{:08x?}",color));
@@ -214,11 +259,12 @@ impl<'a> Splot<'a>{
                 .set("fill",format!("#{:06x?}",color))
                 .set("cx",format!("{}",width-padding/1.2+padding/30.0))
                 .set("cy",format!("{}",padding-padding/8.0+(i as f32)*spacing))
-                .set("r",format!("{}",padding/30.0));
+                .set("r",format!("{}",padding/30.0))
+                .set("class",format!("plot{}fill",i));
             document=document.add(k);
         
 
-            let mut data=Polyline::new().set("fill","none").set("stroke",format!("#{:06x?}",color)).set("stroke-width",3);
+            let mut data=Polyline::new().set("class",format!("plot{}color",i)).set("fill","none").set("stroke",format!("#{:06x?}",color)).set("stroke-width",3);
             
             let it=plots.into_iter();
 
