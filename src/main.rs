@@ -161,7 +161,7 @@ impl<'a> Splot<'a>{
 
         
         let text_color="black";
-        let background_color="grey";
+        let background_color="white";
         let colors=["green","yellow","purple"];
 
         let s=element::Style::new(format!("
@@ -176,7 +176,7 @@ impl<'a> Splot<'a>{
         .plot1color{{stroke:  {3} }}
         .plot2color{{stroke:  {4} }}
 
-        .plot0fill{{fill: {2}}}
+        .plot0fill{{fill:{2}}}
         .plot1fill{{fill:{3}}}
         .plot2fill{{fill:{4}}}
         ",text_color,background_color,colors[0],colors[1],colors[2]));
