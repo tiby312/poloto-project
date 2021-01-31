@@ -159,6 +159,7 @@ impl<'a> Splot<'a>{
         .set("height",height)
         .set("viewBox", (0,0, width, height));
 
+        document=document.add(element::Style::new("fake style!"));
         
         let text_color="black";
         let background_color="white";
@@ -175,42 +176,35 @@ impl<'a> Splot<'a>{
         let colors:Vec<_>=COLOR_TABLE.iter().map(|color|format!("#{:06x?}",color)).collect();
         dbg!(&colors);
 
-        let s=element::Style::new(format!("
-        svg {{
-        --fg_color:   {0};
-        --bg_color:   {1};
-        --plot_color0:{2};
-        --plot_color1:{3};
-        --plot_color2:{4};
-        --plot_color4:{5};
-        --plot_color5:{6};
-        --plot_color6:{7};
-        }}
-        /*color of text*/
-        .ptext{{fill: var(--fg_color);  }}
-        /*color of vertical and horizontal line*/
-        .pline{{stroke: var(--fg_color);}}
-        /*color of background*/
-        .pbackground{{fill: var(--bg_color); }}
-        /*colors of plots*/
-        .plot0color{{stroke:  var(--plot_color0); }}
-        .plot1color{{stroke:  var(--plot_color1); }}
-        .plot2color{{stroke:  var(--plot_color2); }}
-        .plot3color{{stroke:  var(--plot_color3); }}
-        .plot4color{{stroke:  var(--plot_color4); }}
-        .plot5color{{stroke:  var(--plot_color5); }}
-        .plot6color{{stroke:  var(--plot_color6); }}
-        
-        .plot0fill{{fill:var(--plot_color0);}}
-        .plot1fill{{fill:var(--plot_color1);}}
-        .plot2fill{{fill:var(--plot_color2);}}
-        .plot3fill{{fill:var(--plot_color3);}}
-        .plot4fill{{fill:var(--plot_color4);}}
-        .plot5fill{{fill:var(--plot_color5);}}
-        .plot6fill{{fill:var(--plot_color6);}}
-        
-
-        ",text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],colors[5]));
+        let s=element::Style::new(format!(
+r###"svg {{
+--fg_color:   {0};
+--bg_color:   {1};
+--plot_color0:{2};
+--plot_color1:{3};
+--plot_color2:{4};
+--plot_color4:{5};
+--plot_color5:{6};
+--plot_color6:{7};
+}}
+.ptext{{fill: var(--fg_color);  }}
+.pline{{stroke: var(--fg_color);}}
+.pbackground{{fill: var(--bg_color); }}
+.plot0color{{stroke:  var(--plot_color0); }}
+.plot1color{{stroke:  var(--plot_color1); }}
+.plot2color{{stroke:  var(--plot_color2); }}
+.plot3color{{stroke:  var(--plot_color3); }}
+.plot4color{{stroke:  var(--plot_color4); }}
+.plot5color{{stroke:  var(--plot_color5); }}
+.plot6color{{stroke:  var(--plot_color6); }}
+.plot0fill{{fill:var(--plot_color0);}}
+.plot1fill{{fill:var(--plot_color1);}}
+.plot2fill{{fill:var(--plot_color2);}}
+.plot3fill{{fill:var(--plot_color3);}}
+.plot4fill{{fill:var(--plot_color4);}}
+.plot5fill{{fill:var(--plot_color5);}}
+.plot6fill{{fill:var(--plot_color6);}}"###,
+text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],colors[5]));
 
         
         document=document.add(s);
