@@ -162,24 +162,55 @@ impl<'a> Splot<'a>{
         
         let text_color="black";
         let background_color="white";
-        let colors=["green","yellow","purple"];
+        const COLOR_TABLE:[usize;6]=[
+            0xFF0000,
+            0x00FF00,
+            0x0000FF,
+            0x445522,
+            0x558833,
+            0xFF0045
+        ];
+
+
+        let colors:Vec<_>=COLOR_TABLE.iter().map(|color|format!("#{:06x?}",color)).collect();
+        dbg!(&colors);
 
         let s=element::Style::new(format!("
+        svg {{
+        --fg_color:   {0};
+        --bg_color:   {1};
+        --plot_color0:{2};
+        --plot_color1:{3};
+        --plot_color2:{4};
+        --plot_color4:{5};
+        --plot_color5:{6};
+        --plot_color6:{7};
+        }}
         /*color of text*/
-        .ptext{{fill: {0}  }}
+        .ptext{{fill: var(--fg_color);  }}
         /*color of vertical and horizontal line*/
-        .pline{{stroke: {0}}}
+        .pline{{stroke: var(--fg_color);}}
         /*color of background*/
-        .pbackground{{fill: {1} }}
+        .pbackground{{fill: var(--bg_color); }}
         /*colors of plots*/
-        .plot0color{{stroke:  {2} }}
-        .plot1color{{stroke:  {3} }}
-        .plot2color{{stroke:  {4} }}
+        .plot0color{{stroke:  var(--plot_color0); }}
+        .plot1color{{stroke:  var(--plot_color1); }}
+        .plot2color{{stroke:  var(--plot_color2); }}
+        .plot3color{{stroke:  var(--plot_color3); }}
+        .plot4color{{stroke:  var(--plot_color4); }}
+        .plot5color{{stroke:  var(--plot_color5); }}
+        .plot6color{{stroke:  var(--plot_color6); }}
+        
+        .plot0fill{{fill:var(--plot_color0);}}
+        .plot1fill{{fill:var(--plot_color1);}}
+        .plot2fill{{fill:var(--plot_color2);}}
+        .plot3fill{{fill:var(--plot_color3);}}
+        .plot4fill{{fill:var(--plot_color4);}}
+        .plot5fill{{fill:var(--plot_color5);}}
+        .plot6fill{{fill:var(--plot_color6);}}
+        
 
-        .plot0fill{{fill:{2}}}
-        .plot1fill{{fill:{3}}}
-        .plot2fill{{fill:{4}}}
-        ",text_color,background_color,colors[0],colors[1],colors[2]));
+        ",text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],colors[5]));
 
         
         document=document.add(s);
@@ -236,11 +267,6 @@ impl<'a> Splot<'a>{
         }
 
 
-        const COLOR_TABLE:[usize;3]=[
-            0xFF0000,
-            0x00FF00,
-            0x0000FF
-        ];
 
         for (i,Plot{name,mut plots}) in self.plots.into_iter().enumerate(){
             let color=COLOR_TABLE[i%(COLOR_TABLE.len())];
