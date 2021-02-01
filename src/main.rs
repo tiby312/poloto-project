@@ -80,34 +80,34 @@ impl<'a> Splot<'a>{
         
         let data=node::Text::new(format!("{}",self.title));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/4.0)); 
-        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","x-large").set("class","ptext");
         document=document.add(k);
     
         let data=node::Text::new(format!("X:  {}",self.xname));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/2.0)); 
-        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
     
         let data=node::Text::new(format!("Y:  {}",self.yname));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/1.5)); 
-        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
 
         let data=node::Text::new("X");
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",height-padding/5.)); 
-        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
 
         let data=node::Text::new("Y");
         let k=element::Text::new().add(data).set("x",format!("{}",padding/5.0)).set("y",format!("{}",height/2.)); 
-        let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial");
+        let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
@@ -162,11 +162,11 @@ impl<'a> Splot<'a>{
 
         //document=document.add(element::Style::new("fake style!"));
         
-        let text_color="black";
-        let background_color="yellow";
+        let text_color="#000000";
+        let background_color="#FFFFFF";
         const COLOR_TABLE:[usize;6]=[
             0xFF0000,
-            0x00FF00,
+            0xFFFF00,
             0x0000FF,
             0x445522,
             0x558833,
@@ -179,6 +179,7 @@ impl<'a> Splot<'a>{
 
         let s=element::Style::new(format!(
 r###".splotclass {{
+font-family: "Arial";
 --fg_color:   {0};
 --bg_color:   {1};
 --plot_color0:{2};
@@ -244,7 +245,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
                 let precision=(1.0+xstep_power).max(0.0) as usize;
                 let data=node::Text::new(format!("{0:.1$}",p+minx_fixed,precision));
                 let k=element::Text::new().add(data).set("x",format!("{}",p*scalex+padding)).set("y",format!("{}",height-padding+textx_padding)); 
-                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("font-family","Arial").set("class","ptext");                
+                let k=k.set("alignment-baseline","start").set("text-anchor","middle").set("class","ptext");                
                 document=document.add(k);
             }
 
@@ -256,7 +257,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
                 let precision=(1.0+ystep_power).max(0.0) as usize;
                 let data=node::Text::new(format!("{0:.1$}",p+miny_fixed,precision));
                 let k=element::Text::new().add(data).set("x",format!("{}",padding-texty_padding)).set("y",format!("{}",height-p*scaley-padding)); 
-                let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("font-family","Arial").set("class","ptext");
+                let k=k.set("alignment-baseline","middle").set("text-anchor","end").set("class","ptext");
                 document=document.add(k);
             }
         }
@@ -271,7 +272,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
             let spacing=padding/3.0;
             let data=node::Text::new(name);
             let k=element::Text::new().add(data).set("x",format!("{}",width-padding/1.2)).set("y",format!("{}",padding+(i as f32)*spacing)); 
-            let k=k.set("alignment-baseline","middle").set("text-anchor","start").set("font-family","Arial");
+            let k=k.set("alignment-baseline","middle").set("text-anchor","start");
             let k=k.set("font-size","large").set("class","ptext");
             document=document.add(k);
 
@@ -334,19 +335,15 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
 
 
 fn main() {
-    /*
-    dbg!(find_good_step(10,0.15));
-    dbg!(find_good_step(10,2.15));
-    dbg!(find_good_step(10,12556.15));
-    dbg!(find_good_step(10,5467.0));
-    */
-
+    
     let mut s=Splot::new("Testing testing one two three","this is x","this is y");
     //s.lines("yo", (0..50).map(|x|x as f32).map(|x|x*0.5).map(|x|[x,x.sin()+1.0]) );
     //s.lines("yo", (0..500).map(|x|x as f32).map(|x|x).map(|x|[x*2000.0,x*0.000002]) );
     
     s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,x.sin()*0.1]) );
     s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.sin()*0.2]) );
+    
+    s.scatter("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.sin()*0.2]) );
     
     s.lines("testing lol long", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.cos()*0.2]) );
     
