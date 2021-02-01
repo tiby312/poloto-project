@@ -110,14 +110,14 @@ impl<'a> Splot<'a>{
         let k=k.set("font-size","x-large").set("class","ptext");
         document=document.add(k);
     
-        let data=node::Text::new(format!("X:  {}",self.xname));
+        let data=node::Text::new(format!("<tspan class=\"ptext_bold\">X</tspan>:  {}",self.xname));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/2.0)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
     
-        let data=node::Text::new(format!("Y:  {}",self.yname));
+        let data=node::Text::new(format!("<tspan class=\"ptext_bold\">Y</tspan>:  {}",self.yname));
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",padding/1.5)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
@@ -126,13 +126,13 @@ impl<'a> Splot<'a>{
         let data=node::Text::new("X");
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",height-padding/5.)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle");
-        let k=k.set("font-size","large").set("class","ptext");
+        let k=k.set("font-size","large").set("class","ptext_bold");
         document=document.add(k);
     
         let data=node::Text::new("Y");
         let k=element::Text::new().add(data).set("x",format!("{}",padding/5.0)).set("y",format!("{}",height/2.)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle");
-        let k=k.set("font-size","large").set("class","ptext");
+        let k=k.set("font-size","large").set("class","ptext_bold");
         document=document.add(k);
     
         let data = Data::new()
@@ -142,7 +142,6 @@ impl<'a> Splot<'a>{
         
         let vert_line = Path::new()
         .set("style","fill:none !important;")
-        //.set("fill", "none !important")
         .set("stroke", "black")
         .set("stroke-width", 3)
         .set("d", data).set("class","pline");
@@ -194,6 +193,7 @@ font-family: "Arial";
 --plot_color6:{7};
 }}
 .ptext{{fill: var(--fg_color);  }}
+.ptext_bold{{fill: var(--fg_color);font-weight: bold; }}
 .pline{{stroke: var(--fg_color);}}
 .pbackground{{fill: var(--bg_color); }}
 .plot0color{{stroke:  var(--plot_color0); }}
@@ -386,7 +386,7 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
         (range/step) as usize
     };
     
-    (new_step+1,step_power.log10(),step)
+    (new_step,step_power.log10(),step)
 }
 
 
