@@ -157,12 +157,13 @@ impl<'a> Splot<'a>{
         let mut document = Document::new()
         .set("width",width)
         .set("height",height)
-        .set("viewBox", (0,0, width, height));
+        .set("viewBox", (0,0, width, height))
+        .set("class","splotclass").set("id","splot");
 
-        document=document.add(element::Style::new("fake style!"));
+        //document=document.add(element::Style::new("fake style!"));
         
         let text_color="black";
-        let background_color="white";
+        let background_color="yellow";
         const COLOR_TABLE:[usize;6]=[
             0xFF0000,
             0x00FF00,
@@ -177,7 +178,7 @@ impl<'a> Splot<'a>{
         dbg!(&colors);
 
         let s=element::Style::new(format!(
-r###"svg {{
+r###".splotclass {{
 --fg_color:   {0};
 --bg_color:   {1};
 --plot_color0:{2};
