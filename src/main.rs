@@ -26,11 +26,17 @@ trait PlotTrait<'a>{
     fn into_iter(&mut self)->Box<dyn Iterator<Item=[f32;2]>+'a>;
 }
 
+enum PlotType{
+    Scatter,
+    Line,
+    Histo,
+    FillBetween,
+}
 
 struct Plot<'a>{
     name:String,
     plots:Box<dyn PlotTrait<'a>+'a>,
-    //type? line/histo/scatter
+    plotType:PlotType
 }
 
 pub struct Splot<'a>{
@@ -58,12 +64,21 @@ impl<'a> Splot<'a>{
     pub fn new(title:impl ToString,xname:impl ToString,yname:impl ToString)->Splot<'a>{
         Splot{title:title.to_string(),plots:Vec::new(),xname:xname.to_string(),yname:yname.to_string()}
     }
+
+
     ///iterator will be iterated through twice by doing one call to clone().
     ///once to find min max bounds, second to construct plot
     pub fn lines<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
     {
-        self.plots.push(Plot{name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+        self.plots.push(Plot{plotType:PlotType::Line,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
     }
+
+    pub fn scatter<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
+    {
+        self.plots.push(Plot{plotType:PlotType::Scatter,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+    }
+
+
 
     fn setup_axis(&self,mut document:Document,width:f32,height:f32,padding:f32)->Document{
         use svg::node::element::Rectangle;
@@ -264,7 +279,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
 
 
 
-        for (i,Plot{name,mut plots}) in self.plots.into_iter().enumerate(){
+        for (i,Plot{plotType,name,mut plots}) in self.plots.into_iter().enumerate(){
             let color=COLOR_TABLE[i%(COLOR_TABLE.len())];
             println!("{:x}",color);
             //Draw legend
@@ -285,19 +300,36 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
                 .set("class",format!("plot{}fill",i));
             document=document.add(k);
         
-
-            let mut data=Polyline::new().set("class",format!("plot{}color",i)).set("fill","none").set("stroke",format!("#{:06x?}",color)).set("stroke-width",3);
-            
             let it=plots.into_iter();
-
-            use std::fmt::Write;
-            let mut points=String::new();
-            for [x,y] in it{
-                write!(&mut points,"{},{}\n",padding+(x-minx)*scalex,height-padding-(y-miny)*scaley).unwrap();
-            }   
         
-            data=data.set("points",points);
-            document=document.add(data);    
+            match plotType{
+                PlotType::Line=>{
+                    let mut data=Polyline::new().set("class",format!("plot{}color",i)).set("fill","none").set("stroke",format!("#{:06x?}",color)).set("stroke-width",3);
+            
+                    
+                    use std::fmt::Write;
+                    let mut points=String::new();
+                    for [x,y] in it{
+                        write!(&mut points,"{},{}\n",padding+(x-minx)*scalex,height-padding-(y-miny)*scaley).unwrap();
+                    }   
+                
+                    data=data.set("points",points);
+                    document=document.add(data);   
+                },
+                PlotType::Scatter=>{
+                    for [x,y] in it{
+                        let k=element::Circle::new()
+                        .set("fill",format!("#{:06x?}",color))
+                        .set("cx",format!("{}",padding+(x-minx)*scalex))
+                        .set("cy",format!("{}",height-padding-(y-miny)*scaley))
+                        .set("r",format!("{}",padding/40.0))
+                        .set("class",format!("plot{}fill",i));
+
+                        document=document.add(k);
+                    }
+                },
+                _=>{}
+            }
         }
 
         svg::save("image.svg", &document).unwrap();
@@ -337,15 +369,15 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
 fn main() {
     
     let mut s=Splot::new("Testing testing one two three","this is x","this is y");
-    //s.lines("yo", (0..50).map(|x|x as f32).map(|x|x*0.5).map(|x|[x,x.sin()+1.0]) );
-    //s.lines("yo", (0..500).map(|x|x as f32).map(|x|x).map(|x|[x*2000.0,x*0.000002]) );
     
-    s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,x.sin()*0.1]) );
-    s.lines("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.sin()*0.2]) );
+    let x=(0..50).map(|x|x as f32/50.0).map(|x|x*std::f32::consts::TAU);
+
+    s.lines("sin", x.clone().map(|x|[x,x.sin()]) );
     
-    s.scatter("pop jks", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.sin()*0.2]) );
+    s.scatter("cos", x.clone().map(|x|[x,x.cos()]) );
     
-    s.lines("testing lol long", (0..500).map(|x|x as f32).map(|x|x*0.1).map(|x|[x*2000.0,-x.cos()*0.2]) );
+    s.lines("tan", x.clone().map(|x|[x,x.tan()]) );
+    
     
     s.render();
     
