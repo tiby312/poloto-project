@@ -128,19 +128,20 @@ impl<'a> Splot<'a>{
     
 
     
-        /*
+        
         let data = Data::new()
         .move_to((padding, padding))
         .line_to((padding,height-padding))
         .line_to((width-padding,height-padding));
         
         let vert_line = Path::new()
-        .set("fill", "none !important")
+        .set("style","fill:none !important;")
+        //.set("fill", "none !important")
         .set("stroke", "black")
         .set("stroke-width", 3)
-        .set("d", data).set("class","ptext");
-        */
+        .set("d", data).set("class","pline");
         
+        /*
         let vert_line=element::Line::new()
             .set("x1",format!("{}",padding))
             .set("x2",format!("{}",padding))
@@ -156,9 +157,9 @@ impl<'a> Splot<'a>{
         .set("y2",format!("{}",height-padding))
         .set("stroke","black")
             .set("stroke-width",6).set("class","pline");
+        */
 
-
-        document=document.add(vert_line).add(hoz_line);
+        document=document.add(vert_line);
     
     
         document
