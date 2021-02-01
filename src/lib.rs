@@ -167,7 +167,7 @@ impl<'a> Plotter<'a>{
         svg::write(target, &doc)
     }
 
-    pub fn finalize_doc(self)->Document{
+    fn finalize_doc(self)->Document{
         let width=800.0;
         let height=600.0;
         let padding=150.0;
