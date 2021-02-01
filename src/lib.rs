@@ -1,3 +1,17 @@
+//!
+//! splot - A very simple plotter
+//!
+//!
+//! ### How do I change the color of the plots?
+//!
+//! You can doing it by overriding the css.
+//!
+//! ### How do I change the size/thickness of the lines/points?
+//!
+//! You can't do this using splot. Instead, the user is encouraged
+//! to pick a set of data that can fit in the desired area nicely.
+//!
+//!
 use svg::node::element::path::Data;
 use svg::node::element::Polyline;
 use svg::Document;
@@ -36,10 +50,10 @@ enum PlotType{
 struct Plot<'a>{
     name:String,
     plots:Box<dyn PlotTrait<'a>+'a>,
-    plotType:PlotType
+    plot_type:PlotType
 }
 
-pub struct Splot<'a>{
+pub struct Plotter<'a>{
     title:String,
     xname:String,
     yname:String,
@@ -47,46 +61,33 @@ pub struct Splot<'a>{
 }
 
 
-pub struct Color{
-    pub back:u32,
-    pub fore:u32,
-    pub plots:[u32;10]
+pub fn plot<'a>(title:impl ToString,xname:impl ToString,yname:impl ToString)->Plotter<'a>{
+    Plotter{title:title.to_string(),plots:Vec::new(),xname:xname.to_string(),yname:yname.to_string()}
 }
 
-pub const DEFAULT_COLOR:Color=Color{
-    back:0,
-    fore:0,
-    plots:[0;10]
-};
-
-
-impl<'a> Splot<'a>{
-    pub fn new(title:impl ToString,xname:impl ToString,yname:impl ToString)->Splot<'a>{
-        Splot{title:title.to_string(),plots:Vec::new(),xname:xname.to_string(),yname:yname.to_string()}
-    }
-
-
+impl<'a> Plotter<'a>{
+    
     ///iterator will be iterated through twice by doing one call to clone().
     ///once to find min max bounds, second to construct plot
     pub fn lines<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
     {
-        self.plots.push(Plot{plotType:PlotType::Line,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+        self.plots.push(Plot{plot_type:PlotType::Line,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
     }
 
     pub fn scatter<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
     {
-        self.plots.push(Plot{plotType:PlotType::Scatter,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+        self.plots.push(Plot{plot_type:PlotType::Scatter,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
     }
 
     pub fn histogram<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
     {
-        self.plots.push(Plot{plotType:PlotType::Histo,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+        self.plots.push(Plot{plot_type:PlotType::Histo,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
     }
 
 
     pub fn line_fill<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
     {
-        self.plots.push(Plot{plotType:PlotType::LineFill,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+        self.plots.push(Plot{plot_type:PlotType::LineFill,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
     }
 
 
@@ -152,7 +153,21 @@ impl<'a> Splot<'a>{
         document
     }
 
-    pub fn render(self){
+    pub fn into_document(self)->Document{
+        self.finalize_doc()
+    }
+
+    pub fn render_to_file(self,filename:&str)->Result<(),std::io::Error>{
+        let doc=self.finalize_doc();
+        svg::save(filename, &doc)
+    }
+
+    pub fn render<T:std::io::Write>(self,target:T)->Result<(),std::io::Error>{
+        let doc=self.finalize_doc();
+        svg::write(target, &doc)
+    }
+
+    pub fn finalize_doc(self)->Document{
         let width=800.0;
         let height=600.0;
         let padding=150.0;
@@ -163,7 +178,6 @@ impl<'a> Splot<'a>{
         .set("viewBox", (0,0, width, height))
         .set("class","splotclass").set("id","splot");
 
-        //document=document.add(element::Style::new("fake style!"));
         
         let text_color="#000000";
         let background_color="#FFFFFF";
@@ -178,8 +192,7 @@ impl<'a> Splot<'a>{
 
 
         let colors:Vec<_>=COLOR_TABLE.iter().map(|color|format!("#{:06x?}",color)).collect();
-        dbg!(&colors);
-
+        
         let s=element::Style::new(format!(
 r###".splotclass {{
 font-family: "Arial";
@@ -222,7 +235,8 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
         let [minx,maxx,miny,maxy]=if let Some(m)=find_bounds(self.plots.iter().flat_map(|a|a.plots.ref_iter())){
             m
         }else{
-            return; //No plots at all. dont need to draw anything
+            //TODO test that this looks ok
+            return document; //No plots at all. dont need to draw anything
         };
         
         let scalex=(width-padding*2.0)/(maxx-minx);
@@ -240,7 +254,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
 
             let minx_fixed=(minx/xstep).ceil()*xstep;
             let miny_fixed=(miny/ystep).ceil()*ystep;
-            dbg!(xstep,xstep_num,ystep,ystep_num,xstep_power,ystep_power);
+            //dbg!(xstep,xstep_num,ystep,ystep_num,xstep_power,ystep_power);
 
             
             for a in 0..xstep_num{
@@ -257,7 +271,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
             for a in 0..ystep_num{
                 let p = (a as f32) * ystep;
                 
-                dbg!(p,miny,miny_fixed,p+miny_fixed);
+                //dbg!(p,miny,miny_fixed,p+miny_fixed);
                 let precision=(1.0+ystep_power).max(0.0) as usize;
                 let data=node::Text::new(format!("{0:.1$}",p+miny_fixed,precision));
                 let k=element::Text::new().add(data).set("x",format!("{}",padding-texty_padding)).set("y",format!("{}",height-p*scaley-padding)); 
@@ -268,9 +282,9 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
 
 
 
-        for (i,Plot{plotType,name,mut plots}) in self.plots.into_iter().enumerate(){
+        for (i,Plot{plot_type,name,mut plots}) in self.plots.into_iter().enumerate(){
             let color=COLOR_TABLE[i%(COLOR_TABLE.len())];
-            println!("{:x}",color);
+            //println!("{:x}",color);
             //Draw legend
 
             let spacing=padding/3.0;
@@ -280,7 +294,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
             let k=k.set("font-size","large").set("class","ptext");
             document=document.add(k);
 
-            dbg!(format!("#{:08x?}",color));
+            //dbg!(format!("#{:08x?}",color));
             let k=element::Circle::new()
                 .set("fill",format!("#{:06x?}",color))
                 .set("cx",format!("{}",width-padding/1.2+padding/30.0))
@@ -293,7 +307,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
 
             let it=it.map(|[x,y]| [padding+(x-minx)*scalex,height-padding-(y-miny)*scaley]   );
         
-            match plotType{
+            match plot_type{
                 PlotType::Line=>{
                     let mut data=Polyline::new().set("class",format!("plot{}color",i)).set("fill","none").set("stroke",format!("#{:06x?}",color)).set("stroke-width",3);
             
@@ -356,8 +370,8 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
             }
         }
 
-        svg::save("image.svg", &document).unwrap();
-    
+        document
+        
     }
 }
 
@@ -370,11 +384,11 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
     
     let step_power=10.0f32.powf(-rough_step.abs().log10().floor()) as f32;
     let normalized_step=rough_step*step_power;
-    dbg!(normalized_step);
+    //dbg!(normalized_step);
 
     let good_steps=[1.0,2.0,5.0,10.0];
     let good_normalized_step=good_steps.iter().find(|a|**a>normalized_step).unwrap();
-    dbg!(good_normalized_step);
+    //dbg!(good_normalized_step);
 
 
     let step=good_normalized_step/ step_power;
@@ -387,27 +401,6 @@ fn find_good_step(num_steps:usize,range:f32)->(usize,f32,f32){
     };
     
     (new_step,step_power.log10(),step)
-}
-
-
-fn main() {
-    
-    let mut s=Splot::new("Testing testing one two three","this is x","this is y");
-    
-    let x=(0..50).map(|x|x as f32/50.0).map(|x|x*std::f32::consts::TAU);
-
-    s.lines("sin", x.clone().map(|x|[x,x.sin()]) );
-    
-    s.scatter("cos", x.clone().map(|x|[x,x.cos()]) );
-    
-    s.histogram("tan", x.clone().map(|x|[x,x.tan()]) );
-    
-    
-    s.line_fill("tan", x.clone().map(|x|[x,(2.0*x).sin()]) );
-    
-    s.render();
-    
-
 }
 
 
