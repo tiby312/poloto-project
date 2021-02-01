@@ -30,7 +30,7 @@ enum PlotType{
     Scatter,
     Line,
     Histo,
-    FillBetween,
+    LineFill,
 }
 
 struct Plot<'a>{
@@ -78,6 +78,17 @@ impl<'a> Splot<'a>{
         self.plots.push(Plot{plotType:PlotType::Scatter,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
     }
 
+    pub fn histogram<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
+    {
+        self.plots.push(Plot{plotType:PlotType::Histo,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+    }
+
+
+    pub fn line_fill<I:Iterator<Item=[f32;2]>+Clone+'a>(&mut self,name:impl ToString,plots:I)
+    {
+        self.plots.push(Plot{plotType:PlotType::LineFill,name:name.to_string(),plots:Box::new(Wrapper(Some(plots),PhantomData))})
+    }
+
 
 
     fn setup_axis(&self,mut document:Document,width:f32,height:f32,padding:f32)->Document{
@@ -111,7 +122,6 @@ impl<'a> Splot<'a>{
         let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
-    
 
         let data=node::Text::new("X");
         let k=element::Text::new().add(data).set("x",format!("{}",width/2.0)).set("y",format!("{}",height-padding/5.)); 
@@ -119,16 +129,12 @@ impl<'a> Splot<'a>{
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
-
         let data=node::Text::new("Y");
         let k=element::Text::new().add(data).set("x",format!("{}",padding/5.0)).set("y",format!("{}",height/2.)); 
         let k=k.set("alignment-baseline","start").set("text-anchor","middle");
         let k=k.set("font-size","large").set("class","ptext");
         document=document.add(k);
     
-
-    
-        
         let data = Data::new()
         .move_to((padding, padding))
         .line_to((padding,height-padding))
@@ -141,24 +147,6 @@ impl<'a> Splot<'a>{
         .set("stroke-width", 3)
         .set("d", data).set("class","pline");
         
-        /*
-        let vert_line=element::Line::new()
-            .set("x1",format!("{}",padding))
-            .set("x2",format!("{}",padding))
-            .set("y1",format!("{}",padding))
-            .set("y2",format!("{}",height-padding))
-            .set("stroke","black")
-            .set("stroke-width",6).set("class","pline");
-
-        let hoz_line=element::Line::new()
-        .set("x1",format!("{}",padding))
-        .set("x2",format!("{}",width-padding))
-        .set("y1",format!("{}",height-padding))
-        .set("y2",format!("{}",height-padding))
-        .set("stroke","black")
-            .set("stroke-width",6).set("class","pline");
-        */
-
         document=document.add(vert_line);
     
     
@@ -302,6 +290,8 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
             document=document.add(k);
         
             let it=plots.into_iter();
+
+            let it=it.map(|[x,y]| [padding+(x-minx)*scalex,height-padding-(y-miny)*scaley]   );
         
             match plotType{
                 PlotType::Line=>{
@@ -311,7 +301,7 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
                     use std::fmt::Write;
                     let mut points=String::new();
                     for [x,y] in it{
-                        write!(&mut points,"{},{}\n",padding+(x-minx)*scalex,height-padding-(y-miny)*scaley).unwrap();
+                        write!(&mut points,"{},{}\n",x,y).unwrap();
                     }   
                 
                     data=data.set("points",points);
@@ -321,15 +311,48 @@ text_color,background_color,colors[0],colors[1],colors[2],colors[3],colors[4],co
                     for [x,y] in it{
                         let k=element::Circle::new()
                         .set("fill",format!("#{:06x?}",color))
-                        .set("cx",format!("{}",padding+(x-minx)*scalex))
-                        .set("cy",format!("{}",height-padding-(y-miny)*scaley))
+                        .set("cx",format!("{}",x))
+                        .set("cy",format!("{}",y))
                         .set("r",format!("{}",padding/40.0))
                         .set("class",format!("plot{}fill",i));
 
                         document=document.add(k);
                     }
                 },
-                _=>{}
+                PlotType::Histo=>{
+                    let mut last=None;
+                    for [x,y]in it{
+                        if let Some(lx)=last{
+                            let k=element::Rectangle::new()
+                            .set("fill",format!("#{:06x?}",color))
+                            .set("x",format!("{}",x))
+                            .set("y",format!("{}",y))
+                            .set("width",format!("{}",   ((x-lx))-padding*0.02     ))
+                            .set("height",format!("{}",(height-padding-y)))  //TODO ugly?
+                            .set("class",format!("plot{}fill",i));
+
+                            document=document.add(k);
+                        }
+                        last=Some(x)
+                    }
+                },
+                PlotType::LineFill=>{
+                    let mut it=it;
+                    if let Some([startx,starty])=it.next(){
+                        let mut data=Data::new().move_to((startx,starty));
+                        for [x,y] in it{
+                            data=data.line_to((x,y));
+                        }
+
+                        data=data.close();
+
+                        let linefill = Path::new().set("d", data).set("class",format!("plot{}fill",i));
+
+                        document=document.add(linefill);
+                    
+                    }
+                    
+                }
             }
         }
 
@@ -377,8 +400,10 @@ fn main() {
     
     s.scatter("cos", x.clone().map(|x|[x,x.cos()]) );
     
-    s.lines("tan", x.clone().map(|x|[x,x.tan()]) );
+    s.histogram("tan", x.clone().map(|x|[x,x.tan()]) );
     
+    
+    s.line_fill("tan", x.clone().map(|x|[x,(2.0*x).sin()]) );
     
     s.render();
     
