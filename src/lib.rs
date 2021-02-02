@@ -1,10 +1,32 @@
 //!
 //! splot - A very simple plotter
 //!
+//! splot is meant to be used to graph fairly 'obvious' trends
+//! in the data. The user is not meant to be able to extract data
+//! or notice subtle differences in data. For this reason, a lot
+//! of options that are normally provided in a plotting library
+//! aren't provided. For example, you can't change the thickness
+//! of the lines. Instead the user is encouraged, to pick a good
+//! set of data points to "zoom in" on a trend they want to show.
 //!
 //! ### How do I change the color of the plots?
 //!
-//! You can doing it by overriding the css.
+//! You can doing it by overriding the css. If you embed the generated svg into a html file,
+//! then you can add this example css styling to override the default in the svg file:
+//! ```css
+//! #splot{
+//!    font-family: "Open Sans", sans-serif;
+//!    --fg_color:"black";
+//!    --bg_color:"white;
+//!    --plot_color0:"red";
+//!    --plot_color1:"green";
+//!    --plot_color2:"yellow";
+//!    --plot_color3:"orange";
+//!    --plot_color4:"purple";
+//!    --plot_color5:"pink";
+//!    --plot_color6:"aqua";
+//! }
+//! ```  
 //!
 //! ### How do I change the size/thickness of the lines/points?
 //!
