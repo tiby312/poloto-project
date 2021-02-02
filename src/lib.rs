@@ -271,13 +271,16 @@ impl<'a> Plotter<'a> {
 
         let text_color = "#000000";
         let background_color = "#FFFFFF";
+        /*
         const COLOR_TABLE: [usize; 6] =
-            [0xFF0000, 0xFFFF00, 0x0000FF, 0x445522, 0x558833, 0xFF0045];
+            [0x2b2255, ed1c1c, 0x0000FF, 0x445522, 0x558833, 0xFF0045];
 
         let colors: Vec<_> = COLOR_TABLE
             .iter()
             .map(|color| format!("#{:06x?}", color))
             .collect();
+        */
+        let colors=vec!("blue","red","green","purple","yellow","aqua");
 
         let s = element::Style::new(format!(
             r###".splotclass {{
@@ -287,9 +290,9 @@ font-family: "Arial";
 --plot_color0:{2};
 --plot_color1:{3};
 --plot_color2:{4};
---plot_color4:{5};
---plot_color5:{6};
---plot_color6:{7};
+--plot_color3:{5};
+--plot_color4:{6};
+--plot_color5:{7};
 }}
 .ptext{{fill: var(--fg_color);  }}
 .ptext_bold{{fill: var(--fg_color);font-weight: bold; }}
@@ -301,14 +304,12 @@ font-family: "Arial";
 .plot3color{{stroke:  var(--plot_color3); }}
 .plot4color{{stroke:  var(--plot_color4); }}
 .plot5color{{stroke:  var(--plot_color5); }}
-.plot6color{{stroke:  var(--plot_color6); }}
 .plot0fill{{fill:var(--plot_color0);}}
 .plot1fill{{fill:var(--plot_color1);}}
 .plot2fill{{fill:var(--plot_color2);}}
 .plot3fill{{fill:var(--plot_color3);}}
 .plot4fill{{fill:var(--plot_color4);}}
-.plot5fill{{fill:var(--plot_color5);}}
-.plot6fill{{fill:var(--plot_color6);}}"###,
+.plot5fill{{fill:var(--plot_color5);}}"###,
             text_color,
             background_color,
             colors[0],
@@ -392,7 +393,7 @@ font-family: "Arial";
             },
         ) in self.plots.into_iter().enumerate()
         {
-            let color = COLOR_TABLE[i % (COLOR_TABLE.len())];
+            //let color = COLOR_TABLE[i % (COLOR_TABLE.len())];
             //println!("{:x}",color);
             //Draw legend
 
@@ -410,7 +411,7 @@ font-family: "Arial";
 
             //dbg!(format!("#{:08x?}",color));
             let k = element::Circle::new()
-                .set("fill", format!("#{:06x?}", color))
+                //.set("fill", format!("#{:06x?}", color))
                 .set("cx", format!("{}", width - padding / 1.2 + padding / 30.0))
                 .set(
                     "cy",
@@ -434,8 +435,8 @@ font-family: "Arial";
                     let mut data = Polyline::new()
                         .set("class", format!("plot{}color", i))
                         .set("fill", "none")
-                        .set("stroke", format!("#{:06x?}", color))
-                        .set("stroke-width", 3);
+                        //.set("stroke", format!("#{:06x?}", color))
+                        .set("stroke-width", 2);
 
                     use std::fmt::Write;
                     let mut points = String::new();
@@ -449,10 +450,10 @@ font-family: "Arial";
                 PlotType::Scatter => {
                     for [x, y] in it {
                         let k = element::Circle::new()
-                            .set("fill", format!("#{:06x?}", color))
+                            //.set("fill", format!("#{:06x?}", color))
                             .set("cx", format!("{}", x))
                             .set("cy", format!("{}", y))
-                            .set("r", format!("{}", padding / 40.0))
+                            .set("r", format!("{}", padding / 50.0))
                             .set("class", format!("plot{}fill", i));
 
                         doc = doc.add(k);
@@ -463,7 +464,7 @@ font-family: "Arial";
                     for [x, y] in it {
                         if let Some((lx, ly)) = last {
                             let k = element::Rectangle::new()
-                                .set("fill", format!("#{:06x?}", color))
+                                //.set("fill", format!("#{:06x?}", color))
                                 .set("x", format!("{}", lx))
                                 .set("y", format!("{}", ly))
                                 .set("width", format!("{}", (x - lx) - padding * 0.02))
