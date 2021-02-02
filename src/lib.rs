@@ -79,6 +79,11 @@ struct Plot<'a> {
     plot_type: PlotType,
 }
 
+///Keeps track of plots.
+///User supplies iterators that will be iterated on when
+///render is called.
+///Each Iterator will be iterated through twice by doing one call to clone().
+///once to find min max bounds, second to construct plot    
 pub struct Plotter<'a> {
     title: String,
     xname: String,
@@ -86,18 +91,21 @@ pub struct Plotter<'a> {
     plots: Vec<Plot<'a>>,
 }
 
+///Shorthand constructor.
 pub fn plot<'a>(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
-    Plotter {
-        title: title.to_string(),
-        plots: Vec::new(),
-        xname: xname.to_string(),
-        yname: yname.to_string(),
-    }
+    Plotter::new(title, xname, yname)
 }
 
 impl<'a> Plotter<'a> {
-    ///iterator will be iterated through twice by doing one call to clone().
-    ///once to find min max bounds, second to construct plot
+    ///Create a plotter
+    pub fn new(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
+        Plotter {
+            title: title.to_string(),
+            plots: Vec::new(),
+            xname: xname.to_string(),
+            yname: yname.to_string(),
+        }
+    }
     pub fn lines<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
         &mut self,
         name: impl ToString,
@@ -122,6 +130,7 @@ impl<'a> Plotter<'a> {
         })
     }
 
+    ///Each bar's left side will line up with a point
     pub fn histogram<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
         &mut self,
         name: impl ToString,
@@ -452,18 +461,18 @@ font-family: "Arial";
                 PlotType::Histo => {
                     let mut last = None;
                     for [x, y] in it {
-                        if let Some(lx) = last {
+                        if let Some((lx, ly)) = last {
                             let k = element::Rectangle::new()
                                 .set("fill", format!("#{:06x?}", color))
-                                .set("x", format!("{}", x))
-                                .set("y", format!("{}", y))
+                                .set("x", format!("{}", lx))
+                                .set("y", format!("{}", ly))
                                 .set("width", format!("{}", (x - lx) - padding * 0.02))
-                                .set("height", format!("{}", (height - padding - y))) //TODO ugly?
+                                .set("height", format!("{}", (height - padding - ly))) //TODO ugly?
                                 .set("class", format!("plot{}fill", i));
 
                             doc = doc.add(k);
                         }
-                        last = Some(x)
+                        last = Some((x, y))
                     }
                 }
                 PlotType::LineFill => {
