@@ -182,10 +182,11 @@ impl<'a> Plotter<'a> {
             "<tspan class=\"ptext_bold\">X</tspan>:  {}",
             self.xname
         ));
+        
         let k = element::Text::new()
             .add(data)
             .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", padding / 2.0));
+            .set("y", format!("{}", padding / 1.5));
         let k = k
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle");
@@ -199,7 +200,7 @@ impl<'a> Plotter<'a> {
         let k = element::Text::new()
             .add(data)
             .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", padding / 1.5));
+            .set("y", format!("{}", padding / 2.0));
         let k = k
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle");
