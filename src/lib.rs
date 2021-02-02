@@ -1,9 +1,13 @@
 //!
 //! splot - A very simple plotter
 //!
-//! splot is meant to be used to graph fairly 'obvious' trends
+//! splot is meant to be used to graph fairly 'obvious/general' trends
 //! in the data. The user is not meant to be able to extract data
-//! or notice subtle differences in data. For this reason, a lot
+//! or notice subtle differences in data. The desired use case is
+//! to allow inserting a nice graph into a webpage generated via
+//! [mdBook](https://rust-lang.github.io/mdBook/).  
+//!
+//! For this reason, a lot
 //! of options that are normally provided in a plotting library
 //! aren't provided. For example, you can't change the thickness
 //! of the lines. Instead the user is encouraged, to pick a good
@@ -27,12 +31,13 @@
 //!    --plot_color6:"aqua";
 //! }
 //! ```  
+//! The default coloring uses a css class selector, so using a id select overrides it.
+//! Using this method, you can have a specific themes for each mdBook theme.
 //!
-//! ### How do I change the size/thickness of the lines/points?
 //!
-//! You can't do this using splot. Instead, the user is encouraged
-//! to pick a set of data that can fit in the desired area nicely.
+//! ### Example
 //!
+//! See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
 //!
 use core::marker::PhantomData;
 use svg::node;
