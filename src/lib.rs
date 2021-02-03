@@ -449,7 +449,7 @@ font-family: "Arial";
             element::Text::new()
                 .add(node::Text::new(self.xname))
                 .set("x", format!("{}", width / 2.0))
-                .set("y", format!("{}", height - padding / 5.))
+                .set("y", format!("{}", height - padding / 7.))
                 .set("alignment-baseline", "start")
                 .set("text-anchor", "middle")
                 .set("font-size", "large")
