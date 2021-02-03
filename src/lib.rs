@@ -478,7 +478,7 @@ font-family: "Arial";
         );
 
         let data = Data::new()
-            .move_to((padding, padding))
+            .move_to((padding, paddingy))
             .line_to((padding, height - paddingy))
             .line_to((width - padding, height - paddingy));
 
