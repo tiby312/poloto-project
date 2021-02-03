@@ -94,15 +94,6 @@ pub struct Plotter<'a> {
     plots: Vec<Plot<'a>>,
 }
 
-
-pub fn unwrap_float([x,y]:[f32;2])->Option<[f32;2]>{
-    if x.is_nan() || y.is_nan(){
-        None
-    }else{
-        Some([x,y])
-    }
-}
-
 ///Shorthand constructor.
 pub fn plot<'a>(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
     Plotter::new(title, xname, yname)
