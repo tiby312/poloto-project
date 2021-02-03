@@ -37,6 +37,7 @@
 //! ### Usage
 //!
 //! plots containing NaN or Infinity are ignored. 
+//! If there are no plots, then a blank image is returned.
 //!
 //! ### Example
 //!
