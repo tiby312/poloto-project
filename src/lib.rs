@@ -233,7 +233,7 @@ impl<'a> Plotter<'a> {
 
     fn finalize_doc(self) -> Document {
         let width = 800.0;
-        let height = 600.0;
+        let height = 500.0;
         let padding = 150.0;
         let paddingy = 100.0;
 
@@ -255,8 +255,8 @@ impl<'a> Plotter<'a> {
                 .set("height", format!("{}", height)),
         );
 
-        let text_color = "#000000";
-        let background_color = "#FFFFFF";
+        let text_color = "black";
+        let background_color = "yellow";
 
         let colors = vec!["blue", "red", "green", "purple", "yellow", "aqua"];
 
