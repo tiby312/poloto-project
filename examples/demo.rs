@@ -2,12 +2,10 @@ fn main() {
     let mut s = splot::plot("Testing testing one two three", "this is x", "this is y");
 
     let x = (0..10).map(|x| (x as f32 / 10.0) * std::f32::consts::TAU);
-    /*
-        s.lines("sin", x.clone().map(|x| [x, x.sin()]));
 
-        s.scatter("cos", x.clone().map(|x| [x, x.cos()]));
-    */
-    //s.scatter("cos", x.clone().map(|x| [x, x.tan()]));
+    s.lines("sin", x.clone().map(|x| [x, x.sin()]));
+
+    s.scatter("cos", x.clone().map(|x| [x, x.cos()]));
 
     s.histogram("tan", x.clone().map(|x| [x, x.sin()]));
     /*

@@ -155,84 +155,57 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    fn setup_axis(&self, mut doc: Document, width: f32, height: f32, padding: f32) -> Document {
-        use svg::node::element::Rectangle;
-
+    fn setup_axis(
+        mut doc: Document,
+        title: String,
+        xname: String,
+        yname: String,
+        width: f32,
+        height: f32,
+        padding: f32,
+        paddingy: f32,
+    ) -> Document {
         doc = doc.add(
-            Rectangle::new()
-                .set("class", "pbackground")
-                .set("x", "0")
-                .set("y", "0")
-                .set("width", format!("{}", width))
-                .set("height", format!("{}", height)),
+            element::Text::new()
+                .add(node::Text::new(title))
+                .set("x", format!("{}", width / 2.0))
+                .set("y", format!("{}", padding / 4.0))
+                .set("alignment-baseline", "start")
+                .set("text-anchor", "middle")
+                .set("font-size", "x-large")
+                .set("class", "ptext"),
         );
 
-        let data = node::Text::new(format!("{}", self.title));
-        let k = element::Text::new()
-            .add(data)
-            .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", padding / 4.0));
-        let k = k
-            .set("alignment-baseline", "start")
-            .set("text-anchor", "middle");
-        let k = k.set("font-size", "x-large").set("class", "ptext");
-        doc = doc.add(k);
+        doc = doc.add(
+            element::Text::new()
+                .add(node::Text::new(xname))
+                .set("x", format!("{}", width / 2.0))
+                .set("y", format!("{}", height - padding / 5.))
+                .set("alignment-baseline", "start")
+                .set("text-anchor", "middle")
+                .set("font-size", "large")
+                .set("class", "ptext"),
+        );
 
-        let data = node::Text::new(format!(
-            "<tspan class=\"ptext_bold\">X</tspan>:  {}",
-            self.xname
-        ));
-        
-        let k = element::Text::new()
-            .add(data)
-            .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", padding / 1.5));
-        let k = k
-            .set("alignment-baseline", "start")
-            .set("text-anchor", "middle");
-        let k = k.set("font-size", "large").set("class", "ptext");
-        doc = doc.add(k);
-
-        let data = node::Text::new(format!(
-            "<tspan class=\"ptext_bold\">Y</tspan>:  {}",
-            self.yname
-        ));
-        let k = element::Text::new()
-            .add(data)
-            .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", padding / 2.0));
-        let k = k
-            .set("alignment-baseline", "start")
-            .set("text-anchor", "middle");
-        let k = k.set("font-size", "large").set("class", "ptext");
-        doc = doc.add(k);
-
-        let data = node::Text::new("X");
-        let k = element::Text::new()
-            .add(data)
-            .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", height - padding / 5.));
-        let k = k
-            .set("alignment-baseline", "start")
-            .set("text-anchor", "middle");
-        let k = k.set("font-size", "large").set("class", "ptext_bold");
-        doc = doc.add(k);
-
-        let data = node::Text::new("Y");
-        let k = element::Text::new()
-            .add(data)
-            .set("x", format!("{}", padding / 5.0))
-            .set("y", format!("{}", height / 2.));
-        let k = k
-            .set("alignment-baseline", "start")
-            .set("text-anchor", "middle");
-        let k = k.set("font-size", "large").set("class", "ptext_bold");
-        doc = doc.add(k);
+        doc = doc.add(
+            element::Text::new()
+                .add(node::Text::new(yname))
+                .set("x", format!("{}", padding / 3.0))
+                .set("y", format!("{}", height / 2.0))
+                .set("alignment-baseline", "start")
+                .set("text-anchor", "middle")
+                .set(
+                    "transform",
+                    format!("rotate(-90,{},{})", padding / 3.0, height / 2.0),
+                )
+                .set("font-size", "large")
+                .set("class", "ptext"),
+        );
 
         let data = Data::new()
             .move_to((padding, padding))
-            .line_to((padding, height - padding))
-            .line_to((width - padding, height - padding));
+            .line_to((padding, height - paddingy))
+            .line_to((width - padding, height - paddingy));
 
         let vert_line = Path::new()
             .set("style", "fill:none !important;")
@@ -262,6 +235,7 @@ impl<'a> Plotter<'a> {
         let width = 800.0;
         let height = 600.0;
         let padding = 150.0;
+        let paddingy = 100.0;
 
         let mut doc = Document::new()
             .set("width", width)
@@ -270,18 +244,21 @@ impl<'a> Plotter<'a> {
             .set("class", "splotclass")
             .set("id", "splot");
 
+        doc = doc.add(
+            element::Rectangle::new()
+                .set("class", "pbackground")
+                //Do this just so that on legacy svg viewers that don't support css they see *something*.
+                .set("fill", "white")
+                .set("x", "0")
+                .set("y", "0")
+                .set("width", format!("{}", width))
+                .set("height", format!("{}", height)),
+        );
+
         let text_color = "#000000";
         let background_color = "#FFFFFF";
-        /*
-        const COLOR_TABLE: [usize; 6] =
-            [0x2b2255, ed1c1c, 0x0000FF, 0x445522, 0x558833, 0xFF0045];
 
-        let colors: Vec<_> = COLOR_TABLE
-            .iter()
-            .map(|color| format!("#{:06x?}", color))
-            .collect();
-        */
-        let colors=vec!("blue","red","green","purple","yellow","aqua");
+        let colors = vec!["blue", "red", "green", "purple", "yellow", "aqua"];
 
         let s = element::Style::new(format!(
             r###".splotclass {{
@@ -323,8 +300,6 @@ font-family: "Arial";
 
         doc = doc.add(s);
 
-        doc = self.setup_axis(doc, width, height, padding);
-
         let [minx, maxx, miny, maxy] =
             if let Some(m) = find_bounds(self.plots.iter().flat_map(|a| a.plots.ref_iter())) {
                 m
@@ -334,54 +309,60 @@ font-family: "Arial";
             };
 
         let scalex = (width - padding * 2.0) / (maxx - minx);
-        let scaley = (height - padding * 2.0) / (maxy - miny);
+        let scaley = (height - paddingy * 2.0) / (maxy - miny);
 
         {
             //Draw step lines
             //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
             let num_steps = 10;
-            let texty_padding = padding * 0.2;
-            let textx_padding = padding * 0.4;
+            let texty_padding = paddingy * 0.4;
+            let textx_padding = padding * 0.2;
 
             let (xstep_num, xstep_power, xstep) = find_good_step(num_steps, maxx - minx);
             let (ystep_num, ystep_power, ystep) = find_good_step(num_steps, maxy - miny);
 
             let minx_fixed = (minx / xstep).ceil() * xstep;
             let miny_fixed = (miny / ystep).ceil() * ystep;
-            //dbg!(xstep,xstep_num,ystep,ystep_num,xstep_power,ystep_power);
 
             for a in 0..xstep_num {
                 let p = (a as f32) * xstep;
 
                 let precision = (1.0 + xstep_power).max(0.0) as usize;
-                let data = node::Text::new(format!("{0:.1$}", p + minx_fixed, precision));
-                let k = element::Text::new()
-                    .add(data)
-                    .set("x", format!("{}", p * scalex + padding))
-                    .set("y", format!("{}", height - padding + textx_padding));
-                let k = k
-                    .set("alignment-baseline", "start")
-                    .set("text-anchor", "middle")
-                    .set("class", "ptext");
-                doc = doc.add(k);
+
+                doc = doc.add(
+                    element::Text::new()
+                        .add(node::Text::new(format!(
+                            "{0:.1$}",
+                            p + minx_fixed,
+                            precision
+                        )))
+                        .set("x", format!("{}", p * scalex + padding))
+                        .set("y", format!("{}", height - paddingy + texty_padding))
+                        .set("alignment-baseline", "start")
+                        .set("text-anchor", "middle")
+                        .set("class", "ptext"),
+                );
             }
 
             for a in 0..ystep_num {
                 let p = (a as f32) * ystep;
 
-                //dbg!(p,miny,miny_fixed,p+miny_fixed);
                 let precision = (1.0 + ystep_power).max(0.0) as usize;
-                let data = node::Text::new(format!("{0:.1$}", p + miny_fixed, precision));
-                let k = element::Text::new()
-                    .add(data)
-                    .set("x", format!("{}", padding - texty_padding))
-                    .set("y", format!("{}", height - p * scaley - padding));
-                let k = k
-                    .set("alignment-baseline", "middle")
-                    .set("text-anchor", "end")
-                    .set("class", "ptext");
-                doc = doc.add(k);
+
+                doc = doc.add(
+                    element::Text::new()
+                        .add(node::Text::new(format!(
+                            "{0:.1$}",
+                            p + miny_fixed,
+                            precision
+                        )))
+                        .set("x", format!("{}", padding - textx_padding))
+                        .set("y", format!("{}", height - p * scaley - paddingy))
+                        .set("alignment-baseline", "middle")
+                        .set("text-anchor", "end")
+                        .set("class", "ptext"),
+                );
             }
         }
 
@@ -394,70 +375,63 @@ font-family: "Arial";
             },
         ) in self.plots.into_iter().enumerate()
         {
-            //let color = COLOR_TABLE[i % (COLOR_TABLE.len())];
-            //println!("{:x}",color);
-            //Draw legend
-
             let spacing = padding / 3.0;
-            let data = node::Text::new(name);
-            let k = element::Text::new()
-                .add(data)
-                .set("x", format!("{}", width - padding / 1.2))
-                .set("y", format!("{}", padding + (i as f32) * spacing));
-            let k = k
-                .set("alignment-baseline", "middle")
-                .set("text-anchor", "start");
-            let k = k.set("font-size", "large").set("class", "ptext");
-            doc = doc.add(k);
 
-            //dbg!(format!("#{:08x?}",color));
-            let k = element::Circle::new()
-                //.set("fill", format!("#{:06x?}", color))
-                .set("cx", format!("{}", width - padding / 1.2 + padding / 30.0))
-                .set(
-                    "cy",
-                    format!("{}", padding - padding / 8.0 + (i as f32) * spacing),
-                )
-                .set("r", format!("{}", padding / 30.0))
-                .set("class", format!("plot{}fill", i));
-            doc = doc.add(k);
+            doc = doc.add(
+                element::Text::new()
+                    .add(node::Text::new(name))
+                    .set("x", format!("{}", width - padding / 1.2))
+                    .set("y", format!("{}", paddingy + (i as f32) * spacing))
+                    .set("alignment-baseline", "middle")
+                    .set("text-anchor", "start")
+                    .set("font-size", "large")
+                    .set("class", "ptext"),
+            );
+
+            doc = doc.add(
+                element::Circle::new()
+                    .set("cx", format!("{}", width - padding / 1.2 + padding / 30.0))
+                    .set(
+                        "cy",
+                        format!("{}", paddingy - padding / 8.0 + (i as f32) * spacing),
+                    )
+                    .set("r", format!("{}", padding / 30.0))
+                    .set("class", format!("plot{}fill", i)),
+            );
 
             let it = plots.into_iter();
 
             let it = it.map(|[x, y]| {
                 [
                     padding + (x - minx) * scalex,
-                    height - padding - (y - miny) * scaley,
+                    height - paddingy - (y - miny) * scaley,
                 ]
             });
 
             match plot_type {
                 PlotType::Line => {
-                    let mut data = Polyline::new()
-                        .set("class", format!("plot{}color", i))
-                        .set("fill", "none")
-                        //.set("stroke", format!("#{:06x?}", color))
-                        .set("stroke-width", 2);
-
                     use std::fmt::Write;
                     let mut points = String::new();
                     for [x, y] in it {
-                        write!(&mut points, "{},{}\n", x, y).unwrap();
+                        writeln!(&mut points, "{},{}", x, y).unwrap();
                     }
-
-                    data = data.set("points", points);
-                    doc = doc.add(data);
+                    doc = doc.add(
+                        Polyline::new()
+                            .set("class", format!("plot{}color", i))
+                            .set("fill", "none")
+                            .set("stroke-width", 2)
+                            .set("points", points),
+                    );
                 }
                 PlotType::Scatter => {
                     for [x, y] in it {
-                        let k = element::Circle::new()
-                            //.set("fill", format!("#{:06x?}", color))
-                            .set("cx", format!("{}", x))
-                            .set("cy", format!("{}", y))
-                            .set("r", format!("{}", padding / 50.0))
-                            .set("class", format!("plot{}fill", i));
-
-                        doc = doc.add(k);
+                        doc = doc.add(
+                            element::Circle::new()
+                                .set("cx", format!("{}", x))
+                                .set("cy", format!("{}", y))
+                                .set("r", format!("{}", padding / 50.0))
+                                .set("class", format!("plot{}fill", i)),
+                        );
                     }
                 }
                 PlotType::Histo => {
@@ -465,11 +439,10 @@ font-family: "Arial";
                     for [x, y] in it {
                         if let Some((lx, ly)) = last {
                             let k = element::Rectangle::new()
-                                //.set("fill", format!("#{:06x?}", color))
                                 .set("x", format!("{}", lx))
                                 .set("y", format!("{}", ly))
                                 .set("width", format!("{}", (x - lx) - padding * 0.02))
-                                .set("height", format!("{}", (height - padding - ly))) //TODO ugly?
+                                .set("height", format!("{}", (height - paddingy - ly))) //TODO ugly?
                                 .set("class", format!("plot{}fill", i));
 
                             doc = doc.add(k);
@@ -487,15 +460,19 @@ font-family: "Arial";
 
                         data = data.close();
 
-                        let linefill = Path::new()
-                            .set("d", data)
-                            .set("class", format!("plot{}fill", i));
-
-                        doc = doc.add(linefill);
+                        doc = doc.add(
+                            Path::new()
+                                .set("d", data)
+                                .set("class", format!("plot{}fill", i)),
+                        );
                     }
                 }
             }
         }
+
+        doc = Self::setup_axis(
+            doc, self.title, self.xname, self.yname, width, height, padding, paddingy,
+        );
 
         doc
     }
