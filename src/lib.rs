@@ -34,6 +34,9 @@
 //! The default coloring uses a css class selector, so using a id select overrides it.
 //! Using this method, you can have a specific themes for each mdBook theme.
 //!
+//! ### Usage
+//!
+//! plots containing NaN or Infinity are ignored. 
 //!
 //! ### Example
 //!
@@ -52,12 +55,12 @@ struct Wrapper<'a, I: Iterator<Item = [f32; 2]> + Clone + 'a>(Option<I>, Phantom
 impl<'a, I: Iterator<Item = [f32; 2]> + Clone + 'a> PlotTrait<'a> for Wrapper<'a, I> {
     #[inline(always)]
     fn ref_iter(&self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a> {
-        Box::new(self.0.as_ref().unwrap().clone())
+        Box::new(self.0.as_ref().unwrap().clone().filter(|[x,y]|!(x.is_nan()||y.is_nan()||x.is_infinite()||y.is_infinite())))
     }
 
     #[inline(always)]
     fn into_iter(&mut self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a> {
-        Box::new(self.0.take().unwrap())
+        Box::new(self.0.take().unwrap().filter(|[x,y]|!(x.is_nan()||y.is_nan()||x.is_infinite()||y.is_infinite())))
     }
 }
 
@@ -89,6 +92,15 @@ pub struct Plotter<'a> {
     xname: String,
     yname: String,
     plots: Vec<Plot<'a>>,
+}
+
+
+pub fn unwrap_float([x,y]:[f32;2])->Option<[f32;2]>{
+    if x.is_nan() || y.is_nan(){
+        None
+    }else{
+        Some([x,y])
+    }
 }
 
 ///Shorthand constructor.
@@ -155,67 +167,6 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    fn setup_axis(
-        mut doc: Document,
-        title: String,
-        xname: String,
-        yname: String,
-        width: f32,
-        height: f32,
-        padding: f32,
-        paddingy: f32,
-    ) -> Document {
-        doc = doc.add(
-            element::Text::new()
-                .add(node::Text::new(title))
-                .set("x", format!("{}", width / 2.0))
-                .set("y", format!("{}", padding / 4.0))
-                .set("alignment-baseline", "start")
-                .set("text-anchor", "middle")
-                .set("font-size", "x-large")
-                .set("class", "ptext"),
-        );
-
-        doc = doc.add(
-            element::Text::new()
-                .add(node::Text::new(xname))
-                .set("x", format!("{}", width / 2.0))
-                .set("y", format!("{}", height - padding / 5.))
-                .set("alignment-baseline", "start")
-                .set("text-anchor", "middle")
-                .set("font-size", "large")
-                .set("class", "ptext"),
-        );
-
-        doc = doc.add(
-            element::Text::new()
-                .add(node::Text::new(yname))
-                .set("x", format!("{}", padding / 3.0))
-                .set("y", format!("{}", height / 2.0))
-                .set("alignment-baseline", "start")
-                .set("text-anchor", "middle")
-                .set(
-                    "transform",
-                    format!("rotate(-90,{},{})", padding / 3.0, height / 2.0),
-                )
-                .set("font-size", "large")
-                .set("class", "ptext"),
-        );
-
-        let data = Data::new()
-            .move_to((padding, padding))
-            .line_to((padding, height - paddingy))
-            .line_to((width - padding, height - paddingy));
-
-        let vert_line = Path::new()
-            .set("style", "fill:none !important;")
-            .set("stroke", "black")
-            .set("stroke-width", 3)
-            .set("d", data)
-            .set("class", "pline");
-
-        doc.add(vert_line)
-    }
 
     pub fn into_document(self) -> Document {
         self.finalize_doc()
@@ -329,14 +280,24 @@ font-family: "Arial";
                 let p = (a as f32) * xstep;
 
                 let precision = (1.0 + xstep_power).max(0.0) as usize;
+                
+                let t=if (p+minx_fixed).log10()<5.0 {
+                    node::Text::new(format!(
+                        "{0:.1$}",
+                        p + minx_fixed,
+                        precision
+                    ))
+                }else{
+                    node::Text::new(format!(
+                        "{0:.1$e}",
+                        p + minx_fixed,
+                        precision
+                    ))
+                };
 
                 doc = doc.add(
                     element::Text::new()
-                        .add(node::Text::new(format!(
-                            "{0:.1$}",
-                            p + minx_fixed,
-                            precision
-                        )))
+                        .add(t)
                         .set("x", format!("{}", p * scalex + padding))
                         .set("y", format!("{}", height - paddingy + texty_padding))
                         .set("alignment-baseline", "start")
@@ -348,15 +309,24 @@ font-family: "Arial";
             for a in 0..ystep_num {
                 let p = (a as f32) * ystep;
 
-                let precision = (1.0 + ystep_power).max(0.0) as usize;
 
+                let precision = (1.0 + ystep_power).max(0.0) as usize;
+                let t=if (p+miny_fixed).log10()<5.0  {
+                    node::Text::new(format!(
+                        "{0:.1$}",
+                        p + miny_fixed,
+                        precision
+                    ))
+                }else{
+                    node::Text::new(format!(
+                        "{0:.1$e}",
+                        p + miny_fixed,
+                        precision
+                    ))
+                };
                 doc = doc.add(
                     element::Text::new()
-                        .add(node::Text::new(format!(
-                            "{0:.1$}",
-                            p + miny_fixed,
-                            precision
-                        )))
+                        .add(t)
                         .set("x", format!("{}", padding - textx_padding))
                         .set("y", format!("{}", height - p * scaley - paddingy))
                         .set("alignment-baseline", "middle")
@@ -470,11 +440,56 @@ font-family: "Arial";
             }
         }
 
-        doc = Self::setup_axis(
-            doc, self.title, self.xname, self.yname, width, height, padding, paddingy,
+        doc = doc.add(
+            element::Text::new()
+                .add(node::Text::new(self.title))
+                .set("x", format!("{}", width / 2.0))
+                .set("y", format!("{}", padding / 4.0))
+                .set("alignment-baseline", "start")
+                .set("text-anchor", "middle")
+                .set("font-size", "x-large")
+                .set("class", "ptext"),
         );
 
-        doc
+        doc = doc.add(
+            element::Text::new()
+                .add(node::Text::new(self.xname))
+                .set("x", format!("{}", width / 2.0))
+                .set("y", format!("{}", height - padding / 5.))
+                .set("alignment-baseline", "start")
+                .set("text-anchor", "middle")
+                .set("font-size", "large")
+                .set("class", "ptext"),
+        );
+
+        doc = doc.add(
+            element::Text::new()
+                .add(node::Text::new(self.yname))
+                .set("x", format!("{}", padding / 3.0))
+                .set("y", format!("{}", height / 2.0))
+                .set("alignment-baseline", "start")
+                .set("text-anchor", "middle")
+                .set(
+                    "transform",
+                    format!("rotate(-90,{},{})", padding / 3.0, height / 2.0),
+                )
+                .set("font-size", "large")
+                .set("class", "ptext"),
+        );
+
+        let data = Data::new()
+            .move_to((padding, padding))
+            .line_to((padding, height - paddingy))
+            .line_to((width - padding, height - paddingy));
+
+        let vert_line = Path::new()
+            .set("style", "fill:none !important;")
+            .set("stroke", "black")
+            .set("stroke-width", 3)
+            .set("d", data)
+            .set("class", "pline");
+
+        doc.add(vert_line)
     }
 }
 
@@ -485,7 +500,8 @@ fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
 
     let step_power = 10.0f32.powf(-rough_step.abs().log10().floor()) as f32;
     let normalized_step = rough_step * step_power;
-    //dbg!(normalized_step);
+    dbg!(range);
+    dbg!(normalized_step);
 
     let good_steps = [1.0, 2.0, 5.0, 10.0];
     let good_normalized_step = good_steps.iter().find(|a| **a > normalized_step).unwrap();
@@ -505,8 +521,10 @@ fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
 fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
     let mut ii = it.into_iter();
     if let Some([x, y]) = ii.next() {
+        dbg!(x,y);
         let mut val = [x, x, y, y];
         ii.fold(&mut val, |val, [x, y]| {
+            dbg!(x,y);
             if x < val[0] {
                 val[0] = x;
             } else if x > val[1] {
