@@ -281,7 +281,7 @@ font-family: "Arial";
 
                 let precision = (1.0 + xstep_power).max(0.0) as usize;
                 
-                let t=if (p+minx_fixed).log10()<5.0 {
+                let t=if (p+minx_fixed).abs().log10()<5.0 {
                     node::Text::new(format!(
                         "{0:.1$}",
                         p + minx_fixed,
@@ -311,7 +311,9 @@ font-family: "Arial";
 
 
                 let precision = (1.0 + ystep_power).max(0.0) as usize;
-                let t=if (p+miny_fixed).log10()<5.0  {
+                //dbg!((p+miny_fixed).abs().log10());
+                
+                let t=if (p+miny_fixed).abs().log10()<5.0  {
                     node::Text::new(format!(
                         "{0:.1$}",
                         p + miny_fixed,
@@ -500,9 +502,7 @@ fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
 
     let step_power = 10.0f32.powf(-rough_step.abs().log10().floor()) as f32;
     let normalized_step = rough_step * step_power;
-    dbg!(range);
-    dbg!(normalized_step);
-
+    
     let good_steps = [1.0, 2.0, 5.0, 10.0];
     let good_normalized_step = good_steps.iter().find(|a| **a > normalized_step).unwrap();
     //dbg!(good_normalized_step);
@@ -521,10 +521,8 @@ fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
 fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
     let mut ii = it.into_iter();
     if let Some([x, y]) = ii.next() {
-        dbg!(x,y);
         let mut val = [x, x, y, y];
         ii.fold(&mut val, |val, [x, y]| {
-            dbg!(x,y);
             if x < val[0] {
                 val[0] = x;
             } else if x > val[1] {
