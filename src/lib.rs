@@ -363,9 +363,7 @@ font-family: "Arial";
                     .set("class", format!("plot{}fill", i)),
             );
 
-            let it = plots.into_iter();
-
-            let it = it.map(|[x, y]| {
+            let it = plots.into_iter().map(|[x, y]| {
                 [
                     padding + (x - minx) * scalex,
                     height - paddingy - (y - miny) * scaley,
