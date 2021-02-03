@@ -449,7 +449,7 @@ font-family: "Arial";
             element::Text::new()
                 .add(node::Text::new(self.xname))
                 .set("x", format!("{}", width / 2.0))
-                .set("y", format!("{}", height - padding / 7.))
+                .set("y", format!("{}", height - padding / 8.))
                 .set("alignment-baseline", "start")
                 .set("text-anchor", "middle")
                 .set("font-size", "large")
@@ -459,13 +459,13 @@ font-family: "Arial";
         doc = doc.add(
             element::Text::new()
                 .add(node::Text::new(self.yname))
-                .set("x", format!("{}", padding / 3.0))
+                .set("x", format!("{}", padding / 4.0))
                 .set("y", format!("{}", height / 2.0))
                 .set("alignment-baseline", "start")
                 .set("text-anchor", "middle")
                 .set(
                     "transform",
-                    format!("rotate(-90,{},{})", padding / 3.0, height / 2.0),
+                    format!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
                 )
                 .set("font-size", "large")
                 .set("class", "ptext"),
