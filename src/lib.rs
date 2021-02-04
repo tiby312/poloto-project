@@ -36,18 +36,14 @@
 //!
 //! ### Usage
 //!
-//! -Plots containing NaN or Infinity are ignored. 
-//! -If there are no plots, then a blank image is returned.
-//! -If there is one plot, then nothing is drawn (no 2d representation)
-//! 
+//! * Plots containing NaN or Infinity are ignored. 
+//! * If there are no plots or just one plot, then a blank image is returned.
 //!
 //! ### Why use scientific notation?
 //!
-//! Its the most dense and consistent formatting, i.e. easiest to get right
-//! with any possible interval chosen for the graph. 
+//! Its the most dense and consistent formatting. Also easiest to implement. 
 //!
-//!
-//! ### Why not scale the intervals to fit nicely?
+//! ### Why not scale the intervals to end nicely with the ends of the axis lines?
 //! 
 //! Doing this you would have to either have more dead space, or exclude
 //! plots that the user would expect to get plotted. Neither of these sounded
