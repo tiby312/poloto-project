@@ -28,7 +28,7 @@ pub fn render(pl:Plotter) -> Document {
     let text_color = "black";
     let background_color = "yellow";
 
-    let colors = vec!["blue", "red", "green", "purple", "yellow", "aqua"];
+    let colors = vec!["blue", "red", "green", "purple", "aqua", "brown"];
 
     let s = element::Style::new(format!(
         r###".splotclass {{
