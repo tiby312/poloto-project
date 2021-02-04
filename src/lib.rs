@@ -36,8 +36,15 @@
 //!
 //! ### Usage
 //!
-//! plots containing NaN or Infinity are ignored. 
-//! If there are no plots, then a blank image is returned.
+//! -Plots containing NaN or Infinity are ignored. 
+//! -If there are no plots, then a blank image is returned.
+//! -If there is one plot, then nothing is drawn (no 2d representation)
+//! 
+//!
+//! ### Why use scientific notation?
+//!
+//! Its the most dense and consistent formatting, i.e. easiest to get right
+//! with any possible interval chosen for the graph. 
 //!
 //! ### Example
 //!
@@ -82,6 +89,8 @@ struct Plot<'a> {
     plots: Box<dyn PlotTrait<'a> + 'a>,
     plot_type: PlotType,
 }
+
+
 
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
@@ -244,12 +253,17 @@ font-family: "Arial";
         doc = doc.add(s);
 
         let [minx, maxx, miny, maxy] =
-            if let Some(m) = find_bounds(self.plots.iter().flat_map(|a| a.plots.ref_iter())) {
+            if let Some(m) = find_bounds(self.plots.iter().flat_map(|a| a.plots.ref_iter())) {                
                 m
             } else {
                 //TODO test that this looks ok
                 return doc; //No plots at all. dont need to draw anything
             };
+
+        //Return nothing if no range. No 2d quantity to graph
+        if minx==maxx||miny==maxy {
+            return doc;
+        }
 
         let scalex = (width - padding * 2.0) / (maxx - minx);
         let scaley = (height - paddingy * 2.0) / (maxy - miny);
@@ -262,30 +276,18 @@ font-family: "Arial";
             let texty_padding = paddingy * 0.4;
             let textx_padding = padding * 0.2;
 
-            let (xstep_num, xstep_power, xstep) = find_good_step(num_steps, maxx - minx);
-            let (ystep_num, ystep_power, ystep) = find_good_step(num_steps, maxy - miny);
+            let (xstep_num, _xstep_power, xstep) = find_good_step(num_steps, maxx - minx);
+            let (ystep_num, _ystep_power, ystep) = find_good_step(num_steps, maxy - miny);
 
             let minx_fixed = (minx / xstep).ceil() * xstep;
             let miny_fixed = (miny / ystep).ceil() * ystep;
 
             for a in 0..xstep_num {
                 let p = (a as f32) * xstep;
-
-                let precision = (1.0 + xstep_power).max(0.0) as usize;
                 
-                let t=if (p+minx_fixed).abs().log10()<5.0 {
-                    node::Text::new(format!(
-                        "{0:.1$}",
-                        p + minx_fixed,
-                        precision
-                    ))
-                }else{
-                    node::Text::new(format!(
-                        "{0:.1$e}",
-                        p + minx_fixed,
-                        precision
-                    ))
-                };
+                let t=
+                    node::Text::new(print_interval_float(p+minx_fixed));
+
 
                 doc = doc.add(
                     element::Text::new()
@@ -298,26 +300,15 @@ font-family: "Arial";
                 );
             }
 
+
+
             for a in 0..ystep_num {
                 let p = (a as f32) * ystep;
 
 
-                let precision = (1.0 + ystep_power).max(0.0) as usize;
-                //dbg!((p+miny_fixed).abs().log10());
-                
-                let t=if (p+miny_fixed).abs().log10()<5.0  {
-                    node::Text::new(format!(
-                        "{0:.1$}",
-                        p + miny_fixed,
-                        precision
-                    ))
-                }else{
-                    node::Text::new(format!(
-                        "{0:.1$e}",
-                        p + miny_fixed,
-                        precision
-                    ))
-                };
+                let t=
+                    node::Text::new(print_interval_float(p+miny_fixed));
+
                 doc = doc.add(
                     element::Text::new()
                         .add(t)
@@ -486,17 +477,18 @@ font-family: "Arial";
 }
 
 fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
+    let range=range as f64;
     //https://stackoverflow.com/questions/237220/tickmark-algorithm-for-a-graph-axis
+    
+    let rough_step = range / (num_steps - 1) as f64;
 
-    let rough_step = range / (num_steps - 1) as f32;
-
-    let step_power = 10.0f32.powf(-rough_step.abs().log10().floor()) as f32;
+    let step_power = 10.0f64.powf(-rough_step.abs().log10().floor()) as f64;
     let normalized_step = rough_step * step_power;
     
+
     let good_steps = [1.0, 2.0, 5.0, 10.0];
     let good_normalized_step = good_steps.iter().find(|a| **a > normalized_step).unwrap();
-    //dbg!(good_normalized_step);
-
+    
     let step = good_normalized_step / step_power;
 
     let new_step = if range % step != 0.0 {
@@ -505,7 +497,32 @@ fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
         (range / step) as usize
     };
 
-    (new_step, step_power.log10(), step)
+    (new_step, step_power.log10() as f32, step as f32)
+}
+
+fn print_interval_float(a:f32)->String{
+    //scientific notation: m x 10n
+    let n=a.log10().floor();
+    let m=a/10.0f32.powf(n);
+    
+    //Assume we have just one decimal place of precision needed
+    //for fractional part.
+    //This is ok because we specifically chose the intervals
+    //to be from a set of desired steps (e.g. 1,2,5,10)
+    if  (m*10.0).round() as usize % 10 !=0   {
+        format!(
+            "{0:.1$e}",
+            a,
+            1
+        )
+    }else{
+        format!(
+            "{0:.1$e}",
+            a,
+            0
+        )
+    }
+    
 }
 
 fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
