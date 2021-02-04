@@ -1,6 +1,10 @@
 //!
 //! splot - A very simple plotter
 //!
+//! The rise of SVG has made the need to an intermediate representatin of a graph
+//! not necessary. Instead of using .gplot files, just render to SVG graph directly
+//! using this crate. 
+//!
 //! splot is meant to be used to graph fairly 'obvious/general' trends
 //! in the data. The user is not meant to be able to extract data
 //! or notice subtle differences in data. The desired use case is
