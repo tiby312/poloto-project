@@ -46,6 +46,14 @@
 //! Its the most dense and consistent formatting, i.e. easiest to get right
 //! with any possible interval chosen for the graph. 
 //!
+//!
+//! ### Why not scale the intervals to fit nicely?
+//! 
+//! Doing this you would have to either have more dead space, or exclude
+//! plots that the user would expect to get plotted. Neither of these sounded
+//! better than the option of just having the intervals stop not necessarily
+//! at the end of the axis lines.
+//!
 //! ### Example
 //!
 //! See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
