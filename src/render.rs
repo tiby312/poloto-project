@@ -7,6 +7,7 @@ pub fn render(pl:Plotter) -> Document {
     let padding = 150.0;
     let paddingy = 100.0;
 
+    
     let mut doc = Document::new()
         .set("width", width)
         .set("height", height)
@@ -14,6 +15,7 @@ pub fn render(pl:Plotter) -> Document {
         .set("class", "splotclass")
         .set("id", "splot");
 
+    //Draw background
     doc = doc.add(
         element::Rectangle::new()
             .set("class", "pbackground")
@@ -25,12 +27,13 @@ pub fn render(pl:Plotter) -> Document {
             .set("height", format!("{}", height)),
     );
 
+    //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
     let background_color = "yellow";
-
     let colors = vec!["blue", "red", "green", "purple", "aqua", "brown"];
 
-    let s = element::Style::new(format!(
+    //Add CSS styling
+    doc=doc.add(element::Style::new(format!(
         r###".splotclass {{
 font-family: "Arial";
 --fg_color:   {0};
@@ -66,10 +69,9 @@ font-family: "Arial";
         colors[3],
         colors[4],
         colors[5]
-    ));
+    )));
 
-    doc = doc.add(s);
-
+    //Find range.
     let [minx, maxx, miny, maxy] =
         if let Some(m) = util::find_bounds(pl.plots.iter().flat_map(|a| a.plots.ref_iter())) {
             m
@@ -78,12 +80,14 @@ font-family: "Arial";
             return doc; //No plots at all. dont need to draw anything
         };
 
+    //Insert a range if the range is zero.
     let [miny, maxy] = if miny == maxy {
         [miny - 1.0, miny + 1.0]
     } else {
         [miny, maxy]
     };
 
+    //Insert a range if the range is zero.
     let [minx, maxx] = if minx == maxx {
         [minx - 1.0, minx + 1.0]
     } else {
@@ -107,6 +111,7 @@ font-family: "Arial";
         let minx_fixed = (minx / xstep).ceil() * xstep;
         let miny_fixed = (miny / ystep).ceil() * ystep;
 
+        //Draw interval x text
         for a in 0..xstep_num {
             let p = (a as f32) * xstep;
 
@@ -123,6 +128,7 @@ font-family: "Arial";
             );
         }
 
+        //Draw interval y text
         for a in 0..ystep_num {
             let p = (a as f32) * ystep;
 
@@ -151,6 +157,7 @@ font-family: "Arial";
     {
         let spacing = padding / 3.0;
 
+        //Draw legend text
         doc = doc.add(
             element::Text::new()
                 .add(node::Text::new(name))
@@ -162,6 +169,7 @@ font-family: "Arial";
                 .set("class", "ptext"),
         );
 
+        //Draw legend colors
         doc = doc.add(
             element::Circle::new()
                 .set("cx", format!("{}", width - padding / 1.2 + padding / 30.0))
@@ -172,6 +180,8 @@ font-family: "Arial";
                 .set("r", format!("{}", padding / 30.0))
                 .set("class", format!("plot{}fill", i)),
         );
+
+        //Draw plots
 
         let it = plots.into_iter().map(|[x, y]| {
             [
@@ -264,6 +274,7 @@ font-family: "Arial";
         }
     }
 
+    //Draw title
     doc = doc.add(
         element::Text::new()
             .add(node::Text::new(pl.title))
@@ -275,6 +286,7 @@ font-family: "Arial";
             .set("class", "ptext"),
     );
 
+    //Draw xname
     doc = doc.add(
         element::Text::new()
             .add(node::Text::new(pl.xname))
@@ -286,6 +298,7 @@ font-family: "Arial";
             .set("class", "ptext"),
     );
 
+    //Draw yname
     doc = doc.add(
         element::Text::new()
             .add(node::Text::new(pl.yname))
@@ -306,6 +319,7 @@ font-family: "Arial";
         .line_to((padding, height - paddingy))
         .line_to((width - padding, height - paddingy));
 
+    //Draw axis lines
     doc.add(
         Path::new()
             .set("style", "fill:none !important;")
