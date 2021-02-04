@@ -94,6 +94,7 @@ trait PlotTrait<'a> {
 enum PlotType {
     Scatter,
     Line,
+    DottedLine,
     Histo,
     LineFill,
 }
@@ -131,7 +132,20 @@ impl<'a> Plotter<'a> {
             yname: yname.to_string(),
         }
     }
-    pub fn lines<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
+
+    pub fn line_dotted<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
+        &mut self,
+        name: impl ToString,
+        plots: I,
+    ) {
+        self.plots.push(Plot {
+            plot_type: PlotType::DottedLine,
+            name: name.to_string(),
+            plots: Box::new(Wrapper(Some(plots), PhantomData)),
+        })
+    }
+
+    pub fn line<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -436,6 +450,22 @@ font-family: "Arial";
                         Path::new()
                             .set("class", format!("plot{}fill", i))
                             .set("d", data),
+                    );
+                }
+                PlotType::DottedLine => {
+                    use std::fmt::Write;
+                    let mut points = String::new();
+                    for [x, y] in it {
+                        write!(&mut points, "{},{} ", x, y).unwrap();
+                    }
+                    doc = doc.add(
+                        Polyline::new()
+                            .set("class", format!("plot{}color", i))
+                            .set("fill", "none")
+                            .set("stroke-dasharray","4") //TODO combine with ine?
+                            .set("stroke", "black")
+                            .set("stroke-width", 2)
+                            .set("points", points),
                     );
                 }
             }
