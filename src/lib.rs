@@ -36,14 +36,14 @@
 //!
 //! ### Usage
 //!
-//! * Plots containing NaN or Infinity are ignored. 
+//! * Plots containing NaN or Infinity are ignored.
 //!
 //! ### Why use scientific notation?
 //!
-//! Its the most dense and consistent formatting. Also easiest to implement. 
+//! Its the most dense and consistent formatting. Also easiest to implement.
 //!
 //! ### Why not scale the intervals to end nicely with the ends of the axis lines?
-//! 
+//!
 //! Doing this you would have to either have more dead space, or exclude
 //! plots that the user would expect to get plotted. Neither of these sounded
 //! better than the option of just having the intervals stop not necessarily
@@ -66,12 +66,23 @@ struct Wrapper<'a, I: Iterator<Item = [f32; 2]> + Clone + 'a>(Option<I>, Phantom
 impl<'a, I: Iterator<Item = [f32; 2]> + Clone + 'a> PlotTrait<'a> for Wrapper<'a, I> {
     #[inline(always)]
     fn ref_iter(&self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a> {
-        Box::new(self.0.as_ref().unwrap().clone().filter(|[x,y]|!(x.is_nan()||y.is_nan()||x.is_infinite()||y.is_infinite())))
+        Box::new(
+            self.0
+                .as_ref()
+                .unwrap()
+                .clone()
+                .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite())),
+        )
     }
 
     #[inline(always)]
     fn into_iter(&mut self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a> {
-        Box::new(self.0.take().unwrap().filter(|[x,y]|!(x.is_nan()||y.is_nan()||x.is_infinite()||y.is_infinite())))
+        Box::new(
+            self.0
+                .take()
+                .unwrap()
+                .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite())),
+        )
     }
 }
 
@@ -92,8 +103,6 @@ struct Plot<'a> {
     plots: Box<dyn PlotTrait<'a> + 'a>,
     plot_type: PlotType,
 }
-
-
 
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
@@ -170,7 +179,6 @@ impl<'a> Plotter<'a> {
             plots: Box::new(Wrapper(Some(plots), PhantomData)),
         })
     }
-
 
     pub fn into_document(self) -> Document {
         self.finalize_doc()
@@ -256,23 +264,23 @@ font-family: "Arial";
         doc = doc.add(s);
 
         let [minx, maxx, miny, maxy] =
-            if let Some(m) = find_bounds(self.plots.iter().flat_map(|a| a.plots.ref_iter())) {                
+            if let Some(m) = find_bounds(self.plots.iter().flat_map(|a| a.plots.ref_iter())) {
                 m
             } else {
                 //TODO test that this looks ok
                 return doc; //No plots at all. dont need to draw anything
             };
 
-        let [miny,maxy]=if miny==maxy{
-            [miny-1.0,miny+1.0]
-        }else{
-            [miny,maxy]
+        let [miny, maxy] = if miny == maxy {
+            [miny - 1.0, miny + 1.0]
+        } else {
+            [miny, maxy]
         };
 
-        let [minx,maxx]=if minx==maxx{
-            [minx-1.0,minx+1.0]
-        }else{
-            [minx,maxx]
+        let [minx, maxx] = if minx == maxx {
+            [minx - 1.0, minx + 1.0]
+        } else {
+            [minx, maxx]
         };
 
         let scalex = (width - padding * 2.0) / (maxx - minx);
@@ -286,18 +294,16 @@ font-family: "Arial";
             let texty_padding = paddingy * 0.4;
             let textx_padding = padding * 0.2;
 
-            let (xstep_num,  xstep) = find_good_step(num_steps, maxx - minx);
-            let (ystep_num,  ystep) = find_good_step(num_steps, maxy - miny);
+            let (xstep_num, xstep) = find_good_step(num_steps, maxx - minx);
+            let (ystep_num, ystep) = find_good_step(num_steps, maxy - miny);
 
             let minx_fixed = (minx / xstep).ceil() * xstep;
             let miny_fixed = (miny / ystep).ceil() * ystep;
 
             for a in 0..xstep_num {
                 let p = (a as f32) * xstep;
-                
-                let t=
-                    node::Text::new(print_interval_float(p+minx_fixed));
 
+                let t = node::Text::new(print_interval_float(p + minx_fixed));
 
                 doc = doc.add(
                     element::Text::new()
@@ -310,14 +316,11 @@ font-family: "Arial";
                 );
             }
 
-
-
             for a in 0..ystep_num {
                 let p = (a as f32) * ystep;
 
-                dbg!(p,miny_fixed,p+miny_fixed);
-                let t=
-                    node::Text::new(print_interval_float(p+miny_fixed));
+                dbg!(p, miny_fixed, p + miny_fixed);
+                let t = node::Text::new(print_interval_float(p + miny_fixed));
 
                 doc = doc.add(
                     element::Text::new()
@@ -382,12 +385,10 @@ font-family: "Arial";
                         Polyline::new()
                             .set("class", format!("plot{}color", i))
                             .set("fill", "none")
-                            .set("stroke","black")
+                            .set("stroke", "black")
                             .set("stroke-width", 2)
-                            .set("points", points)
+                            .set("points", points),
                     );
-                    
-
                 }
                 PlotType::Scatter => {
                     for [x, y] in it {
@@ -407,7 +408,13 @@ font-family: "Arial";
                             let k = element::Rectangle::new()
                                 .set("x", format!("{}", lx))
                                 .set("y", format!("{}", ly))
-                                .set("width", format!("{}", (padding*0.02).max( (x - lx) - (padding * 0.02))    ))
+                                .set(
+                                    "width",
+                                    format!(
+                                        "{}",
+                                        (padding * 0.02).max((x - lx) - (padding * 0.02))
+                                    ),
+                                )
                                 .set("height", format!("{}", (height - paddingy - ly))) //TODO ugly?
                                 .set("class", format!("plot{}fill", i));
 
@@ -417,22 +424,20 @@ font-family: "Arial";
                     }
                 }
                 PlotType::LineFill => {
-                    let mut data = Data::new().move_to((padding, height-paddingy));
-                        
-                        for [x, y] in it {
-                            data = data.line_to((x, y));
-                        }
+                    let mut data = Data::new().move_to((padding, height - paddingy));
 
-                        data=data.line_to((width-padding,height-paddingy));
-                        data = data.close();
+                    for [x, y] in it {
+                        data = data.line_to((x, y));
+                    }
 
-                        doc = doc.add(
-                            Path::new()
-                                
-                                .set("class", format!("plot{}fill", i))
-                                .set("d", data)
-                        );
-                    
+                    data = data.line_to((width - padding, height - paddingy));
+                    data = data.close();
+
+                    doc = doc.add(
+                        Path::new()
+                            .set("class", format!("plot{}fill", i))
+                            .set("d", data),
+                    );
                 }
             }
         }
@@ -479,30 +484,30 @@ font-family: "Arial";
             .line_to((padding, height - paddingy))
             .line_to((width - padding, height - paddingy));
 
-        doc.add(Path::new()
-        .set("style", "fill:none !important;")
-        .set("stroke", "black")
-        .set("stroke-width", 3)
-        .set("d", data)
-        .set("class", "pline"))
+        doc.add(
+            Path::new()
+                .set("style", "fill:none !important;")
+                .set("stroke", "black")
+                .set("stroke-width", 3)
+                .set("d", data)
+                .set("class", "pline"),
+        )
     }
 }
 
 fn find_good_step(num_steps: usize, range: f32) -> (usize, f32) {
-    
-    let range=range as f64;
-    
+    let range = range as f64;
+
     //https://stackoverflow.com/questions/237220/tickmark-algorithm-for-a-graph-axis
-    
+
     let rough_step = range / (num_steps - 1) as f64;
 
     let step_power = 10.0f64.powf(-rough_step.abs().log10().floor()) as f64;
     let normalized_step = rough_step * step_power;
-    
 
     let good_steps = [1.0, 2.0, 5.0, 10.0];
     let good_normalized_step = good_steps.iter().find(|a| **a > normalized_step).unwrap();
-    
+
     let step = good_normalized_step / step_power;
 
     let new_step = if range % step != 0.0 {
@@ -514,29 +519,20 @@ fn find_good_step(num_steps: usize, range: f32) -> (usize, f32) {
     (new_step, step as f32)
 }
 
-fn print_interval_float(a:f32)->String{
+fn print_interval_float(a: f32) -> String {
     //scientific notation: m x 10n
-    let n=a.log10().floor();
-    let m=a/10.0f32.powf(n);
-    
+    let n = a.log10().floor();
+    let m = a / 10.0f32.powf(n);
+
     //Assume we have just one decimal place of precision needed
     //for fractional part.
     //This is ok because we specifically chose the intervals
     //to be from a set of desired steps (e.g. 1,2,5,10)
-    if  (m*10.0).round() as usize % 10 !=0   {
-        format!(
-            "{0:.1$e}",
-            a,
-            1
-        )
-    }else{
-        format!(
-            "{0:.1$e}",
-            a,
-            0
-        )
+    if (m * 10.0).round() as usize % 10 != 0 {
+        format!("{0:.1$e}", a, 1)
+    } else {
+        format!("{0:.1$e}", a, 0)
     }
-    
 }
 
 fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
