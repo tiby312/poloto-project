@@ -319,7 +319,6 @@ font-family: "Arial";
             for a in 0..ystep_num {
                 let p = (a as f32) * ystep;
 
-                dbg!(p, miny_fixed, p + miny_fixed);
                 let t = node::Text::new(print_interval_float(p + miny_fixed));
 
                 doc = doc.add(
