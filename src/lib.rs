@@ -37,7 +37,6 @@
 //! ### Usage
 //!
 //! * Plots containing NaN or Infinity are ignored. 
-//! * If there are no plots or just one plot, then a blank image is returned.
 //!
 //! ### Why use scientific notation?
 //!
@@ -264,10 +263,17 @@ font-family: "Arial";
                 return doc; //No plots at all. dont need to draw anything
             };
 
-        //Return nothing if no range. No 2d quantity to graph
-        if minx==maxx||miny==maxy {
-            return doc;
-        }
+        let [miny,maxy]=if miny==maxy{
+            [miny-1.0,miny+1.0]
+        }else{
+            [miny,maxy]
+        };
+
+        let [minx,maxx]=if minx==maxx{
+            [minx-1.0,minx+1.0]
+        }else{
+            [minx,maxx]
+        };
 
         let scalex = (width - padding * 2.0) / (maxx - minx);
         let scaley = (height - paddingy * 2.0) / (maxy - miny);
@@ -280,8 +286,8 @@ font-family: "Arial";
             let texty_padding = paddingy * 0.4;
             let textx_padding = padding * 0.2;
 
-            let (xstep_num, _xstep_power, xstep) = find_good_step(num_steps, maxx - minx);
-            let (ystep_num, _ystep_power, ystep) = find_good_step(num_steps, maxy - miny);
+            let (xstep_num,  xstep) = find_good_step(num_steps, maxx - minx);
+            let (ystep_num,  ystep) = find_good_step(num_steps, maxy - miny);
 
             let minx_fixed = (minx / xstep).ceil() * xstep;
             let miny_fixed = (miny / ystep).ceil() * ystep;
@@ -309,7 +315,7 @@ font-family: "Arial";
             for a in 0..ystep_num {
                 let p = (a as f32) * ystep;
 
-
+                dbg!(p,miny_fixed,p+miny_fixed);
                 let t=
                     node::Text::new(print_interval_float(p+miny_fixed));
 
@@ -370,16 +376,18 @@ font-family: "Arial";
                     use std::fmt::Write;
                     let mut points = String::new();
                     for [x, y] in it {
-                        writeln!(&mut points, "{},{}", x, y).unwrap();
+                        write!(&mut points, "{},{} ", x, y).unwrap();
                     }
                     doc = doc.add(
                         Polyline::new()
                             .set("class", format!("plot{}color", i))
                             .set("fill", "none")
+                            .set("stroke","black")
                             .set("stroke-width", 2)
-                            .set("stoke","black")
-                            .set("points", points),
+                            .set("points", points)
                     );
+                    
+
                 }
                 PlotType::Scatter => {
                     for [x, y] in it {
@@ -409,21 +417,22 @@ font-family: "Arial";
                     }
                 }
                 PlotType::LineFill => {
-                    let mut it = it;
-                    if let Some([startx, starty]) = it.next() {
-                        let mut data = Data::new().move_to((startx, starty));
+                    let mut data = Data::new().move_to((padding, height-paddingy));
+                        
                         for [x, y] in it {
                             data = data.line_to((x, y));
                         }
 
+                        data=data.line_to((width-padding,height-paddingy));
                         data = data.close();
 
                         doc = doc.add(
                             Path::new()
+                                
+                                .set("class", format!("plot{}fill", i))
                                 .set("d", data)
-                                .set("class", format!("plot{}fill", i)),
                         );
-                    }
+                    
                 }
             }
         }
@@ -470,19 +479,19 @@ font-family: "Arial";
             .line_to((padding, height - paddingy))
             .line_to((width - padding, height - paddingy));
 
-        let vert_line = Path::new()
-            .set("style", "fill:none !important;")
-            .set("stroke", "black")
-            .set("stroke-width", 3)
-            .set("d", data)
-            .set("class", "pline");
-
-        doc.add(vert_line)
+        doc.add(Path::new()
+        .set("style", "fill:none !important;")
+        .set("stroke", "black")
+        .set("stroke-width", 3)
+        .set("d", data)
+        .set("class", "pline"))
     }
 }
 
-fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
+fn find_good_step(num_steps: usize, range: f32) -> (usize, f32) {
+    
     let range=range as f64;
+    
     //https://stackoverflow.com/questions/237220/tickmark-algorithm-for-a-graph-axis
     
     let rough_step = range / (num_steps - 1) as f64;
@@ -502,7 +511,7 @@ fn find_good_step(num_steps: usize, range: f32) -> (usize, f32, f32) {
         (range / step) as usize
     };
 
-    (new_step, step_power.log10() as f32, step as f32)
+    (new_step, step as f32)
 }
 
 fn print_interval_float(a:f32)->String{
