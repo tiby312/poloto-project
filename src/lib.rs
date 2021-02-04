@@ -377,6 +377,7 @@ font-family: "Arial";
                             .set("class", format!("plot{}color", i))
                             .set("fill", "none")
                             .set("stroke-width", 2)
+                            .set("stoke","black")
                             .set("points", points),
                     );
                 }
@@ -398,7 +399,7 @@ font-family: "Arial";
                             let k = element::Rectangle::new()
                                 .set("x", format!("{}", lx))
                                 .set("y", format!("{}", ly))
-                                .set("width", format!("{}", (x - lx) - padding * 0.02))
+                                .set("width", format!("{}", (padding*0.02).max( (x - lx) - (padding * 0.02))    ))
                                 .set("height", format!("{}", (height - paddingy - ly))) //TODO ugly?
                                 .set("class", format!("plot{}fill", i));
 
