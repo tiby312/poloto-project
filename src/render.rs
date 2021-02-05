@@ -1,7 +1,7 @@
 
 use super::*;
 use svg::Node;
-pub fn render(pl:Plotter) -> Document {
+pub fn render(mut pl:Plotter) -> Document {
     let width = 800.0;
     let height = 500.0;
     let padding = 150.0;
@@ -12,7 +12,7 @@ pub fn render(pl:Plotter) -> Document {
         .set("width", width)
         .set("height", height)
         .set("viewBox", (0, 0, width, height))
-        .set("class", "splotclass");
+        .set("class", "plotato");
 
     //Draw background
     doc.append(
@@ -28,39 +28,34 @@ pub fn render(pl:Plotter) -> Document {
 
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
-    let background_color = "yellow";
-    let colors = vec!["blue", "red", "green", "purple", "aqua", "brown"];
+    let background_color = "aliceblue";
+    let colors = vec!["blue", "red", "green", "gold", "aqua", "brown"];
 
+    if let Some(style)=pl.style.take(){
+        doc.append(style);
+    }
+    
     //Add CSS styling
     doc.append(element::Style::new(format!(
-        r###".splotclass {{
+        r###".plotato {{
 font-family: "Arial";
---fg_color:   {0};
---bg_color:   {1};
---plot_color0:{2};
---plot_color1:{3};
---plot_color2:{4};
---plot_color3:{5};
---plot_color4:{6};
---plot_color5:{7};
-stroke-width:4;
+stroke-width:2;
 }}
-.ptext{{fill: var(--fg_color);  }}
-.ptext_bold{{fill: var(--fg_color);font-weight: bold; }}
-.pline{{stroke: var(--fg_color);}}
-.pbackground{{fill: var(--bg_color); }}
-.plot0stroke{{stroke:  var(--plot_color0); }}
-.plot1stroke{{stroke:  var(--plot_color1); }}
-.plot2stroke{{stroke:  var(--plot_color2); }}
-.plot3stroke{{stroke:  var(--plot_color3); }}
-.plot4stroke{{stroke:  var(--plot_color4); }}
-.plot5stroke{{stroke:  var(--plot_color5); }}
-.plot0fill{{fill:var(--plot_color0);}}
-.plot1fill{{fill:var(--plot_color1);}}
-.plot2fill{{fill:var(--plot_color2);}}
-.plot3fill{{fill:var(--plot_color3);}}
-.plot4fill{{fill:var(--plot_color4);}}
-.plot5fill{{fill:var(--plot_color5);}}"###,
+.plotato_text{{fill: var(--plotato_fg_color,{0});  }}
+.plotato_axis_lines{{stroke: var(--plotato_fg_color,{0});stoke-width:3;fill:none}}
+.pbackground{{fill: var(--plotato_bg_color,{1}); }}
+.plotato0stroke{{stroke:  var(--plotato_color0,{2}); }}
+.plotato1stroke{{stroke:  var(--plotato_color1,{3}); }}
+.plotato2stroke{{stroke:  var(--plotato_color2,{4}); }}
+.plotato3stroke{{stroke:  var(--plotato_color3,{5}); }}
+.plotato4stroke{{stroke:  var(--plotato_color4,{6}); }}
+.plotato5stroke{{stroke:  var(--plotato_color5,{7}); }}
+.plotato0fill{{fill:var(--plotato_color0,{2});}}
+.plotato1fill{{fill:var(--plotato_color1,{3});}}
+.plotato2fill{{fill:var(--plotato_color2,{4});}}
+.plotato3fill{{fill:var(--plotato_color3,{5});}}
+.plotato4fill{{fill:var(--plotato_color4,{6});}}
+.plotato5fill{{fill:var(--plotato_color5,{7});}}"###,
         text_color,
         background_color,
         colors[0],
@@ -124,7 +119,7 @@ stroke-width:4;
                     .set("y", height - paddingy + texty_padding)
                     .set("alignment-baseline", "start")
                     .set("text-anchor", "middle")
-                    .set("class", "ptext"),
+                    .set("class", "plotato_text"),
             );
         }
 
@@ -141,7 +136,7 @@ stroke-width:4;
                     .set("y", height - p * scaley - paddingy)
                     .set("alignment-baseline", "middle")
                     .set("text-anchor", "end")
-                    .set("class", "ptext"),
+                    .set("class", "plotato_text"),
             );
         }
     }
@@ -166,7 +161,7 @@ stroke-width:4;
                 .set("alignment-baseline", "middle")
                 .set("text-anchor", "start")
                 .set("font-size", "large")
-                .set("class", "ptext"),
+                .set("class", "plotato_text"),
         );
 
         let legendx1=width - padding / 1.2 + padding / 30.0;
@@ -183,7 +178,7 @@ stroke-width:4;
 
         match plot_type {
             PlotType::Line => {
-                let st=format!("plot{}stroke", i);
+                let st=format!("plotato{}stroke", i);
                 doc.append(
                     element::Line::new()
                         .set("x1",legendx1)
@@ -205,7 +200,7 @@ stroke-width:4;
                 );
             }
             PlotType::Scatter => {
-                let st=format!("plot{}fill", i);
+                let st=format!("plotato{}fill", i);
                 doc.append(
                     element::Circle::new()
                         .set("cx", legendx1+padding/30.0)
@@ -224,7 +219,7 @@ stroke-width:4;
                 }
             }
             PlotType::Histo => {
-                let st=format!("plot{}fill", i);
+                let st=format!("plotato{}fill", i);
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())
@@ -255,7 +250,7 @@ stroke-width:4;
                 }
             }
             PlotType::LineFill => {
-                let st=format!("plot{}fill", i);
+                let st=format!("plotato{}fill", i);
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())
@@ -294,7 +289,7 @@ stroke-width:4;
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set("font-size", "x-large")
-            .set("class", "ptext"),
+            .set("class", "plotato_text"),
     );
 
     //Draw xname
@@ -306,7 +301,7 @@ stroke-width:4;
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set("font-size", "large")
-            .set("class", "ptext"),
+            .set("class", "plotato_text"),
     );
 
     //Draw yname
@@ -322,7 +317,7 @@ stroke-width:4;
                 format!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
             )
             .set("font-size", "large")
-            .set("class", "ptext"),
+            .set("class", "plotato_text"),
     );
 
     let data = Data::new()
@@ -333,10 +328,9 @@ stroke-width:4;
     //Draw axis lines
     doc.append(
         Path::new()
-            .set("style", "fill:none !important;")
             .set("stroke", "black")
             .set("d", data)
-            .set("class", "pline"),
+            .set("class", "plotato_axis_lines"),
     );
 
     doc

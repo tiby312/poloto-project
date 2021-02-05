@@ -1,32 +1,17 @@
 fn main() {
-    let mut s = splot::plot("Testing testing one two three", "this is x", "this is y");
-
-    //let x=(0..10).map(|x|x as f32);
-    //s.lines("sin", x.clone().map(|x| [x, x]));
+    let mut s = plotato::plot("Demo: Some Trigonometry Plots", "This is the x label", "This is the y label");
 
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
-    //let x=vec!([0.001,2.0],[0.009,4.0]);
-
     
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.scatter("sin", x.clone().map(|x| [x, x.sin()]));
-    s.histogram("sin-10", x.clone().map(|x| [x, x.sin()-10.]));
-
+    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin()-10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() -20.]));
 
-    /*
-    //s.lines("sin", x.clone().map(|x|[x,x.sin()]));
 
-    */
-
-    /*
-    s.lines("sin", x.clone().map(|x| [x, x.sin()]));
-
-
-    */
-    /*
-        s.line_fill("-tan", x.clone().map(|x| [x, -x.tan()]));
-    */
+    //Make the first line a dashed line.
+    s.custom_style(".plotato0stroke{stroke-dasharray:10}");
+    
     //PIPE me to a file!
     //s.render(std::io::stdout()).unwrap();
     //OR use this

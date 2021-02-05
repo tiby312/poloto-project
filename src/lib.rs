@@ -1,11 +1,11 @@
 //!
-//! splot - A very simple plotter
+//! plotato - A very simple plotter
 //!
 //! The rise of SVG has made the need to an intermediate representatin of a graph
 //! not necessary. Instead of using .gplot files, just render to SVG graph directly
 //! using this crate. 
 //!
-//! splot is meant to be used to graph fairly 'obvious/general' trends
+//! plotato is meant to be used to graph fairly 'obvious/general' trends
 //! in the data. The user is not meant to be able to extract data
 //! or notice subtle differences in data. The desired use case is
 //! to allow inserting a nice graph into a webpage generated via
@@ -22,7 +22,7 @@
 //! You can doing it by overriding the css. If you embed the generated svg into a html file,
 //! then you can add this example css styling to override the default in the svg file:
 //! ```css
-//! #splot{
+//! .plotato{
 //!    font-family: "Open Sans", sans-serif;
 //!    --fg_color:"black";
 //!    --bg_color:"white;
@@ -122,6 +122,7 @@ pub struct Plotter<'a> {
     xname: String,
     yname: String,
     plots: Vec<Plot<'a>>,
+    style:Option<element::Style>
 }
 
 ///Shorthand constructor.
@@ -137,7 +138,18 @@ impl<'a> Plotter<'a> {
             plots: Vec::new(),
             xname: xname.to_string(),
             yname: yname.to_string(),
+            style:None
         }
+    }
+
+    ///You can override the css in regular html if you embed the generated svg.
+    ///This gives you a lot of flexibility giving your the power to dynamically
+    ///change the theme of your svg.
+    ///
+    ///However, if you want to embed the svg as an image, you lose this ability.
+    ///If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
+    pub fn custom_style(&mut self, text:impl ToString){
+        self.style=Some(element::Style::new(text.to_string()));
     }
 
 
