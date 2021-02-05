@@ -1,6 +1,6 @@
 
 use super::*;
-
+use svg::Node;
 pub fn render(pl:Plotter) -> Document {
     let width = 800.0;
     let height = 500.0;
@@ -12,11 +12,10 @@ pub fn render(pl:Plotter) -> Document {
         .set("width", width)
         .set("height", height)
         .set("viewBox", (0, 0, width, height))
-        .set("class", "splotclass")
-        .set("id", "splot");
+        .set("class", "splotclass");
 
     //Draw background
-    doc = doc.add(
+    doc.append(
         element::Rectangle::new()
             .set("class", "pbackground")
             //Do this just so that on legacy svg viewers that don't support css they see *something*.
@@ -33,7 +32,7 @@ pub fn render(pl:Plotter) -> Document {
     let colors = vec!["blue", "red", "green", "purple", "aqua", "brown"];
 
     //Add CSS styling
-    doc=doc.add(element::Style::new(format!(
+    doc.append(element::Style::new(format!(
         r###".splotclass {{
 font-family: "Arial";
 --fg_color:   {0};
@@ -117,7 +116,7 @@ font-family: "Arial";
 
             let t = node::Text::new(util::print_interval_float(p + minx_fixed));
 
-            doc = doc.add(
+            doc.append(
                 element::Text::new()
                     .add(t)
                     .set("x", format!("{}", p * scalex + padding))
@@ -134,7 +133,7 @@ font-family: "Arial";
 
             let t = node::Text::new(util::print_interval_float(p + miny_fixed));
 
-            doc = doc.add(
+            doc.append(
                 element::Text::new()
                     .add(t)
                     .set("x", format!("{}", padding - textx_padding))
@@ -158,7 +157,7 @@ font-family: "Arial";
         let spacing = padding / 3.0;
 
         //Draw legend text
-        doc = doc.add(
+        doc.append(
             element::Text::new()
                 .add(node::Text::new(name))
                 .set("x", format!("{}", width - padding / 1.2))
@@ -170,7 +169,7 @@ font-family: "Arial";
         );
 
         //Draw legend colors
-        doc = doc.add(
+        doc.append(
             element::Circle::new()
                 .set("cx", format!("{}", width - padding / 1.2 + padding / 30.0))
                 .set(
@@ -197,7 +196,7 @@ font-family: "Arial";
                 for [x, y] in it {
                     write!(&mut points, "{},{} ", x, y).unwrap();
                 }
-                doc = doc.add(
+                doc.append(
                     Polyline::new()
                         .set("class", format!("plot{}color", i))
                         .set("fill", "none")
@@ -208,7 +207,7 @@ font-family: "Arial";
             }
             PlotType::Scatter => {
                 for [x, y] in it {
-                    doc = doc.add(
+                    doc.append(
                         element::Circle::new()
                             .set("cx", format!("{}", x))
                             .set("cy", format!("{}", y))
@@ -234,7 +233,7 @@ font-family: "Arial";
                             .set("height", format!("{}", (height - paddingy - ly))) //TODO ugly?
                             .set("class", format!("plot{}fill", i));
 
-                        doc = doc.add(k);
+                        doc.append(k);
                     }
                     last = Some((x, y))
                 }
@@ -249,7 +248,7 @@ font-family: "Arial";
                 data = data.line_to((width - padding, height - paddingy));
                 data = data.close();
 
-                doc = doc.add(
+                doc.append(
                     Path::new()
                         .set("class", format!("plot{}fill", i))
                         .set("d", data),
@@ -261,7 +260,7 @@ font-family: "Arial";
                 for [x, y] in it {
                     write!(&mut points, "{},{} ", x, y).unwrap();
                 }
-                doc = doc.add(
+                doc.append(
                     Polyline::new()
                         .set("class", format!("plot{}color", i))
                         .set("fill", "none")
@@ -275,7 +274,7 @@ font-family: "Arial";
     }
 
     //Draw title
-    doc = doc.add(
+    doc.append(
         element::Text::new()
             .add(node::Text::new(pl.title))
             .set("x", format!("{}", width / 2.0))
@@ -287,7 +286,7 @@ font-family: "Arial";
     );
 
     //Draw xname
-    doc = doc.add(
+    doc.append(
         element::Text::new()
             .add(node::Text::new(pl.xname))
             .set("x", format!("{}", width / 2.0))
@@ -299,7 +298,7 @@ font-family: "Arial";
     );
 
     //Draw yname
-    doc = doc.add(
+    doc.append(
         element::Text::new()
             .add(node::Text::new(pl.yname))
             .set("x", format!("{}", padding / 4.0))
@@ -320,12 +319,14 @@ font-family: "Arial";
         .line_to((width - padding, height - paddingy));
 
     //Draw axis lines
-    doc.add(
+    doc.append(
         Path::new()
             .set("style", "fill:none !important;")
             .set("stroke", "black")
             .set("stroke-width", 3)
             .set("d", data)
             .set("class", "pline"),
-    )
+    );
+
+    doc
 }
