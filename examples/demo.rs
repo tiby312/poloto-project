@@ -7,7 +7,6 @@ fn main() {
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
     //let x=vec!([0.001,2.0],[0.009,4.0]);
 
-    s.line_dotted("sin+10", x.clone().map(|x| [x, x.sin()+10.]));
     
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.scatter("sin", x.clone().map(|x| [x, x.sin()]));

@@ -102,7 +102,6 @@ trait PlotTrait<'a> {
 enum PlotType {
     Scatter,
     Line,
-    DottedLine,
     Histo,
     LineFill,
 }
@@ -154,17 +153,6 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    pub fn line_dotted<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
-        &mut self,
-        name: impl ToString,
-        plots: I,
-    ) {
-        self.plots.push(Plot {
-            plot_type: PlotType::DottedLine,
-            name: name.to_string(),
-            plots: Box::new(Wrapper(Some(plots), PhantomData)),
-        })
-    }
     pub fn line_fill<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
         &mut self,
         name: impl ToString,

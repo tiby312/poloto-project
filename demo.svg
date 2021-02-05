@@ -11,6 +11,7 @@ font-family: "Arial";
 --plot_color3:purple;
 --plot_color4:aqua;
 --plot_color5:brown;
+stroke-width:4;
 }
 .ptext{fill: var(--fg_color);  }
 .ptext_bold{fill: var(--fg_color);font-weight: bold; }
@@ -47,146 +48,135 @@ font-family: "Arial";
 <text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="400">
 -2e1
 </text>
-<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="353.11877">
+<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="331.80627">
 -2e1
 </text>
-<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="306.23752">
+<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="263.61258">
 -1e1
 </text>
-<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="259.35626">
+<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="195.41888">
 -5e0
 </text>
-<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="212.47504">
+<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="127.22516">
 0e0
 </text>
-<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="165.59381">
-5e0
-</text>
-<text alignment-baseline="middle" class="ptext" text-anchor="end" x="120" y="118.712555">
-1e1
-</text>
 <text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="100">
-sin+10
-</text>
-<circle class="plot0fill" cx="680" cy="81.25" r="5"/>
-<polyline class="plot0color" fill="none" points="150,109.37225 160.20409,107.50949 170.40816,105.72098 180.61224,104.07803 190.81633,102.64615 201.02042,101.48242 211.22449,100.63324 221.42857,100.13245 231.63266,100 241.83673,100.24121 252.04082,100.846466 262.2449,101.791595 272.44897,103.03897 282.65308,104.53879 292.85715,106.23132 303.06122,108.0491 313.26532,109.919586 323.4694,111.76828 333.67346,113.521454 343.87756,115.10919 354.08163,116.46823 364.2857,117.54437 374.4898,118.29471 384.69388,118.68936 394.89795,118.712555 405.10205,118.36337 415.30612,117.65576 425.51022,116.61789 435.7143,115.29117 445.91837,113.728485 456.12244,111.99213 466.32654,110.15134 476.5306,108.27948 486.7347,106.45117 496.93878,104.73932 507.14285,103.21219 517.3469,101.93063 527.551,100.94574 537.7551,100.296814 547.95917,100.009674 558.16327,100.095795 568.3673,100.55173 578.5714,101.359344 588.7755,102.48639 598.9796,103.88794 609.1837,105.50815 619.38776,107.28238 629.5918,109.139984 639.7959,111.006775 650,112.80847 " stroke="black" stroke-dasharray="4" stroke-width="2"/>
-<text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="150">
 cos
 </text>
-<circle class="plot1fill" cx="680" cy="131.25" r="5"/>
-<polyline class="plot1color" fill="none" points="150,193.7585 160.20409,193.9454 170.40816,194.49866 180.61224,195.3962 190.81633,196.60225 201.02042,198.06874 211.22449,199.73718 221.42857,201.54109 231.63266,203.40854 241.83673,205.26505 252.04082,207.03665 262.2449,208.65268 272.44897,210.04874 282.65308,211.16914 292.85715,211.96927 303.06122,212.41716 313.26532,212.49501 323.4694,212.19969 333.67346,211.54298 343.87756,210.55106 354.08163,209.26346 364.2857,207.73155 374.4898,206.01637 384.69388,204.18631 394.89795,202.31433 405.10205,200.47505 415.30612,198.74182 425.51022,197.1837 435.7143,195.86285 445.91837,194.83191 456.12244,194.13194 466.32654,193.79092 476.5306,193.8224 486.7347,194.22514 496.93878,194.98306 507.14285,196.06598 517.3469,197.4307 527.551,199.02283 537.7551,200.77887 547.95917,202.62885 558.16327,204.499 568.3673,206.31476 578.5714,208.00374 588.7755,209.4986 598.9796,210.73975 609.1837,211.67773 619.38776,212.27513 629.5918,212.50812 639.7959,212.36743 650,211.85866 " stroke="black" stroke-width="2"/>
-<text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="200">
+<line class="plot0color" x1="680" x2="730" y1="81.25" y2="81.25"/>
+<polyline class="plot0color" fill="none" points="150,100 160.20409,100.27188 170.40816,101.07663 180.61224,102.3822 190.81633,104.136536 201.02042,106.269714 211.22449,108.696625 221.42857,111.32059 231.63266,114.03699 241.83673,116.73749 252.04082,119.31445 262.2449,121.66516 272.44897,123.69586 282.65308,125.32562 292.85715,126.48947 303.06122,127.14099 313.26532,127.25424 323.4694,126.824646 333.67346,125.869415 343.87756,124.426544 354.08163,122.55362 364.2857,120.32529 374.4898,117.83038 384.69388,115.168365 394.89795,112.44534 405.10205,109.76993 415.30612,107.24875 425.51022,104.98233 435.7143,103.061005 445.91837,101.56137 456.12244,100.54321 466.32654,100.04715 476.5306,100.09296 486.7347,100.67877 496.93878,101.78125 507.14285,103.356476 517.3469,105.34161 527.551,107.6575 537.7551,110.21185 547.95917,112.90286 558.16327,115.62317 568.3673,118.264404 578.5714,120.72119 588.7755,122.89563 598.9796,124.70102 609.1837,126.06543 619.38776,126.93439 629.5918,127.273285 639.7959,127.068634 650,126.32858 "/>
+<text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="150">
 sin
 </text>
-<circle class="plot2fill" cx="680" cy="181.25" r="5"/>
-<circle class="plot2fill" cx="150" cy="203.13475" r="3"/>
-<circle class="plot2fill" cx="160.20409" cy="201.27197" r="3"/>
-<circle class="plot2fill" cx="170.40816" cy="199.48347" r="3"/>
-<circle class="plot2fill" cx="180.61224" cy="197.84053" r="3"/>
-<circle class="plot2fill" cx="190.81633" cy="196.40865" r="3"/>
-<circle class="plot2fill" cx="201.02042" cy="195.2449" r="3"/>
-<circle class="plot2fill" cx="211.22449" cy="194.39572" r="3"/>
-<circle class="plot2fill" cx="221.42857" cy="193.89494" r="3"/>
-<circle class="plot2fill" cx="231.63266" cy="193.76251" r="3"/>
-<circle class="plot2fill" cx="241.83673" cy="194.00371" r="3"/>
-<circle class="plot2fill" cx="252.04082" cy="194.60895" r="3"/>
-<circle class="plot2fill" cx="262.2449" cy="195.5541" r="3"/>
-<circle class="plot2fill" cx="272.44897" cy="196.80144" r="3"/>
-<circle class="plot2fill" cx="282.65308" cy="198.30128" r="3"/>
-<circle class="plot2fill" cx="292.85715" cy="199.99382" r="3"/>
-<circle class="plot2fill" cx="303.06122" cy="201.81157" r="3"/>
-<circle class="plot2fill" cx="313.26532" cy="203.68208" r="3"/>
-<circle class="plot2fill" cx="323.4694" cy="205.53076" r="3"/>
-<circle class="plot2fill" cx="333.67346" cy="207.28392" r="3"/>
-<circle class="plot2fill" cx="343.87756" cy="208.87169" r="3"/>
-<circle class="plot2fill" cx="354.08163" cy="210.23071" r="3"/>
-<circle class="plot2fill" cx="364.2857" cy="211.30687" r="3"/>
-<circle class="plot2fill" cx="374.4898" cy="212.05722" r="3"/>
-<circle class="plot2fill" cx="384.69388" cy="212.45184" r="3"/>
-<circle class="plot2fill" cx="394.89795" cy="212.47504" r="3"/>
-<circle class="plot2fill" cx="405.10205" cy="212.12587" r="3"/>
-<circle class="plot2fill" cx="415.30612" cy="211.41824" r="3"/>
-<circle class="plot2fill" cx="425.51022" cy="210.38037" r="3"/>
-<circle class="plot2fill" cx="435.7143" cy="209.05367" r="3"/>
-<circle class="plot2fill" cx="445.91837" cy="207.49097" r="3"/>
-<circle class="plot2fill" cx="456.12244" cy="205.75461" r="3"/>
-<circle class="plot2fill" cx="466.32654" cy="203.91382" r="3"/>
-<circle class="plot2fill" cx="476.5306" cy="202.04196" r="3"/>
-<circle class="plot2fill" cx="486.7347" cy="200.21365" r="3"/>
-<circle class="plot2fill" cx="496.93878" cy="198.50182" r="3"/>
-<circle class="plot2fill" cx="507.14285" cy="196.97469" r="3"/>
-<circle class="plot2fill" cx="517.3469" cy="195.69312" r="3"/>
-<circle class="plot2fill" cx="527.551" cy="194.70824" r="3"/>
-<circle class="plot2fill" cx="537.7551" cy="194.05928" r="3"/>
-<circle class="plot2fill" cx="547.95917" cy="193.77217" r="3"/>
-<circle class="plot2fill" cx="558.16327" cy="193.85828" r="3"/>
-<circle class="plot2fill" cx="568.3673" cy="194.31422" r="3"/>
-<circle class="plot2fill" cx="578.5714" cy="195.12181" r="3"/>
-<circle class="plot2fill" cx="588.7755" cy="196.24887" r="3"/>
-<circle class="plot2fill" cx="598.9796" cy="197.65042" r="3"/>
-<circle class="plot2fill" cx="609.1837" cy="199.27061" r="3"/>
-<circle class="plot2fill" cx="619.38776" cy="201.04488" r="3"/>
-<circle class="plot2fill" cx="629.5918" cy="202.90244" r="3"/>
-<circle class="plot2fill" cx="639.7959" cy="204.76927" r="3"/>
-<circle class="plot2fill" cx="650" cy="206.57095" r="3"/>
-<text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="250">
+<circle class="plot1fill" cx="685" cy="131.25" r="5"/>
+<circle class="plot1fill" cx="150" cy="113.63873" r="3"/>
+<circle class="plot1fill" cx="160.20409" cy="110.92914" r="3"/>
+<circle class="plot1fill" cx="170.40816" cy="108.327576" r="3"/>
+<circle class="plot1fill" cx="180.61224" cy="105.937744" r="3"/>
+<circle class="plot1fill" cx="190.81633" cy="103.85492" r="3"/>
+<circle class="plot1fill" cx="201.02042" cy="102.16214" r="3"/>
+<circle class="plot1fill" cx="211.22449" cy="100.92691" r="3"/>
+<circle class="plot1fill" cx="221.42857" cy="100.198456" r="3"/>
+<circle class="plot1fill" cx="231.63266" cy="100.00583" r="3"/>
+<circle class="plot1fill" cx="241.83673" cy="100.35669" r="3"/>
+<circle class="plot1fill" cx="252.04082" cy="101.23706" r="3"/>
+<circle class="plot1fill" cx="262.2449" cy="102.61188" r="3"/>
+<circle class="plot1fill" cx="272.44897" cy="104.42627" r="3"/>
+<circle class="plot1fill" cx="282.65308" cy="106.60797" r="3"/>
+<circle class="plot1fill" cx="292.85715" cy="109.06995" r="3"/>
+<circle class="plot1fill" cx="303.06122" cy="111.71402" r="3"/>
+<circle class="plot1fill" cx="313.26532" cy="114.434906" r="3"/>
+<circle class="plot1fill" cx="323.4694" cy="117.12399" r="3"/>
+<circle class="plot1fill" cx="333.67346" cy="119.674164" r="3"/>
+<circle class="plot1fill" cx="343.87756" cy="121.983734" r="3"/>
+<circle class="plot1fill" cx="354.08163" cy="123.96057" r="3"/>
+<circle class="plot1fill" cx="364.2857" cy="125.52594" r="3"/>
+<circle class="plot1fill" cx="374.4898" cy="126.6174" r="3"/>
+<circle class="plot1fill" cx="384.69388" cy="127.19144" r="3"/>
+<circle class="plot1fill" cx="394.89795" cy="127.22516" r="3"/>
+<circle class="plot1fill" cx="405.10205" cy="126.717285" r="3"/>
+<circle class="plot1fill" cx="415.30612" cy="125.68796" r="3"/>
+<circle class="plot1fill" cx="425.51022" cy="124.17828" r="3"/>
+<circle class="plot1fill" cx="435.7143" cy="122.24844" r="3"/>
+<circle class="plot1fill" cx="445.91837" cy="119.97531" r="3"/>
+<circle class="plot1fill" cx="456.12244" cy="117.449615" r="3"/>
+<circle class="plot1fill" cx="466.32654" cy="114.77197" r="3"/>
+<circle class="plot1fill" cx="476.5306" cy="112.049164" r="3"/>
+<circle class="plot1fill" cx="486.7347" cy="109.38971" r="3"/>
+<circle class="plot1fill" cx="496.93878" cy="106.89966" r="3"/>
+<circle class="plot1fill" cx="507.14285" cy="104.67828" r="3"/>
+<circle class="plot1fill" cx="517.3469" cy="102.81409" r="3"/>
+<circle class="plot1fill" cx="527.551" cy="101.3815" r="3"/>
+<circle class="plot1fill" cx="537.7551" cy="100.43753" r="3"/>
+<circle class="plot1fill" cx="547.95917" cy="100.01987" r="3"/>
+<circle class="plot1fill" cx="558.16327" cy="100.14514" r="3"/>
+<circle class="plot1fill" cx="568.3673" cy="100.80835" r="3"/>
+<circle class="plot1fill" cx="578.5714" cy="101.98309" r="3"/>
+<circle class="plot1fill" cx="588.7755" cy="103.6225" r="3"/>
+<circle class="plot1fill" cx="598.9796" cy="105.661224" r="3"/>
+<circle class="plot1fill" cx="609.1837" cy="108.017944" r="3"/>
+<circle class="plot1fill" cx="619.38776" cy="110.598785" r="3"/>
+<circle class="plot1fill" cx="629.5918" cy="113.30081" r="3"/>
+<circle class="plot1fill" cx="639.7959" cy="116.01633" r="3"/>
+<circle class="plot1fill" cx="650" cy="118.637054" r="3"/>
+<text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="200">
 sin-10
 </text>
-<circle class="plot3fill" cx="680" cy="231.25" r="5"/>
-<rect class="plot3fill" height="103.10278" width="7.2040863" x="150" y="296.89722"/>
-<rect class="plot3fill" height="104.965546" width="7.204071" x="160.20409" y="295.03445"/>
-<rect class="plot3fill" height="106.75406" width="7.2040863" x="170.40816" y="293.24594"/>
-<rect class="plot3fill" height="108.39697" width="7.2040863" x="180.61224" y="291.60303"/>
-<rect class="plot3fill" height="109.82886" width="7.2040863" x="190.81633" y="290.17114"/>
-<rect class="plot3fill" height="110.992615" width="7.204071" x="201.02042" y="289.0074"/>
-<rect class="plot3fill" height="111.8418" width="7.2040863" x="211.22449" y="288.1582"/>
-<rect class="plot3fill" height="112.34259" width="7.2040863" x="221.42857" y="287.6574"/>
-<rect class="plot3fill" height="112.47504" width="7.204071" x="231.63266" y="287.52496"/>
-<rect class="plot3fill" height="112.233795" width="7.2040863" x="241.83673" y="287.7662"/>
-<rect class="plot3fill" height="111.62857" width="7.2040863" x="252.04082" y="288.37143"/>
-<rect class="plot3fill" height="110.68344" width="7.204071" x="262.2449" y="289.31656"/>
-<rect class="plot3fill" height="109.4361" width="7.2041016" x="272.44897" y="290.5639"/>
-<rect class="plot3fill" height="107.93622" width="7.204071" x="282.65308" y="292.06378"/>
-<rect class="plot3fill" height="106.24371" width="7.204071" x="292.85715" y="293.7563"/>
-<rect class="plot3fill" height="104.425934" width="7.2041016" x="303.06122" y="295.57407"/>
-<rect class="plot3fill" height="102.55542" width="7.204071" x="313.26532" y="297.44458"/>
-<rect class="plot3fill" height="100.70676" width="7.204071" x="323.4694" y="299.29324"/>
-<rect class="plot3fill" height="98.95358" width="7.2041016" x="333.67346" y="301.04642"/>
-<rect class="plot3fill" height="97.365845" width="7.204071" x="343.87756" y="302.63416"/>
-<rect class="plot3fill" height="96.006805" width="7.204071" x="354.08163" y="303.9932"/>
-<rect class="plot3fill" height="94.930664" width="7.2041016" x="364.2857" y="305.06934"/>
-<rect class="plot3fill" height="94.1803" width="7.204071" x="374.4898" y="305.8197"/>
-<rect class="plot3fill" height="93.785675" width="7.204071" x="384.69388" y="306.21432"/>
-<rect class="plot3fill" height="93.76248" width="7.2041016" x="394.89795" y="306.23752"/>
-<rect class="plot3fill" height="94.111664" width="7.204071" x="405.10205" y="305.88834"/>
-<rect class="plot3fill" height="94.819275" width="7.2041016" x="415.30612" y="305.18073"/>
-<rect class="plot3fill" height="95.85715" width="7.204071" x="425.51022" y="304.14285"/>
-<rect class="plot3fill" height="97.18384" width="7.204071" x="435.7143" y="302.81616"/>
-<rect class="plot3fill" height="98.74652" width="7.204071" x="445.91837" y="301.25348"/>
-<rect class="plot3fill" height="100.48291" width="7.2041016" x="456.12244" y="299.5171"/>
-<rect class="plot3fill" height="102.3237" width="7.204071" x="466.32654" y="297.6763"/>
-<rect class="plot3fill" height="104.19556" width="7.2041016" x="476.5306" y="295.80444"/>
-<rect class="plot3fill" height="106.023865" width="7.204071" x="486.7347" y="293.97614"/>
-<rect class="plot3fill" height="107.73572" width="7.204071" x="496.93878" y="292.26428"/>
-<rect class="plot3fill" height="109.26282" width="7.204071" x="507.14285" y="290.73718"/>
-<rect class="plot3fill" height="110.5444" width="7.2041016" x="517.3469" y="289.4556"/>
-<rect class="plot3fill" height="111.5293" width="7.2041016" x="527.551" y="288.4707"/>
-<rect class="plot3fill" height="112.17822" width="7.2040405" x="537.7551" y="287.82178"/>
-<rect class="plot3fill" height="112.46536" width="7.2041016" x="547.95917" y="287.53464"/>
-<rect class="plot3fill" height="112.37924" width="7.2040405" x="558.16327" y="287.62076"/>
-<rect class="plot3fill" height="111.92328" width="7.2041016" x="568.3673" y="288.07672"/>
-<rect class="plot3fill" height="111.11569" width="7.2041016" x="578.5714" y="288.8843"/>
-<rect class="plot3fill" height="109.98865" width="7.2041016" x="588.7755" y="290.01135"/>
-<rect class="plot3fill" height="108.5871" width="7.2041016" x="598.9796" y="291.4129"/>
-<rect class="plot3fill" height="106.96689" width="7.2040405" x="609.1837" y="293.0331"/>
-<rect class="plot3fill" height="105.19263" width="7.2040405" x="619.38776" y="294.80737"/>
-<rect class="plot3fill" height="103.33508" width="7.2041016" x="629.5918" y="296.66492"/>
-<rect class="plot3fill" height="101.46826" width="7.2041016" x="639.7959" y="298.53174"/>
-<text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="300">
+<rect class="plot2fill" height="7.5" width="50" x="680" y="176.25"/>
+<rect class="plot2fill" height="149.97385" width="7.2040863" x="150" y="250.02615"/>
+<rect class="plot2fill" height="152.68344" width="7.204071" x="160.20409" y="247.31656"/>
+<rect class="plot2fill" height="155.28502" width="7.2040863" x="170.40816" y="244.71498"/>
+<rect class="plot2fill" height="157.67485" width="7.2040863" x="180.61224" y="242.32515"/>
+<rect class="plot2fill" height="159.75768" width="7.2040863" x="190.81633" y="240.24232"/>
+<rect class="plot2fill" height="161.45044" width="7.204071" x="201.02042" y="238.54956"/>
+<rect class="plot2fill" height="162.68568" width="7.2040863" x="211.22449" y="237.31432"/>
+<rect class="plot2fill" height="163.41414" width="7.2040863" x="221.42857" y="236.58586"/>
+<rect class="plot2fill" height="163.60677" width="7.204071" x="231.63266" y="236.39323"/>
+<rect class="plot2fill" height="163.25589" width="7.2040863" x="241.83673" y="236.74411"/>
+<rect class="plot2fill" height="162.3755" width="7.2040863" x="252.04082" y="237.6245"/>
+<rect class="plot2fill" height="161.00072" width="7.204071" x="262.2449" y="238.99928"/>
+<rect class="plot2fill" height="159.18631" width="7.2041016" x="272.44897" y="240.81369"/>
+<rect class="plot2fill" height="157.00462" width="7.204071" x="282.65308" y="242.99538"/>
+<rect class="plot2fill" height="154.54266" width="7.204071" x="292.85715" y="245.45734"/>
+<rect class="plot2fill" height="151.89854" width="7.2041016" x="303.06122" y="248.10146"/>
+<rect class="plot2fill" height="149.17769" width="7.204071" x="313.26532" y="250.82231"/>
+<rect class="plot2fill" height="146.48859" width="7.204071" x="323.4694" y="253.51141"/>
+<rect class="plot2fill" height="143.93842" width="7.2041016" x="333.67346" y="256.06158"/>
+<rect class="plot2fill" height="141.62888" width="7.204071" x="343.87756" y="258.37112"/>
+<rect class="plot2fill" height="139.65201" width="7.204071" x="354.08163" y="260.348"/>
+<rect class="plot2fill" height="138.08667" width="7.2041016" x="364.2857" y="261.91333"/>
+<rect class="plot2fill" height="136.99518" width="7.204071" x="374.4898" y="263.00482"/>
+<rect class="plot2fill" height="136.42114" width="7.204071" x="384.69388" y="263.57886"/>
+<rect class="plot2fill" height="136.38742" width="7.2041016" x="394.89795" y="263.61258"/>
+<rect class="plot2fill" height="136.89532" width="7.204071" x="405.10205" y="263.10468"/>
+<rect class="plot2fill" height="137.92462" width="7.2041016" x="415.30612" y="262.07538"/>
+<rect class="plot2fill" height="139.43433" width="7.204071" x="425.51022" y="260.56567"/>
+<rect class="plot2fill" height="141.36417" width="7.204071" x="435.7143" y="258.63583"/>
+<rect class="plot2fill" height="143.63727" width="7.204071" x="445.91837" y="256.36273"/>
+<rect class="plot2fill" height="146.16298" width="7.2041016" x="456.12244" y="253.83702"/>
+<rect class="plot2fill" height="148.8406" width="7.204071" x="466.32654" y="251.1594"/>
+<rect class="plot2fill" height="151.56342" width="7.2041016" x="476.5306" y="248.43658"/>
+<rect class="plot2fill" height="154.22287" width="7.204071" x="486.7347" y="245.77713"/>
+<rect class="plot2fill" height="156.71294" width="7.204071" x="496.93878" y="243.28706"/>
+<rect class="plot2fill" height="158.93431" width="7.204071" x="507.14285" y="241.06569"/>
+<rect class="plot2fill" height="160.79848" width="7.2041016" x="517.3469" y="239.20152"/>
+<rect class="plot2fill" height="162.2311" width="7.2041016" x="527.551" y="237.7689"/>
+<rect class="plot2fill" height="163.17505" width="7.2040405" x="537.7551" y="236.82495"/>
+<rect class="plot2fill" height="163.59273" width="7.2041016" x="547.95917" y="236.40727"/>
+<rect class="plot2fill" height="163.46744" width="7.2040405" x="558.16327" y="236.53256"/>
+<rect class="plot2fill" height="162.80423" width="7.2041016" x="568.3673" y="237.19577"/>
+<rect class="plot2fill" height="161.6295" width="7.2041016" x="578.5714" y="238.3705"/>
+<rect class="plot2fill" height="159.9901" width="7.2041016" x="588.7755" y="240.0099"/>
+<rect class="plot2fill" height="157.95137" width="7.2041016" x="598.9796" y="242.04863"/>
+<rect class="plot2fill" height="155.59462" width="7.2040405" x="609.1837" y="244.40538"/>
+<rect class="plot2fill" height="153.01378" width="7.2040405" x="619.38776" y="246.98622"/>
+<rect class="plot2fill" height="150.31175" width="7.2041016" x="629.5918" y="249.68825"/>
+<rect class="plot2fill" height="147.59625" width="7.2041016" x="639.7959" y="252.40375"/>
+<text alignment-baseline="middle" class="ptext" font-size="large" text-anchor="start" x="675" y="250">
 sin-20
 </text>
-<circle class="plot4fill" cx="680" cy="281.25" r="5"/>
-<path class="plot4fill" d="M150,400 L150,390.65973 L160.20409,388.79694 L170.40816,387.00845 L180.61224,385.36548 L190.81633,383.93362 L201.02042,382.76987 L211.22449,381.9207 L221.42857,381.4199 L231.63266,381.28748 L241.83673,381.5287 L252.04082,382.1339 L262.2449,383.07904 L272.44897,384.32642 L282.65308,385.82626 L292.85715,387.5188 L303.06122,389.33652 L313.26532,391.20706 L323.4694,393.05573 L333.67346,394.8089 L343.87756,396.39664 L354.08163,397.75568 L364.2857,398.83182 L374.4898,399.58218 L384.69388,399.9768 L394.89795,400 L405.10205,399.65082 L415.30612,398.9432 L425.51022,397.90533 L435.7143,396.57864 L445.91837,395.01593 L456.12244,393.27957 L466.32654,391.43878 L476.5306,389.56693 L486.7347,387.73862 L496.93878,386.0268 L507.14285,384.49966 L517.3469,383.21808 L527.551,382.23322 L537.7551,381.58426 L547.95917,381.29712 L558.16327,381.38324 L568.3673,381.83917 L578.5714,382.6468 L588.7755,383.77383 L598.9796,385.17538 L609.1837,386.7956 L619.38776,388.56982 L629.5918,390.4274 L639.7959,392.29425 L650,394.09592 L650,400 z"/>
+<rect class="plot3fill" height="7.5" width="50" x="680" y="226.25"/>
+<path class="plot3fill" d="M150,400 L150,386.41357 L160.20409,383.70398 L170.40816,381.10242 L180.61224,378.71255 L190.81633,376.62973 L201.02042,374.93698 L211.22449,373.70172 L221.42857,372.9733 L231.63266,372.78067 L241.83673,373.1315 L252.04082,374.0119 L262.2449,375.3867 L272.44897,377.2011 L282.65308,379.38278 L292.85715,381.84476 L303.06122,384.48886 L313.26532,387.20972 L323.4694,389.89883 L333.67346,392.449 L343.87756,394.75854 L354.08163,396.73538 L364.2857,398.30078 L374.4898,399.39224 L384.69388,399.96625 L394.89795,400 L405.10205,399.49207 L415.30612,398.4628 L425.51022,396.9531 L435.7143,395.02325 L445.91837,392.75015 L456.12244,390.22446 L466.32654,387.5468 L476.5306,384.824 L486.7347,382.16452 L496.93878,379.67447 L507.14285,377.4531 L517.3469,375.58893 L527.551,374.1563 L537.7551,373.21237 L547.95917,372.7947 L558.16327,372.91995 L568.3673,373.5832 L578.5714,374.7579 L588.7755,376.39734 L598.9796,378.43604 L609.1837,380.7928 L619.38776,383.37363 L629.5918,386.07565 L639.7959,388.79117 L650,391.4119 L650,400 z"/>
 <text alignment-baseline="start" class="ptext" font-size="x-large" text-anchor="middle" x="400" y="37.5">
 Testing testing one two three
 </text>
@@ -196,5 +186,5 @@ this is x
 <text alignment-baseline="start" class="ptext" font-size="large" text-anchor="middle" transform="rotate(-90,37.5,250)" x="37.5" y="250">
 this is y
 </text>
-<path class="pline" d="M150,100 L150,400 L650,400" stroke="black" stroke-width="3" style="fill:none !important;"/>
+<path class="pline" d="M150,100 L150,400 L650,400" stroke="black" style="fill:none !important;"/>
 </svg>

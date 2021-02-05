@@ -22,8 +22,8 @@ pub fn render(pl:Plotter) -> Document {
             .set("fill", "white")
             .set("x", "0")
             .set("y", "0")
-            .set("width", format!("{}", width))
-            .set("height", format!("{}", height)),
+            .set("width", width)
+            .set("height", height),
     );
 
     //Default colors if CSS is not overriden with user colors.
@@ -43,6 +43,7 @@ font-family: "Arial";
 --plot_color3:{5};
 --plot_color4:{6};
 --plot_color5:{7};
+stroke-width:4;
 }}
 .ptext{{fill: var(--fg_color);  }}
 .ptext_bold{{fill: var(--fg_color);font-weight: bold; }}
@@ -119,8 +120,8 @@ font-family: "Arial";
             doc.append(
                 element::Text::new()
                     .add(t)
-                    .set("x", format!("{}", p * scalex + padding))
-                    .set("y", format!("{}", height - paddingy + texty_padding))
+                    .set("x", p * scalex + padding)
+                    .set("y", height - paddingy + texty_padding)
                     .set("alignment-baseline", "start")
                     .set("text-anchor", "middle")
                     .set("class", "ptext"),
@@ -136,8 +137,8 @@ font-family: "Arial";
             doc.append(
                 element::Text::new()
                     .add(t)
-                    .set("x", format!("{}", padding - textx_padding))
-                    .set("y", format!("{}", height - p * scaley - paddingy))
+                    .set("x", padding - textx_padding)
+                    .set("y", height - p * scaley - paddingy)
                     .set("alignment-baseline", "middle")
                     .set("text-anchor", "end")
                     .set("class", "ptext"),
@@ -160,25 +161,16 @@ font-family: "Arial";
         doc.append(
             element::Text::new()
                 .add(node::Text::new(name))
-                .set("x", format!("{}", width - padding / 1.2))
-                .set("y", format!("{}", paddingy + (i as f32) * spacing))
+                .set("x", width - padding / 1.2)
+                .set("y", paddingy + (i as f32) * spacing)
                 .set("alignment-baseline", "middle")
                 .set("text-anchor", "start")
                 .set("font-size", "large")
                 .set("class", "ptext"),
         );
 
-        //Draw legend colors
-        doc.append(
-            element::Circle::new()
-                .set("cx", format!("{}", width - padding / 1.2 + padding / 30.0))
-                .set(
-                    "cy",
-                    format!("{}", paddingy - padding / 8.0 + (i as f32) * spacing),
-                )
-                .set("r", format!("{}", padding / 30.0))
-                .set("class", format!("plot{}fill", i)),
-        );
+        let legendx1=width - padding / 1.2 + padding / 30.0;
+        let legendy1=paddingy - padding / 8.0 + (i as f32) * spacing;
 
         //Draw plots
 
@@ -191,6 +183,15 @@ font-family: "Arial";
 
         match plot_type {
             PlotType::Line => {
+                let st=format!("plot{}color", i);
+                doc.append(
+                    element::Line::new()
+                        .set("x1",legendx1)
+                        .set("y1",legendy1)
+                        .set("x2",legendx1+padding/3.0)
+                        .set("y2",legendy1)
+                        .set("class",st.clone())
+                );
                 use std::fmt::Write;
                 let mut points = String::new();
                 for [x, y] in it {
@@ -198,40 +199,55 @@ font-family: "Arial";
                 }
                 doc.append(
                     Polyline::new()
-                        .set("class", format!("plot{}color", i))
+                        .set("class", st)
                         .set("fill", "none")
-                        .set("stroke", "black")
-                        .set("stroke-width", 2)
                         .set("points", points),
                 );
             }
             PlotType::Scatter => {
+                let st=format!("plot{}fill", i);
+                doc.append(
+                    element::Circle::new()
+                        .set("cx", legendx1+padding/30.0)
+                        .set("cy",legendy1,)
+                        .set("r", padding / 30.0)
+                        .set("class", st.clone()),
+                );
                 for [x, y] in it {
                     doc.append(
                         element::Circle::new()
-                            .set("cx", format!("{}", x))
-                            .set("cy", format!("{}", y))
-                            .set("r", format!("{}", padding / 50.0))
-                            .set("class", format!("plot{}fill", i)),
+                            .set("cx",  x)
+                            .set("cy", y)
+                            .set("r",  padding / 50.0)
+                            .set("class", st.clone()),
                     );
                 }
             }
             PlotType::Histo => {
+                let st=format!("plot{}fill", i);
+                doc.append(
+                    element::Rectangle::new()
+                        .set("class", st.clone())
+                        //Do this just so that on legacy svg viewers that don't support css they see *something*.
+                        .set("x", legendx1)
+                        .set("y", legendy1-padding/30.0)
+                        .set("width", padding/3.0)
+                        .set("height", padding/20.0),
+                );
                 let mut last = None;
                 for [x, y] in it {
                     if let Some((lx, ly)) = last {
                         let k = element::Rectangle::new()
-                            .set("x", format!("{}", lx))
-                            .set("y", format!("{}", ly))
+                            .set("x", lx)
+                            .set("y", ly)
                             .set(
                                 "width",
-                                format!(
-                                    "{}",
+                                
                                     (padding * 0.02).max((x - lx) - (padding * 0.02))
-                                ),
+                                ,
                             )
-                            .set("height", format!("{}", (height - paddingy - ly))) //TODO ugly?
-                            .set("class", format!("plot{}fill", i));
+                            .set("height", height - paddingy - ly) //TODO ugly?
+                            .set("class", st.clone());
 
                         doc.append(k);
                     }
@@ -239,6 +255,17 @@ font-family: "Arial";
                 }
             }
             PlotType::LineFill => {
+                let st=format!("plot{}fill", i);
+                doc.append(
+                    element::Rectangle::new()
+                        .set("class", st.clone())
+                        //Do this just so that on legacy svg viewers that don't support css they see *something*.
+                        .set("x", legendx1)
+                        .set("y", legendy1-padding/30.0)
+                        .set("width", padding/3.0)
+                        .set("height", padding/20.0),
+                );
+
                 let mut data = Data::new().move_to((padding, height - paddingy));
 
                 for [x, y] in it {
@@ -250,26 +277,11 @@ font-family: "Arial";
 
                 doc.append(
                     Path::new()
-                        .set("class", format!("plot{}fill", i))
+                        .set("class", st.clone())
                         .set("d", data),
                 );
             }
-            PlotType::DottedLine => {
-                use std::fmt::Write;
-                let mut points = String::new();
-                for [x, y] in it {
-                    write!(&mut points, "{},{} ", x, y).unwrap();
-                }
-                doc.append(
-                    Polyline::new()
-                        .set("class", format!("plot{}color", i))
-                        .set("fill", "none")
-                        .set("stroke-dasharray","4") //TODO combine with ine?
-                        .set("stroke", "black")
-                        .set("stroke-width", 2)
-                        .set("points", points),
-                );
-            }
+            
         }
     }
 
@@ -277,8 +289,8 @@ font-family: "Arial";
     doc.append(
         element::Text::new()
             .add(node::Text::new(pl.title))
-            .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", padding / 4.0))
+            .set("x", width / 2.0)
+            .set("y", padding / 4.0)
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set("font-size", "x-large")
@@ -289,8 +301,8 @@ font-family: "Arial";
     doc.append(
         element::Text::new()
             .add(node::Text::new(pl.xname))
-            .set("x", format!("{}", width / 2.0))
-            .set("y", format!("{}", height - padding / 8.))
+            .set("x", width / 2.0)
+            .set("y", height - padding / 8.)
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set("font-size", "large")
@@ -301,8 +313,8 @@ font-family: "Arial";
     doc.append(
         element::Text::new()
             .add(node::Text::new(pl.yname))
-            .set("x", format!("{}", padding / 4.0))
-            .set("y", format!("{}", height / 2.0))
+            .set("x", padding / 4.0)
+            .set("y",  height / 2.0)
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set(
@@ -323,7 +335,6 @@ font-family: "Arial";
         Path::new()
             .set("style", "fill:none !important;")
             .set("stroke", "black")
-            .set("stroke-width", 3)
             .set("d", data)
             .set("class", "pline"),
     );
