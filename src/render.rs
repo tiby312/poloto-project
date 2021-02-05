@@ -49,12 +49,12 @@ stroke-width:4;
 .ptext_bold{{fill: var(--fg_color);font-weight: bold; }}
 .pline{{stroke: var(--fg_color);}}
 .pbackground{{fill: var(--bg_color); }}
-.plot0color{{stroke:  var(--plot_color0); }}
-.plot1color{{stroke:  var(--plot_color1); }}
-.plot2color{{stroke:  var(--plot_color2); }}
-.plot3color{{stroke:  var(--plot_color3); }}
-.plot4color{{stroke:  var(--plot_color4); }}
-.plot5color{{stroke:  var(--plot_color5); }}
+.plot0stroke{{stroke:  var(--plot_color0); }}
+.plot1stroke{{stroke:  var(--plot_color1); }}
+.plot2stroke{{stroke:  var(--plot_color2); }}
+.plot3stroke{{stroke:  var(--plot_color3); }}
+.plot4stroke{{stroke:  var(--plot_color4); }}
+.plot5stroke{{stroke:  var(--plot_color5); }}
 .plot0fill{{fill:var(--plot_color0);}}
 .plot1fill{{fill:var(--plot_color1);}}
 .plot2fill{{fill:var(--plot_color2);}}
@@ -183,7 +183,7 @@ stroke-width:4;
 
         match plot_type {
             PlotType::Line => {
-                let st=format!("plot{}color", i);
+                let st=format!("plot{}stroke", i);
                 doc.append(
                     element::Line::new()
                         .set("x1",legendx1)
