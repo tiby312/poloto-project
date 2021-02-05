@@ -1,5 +1,5 @@
 <svg class="plotato" height="500" viewBox="0 0 800 500" width="800" xmlns="http://www.w3.org/2000/svg">
-<rect class="pbackground" fill="white" height="500" width="800" x="0" y="0"/>
+<rect class="plotato_background" fill="white" height="500" width="800" x="0" y="0"/>
 <style>
 .plotato0stroke{stroke-dasharray:10}
 </style>
@@ -10,7 +10,7 @@ stroke-width:2;
 }
 .plotato_text{fill: var(--plotato_fg_color,black);  }
 .plotato_axis_lines{stroke: var(--plotato_fg_color,black);stoke-width:3;fill:none}
-.pbackground{fill: var(--plotato_bg_color,aliceblue); }
+.plotato_background{fill: var(--plotato_bg_color,aliceblue); }
 .plotato0stroke{stroke:  var(--plotato_color0,blue); }
 .plotato1stroke{stroke:  var(--plotato_color1,red); }
 .plotato2stroke{stroke:  var(--plotato_color2,green); }

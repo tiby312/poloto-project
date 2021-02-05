@@ -17,7 +17,7 @@ pub fn render(mut pl:Plotter) -> Document {
     //Draw background
     doc.append(
         element::Rectangle::new()
-            .set("class", "pbackground")
+            .set("class", "plotato_background")
             //Do this just so that on legacy svg viewers that don't support css they see *something*.
             .set("fill", "white")
             .set("x", "0")
@@ -43,7 +43,7 @@ stroke-width:2;
 }}
 .plotato_text{{fill: var(--plotato_fg_color,{0});  }}
 .plotato_axis_lines{{stroke: var(--plotato_fg_color,{0});stoke-width:3;fill:none}}
-.pbackground{{fill: var(--plotato_bg_color,{1}); }}
+.plotato_background{{fill: var(--plotato_bg_color,{1}); }}
 .plotato0stroke{{stroke:  var(--plotato_color0,{2}); }}
 .plotato1stroke{{stroke:  var(--plotato_color1,{3}); }}
 .plotato2stroke{{stroke:  var(--plotato_color2,{4}); }}

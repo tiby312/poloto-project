@@ -10,7 +10,8 @@ fn main() {
 
 
     //Make the first line a dashed line.
-    s.custom_style(".plotato0stroke{stroke-dasharray:10}");
+    s.custom_style(
+        ".plotato0stroke{stroke-dasharray:10}");
     
     //PIPE me to a file!
     //s.render(std::io::stdout()).unwrap();
