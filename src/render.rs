@@ -192,6 +192,8 @@ stroke-width:2;
                     Polyline::new()
                         .set("class", st)
                         .set("fill", "none")
+                        //Do this so that on legacy svg viewers that dont have CSS, we see *something*.
+                        .set("stroke","black")
                         .set("points", points),
                 );
             }
@@ -219,7 +221,6 @@ stroke-width:2;
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())
-                        //Do this just so that on legacy svg viewers that don't support css they see *something*.
                         .set("x", legendx1)
                         .set("y", legendy1-padding/30.0)
                         .set("width", padding/3.0)
@@ -252,7 +253,6 @@ stroke-width:2;
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())
-                        //Do this just so that on legacy svg viewers that don't support css they see *something*.
                         .set("x", legendx1)
                         .set("y", legendy1-padding/30.0)
                         .set("width", padding/3.0)
