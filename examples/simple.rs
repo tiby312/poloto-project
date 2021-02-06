@@ -1,3 +1,4 @@
+//PIPE me to a file!
 fn main() {
     let mut s = plotato::plot("Demo: Some Trigonometry Plots", "This is the x label", "This is the y label");
 
@@ -8,13 +9,9 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin()-10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() -20.]));
 
-
     //Make the first line a dashed line.
-    s.custom_style(
-        ".plotato0stroke{stroke-dasharray:10}");
+    s.append(svg::node::Text::new("<style>.plotato0stroke{stroke-dasharray:10}</style>"));
     
-    //PIPE me to a file!
-    //s.render(std::io::stdout()).unwrap();
-    //OR use this
-    s.render_to_file("demo.svg").unwrap();
+    s.render(std::io::stdout()).unwrap();
+    
 }

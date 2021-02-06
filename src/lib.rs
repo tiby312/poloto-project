@@ -122,7 +122,7 @@ pub struct Plotter<'a> {
     xname: String,
     yname: String,
     plots: Vec<Plot<'a>>,
-    style:Option<element::Style>
+    doc:Document,
 }
 
 ///Shorthand constructor.
@@ -133,25 +133,24 @@ pub fn plot<'a>(title: impl ToString, xname: impl ToString, yname: impl ToString
 impl<'a> Plotter<'a> {
     ///Create a plotter
     pub fn new(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
+
+        let doc = Document::new()
+            .set("width", render::WIDTH)
+            .set("height", render::HEIGHT)
+            .set("viewBox", (0, 0, render::WIDTH, render::HEIGHT))
+            .set("class", "plotato");
+
+        
         Plotter {
             title: title.to_string(),
             plots: Vec::new(),
             xname: xname.to_string(),
             yname: yname.to_string(),
-            style:None
+            doc
         }
     }
 
-    ///You can override the css in regular html if you embed the generated svg.
-    ///This gives you a lot of flexibility giving your the power to dynamically
-    ///change the theme of your svg.
-    ///
-    ///However, if you want to embed the svg as an image, you lose this ability.
-    ///If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
-    pub fn custom_style(&mut self, text:impl ToString){
-        self.style=Some(element::Style::new(text.to_string()));
-    }
-
+    
 
     pub fn line<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
         &mut self,
@@ -203,7 +202,21 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    pub fn into_document(self) -> Document {
+    ///You can override the css in regular html if you embed the generated svg.
+    ///This gives you a lot of flexibility giving your the power to dynamically
+    ///change the theme of your svg.
+    ///
+    ///However, if you want to embed the svg as an image, you lose this ability.
+    ///If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
+    ///
+    ///All the plot functions don't actually add anything to the document until a  `render` function is called.
+    ///So calls to this will append elements to the start of the document.
+    pub fn append<N:svg::Node>(&mut self,a:N){
+        use svg::Node;
+        self.doc.append(a);
+    }
+
+    pub fn render_to_document(self) -> Document {
         render::render(self)
     }
 

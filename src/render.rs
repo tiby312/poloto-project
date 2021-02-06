@@ -1,19 +1,17 @@
 
+
+pub const WIDTH:f32=800.0;
+pub const HEIGHT:f32=500.0;
+
 use super::*;
 use svg::Node;
-pub fn render(mut pl:Plotter) -> Document {
-    let width = 800.0;
-    let height = 500.0;
+pub fn render(pl:Plotter) -> Document {
+    let width = WIDTH;
+    let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
-
+    let mut doc=pl.doc;
     
-    let mut doc = Document::new()
-        .set("width", width)
-        .set("height", height)
-        .set("viewBox", (0, 0, width, height))
-        .set("class", "plotato");
-
     //Draw background
     doc.append(
         element::Rectangle::new()
@@ -31,9 +29,6 @@ pub fn render(mut pl:Plotter) -> Document {
     let background_color = "aliceblue";
     let colors = vec!["blue", "red", "green", "gold", "aqua", "brown"];
 
-    if let Some(style)=pl.style.take(){
-        doc.append(style);
-    }
     
     //Add CSS styling
     doc.append(element::Style::new(format!(
