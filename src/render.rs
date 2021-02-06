@@ -138,12 +138,13 @@ stroke-width:2;
 
     for (
         i,
+        colori,
         Plot {
             plot_type,
             name,
             mut plots,
         },
-    ) in pl.plots.into_iter().enumerate()
+    ) in pl.plots.into_iter().enumerate().map(|(i,x)|(i,i%6,x))
     {
         let spacing = padding / 3.0;
 
@@ -173,7 +174,7 @@ stroke-width:2;
 
         match plot_type {
             PlotType::Line => {
-                let st=format!("plotato{}stroke", i);
+                let st=format!("plotato{}stroke", colori);
                 doc.append(
                     element::Line::new()
                         .set("x1",legendx1)
@@ -195,7 +196,7 @@ stroke-width:2;
                 );
             }
             PlotType::Scatter => {
-                let st=format!("plotato{}fill", i);
+                let st=format!("plotato{}fill", colori);
                 doc.append(
                     element::Circle::new()
                         .set("cx", legendx1+padding/30.0)
@@ -214,7 +215,7 @@ stroke-width:2;
                 }
             }
             PlotType::Histo => {
-                let st=format!("plotato{}fill", i);
+                let st=format!("plotato{}fill", colori);
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())
@@ -245,7 +246,7 @@ stroke-width:2;
                 }
             }
             PlotType::LineFill => {
-                let st=format!("plotato{}fill", i);
+                let st=format!("plotato{}fill", colori);
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())

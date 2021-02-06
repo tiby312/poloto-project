@@ -9,6 +9,7 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin()-10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() -20.]));
 
+    
     //Make the first line a dashed line.
     s.append(svg::node::Text::new("<style>.plotato0stroke{stroke-dasharray:10}</style>"));
     
