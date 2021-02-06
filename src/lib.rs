@@ -23,24 +23,27 @@
 //! then you can add this example css styling to override the default in the svg file:
 //! ```css
 //! .plotato{
-//!    font-family: "Open Sans", sans-serif;
-//!    --fg_color:"black";
-//!    --bg_color:"white;
-//!    --plot_color0:"red";
-//!    --plot_color1:"green";
-//!    --plot_color2:"yellow";
-//!    --plot_color3:"orange";
-//!    --plot_color4:"purple";
-//!    --plot_color5:"pink";
-//!    --plot_color6:"aqua";
+//!    --plotato_bg_color:"black";
+//!    --plotato_fg_color:"white;
+//!    --plotato_color0:"red";
+//!    --plotato_color1:"green";
+//!    --plotato_color2:"yellow";
+//!    --plotato_color3:"orange";
+//!    --plotato_color4:"purple";
+//!    --plotato_color5:"pink";
+//!    --plotato_color6:"aqua";
 //! }
 //! ```  
-//! The default coloring uses a css class selector, so using a id select overrides it.
-//! Using this method, you can have a specific themes for each mdBook theme.
+//!
+//! ### Can I change the styling of the plots?
+//! 
+//! Yes! To override the existing style, just use the class specifier twice.
+//! See the examples.
 //!
 //! ### Usage
 //!
 //! * Plots containing NaN or Infinity are ignored.
+//! * After 6 plots, the colors cycle back and are repeated.
 //!
 //! ### Why use scientific notation?
 //!
@@ -52,6 +55,14 @@
 //! plots that the user would expect to get plotted. Neither of these sounded
 //! better than the option of just having the intervals stop not necessarily
 //! at the end of the axis lines.
+//!
+//! ### How do I do I make the histogram corners rounded?
+//!
+//! You can't right now, but with SVG2 with Geometry Properties, you'll be able to do.
+//!
+//! ```css
+//! .plotato2stroke{rx:5;ry:5}
+//! ```
 //!
 //! ### Example
 //!

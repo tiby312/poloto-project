@@ -223,7 +223,9 @@ stroke-width:2;
                         .set("x", legendx1)
                         .set("y", legendy1-padding/30.0)
                         .set("width", padding/3.0)
-                        .set("height", padding/20.0),
+                        .set("height", padding/20.0)
+                        .set("rx",padding/30.0)
+                        .set("ry",padding/30.0)
                 );
                 let mut last = None;
                 for [x, y] in it {
@@ -254,7 +256,9 @@ stroke-width:2;
                         .set("x", legendx1)
                         .set("y", legendy1-padding/30.0)
                         .set("width", padding/3.0)
-                        .set("height", padding/20.0),
+                        .set("height", padding/20.0)
+                        .set("rx",padding/30.0)
+                        .set("ry",padding/30.0)
                 );
 
                 let mut data = Data::new().move_to((padding, height - paddingy));
