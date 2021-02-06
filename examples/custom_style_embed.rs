@@ -20,9 +20,7 @@ fn main(){
     println!(
         r###"
 <html>
-
 <svg width="0" height="0" viewBox="0 0 0 0">
-
 <defs>
     <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
     <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
@@ -31,7 +29,6 @@ fn main(){
      <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
      </pattern> 
 </defs>
-  
 </svg>
 <style>
 .plotato_background.plotato_background{{
