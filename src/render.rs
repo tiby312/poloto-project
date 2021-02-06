@@ -27,7 +27,8 @@ pub fn render(pl:Plotter) -> Document {
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
     let background_color = "aliceblue";
-    let colors = vec!["blue", "red", "green", "gold", "aqua", "brown"];
+
+    let colors = ["blue", "red", "green", "gold", "aqua", "brown","lime","chocolate"];
 
     
     //Add CSS styling
@@ -45,12 +46,16 @@ stroke-width:2;
 .plotato3stroke{{stroke:  var(--plotato_color3,{5}); }}
 .plotato4stroke{{stroke:  var(--plotato_color4,{6}); }}
 .plotato5stroke{{stroke:  var(--plotato_color5,{7}); }}
+.plotato6stroke{{stroke:  var(--plotato_color6,{8}); }}
+.plotato7stroke{{stroke:  var(--plotato_color7,{9}); }}
 .plotato0fill{{fill:var(--plotato_color0,{2});}}
 .plotato1fill{{fill:var(--plotato_color1,{3});}}
 .plotato2fill{{fill:var(--plotato_color2,{4});}}
 .plotato3fill{{fill:var(--plotato_color3,{5});}}
 .plotato4fill{{fill:var(--plotato_color4,{6});}}
-.plotato5fill{{fill:var(--plotato_color5,{7});}}"###,
+.plotato5fill{{fill:var(--plotato_color5,{7});}}
+.plotato6fill{{fill:var(--plotato_color6,{8});}}
+.plotato7fill{{fill:var(--plotato_color7,{9});}}"###,
         text_color,
         background_color,
         colors[0],
@@ -58,7 +63,9 @@ stroke-width:2;
         colors[2],
         colors[3],
         colors[4],
-        colors[5]
+        colors[5],
+        colors[6],
+        colors[7],
     )));
 
     //Find range.
@@ -144,7 +151,7 @@ stroke-width:2;
             name,
             mut plots,
         },
-    ) in pl.plots.into_iter().enumerate().map(|(i,x)|(i,i%6,x))
+    ) in pl.plots.into_iter().enumerate().map(|(i,x)|(i,i%colors.len(),x))
     {
         let spacing = padding / 3.0;
 

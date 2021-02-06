@@ -20,7 +20,7 @@
 //! ### How do I change the color of the plots?
 //!
 //! You can doing it by overriding the css. If you embed the generated svg into a html file,
-//! then you can add this example css styling to override the default in the svg file:
+//! then you can add this example:
 //! ```css
 //! .plotato{
 //!    --plotato_bg_color:"black";
@@ -32,8 +32,16 @@
 //!    --plotato_color4:"purple";
 //!    --plotato_color5:"pink";
 //!    --plotato_color6:"aqua";
+//!    --plotato_color7:"red";
+//!    --plotato_color8:"blue";
 //! }
 //! ```  
+//! By default these variables are not defined, so the svg falls back on some default colors.
+//! With this, it will change the colors. You can also add different styling to make dotted lines,
+//! change the stroke width, etc. Depending on whether you are adding a new style attribute or overriding
+//! an existing one, you might have to increase the specificty of your css clause to make sure it overrides
+//! the svg css clause.
+//!
 //!
 //! ### Can I change the styling of the plots?
 //! 
