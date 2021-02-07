@@ -88,15 +88,16 @@ mod util;
 
 mod render;
 
-struct Wrapper<'a, I: Iterator<Item = [f32; 2]> + 'a>(Option<I>, PhantomData<&'a I>);
+struct Wrapper<'a, I: IntoIterator<Item = [f32; 2]> + 'a>(Option<I>, PhantomData<&'a I>);
 
-impl<'a, I: Iterator<Item = [f32; 2]> + 'a> PlotTrait<'a> for Wrapper<'a, I> {
+impl<'a, I: IntoIterator<Item = [f32; 2]> + 'a> PlotTrait<'a> for Wrapper<'a, I> {
     #[inline(always)]
     fn into_iter(&mut self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a> {
         Box::new(
             self.0
                 .take()
                 .unwrap()
+                .into_iter()
                 .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite())),
         )
     }
@@ -164,7 +165,7 @@ impl<'a> Plotter<'a> {
 
     
 
-    pub fn line<I: Iterator<Item = [f32; 2]> + 'a>(
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -176,7 +177,7 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    pub fn line_fill<I: Iterator<Item = [f32; 2]> + 'a>(
+    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -189,7 +190,7 @@ impl<'a> Plotter<'a> {
     }
 
 
-    pub fn scatter<I: Iterator<Item = [f32; 2]> + 'a>(
+    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -202,7 +203,7 @@ impl<'a> Plotter<'a> {
     }
 
     ///Each bar's left side will line up with a point
-    pub fn histogram<I: Iterator<Item = [f32; 2]>  + 'a>(
+    pub fn histogram<I: IntoIterator<Item = [f32; 2]>  + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
