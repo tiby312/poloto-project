@@ -88,20 +88,9 @@ mod util;
 
 mod render;
 
-struct Wrapper<'a, I: Iterator<Item = [f32; 2]> + Clone + 'a>(Option<I>, PhantomData<&'a I>);
+struct Wrapper<'a, I: Iterator<Item = [f32; 2]> + 'a>(Option<I>, PhantomData<&'a I>);
 
-impl<'a, I: Iterator<Item = [f32; 2]> + Clone + 'a> PlotTrait<'a> for Wrapper<'a, I> {
-    #[inline(always)]
-    fn ref_iter(&self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a> {
-        Box::new(
-            self.0
-                .as_ref()
-                .unwrap()
-                .clone()
-                .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite())),
-        )
-    }
-
+impl<'a, I: Iterator<Item = [f32; 2]> + 'a> PlotTrait<'a> for Wrapper<'a, I> {
     #[inline(always)]
     fn into_iter(&mut self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a> {
         Box::new(
@@ -114,7 +103,6 @@ impl<'a, I: Iterator<Item = [f32; 2]> + Clone + 'a> PlotTrait<'a> for Wrapper<'a
 }
 
 trait PlotTrait<'a> {
-    fn ref_iter(&self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a>;
     fn into_iter(&mut self) -> Box<dyn Iterator<Item = [f32; 2]> + 'a>;
 }
 
@@ -127,9 +115,16 @@ enum PlotType {
 
 struct Plot<'a> {
     name: String,
-    plots: Box<dyn PlotTrait<'a> + 'a>,
     plot_type: PlotType,
+    plots: Box<dyn PlotTrait<'a> + 'a>,
 }
+
+struct PlotDecomp {
+    name: String,
+    plot_type: PlotType,
+    plots: Vec<[f32;2]>,
+}
+
 
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
@@ -171,7 +166,7 @@ impl<'a> Plotter<'a> {
 
     
 
-    pub fn line<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
+    pub fn line<I: Iterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -183,7 +178,7 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    pub fn line_fill<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
+    pub fn line_fill<I: Iterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -196,7 +191,7 @@ impl<'a> Plotter<'a> {
     }
 
 
-    pub fn scatter<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
+    pub fn scatter<I: Iterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -209,7 +204,7 @@ impl<'a> Plotter<'a> {
     }
 
     ///Each bar's left side will line up with a point
-    pub fn histogram<I: Iterator<Item = [f32; 2]> + Clone + 'a>(
+    pub fn histogram<I: Iterator<Item = [f32; 2]>  + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,

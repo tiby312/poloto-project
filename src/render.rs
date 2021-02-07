@@ -68,9 +68,18 @@ stroke-width:2;
         colors[7],
     )));
 
+    //TODO BIIIIG data structure. what to do?
+    let plots:Vec<_>=pl.plots.into_iter().map(|mut x|{
+        PlotDecomp{
+            name:x.name,
+            plot_type:x.plot_type,
+            plots:x.plots.into_iter().collect::<Vec<_>>()
+        }
+    }).collect();
+
     //Find range.
     let [minx, maxx, miny, maxy] =
-        if let Some(m) = util::find_bounds(pl.plots.iter().flat_map(|a| a.plots.ref_iter())) {
+        if let Some(m) = util::find_bounds(plots.iter().flat_map(|x|x.plots.iter().map(|x|*x))) {
             m
         } else {
             //TODO test that this looks ok
@@ -146,12 +155,12 @@ stroke-width:2;
     for (
         i,
         colori,
-        Plot {
+        PlotDecomp {
             plot_type,
             name,
             mut plots,
         },
-    ) in pl.plots.into_iter().enumerate().map(|(i,x)|(i,i%colors.len(),x))
+    ) in plots.into_iter().enumerate().map(|(i,x)|(i,i%colors.len(),x))
     {
         let spacing = padding / 3.0;
 
