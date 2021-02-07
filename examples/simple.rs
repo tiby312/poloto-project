@@ -1,6 +1,6 @@
 //PIPE me to a file!
 fn main() {
-    let mut s = plotato::plot("Demo: Some Trigonometry Plots", "This is the x label", "This is the y label");
+    let mut s = poloto::plot("Demo: Some Trigonometry Plots", "This is the x label", "This is the y label");
 
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
     
@@ -11,7 +11,7 @@ fn main() {
 
 
     //Make the first line a dashed line.
-    s.append(svg::node::Text::new("<style>.plotato0stroke{stroke-dasharray:10}</style>"));
+    s.append(svg::node::Text::new("<style>.poloto0stroke{stroke-dasharray:10}</style>"));
     
     s.render(std::io::stdout()).unwrap();
     

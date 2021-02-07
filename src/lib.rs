@@ -1,11 +1,11 @@
 //!
-//! plotato - A very simple plotter
+//! poloto - A very simple plotter
 //!
 //! The rise of SVG has made the need to an intermediate representatin of a graph
 //! not necessary. Instead of using .gplot files, just render to SVG graph directly
 //! using this crate. 
 //!
-//! plotato is meant to be used to graph fairly 'obvious/general' trends
+//! poloto is meant to be used to graph fairly 'obvious/general' trends
 //! in the data. The user is not meant to be able to extract data
 //! or notice subtle differences in data. The desired use case is
 //! to allow inserting a nice graph into a webpage generated via
@@ -22,18 +22,18 @@
 //! You can doing it by overriding the css. If you embed the generated svg into a html file,
 //! then you can add this example:
 //! ```css
-//! .plotato{
-//!    --plotato_bg_color:"black";
-//!    --plotato_fg_color:"white;
-//!    --plotato_color0:"red";
-//!    --plotato_color1:"green";
-//!    --plotato_color2:"yellow";
-//!    --plotato_color3:"orange";
-//!    --plotato_color4:"purple";
-//!    --plotato_color5:"pink";
-//!    --plotato_color6:"aqua";
-//!    --plotato_color7:"red";
-//!    --plotato_color8:"blue";
+//! .poloto{
+//!    --poloto_bg_color:"black";
+//!    --poloto_fg_color:"white;
+//!    --poloto_color0:"red";
+//!    --poloto_color1:"green";
+//!    --poloto_color2:"yellow";
+//!    --poloto_color3:"orange";
+//!    --poloto_color4:"purple";
+//!    --poloto_color5:"pink";
+//!    --poloto_color6:"aqua";
+//!    --poloto_color7:"red";
+//!    --poloto_color8:"blue";
 //! }
 //! ```  
 //! By default these variables are not defined, so the svg falls back on some default colors.
@@ -69,7 +69,7 @@
 //! You can't right now, but with SVG2 with Geometry Properties, you'll be able to do.
 //!
 //! ```css
-//! .plotato2stroke{rx:5;ry:5}
+//! .poloto2stroke{rx:5;ry:5}
 //! ```
 //!
 //! ### Example
@@ -152,7 +152,7 @@ impl<'a> Plotter<'a> {
             .set("width", render::WIDTH)
             .set("height", render::HEIGHT)
             .set("viewBox", (0, 0, render::WIDTH, render::HEIGHT))
-            .set("class", "plotato");
+            .set("class", "poloto");
 
         
         Plotter {

@@ -5,7 +5,7 @@
 ///The svg is embeded in the html, and we can modify its style by
 ///using styles that override the svg's style.
 fn main(){
-    let mut s = plotato::plot(
+    let mut s = poloto::plot(
         "Demo: you can use CSS patterns if you embed SVG!", 
         "x",
         "y"
@@ -31,13 +31,13 @@ fn main(){
 </defs>
 </svg>
 <style>
-.plotato_background.plotato_background{{
+.poloto_background.poloto_background{{
     fill: url(#pattern);
 }}
-.plotato0stroke.plotato0stroke{{
+.poloto0stroke.poloto0stroke{{
     stroke-dasharray:10 2 2;
 }}
-.plotato1fill.plotato1fill{{
+.poloto1fill.poloto1fill{{
     fill: url(#pattern2);
 }}
 </style>
