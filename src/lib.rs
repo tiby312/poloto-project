@@ -129,8 +129,6 @@ struct PlotDecomp {
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
 ///render is called.
-///Each Iterator will be iterated through twice by doing one call to clone().
-///once to find min max bounds, second to construct plot    
 pub struct Plotter<'a> {
     title: String,
     xname: String,
