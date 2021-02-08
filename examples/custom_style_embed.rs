@@ -20,6 +20,20 @@ fn main(){
     println!(
         r###"
 <html>
+<script>
+        function monclick(){{
+            var foo=document.getElementsByClassName('poloto_background')[0];
+            foo.classList.remove('poloto_background');
+            foo.classList.add('poloto_background2');
+
+            document.querySelectorAll('.poloto_text').forEach(function(e) {{
+                e.classList.remove('poloto_text');
+                e.classList.add('poloto_text2');
+            }});
+            
+        }}
+</script>
+<button type="button" style="font-size: 24px;" onclick="monclick();">Remove Background Dynamically</button>
 <svg width="0" height="0" viewBox="0 0 0 0">
 <defs>
     <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
@@ -31,6 +45,12 @@ fn main(){
 </defs>
 </svg>
 <style>
+.poloto_text2{{
+    fill:white;
+}}
+.poloto_background2{{
+    fill:green;
+}}
 .poloto_background.poloto_background{{
     fill: url(#pattern);
 }}
@@ -41,7 +61,9 @@ fn main(){
     fill: url(#pattern2);
 }}
 </style>
+<div id="test" class="phase1">
 {0}
+</div>
 </html>
         "###,s.render_to_document());
 
