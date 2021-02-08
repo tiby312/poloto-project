@@ -3,7 +3,7 @@
 //!
 //! The rise of SVG has made the need to an intermediate representatin of a graph
 //! not necessary. Instead of using .gplot files, just render to SVG graph directly
-//! using this crate. 
+//! using this crate.
 //!
 //! poloto is meant to be used to graph fairly 'obvious/general' trends
 //! in the data. The user is not meant to be able to extract data
@@ -44,7 +44,7 @@
 //!
 //!
 //! ### Can I change the styling of the plots?
-//! 
+//!
 //! Yes! To override the existing style, just use the class specifier twice.
 //! See the examples.
 //!
@@ -123,9 +123,8 @@ struct Plot<'a> {
 struct PlotDecomp {
     name: String,
     plot_type: PlotType,
-    plots: Vec<[f32;2]>,
+    plots: Vec<[f32; 2]>,
 }
-
 
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
@@ -135,7 +134,7 @@ pub struct Plotter<'a> {
     xname: String,
     yname: String,
     plots: Vec<Plot<'a>>,
-    doc:Document,
+    doc: Document,
 }
 
 ///Shorthand constructor.
@@ -146,30 +145,22 @@ pub fn plot<'a>(title: impl ToString, xname: impl ToString, yname: impl ToString
 impl<'a> Plotter<'a> {
     ///Create a plotter
     pub fn new(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
-
         let doc = Document::new()
             .set("width", render::WIDTH)
             .set("height", render::HEIGHT)
             .set("viewBox", (0, 0, render::WIDTH, render::HEIGHT))
             .set("class", "poloto");
 
-        
         Plotter {
             title: title.to_string(),
             plots: Vec::new(),
             xname: xname.to_string(),
             yname: yname.to_string(),
-            doc
+            doc,
         }
     }
 
-    
-
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(
-        &mut self,
-        name: impl ToString,
-        plots: I,
-    ) {
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             name: name.to_string(),
@@ -189,7 +180,6 @@ impl<'a> Plotter<'a> {
         })
     }
 
-
     pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
@@ -203,7 +193,7 @@ impl<'a> Plotter<'a> {
     }
 
     ///Each bar's left side will line up with a point
-    pub fn histogram<I: IntoIterator<Item = [f32; 2]>  + 'a>(
+    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -224,7 +214,7 @@ impl<'a> Plotter<'a> {
     ///
     ///All the plot functions don't actually add anything to the document until a  `render` function is called.
     ///So calls to this will append elements to the start of the document.
-    pub fn append<N:svg::Node>(&mut self,a:N){
+    pub fn append<N: svg::Node>(&mut self, a: N) {
         use svg::Node;
         self.doc.append(a);
     }
@@ -242,5 +232,4 @@ impl<'a> Plotter<'a> {
         let doc = render::render(self);
         svg::write(target, &doc)
     }
-
 }

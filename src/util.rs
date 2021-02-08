@@ -1,4 +1,3 @@
-
 pub fn find_good_step(num_steps: usize, range: f32) -> (usize, f32) {
     let range = range as f64;
 

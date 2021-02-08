@@ -1,17 +1,15 @@
-
-
-pub const WIDTH:f32=800.0;
-pub const HEIGHT:f32=500.0;
+pub const WIDTH: f32 = 800.0;
+pub const HEIGHT: f32 = 500.0;
 
 use super::*;
 use svg::Node;
-pub fn render(pl:Plotter) -> Document {
+pub fn render(pl: Plotter) -> Document {
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
-    let mut doc=pl.doc;
-    
+    let mut doc = pl.doc;
+
     //Draw background
     doc.append(
         element::Rectangle::new()
@@ -28,9 +26,17 @@ pub fn render(pl:Plotter) -> Document {
     let text_color = "black";
     let background_color = "aliceblue";
 
-    let colors = ["blue", "red", "green", "gold", "aqua", "brown","lime","chocolate"];
+    let colors = [
+        "blue",
+        "red",
+        "green",
+        "gold",
+        "aqua",
+        "brown",
+        "lime",
+        "chocolate",
+    ];
 
-    
     //Add CSS styling
     doc.append(element::Style::new(format!(
         r###".poloto {{
@@ -69,17 +75,19 @@ stroke-width:2;
     )));
 
     //TODO BIIIIG data structure. what to do?
-    let plots:Vec<_>=pl.plots.into_iter().map(|mut x|{
-        PlotDecomp{
-            name:x.name,
-            plot_type:x.plot_type,
-            plots:x.plots.into_iter().collect::<Vec<_>>()
-        }
-    }).collect();
+    let plots: Vec<_> = pl
+        .plots
+        .into_iter()
+        .map(|mut x| PlotDecomp {
+            name: x.name,
+            plot_type: x.plot_type,
+            plots: x.plots.into_iter().collect::<Vec<_>>(),
+        })
+        .collect();
 
     //Find range.
     let [minx, maxx, miny, maxy] =
-        if let Some(m) = util::find_bounds(plots.iter().flat_map(|x|x.plots.iter().map(|x|*x))) {
+        if let Some(m) = util::find_bounds(plots.iter().flat_map(|x| x.plots.iter().map(|x| *x))) {
             m
         } else {
             //TODO test that this looks ok
@@ -160,7 +168,10 @@ stroke-width:2;
             name,
             plots,
         },
-    ) in plots.into_iter().enumerate().map(|(i,x)|(i,i%colors.len(),x))
+    ) in plots
+        .into_iter()
+        .enumerate()
+        .map(|(i, x)| (i, i % colors.len(), x))
     {
         let spacing = padding / 3.0;
 
@@ -176,8 +187,8 @@ stroke-width:2;
                 .set("class", "poloto_text"),
         );
 
-        let legendx1=width - padding / 1.2 + padding / 30.0;
-        let legendy1=paddingy - padding / 8.0 + (i as f32) * spacing;
+        let legendx1 = width - padding / 1.2 + padding / 30.0;
+        let legendy1 = paddingy - padding / 8.0 + (i as f32) * spacing;
 
         //Draw plots
 
@@ -190,14 +201,14 @@ stroke-width:2;
 
         match plot_type {
             PlotType::Line => {
-                let st=format!("poloto{}stroke", colori);
+                let st = format!("poloto{}stroke", colori);
                 doc.append(
                     element::Line::new()
-                        .set("x1",legendx1)
-                        .set("y1",legendy1)
-                        .set("x2",legendx1+padding/3.0)
-                        .set("y2",legendy1)
-                        .set("class",st.clone())
+                        .set("x1", legendx1)
+                        .set("y1", legendy1)
+                        .set("x2", legendx1 + padding / 3.0)
+                        .set("y2", legendy1)
+                        .set("class", st.clone()),
                 );
                 use std::fmt::Write;
                 let mut points = String::new();
@@ -209,40 +220,40 @@ stroke-width:2;
                         .set("class", st)
                         .set("fill", "none")
                         //Do this so that on legacy svg viewers that dont have CSS, we see *something*.
-                        .set("stroke","black")
+                        .set("stroke", "black")
                         .set("points", points),
                 );
             }
             PlotType::Scatter => {
-                let st=format!("poloto{}fill", colori);
+                let st = format!("poloto{}fill", colori);
                 doc.append(
                     element::Circle::new()
-                        .set("cx", legendx1+padding/30.0)
-                        .set("cy",legendy1,)
+                        .set("cx", legendx1 + padding / 30.0)
+                        .set("cy", legendy1)
                         .set("r", padding / 30.0)
                         .set("class", st.clone()),
                 );
                 for [x, y] in it {
                     doc.append(
                         element::Circle::new()
-                            .set("cx",  x)
+                            .set("cx", x)
                             .set("cy", y)
-                            .set("r",  padding / 50.0)
+                            .set("r", padding / 50.0)
                             .set("class", st.clone()),
                     );
                 }
             }
             PlotType::Histo => {
-                let st=format!("poloto{}fill", colori);
+                let st = format!("poloto{}fill", colori);
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())
                         .set("x", legendx1)
-                        .set("y", legendy1-padding/30.0)
-                        .set("width", padding/3.0)
-                        .set("height", padding/20.0)
-                        .set("rx",padding/30.0)
-                        .set("ry",padding/30.0)
+                        .set("y", legendy1 - padding / 30.0)
+                        .set("width", padding / 3.0)
+                        .set("height", padding / 20.0)
+                        .set("rx", padding / 30.0)
+                        .set("ry", padding / 30.0),
                 );
                 let mut last = None;
                 for [x, y] in it {
@@ -250,12 +261,7 @@ stroke-width:2;
                         let k = element::Rectangle::new()
                             .set("x", lx)
                             .set("y", ly)
-                            .set(
-                                "width",
-                                
-                                    (padding * 0.02).max((x - lx) - (padding * 0.02))
-                                ,
-                            )
+                            .set("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))
                             .set("height", height - paddingy - ly) //TODO ugly?
                             .set("class", st.clone());
 
@@ -265,16 +271,16 @@ stroke-width:2;
                 }
             }
             PlotType::LineFill => {
-                let st=format!("poloto{}fill", colori);
+                let st = format!("poloto{}fill", colori);
                 doc.append(
                     element::Rectangle::new()
                         .set("class", st.clone())
                         .set("x", legendx1)
-                        .set("y", legendy1-padding/30.0)
-                        .set("width", padding/3.0)
-                        .set("height", padding/20.0)
-                        .set("rx",padding/30.0)
-                        .set("ry",padding/30.0)
+                        .set("y", legendy1 - padding / 30.0)
+                        .set("width", padding / 3.0)
+                        .set("height", padding / 20.0)
+                        .set("rx", padding / 30.0)
+                        .set("ry", padding / 30.0),
                 );
 
                 let mut data = Data::new().move_to((padding, height - paddingy));
@@ -286,13 +292,8 @@ stroke-width:2;
                 data = data.line_to((width - padding, height - paddingy));
                 data = data.close();
 
-                doc.append(
-                    Path::new()
-                        .set("class", st.clone())
-                        .set("d", data),
-                );
+                doc.append(Path::new().set("class", st.clone()).set("d", data));
             }
-            
         }
     }
 
@@ -325,7 +326,7 @@ stroke-width:2;
         element::Text::new()
             .add(node::Text::new(pl.yname))
             .set("x", padding / 4.0)
-            .set("y",  height / 2.0)
+            .set("y", height / 2.0)
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set(

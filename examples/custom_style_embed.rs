@@ -1,36 +1,15 @@
-
-
-fn main(){
-    let mut s = poloto::plot(
-        "Demo: you can use CSS patterns if you embed SVG!", 
-        "x",
-        "y"
-    );
+fn main() {
+    let mut s = poloto::plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
-    
+
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
-    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin()-10.]));
-    
+    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     println!(
         r###"
 <html>
-<script>
-        var flip=false;
-        function monclick(){{
-            var foo=document.getElementById("test");
-            if (flip){{
-                foo.classList.remove("light");
-                foo.classList.add("navy");
-            }}else{{
-                foo.classList.remove("navy");
-                foo.classList.add("light");
-                    
-            }}
-            flip=!flip;
-        }}
-</script>
+{0}
 <button type="button" style="font-size: 24px;" onclick="monclick();">Change Color Scheme</button>
 <svg width="0" height="0" viewBox="0 0 0 0">
 <defs>
@@ -42,9 +21,38 @@ fn main(){
      </pattern> 
 </defs>
 </svg>
+<div id="test" class="navy">
+{1}
+</div>
+</html>
+        "###,
+        HEADER,
+        s.render_to_document()
+    );
+}
+
+const HEADER: &'static str = r###"
+<head>
+<script>
+    var flip=false;
+    function monclick(){
+        var foo=document.getElementById("test");
+        if (flip){
+            foo.classList.remove("light");
+            foo.classList.add("navy");
+        }else{
+            foo.classList.remove("navy");
+            foo.classList.add("light");
+                
+        }
+        flip=!flip;
+    }
+</script>
 <style>
-body {{background-color: coral;}}
-.light{{
+body {
+    background-color: coral;
+}
+.light{
     --fg:black;
     --bg:white;
     --pplot_color0:blue;
@@ -57,8 +65,8 @@ body {{background-color: coral;}}
     --pplot_color7:lime;
     --pplot_color8:chocolate;
  
-}}
-.navy{{
+}
+.navy{
     --fg:white;
     --bg:black;
     --pplot_color0:rgb(0, 88, 251);
@@ -71,8 +79,8 @@ body {{background-color: coral;}}
     --pplot_color7:lime;
     --pplot_color8:chocolate;
  
-}}
-.poloto{{
+}
+.poloto{
     --poloto_fg_color:var(--fg);
     --poloto_bg_color:var(--bg);
     --poloto_color0:var(--pplot_color0);
@@ -84,16 +92,7 @@ body {{background-color: coral;}}
     --poloto_color6:var(--pplot_color6);
     --poloto_color7:var(--pplot_color7);
     --poloto_color8:var(--pplot_color8);
-  }}
-  
+  }
 </style>
-<div id="test" class="navy">
-{0}
-</div>
-</html>
-        "###,s.render_to_document());
-
-        
-
-
-}
+</head> 
+"###;
