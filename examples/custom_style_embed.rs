@@ -1,9 +1,5 @@
 
 
-///This displays the same exact image as in the `custom_style.rs`,
-///with the exception that the styles are not in the svg itself.
-///The svg is embeded in the html, and we can modify its style by
-///using styles that override the svg's style.
 fn main(){
     let mut s = poloto::plot(
         "Demo: you can use CSS patterns if you embed SVG!", 
