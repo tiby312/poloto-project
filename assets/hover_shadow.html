@@ -2,21 +2,58 @@
 <html>
 
 <head>
+<svg width=0 height=0>
+<defs>
+<filter id="dropshadow" height="130%">
+  <feGaussianBlur in="SourceAlpha" stdDeviation="3"/> <!-- stdDeviation is how much to blur -->
+  <feOffset dx="2" dy="2" result="offsetblur"/> <!-- how much to offset -->
+  <feComponentTransfer>
+    <feFuncA type="linear" slope="0.5"/> <!-- slope is the opacity of the shadow -->
+  </feComponentTransfer>
+  <feMerge> 
+    <feMergeNode/> <!-- this contains the offset blurred image -->
+    <feMergeNode in="SourceGraphic"/> <!-- this contains the element that the filter is applied to -->
+  </feMerge>
+</defs>
+</svg>
 <style>
 body {
     background-color: coral;
 }
+@keyframes gelatine {
+    from, to { transform: scale(1, 1); }
+    25% { transform: scale(0.9, 1.1); }
+    50% { transform: scale(1.1, 0.9); }
+    75% { transform: scale(0.95, 1.05); }
+  }
 .poloto{
-    text-shadow: 2px 2px;
+    
+    text-shadow: 2px 2px 5px black;
 }
 .poloto0stroke:hover{
     stroke:black;
-    stroke-width:5;
+    stroke-width:3;
+}
+.poloto1fill{
+    animation: gelatine 3.0s infinite;
+    transform-origin: center;
+    filter:url(#dropshadow);
 }
 .poloto1fill:hover{
+    
     stroke:black;
-    stroke-width:5;
+    stroke-width:3;
 }
+
+.poloto2fill:hover{
+
+    stroke:black;
+    stroke-width:3;
+}
+.poloto2fill{
+    filter:url(#dropshadow);
+}
+
 </style>
 </head> 
 
@@ -84,7 +121,7 @@ cos
 <line class="poloto0stroke" x1="680" x2="730" y1="81.25" y2="81.25"/>
 <polyline class="poloto0stroke" fill="none" points="150,100 160.20409,101.19693 170.40816,104.73999 180.61224,110.487885 190.81633,118.21158 201.02042,127.60306 211.22449,138.2879 221.42857,149.84021 231.63266,161.79936 241.83673,173.68864 252.04082,185.03403 262.2449,195.38324 272.44897,204.32364 282.65308,211.49886 292.85715,216.6228 303.06122,219.4912 313.26532,219.98973 323.4694,218.09846 333.67346,213.89285 343.87756,207.54054 354.08163,199.29478 364.2857,189.4843 374.4898,178.50017 384.69388,166.78038 394.89795,154.79208 405.10205,143.01328 415.30612,131.91348 425.51022,121.93524 435.7143,113.47638 445.91837,106.874115 456.12244,102.3916 466.32654,100.20761 476.5306,100.40921 486.7347,102.98834 496.93878,107.84216 507.14285,114.77719 517.3469,123.51697 527.551,133.71301 537.7551,144.95888 547.95917,156.80621 558.16327,168.78275 568.3673,180.41096 578.5714,191.22726 588.7755,200.80054 598.9796,208.749 609.1837,214.75583 619.38776,218.58157 629.5918,220.07368 639.7959,219.1727 650,215.91447 " stroke="black"/>
 <text alignment-baseline="middle" class="poloto_text" font-size="large" text-anchor="start" x="675" y="150">
-sin-10
+sin-3
 </text>
 <rect class="poloto1fill" height="7.5" rx="5" ry="5" width="50" x="680" y="126.25"/>
 <rect class="poloto1fill" height="59.815765" width="27.612244" x="150" y="340.18423"/>
@@ -103,8 +140,29 @@ sin-10
 <rect class="poloto1fill" height="119.77435" width="27.612244" x="547.95917" y="280.22565"/>
 <rect class="poloto1fill" height="111.13107" width="27.612305" x="578.5714" y="288.86893"/>
 <rect class="poloto1fill" height="84.56186" width="27.612183" x="609.1837" y="315.43814"/>
+<text alignment-baseline="middle" class="poloto_text" font-size="large" text-anchor="start" x="675" y="200">
+sin
+</text>
+<circle class="poloto2fill" cx="685" cy="181.25" r="5"/>
+<circle class="poloto2fill" cx="150" cy="160.04605" r="3"/>
+<circle class="poloto2fill" cx="180.61224" cy="126.14148" r="3"/>
+<circle class="poloto2fill" cx="211.22449" cy="104.08078" r="3"/>
+<circle class="poloto2fill" cx="241.83673" cy="101.57034" r="3"/>
+<circle class="poloto2fill" cx="272.44897" cy="119.48712" r="3"/>
+<circle class="poloto2fill" cx="303.06122" cy="151.57234" r="3"/>
+<circle class="poloto2fill" cx="333.67346" cy="186.61768" r="3"/>
+<circle class="poloto2fill" cx="364.2857" cy="212.38074" r="3"/>
+<circle class="poloto2fill" cx="394.89795" cy="219.86182" r="3"/>
+<circle class="poloto2fill" cx="425.51022" cy="206.44751" r="3"/>
+<circle class="poloto2fill" cx="456.12244" cy="176.82385" r="3"/>
+<circle class="poloto2fill" cx="486.7347" cy="141.3392" r="3"/>
+<circle class="poloto2fill" cx="517.3469" cy="112.389404" r="3"/>
+<circle class="poloto2fill" cx="547.95917" cy="100.08743" r="3"/>
+<circle class="poloto2fill" cx="578.5714" cy="108.73074" r="3"/>
+<circle class="poloto2fill" cx="609.1837" cy="135.29996" r="3"/>
+<circle class="poloto2fill" cx="639.7959" cy="170.51366" r="3"/>
 <text alignment-baseline="start" class="poloto_text" font-size="x-large" text-anchor="middle" x="400" y="37.5">
-Demo: Hovering
+Demo: Hovering and shadows
 </text>
 <text alignment-baseline="start" class="poloto_text" font-size="large" text-anchor="middle" x="400" y="481.25">
 x
