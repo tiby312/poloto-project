@@ -11,16 +11,6 @@ fn main() {
 <html>
 {0}
 <button type="button" style="font-size: 24px;" onclick="monclick();">Change Color Scheme</button>
-<svg width="0" height="0" viewBox="0 0 0 0">
-<defs>
-    <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
-    <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
-     </pattern>
-     <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
-     <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
-     </pattern> 
-</defs>
-</svg>
 <div id="test" class="navy">
 {1}
 </div>
