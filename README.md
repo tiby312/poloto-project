@@ -3,4 +3,4 @@ A simple 2D plotting library that outputs graphs to SVG that can be styled using
 
 
 
-<img src="./assets/simple.svg" alt="screenshot">
+<img src="./assets/simple.svg" alt="demo">
