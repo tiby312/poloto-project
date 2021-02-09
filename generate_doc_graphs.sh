@@ -1,5 +1,6 @@
 mkdir assets
 cargo run --example simple > assets/simple.svg &&
-cargo run --example custom_style > assets/custom_style.svg
-cargo run --example custom_style_embed > assets/custom_style_embed.html
-cargo run --example custom_style_embed2 > assets/custom_style_embed2.html
+cargo run --example custom_colors_html > assets/custom_colors_html.svg
+cargo run --example custom_style_html > assets/custom_style_html.html
+cargo run --example custom_style > assets/custom_style.html
+cargo run --example hover_html > assets/hover_html.html
