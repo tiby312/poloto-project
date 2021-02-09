@@ -1,21 +1,6 @@
 //!
-//! poloto - A very simple plotter
+//! poloto - plot to SVG and style with CSS
 //!
-//! The rise of SVG has made the need to an intermediate representatin of a graph
-//! not necessary. Instead of using .gplot files, just render to SVG graph directly
-//! using this crate.
-//!
-//! poloto is meant to be used to graph fairly 'obvious/general' trends
-//! in the data. The user is not meant to be able to extract data
-//! or notice subtle differences in data. The desired use case is
-//! to allow inserting a nice graph into a webpage generated via
-//! [mdBook](https://rust-lang.github.io/mdBook/).  
-//!
-//! For this reason, a lot
-//! of options that are normally provided in a plotting library
-//! aren't provided. For example, you can't change the thickness
-//! of the lines. Instead the user is encouraged, to pick a good
-//! set of data points to "zoom in" on a trend they want to show.
 //!
 //! ### How do I change the color of the plots?
 //!
@@ -37,11 +22,7 @@
 //! }
 //! ```  
 //! By default these variables are not defined, so the svg falls back on some default colors.
-//! With this, it will change the colors. You can also add different styling to make dotted lines,
-//! change the stroke width, etc. Depending on whether you are adding a new style attribute or overriding
-//! an existing one, you might have to increase the specificty of your css clause to make sure it overrides
-//! the svg css clause.
-//!
+//! With this, it will change the colors. 
 //!
 //! ### Can I change the styling of the plots?
 //!
@@ -51,8 +32,11 @@
 //!
 //! * Change the color scheme to fit your html theme.
 //! * Highlight one plot, make it dashed, or add hover effect
-//! * 
+//! * Animate things using @keyframes
 //!
+//! Depending on whether you are adding a new style attribute or overriding
+//! an existing one, you might have to increase the specificty of your css clause to make sure it overrides
+//! the svg css clause.
 //! ### Usage
 //!
 //! * Plots containing NaN or Infinity are ignored.
