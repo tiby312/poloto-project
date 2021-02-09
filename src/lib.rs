@@ -26,8 +26,7 @@
 //!
 //! ### Can I change the styling of the plots?
 //!
-//! Yes! To override the existing style, just use the class specifier twice.
-//! See the examples. You can harness the power of CSS both in the svg, or outside
+//! Yes! You can harness the power of CSS both in the svg, or outside
 //! in html with an embeded svg. Some things you can do:
 //!
 //! * Change the color scheme to fit your html theme.
