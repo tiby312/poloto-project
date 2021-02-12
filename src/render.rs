@@ -129,8 +129,6 @@ stroke-width:2;
 
         let distance_to_firsty=ystart_step-miny;
 
-        dbg!(xstart_step,minx,distance_to_firstx);
-        dbg!(ystart_step,miny,distance_to_firsty);
         //Draw interva`l x text
         for a in 0..xstep_num {
             

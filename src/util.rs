@@ -45,7 +45,6 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
         let mut counter=start_step;
         let mut num=0;
         loop{
-            dbg!(counter);
             
             if counter>range_all[1]{
                 break;
@@ -61,43 +60,19 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
     assert!(num_step>=1);
     assert!(start_step+step*((num_step-1) as f64)<=range_all[1]);
     
-    
-    
-    
-    
-    //let start_step=(range_all[0]/step).floor()*step;
-    //dbg!(step);
     (num_step, step as f32,start_step as f32)
 }
 
 pub fn print_interval_float(a: f32,precision:f32) -> String {
     //scientific notation: m x 10n
-    let n = a.log10().floor();
-    let m = a / 10.0f32.powf(n);
+    //let n = a.log10().floor();
+    //let m = a / 10.0f32.powf(n);
 
     let k=(-precision.log10()).ceil();
     let k=k.max(0.0);
-    dbg!(k);
-/*
-    let pp=m.fract().log10().ceil();
-    dbg!(m,m.fract(),pp);
-    */
-    //println!("{:.32}",m.fract());
-    //Assume we have just one decimal place of precision needed
-    //for fractional part.
-    //This is ok because we specifically chose the intervals
-    //to be from a set of desired steps (e.g. 1,2,5,10)
-    //dbg!(m);
-    //format!("{0:.1$e}", a, m.floor() as usize)
+    
+
     format!("{0:.1$}",a,k as usize)
-    //format!("{0:.1$e}",a,k as usize)
-    /*
-    if (m * 10.0).round() as usize % 10 != 0 {
-        format!("{0:.1$e}", a, 1)
-    } else {
-        format!("{0:.1$e}", a, 0)
-    }
-    */
 }
 
 pub fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
