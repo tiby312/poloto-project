@@ -10,27 +10,34 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 Here is a simple demo:
 
-<img src="./assets/simple.svg" alt="demo">
+### Example 
 
 ```rust
 //PIPE me to a file!
 fn main() {
     let mut s = poloto::plot(
-        "Cows Per Year",
-        "Year",
-        "Cow",
+        "Demo: Some Trigonometry Plots",
+        "This is the x label",
+        "This is the y label",
     );
 
-    let data=[
-        [1979.0,10.0],
-        [1989.0,12.0],
-        [2001.0,13.0],
-        [2010.0,4.0]
-    ];
-    
-    s.line("cows", data.iter().map(|x|*x));
-    
+    let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
+
+    s.line("cos", x.clone().map(|x| [x, x.cos()]));
+    s.scatter("sin", x.clone().map(|x| [x, x.sin()]));
+    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
+    s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
+
+    //Make the first line a dashed line.
+    s.append(svg::node::Text::new(
+        "<style>.poloto0stroke{stroke-dasharray:10}</style>",
+    ));
 
     s.render(std::io::stdout()).unwrap();
 }
 ```
+
+### Output
+
+
+<img src="./assets/simple.svg" alt="demo">
