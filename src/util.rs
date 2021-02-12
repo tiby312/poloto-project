@@ -65,12 +65,15 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
 
 pub fn print_interval_float(a: f32,precision:f32) -> String {
     
-
-    if a!=0.0 && a.abs().log10().floor().abs()>4.0{    
-        let k=(-(precision.log10()+4.0)).ceil();
-        let k=k.max(0.0);
-        format!("{0:.1$e}",a,k as usize)
-    }else{
+    const SCIENCE:usize=4;
+    if a!=0.0 && a.abs().log10().floor().abs()>SCIENCE as f32{    
+        //let k=(precision.log10().abs()).ceil().abs();
+        
+        //let l=(k-(SCIENCE+1) as f32).max(0.0) as usize;
+        //dbg!(k,l);
+        format!("{0:.1$e}",a, 2 )
+    }else
+    {
         let k=(-precision.log10()).ceil();
         let k=k.max(0.0);
         format!("{0:.1$}",a,k as usize)
