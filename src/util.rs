@@ -1,5 +1,10 @@
-pub fn find_good_step(num_steps: usize, range: f32) -> (usize, f32) {
-    let range = range as f64;
+
+
+
+pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) {
+    let range_all = [range_all[0] as f64,range_all[1] as f64];
+    let range=range_all[1]-range_all[0];
+
 
     //https://stackoverflow.com/questions/237220/tickmark-algorithm-for-a-graph-axis
 
@@ -13,29 +18,86 @@ pub fn find_good_step(num_steps: usize, range: f32) -> (usize, f32) {
 
     let step = good_normalized_step / step_power;
 
-    let new_step = if range % step != 0.0 {
-        (range / step) as usize + 1
-    } else {
-        (range / step) as usize
-    };
 
-    (new_step, step as f32)
+    let start_step={
+        //naively find starting point.
+        let aa=(range_all[0]/step).floor()*step;
+        let bb=(range_all[0]/step).ceil()*step;
+        if aa<bb{
+            if aa<range_all[0]{
+                bb
+            }else{
+                aa
+            }
+        }else{
+            if bb<range_all[0]{
+                aa
+            }else{
+                aa
+            }
+        }
+    };
+    assert!(start_step>=range_all[0]);
+    
+
+    let num_step={
+        //naively find number of steps
+        let mut counter=start_step;
+        let mut num=0;
+        loop{
+            dbg!(counter);
+            
+            if counter>range_all[1]{
+                break;
+            }
+            counter+=step;
+            
+            num+=1;
+            
+        }    
+        num
+        
+    };
+    assert!(num_step>=1);
+    assert!(start_step+step*((num_step-1) as f64)<=range_all[1]);
+    
+    
+    
+    
+    
+    //let start_step=(range_all[0]/step).floor()*step;
+    //dbg!(step);
+    (num_step, step as f32,start_step as f32)
 }
 
-pub fn print_interval_float(a: f32) -> String {
+pub fn print_interval_float(a: f32,precision:f32) -> String {
     //scientific notation: m x 10n
     let n = a.log10().floor();
     let m = a / 10.0f32.powf(n);
 
+    let k=(-precision.log10()).ceil();
+    let k=k.max(0.0);
+    dbg!(k);
+/*
+    let pp=m.fract().log10().ceil();
+    dbg!(m,m.fract(),pp);
+    */
+    //println!("{:.32}",m.fract());
     //Assume we have just one decimal place of precision needed
     //for fractional part.
     //This is ok because we specifically chose the intervals
     //to be from a set of desired steps (e.g. 1,2,5,10)
+    //dbg!(m);
+    //format!("{0:.1$e}", a, m.floor() as usize)
+    format!("{0:.1$}",a,k as usize)
+    //format!("{0:.1$e}",a,k as usize)
+    /*
     if (m * 10.0).round() as usize % 10 != 0 {
         format!("{0:.1$e}", a, 1)
     } else {
         format!("{0:.1$e}", a, 0)
     }
+    */
 }
 
 pub fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {

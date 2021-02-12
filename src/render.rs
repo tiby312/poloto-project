@@ -115,26 +115,44 @@ stroke-width:2;
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
-        let num_steps = 10;
+        let ideal_num_xsteps = 9;
+        let ideal_num_ysteps = 10;
+        
         let texty_padding = paddingy * 0.4;
         let textx_padding = padding * 0.2;
 
-        let (xstep_num, xstep) = util::find_good_step(num_steps, maxx - minx);
-        let (ystep_num, ystep) = util::find_good_step(num_steps, maxy - miny);
+        let (xstep_num, xstep,xstart_step) = util::find_good_step(ideal_num_xsteps, [minx,maxx] );
+        let (ystep_num, ystep,ystart_step) = util::find_good_step(ideal_num_ysteps, [miny,maxy] );
 
-        let minx_fixed = (minx / xstep).ceil() * xstep;
-        let miny_fixed = (miny / ystep).ceil() * ystep;
 
-        //Draw interval x text
+        let distance_to_firstx=xstart_step-minx;
+
+        let distance_to_firsty=ystart_step-miny;
+
+        dbg!(xstart_step,minx,distance_to_firstx);
+        dbg!(ystart_step,miny,distance_to_firsty);
+        //Draw interva`l x text
         for a in 0..xstep_num {
+            
             let p = (a as f32) * xstep;
 
-            let t = node::Text::new(util::print_interval_float(p + minx_fixed));
+            let t = node::Text::new(util::print_interval_float(p + xstart_step,xstep));
+
+            let xx=(distance_to_firstx+p) * scalex + padding;
+            doc.append(
+                element::Line::new()
+                    .set("x1",xx)
+                    .set("x2",xx)
+                    .set("y1",height-paddingy)
+                    .set("y2",height-paddingy*0.95)
+                    .set("stroke","black")
+                    .set("class", "poloto_axis_lines")
+            );
 
             doc.append(
                 element::Text::new()
                     .add(t)
-                    .set("x", p * scalex + padding)
+                    .set("x", xx)
                     .set("y", height - paddingy + texty_padding)
                     .set("alignment-baseline", "start")
                     .set("text-anchor", "middle")
@@ -146,13 +164,22 @@ stroke-width:2;
         for a in 0..ystep_num {
             let p = (a as f32) * ystep;
 
-            let t = node::Text::new(util::print_interval_float(p + miny_fixed));
-
+            let t = node::Text::new(util::print_interval_float(p + ystart_step,ystep));
+            let yy=height - (distance_to_firsty+p) * scaley - paddingy;
+            doc.append(
+                element::Line::new()
+                    .set("x1",padding)
+                    .set("x2",padding*0.96)
+                    .set("y1",yy)
+                    .set("y2",yy)
+                    .set("stroke","black")
+                    .set("class", "poloto_axis_lines")
+            );
             doc.append(
                 element::Text::new()
                     .add(t)
                     .set("x", padding - textx_padding)
-                    .set("y", height - p * scaley - paddingy)
+                    .set("y", yy)
                     .set("alignment-baseline", "middle")
                     .set("text-anchor", "end")
                     .set("class", "poloto_text"),

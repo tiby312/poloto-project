@@ -41,10 +41,6 @@
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 6 plots, the colors cycle back and are repeated.
 //!
-//! ### Why use scientific notation?
-//!
-//! Its the most dense and consistent formatting. Also easiest to implement.
-//!
 //! ### Why not scale the intervals to end nicely with the ends of the axis lines?
 //!
 //! Doing this you would have to either have more dead space, or exclude
