@@ -18,11 +18,9 @@
 //!    --poloto_color5:"pink";
 //!    --poloto_color6:"aqua";
 //!    --poloto_color7:"red";
-//!    --poloto_color8:"blue";
 //! }
 //! ```  
 //! By default these variables are not defined, so the svg falls back on some default colors.
-//! With this, it will change the colors. 
 //!
 //! ### Can I change the styling of the plots?
 //!
