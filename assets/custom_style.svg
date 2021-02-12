@@ -46,38 +46,49 @@ stroke-width:2;
 .poloto6fill{fill:var(--poloto_color6,lime);}
 .poloto7fill{fill:var(--poloto_color7,chocolate);}
 </style>
+<line class="poloto_axis_lines" stroke="black" x1="150" x2="150" y1="400" y2="405"/>
 <text alignment-baseline="start" class="poloto_text" text-anchor="middle" x="150" y="440">
-0e0
+0
 </text>
+<line class="poloto_axis_lines" stroke="black" x1="252.04082" x2="252.04082" y1="400" y2="405"/>
 <text alignment-baseline="start" class="poloto_text" text-anchor="middle" x="252.04082" y="440">
-2e0
+2
 </text>
+<line class="poloto_axis_lines" stroke="black" x1="354.08163" x2="354.08163" y1="400" y2="405"/>
 <text alignment-baseline="start" class="poloto_text" text-anchor="middle" x="354.08163" y="440">
-4e0
+4
 </text>
+<line class="poloto_axis_lines" stroke="black" x1="456.12244" x2="456.12244" y1="400" y2="405"/>
 <text alignment-baseline="start" class="poloto_text" text-anchor="middle" x="456.12244" y="440">
-6e0
+6
 </text>
+<line class="poloto_axis_lines" stroke="black" x1="558.16327" x2="558.16327" y1="400" y2="405"/>
 <text alignment-baseline="start" class="poloto_text" text-anchor="middle" x="558.16327" y="440">
-8e0
+8
 </text>
-<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="400">
--1e1
+<line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="375.08792" y2="375.08792"/>
+<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="375.08792">
+-10
 </text>
-<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="349.984">
--8e0
+<line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="325.07196" y2="325.07196"/>
+<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="325.07196">
+-8
 </text>
-<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="299.96802">
--6e0
+<line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="275.05597" y2="275.05597"/>
+<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="275.05597">
+-6
 </text>
-<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="249.95203">
--4e0
+<line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="225.03998" y2="225.03998"/>
+<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="225.03998">
+-4
 </text>
-<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="199.93604">
--2e0
+<line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="175.02399" y2="175.02399"/>
+<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="175.02399">
+-2
 </text>
-<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="149.92006">
-0e0
+<line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="125.007996" y2="125.007996"/>
+<text alignment-baseline="middle" class="poloto_text" text-anchor="end" x="120" y="125.007996">
+0
 </text>
 <text alignment-baseline="middle" class="poloto_text" font-size="large" text-anchor="start" x="675" y="100">
 cos
