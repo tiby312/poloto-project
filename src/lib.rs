@@ -46,14 +46,6 @@
 //! better than the option of just having the intervals stop not necessarily
 //! at the end of the axis lines.
 //!
-//! ### How do I do I make the histogram corners rounded?
-//!
-//! You can't right now, but with SVG2 with Geometry Properties, you'll be able to do.
-//!
-//! ```css
-//! .poloto2stroke{rx:5;ry:5}
-//! ```
-//!
 //! ### Example
 //!
 //! See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
@@ -119,13 +111,25 @@ pub struct Plotter<'a> {
     doc: Document,
 }
 
-///Shorthand constructor.
+/// Shorthand constructor.
+///
+/// # Example
+///
+/// ```
+/// let plotter = poloto::plot("Number of Cows per Year","Year","Cow");
+/// ```
 pub fn plot<'a>(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
     Plotter::new(title, xname, yname)
 }
 
 impl<'a> Plotter<'a> {
-    ///Create a plotter
+    /// Create a plotter
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// ```
     pub fn new(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
         let doc = Document::new()
             .set("width", render::WIDTH)
@@ -142,6 +146,19 @@ impl<'a> Plotter<'a> {
         }
     }
 
+    /// Create a line from plots.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// plotter.line("cow",data.iter().map(|&x|x))
+    /// ```
     pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -150,6 +167,19 @@ impl<'a> Plotter<'a> {
         })
     }
 
+    /// Create a line from plots that will be filled underneath.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// plotter.line_fill("cow",data.iter().map(|&x|x))
+    /// ```
     pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
@@ -162,6 +192,19 @@ impl<'a> Plotter<'a> {
         })
     }
 
+    /// Create a scatter plot from plots.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// plotter.scatter("cow",data.iter().map(|&x|x))
+    /// ```
     pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
@@ -174,7 +217,20 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    ///Each bar's left side will line up with a point
+    /// Create a histogram from plots.
+    /// Each bar's left side will line up with a point
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// plotter.histogram("cow",data.iter().map(|&x|x))
+    /// ```
     pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: impl ToString,
@@ -196,20 +252,79 @@ impl<'a> Plotter<'a> {
     ///
     ///All the plot functions don't actually add anything to the document until a  `render` function is called.
     ///So calls to this will append elements to the start of the document.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// // Make the line purple.
+    /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
+    /// plotter.line("cow",data.iter().map(|&x|x));
+    /// ```
     pub fn append<N: svg::Node>(&mut self, a: N) {
         use svg::Node;
         self.doc.append(a);
     }
 
+    /// Create a histogram from plots.
+    /// Each bar's left side will line up with a point
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// plotter.line("cow",data.iter().map(|&x|x));
+    /// plotter.render_to_document();
+    /// ```
     pub fn render_to_document(self) -> Document {
         render::render(self)
     }
 
+    /// Create a histogram from plots.
+    /// Each bar's left side will line up with a point
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// plotter.line("cow",data.iter().map(|&x|x));
+    /// //plotter.render_to_file("test.svg");
+    /// ```
     pub fn render_to_file(self, filename: &str) -> Result<(), std::io::Error> {
         let doc = render::render(self);
         svg::save(filename, &doc)
     }
 
+        /// Create a histogram from plots.
+    /// Each bar's left side will line up with a point
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let data=[
+    ///         [1.0f32,4.0],
+    ///         [2.0,5.0],
+    ///         [3.0,6.0]
+    /// ];
+    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// plotter.line("cow",data.iter().map(|&x|x));
+    /// plotter.render(std::io::stdout());
+    /// ```
     pub fn render<T: std::io::Write>(self, target: T) -> Result<(), std::io::Error> {
         let doc = render::render(self);
         svg::write(target, &doc)
