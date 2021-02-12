@@ -1,6 +1,10 @@
 
 
-
+//Specify ideal number of steps and range.
+//Returns:
+//number of intervals.
+//size of each interval
+//first interval location.
 pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) {
     let range_all = [range_all[0] as f64,range_all[1] as f64];
     let range=range_all[1]-range_all[0];
@@ -63,14 +67,12 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
     (num_step, step as f32,start_step as f32)
 }
 
+//pass the value to be printed, and
+//the step size
 pub fn print_interval_float(a: f32,precision:f32) -> String {
     
     const SCIENCE:usize=4;
     if a!=0.0 && a.abs().log10().floor().abs()>SCIENCE as f32{    
-        //let k=(precision.log10().abs()).ceil().abs();
-        
-        //let l=(k-(SCIENCE+1) as f32).max(0.0) as usize;
-        //dbg!(k,l);
         format!("{0:.1$e}",a, 2 )
     }else
     {
@@ -79,6 +81,7 @@ pub fn print_interval_float(a: f32,precision:f32) -> String {
         format!("{0:.1$}",a,k as usize)
     }
 }
+
 
 pub fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
     let mut ii = it.into_iter();
