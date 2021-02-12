@@ -64,15 +64,17 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
 }
 
 pub fn print_interval_float(a: f32,precision:f32) -> String {
-    //scientific notation: m x 10n
-    //let n = a.log10().floor();
-    //let m = a / 10.0f32.powf(n);
-
-    let k=(-precision.log10()).ceil();
-    let k=k.max(0.0);
     
 
-    format!("{0:.1$}",a,k as usize)
+    if a!=0.0 && a.abs().log10().floor().abs()>4.0{    
+        let k=(-(precision.log10()+4.0)).ceil();
+        let k=k.max(0.0);
+        format!("{0:.1$e}",a,k as usize)
+    }else{
+        let k=(-precision.log10()).ceil();
+        let k=k.max(0.0);
+        format!("{0:.1$}",a,k as usize)
+    }
 }
 
 pub fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {

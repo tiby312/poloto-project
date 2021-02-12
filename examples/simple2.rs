@@ -6,14 +6,8 @@ fn main() {
         "This is the y label",
     );
 
-    let k=[-0.05,0.0002];
+    let k=[-0.0000005,200000.0];
     s.line("cos",k.iter().map(|x|[*x,*x]) );
-
-
-    //Make the first line a dashed line.
-    s.append(svg::node::Text::new(
-        "<style>.poloto0stroke{stroke-dasharray:10}</style>",
-    ));
 
     s.render(std::io::stdout()).unwrap();
 }
