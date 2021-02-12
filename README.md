@@ -8,8 +8,6 @@ Poloto graphs can be stylized using css either directly in the SVG, or from insi
 
 You can see it in action in this rust book [broccoli-book](https://tiby312.github.io/broccoli_report/)
 
-Here is a simple demo:
-
 ### Example 
 
 ```rust
