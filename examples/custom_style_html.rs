@@ -31,7 +31,7 @@ fn main() {
 </html>
         "###,
         HEADER,
-        s.render_to_document()
+        s.render_to_string()
     );
 }
 

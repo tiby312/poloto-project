@@ -85,13 +85,13 @@ enum PlotType {
 }
 
 struct Plot<'a> {
-    name: String,
+    name: &'a str,
     plot_type: PlotType,
     plots: Box<dyn PlotTrait<'a> + 'a>,
 }
 
-struct PlotDecomp {
-    name: String,
+struct PlotDecomp<'a> {
+    name: &'a str,
     plot_type: PlotType,
     plots: Vec<[f32; 2]>,
 }
@@ -148,10 +148,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper(Some(plots), PhantomData)),
         })
     }
@@ -171,12 +171,12 @@ impl<'a> Plotter<'a> {
     /// ```
     pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
-        name: impl ToString,
+        name: &'a str,
         plots: I,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper(Some(plots), PhantomData)),
         })
     }
@@ -196,12 +196,12 @@ impl<'a> Plotter<'a> {
     /// ```
     pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
-        name: impl ToString,
+        name: &'a str,
         plots: I,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper(Some(plots), PhantomData)),
         })
     }
@@ -222,12 +222,12 @@ impl<'a> Plotter<'a> {
     /// ```
     pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
-        name: impl ToString,
+        name: &'a str,
         plots: I,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper(Some(plots), PhantomData)),
         })
     }
@@ -262,5 +262,12 @@ impl<'a> Plotter<'a> {
 
     pub fn render<T:Write>(self,writer:T){
         render::render(writer,self,|_|{});
+    }
+
+    ///Convenience function.
+    pub fn render_to_string(self)->String{
+        let mut s=String::new();
+        self.render(&mut s);
+        s
     }
 }

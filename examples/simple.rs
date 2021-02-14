@@ -1,5 +1,6 @@
 //PIPE me to a file!
 fn main() {
+
     let mut s = poloto::plot(
         "Demo: Some Trigonometry Plots",
         "This is the x label",

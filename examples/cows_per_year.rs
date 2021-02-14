@@ -15,5 +15,6 @@ fn main() {
     
     s.line_fill("cows", data.iter().map(|x|*x));
     
-    s.render(std::io::stdout()).unwrap();
+
+    s.render(tagger::upgrade_writer(std::io::stdout()));
 }
