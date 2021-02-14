@@ -14,14 +14,12 @@ fn main() {
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
     
-    let mut st=String::new();
     s.render_with_elements(
-        &mut st,
+        tagger::upgrade_write(std::io::stdout()),
         |e|{
             //Make the first line a dashed line.
             e.write_str("<style>.poloto0stroke{stroke-dasharray:10}</style>");
         }
     );
-    println!("{}",st);
     
 }

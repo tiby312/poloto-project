@@ -143,4 +143,3 @@ This is the x label	</text>
 This is the y label	</text>
 	<path stroke = "black" class = "poloto_axis_lines" d="M 150 100 L 150 400 L 650 400 "/>
 </svg>
-

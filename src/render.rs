@@ -2,14 +2,13 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
-use svg::Node;
-pub fn render<T:Write>(writer:&mut T,mut pl: Plotter,func:impl FnOnce(&mut tagger::Element<T>)) {
+pub fn render<T:Write>(mut writer:T,pl: Plotter,func:impl FnOnce(&mut tagger::Element<T>)) {
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
     
-    let mut root=tagger::root(writer);
+    let mut root=tagger::root(&mut writer);
     let mut svg=root.tag_build("svg")
     .set("class","poloto")
     .set("height",render::HEIGHT)
