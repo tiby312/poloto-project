@@ -14,12 +14,13 @@ fn main() {
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
     
-    s.render_with_elements(
-        tagger::upgrade_write(std::io::stdout()),
+    s.render_with_content(
         |e|{
+            //Contents added here are added right after the <svg> tag.
             //Make the first line a dashed line.
-            e.write_str("<style>.poloto0stroke{stroke-dasharray:10}</style>");
-        }
+            e.write_str("<style>.poloto0stroke{stroke-dasharray:10}</style>\n");
+        },
+        tagger::upgrade_writer(std::io::stdout())  
     );
     
 }

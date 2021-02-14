@@ -1,5 +1,6 @@
 <svg class = "poloto" height = "500" width = "800" viewBox = "0 0 800 500" xmlns = "http://www.w3.org/2000/svg">
-<style>.poloto0stroke{stroke-dasharray:10}</style>	<rect class = "poloto_background" fill = "white" x = "0" y = "0" width = "800" height = "500">
+<style>.poloto0stroke{stroke-dasharray:10}</style>
+	<rect class = "poloto_background" fill = "white" x = "0" y = "0" width = "800" height = "500">
 	</rect>
 	<style>
 .poloto {

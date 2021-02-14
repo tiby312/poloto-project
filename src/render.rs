@@ -13,7 +13,7 @@ pub fn render<T:Write>(mut writer:T,pl: Plotter,func:impl FnOnce(&mut tagger::El
     .set("class","poloto")
     .set("height",render::HEIGHT)
     .set("width",render::WIDTH)
-    .set("viewBox","0 0 800 500")
+    .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
     .set("xmlns","http://www.w3.org/2000/svg")
     .end();
 
@@ -23,8 +23,8 @@ pub fn render<T:Write>(mut writer:T,pl: Plotter,func:impl FnOnce(&mut tagger::El
     svg.tag_build("rect").set("class", "poloto_background")
     //Do this just so that on legacy svg viewers that don't support css they see *something*.
     .set("fill", "white")
-    .set("x", "0")
-    .set("y", "0")
+    .set("x", 0)
+    .set("y", 0)
     .set("width", width)
     .set("height", height)
     .end();

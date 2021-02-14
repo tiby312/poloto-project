@@ -256,9 +256,10 @@ impl<'a> Plotter<'a> {
     /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
     /// ```
-    pub fn render_with_elements<T:Write>(self,writer:T,func:impl FnOnce(&mut tagger::Element<T>)){
+    pub fn render_with_content<T:Write>(self,func:impl FnOnce(&mut tagger::Element<T>),writer:T){
         render::render(writer,self,func);
     }
+    
     pub fn render<T:Write>(self,writer:T){
         render::render(writer,self,|_|{});
     }
