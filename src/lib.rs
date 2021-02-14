@@ -100,9 +100,9 @@ struct PlotDecomp {
 ///User supplies iterators that will be iterated on when
 ///render is called.
 pub struct Plotter<'a> {
-    title: String,
-    xname: String,
-    yname: String,
+    title: &'a str,
+    xname: &'a str,
+    yname: &'a str,
     plots: Vec<Plot<'a>>
 }
 
@@ -113,7 +113,7 @@ pub struct Plotter<'a> {
 /// ```
 /// let plotter = poloto::plot("Number of Cows per Year","Year","Cow");
 /// ```
-pub fn plot<'a>(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
+pub fn plot<'a>(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
     Plotter::new(title, xname, yname)
 }
 
@@ -125,13 +125,13 @@ impl<'a> Plotter<'a> {
     /// ```
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
-    pub fn new(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
+    pub fn new(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
         
         Plotter {
-            title: title.to_string(),
+            title,
             plots: Vec::new(),
-            xname: xname.to_string(),
-            yname: yname.to_string()
+            xname,
+            yname
         }
     }
 
@@ -259,7 +259,7 @@ impl<'a> Plotter<'a> {
     pub fn render_with_content<T:Write>(self,func:impl FnOnce(&mut tagger::Element<T>),writer:T){
         render::render(writer,self,func);
     }
-    
+
     pub fn render<T:Write>(self,writer:T){
         render::render(writer,self,|_|{});
     }

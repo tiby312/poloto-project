@@ -232,17 +232,16 @@ stroke-width:2;
 
         match plot_type {
             PlotType::Line => {
-                let st = format!("poloto{}stroke", colori);
                 svg.tag_build("line")
                     .set("x1", legendx1)
                     .set("y1", legendy1)
                     .set("x2", legendx1 + padding / 3.0)
                     .set("y2", legendy1)
-                    .set("class", st.clone())
+                    .setw("class",|w|write!(w,"poloto{}stroke",colori))    
                     .empty();
                 
                 let mut poly=svg.tag_build("polyline")
-                    .set("class", st)
+                    .setw("class",|w|write!(w,"poloto{}stroke",colori))
                     .set("fill", "none")
                     //Do this so that on legacy svg viewers that dont have CSS, we see *something*.
                     .set("stroke", "black");
@@ -258,12 +257,11 @@ stroke-width:2;
                 
             }
             PlotType::Scatter => {
-                let st = format!("poloto{}fill", colori);
                 svg.tag_build("circle")
                     .set("cx", legendx1 + padding / 30.0)
                     .set("cy", legendy1)
                     .set("r", padding / 30.0)
-                    .set("class", st.clone())
+                    .setw("class",|w|write!(w,"poloto{}fill",colori))    
                     .empty();
                 
                 for [x, y] in it {
@@ -271,15 +269,14 @@ stroke-width:2;
                         .set("cx", x)
                         .set("cy", y)
                         .set("r", padding / 50.0)
-                        .set("class", st.clone())
+                        .setw("class",|w|write!(w,"poloto{}fill",colori))
                         .empty();
                     
                 }
             }
             PlotType::Histo => {
-                let st = format!("poloto{}fill", colori);
                 svg.tag_build("rect")
-                        .set("class", st.clone())
+                        .setw("class",|w|write!(w,"poloto{}fill",colori))
                         .set("x", legendx1)
                         .set("y", legendy1 - padding / 30.0)
                         .set("width", padding / 3.0)
@@ -296,7 +293,7 @@ stroke-width:2;
                             .set("y", ly)
                             .set("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))
                             .set("height", height - paddingy - ly) //TODO ugly?
-                            .set("class", st.clone())
+                            .setw("class",|w|write!(w,"poloto{}fill",colori))
                             .empty();
 
                     }
@@ -304,9 +301,8 @@ stroke-width:2;
                 }
             }
             PlotType::LineFill => {
-                let st = format!("poloto{}fill", colori);
                 svg.tag_build("rect")
-                        .set("class", st.clone())
+                        .setw("class",|w|write!(w,"poloto{}fill",colori))
                         .set("x", legendx1)
                         .set("y", legendy1 - padding / 30.0)
                         .set("width", padding / 3.0)
@@ -316,9 +312,7 @@ stroke-width:2;
                         .empty();
                 
 
-
-
-                let mut d=svg.tag_build("path").set("class",st.clone());
+                let mut d=svg.tag_build("path").setw("class",|w|write!(w,"poloto{}fill",colori));
                 {
                     let mut data=d.path_data();
                     data.move_to([padding, height - paddingy]);
@@ -344,7 +338,7 @@ stroke-width:2;
             .set("font-size", "x-large")
             .set("class", "poloto_text")
             .end();
-    t.write_str(&pl.title);
+    t.write_str(pl.title);
     drop(t);
     
 
@@ -356,7 +350,7 @@ stroke-width:2;
             .set("font-size", "large")
             .set("class", "poloto_text")
             .end();
-    t.write_str(&pl.xname);
+    t.write_str(pl.xname);
     drop(t);
 
 
@@ -372,7 +366,7 @@ stroke-width:2;
             .set("font-size", "large")
             .set("class", "poloto_text")
             .end();
-    t.write_str(&pl.yname);
+    t.write_str(pl.yname);
     drop(t);
     
 
