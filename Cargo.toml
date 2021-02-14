@@ -15,3 +15,4 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 
 [dependencies]
 svg = "0.9"
+tagger = {path="../tagger"}

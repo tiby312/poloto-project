@@ -13,10 +13,15 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
-    //Make the first line a dashed line.
-    s.append(svg::node::Text::new(
-        "<style>.poloto0stroke{stroke-dasharray:10}</style>",
-    ));
-
-    s.render(std::io::stdout()).unwrap();
+    
+    let mut st=String::new();
+    s.render_with_elements(
+        &mut st,
+        |e|{
+            //Make the first line a dashed line.
+            e.write_str("<style>.poloto0stroke{stroke-dasharray:10}</style>");
+        }
+    );
+    println!("{}",st);
+    
 }

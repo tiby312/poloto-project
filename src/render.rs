@@ -3,24 +3,33 @@ pub const HEIGHT: f32 = 500.0;
 
 use super::*;
 use svg::Node;
-pub fn render(pl: Plotter) -> Document {
+pub fn render<T:Write>(writer:&mut T,mut pl: Plotter,func:impl FnOnce(&mut tagger::Element<T>)) {
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
-    let mut doc = pl.doc;
+    
+    let mut root=tagger::root(writer);
+    let mut svg=root.tag_build("svg")
+    .set("class","poloto")
+    .set("height",render::HEIGHT)
+    .set("width",render::WIDTH)
+    .set("viewBox","0 0 800 500")
+    .set("xmlns","http://www.w3.org/2000/svg")
+    .end();
+
+    func(&mut svg);
 
     //Draw background
-    doc.append(
-        element::Rectangle::new()
-            .set("class", "poloto_background")
-            //Do this just so that on legacy svg viewers that don't support css they see *something*.
-            .set("fill", "white")
-            .set("x", "0")
-            .set("y", "0")
-            .set("width", width)
-            .set("height", height),
-    );
+    svg.tag_build("rect").set("class", "poloto_background")
+    //Do this just so that on legacy svg viewers that don't support css they see *something*.
+    .set("fill", "white")
+    .set("x", "0")
+    .set("y", "0")
+    .set("width", width)
+    .set("height", height)
+    .end();
+
 
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
@@ -37,8 +46,9 @@ pub fn render(pl: Plotter) -> Document {
         "chocolate",
     ];
 
-    //Add CSS styling
-    doc.append(element::Style::new(format!(
+    
+    let mut s=svg.tag_build("style").end();
+    write!(s.get_writer(),
         r###".poloto {{
 font-family: "Arial";
 stroke-width:2;
@@ -72,7 +82,8 @@ stroke-width:2;
         colors[5],
         colors[6],
         colors[7],
-    )));
+    ).unwrap();
+    drop(s);
 
     //TODO BIIIIG data structure. what to do?
     let plots: Vec<_> = pl
@@ -91,7 +102,7 @@ stroke-width:2;
             m
         } else {
             //TODO test that this looks ok
-            return doc; //No plots at all. dont need to draw anything
+            return ; //No plots at all. dont need to draw anything
         };
 
     //Insert a range if the range is zero.
@@ -134,54 +145,51 @@ stroke-width:2;
             
             let p = (a as f32) * xstep;
 
-            let t = node::Text::new(util::print_interval_float(p + xstart_step,xstep));
 
             let xx=(distance_to_firstx+p) * scalex + padding;
-            doc.append(
-                element::Line::new()
+            svg.tag_build("line")
                     .set("x1",xx)
                     .set("x2",xx)
                     .set("y1",height-paddingy)
                     .set("y2",height-paddingy*0.95)
                     .set("stroke","black")
                     .set("class", "poloto_axis_lines")
-            );
+                    .empty();
 
-            doc.append(
-                element::Text::new()
-                    .add(t)
+            let mut t=svg.tag_build("text")
                     .set("x", xx)
                     .set("y", height - paddingy + texty_padding)
                     .set("alignment-baseline", "start")
                     .set("text-anchor", "middle")
-                    .set("class", "poloto_text"),
-            );
+                    .set("class", "poloto_text").end();
+
+
+            t.write_str(&util::print_interval_float(p + xstart_step,xstep));
+            
         }
 
         //Draw interval y text
         for a in 0..ystep_num {
             let p = (a as f32) * ystep;
 
-            let t = node::Text::new(util::print_interval_float(p + ystart_step,ystep));
             let yy=height - (distance_to_firsty+p) * scaley - paddingy;
-            doc.append(
-                element::Line::new()
+            svg.tag_build("line")
                     .set("x1",padding)
                     .set("x2",padding*0.96)
                     .set("y1",yy)
                     .set("y2",yy)
                     .set("stroke","black")
                     .set("class", "poloto_axis_lines")
-            );
-            doc.append(
-                element::Text::new()
-                    .add(t)
+                    .empty();
+            let mut t=svg.tag_build("text")
                     .set("x", padding - textx_padding)
                     .set("y", yy)
                     .set("alignment-baseline", "middle")
                     .set("text-anchor", "end")
-                    .set("class", "poloto_text"),
-            );
+                    .set("class", "poloto_text")
+                    .end();
+
+            t.write_str(&util::print_interval_float(p + ystart_step,ystep));
         }
     }
 
@@ -200,17 +208,16 @@ stroke-width:2;
     {
         let spacing = padding / 3.0;
 
-        //Draw legend text
-        doc.append(
-            element::Text::new()
-                .add(node::Text::new(name))
+        let mut t=svg.tag_build("text")
                 .set("x", width - padding / 1.2)
                 .set("y", paddingy + (i as f32) * spacing)
                 .set("alignment-baseline", "middle")
                 .set("text-anchor", "start")
                 .set("font-size", "large")
-                .set("class", "poloto_text"),
-        );
+                .set("class", "poloto_text")
+                .end();
+        t.write_str(&name);
+        drop(t);
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f32) * spacing;
@@ -227,129 +234,134 @@ stroke-width:2;
         match plot_type {
             PlotType::Line => {
                 let st = format!("poloto{}stroke", colori);
-                doc.append(
-                    element::Line::new()
-                        .set("x1", legendx1)
-                        .set("y1", legendy1)
-                        .set("x2", legendx1 + padding / 3.0)
-                        .set("y2", legendy1)
-                        .set("class", st.clone()),
-                );
-                use std::fmt::Write;
-                let mut points = String::new();
-                for [x, y] in it {
-                    write!(&mut points, "{},{} ", x, y).unwrap();
+                svg.tag_build("line")
+                    .set("x1", legendx1)
+                    .set("y1", legendy1)
+                    .set("x2", legendx1 + padding / 3.0)
+                    .set("y2", legendy1)
+                    .set("class", st.clone())
+                    .empty();
+                
+                let mut poly=svg.tag_build("polyline")
+                    .set("class", st)
+                    .set("fill", "none")
+                    //Do this so that on legacy svg viewers that dont have CSS, we see *something*.
+                    .set("stroke", "black");
+
+                {
+                    let mut d=poly.polyline_data();
+                    for p in it{
+                        d.point(p);
+                    }
                 }
-                doc.append(
-                    Polyline::new()
-                        .set("class", st)
-                        .set("fill", "none")
-                        //Do this so that on legacy svg viewers that dont have CSS, we see *something*.
-                        .set("stroke", "black")
-                        .set("points", points),
-                );
+                
+                poly.empty();
+                
             }
             PlotType::Scatter => {
                 let st = format!("poloto{}fill", colori);
-                doc.append(
-                    element::Circle::new()
-                        .set("cx", legendx1 + padding / 30.0)
-                        .set("cy", legendy1)
-                        .set("r", padding / 30.0)
-                        .set("class", st.clone()),
-                );
+                svg.tag_build("circle")
+                    .set("cx", legendx1 + padding / 30.0)
+                    .set("cy", legendy1)
+                    .set("r", padding / 30.0)
+                    .set("class", st.clone())
+                    .empty();
+                
                 for [x, y] in it {
-                    doc.append(
-                        element::Circle::new()
-                            .set("cx", x)
-                            .set("cy", y)
-                            .set("r", padding / 50.0)
-                            .set("class", st.clone()),
-                    );
+                    svg.tag_build("circle")
+                        .set("cx", x)
+                        .set("cy", y)
+                        .set("r", padding / 50.0)
+                        .set("class", st.clone())
+                        .empty();
+                    
                 }
             }
             PlotType::Histo => {
                 let st = format!("poloto{}fill", colori);
-                doc.append(
-                    element::Rectangle::new()
+                svg.tag_build("rect")
                         .set("class", st.clone())
                         .set("x", legendx1)
                         .set("y", legendy1 - padding / 30.0)
                         .set("width", padding / 3.0)
                         .set("height", padding / 20.0)
                         .set("rx", padding / 30.0)
-                        .set("ry", padding / 30.0),
-                );
+                        .set("ry", padding / 30.0)
+                        .empty();
+                
                 let mut last = None;
                 for [x, y] in it {
                     if let Some((lx, ly)) = last {
-                        let k = element::Rectangle::new()
+                        svg.tag_build("rect")
                             .set("x", lx)
                             .set("y", ly)
                             .set("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))
                             .set("height", height - paddingy - ly) //TODO ugly?
-                            .set("class", st.clone());
+                            .set("class", st.clone())
+                            .empty();
 
-                        doc.append(k);
                     }
                     last = Some((x, y))
                 }
             }
             PlotType::LineFill => {
                 let st = format!("poloto{}fill", colori);
-                doc.append(
-                    element::Rectangle::new()
+                svg.tag_build("rect")
                         .set("class", st.clone())
                         .set("x", legendx1)
                         .set("y", legendy1 - padding / 30.0)
                         .set("width", padding / 3.0)
                         .set("height", padding / 20.0)
                         .set("rx", padding / 30.0)
-                        .set("ry", padding / 30.0),
-                );
+                        .set("ry", padding / 30.0)
+                        .empty();
+                
 
-                let mut data = Data::new().move_to((padding, height - paddingy));
 
-                for [x, y] in it {
-                    data = data.line_to((x, y));
+
+                let mut d=svg.tag_build("path").set("class",st.clone());
+                {
+                    let mut data=d.path_data();
+                    data.move_to([padding, height - paddingy]);
+
+                    for p in it {
+                        data.line_to(p);
+                    }
+
+                    data.line_to([width - padding, height - paddingy]);
+                    data.close();
                 }
+                d.empty();
 
-                data = data.line_to((width - padding, height - paddingy));
-                data = data.close();
-
-                doc.append(Path::new().set("class", st.clone()).set("d", data));
             }
         }
     }
 
-    //Draw title
-    doc.append(
-        element::Text::new()
-            .add(node::Text::new(pl.title))
+    let mut t=svg.tag_build("text")
             .set("x", width / 2.0)
             .set("y", padding / 4.0)
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set("font-size", "x-large")
-            .set("class", "poloto_text"),
-    );
+            .set("class", "poloto_text")
+            .end();
+    t.write_str(&pl.title);
+    drop(t);
+    
 
-    //Draw xname
-    doc.append(
-        element::Text::new()
-            .add(node::Text::new(pl.xname))
+    let mut t=svg.tag_build("text")
             .set("x", width / 2.0)
             .set("y", height - padding / 8.)
             .set("alignment-baseline", "start")
             .set("text-anchor", "middle")
             .set("font-size", "large")
-            .set("class", "poloto_text"),
-    );
+            .set("class", "poloto_text")
+            .end();
+    t.write_str(&pl.xname);
+    drop(t);
 
-    //Draw yname
-    doc.append(
-        element::Text::new()
-            .add(node::Text::new(pl.yname))
+
+    let mut t=svg.tag_build("text")
             .set("x", padding / 4.0)
             .set("y", height / 2.0)
             .set("alignment-baseline", "start")
@@ -359,21 +371,20 @@ stroke-width:2;
                 format!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
             )
             .set("font-size", "large")
-            .set("class", "poloto_text"),
-    );
+            .set("class", "poloto_text")
+            .end();
+    t.write_str(&pl.yname);
+    drop(t);
+    
 
-    let data = Data::new()
-        .move_to((padding, paddingy))
-        .line_to((padding, height - paddingy))
-        .line_to((width - padding, height - paddingy));
-
-    //Draw axis lines
-    doc.append(
-        Path::new()
-            .set("stroke", "black")
-            .set("d", data)
-            .set("class", "poloto_axis_lines"),
-    );
-
-    doc
+    let mut t=svg.tag_build("path")
+        .set("stroke", "black")
+        .set("class", "poloto_axis_lines");
+    {
+        let mut p=t.path_data();
+        p.move_to([padding, paddingy])
+        .line_to([padding, height - paddingy])
+        .line_to([width - padding, height - paddingy]);
+    }   
+    t.empty();
 }

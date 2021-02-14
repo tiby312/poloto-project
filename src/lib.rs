@@ -58,6 +58,8 @@ use svg::node::element::Path;
 use svg::node::element::Polyline;
 use svg::Document;
 
+use core::fmt::Write;
+
 mod util;
 
 mod render;
@@ -107,8 +109,7 @@ pub struct Plotter<'a> {
     title: String,
     xname: String,
     yname: String,
-    plots: Vec<Plot<'a>>,
-    doc: Document,
+    plots: Vec<Plot<'a>>
 }
 
 /// Shorthand constructor.
@@ -131,18 +132,12 @@ impl<'a> Plotter<'a> {
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
     pub fn new(title: impl ToString, xname: impl ToString, yname: impl ToString) -> Plotter<'a> {
-        let doc = Document::new()
-            .set("width", render::WIDTH)
-            .set("height", render::HEIGHT)
-            .set("viewBox", (0, 0, render::WIDTH, render::HEIGHT))
-            .set("class", "poloto");
-
+        
         Plotter {
             title: title.to_string(),
             plots: Vec::new(),
             xname: xname.to_string(),
-            yname: yname.to_string(),
-            doc,
+            yname: yname.to_string()
         }
     }
 
@@ -243,6 +238,7 @@ impl<'a> Plotter<'a> {
         })
     }
 
+
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
     ///change the theme of your svg.
@@ -266,67 +262,10 @@ impl<'a> Plotter<'a> {
     /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
     /// ```
-    pub fn append<N: svg::Node>(&mut self, a: N) {
-        use svg::Node;
-        self.doc.append(a);
+    pub fn render_with_elements<T:Write>(self,writer:&mut T,func:impl FnOnce(&mut tagger::Element<T>)){
+        render::render(writer,self,func);
     }
-
-    /// Create a histogram from plots.
-    /// Each bar's left side will line up with a point
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let data=[
-    ///         [1.0f32,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.line("cow",data.iter().map(|&x|x));
-    /// plotter.render_to_document();
-    /// ```
-    pub fn render_to_document(self) -> Document {
-        render::render(self)
-    }
-
-    /// Create a histogram from plots.
-    /// Each bar's left side will line up with a point
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let data=[
-    ///         [1.0f32,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.line("cow",data.iter().map(|&x|x));
-    /// //plotter.render_to_file("test.svg");
-    /// ```
-    pub fn render_to_file(self, filename: &str) -> Result<(), std::io::Error> {
-        let doc = render::render(self);
-        svg::save(filename, &doc)
-    }
-
-        /// Create a histogram from plots.
-    /// Each bar's left side will line up with a point
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let data=[
-    ///         [1.0f32,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.line("cow",data.iter().map(|&x|x));
-    /// plotter.render(std::io::stdout());
-    /// ```
-    pub fn render<T: std::io::Write>(self, target: T) -> Result<(), std::io::Error> {
-        let doc = render::render(self);
-        svg::write(target, &doc)
+    pub fn render<T:Write>(self,writer:&mut T){
+        render::render(writer,self,|_|{});
     }
 }

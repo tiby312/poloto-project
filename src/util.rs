@@ -69,6 +69,7 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
 
 //pass the value to be printed, and
 //the step size
+//TODO make write to writer instead.
 pub fn print_interval_float(a: f32,precision:f32) -> String {
     
     const SCIENCE:usize=4;
