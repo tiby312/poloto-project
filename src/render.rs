@@ -2,7 +2,7 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
-pub fn render<T:Write>(pl: Plotter<T>) {
+pub fn render<T:Write,N:NameMaker<W=T>>(mut pl: Plotter<T,N>) {
     use tagger::prelude::*;
         
     let width = WIDTH;
@@ -81,10 +81,18 @@ stroke-width:2;
     let plots: Vec<_> = pl
         .plots
         .into_iter()
-        .map(|mut x| PlotDecomp {
-            name: x.name,
-            plot_type: x.plot_type,
-            plots: x.plots.into_iter().collect::<Vec<_>>(),
+        .map(|mut x| {
+            let plots:Vec<_>=x.plots
+            .get_iter_mut()
+            .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite()))
+            .collect();
+            
+        
+            PlotDecomp {
+                plot_type:x.plot_type,
+                orig:x.plots,
+                plots,
+            }
         })
         .collect();
 
@@ -190,7 +198,7 @@ stroke-width:2;
         colori,
         PlotDecomp {
             plot_type,
-            name,
+            mut orig,
             plots,
         },
     ) in plots
@@ -208,7 +216,8 @@ stroke-width:2;
                 .set("font-size", "large")
                 .set("class", "poloto_text")
                 .end();
-        t.write_str(&name);
+        use PlotTrait;
+        orig.write_name(t.get_writer()).unwrap();
         drop(t);
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
@@ -323,6 +332,8 @@ stroke-width:2;
         }
     }
 
+    let (title,xname,yname)=pl.names.split();
+
     let mut t=svg.tag_build("text")
             .set("x", width / 2.0)
             .set("y", padding / 4.0)
@@ -331,7 +342,7 @@ stroke-width:2;
             .set("font-size", "x-large")
             .set("class", "poloto_text")
             .end();
-    t.write_str(pl.title);
+    title(t.get_writer()).unwrap();
     drop(t);
     
 
@@ -343,7 +354,7 @@ stroke-width:2;
             .set("font-size", "large")
             .set("class", "poloto_text")
             .end();
-    t.write_str(pl.xname);
+    xname(t.get_writer()).unwrap();
     drop(t);
 
 
@@ -359,7 +370,7 @@ stroke-width:2;
             .set("font-size", "large")
             .set("class", "poloto_text")
             .end();
-    t.write_str(pl.yname);
+    yname(t.get_writer()).unwrap();
     drop(t);
     
 
