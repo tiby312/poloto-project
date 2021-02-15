@@ -60,10 +60,26 @@ mod util;
 use core::fmt;
 mod render;
 
+
+
+//TODO determine variance.
 struct Wrapper<I: Iterator<Item = [f32; 2]>,F:FnOnce(&mut W)->fmt::Result,W:Write>{
     it:I,
     name:Option<F>,
     _p:PhantomData<W>
+}
+impl<'a,
+    I: Iterator<Item = [f32; 2]> + 'a,
+    F:FnOnce(&mut W)->fmt::Result,
+    W:Write
+> Wrapper<I,F,W> {
+    fn new(it:I,name:F)->Self{
+        Wrapper{
+            it,
+            name:Some(name),
+            _p:PhantomData
+        }
+    }
 }
 
 impl<'a,
@@ -111,13 +127,19 @@ use tagger::element_move::FlatElement;
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
 ///render is called.
-pub struct Plotter<'a,T:Write,N:NameMaker> {
+///BELOW IMPORTANT:::
+///We hold the writer for type inference for the _fmt functions
+///We don't actually write anything to it until render() is called.
+///This way you don't need to handle formatting errors in multipe places
+///Only when you call render.
+pub struct Plotter<'a,T:Write,N:Labels> {
     element:FlatElement<T>,
     names:N,
-    plots: Vec<Plot<'a,T>> //TODO
+    plots: Vec<Plot<'a,T>>,
+    svg_header:bool
 }
 
-impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
+impl<'a,T:Write+'a,N:Labels<W=T>+'a> Plotter<'a,T,N> {
     /// Create a plotter
     ///
     /// # Example
@@ -125,21 +147,14 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
     /// ```
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
-    fn new(writer:T,names:N) -> Plotter<'a,T,N> {
-        use tagger::prelude::*;
-        let root=tagger::root(writer);
-        let svg=root.tag_build_flat("svg")
-        .set("class","poloto")
-        .set("height",render::HEIGHT)
-        .set("width",render::WIDTH)
-        .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
-        .set("xmlns","http://www.w3.org/2000/svg")
-        .end();
+    fn new(writer:T,names:N,svg_header:bool) -> Plotter<'a,T,N> {
 
+        
         Plotter {
             element:svg,            
             plots: Vec::new(),
-            names
+            names,
+            svg_header
         }
     }
 
@@ -161,20 +176,16 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             plots: Box::new(
-                Wrapper{
-                it:plots.into_iter(),
-                name:Some(name),
-                _p:PhantomData
-            }),
+                Wrapper::new(plots.into_iter(),name)),
         })
         
     }
-    
+
     pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
         self.line_fmt(move |w|write!(w,"{}",name),plots)
     }
 
-    /*
+    
     /// Create a line from plots that will be filled underneath.
     ///
     /// # Example
@@ -188,17 +199,24 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line_fill("cow",data.iter().map(|&x|x))
     /// ```
+    pub fn line_fill_fmt<I: IntoIterator<Item = [f32; 2]> + 'a>(
+        &mut self,
+        name: impl FnOnce(&mut T)->fmt::Result+'a,
+        plots: I,
+    ) {
+        self.plots.push(Plot {
+            plot_type: PlotType::LineFill,
+            plots: Box::new(Wrapper::new(plots.into_iter(),name)),
+        })
+    }
     pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: &'a str,
         plots: I,
     ) {
-        self.plots.push(Plot {
-            plot_type: PlotType::LineFill,
-            name,
-            plots: Box::new(Wrapper(Some(plots))),
-        })
+        self.line_fill_fmt(move |w|write!(w,"{}",name),plots)
     }
+    
 
     /// Create a scatter plot from plots.
     ///
@@ -213,17 +231,28 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
+    pub fn scatter_fmt<I: IntoIterator<Item = [f32; 2]> + 'a>(
+        &mut self,
+        name: impl FnOnce(&mut T)->fmt::Result+'a,
+        plots: I,
+    ) {
+        self.plots.push(Plot {
+            plot_type: PlotType::Scatter,
+            plots: Box::new(Wrapper::new(plots.into_iter(),name)),
+        })
+    }
+
     pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: &'a str,
         plots: I,
     ) {
-        self.plots.push(Plot {
-            plot_type: PlotType::Scatter,
-            name,
-            plots: Box::new(Wrapper(Some(plots))),
-        })
+        self.scatter_fmt(move |w|write!(w,"{}",name),plots)
     }
+
+
+
+    
 
     /// Create a histogram from plots.
     /// Each bar's left side will line up with a point
@@ -239,18 +268,24 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.histogram("cow",data.iter().map(|&x|x))
     /// ```
+    pub fn histogram_fmt<I: IntoIterator<Item = [f32; 2]> + 'a>(
+        &mut self,
+        name: impl FnOnce(&mut T)->fmt::Result+'a,
+        plots: I,
+    ) {
+        self.plots.push(Plot {
+            plot_type: PlotType::Histo,
+            plots: Box::new(Wrapper::new(plots.into_iter(),name)),
+        })
+    }
+    
     pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(
         &mut self,
         name: &'a str,
         plots: I,
     ) {
-        self.plots.push(Plot {
-            plot_type: PlotType::Histo,
-            name,
-            plots: Box::new(Wrapper(Some(plots))),
-        })
+        self.histogram_fmt(move |w|write!(w,"{}",name),plots)
     }
-    */
 /*
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
@@ -276,7 +311,7 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
     /// plotter.line("cow",data.iter().map(|&x|x));
     /// ```    
     
-    pub fn render_to_element<T:core::fmt::Write>(self,element:tagger::Element<T>)->RenderBuilder<T>{
+    pub fn render_to_element<T:core::fmt::Write>(self,element:tagger::Element<T>)->PlotterBuilder<T>{
         /*
         let root=tagger::root(writer);
         let svg=root.tag_build_flat("svg")
@@ -290,39 +325,40 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
         //render::render(self);
     }
     */
-    pub fn render(self){
-        render::render(self);
+
+    pub fn render(self)->fmt::Result{
+        render::render(self)
     }
     
 }
 
 
-pub struct RenderBuilder<T:Write>{
+pub struct PlotterBuilder<T:Write>{
     inner:T
 }
 
-pub fn plot_io<T:std::io::Write>(write:T)->RenderBuilder<tagger::WriterAdaptor<T>>{
-    RenderBuilder{
+pub fn plot_io<T:std::io::Write>(write:T)->PlotterBuilder<tagger::WriterAdaptor<T>>{
+    PlotterBuilder{
         inner:tagger::upgrade_writer(write)
     }
 }
-pub fn plot<T:core::fmt::Write>(write:T)->RenderBuilder<T>{
-    RenderBuilder{
+pub fn plot<T:core::fmt::Write>(write:T)->PlotterBuilder<T>{
+    PlotterBuilder{
         inner:write
     }
 }
-pub fn plot_from_element<T:core::fmt::Write>(element:tagger::element_borrow::Element<T>)->RenderBuilder<T>{
+pub fn plot_from_element<T:core::fmt::Write>(element:tagger::element_borrow::Element<T>)->PlotterBuilder<T>{
     unimplemented!();
 }
 
 
 
-impl<'a,T:Write+'a> RenderBuilder<T>{
+impl<'a,T:Write+'a> PlotterBuilder<T>{
     
     pub fn finish(self,
         title:&'a str,
         xname:&'a str,
-        yname:&'a str)->Plotter<'a,T,impl NameMaker<W=T>+'a>{
+        yname:&'a str)->Plotter<'a,T,impl Labels<W=T>+'a>{
             Plotter::new(self.inner,NameSetter{
                 title:move |w:&mut T|write!(w,"{}",title),
                 xname:move |w:&mut T|write!(w,"{}",xname),
@@ -334,7 +370,7 @@ impl<'a,T:Write+'a> RenderBuilder<T>{
         title:A,
         xname:B,
         yname:C,
-    )->Plotter<'a,T,impl NameMaker<W=T>+'a> //NameSetter<A,B,C,T>
+    )->Plotter<'a,T,impl Labels<W=T>+'a> //NameSetter<A,B,C,T>
     where 
     T:'a,
     A:FnOnce(&mut T)->fmt::Result+'a,
@@ -350,15 +386,16 @@ impl<'a,T:Write+'a> RenderBuilder<T>{
     }
 }
 
-
-
-pub trait NameMaker{
-    type W:Write;
+///A trait used internally to group functions that
+///generate the title, xaxis name, and yaxis name.
+pub trait Labels{
+    type W:fmt::Write;
     type A:FnOnce(&mut Self::W)->fmt::Result;
     type B:FnOnce(&mut Self::W)->fmt::Result;
     type C:FnOnce(&mut Self::W)->fmt::Result;
     fn split(self)->(Self::A,Self::B,Self::C);
 }
+
 
 struct NameSetter<A,B,C,T>{
     title:A,
@@ -368,7 +405,7 @@ struct NameSetter<A,B,C,T>{
 }
 
 
-impl<A,B,C,T> NameMaker for NameSetter<A,B,C,T> where
+impl<A,B,C,T> Labels for NameSetter<A,B,C,T> where
     A:FnOnce(&mut T)->fmt::Result,
     B:FnOnce(&mut T)->fmt::Result,
     C:FnOnce(&mut T)->fmt::Result,

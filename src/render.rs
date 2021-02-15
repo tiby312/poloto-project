@@ -2,7 +2,7 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
-pub fn render<T:Write,N:NameMaker<W=T>>(mut pl: Plotter<T,N>) {
+pub fn render<T:Write,N:Labels<W=T>>(mut pl: Plotter<T,N>) ->fmt::Result{
     use tagger::prelude::*;
         
     let width = WIDTH;
@@ -10,7 +10,25 @@ pub fn render<T:Write,N:NameMaker<W=T>>(mut pl: Plotter<T,N>) {
     let padding = 150.0;
     let paddingy = 100.0;
     
-    let mut svg=pl.element;
+    //let mut svg=pl.element;
+
+    let svg=if pl.svg_header{
+        //TODO do this inside of render!!!
+        use tagger::prelude::*;
+        //let root=tagger::root(writer);
+        let svg=pl.element.tag_build("svg")
+        .set("class","poloto")
+        .set("height",render::HEIGHT)
+        .set("width",render::WIDTH)
+        .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
+        .set("xmlns","http://www.w3.org/2000/svg")
+        .end();
+        svg
+
+    }else{
+        pl.element
+    };
+
 
     //Draw background
     svg.tag_build("rect").set("class", "poloto_background")
@@ -384,4 +402,5 @@ stroke-width:2;
         .line_to([width - padding, height - paddingy]);
     }   
     t.empty();
+    Ok(())
 }
