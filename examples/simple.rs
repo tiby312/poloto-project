@@ -2,6 +2,7 @@
 fn main() {
 
     let mut s = poloto::plot(
+        tagger::upgrade_writer(std::io::stdout()),
         "Demo: Some Trigonometry Plots",
         "This is the x label",
         "This is the y label",
@@ -14,14 +15,10 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
+    //Make the first line a dashed line.
+    use tagger::prelude::*;
+    s.get_svg_element().write_str("<style>.poloto0stroke{stroke-dasharray:10}</style>\n");
     
-    s.render_with_content(
-        |e|{
-            //Contents added here are added right after the <svg> tag.
-            //Make the first line a dashed line.
-            e.write_str("<style>.poloto0stroke{stroke-dasharray:10}</style>\n");
-        },
-        tagger::upgrade_writer(std::io::stdout())  
-    );
+    s.render();
     
 }

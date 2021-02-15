@@ -1,25 +1,25 @@
 <svg class = "poloto" height = "500" width = "800" viewBox = "0 0 800 500" xmlns = "http://www.w3.org/2000/svg">
 
-<defs>
-    <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
-        <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
-    </pattern>
-    <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
-        <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
-        </pattern> 
-</defs>
-<style>
-.poloto_background.poloto_background{
-    fill: url(#pattern);
-}
-.poloto0stroke.poloto0stroke{
-    stroke-dasharray:10 2 2;
-}
-.poloto1fill.poloto1fill{
-    fill: url(#pattern2);
-}
-</style>
-	<rect class = "poloto_background" fill = "white" x = "0" y = "0" width = "800" height = "500">
+        <defs>
+            <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
+                <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
+            </pattern>
+            <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
+                <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
+                </pattern> 
+        </defs>
+        <style>
+        .poloto_background.poloto_background{
+            fill: url(#pattern);
+        }
+        .poloto0stroke.poloto0stroke{
+            stroke-dasharray:10 2 2;
+        }
+        .poloto1fill.poloto1fill{
+            fill: url(#pattern2);
+        }
+        </style>
+        	<rect class = "poloto_background" fill = "white" x = "0" y = "0" width = "800" height = "500">
 	</rect>
 	<style>
 .poloto {

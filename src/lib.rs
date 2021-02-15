@@ -96,10 +96,13 @@ struct PlotDecomp<'a> {
     plots: Vec<[f32; 2]>,
 }
 
+use tagger::element_move::FlatElement;
+
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
 ///render is called.
-pub struct Plotter<'a> {
+pub struct Plotter<'a,T:Write> {
+    element:FlatElement<T>,
     title: &'a str,
     xname: &'a str,
     yname: &'a str,
@@ -113,11 +116,12 @@ pub struct Plotter<'a> {
 /// ```
 /// let plotter = poloto::plot("Number of Cows per Year","Year","Cow");
 /// ```
-pub fn plot<'a>(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
-    Plotter::new(title, xname, yname)
+pub fn plot<'a,T:Write>(writer:T,title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a,T> {
+    Plotter::new(writer,title, xname, yname)
 }
 
-impl<'a> Plotter<'a> {
+
+impl<'a,T:Write> Plotter<'a,T> {
     /// Create a plotter
     ///
     /// # Example
@@ -125,9 +129,21 @@ impl<'a> Plotter<'a> {
     /// ```
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
-    pub fn new(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
+    pub fn new(writer:T,title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a,T> {
         
+        let root=tagger::root(writer);
+        let svg=root.tag_build_flat("svg")
+        .set("class","poloto")
+        .set("height",render::HEIGHT)
+        .set("width",render::WIDTH)
+        .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
+        .set("xmlns","http://www.w3.org/2000/svg")
+        .end();
+
+        //TODO draw axis right here!!!!
+
         Plotter {
+            element:svg,
             title,
             plots: Vec::new(),
             xname,
@@ -232,7 +248,6 @@ impl<'a> Plotter<'a> {
         })
     }
 
-
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
     ///change the theme of your svg.
@@ -256,18 +271,12 @@ impl<'a> Plotter<'a> {
     /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
     /// ```
-    pub fn render_with_content<T:Write>(self,func:impl FnOnce(&mut tagger::Element<T>),writer:T){
-        render::render(writer,self,func);
+    pub fn get_svg_element(&mut self)->&mut FlatElement<T>{
+        &mut self.element
+    }
+    
+    pub fn render(self){
+        render::render(self);
     }
 
-    pub fn render<T:Write>(self,writer:T){
-        render::render(writer,self,|_|{});
-    }
-
-    ///Convenience function.
-    pub fn render_to_string(self)->String{
-        let mut s=String::new();
-        self.render(&mut s);
-        s
-    }
 }

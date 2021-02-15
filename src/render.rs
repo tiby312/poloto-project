@@ -2,12 +2,15 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
-pub fn render<T:Write>(mut writer:T,pl: Plotter,func:impl FnOnce(&mut tagger::Element<T>)) {
+pub fn render<T:Write>(pl: Plotter<T>) {
+    use tagger::prelude::*;
+        
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
     
+    /*
     let mut root=tagger::root(&mut writer);
     let mut svg=root.tag_build("svg")
     .set("class","poloto")
@@ -18,6 +21,8 @@ pub fn render<T:Write>(mut writer:T,pl: Plotter,func:impl FnOnce(&mut tagger::El
     .end();
 
     func(&mut svg);
+    */
+    let mut svg=pl.element;
 
     //Draw background
     svg.tag_build("rect").set("class", "poloto_background")

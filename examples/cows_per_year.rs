@@ -1,5 +1,6 @@
 fn main() {
     let mut s = poloto::plot(
+        tagger::upgrade_writer(std::io::stdout()),
         "Cows Per Year",
         "Year",
         "Cow",
@@ -15,6 +16,5 @@ fn main() {
     
     s.line_fill("cows", data.iter().map(|x|*x));
     
-
-    s.render(tagger::upgrade_writer(std::io::stdout()));
+    s.render();
 }
