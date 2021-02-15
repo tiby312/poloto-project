@@ -4,9 +4,9 @@ fn main() {
 
     let mut s = poloto::plot_io(std::io::stdout())
     .finish(
-        |w|write!(w,"Demo: Some Trigonometry Plots"),
-        |w|write!(w,"This is the x label"),
-        |w|write!(w,"This is the y label")
+        "Demo: Some Trigonometry Plots",
+        "This is the x label",
+        "This is the y label"
     );
 
 
@@ -24,7 +24,7 @@ fn main() {
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
     s.line(
-        |w|write!(w,"cos {}",3),
+        "cos",
         x.clone().map(|x| [x, x.cos()])
     );
     s.render();

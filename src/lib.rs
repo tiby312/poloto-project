@@ -117,7 +117,7 @@ pub struct Plotter<'a,T:Write,N:NameMaker> {
     plots: Vec<Plot<'a,T>> //TODO
 }
 
-impl<'a,T:Write+'a,N:NameMaker<W=T>> Plotter<'a,T,N> {
+impl<'a,T:Write+'a,N:NameMaker<W=T>+'a> Plotter<'a,T,N> {
     /// Create a plotter
     ///
     /// # Example
@@ -156,7 +156,7 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>> Plotter<'a,T,N> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl FnOnce(&mut T)->fmt::Result+'a, plots: I) {
+    pub fn line_fmt<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl FnOnce(&mut T)->fmt::Result+'a, plots: I) {
         
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -168,6 +168,10 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>> Plotter<'a,T,N> {
             }),
         })
         
+    }
+    
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
+        self.line_fmt(move |w|write!(w,"{}",name),plots)
     }
 
     /*
@@ -313,18 +317,29 @@ pub fn plot_from_element<T:core::fmt::Write>(element:tagger::element_borrow::Ele
 
 
 
-impl<T:Write> RenderBuilder<T>{
+impl<'a,T:Write+'a> RenderBuilder<T>{
     
-    pub fn finish<'a,A,B,C>(self,
+    pub fn finish(self,
+        title:&'a str,
+        xname:&'a str,
+        yname:&'a str)->Plotter<'a,T,impl NameMaker<W=T>+'a>{
+            Plotter::new(self.inner,NameSetter{
+                title:move |w:&mut T|write!(w,"{}",title),
+                xname:move |w:&mut T|write!(w,"{}",xname),
+                yname:move |w:&mut T|write!(w,"{}",yname),
+                _p:PhantomData
+            })
+    }
+    pub fn finish_fmt<A,B,C>(self,
         title:A,
         xname:B,
         yname:C,
-    )->Plotter<'a,T,impl NameMaker<W=T>> //NameSetter<A,B,C,T>
+    )->Plotter<'a,T,impl NameMaker<W=T>+'a> //NameSetter<A,B,C,T>
     where 
     T:'a,
-    A:FnOnce(&mut T)->fmt::Result,
-    B:FnOnce(&mut T)->fmt::Result,
-    C:FnOnce(&mut T)->fmt::Result,
+    A:FnOnce(&mut T)->fmt::Result+'a,
+    B:FnOnce(&mut T)->fmt::Result+'a,
+    C:FnOnce(&mut T)->fmt::Result+'a,
     {
         Plotter::new(self.inner,NameSetter{
             title,
