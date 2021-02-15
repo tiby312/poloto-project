@@ -2,13 +2,14 @@
 fn main() {
 
 
-    let mut s = poloto::RenderBuilder::new_io(std::io::stdout()).finish(
+    let mut s = poloto::plot_io(std::io::stdout())
+    .finish(
         |w|write!(w,"Demo: Some Trigonometry Plots"),
         |w|write!(w,"This is the x label"),
         |w|write!(w,"This is the y label")
     );
 
-    
+
     /*
     let s=poloto::default_svg();
     s.write_str("<style>.poloto0stroke{stroke-dasharray:10}</style>\n");
@@ -26,6 +27,7 @@ fn main() {
         |w|write!(w,"cos {}",3),
         x.clone().map(|x| [x, x.cos()])
     );
+    s.render();
     /*
     s.scatter("sin", x.clone().map(|x| [x, x.sin()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));

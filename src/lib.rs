@@ -125,7 +125,7 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>> Plotter<'a,T,N> {
     /// ```
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
-    pub fn new(writer:T,names:N) -> Plotter<'a,T,N> {
+    fn new(writer:T,names:N) -> Plotter<'a,T,N> {
         use tagger::prelude::*;
         let root=tagger::root(writer);
         let svg=root.tag_build_flat("svg")
@@ -285,10 +285,11 @@ impl<'a,T:Write+'a,N:NameMaker<W=T>> Plotter<'a,T,N> {
         */
         //render::render(self);
     }
-    pub fn render<T:core::fmt::Write>(self)->RenderBuilder<T>{
-
-    }
     */
+    pub fn render(self){
+        render::render(self);
+    }
+    
 }
 
 
@@ -296,22 +297,23 @@ pub struct RenderBuilder<T:Write>{
     inner:T
 }
 
-impl<T:std::io::Write> RenderBuilder<tagger::WriterAdaptor<T>>{
-    pub fn new_io(write:T)->RenderBuilder<tagger::WriterAdaptor<T>>{
-        RenderBuilder{
-            inner:tagger::upgrade_writer(write)
-        }
+pub fn plot_io<T:std::io::Write>(write:T)->RenderBuilder<tagger::WriterAdaptor<T>>{
+    RenderBuilder{
+        inner:tagger::upgrade_writer(write)
     }
+}
+pub fn plot<T:core::fmt::Write>(write:T)->RenderBuilder<T>{
+    RenderBuilder{
+        inner:write
+    }
+}
+pub fn plot_from_element<T:core::fmt::Write>(element:tagger::element_borrow::Element<T>)->RenderBuilder<T>{
+    unimplemented!();
 }
 
 
 
 impl<T:Write> RenderBuilder<T>{
-    pub fn new(inner:T)->RenderBuilder<T>{
-        RenderBuilder{
-            inner
-        }
-    }
     
     pub fn finish<'a,A,B,C>(self,
         title:A,
