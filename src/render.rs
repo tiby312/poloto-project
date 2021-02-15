@@ -10,23 +10,11 @@ pub fn render<T:Write>(pl: Plotter<T>) {
     let padding = 150.0;
     let paddingy = 100.0;
     
-    /*
-    let mut root=tagger::root(&mut writer);
-    let mut svg=root.tag_build("svg")
-    .set("class","poloto")
-    .set("height",render::HEIGHT)
-    .set("width",render::WIDTH)
-    .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
-    .set("xmlns","http://www.w3.org/2000/svg")
-    .end();
-
-    func(&mut svg);
-    */
     let mut svg=pl.element;
 
     //Draw background
     svg.tag_build("rect").set("class", "poloto_background")
-    //Do this just so that on legacy svg viewers that don't support css they see *something*.
+    //Do this just so that on svg viewers that don't support css they see *something*.
     .set("fill", "white")
     .set("x", 0)
     .set("y", 0)
