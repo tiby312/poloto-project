@@ -15,4 +15,3 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 
 [dependencies]
 tagger = {path="../tagger"}
-fmt2io = "0.1.0"

@@ -114,7 +114,7 @@ use tagger::element_move::FlatElement;
 pub struct Plotter<'a,T:Write,N:NameMaker> {
     element:FlatElement<T>,
     names:N,
-    plots: Vec<Plot<'a,T>>
+    plots: Vec<Plot<'a,T>> //TODO
 }
 
 impl<'a,T:Write+'a,N:NameMaker<W=T>> Plotter<'a,T,N> {
