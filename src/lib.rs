@@ -54,6 +54,7 @@ use core::marker::PhantomData;
 
 use core::fmt::Write;
 
+
 mod util;
 
 mod render;
@@ -120,6 +121,9 @@ pub fn plot<'a,T:Write>(writer:T,title: &'a str, xname: &'a str, yname: &'a str)
     Plotter::new(writer,title, xname, yname)
 }
 
+pub fn plot_io<'a,T:std::io::Write>(writer:T,title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a,tagger::WriterAdaptor<T>> {
+    Plotter::new(tagger::upgrade_writer(writer),title, xname, yname)
+}
 
 impl<'a,T:Write> Plotter<'a,T> {
     /// Create a plotter

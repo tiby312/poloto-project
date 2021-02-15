@@ -1,7 +1,7 @@
 //PIPE me to a file!
 fn main() {
-    let mut s = poloto::plot(
-        tagger::upgrade_writer(std::io::stdout()),
+    let mut s = poloto::plot_io(
+        std::io::stdout(),
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
