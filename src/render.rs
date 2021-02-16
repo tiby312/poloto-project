@@ -2,7 +2,7 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
-pub fn render<T:Write,N:Labels<W=T>>(mut pl: Plotter<T,N>) ->fmt::Result{
+pub fn render<T:Write,N:Labels<W=T>>(pl: Plotter<T,N>) ->fmt::Result{
     use tagger::prelude::*;
         
     let width = WIDTH;
@@ -10,24 +10,7 @@ pub fn render<T:Write,N:Labels<W=T>>(mut pl: Plotter<T,N>) ->fmt::Result{
     let padding = 150.0;
     let paddingy = 100.0;
     
-    //let mut svg=pl.element;
-
-    let svg=if pl.svg_header{
-        //TODO do this inside of render!!!
-        use tagger::prelude::*;
-        //let root=tagger::root(writer);
-        let svg=pl.element.tag_build("svg")
-        .set("class","poloto")
-        .set("height",render::HEIGHT)
-        .set("width",render::WIDTH)
-        .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
-        .set("xmlns","http://www.w3.org/2000/svg")
-        .end();
-        svg
-
-    }else{
-        pl.element
-    };
+    let mut svg=pl.element;
 
 
     //Draw background
@@ -120,7 +103,7 @@ stroke-width:2;
             m
         } else {
             //TODO test that this looks ok
-            return ; //No plots at all. dont need to draw anything
+            return Ok(()); //No plots at all. dont need to draw anything
         };
 
     //Insert a range if the range is zero.
@@ -234,8 +217,7 @@ stroke-width:2;
                 .set("font-size", "large")
                 .set("class", "poloto_text")
                 .end();
-        use PlotTrait;
-        orig.write_name(t.get_writer()).unwrap();
+        orig.write_name(t.get_writer())?;
         drop(t);
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
@@ -360,7 +342,7 @@ stroke-width:2;
             .set("font-size", "x-large")
             .set("class", "poloto_text")
             .end();
-    title(t.get_writer()).unwrap();
+    title(t.get_writer())?;
     drop(t);
     
 
@@ -372,7 +354,7 @@ stroke-width:2;
             .set("font-size", "large")
             .set("class", "poloto_text")
             .end();
-    xname(t.get_writer()).unwrap();
+    xname(t.get_writer())?;
     drop(t);
 
 
@@ -388,7 +370,7 @@ stroke-width:2;
             .set("font-size", "large")
             .set("class", "poloto_text")
             .end();
-    yname(t.get_writer()).unwrap();
+    yname(t.get_writer())?;
     drop(t);
     
 

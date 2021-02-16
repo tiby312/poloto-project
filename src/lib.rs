@@ -135,8 +135,7 @@ use tagger::element_move::FlatElement;
 pub struct Plotter<'a,T:Write,N:Labels> {
     element:FlatElement<T>,
     names:N,
-    plots: Vec<Plot<'a,T>>,
-    svg_header:bool
+    plots: Vec<Plot<'a,T>>
 }
 
 impl<'a,T:Write+'a,N:Labels<W=T>+'a> Plotter<'a,T,N> {
@@ -147,14 +146,13 @@ impl<'a,T:Write+'a,N:Labels<W=T>+'a> Plotter<'a,T,N> {
     /// ```
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
-    fn new(writer:T,names:N,svg_header:bool) -> Plotter<'a,T,N> {
+    fn new(element:FlatElement<T>,names:N) -> Plotter<'a,T,N> {
 
         
         Plotter {
-            element:svg,            
+            element,            
             plots: Vec::new(),
             names,
-            svg_header
         }
     }
 
@@ -334,21 +332,44 @@ impl<'a,T:Write+'a,N:Labels<W=T>+'a> Plotter<'a,T,N> {
 
 
 pub struct PlotterBuilder<T:Write>{
-    inner:T
+    inner:FlatElement<T>
+}
+
+
+pub fn default_svg<T:Write>(writer:T)->FlatElement<T>{
+    use tagger::prelude::*;
+    let root=tagger::root(writer);
+    let svg=root.tag_build_flat("svg")
+    .set("class","poloto")
+    .set("height",render::HEIGHT)
+    .set("width",render::WIDTH)
+    .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
+    .set("xmlns","http://www.w3.org/2000/svg")
+    .end();
+    svg
 }
 
 pub fn plot_io<T:std::io::Write>(write:T)->PlotterBuilder<tagger::WriterAdaptor<T>>{
+    let inner=default_svg(tagger::upgrade_writer(write));
+
     PlotterBuilder{
-        inner:tagger::upgrade_writer(write)
+        inner
     }
 }
 pub fn plot<T:core::fmt::Write>(write:T)->PlotterBuilder<T>{
+    let inner=default_svg(write);
+
     PlotterBuilder{
-        inner:write
+        inner
     }
 }
-pub fn plot_from_element<T:core::fmt::Write>(element:tagger::element_borrow::Element<T>)->PlotterBuilder<T>{
-    unimplemented!();
+pub fn plot_from_element<T:core::fmt::Write>(element:tagger::element_move::FlatElement<T>)->PlotterBuilder<T>{
+    let inner=element;
+
+    PlotterBuilder{
+        inner
+    }
+    
 }
 
 
