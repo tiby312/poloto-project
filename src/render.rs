@@ -6,18 +6,11 @@ use tagger::*;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: Write>(pl: Plotter, writer: &mut T) -> fmt::Result {
+pub fn render<T: Write>(pl: Plotter, svg:&mut Element<T>) -> fmt::Result {
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
-
-    let mut svg=new_element!(
-        writer,
-        "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
-        "</svg>",
-        w=render::WIDTH,
-        h=render::HEIGHT)?;
 
     empty_element!(
         svg,
