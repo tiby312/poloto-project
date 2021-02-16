@@ -5,8 +5,8 @@ fn main() {
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
-    
-    let fs=s.render_to_string();
+
+    let fs = s.render_to_string();
 
     println!(
         r###"
@@ -18,8 +18,7 @@ fn main() {
 </div>
 </html>
         "###,
-        HEADER,
-        fs
+        HEADER, fs
     );
 }
 

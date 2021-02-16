@@ -1,13 +1,12 @@
 fn main() {
-    
     let mut s = poloto::plot("Demo: Hovering and shadows", "x", "y");
 
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
-    s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin() ]));
-    let fs=s.render_to_string();
+    s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
+    let fs = s.render_to_string();
     println!(
         r###"
 <html>
@@ -17,8 +16,7 @@ fn main() {
 </div>
 </html>
         "###,
-        HEADER,
-        fs
+        HEADER, fs
     );
 }
 

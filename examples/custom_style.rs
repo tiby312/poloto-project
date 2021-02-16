@@ -1,12 +1,7 @@
 use tagger::prelude::*;
-   
-
-
-
 
 //PIPE me to a file!
 fn main() {
-    
     let mut s = poloto::plot(
         "Demo: you can change the style of the svg file itself!",
         "x",
@@ -18,9 +13,9 @@ fn main() {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    s.render_io_with_element(std::io::stdout(),|svg|{
+    s.render_io_with_element(std::io::stdout(), |svg| {
         svg.write_str(
-        r###"
+            r###"
         <defs>
             <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
                 <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
@@ -40,8 +35,8 @@ fn main() {
             fill: url(#pattern2);
         }
         </style>
-        "###);
-    }).unwrap();
-
-
+        "###,
+        );
+    })
+    .unwrap();
 }

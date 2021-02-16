@@ -53,37 +53,26 @@
 
 use core::fmt::Write;
 
-
 mod util;
 
 use core::fmt;
 mod render;
 
-
-
-
-
-
 //TODO determine variance.
-struct Wrapper<I: Iterator<Item = [f32; 2]>>{
-    it:I,
+struct Wrapper<I: Iterator<Item = [f32; 2]>> {
+    it: I,
 }
-impl<'a,I: Iterator<Item = [f32; 2]> + 'a> Wrapper<I> {
-    fn new(it:I)->Self{
-        Wrapper{
-            it
-        }
+impl<'a, I: Iterator<Item = [f32; 2]> + 'a> Wrapper<I> {
+    fn new(it: I) -> Self {
+        Wrapper { it }
     }
 }
 
-impl<'a,
-    I: Iterator<Item = [f32; 2]> + 'a
-> PlotTrait<'a> for Wrapper<I> {
+impl<'a, I: Iterator<Item = [f32; 2]> + 'a> PlotTrait<'a> for Wrapper<I> {
     #[inline(always)]
     fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f32; 2]> + 'a) {
         &mut self.it
     }
-
 }
 
 trait PlotTrait<'a> {
@@ -99,18 +88,18 @@ enum PlotType {
 
 struct Plot<'a> {
     plot_type: PlotType,
-    name:&'a str,
+    name: &'a str,
     plots: Box<dyn PlotTrait<'a> + 'a>,
 }
 
 struct PlotDecomp<'a> {
-    plot_type:PlotType,
-    name:&'a str,
+    plot_type: PlotType,
+    name: &'a str,
     plots: Vec<[f32; 2]>,
 }
 
-use tagger::element_move::FlatElement;
 use tagger::element_borrow::Element;
+use tagger::element_move::FlatElement;
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
 ///render is called.
@@ -119,7 +108,6 @@ use tagger::element_borrow::Element;
 ///We don't actually write anything to it until render() is called.
 ///This way you don't need to handle formatting errors in multipe places
 ///Only when you call render.
-
 
 ///Its important to note that most of the time when this library is used,
 ///if run through the code is first accompanied by one compilation of the code.
@@ -130,14 +118,13 @@ use tagger::element_borrow::Element;
 ///to be approachable to them.
 pub struct Plotter<'a> {
     plots: Vec<Plot<'a>>,
-    title:&'a str,
-    xname:&'a str,
-    yname:&'a str
+    title: &'a str,
+    xname: &'a str,
+    yname: &'a str,
 }
 
-
-pub fn plot<'a>(title:&'a str,xname:&'a str,yname:&'a str) -> Plotter<'a>{
-    Plotter::new(title,xname,yname)
+pub fn plot<'a>(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
+    Plotter::new(title, xname, yname)
 }
 
 impl<'a> Plotter<'a> {
@@ -148,10 +135,8 @@ impl<'a> Plotter<'a> {
     /// ```
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
-    pub fn new(title:&'a str,xname:&'a str,yname:&'a str) -> Plotter<'a> {
-
-        
-        Plotter {        
+    pub fn new(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
+        Plotter {
             plots: Vec::new(),
             title,
             xname,
@@ -172,19 +157,14 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str,plots: I) {
-        
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             name,
-            plots: Box::new(
-                Wrapper::new(plots.into_iter())),
+            plots: Box::new(Wrapper::new(plots.into_iter())),
         })
-        
     }
 
-
-    
     /// Create a line from plots that will be filled underneath.
     ///
     /// # Example
@@ -198,18 +178,13 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line_fill("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(
-        &mut self,
-        name: &'a str,
-        plots: I,
-    ) {
+    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
             name,
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
-    
 
     /// Create a scatter plot from plots.
     ///
@@ -224,22 +199,13 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
-        &mut self,
-        name: &'a str,
-        plots: I,
-    ) {
+    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
             name,
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
-
-
-
-
-    
 
     /// Create a histogram from plots.
     /// Each bar's left side will line up with a point
@@ -255,18 +221,13 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.histogram("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(
-        &mut self,
-        name: &'a str,
-        plots: I,
-    ) {
+    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
             name,
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
-    
 
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
@@ -291,49 +252,56 @@ impl<'a> Plotter<'a> {
     /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
     /// ```    
-    pub fn render_from_element<T:Write>(self,el:&mut Element<T>)->fmt::Result{
-        render::render(self,el)
+    pub fn render_from_element<T: Write>(self, el: &mut Element<T>) -> fmt::Result {
+        render::render(self, el)
     }
 
-    pub fn render_io_with_element<T:std::io::Write>(self,w:T,func:impl FnOnce(&mut Element<tagger::WriterAdaptor<T>>))->fmt::Result{
-        self.render_with_element(tagger::upgrade_writer(w),func)
+    pub fn render_io_with_element<T: std::io::Write>(
+        self,
+        w: T,
+        func: impl FnOnce(&mut Element<tagger::WriterAdaptor<T>>),
+    ) -> fmt::Result {
+        self.render_with_element(tagger::upgrade_writer(w), func)
     }
 
-    pub fn render_with_element<T:Write>(self,w:T,func:impl FnOnce(&mut Element<T>))->fmt::Result{
-        let mut el=default_svg(w);
-        let mut el=el.borrow();
+    pub fn render_with_element<T: Write>(
+        self,
+        w: T,
+        func: impl FnOnce(&mut Element<T>),
+    ) -> fmt::Result {
+        let mut el = default_svg(w);
+        let mut el = el.borrow();
         func(&mut el);
-        render::render(self,&mut el)
+        render::render(self, &mut el)
     }
 
     ///Panics unlike other render functions.
-    pub fn render_to_string(self)->String{
-        let mut s=String::new();
+    pub fn render_to_string(self) -> String {
+        let mut s = String::new();
         self.render(&mut s).unwrap();
         s
     }
-    pub fn render_io<T:std::io::Write>(self,w:T)->fmt::Result{
-        self.render_with_element(tagger::upgrade_writer(w),|_|{})
+    pub fn render_io<T: std::io::Write>(self, w: T) -> fmt::Result {
+        self.render_with_element(tagger::upgrade_writer(w), |_| {})
     }
-    pub fn render<T:Write>(self,w:T)->fmt::Result{
-        self.render_with_element(w,|_|{})
+    pub fn render<T: Write>(self, w: T) -> fmt::Result {
+        self.render_with_element(w, |_| {})
     }
-    
 }
 
-
-
-
-fn default_svg<T:Write>(writer:T)->FlatElement<T>{
+fn default_svg<T: Write>(writer: T) -> FlatElement<T> {
     use tagger::prelude::*;
-    let root=tagger::root(writer);
-    let svg=root.tag_build_flat("svg")
-    .set("class","poloto")
-    .set("height",render::HEIGHT)
-    .set("width",render::WIDTH)
-    .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
-    .set("xmlns","http://www.w3.org/2000/svg")
-    .end();
+    let root = tagger::root(writer);
+    let svg = root
+        .tag_build_flat("svg")
+        .set("class", "poloto")
+        .set("height", render::HEIGHT)
+        .set("width", render::WIDTH)
+        .set(
+            "viewBox",
+            format!("0 0 {} {}", render::WIDTH, render::HEIGHT),
+        )
+        .set("xmlns", "http://www.w3.org/2000/svg")
+        .end();
     svg
 }
-
