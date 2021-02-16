@@ -2,8 +2,7 @@
 fn main() {
 
 
-    let mut s = poloto::plot_io(std::io::stdout())
-    .finish(
+    let mut s = poloto::plot(
         "Demo: Some Trigonometry Plots",
         "This is the x label",
         "This is the y label"
@@ -26,7 +25,7 @@ fn main() {
         "cos",
         x.clone().map(|x| [x, x.cos()])
     );
-    s.render().unwrap();
+    s.render_io(std::io::stdout()).unwrap();
     /*
     s.scatter("sin", x.clone().map(|x| [x, x.sin()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
