@@ -39,7 +39,7 @@ pub fn render<T:Write>(pl: Plotter,svg:&mut Element<T>) ->fmt::Result{
     .set("y", 0)
     .set("width", width)
     .set("height", height)
-    .end();
+    .empty();
 
 
     //Default colors if CSS is not overriden with user colors.
@@ -183,7 +183,9 @@ stroke-width:2;
                     .set("class", "poloto_text").end();
 
 
-            t.write_str(&util::print_interval_float(p + xstart_step,xstep));
+            let w=t.get_writer();
+            util::print_interval_float(w,p + xstart_step,xstep)?;
+            t.write_str("\n");
             
         }
 
@@ -208,7 +210,10 @@ stroke-width:2;
                     .set("class", "poloto_text")
                     .end();
 
-            t.write_str(&util::print_interval_float(p + ystart_step,ystep));
+
+            let w=t.get_writer();
+            util::print_interval_float(w,p + ystart_step,ystep)?;
+            t.write_str("\n");
         }
     }
 

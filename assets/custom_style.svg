@@ -19,8 +19,7 @@
             fill: url(#pattern2);
         }
         </style>
-        	<rect class = "poloto_background" fill = "white" x = "0" y = "0" width = "800" height = "500">
-	</rect>
+        	<rect class = "poloto_background" fill = "white" x = "0" y = "0" width = "800" height = "500"/>
 	<style>
 .poloto {
 font-family: "Arial";
@@ -47,37 +46,48 @@ stroke-width:2;
 .poloto7fill{fill:var(--poloto_color7,chocolate);}	</style>
 	<line x1 = "150" x2 = "150" y1 = "400" y2 = "405" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "150" y = "440" alignment-baseline = "start" text-anchor = "middle" class = "poloto_text">
-0	</text>
+0
+	</text>
 	<line x1 = "252.04082" x2 = "252.04082" y1 = "400" y2 = "405" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "252.04082" y = "440" alignment-baseline = "start" text-anchor = "middle" class = "poloto_text">
-2	</text>
+2
+	</text>
 	<line x1 = "354.08163" x2 = "354.08163" y1 = "400" y2 = "405" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "354.08163" y = "440" alignment-baseline = "start" text-anchor = "middle" class = "poloto_text">
-4	</text>
+4
+	</text>
 	<line x1 = "456.12244" x2 = "456.12244" y1 = "400" y2 = "405" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "456.12244" y = "440" alignment-baseline = "start" text-anchor = "middle" class = "poloto_text">
-6	</text>
+6
+	</text>
 	<line x1 = "558.16327" x2 = "558.16327" y1 = "400" y2 = "405" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "558.16327" y = "440" alignment-baseline = "start" text-anchor = "middle" class = "poloto_text">
-8	</text>
+8
+	</text>
 	<line x1 = "150" x2 = "144" y1 = "375.08792" y2 = "375.08792" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "120" y = "375.08792" alignment-baseline = "middle" text-anchor = "end" class = "poloto_text">
--10	</text>
+-10
+	</text>
 	<line x1 = "150" x2 = "144" y1 = "325.07196" y2 = "325.07196" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "120" y = "325.07196" alignment-baseline = "middle" text-anchor = "end" class = "poloto_text">
--8	</text>
+-8
+	</text>
 	<line x1 = "150" x2 = "144" y1 = "275.05597" y2 = "275.05597" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "120" y = "275.05597" alignment-baseline = "middle" text-anchor = "end" class = "poloto_text">
--6	</text>
+-6
+	</text>
 	<line x1 = "150" x2 = "144" y1 = "225.03998" y2 = "225.03998" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "120" y = "225.03998" alignment-baseline = "middle" text-anchor = "end" class = "poloto_text">
--4	</text>
+-4
+	</text>
 	<line x1 = "150" x2 = "144" y1 = "175.02399" y2 = "175.02399" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "120" y = "175.02399" alignment-baseline = "middle" text-anchor = "end" class = "poloto_text">
--2	</text>
+-2
+	</text>
 	<line x1 = "150" x2 = "144" y1 = "125.007996" y2 = "125.007996" stroke = "black" class = "poloto_axis_lines"/>
 	<text x = "120" y = "125.007996" alignment-baseline = "middle" text-anchor = "end" class = "poloto_text">
-0	</text>
+0
+	</text>
 	<text x = "675" y = "100" alignment-baseline = "middle" text-anchor = "start" font-size = "large" class = "poloto_text">
 cos	</text>
 	<line x1 = "680" y1 = "81.25" x2 = "730" y2 = "81.25" class = "poloto0stroke"/>

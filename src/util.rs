@@ -70,16 +70,16 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
 //pass the value to be printed, and
 //the step size
 //TODO make write to writer instead.
-pub fn print_interval_float(a: f32,precision:f32) -> String {
+pub fn print_interval_float<T:core::fmt::Write>(w:&mut T,a: f32,precision:f32) -> core::fmt::Result {
     
     const SCIENCE:usize=4;
     if a!=0.0 && a.abs().log10().floor().abs()>SCIENCE as f32{    
-        format!("{0:.1$e}",a, 2 )
+        write!(w,"{0:.1$e}",a, 2 )
     }else
     {
         let k=(-precision.log10()).ceil();
         let k=k.max(0.0);
-        format!("{0:.1$}",a,k as usize)
+        write!(w,"{0:.1$}",a,k as usize)
     }
 }
 
