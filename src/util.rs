@@ -59,18 +59,17 @@ pub fn find_good_step(num_steps: usize, range_all: [f32; 2]) -> (usize, f32, f32
     (num_step, step as f32, start_step as f32)
 }
 
-
 //pass the value to be printed, and
 //the step size
-pub fn interval_float(a:f32,precision:f32)->impl core::fmt::Display{
-    struct Foo{
-        a:f32,
-        precision:f32
+pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
+    struct Foo {
+        a: f32,
+        precision: f32,
     }
-    impl core::fmt::Display for Foo{
-        fn fmt(&self,fm:&mut core::fmt::Formatter)->core::fmt::Result{
-            let a=self.a;
-            let precision=self.precision;
+    impl core::fmt::Display for Foo {
+        fn fmt(&self, fm: &mut core::fmt::Formatter) -> core::fmt::Result {
+            let a = self.a;
+            let precision = self.precision;
             const SCIENCE: usize = 4;
             if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
                 write!(fm, "{0:.1$e}", a, 2)?
@@ -82,7 +81,7 @@ pub fn interval_float(a:f32,precision:f32)->impl core::fmt::Display{
             Ok(())
         }
     }
-    Foo{a,precision}
+    Foo { a, precision }
 }
 
 /*

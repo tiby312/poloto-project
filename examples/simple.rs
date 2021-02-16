@@ -14,8 +14,8 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
-    let mut f=String::new();
-    
+    let mut f = String::new();
+
     s.render(&mut f).unwrap();
-    println!("{}",f);
+    println!("{}", f);
 }

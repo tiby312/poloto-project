@@ -229,13 +229,12 @@ impl<'a> Plotter<'a> {
         })
     }
 
-
-    pub fn render<T:Write>(self,writer:&mut T)->fmt::Result{
-        render::render(self,writer)
+    pub fn render<T: Write>(self, writer: &mut T) -> fmt::Result {
+        render::render(self, writer)
     }
 
     ///Panics unlike other render functions.
-    pub fn render_to_string(self) -> Result<String,fmt::Error> {
+    pub fn render_to_string(self) -> Result<String, fmt::Error> {
         let mut s = String::new();
         self.render(&mut s)?;
         Ok(s)
@@ -264,7 +263,7 @@ impl<'a> Plotter<'a> {
     /// // Make the line purple.
     /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
-    /// ```    
+    /// ```
     pub fn render_from_element<T: Write>(self, el: &mut Element<T>) -> fmt::Result {
         render::render(self, el)
     }
