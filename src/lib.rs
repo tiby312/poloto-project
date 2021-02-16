@@ -98,8 +98,8 @@ struct PlotDecomp<'a> {
     plots: Vec<[f32; 2]>,
 }
 
-use tagger::element_borrow::Element;
-use tagger::element_move::FlatElement;
+//use tagger::element_borrow::Element;
+//use tagger::element_move::FlatElement;
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
 ///render is called.
@@ -229,6 +229,19 @@ impl<'a> Plotter<'a> {
         })
     }
 
+
+    pub fn render<T:Write>(self,writer:&mut T)->fmt::Result{
+        render::render(self,writer)
+    }
+
+    ///Panics unlike other render functions.
+    pub fn render_to_string(self) -> Result<String,fmt::Error> {
+        let mut s = String::new();
+        self.render(&mut s)?;
+        Ok(s)
+    }
+    /*
+
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
     ///change the theme of your svg.
@@ -287,8 +300,10 @@ impl<'a> Plotter<'a> {
     pub fn render<T: Write>(self, w: T) -> fmt::Result {
         self.render_with_element(w, |_| {})
     }
+    */
 }
 
+/*
 fn default_svg<T: Write>(writer: T) -> FlatElement<T> {
     use tagger::prelude::*;
     let root = tagger::root(writer);
@@ -305,3 +320,4 @@ fn default_svg<T: Write>(writer: T) -> FlatElement<T> {
         .end();
     svg
 }
+*/

@@ -11,5 +11,7 @@ fn main() {
 
     s.line_fill("cows", data.iter().map(|x| *x));
 
-    s.render_io(std::io::stdout()).unwrap();
+    let mut f=String::new();
+    s.render(&mut f).unwrap();
+    println!("{}",f);
 }

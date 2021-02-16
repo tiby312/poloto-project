@@ -2,44 +2,29 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
+use tagger::*;
+
+
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: Write>(pl: Plotter, svg: &mut Element<T>) -> fmt::Result {
-    use tagger::prelude::*;
-
+pub fn render<T: Write>(pl: Plotter, writer:&mut T) -> fmt::Result {
+    
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
 
-    /*
-    let mut svg=if pl.make_svg{
-        use tagger::prelude::*;
-        let root=pl.element;
-        let svg=root.tag_build_flat("svg")
-        .set("class","poloto")
-        .set("height",render::HEIGHT)
-        .set("width",render::WIDTH)
-        .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
-        .set("xmlns","http://www.w3.org/2000/svg")
-        .end();
-        svg
-    }else{
-        pl.element
-    };
-    */
+    let mut svg=new_element!(
+        writer,
+        "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
+        "</svg>",
+        w=render::WIDTH,
+        h=render::HEIGHT)?;
 
-    //Draw background
-    svg.tag_build("rect")
-        .set("class", "poloto_background")
-        //Do this just so that on svg viewers that don't support css they see *something*.
-        .set("fill", "white")
-        .set("x", 0)
-        .set("y", 0)
-        .set("width", width)
-        .set("height", height)
-        .empty();
+
+    empty_element!(svg,"<rect class='poloto_background' fill='white' x='0' y='0' width='{}' height='{}'/>",width,height)?;
+    
 
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
@@ -56,10 +41,9 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut Element<T>) -> fmt::Result {
         "chocolate",
     ];
 
-    let mut s = svg.tag_build("style").end();
-    write!(
-        s.get_writer(),
-        r###".poloto {{
+
+    empty_element!(svg,
+        r###"<style>.poloto {{
 font-family: "Arial";
 stroke-width:2;
 }}
@@ -81,7 +65,7 @@ stroke-width:2;
 .poloto4fill{{fill:var(--poloto_color4,{6});}}
 .poloto5fill{{fill:var(--poloto_color5,{7});}}
 .poloto6fill{{fill:var(--poloto_color6,{8});}}
-.poloto7fill{{fill:var(--poloto_color7,{9});}}"###,
+.poloto7fill{{fill:var(--poloto_color7,{9});}}</style>"###,
         text_color,
         background_color,
         colors[0],
@@ -92,9 +76,7 @@ stroke-width:2;
         colors[5],
         colors[6],
         colors[7],
-    )
-    .unwrap();
-    drop(s);
+    )?;
 
     //TODO BIIIIG data structure. what to do?
     let plots: Vec<_> = pl
@@ -163,27 +145,13 @@ stroke-width:2;
             let p = (a as f32) * xstep;
 
             let xx = (distance_to_firstx + p) * scalex + padding;
-            svg.tag_build("line")
-                .set("x1", xx)
-                .set("x2", xx)
-                .set("y1", height - paddingy)
-                .set("y2", height - paddingy * 0.95)
-                .set("stroke", "black")
-                .set("class", "poloto_axis_lines")
-                .empty();
 
-            let mut t = svg
-                .tag_build("text")
-                .set("x", xx)
-                .set("y", height - paddingy + texty_padding)
-                .set("alignment-baseline", "start")
-                .set("text-anchor", "middle")
-                .set("class", "poloto_text")
-                .end();
+            empty_element!(svg,"<line x1='{}' x2='{}' y1='{}' y2='{}' stroke='black' class='poloto_axis_lines'/>",
+                    xx,xx,height-paddingy,height-paddingy*0.95)?;
 
-            let w = t.get_writer();
-            util::print_interval_float(w, p + xstart_step, xstep)?;
-            t.write_str("\n");
+            empty_element!(svg,"<text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' class='poloto_text'>{}</text>",
+                xx,height-paddingy+texty_padding,util::interval_float(p + xstart_step, xstep))?;
+                
         }
 
         //Draw interval y text
@@ -191,26 +159,14 @@ stroke-width:2;
             let p = (a as f32) * ystep;
 
             let yy = height - (distance_to_firsty + p) * scaley - paddingy;
-            svg.tag_build("line")
-                .set("x1", padding)
-                .set("x2", padding * 0.96)
-                .set("y1", yy)
-                .set("y2", yy)
-                .set("stroke", "black")
-                .set("class", "poloto_axis_lines")
-                .empty();
-            let mut t = svg
-                .tag_build("text")
-                .set("x", padding - textx_padding)
-                .set("y", yy)
-                .set("alignment-baseline", "middle")
-                .set("text-anchor", "end")
-                .set("class", "poloto_text")
-                .end();
 
-            let w = t.get_writer();
-            util::print_interval_float(w, p + ystart_step, ystep)?;
-            t.write_str("\n");
+            empty_element!(svg,"<line x1='{}' x2='{}' y1='{}' y2='{}' stroke='black' class='poloto_axis_lines'/>",
+                padding,padding*0.96,yy,yy)?;
+
+            empty_element!(svg,"<text x='{}' y='{}' alignment-baseline='middle' text-anchor='end' class='poloto_text'>{}</text>",
+                    padding-textx_padding,yy,util::interval_float(p + ystart_step, ystep))?;
+
+
         }
     }
 
@@ -229,18 +185,11 @@ stroke-width:2;
     {
         let spacing = padding / 3.0;
 
-        let mut t = svg
-            .tag_build("text")
-            .set("x", width - padding / 1.2)
-            .set("y", paddingy + (i as f32) * spacing)
-            .set("alignment-baseline", "middle")
-            .set("text-anchor", "start")
-            .set("font-size", "large")
-            .set("class", "poloto_text")
-            .end();
 
-        t.write_str(name);
-        drop(t);
+        empty_element!(svg,
+"<text x='{}' y='{}' alignment-baseline='middle' text-anchor='start' font-size='large' class='poloto_text'>{}</text>",
+width-padding/1.2,paddingy+(i as f32)*spacing,name)?;
+
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f32) * spacing;
@@ -256,152 +205,80 @@ stroke-width:2;
 
         match plot_type {
             PlotType::Line => {
-                svg.tag_build("line")
-                    .set("x1", legendx1)
-                    .set("y1", legendy1)
-                    .set("x2", legendx1 + padding / 3.0)
-                    .set("y2", legendy1)
-                    .setw("class", |w| write!(w, "poloto{}stroke", colori))
-                    .empty();
 
-                let mut poly = svg
-                    .tag_build("polyline")
-                    .setw("class", |w| write!(w, "poloto{}stroke", colori))
-                    .set("fill", "none")
-                    //Do this so that on legacy svg viewers that dont have CSS, we see *something*.
-                    .set("stroke", "black");
+                empty_element!(svg,"<line x1='{}' y1='{}' x2='{}' y2='{}' class='poloto{}stroke'/>",
+                    legendx1,legendy1,legendx1+padding/3.0,legendy1,colori)?;
 
-                {
-                    let mut d = poly.polyline_data();
-                    for p in it {
-                        d.point(p);
-                    }
-                }
 
-                poly.empty();
+                empty_element!(svg,"<polyline class='poloto{}stroke' fill='none' stroke='black' points='{}'/>",
+                    colori,tagger::poly(it))?;
+                
             }
             PlotType::Scatter => {
-                svg.tag_build("circle")
-                    .set("cx", legendx1 + padding / 30.0)
-                    .set("cy", legendy1)
-                    .set("r", padding / 30.0)
-                    .setw("class", |w| write!(w, "poloto{}fill", colori))
-                    .empty();
+                empty_element!(svg,"<circle cx='{}' cy='{}' r='{}' class='poloto{}fill'/>",
+                        legendx1+padding/30.0,legendy1,padding/30.0,colori)?;
 
                 for [x, y] in it {
-                    svg.tag_build("circle")
-                        .set("cx", x)
-                        .set("cy", y)
-                        .set("r", padding / 50.0)
-                        .setw("class", |w| write!(w, "poloto{}fill", colori))
-                        .empty();
+                    empty_element!(svg,"<circle cx='{}' cy='{}' r='{}' class='poloto{}fill'/>",
+                        x,y,padding/30.0,colori)?;
                 }
             }
             PlotType::Histo => {
-                svg.tag_build("rect")
-                    .setw("class", |w| write!(w, "poloto{}fill", colori))
-                    .set("x", legendx1)
-                    .set("y", legendy1 - padding / 30.0)
-                    .set("width", padding / 3.0)
-                    .set("height", padding / 20.0)
-                    .set("rx", padding / 30.0)
-                    .set("ry", padding / 30.0)
-                    .empty();
+
+                empty_element!(svg,"<rect class='poloto{}fill' x='{}' y='{}' width='{}' height='{}' rx='{}' ry='{}'/>",
+                    colori,legendx1,legendy1-padding/30.0,padding/3.0,padding/20.0,padding/30.0,padding/30.0)?;
 
                 let mut last = None;
                 for [x, y] in it {
                     if let Some((lx, ly)) = last {
-                        svg.tag_build("rect")
-                            .set("x", lx)
-                            .set("y", ly)
-                            .set("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))
-                            .set("height", height - paddingy - ly) //TODO ugly?
-                            .setw("class", |w| write!(w, "poloto{}fill", colori))
-                            .empty();
+                        empty_element!(svg,"<rect class='poloto{}fill' x='{}' y='{}' width='{}' height='{}'/>",
+                        colori,lx,ly,(padding * 0.02).max((x - lx) - (padding * 0.02)),height - paddingy - ly)?;
                     }
                     last = Some((x, y))
                 }
             }
             PlotType::LineFill => {
-                svg.tag_build("rect")
-                    .setw("class", |w| write!(w, "poloto{}fill", colori))
-                    .set("x", legendx1)
-                    .set("y", legendy1 - padding / 30.0)
-                    .set("width", padding / 3.0)
-                    .set("height", padding / 20.0)
-                    .set("rx", padding / 30.0)
-                    .set("ry", padding / 30.0)
-                    .empty();
+                empty_element!(svg,"<rect class='poloto{}fill' x='{}' y='{}' width='{}' height='{}' rx='{}' ry='{}'/>",
+                    colori,legendx1,legendy1-padding/30.0,padding/3.0,padding/20.0,padding/30.0,padding/30.0)?;
 
-                let mut d = svg
-                    .tag_build("path")
-                    .setw("class", |w| write!(w, "poloto{}fill", colori));
-                {
-                    let mut data = d.path_data();
-                    data.move_to([padding, height - paddingy]);
+                
+                empty_element!(svg,"<path class='poloto{}fill' d='{}'/>",colori,tagger::path(|mut data|{
+                    data.move_to([padding, height - paddingy])?;
 
                     for p in it {
-                        data.line_to(p);
+                        data.line_to(p)?;
                     }
 
-                    data.line_to([width - padding, height - paddingy]);
-                    data.close();
-                }
-                d.empty();
+                    data.line_to([width - padding, height - paddingy])?;
+                    data.close()?;
+                    Ok(())
+                }))?;
+
             }
         }
     }
 
-    let mut t = svg
-        .tag_build("text")
-        .set("x", width / 2.0)
-        .set("y", padding / 4.0)
-        .set("alignment-baseline", "start")
-        .set("text-anchor", "middle")
-        .set("font-size", "x-large")
-        .set("class", "poloto_text")
-        .end();
-    t.write_str(pl.title);
-    drop(t);
+    empty_element!(svg,
+        "<text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' font-size='x-large' class='poloto_text'>{}</text>",
+        width/2.0,padding/4.0,pl.title)?;
 
-    let mut t = svg
-        .tag_build("text")
-        .set("x", width / 2.0)
-        .set("y", height - padding / 8.)
-        .set("alignment-baseline", "start")
-        .set("text-anchor", "middle")
-        .set("font-size", "large")
-        .set("class", "poloto_text")
-        .end();
-    t.write_str(pl.xname);
-    drop(t);
 
-    let mut t = svg
-        .tag_build("text")
-        .set("x", padding / 4.0)
-        .set("y", height / 2.0)
-        .set("alignment-baseline", "start")
-        .set("text-anchor", "middle")
-        .set(
-            "transform",
-            format!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
-        )
-        .set("font-size", "large")
-        .set("class", "poloto_text")
-        .end();
-    t.write_str(pl.yname);
-    drop(t);
+    empty_element!(svg,"<text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' font-size='large' class='poloto_text'>{}</text>",
+    width / 2.0,height - padding / 8.,pl.xname)?;
+    
 
-    let mut t = svg
-        .tag_build("path")
-        .set("stroke", "black")
-        .set("class", "poloto_axis_lines");
-    {
-        let mut p = t.path_data();
-        p.move_to([padding, paddingy])
-            .line_to([padding, height - paddingy])
-            .line_to([width - padding, height - paddingy]);
-    }
-    t.empty();
+    empty_element!(svg,"
+        <text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' transform='rotate(-90,{},{})' font-size='large' class='poloto_text'>{}</text>",
+            padding/4.0,height/2.0,padding/4.0,height/2.0,pl.yname)?;
+
+
+    empty_element!(svg,"<path stroke='black' class='poloto_axis_lines' d='{}'/>",
+            tagger::path(|mut p|{
+                p.move_to([padding, paddingy])?
+                .line_to([padding, height - paddingy])?
+                .line_to([width - padding, height - paddingy])?;
+                Ok(())
+            }))?;
+    
     Ok(())
 }

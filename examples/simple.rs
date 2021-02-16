@@ -13,5 +13,9 @@ fn main() {
     s.scatter("sin", x.clone().map(|x| [x, x.sin()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
-    s.render_io(std::io::stdout()).unwrap();
+
+    let mut f=String::new();
+    
+    s.render(&mut f).unwrap();
+    println!("{}",f);
 }
