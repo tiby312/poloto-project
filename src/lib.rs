@@ -267,7 +267,7 @@ impl<'a> Plotter<'a> {
         })
     }
     
-/*
+
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
     ///change the theme of your svg.
@@ -291,34 +291,32 @@ impl<'a> Plotter<'a> {
     /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
     /// ```    
-    
-    pub fn render_to_element<T:core::fmt::Write>(self,element:tagger::Element<T>)->PlotterBuilder<T>{
-        /*
-        let root=tagger::root(writer);
-        let svg=root.tag_build_flat("svg")
-        .set("class","poloto")
-        .set("height",render::HEIGHT)
-        .set("width",render::WIDTH)
-        .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
-        .set("xmlns","http://www.w3.org/2000/svg")
-        .end();
-        */
-        //render::render(self);
-    }
-    */
-
     pub fn render_from_element<T:Write>(self,el:&mut Element<T>)->fmt::Result{
         render::render(self,el)
     }
-    pub fn render_io<T:std::io::Write>(self,w:T)->fmt::Result{
-        let mut el=default_svg(tagger::upgrade_writer(w));
-        let mut el=el.borrow();
-        render::render(self,&mut el)
+
+    pub fn render_io_with_element<T:std::io::Write>(self,w:T,func:impl FnOnce(&mut Element<tagger::WriterAdaptor<T>>))->fmt::Result{
+        self.render_with_element(tagger::upgrade_writer(w),func)
     }
-    pub fn render<T:Write>(self,w:T)->fmt::Result{
+
+    pub fn render_with_element<T:Write>(self,w:T,func:impl FnOnce(&mut Element<T>))->fmt::Result{
         let mut el=default_svg(w);
         let mut el=el.borrow();
+        func(&mut el);
         render::render(self,&mut el)
+    }
+
+    ///Panics unlike other render functions.
+    pub fn render_to_string(self)->String{
+        let mut s=String::new();
+        self.render(&mut s).unwrap();
+        s
+    }
+    pub fn render_io<T:std::io::Write>(self,w:T)->fmt::Result{
+        self.render_with_element(tagger::upgrade_writer(w),|_|{})
+    }
+    pub fn render<T:Write>(self,w:T)->fmt::Result{
+        self.render_with_element(w,|_|{})
     }
     
 }
@@ -326,7 +324,7 @@ impl<'a> Plotter<'a> {
 
 
 
-pub fn default_svg<T:Write>(writer:T)->FlatElement<T>{
+fn default_svg<T:Write>(writer:T)->FlatElement<T>{
     use tagger::prelude::*;
     let root=tagger::root(writer);
     let svg=root.tag_build_flat("svg")

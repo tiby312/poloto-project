@@ -1,6 +1,5 @@
 fn main() {
-    let mut s = poloto::plot_io(
-        std::io::stdout(),
+    let mut s = poloto::plot(
         "Cows Per Year",
         "Year",
         "Cow",
@@ -16,5 +15,5 @@ fn main() {
     
     s.line_fill("cows", data.iter().map(|x|*x));
     
-    s.render();
+    s.render_io(std::io::stdout()).unwrap();
 }
