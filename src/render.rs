@@ -2,6 +2,9 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
+
+//Returns error if the user supplied format functions don't work.
+//Panics if the element tag writing writes fail
 pub fn render<T:Write,N:Labels<W=T>>(pl: Plotter<T,N>) ->fmt::Result{
     use tagger::prelude::*;
         
@@ -10,7 +13,20 @@ pub fn render<T:Write,N:Labels<W=T>>(pl: Plotter<T,N>) ->fmt::Result{
     let padding = 150.0;
     let paddingy = 100.0;
     
-    let mut svg=pl.element;
+    let mut svg=if pl.make_svg{
+        use tagger::prelude::*;
+        let root=pl.element;
+        let svg=root.tag_build_flat("svg")
+        .set("class","poloto")
+        .set("height",render::HEIGHT)
+        .set("width",render::WIDTH)
+        .set("viewBox",format!("0 0 {} {}",render::WIDTH,render::HEIGHT))
+        .set("xmlns","http://www.w3.org/2000/svg")
+        .end();
+        svg
+    }else{
+        pl.element
+    };
 
 
     //Draw background
@@ -217,6 +233,7 @@ stroke-width:2;
                 .set("font-size", "large")
                 .set("class", "poloto_text")
                 .end();
+        
         orig.write_name(t.get_writer())?;
         drop(t);
 

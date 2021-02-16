@@ -62,6 +62,9 @@ mod render;
 
 
 
+
+
+
 //TODO determine variance.
 struct Wrapper<I: Iterator<Item = [f32; 2]>,F:FnOnce(&mut W)->fmt::Result,W:Write>{
     it:I,
@@ -135,7 +138,12 @@ use tagger::element_move::FlatElement;
 pub struct Plotter<'a,T:Write,N:Labels> {
     element:FlatElement<T>,
     names:N,
-    plots: Vec<Plot<'a,T>>
+    plots: Vec<Plot<'a,T>>,
+
+    //We could written the svg tag inside of the plot() function,
+    //but to make that function infalliable, lets do it instead in the
+    //render() function defering it using this boolean
+    make_svg:bool
 }
 
 impl<'a,T:Write+'a,N:Labels<W=T>+'a> Plotter<'a,T,N> {
@@ -146,13 +154,14 @@ impl<'a,T:Write+'a,N:Labels<W=T>+'a> Plotter<'a,T,N> {
     /// ```
     /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// ```
-    fn new(element:FlatElement<T>,names:N) -> Plotter<'a,T,N> {
+    fn new(element:FlatElement<T>,names:N,make_svg:bool) -> Plotter<'a,T,N> {
 
         
         Plotter {
             element,            
             plots: Vec::new(),
             names,
+            make_svg
         }
     }
 
@@ -332,7 +341,8 @@ impl<'a,T:Write+'a,N:Labels<W=T>+'a> Plotter<'a,T,N> {
 
 
 pub struct PlotterBuilder<T:Write>{
-    inner:FlatElement<T>
+    inner:FlatElement<T>,
+    make_svg:bool
 }
 
 
@@ -350,24 +360,27 @@ pub fn default_svg<T:Write>(writer:T)->FlatElement<T>{
 }
 
 pub fn plot_io<T:std::io::Write>(write:T)->PlotterBuilder<tagger::WriterAdaptor<T>>{
-    let inner=default_svg(tagger::upgrade_writer(write));
+    let inner=tagger::root(tagger::upgrade_writer(write));
 
     PlotterBuilder{
-        inner
+        inner,
+        make_svg:true
     }
 }
 pub fn plot<T:core::fmt::Write>(write:T)->PlotterBuilder<T>{
-    let inner=default_svg(write);
+    let inner=tagger::root(write);
 
     PlotterBuilder{
-        inner
+        inner,
+        make_svg:true
     }
 }
 pub fn plot_from_element<T:core::fmt::Write>(element:tagger::element_move::FlatElement<T>)->PlotterBuilder<T>{
     let inner=element;
 
     PlotterBuilder{
-        inner
+        inner,
+        make_svg:false
     }
     
 }
@@ -385,7 +398,7 @@ impl<'a,T:Write+'a> PlotterBuilder<T>{
                 xname:move |w:&mut T|write!(w,"{}",xname),
                 yname:move |w:&mut T|write!(w,"{}",yname),
                 _p:PhantomData
-            })
+            },self.make_svg)
     }
     pub fn finish_fmt<A,B,C>(self,
         title:A,
@@ -403,7 +416,7 @@ impl<'a,T:Write+'a> PlotterBuilder<T>{
             xname,
             yname,
             _p:PhantomData
-        })
+        },self.make_svg)
     }
 }
 
