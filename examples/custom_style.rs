@@ -1,16 +1,16 @@
-
 //PIPE me to a file!
-fn main() ->core::fmt::Result{
-   
-    let mut w=tagger::upgrade(std::io::stdout());
+fn main() -> core::fmt::Result {
+    let mut w = tagger::upgrade(std::io::stdout());
     let mut svg=tagger::new_element!(
         &mut w,
         "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
         w=poloto::WIDTH,
         h=poloto::HEIGHT)?;
-    
-    tagger::empty_element!(svg,"{}",
-    r###"
+
+    tagger::empty_element!(
+        svg,
+        "{}",
+        r###"
     <defs>
         <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
             <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
@@ -30,7 +30,8 @@ fn main() ->core::fmt::Result{
         fill: url(#pattern2);
     }
     </style>
-    "###)?;
+    "###
+    )?;
 
     let mut s = poloto::plot(
         "Demo: you can change the style of the svg file itself!",
@@ -43,8 +44,7 @@ fn main() ->core::fmt::Result{
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
     s.render(&mut svg)?;
-    
-    tagger::end!(svg,"</svg>")?;
+
+    tagger::end!(svg, "</svg>")?;
     Ok(())
-    
 }

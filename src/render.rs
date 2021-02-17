@@ -2,12 +2,12 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
-use tagger::prelude::*;
 use tagger::elem::Element;
+use tagger::prelude::*;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: Write>(pl: Plotter, svg:&mut Element<T>) -> fmt::Result {
+pub fn render<T: Write>(pl: Plotter, svg: &mut Element<T>) -> fmt::Result {
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;

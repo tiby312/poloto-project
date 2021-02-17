@@ -1,4 +1,4 @@
-fn main() {
+fn main() -> core::fmt::Result {
     let mut s = poloto::plot("Cows Per Year", "Year", "Cow");
     let data = [
         [1979.0, 10.0],
@@ -11,6 +11,6 @@ fn main() {
 
     s.line_fill("cows", data.iter().map(|x| *x));
 
-    poloto::render_svg_io(std::io::stdout(),s).unwrap();
-
+    poloto::render_svg_io(std::io::stdout(), s)?;
+    Ok(())
 }

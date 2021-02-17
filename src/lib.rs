@@ -58,8 +58,8 @@ mod util;
 use core::fmt;
 mod render;
 
-pub use render::WIDTH;
 pub use render::HEIGHT;
+pub use render::WIDTH;
 
 use tagger::elem::Element;
 struct Wrapper<I: Iterator<Item = [f32; 2]>> {
@@ -232,9 +232,7 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    
-
-    pub fn render<T: Write>(self,el :&mut Element<T>) -> fmt::Result {
+    pub fn render<T: Write>(self, el: &mut Element<T>) -> fmt::Result {
         render::render(self, el)
     }
 
@@ -246,7 +244,7 @@ impl<'a> Plotter<'a> {
             "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
             w=render::WIDTH,
             h=render::HEIGHT)?;
-        
+
             func(&mut svg);
 
         render::render(self, &mut svg)?;
@@ -264,8 +262,8 @@ impl<'a> Plotter<'a> {
         Ok(s)
     }
     */
-    
-/*
+
+    /*
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
     ///change the theme of your svg.
@@ -289,26 +287,25 @@ impl<'a> Plotter<'a> {
     /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
     /// ```
-*/
+    */
 }
 
-pub fn render_to_string(a:Plotter)->Result<String,fmt::Error>{
-    let mut s=String::new();
-    render_svg(&mut s,a)?;
+pub fn render_to_string(a: Plotter) -> Result<String, fmt::Error> {
+    let mut s = String::new();
+    render_svg(&mut s, a)?;
     Ok(s)
 }
-pub fn render_svg_io<T:std::io::Write>(writer:T,a:Plotter)->fmt::Result{
-    render_svg(tagger::upgrade(writer),a)
+pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
+    render_svg(tagger::upgrade(writer), a)
 }
-pub fn render_svg<T:Write>(mut writer:T,a:Plotter)->fmt::Result{
+pub fn render_svg<T: Write>(mut writer: T, a: Plotter) -> fmt::Result {
     let mut svg=tagger::new_element!(
         &mut writer,
         "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
         w=render::WIDTH,
         h=render::HEIGHT)?;
-    
 
     a.render(&mut svg)?;
 
-    tagger::end!(svg,"</svg>")
+    tagger::end!(svg, "</svg>")
 }

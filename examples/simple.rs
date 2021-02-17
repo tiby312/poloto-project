@@ -1,5 +1,5 @@
 //PIPE me to a file!
-fn main() {
+fn main() -> core::fmt::Result {
     let mut s = poloto::plot(
         "Demo: Some Trigonometry Plots",
         "This is the x label",
@@ -14,7 +14,7 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
-    poloto::render_svg_io(std::io::stdout(),s).unwrap();
+    poloto::render_svg_io(std::io::stdout(), s)?;
 
-
+    Ok(())
 }
