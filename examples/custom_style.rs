@@ -1,14 +1,9 @@
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut w = tagger::upgrade(std::io::stdout());
-    let mut svg=tagger::new_element!(
-        &mut w,
-        "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
-        w=poloto::WIDTH,
-        h=poloto::HEIGHT)?;
-
+    let mut svg=poloto::default_header(tagger::upgrade(std::io::stdout()))?;
+    
     tagger::empty_element!(
-        svg,
+        svg.borrow(),
         "{}",
         r###"
     <defs>
@@ -43,8 +38,8 @@ fn main() -> core::fmt::Result {
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
-    s.render(&mut svg)?;
+    s.render(&mut svg.borrow())?;
 
-    tagger::end!(svg, "</svg>")?;
+    svg.finish()?;
     Ok(())
 }

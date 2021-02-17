@@ -61,7 +61,6 @@ mod render;
 pub use render::HEIGHT;
 pub use render::WIDTH;
 
-use tagger::elem::Element;
 struct Wrapper<I: Iterator<Item = [f32; 2]>> {
     it: I,
 }
@@ -232,7 +231,7 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    pub fn render<T: Write>(self, el: &mut Element<T>) -> fmt::Result {
+    pub fn render<T: Write>(self, el: &mut tagger::elem::Single<T>) -> fmt::Result {
         render::render(self, el)
     }
 
@@ -290,6 +289,15 @@ impl<'a> Plotter<'a> {
     */
 }
 
+
+///Create the default SVG tag.
+pub fn default_header<T:Write>(w:T)->Result<tagger::elem::ElementStack<T>,fmt::Error>{
+    
+    let svg=tagger::elem::ElementStack::new(w,format_args!("<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
+    w=render::WIDTH,
+    h=render::HEIGHT),"</svg>")?;
+    Ok(svg)
+}
 pub fn render_to_string(a: Plotter) -> Result<String, fmt::Error> {
     let mut s = String::new();
     render_svg(&mut s, a)?;
@@ -298,14 +306,9 @@ pub fn render_to_string(a: Plotter) -> Result<String, fmt::Error> {
 pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
     render_svg(tagger::upgrade(writer), a)
 }
-pub fn render_svg<T: Write>(mut writer: T, a: Plotter) -> fmt::Result {
-    let mut svg=tagger::new_element!(
-        &mut writer,
-        "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
-        w=render::WIDTH,
-        h=render::HEIGHT)?;
-
-    a.render(&mut svg)?;
-
-    tagger::end!(svg, "</svg>")
+pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
+    let mut stack=default_header(writer)?;
+    a.render( &mut stack.borrow() )?;
+    stack.finish()?;
+    Ok(())
 }
