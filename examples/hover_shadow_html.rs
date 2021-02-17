@@ -5,8 +5,8 @@ fn main() {
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
-    s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin() ]));
-
+    s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
+    let fs = poloto::render_to_string(s).unwrap();
     println!(
         r###"
 <html>
@@ -16,8 +16,7 @@ fn main() {
 </div>
 </html>
         "###,
-        HEADER,
-        s.render_to_document()
+        HEADER, fs
     );
 }
 

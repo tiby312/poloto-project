@@ -1,14 +1,11 @@
-
-
 //Specify ideal number of steps and range.
 //Returns:
 //number of intervals.
 //size of each interval
 //first interval location.
-pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) {
-    let range_all = [range_all[0] as f64,range_all[1] as f64];
-    let range=range_all[1]-range_all[0];
-
+pub fn find_good_step(num_steps: usize, range_all: [f32; 2]) -> (usize, f32, f32) {
+    let range_all = [range_all[0] as f64, range_all[1] as f64];
+    let range = range_all[1] - range_all[0];
 
     //https://stackoverflow.com/questions/237220/tickmark-algorithm-for-a-graph-axis
 
@@ -22,66 +19,88 @@ pub fn find_good_step(num_steps: usize, range_all: [f32;2]) -> (usize, f32,f32) 
 
     let step = good_normalized_step / step_power;
 
-
-    let start_step={
+    let start_step = {
         //naively find starting point.
-        let aa=(range_all[0]/step).floor()*step;
-        let bb=(range_all[0]/step).ceil()*step;
-        if aa<bb{
-            if aa<range_all[0]{
+        let aa = (range_all[0] / step).floor() * step;
+        let bb = (range_all[0] / step).ceil() * step;
+        if aa < bb {
+            if aa < range_all[0] {
                 bb
-            }else{
+            } else {
                 aa
             }
-        }else{
-            if bb<range_all[0]{
+        } else {
+            if bb < range_all[0] {
                 aa
-            }else{
+            } else {
                 aa
             }
         }
     };
-    assert!(start_step>=range_all[0]);
-    
+    assert!(start_step >= range_all[0]);
 
-    let num_step={
+    let num_step = {
         //naively find number of steps
-        let mut counter=start_step;
-        let mut num=0;
-        loop{
-            
-            if counter>range_all[1]{
+        let mut counter = start_step;
+        let mut num = 0;
+        loop {
+            if counter > range_all[1] {
                 break;
             }
-            counter+=step;
-            
-            num+=1;
-            
-        }    
+            counter += step;
+
+            num += 1;
+        }
         num
-        
     };
-    assert!(num_step>=1);
-    assert!(start_step+step*((num_step-1) as f64)<=range_all[1]);
-    
-    (num_step, step as f32,start_step as f32)
+    assert!(num_step >= 1);
+    assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
+
+    (num_step, step as f32, start_step as f32)
 }
 
 //pass the value to be printed, and
 //the step size
-pub fn print_interval_float(a: f32,precision:f32) -> String {
-    
-    const SCIENCE:usize=4;
-    if a!=0.0 && a.abs().log10().floor().abs()>SCIENCE as f32{    
-        format!("{0:.1$e}",a, 2 )
-    }else
-    {
-        let k=(-precision.log10()).ceil();
-        let k=k.max(0.0);
-        format!("{0:.1$}",a,k as usize)
+pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
+    struct Foo {
+        a: f32,
+        precision: f32,
     }
+    impl core::fmt::Display for Foo {
+        fn fmt(&self, fm: &mut core::fmt::Formatter) -> core::fmt::Result {
+            let a = self.a;
+            let precision = self.precision;
+            const SCIENCE: usize = 4;
+            if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
+                write!(fm, "{0:.1$e}", a, 2)?
+            } else {
+                let k = (-precision.log10()).ceil();
+                let k = k.max(0.0);
+                write!(fm, "{0:.1$}", a, k as usize)?
+            }
+            Ok(())
+        }
+    }
+    Foo { a, precision }
 }
 
+/*
+//TODO make write to writer instead.
+pub fn print_interval_float<T: core::fmt::Write>(
+    w: &mut T,
+    a: f32,
+    precision: f32,
+) -> core::fmt::Result {
+    const SCIENCE: usize = 4;
+    if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
+        write!(w, "{0:.1$e}", a, 2)
+    } else {
+        let k = (-precision.log10()).ceil();
+        let k = k.max(0.0);
+        write!(w, "{0:.1$}", a, k as usize)
+    }
+}
+*/
 
 pub fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
     let mut ii = it.into_iter();
