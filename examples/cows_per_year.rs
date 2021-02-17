@@ -11,5 +11,6 @@ fn main() {
 
     s.line_fill("cows", data.iter().map(|x| *x));
 
-    s.render(tagger::upgrade(std::io::stdout()),|_|{}).unwrap();
+    poloto::render_svg_io(std::io::stdout(),s).unwrap();
+
 }
