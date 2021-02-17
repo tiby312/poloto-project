@@ -90,13 +90,13 @@ enum PlotType {
 
 struct Plot<'a> {
     plot_type: PlotType,
-    name: &'a str,
+    name: String,
     plots: Box<dyn PlotTrait<'a> + 'a>,
 }
 
-struct PlotDecomp<'a> {
+struct PlotDecomp {
     plot_type: PlotType,
-    name: &'a str,
+    name: String,
     plots: Vec<[f32; 2]>,
 }
 
@@ -160,10 +160,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            name,
+            name:name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -181,10 +181,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line_fill("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
+    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            name,
+            name:name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -202,10 +202,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
+    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            name,
+            name:name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -224,10 +224,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.histogram("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
+    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            name,
+            name:name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
