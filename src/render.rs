@@ -2,7 +2,8 @@ pub const WIDTH: f32 = 800.0;
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;
-use tagger::*;
+use tagger::prelude::*;
+use tagger::elem::Element;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
@@ -219,7 +220,7 @@ width-padding/1.2,paddingy+(i as f32)*spacing,name)?;
                     svg,
                     "<polyline class='poloto{}stroke' fill='none' stroke='black' points='{}'/>",
                     colori,
-                    tagger::poly(it)
+                    tagger::svg::poly(it)
                 )?;
             }
             PlotType::Scatter => {
@@ -271,7 +272,7 @@ width-padding/1.2,paddingy+(i as f32)*spacing,name)?;
                     svg,
                     "<path class='poloto{}fill' d='{}'/>",
                     colori,
-                    tagger::path(|mut data| {
+                    tagger::svg::path(|mut data| {
                         data.move_to([padding, height - paddingy])?;
 
                         for p in it {
@@ -301,7 +302,7 @@ width-padding/1.2,paddingy+(i as f32)*spacing,name)?;
     empty_element!(
         svg,
         "<path stroke='black' class='poloto_axis_lines' d='{}'/>",
-        tagger::path(|mut p| {
+        tagger::svg::path(|mut p| {
             p.move_to([padding, paddingy])?
                 .line_to([padding, height - paddingy])?
                 .line_to([width - padding, height - paddingy])?;

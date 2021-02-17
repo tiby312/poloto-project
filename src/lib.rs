@@ -58,7 +58,7 @@ mod util;
 use core::fmt;
 mod render;
 
-//TODO determine variance.
+use tagger::elem::Element;
 struct Wrapper<I: Iterator<Item = [f32; 2]>> {
     it: I,
 }
@@ -230,26 +230,30 @@ impl<'a> Plotter<'a> {
     }
 
 
-    pub fn render_no_svg<T: Write>(self,el :&mut tagger::Element<T>) -> fmt::Result {
+    pub fn render_no_svg<T: Write>(self,el :&mut Element<T>) -> fmt::Result {
         render::render(self, el)
     }
 
-    pub fn render<T: Write>(self, mut writer: T,func:impl FnOnce(&mut tagger::Element<T>)) -> fmt::Result {
+    pub fn render<T: Write>(self, mut writer: T,func:impl FnOnce(&mut Element<T>)) -> fmt::Result {
 
         let mut svg=tagger::new_element!(
             &mut writer,
             "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
-            "</svg>",
             w=render::WIDTH,
             h=render::HEIGHT)?;
         
             func(&mut svg);
 
-        render::render(self, &mut svg)
+        render::render(self, &mut svg)?;
+
+
+        tagger::end!(svg,"</svg>")
+
+
     }
 
     ///Panics unlike other render functions.
-    pub fn render_to_string(self,func:impl FnOnce(&mut tagger::Element<&mut String>)) -> Result<String, fmt::Error> {
+    pub fn render_to_string(self,func:impl FnOnce(&mut Element<&mut String>)) -> Result<String, fmt::Error> {
         let mut s = String::new();
         self.render(&mut s,func)?;
         Ok(s)
