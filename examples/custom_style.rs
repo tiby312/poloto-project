@@ -1,7 +1,7 @@
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut svg=poloto::default_header(tagger::upgrade(std::io::stdout()))?;
-    
+    let mut svg = poloto::default_header(tagger::upgrade(std::io::stdout()))?;
+
     tagger::empty_element!(
         svg.borrow(),
         "{}",

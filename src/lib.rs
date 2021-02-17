@@ -125,7 +125,7 @@ pub struct Plotter<'a> {
     yname: &'a str,
 }
 
-///Convenience function for [`Plot::new()`]
+///Convenience function for [`Plotter::new()`]
 pub fn plot<'a>(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
     Plotter::new(title, xname, yname)
 }
@@ -232,7 +232,6 @@ impl<'a> Plotter<'a> {
         })
     }
 
-
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
     ///change the theme of your svg.
@@ -259,7 +258,7 @@ impl<'a> Plotter<'a> {
     /// // Make the line purple.
     /// use core::fmt::Write;
     /// write!(svg.get_writer(),"{}","<style>.poloto{--poloto_color0:purple;}</style>").unwrap();
-    /// 
+    ///
     ///
     /// plotter.render(&mut svg.borrow()).unwrap();
     /// svg.finish().unwrap();
@@ -267,13 +266,10 @@ impl<'a> Plotter<'a> {
     pub fn render<T: Write>(self, el: &mut tagger::elem::Single<T>) -> fmt::Result {
         render::render(self, el)
     }
-
 }
 
-
 ///Create the default SVG tag.
-pub fn default_header<T:Write>(w:T)->Result<tagger::elem::ElementStack<T>,fmt::Error>{
-    
+pub fn default_header<T: Write>(w: T) -> Result<tagger::elem::ElementStack<T>, fmt::Error> {
     let svg=tagger::elem::ElementStack::new(w,format_args!("<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
     w=render::WIDTH,
     h=render::HEIGHT),"</svg>")?;
@@ -292,10 +288,10 @@ pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
     render_svg(tagger::upgrade(writer), a)
 }
 
-///Convenience function to write to a T that implements 'std::fmt::Write'
+///Convenience function to write to a T that implements `std::fmt::Write`
 pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
-    let mut stack=default_header(writer)?;
-    a.render( &mut stack.borrow() )?;
+    let mut stack = default_header(writer)?;
+    a.render(&mut stack.borrow())?;
     stack.finish()?;
     Ok(())
 }
