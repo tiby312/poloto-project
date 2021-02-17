@@ -1,4 +1,6 @@
+/// Provided in case the user wants to define their own SVG tag.
 pub const WIDTH: f32 = 800.0;
+/// Provided in case the user wants to define their own SVG tag.
 pub const HEIGHT: f32 = 500.0;
 
 use super::*;

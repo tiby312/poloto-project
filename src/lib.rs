@@ -125,6 +125,7 @@ pub struct Plotter<'a> {
     yname: &'a str,
 }
 
+///Convenience function for [`Plot::new()`]
 pub fn plot<'a>(title: &'a str, xname: &'a str, yname: &'a str) -> Plotter<'a> {
     Plotter::new(title, xname, yname)
 }
@@ -231,38 +232,7 @@ impl<'a> Plotter<'a> {
         })
     }
 
-    pub fn render<T: Write>(self, el: &mut tagger::elem::Single<T>) -> fmt::Result {
-        render::render(self, el)
-    }
 
-    /*
-    pub fn render<T: Write>(self, mut writer: T,func:impl FnOnce(&mut Element<T>)) -> fmt::Result {
-
-        let mut svg=tagger::new_element!(
-            &mut writer,
-            "<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
-            w=render::WIDTH,
-            h=render::HEIGHT)?;
-
-            func(&mut svg);
-
-        render::render(self, &mut svg)?;
-
-
-        tagger::end!(svg,"</svg>")
-
-
-    }
-
-    ///Panics unlike other render functions.
-    pub fn render_to_string(self,func:impl FnOnce(&mut Element<&mut String>)) -> Result<String, fmt::Error> {
-        let mut s = String::new();
-        self.render(&mut s,func)?;
-        Ok(s)
-    }
-    */
-
-    /*
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
     ///change the theme of your svg.
@@ -282,11 +252,22 @@ impl<'a> Plotter<'a> {
     ///         [3.0,6.0]
     /// ];
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// // Make the line purple.
-    /// plotter.append(svg::node::Text::new("<style>.poloto{--poloto_color0:purple;}</style>"));
     /// plotter.line("cow",data.iter().map(|&x|x));
+    ///
+    /// let mut s=String::new();
+    /// let mut svg=poloto::default_header(&mut s).unwrap();
+    /// // Make the line purple.
+    /// use core::fmt::Write;
+    /// write!(svg.get_writer(),"{}","<style>.poloto{--poloto_color0:purple;}</style>").unwrap();
+    /// 
+    ///
+    /// plotter.render(&mut svg.borrow()).unwrap();
+    /// svg.finish().unwrap();
     /// ```
-    */
+    pub fn render<T: Write>(self, el: &mut tagger::elem::Single<T>) -> fmt::Result {
+        render::render(self, el)
+    }
+
 }
 
 
@@ -298,14 +279,20 @@ pub fn default_header<T:Write>(w:T)->Result<tagger::elem::ElementStack<T>,fmt::E
     h=render::HEIGHT),"</svg>")?;
     Ok(svg)
 }
+
+///Convenience function to just write to a string.
 pub fn render_to_string(a: Plotter) -> Result<String, fmt::Error> {
     let mut s = String::new();
     render_svg(&mut s, a)?;
     Ok(s)
 }
+
+///Convenience function to write to a T that implements `std::io::Write` instead of `std::fmt::Write`
 pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
     render_svg(tagger::upgrade(writer), a)
 }
+
+///Convenience function to write to a T that implements 'std::fmt::Write'
 pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
     let mut stack=default_header(writer)?;
     a.render( &mut stack.borrow() )?;
