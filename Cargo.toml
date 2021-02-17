@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "0.2.4"
+version = "0.3.0"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -14,4 +14,4 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tagger = {path="../tagger"}
+tagger = "0.1"
