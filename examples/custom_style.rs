@@ -1,9 +1,11 @@
+use tagger::prelude::*;
+
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut svg = poloto::default_header(tagger::upgrade(std::io::stdout()))?;
+    let mut w = tagger::upgrade(std::io::stdout());
+    let mut svg = poloto::default_header(&mut w)?;
 
-    tagger::empty_element!(
-        svg.borrow(),
+    svg.single(wr!(
         "{}",
         r###"
     <defs>
@@ -26,7 +28,7 @@ fn main() -> core::fmt::Result {
     }
     </style>
     "###
-    )?;
+    ))?;
 
     let mut s = poloto::plot(
         "Demo: you can change the style of the svg file itself!",
@@ -38,8 +40,8 @@ fn main() -> core::fmt::Result {
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
-    s.render(&mut svg.borrow())?;
+    s.render(&mut svg)?;
 
-    svg.finish()?;
+    svg.end()?;
     Ok(())
 }

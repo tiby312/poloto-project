@@ -100,24 +100,15 @@ struct PlotDecomp {
     plots: Vec<[f32; 2]>,
 }
 
-//use tagger::element_borrow::Element;
-//use tagger::element_move::FlatElement;
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
 ///render is called.
-///BELOW IMPORTANT:::
-///We hold the writer for type inference for the _fmt functions
-///We don't actually write anything to it until render() is called.
-///This way you don't need to handle formatting errors in multipe places
-///Only when you call render.
 
-///Its important to note that most of the time when this library is used,
-///if run through the code is first accompanied by one compilation of the code.
-///So inefficiencies in dynamically allocating strings using format!() to then
-///be just passed to a writer are not that bad seeing as the solution
-///would involve passing a lot of closures around.
-///Also plotting is used a lot by data scientists, and I wanted the code
-///to be approachable to them.
+//Its important to note that most of the time when this library is used,
+//every run through the code is first accompanied by one compilation of the code.
+//So inefficiencies in dynamically allocating strings using format!() to then
+//be just passed to a writer are not that bad seeing as the solution
+//would involve passing a lot of closures around.
 pub struct Plotter<'a> {
     plots: Vec<Plot<'a>>,
     title: &'a str,
@@ -163,7 +154,7 @@ impl<'a> Plotter<'a> {
     pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            name:name.to_string(),
+            name: name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -181,10 +172,14 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line_fill("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
+    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(
+        &mut self,
+        name: impl ToString,
+        plots: I,
+    ) {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            name:name.to_string(),
+            name: name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -202,10 +197,14 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
+    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
+        &mut self,
+        name: impl ToString,
+        plots: I,
+    ) {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            name:name.to_string(),
+            name: name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -224,10 +223,14 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.histogram("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
+    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(
+        &mut self,
+        name: impl ToString,
+        plots: I,
+    ) {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            name:name.to_string(),
+            name: name.to_string(),
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -245,35 +248,42 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let data=[
+    /// fn main()->std::fmt::Result{
+    ///     use tagger::prelude::*;
+    ///     let data=[
     ///         [1.0f32,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
-    /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.line("cow",data.iter().map(|&x|x));
+    ///     ];
+    ///     let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    ///     plotter.line("cow",data.iter().map(|&x|x));
     ///
-    /// let mut s=String::new();
-    /// let mut svg=poloto::default_header(&mut s).unwrap();
-    /// // Make the line purple.
-    /// use core::fmt::Write;
-    /// write!(svg.get_writer(),"{}","<style>.poloto{--poloto_color0:purple;}</style>").unwrap();
-    ///
-    ///
-    /// plotter.render(&mut svg.borrow()).unwrap();
-    /// svg.finish().unwrap();
+    ///     let mut s=String::new();
+    ///     let mut svg=poloto::default_header(&mut s)?;
+    ///     // Make the line purple.
+    ///     use core::fmt::Write;
+    ///     svg.single(wr!("{}","<style>.poloto{--poloto_color0:purple;}</style>"))?;
+    //
+    ///     plotter.render(&mut svg)?;
+    ///     svg.end()?;
+    ///     Ok(())
+    /// }
     /// ```
-    pub fn render<T: Write>(self, el: &mut tagger::elem::Single<T>) -> fmt::Result {
+    pub fn render<T: Write, F: FnOnce(&mut T) -> fmt::Result>(
+        self,
+        el: &mut tagger::Element<T, F>,
+    ) -> fmt::Result {
         render::render(self, el)
     }
 }
 
-///Create the default SVG tag.
-pub fn default_header<T: Write>(w: T) -> Result<tagger::elem::ElementStack<T>, fmt::Error> {
-    let svg=tagger::elem::ElementStack::new(w,format_args!("<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
+///Return the default svg header.
+pub fn default_header<'a, T: Write>(
+    w: &'a mut T,
+) -> Result<tagger::Element<'a, T, impl FnOnce(&mut T) -> fmt::Result>, fmt::Error> {
+    tagger::elem(w,tagger::wr!("<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
     w=render::WIDTH,
-    h=render::HEIGHT),"</svg>")?;
-    Ok(svg)
+    h=render::HEIGHT),tagger::wr!("</svg>"))
 }
 
 ///Convenience function to just write to a string.
@@ -289,9 +299,9 @@ pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
 }
 
 ///Convenience function to write to a T that implements `std::fmt::Write`
-pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
-    let mut stack = default_header(writer)?;
-    a.render(&mut stack.borrow())?;
-    stack.finish()?;
+pub fn render_svg<T: Write>(mut writer: T, a: Plotter) -> fmt::Result {
+    let mut stack = default_header(&mut writer)?;
+    a.render(&mut &mut stack)?;
+    stack.end()?;
     Ok(())
 }
