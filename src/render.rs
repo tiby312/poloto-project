@@ -35,7 +35,7 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
     ];
 
     svg.elem_no_attr("style", |w| {
-        write!(
+        write_ret!(
             w,
             r###"<style>.poloto {{
             font-family: "Arial";
@@ -164,8 +164,7 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
                         .attr("x", xx)?
                         .attr("y", height - paddingy + texty_padding)
                 })?;
-                write!(text, "{}", util::interval_float(p + xstart_step, xstep))?;
-                Ok(text)
+                write_ret!(text, "{}", util::interval_float(p + xstart_step, xstep))
             })?;
         }
 
@@ -192,8 +191,7 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
                         .attr("x", padding - textx_padding)?
                         .attr("y", yy)
                 })?;
-                write!(text, "{}", util::interval_float(p + ystart_step, ystep))?;
-                Ok(text)
+                write_ret!(text, "{}", util::interval_float(p + ystart_step, ystep))
             })?;
         }
     }
@@ -222,8 +220,7 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
                     .attr("x", width - padding / 1.2)?
                     .attr("y", paddingy + (i as f32) * spacing)
             })?;
-            write!(text, "{}", name)?;
-            Ok(text)
+            write_ret!(text, "{}", name)
         })?;
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
@@ -341,8 +338,7 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
                 .attr("x", width / 2.0)?
                 .attr("y", padding / 4.0)
         })?;
-        write!(text, "{}", title)?;
-        Ok(text)
+        write_ret!(text, "{}", title)
     })?;
 
     svg.elem("text", |writer| {
@@ -354,8 +350,7 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
                 .attr("x", width / 2.0)?
                 .attr("y", height - padding / 8.)
         })?;
-        write!(text, "{}", xname)?;
-        Ok(text)
+        write_ret!(text, "{}", xname)
     })?;
 
     svg.elem("text", |writer| {
@@ -371,8 +366,7 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
                 .attr("x", padding / 4.0)?
                 .attr("y", height / 2.0)
         })?;
-        write!(text, "{}", yname)?;
-        Ok(text)
+        write_ret!(text, "{}", yname)
     })?;
 
     svg.single("path", |w| {

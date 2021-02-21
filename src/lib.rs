@@ -294,7 +294,7 @@ impl<'a> Plotter<'a> {
     ///
     ///         // Make the line purple.
     ///         svg.elem_no_attr("style",|w|{
-    ///             write!(w,"{}","<style>.poloto{--poloto_color0:purple;}</style>")
+    ///             write_ret!(w,"{}","<style>.poloto{--poloto_color0:purple;}</style>")
     ///         })?;
     ///     
     ///         plotter.render(svg)
