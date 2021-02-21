@@ -186,8 +186,8 @@ pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Resu
             svg.elem("text", |writer| {
                 let text = writer.write(|w| {
                     w.attr("class", "poloto_text")?
-                        .attr("alignment-baseline", "start")?
-                        .attr("text-anchor", "middle")?
+                        .attr("alignment-baseline", "middle")?
+                        .attr("text-anchor", "end")?
                         .attr("x", padding - textx_padding)?
                         .attr("y", yy)
                 })?;
