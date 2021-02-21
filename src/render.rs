@@ -100,7 +100,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
 
     //Find range.
     let [minx, maxx, miny, maxy] =
-        if let Some(m) = util::find_bounds(plots.iter().flat_map(|x| x.plots.iter().map(|x| *x))) {
+        if let Some(m) = util::find_bounds(plots.iter().flat_map(|x| x.plots.iter().copied())) {
             m
         } else {
             //TODO test that this looks ok

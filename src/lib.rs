@@ -64,7 +64,7 @@ pub mod default_svg_tag {
     use core::fmt;
 
     ///The class of the svg tag.
-    pub const CLASS: &'static str = "poloto";
+    pub const CLASS: &str = "poloto";
     ///The width of the svg tag.
     pub const WIDTH: f32 = 800.0;
     ///The height of the svg tag.
