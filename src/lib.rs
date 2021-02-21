@@ -287,7 +287,7 @@ impl<'a> Plotter<'a> {
     ///     let mut root=tagger::Element::new(&mut buffer);
     ///
     ///     root.elem("svg",|writer|{
-    ///         let (svg,cert)=writer.write(|w|{
+    ///         let svg=writer.write(|w|{
     ///             poloto::default_svg_tag::default()(w)?;
     ///             Ok(w)
     ///         })?;
@@ -297,14 +297,13 @@ impl<'a> Plotter<'a> {
     ///             write!(w,"{}","<style>.poloto{--poloto_color0:purple;}</style>")
     ///         })?;
     ///     
-    ///         plotter.render(svg)?;
-    ///         cert
+    ///         plotter.render(svg)
     ///     })?;
     ///     println!("{}",buffer);
     ///     Ok(())
     /// }
     /// ```
-    pub fn render<T: Write>(self, el: &mut tagger::Element<T>) -> fmt::Result {
+    pub fn render<T: Write>(self, el: &mut tagger::Element<T>) -> Result<&mut tagger::Element<T>,fmt::Error> {
         render::render(self, el)
     }
 }
@@ -315,12 +314,11 @@ pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
     let mut root = tagger::Element::new(writer);
 
     root.elem("svg", |writer| {
-        let (svg, cert) = writer.write(|w| {
+        let svg = writer.write(|w| {
             default_svg_tag::default()(w)?;
             Ok(w)
         })?;
-        a.render(svg)?;
-        cert
+        a.render(svg)
     })?;
 
     Ok(())

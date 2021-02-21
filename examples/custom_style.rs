@@ -5,7 +5,7 @@ fn main() -> core::fmt::Result {
     let mut root = tagger::Element::new(tagger::upgrade(std::io::stdout()));
 
     root.elem("svg", |writer| {
-        let (svg, cert) = writer.write(|w| {
+        let svg = writer.write(|w| {
             poloto::default_svg_tag::default()(w)?;
             Ok(w)
         })?;
@@ -46,8 +46,7 @@ fn main() -> core::fmt::Result {
 
         s.line("cos", x.clone().map(|x| [x, x.cos()]));
         s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
-        s.render(svg)?;
-
-        cert
-    })
+        s.render(svg)
+    })?;
+    Ok(())
 }

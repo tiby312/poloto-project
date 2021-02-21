@@ -3,7 +3,7 @@ use tagger::prelude::*;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Result {
+pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Result<&'a mut tagger::Element<T>,fmt::Error>{
     use super::default_svg_tag::*;
     let width = WIDTH;
     let height = HEIGHT;
@@ -104,7 +104,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
             m
         } else {
             //TODO test that this looks ok
-            return Ok(()); //No plots at all. dont need to draw anything
+            return Ok(svg); //No plots at all. dont need to draw anything
         };
 
     //Insert a range if the range is zero.
@@ -157,7 +157,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
             })?;
 
             svg.elem("text", |writer| {
-                let (text, cert) = writer.write(|w| {
+                let text = writer.write(|w| {
                     w.attr("class", "poloto_text")?
                         .attr("alignment-baseline", "start")?
                         .attr("text-anchor", "middle")?
@@ -165,7 +165,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
                         .attr("y", height - paddingy + texty_padding)
                 })?;
                 write!(text, "{}", util::interval_float(p + xstart_step, xstep))?;
-                cert
+                Ok(text)
             })?;
         }
 
@@ -185,7 +185,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
             })?;
 
             svg.elem("text", |writer| {
-                let (text, cert) = writer.write(|w| {
+                let text = writer.write(|w| {
                     w.attr("class", "poloto_text")?
                         .attr("alignment-baseline", "start")?
                         .attr("text-anchor", "middle")?
@@ -193,7 +193,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
                         .attr("y", yy)
                 })?;
                 write!(text, "{}", util::interval_float(p + ystart_step, ystep))?;
-                cert
+                Ok(text)
             })?;
         }
     }
@@ -214,7 +214,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
         let spacing = padding / 3.0;
 
         svg.elem("text", |writer| {
-            let (text, cert) = writer.write(|w| {
+            let text = writer.write(|w| {
                 w.attr("class", "poloto_text")?
                     .attr("alignment-baseline", "middle")?
                     .attr("text-anchor", "start")?
@@ -223,7 +223,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
                     .attr("y", paddingy + (i as f32) * spacing)
             })?;
             write!(text, "{}", name)?;
-            cert
+            Ok(text)
         })?;
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
@@ -333,7 +333,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
     }
 
     svg.elem("text", |writer| {
-        let (text, cert) = writer.write(|w| {
+        let text = writer.write(|w| {
             w.attr("class", "poloto_text")?
                 .attr("alignment-baseline", "start")?
                 .attr("text-anchor", "middle")?
@@ -342,11 +342,11 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
                 .attr("y", padding / 4.0)
         })?;
         write!(text, "{}", title)?;
-        cert
+        Ok(text)
     })?;
 
     svg.elem("text", |writer| {
-        let (text, cert) = writer.write(|w| {
+        let text = writer.write(|w| {
             w.attr("class", "poloto_text")?
                 .attr("alignment-baseline", "start")?
                 .attr("text-anchor", "middle")?
@@ -355,11 +355,11 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
                 .attr("y", height - padding / 8.)
         })?;
         write!(text, "{}", xname)?;
-        cert
+        Ok(text)
     })?;
 
     svg.elem("text", |writer| {
-        let (text, cert) = writer.write(|w| {
+        let text = writer.write(|w| {
             w.attr("class", "poloto_text")?
                 .attr("alignment-baseline", "start")?
                 .attr("text-anchor", "middle")?
@@ -372,7 +372,7 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
                 .attr("y", height / 2.0)
         })?;
         write!(text, "{}", yname)?;
-        cert
+        Ok(text)
     })?;
 
     svg.single("path", |w| {
@@ -384,7 +384,5 @@ pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Resul
                     .line_to([padding, height - paddingy])?
                     .line_to([width - padding, height - paddingy])
             })
-    })?;
-
-    Ok(())
+    })
 }
