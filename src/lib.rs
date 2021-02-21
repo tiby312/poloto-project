@@ -58,8 +58,33 @@ mod util;
 use core::fmt;
 mod render;
 
-pub use render::HEIGHT;
-pub use render::WIDTH;
+/// [`render_svg`] creates its own svg tag, and then calls [`Plotter::render`].
+/// The default attributes set in that svg tag are in this module.
+pub mod default_svg_tag {
+    use core::fmt;
+
+    ///The class of the svg tag.
+    pub const CLASS: &'static str = "poloto";
+    ///The width of the svg tag.
+    pub const WIDTH: f32 = 800.0;
+    ///The height of the svg tag.
+    pub const HEIGHT: f32 = 500.0;
+
+    ///Returns a function that will write the attributes.
+    pub fn default<T: fmt::Write>(
+    ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
+        use tagger::prelude::*;
+
+        |w| {
+            w.attr("class", CLASS)?
+                .attr("width", WIDTH)?
+                .attr("height", HEIGHT)?
+                .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
+                .attr("xmlns", "http://www.w3.org/2000/svg")?;
+            Ok(())
+        }
+    }
+}
 
 struct Wrapper<I: Iterator<Item = [f32; 2]>> {
     it: I,
@@ -258,32 +283,47 @@ impl<'a> Plotter<'a> {
     ///     let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     ///     plotter.line("cow",data.iter().map(|&x|x));
     ///
-    ///     let mut s=String::new();
-    ///     let mut svg=poloto::default_header(&mut s)?;
-    ///     // Make the line purple.
-    ///     use core::fmt::Write;
-    ///     svg.single(wr!("{}","<style>.poloto{--poloto_color0:purple;}</style>"))?;
-    //
-    ///     plotter.render(&mut svg)?;
-    ///     svg.end()?;
+    ///     let mut buffer=String::new();
+    ///     let mut root=tagger::Element::new(&mut buffer);
+    ///
+    ///     root.elem("svg",|writer|{
+    ///         let (svg,cert)=writer.write(|w|{
+    ///             poloto::default_svg_tag::default()(w)?;
+    ///             Ok(w)
+    ///         })?;
+    ///
+    ///         // Make the line purple.
+    ///         svg.elem_no_attr("style",|w|{
+    ///             write!(w,"{}","<style>.poloto{--poloto_color0:purple;}</style>")
+    ///         })?;
+    ///     
+    ///         plotter.render(svg)?;
+    ///         cert
+    ///     })?;
+    ///     println!("{}",buffer);
     ///     Ok(())
     /// }
     /// ```
-    pub fn render<T: Write, F: FnOnce(&mut T) -> fmt::Result>(
-        self,
-        el: &mut tagger::Element<T, F>,
-    ) -> fmt::Result {
+    pub fn render<T: Write>(self, el: &mut tagger::Element<T>) -> fmt::Result {
         render::render(self, el)
     }
 }
 
-///Return the default svg header.
-pub fn default_header<'a, T: Write>(
-    w: &'a mut T,
-) -> Result<tagger::Element<'a, T, impl FnOnce(&mut T) -> fmt::Result>, fmt::Error> {
-    tagger::elem(w,tagger::wr!("<svg class='poloto' height='{h}' width='{w}' viewBox='0 0 {w} {h}' xmlns='http://www.w3.org/2000/svg'>",
-    w=render::WIDTH,
-    h=render::HEIGHT),tagger::wr!("</svg>"))
+///Function to write to a T that implements `std::fmt::Write`
+///Makes a svg tag with the defaults defined in [`default_svg_tag`].
+pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
+    let mut root = tagger::Element::new(writer);
+
+    root.elem("svg", |writer| {
+        let (svg, cert) = writer.write(|w| {
+            default_svg_tag::default()(w)?;
+            Ok(w)
+        })?;
+        a.render(svg)?;
+        cert
+    })?;
+
+    Ok(())
 }
 
 ///Convenience function to just write to a string.
@@ -291,17 +331,4 @@ pub fn render_to_string(a: Plotter) -> Result<String, fmt::Error> {
     let mut s = String::new();
     render_svg(&mut s, a)?;
     Ok(s)
-}
-
-///Convenience function to write to a T that implements `std::io::Write` instead of `std::fmt::Write`
-pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
-    render_svg(tagger::upgrade(writer), a)
-}
-
-///Convenience function to write to a T that implements `std::fmt::Write`
-pub fn render_svg<T: Write>(mut writer: T, a: Plotter) -> fmt::Result {
-    let mut stack = default_header(&mut writer)?;
-    a.render(&mut &mut stack)?;
-    stack.end()?;
-    Ok(())
 }

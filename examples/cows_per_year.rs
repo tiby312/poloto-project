@@ -11,6 +11,6 @@ fn main() -> core::fmt::Result {
 
     s.line_fill("cows", data.iter().map(|x| *x));
 
-    poloto::render_svg_io(std::io::stdout(), s)?;
+    poloto::render_svg(tagger::upgrade(std::io::stdout()), s)?;
     Ok(())
 }

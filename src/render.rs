@@ -1,27 +1,23 @@
-/// Provided in case the user wants to define their own SVG tag.
-pub const WIDTH: f32 = 800.0;
-/// Provided in case the user wants to define their own SVG tag.
-pub const HEIGHT: f32 = 500.0;
-
 use super::*;
 use tagger::prelude::*;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: Write, F: FnOnce(&mut T) -> fmt::Result>(
-    pl: Plotter,
-    svg: &mut tagger::Element<T, F>,
-) -> fmt::Result {
+pub fn render<T: Write>(pl: Plotter, svg: &mut tagger::Element<T>) -> fmt::Result {
+    use super::default_svg_tag::*;
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
 
-    svg.single(wr!(
-        "<rect class='poloto_background' fill='white' x='0' y='0' width='{}' height='{}'/>",
-        width,
-        height
-    ))?;
+    svg.single("rect", |w| {
+        w.attr("class", "poloto_background")?
+            .attr("fill", "white")?
+            .attr("x", 0)?
+            .attr("y", 0)?
+            .attr("width", width)?
+            .attr("height", height)
+    })?;
 
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
@@ -38,41 +34,44 @@ pub fn render<T: Write, F: FnOnce(&mut T) -> fmt::Result>(
         "chocolate",
     ];
 
-    svg.single(wr!(
-        r###"<style>.poloto {{
-font-family: "Arial";
-stroke-width:2;
-}}
-.poloto_text{{fill: var(--poloto_fg_color,{0});  }}
-.poloto_axis_lines{{stroke: var(--poloto_fg_color,{0});stoke-width:3;fill:none}}
-.poloto_background{{fill: var(--poloto_bg_color,{1}); }}
-.poloto0stroke{{stroke:  var(--poloto_color0,{2}); }}
-.poloto1stroke{{stroke:  var(--poloto_color1,{3}); }}
-.poloto2stroke{{stroke:  var(--poloto_color2,{4}); }}
-.poloto3stroke{{stroke:  var(--poloto_color3,{5}); }}
-.poloto4stroke{{stroke:  var(--poloto_color4,{6}); }}
-.poloto5stroke{{stroke:  var(--poloto_color5,{7}); }}
-.poloto6stroke{{stroke:  var(--poloto_color6,{8}); }}
-.poloto7stroke{{stroke:  var(--poloto_color7,{9}); }}
-.poloto0fill{{fill:var(--poloto_color0,{2});}}
-.poloto1fill{{fill:var(--poloto_color1,{3});}}
-.poloto2fill{{fill:var(--poloto_color2,{4});}}
-.poloto3fill{{fill:var(--poloto_color3,{5});}}
-.poloto4fill{{fill:var(--poloto_color4,{6});}}
-.poloto5fill{{fill:var(--poloto_color5,{7});}}
-.poloto6fill{{fill:var(--poloto_color6,{8});}}
-.poloto7fill{{fill:var(--poloto_color7,{9});}}</style>"###,
-        text_color,
-        background_color,
-        colors[0],
-        colors[1],
-        colors[2],
-        colors[3],
-        colors[4],
-        colors[5],
-        colors[6],
-        colors[7],
-    ))?;
+    svg.elem_no_attr("style", |w| {
+        write!(
+            w,
+            r###"<style>.poloto {{
+            font-family: "Arial";
+            stroke-width:2;
+            }}
+            .poloto_text{{fill: var(--poloto_fg_color,{0});  }}
+            .poloto_axis_lines{{stroke: var(--poloto_fg_color,{0});stoke-width:3;fill:none}}
+            .poloto_background{{fill: var(--poloto_bg_color,{1}); }}
+            .poloto0stroke{{stroke:  var(--poloto_color0,{2}); }}
+            .poloto1stroke{{stroke:  var(--poloto_color1,{3}); }}
+            .poloto2stroke{{stroke:  var(--poloto_color2,{4}); }}
+            .poloto3stroke{{stroke:  var(--poloto_color3,{5}); }}
+            .poloto4stroke{{stroke:  var(--poloto_color4,{6}); }}
+            .poloto5stroke{{stroke:  var(--poloto_color5,{7}); }}
+            .poloto6stroke{{stroke:  var(--poloto_color6,{8}); }}
+            .poloto7stroke{{stroke:  var(--poloto_color7,{9}); }}
+            .poloto0fill{{fill:var(--poloto_color0,{2});}}
+            .poloto1fill{{fill:var(--poloto_color1,{3});}}
+            .poloto2fill{{fill:var(--poloto_color2,{4});}}
+            .poloto3fill{{fill:var(--poloto_color3,{5});}}
+            .poloto4fill{{fill:var(--poloto_color4,{6});}}
+            .poloto5fill{{fill:var(--poloto_color5,{7});}}
+            .poloto6fill{{fill:var(--poloto_color6,{8});}}
+            .poloto7fill{{fill:var(--poloto_color7,{9});}}</style>"###,
+            text_color,
+            background_color,
+            colors[0],
+            colors[1],
+            colors[2],
+            colors[3],
+            colors[4],
+            colors[5],
+            colors[6],
+            colors[7],
+        )
+    })?;
 
     let Plotter {
         plots,
@@ -148,16 +147,26 @@ stroke-width:2;
 
             let xx = (distance_to_firstx + p) * scalex + padding;
 
-            svg.single(wr!(
-                "<line x1='{}' x2='{}' y1='{}' y2='{}' stroke='black' class='poloto_axis_lines'/>",
-                xx,
-                xx,
-                height - paddingy,
-                height - paddingy * 0.95
-            ))?;
+            svg.single("line", |w| {
+                w.attr("class", "poloto_axis_lines")?
+                    .attr("stroke", "black")?
+                    .attr("x1", xx)?
+                    .attr("x2", xx)?
+                    .attr("y1", height - paddingy)?
+                    .attr("y2", height - paddingy * 0.95) //TODO operations of order?
+            })?;
 
-            svg.single(wr!("<text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' class='poloto_text'>{}</text>",
-                xx,height-paddingy+texty_padding,util::interval_float(p + xstart_step, xstep)))?;
+            svg.elem("text", |writer| {
+                let (text, cert) = writer.write(|w| {
+                    w.attr("class", "poloto_text")?
+                        .attr("alignment-baseline", "start")?
+                        .attr("text-anchor", "middle")?
+                        .attr("x", xx)?
+                        .attr("y", height - paddingy + texty_padding)
+                })?;
+                write!(text, "{}", util::interval_float(p + xstart_step, xstep))?;
+                cert
+            })?;
         }
 
         //Draw interval y text
@@ -166,16 +175,26 @@ stroke-width:2;
 
             let yy = height - (distance_to_firsty + p) * scaley - paddingy;
 
-            svg.single(wr!(
-                "<line x1='{}' x2='{}' y1='{}' y2='{}' stroke='black' class='poloto_axis_lines'/>",
-                padding,
-                padding * 0.96,
-                yy,
-                yy
-            ))?;
+            svg.single("line", |w| {
+                w.attr("class", "poloto_axis_lines")?
+                    .attr("stroke", "black")?
+                    .attr("x1", padding)?
+                    .attr("x2", padding * 0.96)?
+                    .attr("y1", yy)?
+                    .attr("y2", yy)
+            })?;
 
-            svg.single(wr!("<text x='{}' y='{}' alignment-baseline='middle' text-anchor='end' class='poloto_text'>{}</text>",
-                    padding-textx_padding,yy,util::interval_float(p + ystart_step, ystep)))?;
+            svg.elem("text", |writer| {
+                let (text, cert) = writer.write(|w| {
+                    w.attr("class", "poloto_text")?
+                        .attr("alignment-baseline", "start")?
+                        .attr("text-anchor", "middle")?
+                        .attr("x", padding - textx_padding)?
+                        .attr("y", yy)
+                })?;
+                write!(text, "{}", util::interval_float(p + ystart_step, ystep))?;
+                cert
+            })?;
         }
     }
 
@@ -194,9 +213,18 @@ stroke-width:2;
     {
         let spacing = padding / 3.0;
 
-        svg.single(wr!(
-"<text x='{}' y='{}' alignment-baseline='middle' text-anchor='start' font-size='large' class='poloto_text'>{}</text>",
-width-padding/1.2,paddingy+(i as f32)*spacing,name))?;
+        svg.elem("text", |writer| {
+            let (text, cert) = writer.write(|w| {
+                w.attr("class", "poloto_text")?
+                    .attr("alignment-baseline", "middle")?
+                    .attr("text-anchor", "start")?
+                    .attr("font-size", "large")?
+                    .attr("x", width - padding / 1.2)?
+                    .attr("y", paddingy + (i as f32) * spacing)
+            })?;
+            write!(text, "{}", name)?;
+            cert
+        })?;
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f32) * spacing;
@@ -212,101 +240,151 @@ width-padding/1.2,paddingy+(i as f32)*spacing,name))?;
 
         match plot_type {
             PlotType::Line => {
-                svg.single(wr!(
-                    "<line x1='{}' y1='{}' x2='{}' y2='{}' class='poloto{}stroke'/>",
-                    legendx1,
-                    legendy1,
-                    legendx1 + padding / 3.0,
-                    legendy1,
-                    colori
-                ))?;
+                svg.single("line", |w| {
+                    w.with_attr("class", wr!("poloto{}stroke", colori))?
+                        .attr("stroke", "black")?
+                        .attr("x1", legendx1)?
+                        .attr("x2", legendx1 + padding / 3.0)?
+                        .attr("y1", legendy1)?
+                        .attr("y2", legendy1)
+                })?;
 
-                svg.single(wr!(
-                    "<polyline class='poloto{}stroke' fill='none' stroke='black' points='{}'/>",
-                    colori,
-                    tagger::svg::poly(it)
-                ))?;
+                svg.single("polyline", |w| {
+                    w.with_attr("class", wr!("poloto{}stroke", colori))?
+                        .attr("fill", "none")?
+                        .attr("stroke", "black")?
+                        .polyline_data(|w| {
+                            for a in it {
+                                w.add_point(a)?;
+                            }
+                            Ok(w)
+                        })
+                })?;
             }
             PlotType::Scatter => {
-                svg.single(wr!(
-                    "<circle cx='{}' cy='{}' r='{}' class='poloto{}fill'/>",
-                    legendx1 + padding / 30.0,
-                    legendy1,
-                    padding / 30.0,
-                    colori
-                ))?;
+                svg.single("circle", |w| {
+                    w.with_attr("class", wr!("poloto{}fill", colori))?
+                        .attr("cx", legendx1 + padding / 30.0)?
+                        .attr("cy", legendy1)?
+                        .attr("r", padding / 30.0)
+                })?;
 
                 for [x, y] in it {
-                    svg.single(wr!(
-                        "<circle cx='{}' cy='{}' r='{}' class='poloto{}fill'/>",
-                        x,
-                        y,
-                        padding / 30.0,
-                        colori
-                    ))?;
+                    svg.single("circle", |w| {
+                        //TODO use a g element!!!!
+                        w.with_attr("class", wr!("poloto{}fill", colori))?
+                            .attr("cx", x)?
+                            .attr("cy", y)?
+                            .attr("r", padding / 30.0)
+                    })?;
                 }
             }
             PlotType::Histo => {
-                svg.single(wr!("<rect class='poloto{}fill' x='{}' y='{}' width='{}' height='{}' rx='{}' ry='{}'/>",
-                    colori,legendx1,legendy1-padding/30.0,padding/3.0,padding/20.0,padding/30.0,padding/30.0))?;
+                svg.single("rect", |w| {
+                    w.with_attr("class", wr!("poloto{}fill", colori))?
+                        .attr("x", legendx1)?
+                        .attr("y", legendy1 - padding / 30.0)?
+                        .attr("width", padding / 3.0)?
+                        .attr("height", padding / 20.0)?
+                        .attr("rx", padding / 30.0)?
+                        .attr("ry", padding / 30.0)
+                })?;
 
                 let mut last = None;
                 for [x, y] in it {
                     if let Some((lx, ly)) = last {
-                        svg.single(wr!(
-                            "<rect class='poloto{}fill' x='{}' y='{}' width='{}' height='{}'/>",
-                            colori,
-                            lx,
-                            ly,
-                            (padding * 0.02).max((x - lx) - (padding * 0.02)),
-                            height - paddingy - ly
-                        ))?;
+                        svg.single("rect", |w| {
+                            w.with_attr("class", wr!("poloto{}fill", colori))?
+                                .attr("x", lx)?
+                                .attr("y", ly)?
+                                .attr("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))?
+                                .attr("height", height - paddingy - ly)
+                        })?;
                     }
                     last = Some((x, y))
                 }
             }
             PlotType::LineFill => {
-                svg.single(wr!("<rect class='poloto{}fill' x='{}' y='{}' width='{}' height='{}' rx='{}' ry='{}'/>",
-                    colori,legendx1,legendy1-padding/30.0,padding/3.0,padding/20.0,padding/30.0,padding/30.0))?;
+                svg.single("rect", |w| {
+                    w.with_attr("class", wr!("poloto{}fill", colori))?
+                        .attr("x", legendx1)?
+                        .attr("y", legendy1 - padding / 30.0)?
+                        .attr("width", padding / 3.0)?
+                        .attr("height", padding / 20.0)?
+                        .attr("rx", padding / 30.0)?
+                        .attr("ry", padding / 30.0)
+                })?;
 
-                svg.single(wr!(
-                    "<path class='poloto{}fill' d='{}'/>",
-                    colori,
-                    tagger::svg::path(|mut data| {
-                        data.move_to([padding, height - paddingy])?;
+                svg.single("path", |w| {
+                    w.with_attr("class", wr!("poloto{}fill", colori))?
+                        .path_data(|data| {
+                            data.move_to([padding, height - paddingy])?;
 
-                        for p in it {
-                            data.line_to(p)?;
-                        }
+                            for p in it {
+                                data.line_to(p)?;
+                            }
 
-                        data.line_to([width - padding, height - paddingy])?;
-                        data.close()?;
-                        Ok(())
-                    })
-                ))?;
+                            data.line_to([width - padding, height - paddingy])?;
+                            data.close()
+                        })
+                })?;
             }
         }
     }
 
-    svg.single(wr!("<text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' font-size='x-large' class='poloto_text'>{}</text>",
-        width/2.0,padding/4.0,title))?;
+    svg.elem("text", |writer| {
+        let (text, cert) = writer.write(|w| {
+            w.attr("class", "poloto_text")?
+                .attr("alignment-baseline", "start")?
+                .attr("text-anchor", "middle")?
+                .attr("font-size", "x-large")?
+                .attr("x", width / 2.0)?
+                .attr("y", padding / 4.0)
+        })?;
+        write!(text, "{}", title)?;
+        cert
+    })?;
 
-    svg.single(wr!("<text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' font-size='large' class='poloto_text'>{}</text>",
-    width / 2.0,height - padding / 8.,xname))?;
+    svg.elem("text", |writer| {
+        let (text, cert) = writer.write(|w| {
+            w.attr("class", "poloto_text")?
+                .attr("alignment-baseline", "start")?
+                .attr("text-anchor", "middle")?
+                .attr("font-size", "x-large")?
+                .attr("x", width / 2.0)?
+                .attr("y", height - padding / 8.)
+        })?;
+        write!(text, "{}", xname)?;
+        cert
+    })?;
 
-    svg.single(wr!("
-        <text x='{}' y='{}' alignment-baseline='start' text-anchor='middle' transform='rotate(-90,{},{})' font-size='large' class='poloto_text'>{}</text>",
-            padding/4.0,height/2.0,padding/4.0,height/2.0,yname))?;
+    svg.elem("text", |writer| {
+        let (text, cert) = writer.write(|w| {
+            w.attr("class", "poloto_text")?
+                .attr("alignment-baseline", "start")?
+                .attr("text-anchor", "middle")?
+                .attr("font-size", "x-large")?
+                .with_attr(
+                    "transform",
+                    wr!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
+                )?
+                .attr("x", padding / 4.0)?
+                .attr("y", height / 2.0)
+        })?;
+        write!(text, "{}", yname)?;
+        cert
+    })?;
 
-    svg.single(wr!(
-        "<path stroke='black' class='poloto_axis_lines' d='{}'/>",
-        tagger::svg::path(|mut p| {
-            p.move_to([padding, paddingy])?
-                .line_to([padding, height - paddingy])?
-                .line_to([width - padding, height - paddingy])?;
-            Ok(())
-        })
-    ))?;
+    svg.single("path", |w| {
+        w.attr("stroke", "black")?
+            .attr("fill", "none")?
+            .attr("class", "poloto_axis_lines")?
+            .path_data(|p| {
+                p.move_to([padding, paddingy])?
+                    .line_to([padding, height - paddingy])?
+                    .line_to([width - padding, height - paddingy])
+            })
+    })?;
 
     Ok(())
 }
