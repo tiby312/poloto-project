@@ -9,7 +9,7 @@ fn main() -> core::fmt::Result {
         [2020.0, 6.0],
     ];
 
-    s.line_fill("cows", data.iter().map(|x| *x));
+    s.line_fill("", data.iter().map(|x| *x));
 
     poloto::render_svg(tagger::upgrade(std::io::stdout()), s)?;
     Ok(())

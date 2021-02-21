@@ -213,17 +213,19 @@ pub fn render<'a, T: Write>(
     {
         let spacing = padding / 3.0;
 
-        svg.elem("text", |writer| {
-            let text = writer.write(|w| {
-                w.attr("class", "poloto_text")?
-                    .attr("alignment-baseline", "middle")?
-                    .attr("text-anchor", "start")?
-                    .attr("font-size", "large")?
-                    .attr("x", width - padding / 1.2)?
-                    .attr("y", paddingy + (i as f32) * spacing)
+        if !name.is_empty() {
+            svg.elem("text", |writer| {
+                let text = writer.write(|w| {
+                    w.attr("class", "poloto_text")?
+                        .attr("alignment-baseline", "middle")?
+                        .attr("text-anchor", "start")?
+                        .attr("font-size", "large")?
+                        .attr("x", width - padding / 1.2)?
+                        .attr("y", paddingy + (i as f32) * spacing)
+                })?;
+                write_ret!(text, "{}", name)
             })?;
-            write_ret!(text, "{}", name)
-        })?;
+        }
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f32) * spacing;
@@ -239,14 +241,17 @@ pub fn render<'a, T: Write>(
 
         match plot_type {
             PlotType::Line => {
-                svg.single("line", |w| {
-                    w.with_attr("class", wr!("poloto{}stroke", colori))?
-                        .attr("stroke", "black")?
-                        .attr("x1", legendx1)?
-                        .attr("x2", legendx1 + padding / 3.0)?
-                        .attr("y1", legendy1)?
-                        .attr("y2", legendy1)
-                })?;
+                //TODO better way to modularize this if statement for all plots?
+                if !name.is_empty() {
+                    svg.single("line", |w| {
+                        w.with_attr("class", wr!("poloto{}stroke", colori))?
+                            .attr("stroke", "black")?
+                            .attr("x1", legendx1)?
+                            .attr("x2", legendx1 + padding / 3.0)?
+                            .attr("y1", legendy1)?
+                            .attr("y2", legendy1)
+                    })?;
+                }
 
                 svg.single("polyline", |w| {
                     w.with_attr("class", wr!("poloto{}stroke", colori))?
@@ -261,12 +266,14 @@ pub fn render<'a, T: Write>(
                 })?;
             }
             PlotType::Scatter => {
-                svg.single("circle", |w| {
-                    w.with_attr("class", wr!("poloto{}fill", colori))?
-                        .attr("cx", legendx1 + padding / 30.0)?
-                        .attr("cy", legendy1)?
-                        .attr("r", padding / 30.0)
-                })?;
+                if !name.is_empty() {
+                    svg.single("circle", |w| {
+                        w.with_attr("class", wr!("poloto{}fill", colori))?
+                            .attr("cx", legendx1 + padding / 30.0)?
+                            .attr("cy", legendy1)?
+                            .attr("r", padding / 30.0)
+                    })?;
+                }
 
                 for [x, y] in it {
                     svg.single("circle", |w| {
@@ -279,16 +286,17 @@ pub fn render<'a, T: Write>(
                 }
             }
             PlotType::Histo => {
-                svg.single("rect", |w| {
-                    w.with_attr("class", wr!("poloto{}fill", colori))?
-                        .attr("x", legendx1)?
-                        .attr("y", legendy1 - padding / 30.0)?
-                        .attr("width", padding / 3.0)?
-                        .attr("height", padding / 20.0)?
-                        .attr("rx", padding / 30.0)?
-                        .attr("ry", padding / 30.0)
-                })?;
-
+                if !name.is_empty() {
+                    svg.single("rect", |w| {
+                        w.with_attr("class", wr!("poloto{}fill", colori))?
+                            .attr("x", legendx1)?
+                            .attr("y", legendy1 - padding / 30.0)?
+                            .attr("width", padding / 3.0)?
+                            .attr("height", padding / 20.0)?
+                            .attr("rx", padding / 30.0)?
+                            .attr("ry", padding / 30.0)
+                    })?;
+                }
                 let mut last = None;
                 for [x, y] in it {
                     if let Some((lx, ly)) = last {
@@ -304,16 +312,17 @@ pub fn render<'a, T: Write>(
                 }
             }
             PlotType::LineFill => {
-                svg.single("rect", |w| {
-                    w.with_attr("class", wr!("poloto{}fill", colori))?
-                        .attr("x", legendx1)?
-                        .attr("y", legendy1 - padding / 30.0)?
-                        .attr("width", padding / 3.0)?
-                        .attr("height", padding / 20.0)?
-                        .attr("rx", padding / 30.0)?
-                        .attr("ry", padding / 30.0)
-                })?;
-
+                if !name.is_empty() {
+                    svg.single("rect", |w| {
+                        w.with_attr("class", wr!("poloto{}fill", colori))?
+                            .attr("x", legendx1)?
+                            .attr("y", legendy1 - padding / 30.0)?
+                            .attr("width", padding / 3.0)?
+                            .attr("height", padding / 20.0)?
+                            .attr("rx", padding / 30.0)?
+                            .attr("ry", padding / 30.0)
+                    })?;
+                }
                 svg.single("path", |w| {
                     w.with_attr("class", wr!("poloto{}fill", colori))?
                         .path_data(|data| {
