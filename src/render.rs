@@ -275,15 +275,17 @@ pub fn render<'a, T: Write>(
                     })?;
                 }
 
-                for [x, y] in it {
-                    svg.single("circle", |w| {
-                        //TODO use a g element!!!!
-                        w.with_attr("class", wr!("poloto{}fill", colori))?
-                            .attr("cx", x)?
-                            .attr("cy", y)?
-                            .attr("r", padding / 30.0)
-                    })?;
-                }
+                svg.elem("g", |w| {
+                    let g = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori)))?;
+
+                    for [x, y] in it {
+                        g.single("circle", |w| {
+                            //TODO use a g element!!!!
+                            w.attr("cx", x)?.attr("cy", y)?.attr("r", padding / 30.0)
+                        })?;
+                    }
+                    Ok(g)
+                })?;
             }
             PlotType::Histo => {
                 if !name.is_empty() {
@@ -297,19 +299,28 @@ pub fn render<'a, T: Write>(
                             .attr("ry", padding / 30.0)
                     })?;
                 }
-                let mut last = None;
-                for [x, y] in it {
-                    if let Some((lx, ly)) = last {
-                        svg.single("rect", |w| {
-                            w.with_attr("class", wr!("poloto{}fill", colori))?
-                                .attr("x", lx)?
-                                .attr("y", ly)?
-                                .attr("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))?
-                                .attr("height", height - paddingy - ly)
-                        })?;
+
+                svg.elem("g", |w| {
+                    let g = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori)))?;
+
+                    let mut last = None;
+                    for [x, y] in it {
+                        if let Some((lx, ly)) = last {
+                            g.single("rect", |w| {
+                                w.attr("x", lx)?
+                                    .attr("y", ly)?
+                                    .attr(
+                                        "width",
+                                        (padding * 0.02).max((x - lx) - (padding * 0.02)),
+                                    )?
+                                    .attr("height", height - paddingy - ly)
+                            })?;
+                        }
+                        last = Some((x, y))
                     }
-                    last = Some((x, y))
-                }
+
+                    Ok(g)
+                })?;
             }
             PlotType::LineFill => {
                 if !name.is_empty() {
