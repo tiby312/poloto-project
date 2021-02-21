@@ -86,10 +86,9 @@ pub fn render<'a, T: Write>(
     //TODO BIIIIG data structure. what to do?
     let plots: Vec<_> = plots
         .into_iter()
-        .map(|mut x| {
+        .map(|x| {
             let plots: Vec<_> = x
                 .plots
-                .get_iter_mut()
                 .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite()))
                 .collect();
 

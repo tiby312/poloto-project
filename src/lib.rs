@@ -86,24 +86,27 @@ pub mod default_svg_tag {
     }
 }
 
-struct Wrapper<I: Iterator<Item = [f32; 2]>> {
+struct Wrapper<I: Iterator<Item = [f32; 2]> + ExactSizeIterator> {
     it: I,
 }
-impl<'a, I: Iterator<Item = [f32; 2]> + 'a> Wrapper<I> {
+impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> Wrapper<I> {
     fn new(it: I) -> Self {
         Wrapper { it }
     }
 }
 
-impl<'a, I: Iterator<Item = [f32; 2]> + 'a> PlotTrait<'a> for Wrapper<I> {
-    #[inline(always)]
-    fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f32; 2]> + 'a) {
-        &mut self.it
+impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> Iterator for Wrapper<I> {
+    type Item = [f32; 2];
+    fn next(&mut self) -> Option<Self::Item> {
+        self.it.next()
     }
 }
+impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> ExactSizeIterator for Wrapper<I> {}
 
-trait PlotTrait<'a> {
-    fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f32; 2]> + 'a);
+impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> PlotTrait<'a> for Wrapper<I> {}
+
+trait PlotTrait<'a>: Iterator<Item = [f32; 2]> + ExactSizeIterator {
+    //fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f32; 2]> + ExactSizeIterator+'a);
 }
 
 enum PlotType {
@@ -176,7 +179,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I)
+    where
+        I::IntoIter: ExactSizeIterator,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             name: name.to_string(),
@@ -201,7 +207,9 @@ impl<'a> Plotter<'a> {
         &mut self,
         name: impl ToString,
         plots: I,
-    ) {
+    ) where
+        I::IntoIter: ExactSizeIterator,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
             name: name.to_string(),
@@ -222,11 +230,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
-        &mut self,
-        name: impl ToString,
-        plots: I,
-    ) {
+    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I)
+    where
+        I::IntoIter: ExactSizeIterator,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
             name: name.to_string(),
@@ -252,7 +259,9 @@ impl<'a> Plotter<'a> {
         &mut self,
         name: impl ToString,
         plots: I,
-    ) {
+    ) where
+        I::IntoIter: ExactSizeIterator,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
             name: name.to_string(),
