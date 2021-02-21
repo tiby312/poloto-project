@@ -3,7 +3,10 @@ use tagger::prelude::*;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<'a,T: Write>(pl: Plotter, svg: &'a mut tagger::Element<T>) -> Result<&'a mut tagger::Element<T>,fmt::Error>{
+pub fn render<'a, T: Write>(
+    pl: Plotter,
+    svg: &'a mut tagger::Element<T>,
+) -> Result<&'a mut tagger::Element<T>, fmt::Error> {
     use super::default_svg_tag::*;
     let width = WIDTH;
     let height = HEIGHT;

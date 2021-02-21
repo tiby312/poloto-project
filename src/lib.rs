@@ -303,7 +303,10 @@ impl<'a> Plotter<'a> {
     ///     Ok(())
     /// }
     /// ```
-    pub fn render<T: Write>(self, el: &mut tagger::Element<T>) -> Result<&mut tagger::Element<T>,fmt::Error> {
+    pub fn render<T: Write>(
+        self,
+        el: &mut tagger::Element<T>,
+    ) -> Result<&mut tagger::Element<T>, fmt::Error> {
         render::render(self, el)
     }
 }

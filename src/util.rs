@@ -34,7 +34,6 @@ pub fn find_good_step(num_steps: usize, range_all: [f32; 2]) -> (usize, f32, f32
         } else {
             bb
         }
-    
     };
     assert!(start_step >= range_all[0]);
 

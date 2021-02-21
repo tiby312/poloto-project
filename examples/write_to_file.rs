@@ -13,6 +13,6 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
-    let mut file=std::fs::File::create("test.svg").unwrap();
+    let mut file = std::fs::File::create("test.svg").unwrap();
     poloto::render_svg(tagger::upgrade(&mut file), s).unwrap();
 }
