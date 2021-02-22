@@ -145,7 +145,7 @@ pub fn render<'a, T: Write>(
 
         //Draw interva`l x text
         for a in 0..xstep_num {
-            let p = (a as f32) * xstep;
+            let p = (a as f64) * xstep;
 
             let xx = (distance_to_firstx + p) * scalex + padding;
 
@@ -172,7 +172,7 @@ pub fn render<'a, T: Write>(
 
         //Draw interval y text
         for a in 0..ystep_num {
-            let p = (a as f32) * ystep;
+            let p = (a as f64) * ystep;
 
             let yy = height - (distance_to_firsty + p) * scaley - paddingy;
 
@@ -221,14 +221,14 @@ pub fn render<'a, T: Write>(
                         .attr("text-anchor", "start")?
                         .attr("font-size", "large")?
                         .attr("x", width - padding / 1.2)?
-                        .attr("y", paddingy + (i as f32) * spacing)
+                        .attr("y", paddingy + (i as f64) * spacing)
                 })?;
                 write_ret!(text, "{}", name)
             })?;
         }
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
-        let legendy1 = paddingy - padding / 8.0 + (i as f32) * spacing;
+        let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
 
         //Draw plots
 

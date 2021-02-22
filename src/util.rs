@@ -3,7 +3,7 @@
 //number of intervals.
 //size of each interval
 //first interval location.
-pub fn find_good_step(num_steps: usize, range_all: [f32; 2]) -> (usize, f32, f32) {
+pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64) {
     let range_all = [range_all[0] as f64, range_all[1] as f64];
     let range = range_all[1] - range_all[0];
 
@@ -54,15 +54,15 @@ pub fn find_good_step(num_steps: usize, range_all: [f32; 2]) -> (usize, f32, f32
     assert!(num_step >= 1);
     assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
 
-    (num_step, step as f32, start_step as f32)
+    (num_step, step as f64, start_step as f64)
 }
 
 //pass the value to be printed, and
 //the step size
-pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
+pub fn interval_float(a: f64, precision: f64) -> impl core::fmt::Display {
     struct Foo {
-        a: f32,
-        precision: f32,
+        a: f64,
+        precision: f64,
     }
     impl core::fmt::Display for Foo {
         fn fmt(&self, fm: &mut core::fmt::Formatter) -> core::fmt::Result {
@@ -70,7 +70,8 @@ pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
             let precision = self.precision;
             
             const SCIENCE: usize = 4;
-            if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
+            
+            if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f64 {
             
                 let precision=if a==0.0{
                     0
@@ -80,6 +81,7 @@ pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
                     //dbg!(a,k2);
                     let k1=k1 as isize;
                     let k2=k2 as isize;
+                    dbg!(k1,k2);
                     let k3=(k1-k2).max(0) as usize;
                     //dbg!(k1,k2,k3);
                     k3
@@ -87,6 +89,7 @@ pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
                 write!(fm, "{0:.1$e}", a, precision)?;
             
             }else{
+                
                 let k = (-precision.log10()).ceil();
                 let k = k.max(0.0);
                 write!(fm, "{0:.1$}", a, k as usize)?;
@@ -103,11 +106,11 @@ pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
 //TODO make write to writer instead.
 pub fn print_interval_float<T: core::fmt::Write>(
     w: &mut T,
-    a: f32,
-    precision: f32,
+    a: f64,
+    precision: f64,
 ) -> core::fmt::Result {
     const SCIENCE: usize = 4;
-    if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
+    if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f64 {
         write!(w, "{0:.1$e}", a, 2)
     } else {
         let k = (-precision.log10()).ceil();
@@ -117,7 +120,7 @@ pub fn print_interval_float<T: core::fmt::Write>(
 }
 */
 
-pub fn find_bounds(it: impl IntoIterator<Item = [f32; 2]>) -> Option<[f32; 4]> {
+pub fn find_bounds(it: impl IntoIterator<Item = [f64; 2]>) -> Option<[f64; 4]> {
     let mut ii = it.into_iter();
     if let Some([x, y]) = ii.next() {
         let mut val = [x, x, y, y];

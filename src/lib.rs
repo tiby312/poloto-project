@@ -66,9 +66,9 @@ pub mod default_svg_tag {
     ///The class of the svg tag.
     pub const CLASS: &str = "poloto";
     ///The width of the svg tag.
-    pub const WIDTH: f32 = 800.0;
+    pub const WIDTH: f64 = 800.0;
     ///The height of the svg tag.
-    pub const HEIGHT: f32 = 500.0;
+    pub const HEIGHT: f64 = 500.0;
 
     ///Returns a function that will write the attributes.
     pub fn default<T: fmt::Write>(
@@ -86,27 +86,27 @@ pub mod default_svg_tag {
     }
 }
 
-struct Wrapper<I: Iterator<Item = [f32; 2]>> {
+struct Wrapper<I: Iterator<Item = [f64; 2]>> {
     it: I,
 }
-impl<'a, I: Iterator<Item = [f32; 2]> + 'a> Wrapper<I> {
+impl<'a, I: Iterator<Item = [f64; 2]> + 'a> Wrapper<I> {
     fn new(it: I) -> Self {
         Wrapper { it }
     }
 }
 
-impl<'a, I: Iterator<Item = [f32; 2]> + 'a> Iterator for Wrapper<I> {
-    type Item = [f32; 2];
+impl<'a, I: Iterator<Item = [f64; 2]> + 'a> Iterator for Wrapper<I> {
+    type Item = [f64; 2];
     fn next(&mut self) -> Option<Self::Item> {
         self.it.next()
     }
 }
-impl<'a, I: Iterator<Item = [f32; 2]> + 'a> ExactSizeIterator for Wrapper<I> {}
+impl<'a, I: Iterator<Item = [f64; 2]> + 'a> ExactSizeIterator for Wrapper<I> {}
 
-impl<'a, I: Iterator<Item = [f32; 2]> + 'a> PlotTrait<'a> for Wrapper<I> {}
+impl<'a, I: Iterator<Item = [f64; 2]> + 'a> PlotTrait<'a> for Wrapper<I> {}
 
-trait PlotTrait<'a>: Iterator<Item = [f32; 2]> {
-    //fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f32; 2]> + ExactSizeIterator+'a);
+trait PlotTrait<'a>: Iterator<Item = [f64; 2]> {
+    //fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f64; 2]> + ExactSizeIterator+'a);
 }
 
 enum PlotType {
@@ -125,7 +125,7 @@ struct Plot<'a> {
 struct PlotDecomp {
     plot_type: PlotType,
     name: String,
-    plots: Vec<[f32; 2]>,
+    plots: Vec<[f64; 2]>,
 }
 
 ///Keeps track of plots.
@@ -172,14 +172,14 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f32,4.0],
+    ///         [1.0f64,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
+    pub fn line<I: IntoIterator<Item = [f64; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             name: name.to_string(),
@@ -193,14 +193,14 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f32,4.0],
+    ///         [1.0f64,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line_fill("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line_fill<I: IntoIterator<Item = [f32; 2]> + 'a>(
+    pub fn line_fill<I: IntoIterator<Item = [f64; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -218,14 +218,14 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f32,4.0],
+    ///         [1.0f64,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
+    pub fn scatter<I: IntoIterator<Item = [f64; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -244,14 +244,14 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f32,4.0],
+    ///         [1.0f64,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.histogram("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn histogram<I: IntoIterator<Item = [f32; 2]> + 'a>(
+    pub fn histogram<I: IntoIterator<Item = [f64; 2]> + 'a>(
         &mut self,
         name: impl ToString,
         plots: I,
@@ -279,7 +279,7 @@ impl<'a> Plotter<'a> {
     /// fn main()->std::fmt::Result{
     ///     use tagger::prelude::*;
     ///     let data=[
-    ///         [1.0f32,4.0],
+    ///         [1.0f64,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     ///     ];
