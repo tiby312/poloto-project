@@ -46,7 +46,7 @@
 //! in the step size between the intervals. If the magnitude of a number is detected to be too big or small, it
 //! may switch to scientific notation, still at the required precision. It will only switch if the scientific
 //! notation version is actually less characters than the normal decimal format which is not always the case
-//! when you consider the precision that might be required to capture the step size. 
+//! when you consider the precision that might be required to capture the step size.
 //!
 //! Even with the above system, there are cases where the numbers all have a really big magnitude, but
 //! are all really close together (small step size). In this case, there isnt a really good way to format it.
