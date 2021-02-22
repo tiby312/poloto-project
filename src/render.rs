@@ -133,8 +133,8 @@ pub fn render<'a, T: Write>(
         let ideal_num_xsteps = 9;
         let ideal_num_ysteps = 10;
 
-        let texty_padding = paddingy * 0.4;
-        let textx_padding = padding * 0.2;
+        let texty_padding = paddingy * 0.3;
+        let textx_padding = padding * 0.1;
 
         let (xstep_num, xstep, xstart_step) = util::find_good_step(ideal_num_xsteps, [minx, maxx]);
         let (ystep_num, ystep, ystart_step) = util::find_good_step(ideal_num_ysteps, [miny, maxy]);

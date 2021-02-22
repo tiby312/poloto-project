@@ -68,14 +68,14 @@ pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
         fn fmt(&self, fm: &mut core::fmt::Formatter) -> core::fmt::Result {
             let a = self.a;
             let precision = self.precision;
-            const SCIENCE: usize = 4;
-            if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
-                write!(fm, "{0:.1$e}", a, 2)?
-            } else {
+            //const SCIENCE: usize = 4;
+            //if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
+            //    write!(fm, "{0:.1$e}", a, 2)?
+            //} else {
                 let k = (-precision.log10()).ceil();
                 let k = k.max(0.0);
-                write!(fm, "{0:.1$}", a, k as usize)?
-            }
+                write!(fm, "{0:.1$}", a, k as usize)?;
+            //}
             Ok(())
         }
     }
