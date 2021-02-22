@@ -95,17 +95,17 @@ impl<'a, I: Iterator<Item = [f32; 2]> + 'a> Wrapper<I> {
     }
 }
 
-impl<'a, I: Iterator<Item = [f32; 2]>  + 'a> Iterator for Wrapper<I> {
+impl<'a, I: Iterator<Item = [f32; 2]> + 'a> Iterator for Wrapper<I> {
     type Item = [f32; 2];
     fn next(&mut self) -> Option<Self::Item> {
         self.it.next()
     }
 }
-impl<'a, I: Iterator<Item = [f32; 2]>  + 'a> ExactSizeIterator for Wrapper<I> {}
+impl<'a, I: Iterator<Item = [f32; 2]> + 'a> ExactSizeIterator for Wrapper<I> {}
 
-impl<'a, I: Iterator<Item = [f32; 2]>  + 'a> PlotTrait<'a> for Wrapper<I> {}
+impl<'a, I: Iterator<Item = [f32; 2]> + 'a> PlotTrait<'a> for Wrapper<I> {}
 
-trait PlotTrait<'a>: Iterator<Item = [f32; 2]>  {
+trait PlotTrait<'a>: Iterator<Item = [f32; 2]> {
     //fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f32; 2]> + ExactSizeIterator+'a);
 }
 
@@ -179,9 +179,7 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I)
-
-    {
+    pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             name: name.to_string(),
@@ -206,8 +204,7 @@ impl<'a> Plotter<'a> {
         &mut self,
         name: impl ToString,
         plots: I,
-    ) 
-    {
+    ) {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
             name: name.to_string(),
@@ -228,9 +225,11 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I)
-    
-    {
+    pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(
+        &mut self,
+        name: impl ToString,
+        plots: I,
+    ) {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
             name: name.to_string(),
@@ -256,8 +255,7 @@ impl<'a> Plotter<'a> {
         &mut self,
         name: impl ToString,
         plots: I,
-    ) 
-    {
+    ) {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
             name: name.to_string(),
@@ -334,8 +332,8 @@ pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
 
 ///Function to write to a T that implements `std::io::Write`
 ///Makes a svg tag with the defaults defined in [`default_svg_tag`].
-pub fn render_svg_io<T:std::io::Write>(writer:T,a:Plotter)->fmt::Result{
-    render_svg(tagger::upgrade(writer),a)
+pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
+    render_svg(tagger::upgrade(writer), a)
 }
 
 ///Convenience function to just write to a string.

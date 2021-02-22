@@ -72,9 +72,9 @@ pub fn interval_float(a: f32, precision: f32) -> impl core::fmt::Display {
             //if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f32 {
             //    write!(fm, "{0:.1$e}", a, 2)?
             //} else {
-                let k = (-precision.log10()).ceil();
-                let k = k.max(0.0);
-                write!(fm, "{0:.1$}", a, k as usize)?;
+            let k = (-precision.log10()).ceil();
+            let k = k.max(0.0);
+            write!(fm, "{0:.1$}", a, k as usize)?;
             //}
             Ok(())
         }
