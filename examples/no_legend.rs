@@ -20,7 +20,7 @@ fn main() -> core::fmt::Result {
     ];
     
 
-    s.line_fill("", data.iter().map(|x| *x));
+    s.scatter("", data.iter().map(|x| *x));
 
     poloto::render_svg_io(std::io::stdout(), s)?;
     Ok(())
