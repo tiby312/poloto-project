@@ -332,6 +332,12 @@ pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
     Ok(())
 }
 
+///Function to write to a T that implements `std::io::Write`
+///Makes a svg tag with the defaults defined in [`default_svg_tag`].
+pub fn render_svg_io<T:std::io::Write>(writer:T,a:Plotter)->fmt::Result{
+    render_svg(tagger::upgrade(writer),a)
+}
+
 ///Convenience function to just write to a string.
 pub fn render_to_string(a: Plotter) -> Result<String, fmt::Error> {
     let mut s = String::new();

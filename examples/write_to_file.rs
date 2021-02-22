@@ -14,5 +14,5 @@ fn main() {
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
     let mut file = std::fs::File::create("test.svg").unwrap();
-    poloto::render_svg(tagger::upgrade(&mut file), s).unwrap();
+    poloto::render_svg_io(&mut file, s).unwrap();
 }
