@@ -86,26 +86,26 @@ pub mod default_svg_tag {
     }
 }
 
-struct Wrapper<I: Iterator<Item = [f32; 2]> + ExactSizeIterator> {
+struct Wrapper<I: Iterator<Item = [f32; 2]>> {
     it: I,
 }
-impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> Wrapper<I> {
+impl<'a, I: Iterator<Item = [f32; 2]> + 'a> Wrapper<I> {
     fn new(it: I) -> Self {
         Wrapper { it }
     }
 }
 
-impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> Iterator for Wrapper<I> {
+impl<'a, I: Iterator<Item = [f32; 2]>  + 'a> Iterator for Wrapper<I> {
     type Item = [f32; 2];
     fn next(&mut self) -> Option<Self::Item> {
         self.it.next()
     }
 }
-impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> ExactSizeIterator for Wrapper<I> {}
+impl<'a, I: Iterator<Item = [f32; 2]>  + 'a> ExactSizeIterator for Wrapper<I> {}
 
-impl<'a, I: Iterator<Item = [f32; 2]> + ExactSizeIterator + 'a> PlotTrait<'a> for Wrapper<I> {}
+impl<'a, I: Iterator<Item = [f32; 2]>  + 'a> PlotTrait<'a> for Wrapper<I> {}
 
-trait PlotTrait<'a>: Iterator<Item = [f32; 2]> + ExactSizeIterator {
+trait PlotTrait<'a>: Iterator<Item = [f32; 2]>  {
     //fn get_iter_mut(&mut self) -> &mut (dyn Iterator<Item = [f32; 2]> + ExactSizeIterator+'a);
 }
 
@@ -180,8 +180,7 @@ impl<'a> Plotter<'a> {
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
     pub fn line<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I)
-    where
-        I::IntoIter: ExactSizeIterator,
+
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -207,8 +206,7 @@ impl<'a> Plotter<'a> {
         &mut self,
         name: impl ToString,
         plots: I,
-    ) where
-        I::IntoIter: ExactSizeIterator,
+    ) 
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -231,8 +229,7 @@ impl<'a> Plotter<'a> {
     /// plotter.scatter("cow",data.iter().map(|&x|x))
     /// ```
     pub fn scatter<I: IntoIterator<Item = [f32; 2]> + 'a>(&mut self, name: impl ToString, plots: I)
-    where
-        I::IntoIter: ExactSizeIterator,
+    
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -259,8 +256,7 @@ impl<'a> Plotter<'a> {
         &mut self,
         name: impl ToString,
         plots: I,
-    ) where
-        I::IntoIter: ExactSizeIterator,
+    ) 
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
