@@ -166,35 +166,63 @@ pub fn render<'a, T: Write>(
                         .attr("x", xx)?
                         .attr("y", height - paddingy + texty_padding)
                 })?;
-                write_ret!(text, "{}", util::interval_float(p + xstart_step, xstep))
+                util::interval_float(text,p + xstart_step, xstep)?;
+                Ok(text)
             })?;
         }
 
-        //Draw interval y text
-        for a in 0..ystep_num {
-            let p = (a as f64) * ystep;
+        {
+            //step num is assured to be atleast 1.
+            let (extra,ystart_step)=if crate::util::determine_if_should_use_strat(ystart_step,ystart_step+((ystep_num-1) as f64)*ystep,ystep)?{
+            //let (extra,ystart_step)=if true{
+                svg.elem("text", |writer| {
+                    let text = writer.write(|w| {
+                        w.attr("class", "poloto_text")?
+                            .attr("alignment-baseline", "middle")?
+                            .attr("text-anchor", "start")?
+                            .attr("x", padding)?
+                            .attr("y", paddingy*0.7)
+                    })?;
+                    write!(text,"Where k = ")?;
 
-            let yy = height - (distance_to_firsty + p) * scaley - paddingy;
-
-            svg.single("line", |w| {
-                w.attr("class", "poloto_axis_lines")?
-                    .attr("stroke", "black")?
-                    .attr("x1", padding)?
-                    .attr("x2", padding * 0.96)?
-                    .attr("y1", yy)?
-                    .attr("y2", yy)
-            })?;
-
-            svg.elem("text", |writer| {
-                let text = writer.write(|w| {
-                    w.attr("class", "poloto_text")?
-                        .attr("alignment-baseline", "middle")?
-                        .attr("text-anchor", "end")?
-                        .attr("x", padding - textx_padding)?
-                        .attr("y", yy)
+                    crate::util::interval_float_any_precision(text,ystart_step)?;
+                    Ok(text)
                 })?;
-                write_ret!(text, "{}", util::interval_float(p + ystart_step, ystep))
-            })?;
+
+                ("k+",0.0)
+            }else{
+                ("",ystart_step)
+            };
+
+            //Draw interval y text
+            for a in 0..ystep_num {
+                let p = (a as f64) * ystep;
+
+                let yy = height - (distance_to_firsty + p) * scaley - paddingy;
+
+                svg.single("line", |w| {
+                    w.attr("class", "poloto_axis_lines")?
+                        .attr("stroke", "black")?
+                        .attr("x1", padding)?
+                        .attr("x2", padding * 0.96)?
+                        .attr("y1", yy)?
+                        .attr("y2", yy)
+                })?;
+
+                svg.elem("text", |writer| {
+                    let text = writer.write(|w| {
+                        w.attr("class", "poloto_text")?
+                            .attr("alignment-baseline", "middle")?
+                            .attr("text-anchor", "end")?
+                            .attr("x", padding - textx_padding)?
+                            .attr("y", yy)
+                    })?;
+                    write!(text,"{}",extra)?;
+
+                    util::interval_float(text,p + ystart_step, ystep)?;
+                    Ok(text)
+                })?;
+            }
         }
     }
 
