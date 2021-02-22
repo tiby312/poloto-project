@@ -143,55 +143,89 @@ pub fn render<'a, T: Write>(
 
         let distance_to_firsty = ystart_step - miny;
 
-        //Draw interva`l x text
-        for a in 0..xstep_num {
-            let p = (a as f64) * xstep;
+        {
+            //step num is assured to be atleast 1.
+            let (extra, xstart_step) = if crate::util::determine_if_should_use_strat(
+                xstart_step,
+                xstart_step + ((xstep_num - 1) as f64) * xstep,
+                xstep,
+            )? {
+                //let (extra,ystart_step)=if true{
+                svg.elem("text", |writer| {
+                    let text = writer.write(|w| {
+                        w.attr("class", "poloto_text")?
+                            .attr("alignment-baseline", "middle")?
+                            .attr("text-anchor", "start")?
+                            .attr("x", width * 0.6)?
+                            .attr("y", paddingy * 0.7)
+                    })?;
+                    write!(text, "Where j = ")?;
 
-            let xx = (distance_to_firstx + p) * scalex + padding;
-
-            svg.single("line", |w| {
-                w.attr("class", "poloto_axis_lines")?
-                    .attr("stroke", "black")?
-                    .attr("x1", xx)?
-                    .attr("x2", xx)?
-                    .attr("y1", height - paddingy)?
-                    .attr("y2", height - paddingy * 0.95) //TODO operations of order?
-            })?;
-
-            svg.elem("text", |writer| {
-                let text = writer.write(|w| {
-                    w.attr("class", "poloto_text")?
-                        .attr("alignment-baseline", "start")?
-                        .attr("text-anchor", "middle")?
-                        .attr("x", xx)?
-                        .attr("y", height - paddingy + texty_padding)
+                    crate::util::interval_float_any_precision(text, xstart_step)?;
+                    Ok(text)
                 })?;
-                util::interval_float(text,p + xstart_step, xstep)?;
-                Ok(text)
-            })?;
+
+                ("j+", 0.0)
+            } else {
+                ("", xstart_step)
+            };
+
+            //Draw interva`l x text
+            for a in 0..xstep_num {
+                let p = (a as f64) * xstep;
+
+                let xx = (distance_to_firstx + p) * scalex + padding;
+
+                svg.single("line", |w| {
+                    w.attr("class", "poloto_axis_lines")?
+                        .attr("stroke", "black")?
+                        .attr("x1", xx)?
+                        .attr("x2", xx)?
+                        .attr("y1", height - paddingy)?
+                        .attr("y2", height - paddingy * 0.95) //TODO operations of order?
+                })?;
+
+                svg.elem("text", |writer| {
+                    let text = writer.write(|w| {
+                        w.attr("class", "poloto_text")?
+                            .attr("alignment-baseline", "start")?
+                            .attr("text-anchor", "middle")?
+                            .attr("x", xx)?
+                            .attr("y", height - paddingy + texty_padding)
+                    })?;
+                    write!(text, "{}", extra)?;
+
+                    util::interval_float(text, p + xstart_step, xstep)?;
+                    Ok(text)
+                })?;
+            }
         }
 
         {
             //step num is assured to be atleast 1.
-            let (extra,ystart_step)=if crate::util::determine_if_should_use_strat(ystart_step,ystart_step+((ystep_num-1) as f64)*ystep,ystep)?{
-            //let (extra,ystart_step)=if true{
+            let (extra, ystart_step) = if crate::util::determine_if_should_use_strat(
+                ystart_step,
+                ystart_step + ((ystep_num - 1) as f64) * ystep,
+                ystep,
+            )? {
+                //let (extra,ystart_step)=if true{
                 svg.elem("text", |writer| {
                     let text = writer.write(|w| {
                         w.attr("class", "poloto_text")?
                             .attr("alignment-baseline", "middle")?
                             .attr("text-anchor", "start")?
                             .attr("x", padding)?
-                            .attr("y", paddingy*0.7)
+                            .attr("y", paddingy * 0.7)
                     })?;
-                    write!(text,"Where k = ")?;
+                    write!(text, "Where k = ")?;
 
-                    crate::util::interval_float_any_precision(text,ystart_step)?;
+                    crate::util::interval_float_any_precision(text, ystart_step)?;
                     Ok(text)
                 })?;
 
-                ("k+",0.0)
-            }else{
-                ("",ystart_step)
+                ("k+", 0.0)
+            } else {
+                ("", ystart_step)
             };
 
             //Draw interval y text
@@ -217,9 +251,9 @@ pub fn render<'a, T: Write>(
                             .attr("x", padding - textx_padding)?
                             .attr("y", yy)
                     })?;
-                    write!(text,"{}",extra)?;
+                    write!(text, "{}", extra)?;
 
-                    util::interval_float(text,p + ystart_step, ystep)?;
+                    util::interval_float(text, p + ystart_step, ystep)?;
                     Ok(text)
                 })?;
             }

@@ -1,11 +1,9 @@
-
-
 #[derive(Debug)]
-struct Res{
-    use_scientific:bool,
-    precision:usize
+struct Res {
+    use_scientific: bool,
+    precision: usize,
 }
-fn write_data(low:f64,heigh:f64,step:f64)->Res{
+fn write_data(low: f64, heigh: f64, step: f64) -> Res {
     //const SCIENCE: usize = 4;
     //if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f64 {
     //    write!(fm, "{0:.1$e}", a, 2)?
@@ -14,12 +12,12 @@ fn write_data(low:f64,heigh:f64,step:f64)->Res{
     dbg!(k);
     let k = k.max(0.0);
 
-    Res{
-        use_scientific:false,
-        precision:k as usize
+    Res {
+        use_scientific: false,
+        precision: k as usize,
     }
 }
 
-fn main(){
-    dbg!(write_data(1000.0,200.0,1000.0));
+fn main() {
+    dbg!(write_data(1000.0, 200.0, 1000.0));
 }

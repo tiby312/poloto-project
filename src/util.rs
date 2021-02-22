@@ -57,91 +57,76 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
     (num_step, step as f64, start_step as f64)
 }
 
-
 use core::fmt;
 
-fn write_normal<T:fmt::Write>(fm:&mut T,a:f64,step:f64)->fmt::Result{
+fn write_normal<T: fmt::Write>(fm: &mut T, a: f64, step: f64) -> fmt::Result {
     let k = (-step.log10()).ceil();
     let k = k.max(0.0);
     write!(fm, "{0:.1$}", a, k as usize)
 }
-fn write_science<T:fmt::Write>(fm:&mut T,a:f64,step:f64)->fmt::Result{
-
-    let precision=if a==0.0{
+fn write_science<T: fmt::Write>(fm: &mut T, a: f64, step: f64) -> fmt::Result {
+    let precision = if a == 0.0 {
         0
-    }else{
-        let k1=-step.log10().ceil();
-        let k2=-a.abs().log10().ceil();
-        let k1=k1 as isize;
-        let k2=k2 as isize;
-        
-        let k3=(k1-k2).max(0) as usize;
+    } else {
+        let k1 = -step.log10().ceil();
+        let k2 = -a.abs().log10().ceil();
+        let k1 = k1 as isize;
+        let k2 = k2 as isize;
+
+        let k3 = (k1 - k2).max(0) as usize;
 
         k3
     };
-    
+
     write!(fm, "{0:.1$e}", a, precision)
 }
 
+pub fn determine_if_should_use_strat(start: f64, end: f64, step: f64) -> Result<bool, fmt::Error> {
+    let mut start_s = String::new();
+    let mut end_s = String::new();
 
-pub fn determine_if_should_use_strat(start:f64,end:f64,step:f64)->Result<bool,fmt::Error>{
-    let mut start_s=String::new();
-    let mut end_s=String::new();
-    
-    interval_float(&mut start_s,start,step)?;
-    interval_float(&mut end_s,end,step)?;
+    interval_float(&mut start_s, start, step)?;
+    interval_float(&mut end_s, end, step)?;
 
-    if start_s.len()>7 || end_s.len()>7{
+    if start_s.len() > 7 || end_s.len() > 7 {
         Ok(true)
-    }else{
+    } else {
         Ok(false)
     }
 }
 
 const SCIENCE: usize = 4;
-    
-pub fn interval_float_any_precision<T:fmt::Write>(fm:&mut T,a:f64)->fmt::Result{
-    
-    if  a.abs().log10().floor().abs() > SCIENCE as f64 {
+
+pub fn interval_float_any_precision<T: fmt::Write>(fm: &mut T, a: f64) -> fmt::Result {
+    if a.abs().log10().floor().abs() > SCIENCE as f64 {
         write!(fm, "{0:e}", a)
-    }else{
-        write!(fm,"{}",a)
+    } else {
+        write!(fm, "{}", a)
     }
 }
 /// The step amount dictates the precision we need to show at each interval
 /// in order to capture the changes from each step
-pub fn interval_float<T:fmt::Write>(fm:&mut T,a: f64, step: f64) -> fmt::Result {
-    
+pub fn interval_float<T: fmt::Write>(fm: &mut T, a: f64, step: f64) -> fmt::Result {
     //TODO handle zero???
     //want to display zero with a formatting that is cosistent with others
 
-    
-    if  a.abs().log10().floor().abs() > SCIENCE as f64 {
-    
-        let mut k=String::new();
-        write_science(&mut k,a,step)?;
+    if a.abs().log10().floor().abs() > SCIENCE as f64 {
+        let mut k = String::new();
+        write_science(&mut k, a, step)?;
 
-        let mut j=String::new();
-        write_normal(&mut j,a,step)?;
+        let mut j = String::new();
+        write_normal(&mut j, a, step)?;
 
         //Even if we use scientific notation,
         //it could end up as more characters
         //because of the needed precision.
-        let ans=if k.len()<j.len(){
-            k
-        }else{
-            j
-        };
-        write!(fm,"{}",ans)?;
-
-    }
-    else
-    {
-        write_normal(fm,a,step)?;
+        let ans = if k.len() < j.len() { k } else { j };
+        write!(fm, "{}", ans)?;
+    } else {
+        write_normal(fm, a, step)?;
     }
     Ok(())
 }
-
 
 pub fn find_bounds(it: impl IntoIterator<Item = [f64; 2]>) -> Option<[f64; 4]> {
     let mut ii = it.into_iter();
