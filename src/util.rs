@@ -57,6 +57,35 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
     (num_step, step as f64, start_step as f64)
 }
 
+
+use core::fmt;
+
+fn write_normal<T:fmt::Write>(fm:&mut T,a:f64,precision:f64)->fmt::Result{
+    let k = (-precision.log10()).ceil();
+    let k = k.max(0.0);
+    write!(fm, "{0:.1$}", a, k as usize)
+}
+fn write_science<T:fmt::Write>(fm:&mut T,a:f64,precision:f64)->fmt::Result{
+
+    let precision=if a==0.0{
+        0
+    }else{
+        let k1=-precision.log10().ceil();
+        let k2=-a.abs().log10().ceil();
+        //dbg!(a,k2);
+        let k1=k1 as isize;
+        let k2=k2 as isize;
+        
+        let k3=(k1-k2).max(0) as usize;
+
+        //dbg!(k1,k2,k3);
+        k3
+    };
+    
+    write!(fm, "{0:.1$e}", a, precision)
+}
+
+
 //pass the value to be printed, and
 //the step size
 pub fn interval_float(a: f64, precision: f64) -> impl core::fmt::Display {
@@ -73,26 +102,24 @@ pub fn interval_float(a: f64, precision: f64) -> impl core::fmt::Display {
             
             if a != 0.0 && a.abs().log10().floor().abs() > SCIENCE as f64 {
             
-                let precision=if a==0.0{
-                    0
+                let mut k=String::new();
+                write_science(&mut k,a,precision)?;
+
+                let mut j=String::new();
+                write_normal(&mut j,a,precision)?;
+
+                //Even if we use scientific notation,
+                //it could end up as more characters
+                //because of the needed precision.
+                if k.len()<j.len(){
+                    write!(fm,"{}",k)?;
                 }else{
-                    let k1=-precision.log10().ceil();
-                    let k2=-a.abs().log10().ceil();
-                    //dbg!(a,k2);
-                    let k1=k1 as isize;
-                    let k2=k2 as isize;
-                    dbg!(k1,k2);
-                    let k3=(k1-k2).max(0) as usize;
-                    //dbg!(k1,k2,k3);
-                    k3
-                };
-                write!(fm, "{0:.1$e}", a, precision)?;
+                    write!(fm,"{}",j)?;
+                }
+
             
             }else{
-                
-                let k = (-precision.log10()).ceil();
-                let k = k.max(0.0);
-                write!(fm, "{0:.1$}", a, k as usize)?;
+                write_normal(fm,a,precision)?;
             }
             
             
