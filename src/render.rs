@@ -117,17 +117,17 @@ pub fn render<'a, T: Write>(
             return Ok(svg); //No plots at all. dont need to draw anything
         };
 
-    const EPSILON:f64=f64::MIN_POSITIVE*10.0;
+    const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
 
     //Insert a range if the range is zero.
-    let [miny, maxy] = if (maxy-miny).abs()<EPSILON {
+    let [miny, maxy] = if (maxy - miny).abs() < EPSILON {
         [miny - 1.0, miny + 1.0]
     } else {
         [miny, maxy]
     };
 
     //Insert a range if the range is zero.
-    let [minx, maxx] = if (maxx-minx).abs()<EPSILON{
+    let [minx, maxx] = if (maxx - minx).abs() < EPSILON {
         [minx - 1.0, minx + 1.0]
     } else {
         [minx, maxx]
@@ -170,7 +170,7 @@ pub fn render<'a, T: Write>(
                     })?;
                     write!(text, "Where j = ")?;
 
-                    crate::util::interval_float(text,xstart_step,None)?; //Some(xstep)
+                    crate::util::interval_float(text, xstart_step, None)?; //Some(xstep)
                     Ok(text)
                 })?;
 
@@ -227,8 +227,8 @@ pub fn render<'a, T: Write>(
                     })?;
                     write!(text, "Where k = ")?;
 
-                    crate::util::interval_float(text,ystart_step,None)?;//Some(ystep)
-                    
+                    crate::util::interval_float(text, ystart_step, None)?; //Some(ystep)
+
                     Ok(text)
                 })?;
 

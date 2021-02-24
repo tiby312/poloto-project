@@ -52,7 +52,7 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
         num
     };
     assert!(num_step >= 1);
-    
+
     //Because of the requirement for the num step to be atleast one, this assertion isnt
     //necessarily true.
     //assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
@@ -63,16 +63,16 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
 use core::fmt;
 
 fn write_normal<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
-    if let Some(step)=step{
+    if let Some(step) = step {
         let k = (-step.log10()).ceil();
         let k = k.max(0.0);
         write!(fm, "{0:.1$}", a, k as usize)
-    }else{
+    } else {
         write!(fm, "{0:e}", a)
     }
 }
 fn write_science<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
-    if let Some(step)=step{
+    if let Some(step) = step {
         let precision = if a == 0.0 {
             0
         } else {
@@ -85,8 +85,8 @@ fn write_science<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::R
         };
 
         write!(fm, "{0:.1$e}", a, precision)
-    }else{
-        write!(fm, "{}", a)   
+    } else {
+        write!(fm, "{}", a)
     }
 }
 
@@ -105,7 +105,6 @@ pub fn determine_if_should_use_strat(start: f64, end: f64, step: f64) -> Result<
 }
 
 const SCIENCE: usize = 4;
-
 
 /// The step amount dictates the precision we need to show at each interval
 /// in order to capture the changes from each step
