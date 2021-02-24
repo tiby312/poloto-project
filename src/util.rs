@@ -52,7 +52,10 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
         num
     };
     assert!(num_step >= 1);
-    assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
+    
+    //Because of the requirement for the num step to be atleast one, this assertion isnt
+    //necessarily true.
+    //assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
 
     (num_step, step as f64, start_step as f64)
 }

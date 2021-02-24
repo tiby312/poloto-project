@@ -324,7 +324,7 @@ impl<'a> Plotter<'a> {
         self,
         el: &mut tagger::Element<T>,
     ) -> Result<&mut tagger::Element<T>, fmt::Error> {
-        let el=render::add_styling(el)?;
+        let el = render::add_styling(el)?;
         render::render(self, el)
     }
 

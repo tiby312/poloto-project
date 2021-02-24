@@ -1,11 +1,11 @@
 use super::*;
 use tagger::prelude::*;
 
+const NUM_COLORS: usize = 8;
 
-const NUM_COLORS:usize=8;
-
-pub fn add_styling<'a,T:Write>(svg:&'a mut tagger::Element<T>)->Result<&'a mut tagger::Element<T>,fmt::Error>{
-
+pub fn add_styling<'a, T: Write>(
+    svg: &'a mut tagger::Element<T>,
+) -> Result<&'a mut tagger::Element<T>, fmt::Error> {
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
     let background_color = "aliceblue";
@@ -62,7 +62,6 @@ pub fn add_styling<'a,T:Write>(svg:&'a mut tagger::Element<T>)->Result<&'a mut t
 
     Ok(svg)
 }
-
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
