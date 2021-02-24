@@ -3,9 +3,9 @@ use tagger::prelude::*;
 
 const NUM_COLORS: usize = 8;
 
-pub fn add_styling<'a, T: Write>(
-    svg: &'a mut tagger::Element<T>,
-) -> Result<&'a mut tagger::Element<T>, fmt::Error> {
+pub fn add_styling<T: Write>(
+    svg: &mut tagger::Element<T>,
+) -> Result<&mut tagger::Element<T>, fmt::Error> {
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
     let background_color = "aliceblue";
@@ -117,15 +117,17 @@ pub fn render<'a, T: Write>(
             return Ok(svg); //No plots at all. dont need to draw anything
         };
 
+    const EPSILON:f64=f64::MIN_POSITIVE*10.0;
+
     //Insert a range if the range is zero.
-    let [miny, maxy] = if miny == maxy {
+    let [miny, maxy] = if (maxy-miny).abs()<EPSILON {
         [miny - 1.0, miny + 1.0]
     } else {
         [miny, maxy]
     };
 
     //Insert a range if the range is zero.
-    let [minx, maxx] = if minx == maxx {
+    let [minx, maxx] = if (maxx-minx).abs()<EPSILON{
         [minx - 1.0, minx + 1.0]
     } else {
         [minx, maxx]
@@ -158,18 +160,17 @@ pub fn render<'a, T: Write>(
                 xstart_step + ((xstep_num - 1) as f64) * xstep,
                 xstep,
             )? {
-                //let (extra,ystart_step)=if true{
                 svg.elem("text", |writer| {
                     let text = writer.write(|w| {
                         w.attr("class", "poloto_text")?
                             .attr("alignment-baseline", "middle")?
                             .attr("text-anchor", "start")?
-                            .attr("x", width * 0.6)?
+                            .attr("x", width * 0.55)?
                             .attr("y", paddingy * 0.7)
                     })?;
                     write!(text, "Where j = ")?;
 
-                    crate::util::interval_float_any_precision(text, xstart_step)?;
+                    crate::util::interval_float(text,xstart_step,None)?; //Some(xstep)
                     Ok(text)
                 })?;
 
@@ -203,7 +204,7 @@ pub fn render<'a, T: Write>(
                     })?;
                     write!(text, "{}", extra)?;
 
-                    util::interval_float(text, p + xstart_step, xstep)?;
+                    util::interval_float(text, p + xstart_step, Some(xstep))?;
                     Ok(text)
                 })?;
             }
@@ -216,7 +217,6 @@ pub fn render<'a, T: Write>(
                 ystart_step + ((ystep_num - 1) as f64) * ystep,
                 ystep,
             )? {
-                //let (extra,ystart_step)=if true{
                 svg.elem("text", |writer| {
                     let text = writer.write(|w| {
                         w.attr("class", "poloto_text")?
@@ -227,7 +227,8 @@ pub fn render<'a, T: Write>(
                     })?;
                     write!(text, "Where k = ")?;
 
-                    crate::util::interval_float_any_precision(text, ystart_step)?;
+                    crate::util::interval_float(text,ystart_step,None)?;//Some(ystep)
+                    
                     Ok(text)
                 })?;
 
@@ -261,7 +262,7 @@ pub fn render<'a, T: Write>(
                     })?;
                     write!(text, "{}", extra)?;
 
-                    util::interval_float(text, p + ystart_step, ystep)?;
+                    util::interval_float(text, p + ystart_step, Some(ystep))?;
                     Ok(text)
                 })?;
             }

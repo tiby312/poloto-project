@@ -5,3 +5,4 @@ cargo run --example custom_style_html > assets/custom_style.html
 cargo run --example custom_style > assets/custom_style.svg
 cargo run --example hover_shadow_html > assets/hover_shadow.html
 cargo run --example no_legend > assets/no_legend.svg
+cargo run --example test > assets/test.html
