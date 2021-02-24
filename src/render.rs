@@ -1,26 +1,10 @@
 use super::*;
 use tagger::prelude::*;
 
-//Returns error if the user supplied format functions don't work.
-//Panics if the element tag writing writes fail
-pub fn render<'a, T: Write>(
-    pl: Plotter,
-    svg: &'a mut tagger::Element<T>,
-) -> Result<&'a mut tagger::Element<T>, fmt::Error> {
-    use super::default_svg_tag::*;
-    let width = WIDTH;
-    let height = HEIGHT;
-    let padding = 150.0;
-    let paddingy = 100.0;
 
-    svg.single("rect", |w| {
-        w.attr("class", "poloto_background")?
-            .attr("fill", "white")?
-            .attr("x", 0)?
-            .attr("y", 0)?
-            .attr("width", width)?
-            .attr("height", height)
-    })?;
+const NUM_COLORS:usize=8;
+
+pub fn add_styling<'a,T:Write>(svg:&'a mut tagger::Element<T>)->Result<&'a mut tagger::Element<T>,fmt::Error>{
 
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
@@ -74,6 +58,31 @@ pub fn render<'a, T: Write>(
             colors[6],
             colors[7],
         )
+    })?;
+
+    Ok(svg)
+}
+
+
+//Returns error if the user supplied format functions don't work.
+//Panics if the element tag writing writes fail
+pub fn render<'a, T: Write>(
+    pl: Plotter,
+    svg: &'a mut tagger::Element<T>,
+) -> Result<&'a mut tagger::Element<T>, fmt::Error> {
+    use super::default_svg_tag::*;
+    let width = WIDTH;
+    let height = HEIGHT;
+    let padding = 150.0;
+    let paddingy = 100.0;
+
+    svg.single("rect", |w| {
+        w.attr("class", "poloto_background")?
+            .attr("fill", "white")?
+            .attr("x", 0)?
+            .attr("y", 0)?
+            .attr("width", width)?
+            .attr("height", height)
     })?;
 
     let Plotter {
@@ -271,7 +280,7 @@ pub fn render<'a, T: Write>(
     ) in plots
         .into_iter()
         .enumerate()
-        .map(|(i, x)| (i, i % colors.len(), x))
+        .map(|(i, x)| (i, i % NUM_COLORS, x))
     {
         let spacing = padding / 3.0;
 
