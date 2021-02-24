@@ -1,11 +1,3 @@
-struct Point {
-    x: f64,
-    y: f64,
-}
-
-struct Test<'a>(&'a [Point]);
-
-
 const fn generate_test() -> [&'static [[f64; 2]]  ;8]{
     let test0= &[[0.0,6000.0],[0.0,200.0]];
 
