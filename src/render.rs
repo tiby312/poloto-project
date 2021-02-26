@@ -408,14 +408,15 @@ pub fn render<'a, T: Write>(
                 svg.single("path", |w| {
                     w.with_attr("class", wr!("poloto{}fill", colori))?
                         .path_data(|data| {
-                            data.move_to([padding, height - paddingy])?;
+                            use tagger::svg::PathCommand::*;
+                            data.draw(M(padding,height - paddingy))?;
 
-                            for p in it {
-                                data.line_to(p)?;
+                            for [x,y] in it {
+                                data.draw(L(x,y))?;
                             }
 
-                            data.line_to([width - padding, height - paddingy])?;
-                            data.close()
+                            data.draw(L(width - padding,height - paddingy))?;
+                            data.draw_z()
                         })
                 })?;
             }
@@ -467,9 +468,10 @@ pub fn render<'a, T: Write>(
             .attr("fill", "none")?
             .attr("class", "poloto_axis_lines")?
             .path_data(|p| {
-                p.move_to([padding, paddingy])?
-                    .line_to([padding, height - paddingy])?
-                    .line_to([width - padding, height - paddingy])
+                use tagger::svg::PathCommand::*;
+                p.draw(M(padding,paddingy))?
+                .draw(L(padding,height-paddingy))?
+                .draw(L(width-padding,height-paddingy))
             })
     })
 }
