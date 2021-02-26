@@ -328,9 +328,9 @@ pub fn render<'a, T: Write>(
                     w.with_attr("class", wr!("poloto{}stroke", colori))?
                         .attr("fill", "none")?
                         .attr("stroke", "black")?
-                        .polyline_data(|w| {
-                            for a in it {
-                                w.add_point(a)?;
+                        .points_data(|w| {
+                            for [x,y] in it {
+                                w.add_point(x,y)?;
                             }
                             Ok(w)
                         })

@@ -14,4 +14,4 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tagger = "0.5"
+tagger = "0.6"
