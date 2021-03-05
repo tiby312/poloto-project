@@ -65,16 +65,24 @@ pub fn add_styling<T: Write>(
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<'a, T: Write>(
-    pl: Plotter,
-    svg: &'a mut tagger::Element<T>,
-) -> Result<&'a mut tagger::Element<T>, fmt::Error> {
+pub fn render<'a,'x, T: Write>(
+    mut writer:&'x mut T,
+    plots:PlotData<'a,T>,
+    title:impl FnOnce(&mut T)->fmt::Result,
+    xname:impl FnOnce(&mut T)->fmt::Result,
+    yname:impl FnOnce(&mut T)->fmt::Result,
+) -> Result<&'x mut T, fmt::Error> {
     use super::default_svg_tag::*;
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
     let paddingy = 100.0;
 
+    
+    let mut plots=plots.0;
+
+    let svg=&mut tagger::Element::new(&mut writer);
+    
     svg.single("rect", |w| {
         w.attr("class", "poloto_background")?
             .attr("fill", "white")?
@@ -84,25 +92,18 @@ pub fn render<'a, T: Write>(
             .attr("height", height)
     })?;
 
-    let Plotter {
-        plots,
-        title,
-        xname,
-        yname,
-    } = pl;
-
     //TODO BIIIIG data structure. what to do?
     let plots: Vec<_> = plots
-        .into_iter()
-        .map(|x| {
+        .drain(..)
+        .map(|mut x| {
             let plots: Vec<_> = x
-                .plots
+                .plots.iter()
                 .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite()))
                 .collect();
 
             PlotDecomp {
                 plot_type: x.plot_type,
-                name: x.name,
+                name_writer:x.plots,
                 plots,
             }
         })
@@ -114,7 +115,7 @@ pub fn render<'a, T: Write>(
             m
         } else {
             //TODO test that this looks ok
-            return Ok(svg); //No plots at all. dont need to draw anything
+            return Ok(writer); //No plots at all. dont need to draw anything
         };
 
     const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
@@ -274,7 +275,7 @@ pub fn render<'a, T: Write>(
         colori,
         PlotDecomp {
             plot_type,
-            name,
+            mut name_writer,
             plots,
         },
     ) in plots
@@ -284,7 +285,8 @@ pub fn render<'a, T: Write>(
     {
         let spacing = padding / 3.0;
 
-        if !name.is_empty() {
+        //TODO how to check for this???
+        //if !name.is_empty() {
             svg.elem("text", |writer| {
                 let text = writer.write(|w| {
                     w.attr("class", "poloto_text")?
@@ -294,9 +296,10 @@ pub fn render<'a, T: Write>(
                         .attr("x", width - padding / 1.2)?
                         .attr("y", paddingy + (i as f64) * spacing)
                 })?;
-                write_ret!(text, "{}", name)
+                name_writer.write_name(text.get_writer())?;
+                Ok(text)
             })?;
-        }
+        //}
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
@@ -313,7 +316,7 @@ pub fn render<'a, T: Write>(
         match plot_type {
             PlotType::Line => {
                 //TODO better way to modularize this if statement for all plots?
-                if !name.is_empty() {
+                //if !name.is_empty() {
                     svg.single("line", |w| {
                         w.with_attr("class", wr!("poloto{}stroke", colori))?
                             .attr("stroke", "black")?
@@ -322,7 +325,7 @@ pub fn render<'a, T: Write>(
                             .attr("y1", legendy1)?
                             .attr("y2", legendy1)
                     })?;
-                }
+                //}
 
                 svg.single("polyline", |w| {
                     w.with_attr("class", wr!("poloto{}stroke", colori))?
@@ -337,14 +340,14 @@ pub fn render<'a, T: Write>(
                 })?;
             }
             PlotType::Scatter => {
-                if !name.is_empty() {
+                //if !name.is_empty() {
                     svg.single("circle", |w| {
                         w.with_attr("class", wr!("poloto{}fill", colori))?
                             .attr("cx", legendx1 + padding / 30.0)?
                             .attr("cy", legendy1)?
                             .attr("r", padding / 30.0)
                     })?;
-                }
+                //}
 
                 svg.elem("g", |w| {
                     let g = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori)))?;
@@ -359,7 +362,7 @@ pub fn render<'a, T: Write>(
                 })?;
             }
             PlotType::Histo => {
-                if !name.is_empty() {
+                //if !name.is_empty() {
                     svg.single("rect", |w| {
                         w.with_attr("class", wr!("poloto{}fill", colori))?
                             .attr("x", legendx1)?
@@ -369,7 +372,7 @@ pub fn render<'a, T: Write>(
                             .attr("rx", padding / 30.0)?
                             .attr("ry", padding / 30.0)
                     })?;
-                }
+                //}
 
                 svg.elem("g", |w| {
                     let g = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori)))?;
@@ -394,7 +397,7 @@ pub fn render<'a, T: Write>(
                 })?;
             }
             PlotType::LineFill => {
-                if !name.is_empty() {
+                //if !name.is_empty() {
                     svg.single("rect", |w| {
                         w.with_attr("class", wr!("poloto{}fill", colori))?
                             .attr("x", legendx1)?
@@ -404,7 +407,7 @@ pub fn render<'a, T: Write>(
                             .attr("rx", padding / 30.0)?
                             .attr("ry", padding / 30.0)
                     })?;
-                }
+                //}
                 svg.single("path", |w| {
                     w.with_attr("class", wr!("poloto{}fill", colori))?
                         .path_data(|data| {
@@ -432,7 +435,8 @@ pub fn render<'a, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", padding / 4.0)
         })?;
-        write_ret!(text, "{}", title)
+        title(text.get_writer())?;
+        Ok(text)
     })?;
 
     svg.elem("text", |writer| {
@@ -444,7 +448,8 @@ pub fn render<'a, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", height - padding / 8.)
         })?;
-        write_ret!(text, "{}", xname)
+        xname(text.get_writer())?;
+        Ok(text)
     })?;
 
     svg.elem("text", |writer| {
@@ -460,7 +465,8 @@ pub fn render<'a, T: Write>(
                 .attr("x", padding / 4.0)?
                 .attr("y", height / 2.0)
         })?;
-        write_ret!(text, "{}", yname)
+        yname(text.get_writer())?;
+        Ok(text)
     })?;
 
     svg.single("path", |w| {
@@ -473,5 +479,8 @@ pub fn render<'a, T: Write>(
                 .draw(L(padding,height-paddingy))?
                 .draw(L(width-padding,height-paddingy))
             })
-    })
+    })?;
+
+    Ok(writer)
+
 }

@@ -1,22 +1,34 @@
+
+use tagger::prelude::*;
+
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut s = poloto::plot(
-        "Demo: Some Trigonometry Plots",
-        "This is the x label",
-        "This is the y label",
-    );
 
-    let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
+    let mut buffer=String::new();
 
-    s.line("cos", x.clone().map(|x| [x, x.cos()]));
+    let mut s = poloto::plot(&mut buffer);
+    
+    let x = (0..1).map(|x| (x as f64 / 50.0) * 10.0);
+    
+    let chi=5;
+    {
+        s.line( |w|write!(w,"chicken {}",chi), x.clone().map(|x| [x, x.cos()]));
+    }
+    
+    s.scatter(wr!("sin"), x.clone().map(|x| [x, x.sin()]));
 
-    s.scatter("sin", x.clone().map(|x| [x, x.sin()]));
+    s.histogram(wr!("sin-10"), x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
+    s.line_fill(wr!("sin-20"), x.clone().map(|x| [x, x.sin() - 20.]));
+    
+    s.render(
+        wr!("Demo: Some Trigonometry Plots {}",5),
+        wr!("This is the x label"),
+        wr!("This is the y label"),
+    )?;
+    
 
-    s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
-
-    poloto::render_svg_io(std::io::stdout(), s)?;
+    println!("{}",buffer);
 
     Ok(())
 }
