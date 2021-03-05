@@ -132,13 +132,13 @@ enum PlotType {
 
 struct Plot<'a> {
     plot_type: PlotType,
-    name: String,
+    name: &'a str,
     plots: Box<dyn PlotTrait<'a> + 'a>,
 }
 
-struct PlotDecomp {
+struct PlotDecomp<'a> {
     plot_type: PlotType,
-    name: String,
+    name: &'a str,
     plots: Vec<[f64; 2]>,
 }
 
@@ -193,10 +193,10 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
     /// plotter.line("cow",data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f64; 2]> + 'a>(&mut self, name: impl ToString, plots: I) {
+    pub fn line<I: IntoIterator<Item = [f64; 2]> + 'a>(&mut self, name: &'a str, plots: I) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -216,12 +216,12 @@ impl<'a> Plotter<'a> {
     /// ```
     pub fn line_fill<I: IntoIterator<Item = [f64; 2]> + 'a>(
         &mut self,
-        name: impl ToString,
+        name: &'a str,
         plots: I,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -241,12 +241,12 @@ impl<'a> Plotter<'a> {
     /// ```
     pub fn scatter<I: IntoIterator<Item = [f64; 2]> + 'a>(
         &mut self,
-        name: impl ToString,
+        name: &'a str,
         plots: I,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -267,12 +267,12 @@ impl<'a> Plotter<'a> {
     /// ```
     pub fn histogram<I: IntoIterator<Item = [f64; 2]> + 'a>(
         &mut self,
-        name: impl ToString,
+        name: &'a str,
         plots: I,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            name: name.to_string(),
+            name,
             plots: Box::new(Wrapper::new(plots.into_iter())),
         })
     }
@@ -335,6 +335,8 @@ impl<'a> Plotter<'a> {
         render::render(self, el)
     }
 }
+
+
 
 ///Function to write to a T that implements `std::fmt::Write`
 ///Makes a svg tag with the defaults defined in [`default_svg_tag`].
