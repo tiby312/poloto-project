@@ -1,0 +1,23 @@
+<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"><style>.poloto {
+            font-family: "Arial";
+            stroke-width:2;
+            }
+            .poloto_text{fill: var(--poloto_fg_color,black);  }
+            .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stoke-width:3;fill:none}
+            .poloto_background{fill: var(--poloto_bg_color,aliceblue); }
+            .poloto0stroke{stroke:  var(--poloto_color0,blue); }
+            .poloto1stroke{stroke:  var(--poloto_color1,red); }
+            .poloto2stroke{stroke:  var(--poloto_color2,green); }
+            .poloto3stroke{stroke:  var(--poloto_color3,gold); }
+            .poloto4stroke{stroke:  var(--poloto_color4,aqua); }
+            .poloto5stroke{stroke:  var(--poloto_color5,brown); }
+            .poloto6stroke{stroke:  var(--poloto_color6,lime); }
+            .poloto7stroke{stroke:  var(--poloto_color7,chocolate); }
+            .poloto0fill{fill:var(--poloto_color0,blue);}
+            .poloto1fill{fill:var(--poloto_color1,red);}
+            .poloto2fill{fill:var(--poloto_color2,green);}
+            .poloto3fill{fill:var(--poloto_color3,gold);}
+            .poloto4fill{fill:var(--poloto_color4,aqua);}
+            .poloto5fill{fill:var(--poloto_color5,brown);}
+            .poloto6fill{fill:var(--poloto_color6,lime);}
+            .poloto7fill{fill:var(--poloto_color7,chocolate);}</style><style><style>.poloto{--poloto_color0:purple;}</style></style><rect class="poloto_background" fill="white" x="0" y="0" width="800" height="500"/><line class="poloto_axis_lines" stroke="black" x1="150" x2="150" y1="400" y2="405"/><text class="poloto_text" alignment-baseline="start" text-anchor="middle" x="150" y="430">1.0</text><line class="poloto_axis_lines" stroke="black" x1="275" x2="275" y1="400" y2="405"/><text class="poloto_text" alignment-baseline="start" text-anchor="middle" x="275" y="430">1.5</text><line class="poloto_axis_lines" stroke="black" x1="400" x2="400" y1="400" y2="405"/><text class="poloto_text" alignment-baseline="start" text-anchor="middle" x="400" y="430">2.0</text><line class="poloto_axis_lines" stroke="black" x1="525" x2="525" y1="400" y2="405"/><text class="poloto_text" alignment-baseline="start" text-anchor="middle" x="525" y="430">2.5</text><line class="poloto_axis_lines" stroke="black" x1="650" x2="650" y1="400" y2="405"/><text class="poloto_text" alignment-baseline="start" text-anchor="middle" x="650" y="430">3.0</text><line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="400" y2="400"/><text class="poloto_text" alignment-baseline="middle" text-anchor="end" x="135" y="400">4.0</text><line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="325" y2="325"/><text class="poloto_text" alignment-baseline="middle" text-anchor="end" x="135" y="325">4.5</text><line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="250" y2="250"/><text class="poloto_text" alignment-baseline="middle" text-anchor="end" x="135" y="250">5.0</text><line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="175" y2="175"/><text class="poloto_text" alignment-baseline="middle" text-anchor="end" x="135" y="175">5.5</text><line class="poloto_axis_lines" stroke="black" x1="150" x2="144" y1="100" y2="100"/><text class="poloto_text" alignment-baseline="middle" text-anchor="end" x="135" y="100">6.0</text><text class="poloto_text" alignment-baseline="middle" text-anchor="start" font-size="large" x="675" y="100">cow</text><line class="poloto0stroke" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/><polyline class="poloto0stroke" fill="none" stroke="black" points="150,400 400,250 650,100 "/><text class="poloto_text" alignment-baseline="start" text-anchor="middle" font-size="x-large" x="400" y="37.5">cows per year</text><text class="poloto_text" alignment-baseline="start" text-anchor="middle" font-size="x-large" x="400" y="481.25">year</text><text class="poloto_text" alignment-baseline="start" text-anchor="middle" font-size="x-large" transform="rotate(-90,37.5,250)" x="37.5" y="250">cows</text><path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150 100 L 150 400 L 650 400"/></svg>

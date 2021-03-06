@@ -2,14 +2,9 @@ use tagger::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut root = tagger::Element::new(tagger::upgrade(std::io::stdout()));
+    let mut buffer = tagger::upgrade(std::io::stdout());
 
-    root.elem("svg", |writer| {
-        let svg = writer.write(|w| {
-            poloto::default_svg_tag::default()(w)?;
-            Ok(w)
-        })?;
-
+    poloto::default_tags::default_svg_and_styling(&mut buffer, |svg| {
         write!(
             svg,
             "{}",
@@ -36,17 +31,21 @@ fn main() -> core::fmt::Result {
         "###
         )?;
 
-        let mut s = poloto::plot(
-            "Demo: you can change the style of the svg file itself!",
-            "x",
-            "y",
-        );
+        let mut s = poloto::plot(svg);
 
         let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-        s.line("cos", x.clone().map(|x| [x, x.cos()]));
-        s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
-        s.render(svg)
+        s.line(wr!("cos"), x.clone().map(|x| [x, x.cos()]));
+        s.histogram(
+            wr!("sin-10"),
+            x.clone().step_by(3).map(|x| [x, x.sin() - 10.]),
+        );
+        s.render_no_default_tags(
+            wr!("Demo: you can change the style of the svg file itself!"),
+            wr!("x"),
+            wr!("y"),
+        )
     })?;
+
     Ok(())
 }

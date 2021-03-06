@@ -1,12 +1,19 @@
-fn main() {
-    let mut s = poloto::plot("Demo: Hovering and shadows", "x", "y");
+use poloto::prelude::*;
+fn main() -> core::fmt::Result {
+    let mut fs = String::new();
+    let mut s = poloto::plot(&mut fs);
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    s.line("cos", x.clone().map(|x| [x, x.cos()]));
-    s.histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
-    s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
-    let fs = poloto::render_to_string(s).unwrap();
+    s.line(wr!("cos"), x.clone().map(|x| [x, x.cos()]));
+    s.histogram(
+        wr!("sin-3"),
+        x.clone().step_by(3).map(|x| [x, x.sin() - 3.]),
+    );
+    s.scatter(wr!("sin"), x.clone().step_by(3).map(|x| [x, x.sin()]));
+
+    s.render(wr!("Demo: Hovering and shadows"), wr!("x"), wr!("y"))?;
+
     println!(
         r###"
 <html>
@@ -18,6 +25,7 @@ fn main() {
         "###,
         HEADER, fs
     );
+    Ok(())
 }
 
 const HEADER: &'static str = r###"
