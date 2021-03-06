@@ -68,9 +68,12 @@ use core::marker::PhantomData;
 use core::fmt::Write;
 
 mod util;
-
+pub mod prelude{
+    pub use tagger::wr;
+    pub use core::fmt::Write;
+}
 use core::fmt;
-mod render;
+pub mod render;
 
 /// [`render_svg`] creates its own svg tag, and then calls [`Plotter::render`].
 /// The default attributes set in that svg tag are in this module.
@@ -84,6 +87,7 @@ pub mod default_svg_tag {
     ///The height of the svg tag.
     pub const HEIGHT: f64 = 500.0;
 
+    pub const XMLNS:&str="http://www.w3.org/2000/svg";
     ///Returns a function that will write the attributes.
     pub fn default<T: fmt::Write>(
     ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
@@ -94,7 +98,7 @@ pub mod default_svg_tag {
                 .attr("width", WIDTH)?
                 .attr("height", HEIGHT)?
                 .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
-                .attr("xmlns", "http://www.w3.org/2000/svg")?;
+                .attr("xmlns", XMLNS)?;
             Ok(())
         }
     }
@@ -158,7 +162,7 @@ pub struct Plotter<'a,T> {
 }
 
 
-pub struct PlotData<'a,T>(Vec<Plot<'a,T>>);
+struct PlotData<'a,T>(Vec<Plot<'a,T>>);
 
 
 ///Convenience function for [`Plotter::new()`]
@@ -166,30 +170,30 @@ pub fn plot<'a,T:fmt::Write+'a>(writer:T) -> Plotter<'a,T> {
     Plotter::new(writer)
 }
 
+///Convenience function for
+///
+/// Instead of this
+/// ```
+/// let plotter = poloto::plot(tagger::upgrade(std::io::stdout()));
+/// ```
+/// You can call this function like this
+/// ```
+/// let plotter = poloto::plot_io(std::io::stdout());
+/// ```
+pub fn plot_io<'a,T:std::io::Write+'a>(writer:T) -> Plotter<'a,tagger::WriterAdaptor<T>> {
+    Plotter::new(tagger::upgrade(writer))
+}
 
 impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
-    /*
     /// Create a plotter
     ///
     /// # Example
     ///
     /// ```
-    /// let plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
+    /// let mut s=String::new();
+    /// let plotter = poloto::Plotter::new(&mut s);
     /// ```
-    pub fn from_element(mut element:tagger::ElementStack<'a,T>) -> Result<Plotter<'a,T>,fmt::Error> {
-        render::add_styling(&mut element)?;
-
-        Ok(Plotter {
-            element,
-            plots: Vec::new(),
-        })
-    }
-    */
     pub fn new(writer:T)->Plotter<'a,T>{
-        //let mut stack=tagger::ElementStack::new(writer);
-        //stack.elem_stack("svg",|w|{default_svg_tag::default()(w)?;Ok(w)})?;    
-        //render::add_styling(&mut stack)?;
-        //Self::from_element(stack)    
         Plotter{
             writer,
             plots:PlotData(Vec::new())
@@ -206,10 +210,12 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.line("cow",data.iter().map(|&x|x))
+    /// use core::fmt::Write;
+    /// let mut s=String::new();
+    /// let mut plotter = poloto::Plotter::new(&mut s);
+    /// plotter.line(|w|write!(w,"cow"),data.iter().map(|&x|x))
     /// ```
-    pub fn line<I: IntoIterator<Item = [f64; 2]>+'a >(&mut self, name: impl FnOnce(&mut T)->fmt::Result+'a, plots: I) {
+    pub fn line(&mut self, name: impl FnOnce(&mut T)->fmt::Result+'a, plots: impl IntoIterator<Item = [f64; 2]>+'a ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Line,
             plots: Box::new(Wrapper::new(plots.into_iter(),name)),
@@ -227,13 +233,15 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.line_fill("cow",data.iter().map(|&x|x))
+    /// use core::fmt::Write;
+    /// let mut s=String::new();
+    /// let mut plotter = poloto::Plotter::new(&mut s);
+    /// plotter.line_fill(|w|write!(w,"cow"),data.iter().map(|&x|x))
     /// ```
-    pub fn line_fill<I: IntoIterator<Item = [f64; 2]> + 'a>(
+    pub fn line_fill(
         &mut self,
         name: impl FnOnce(&mut T)->fmt::Result+'a,
-        plots: I,
+        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::LineFill,
@@ -251,13 +259,15 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.scatter("cow",data.iter().map(|&x|x))
+    /// use core::fmt::Write;
+    /// let mut s=String::new();
+    /// let mut plotter = poloto::Plotter::new(&mut s);
+    /// plotter.scatter(|w|write!(w,"cow"),data.iter().map(|&x|x))
     /// ```
-    pub fn scatter<I: IntoIterator<Item = [f64; 2]> + 'a>(
+    pub fn scatter(
         &mut self,
         name: impl FnOnce(&mut T)->fmt::Result+'a,
-        plots: I,
+        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Scatter,
@@ -276,13 +286,15 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    /// plotter.histogram("cow",data.iter().map(|&x|x))
+    /// use core::fmt::Write;
+    /// let mut s=String::new();
+    /// let mut plotter = poloto::Plotter::new(&mut s);
+    /// plotter.histogram(|w|write!(w,"cow"),data.iter().map(|&x|x))
     /// ```
-    pub fn histogram<I: IntoIterator<Item = [f64; 2]> + 'a>(
+    pub fn histogram(
         &mut self,
         name: impl FnOnce(&mut T)->fmt::Result+'a,
-        plots: I,
+        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Histo,
@@ -301,39 +313,6 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     ///All the plot functions don't actually add anything to the document until a  `render` function is called.
     ///So calls to this will append elements to the start of the document.
     ///
-    /// # Example
-    ///
-    /// ```
-    /// fn main()->std::fmt::Result{
-    ///     use tagger::prelude::*;
-    ///     let data=[
-    ///         [1.0f64,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    ///     ];
-    ///     let mut plotter = poloto::Plotter::new("Number of Cows per Year","Year","Cow");
-    ///     plotter.line("cow",data.iter().map(|&x|x));
-    ///
-    ///     let mut buffer=String::new();
-    ///     let mut root=tagger::Element::new(&mut buffer);
-    ///
-    ///     root.elem("svg",|writer|{
-    ///         let svg=writer.write(|w|{
-    ///             poloto::default_svg_tag::default()(w)?;
-    ///             Ok(w)
-    ///         })?;
-    ///
-    ///         // Make the line purple.
-    ///         svg.elem_no_attr("style",|w|{
-    ///             write_ret!(w,"{}","<style>.poloto{--poloto_color0:purple;}</style>")
-    ///         })?;
-    ///     
-    ///         plotter.render(svg)
-    ///     })?;
-    ///     println!("{}",buffer);
-    ///     Ok(())
-    /// }
-    /// ```
     pub fn render_no_default_tags(
         self,
         title:impl FnOnce(&mut T)->fmt::Result,
@@ -372,18 +351,20 @@ pub fn default_svg<T:Write>(writer:T,func:impl FnOnce(&mut tagger::Element<T>)->
     let mut root = tagger::Element::new(writer);
 
     root.elem("svg", |writer| {
-        let svg = writer.write(|w| {
+        let mut svg = writer.write(|w| {
             default_svg_tag::default()(w)?;
             
             Ok(w)
         })?;
-        render::add_styling(svg)?;
+        render::add_styling(&mut svg)?;
         func(svg)
     })?;
 
     Ok(root.into_writer())
 
 }
+
+
 /*
 ///Function to write to a T that implements `std::fmt::Write`
 ///Makes a svg tag with the defaults defined in [`default_svg_tag`].

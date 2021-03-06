@@ -31,18 +31,29 @@ fn main() -> fmt::Result {
 
             for test in generate_test().iter() {
                 div.elem("svg", |writer| {
-                    let svg = writer.write(|w| {
+
+                    //Build the svg tag from scratch so we can use our own
+                    //width and height
+                    let mut svg = writer.write(|w| {
+                        use poloto::default_svg_tag::*;
+                        w.attr("class",CLASS)?;
+                        w.attr("xmlns", XMLNS)?;
+                        w.with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?;
                         w.attr("width", "500px")?.attr("height", "100%")?;
-                        poloto::default_svg_tag::default()(w)?;
                         Ok(w)
                     })?;
 
-                    let mut s =
-                        poloto::plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
+                    poloto::render::add_styling(&mut svg)?;
 
-                    s.scatter("test", test.iter().copied());
+                    let mut s = poloto::plot(svg);
 
-                    s.render(svg)
+                    s.scatter(wr!("test"), test.iter().copied());
+
+                    s.render(
+                        wr!("Demo: you can use CSS patterns if you embed SVG!"),
+                        wr!("x"),
+                        wr!("y")
+                    )
                 })?;
             }
             Ok(div)
