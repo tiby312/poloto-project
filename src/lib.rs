@@ -64,13 +64,13 @@
 //!
 //! See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
 //!
-use core::marker::PhantomData;
 use core::fmt::Write;
+use core::marker::PhantomData;
 
 mod util;
-pub mod prelude{
-    pub use tagger::wr;
+pub mod prelude {
     pub use core::fmt::Write;
+    pub use tagger::wr;
 }
 use core::fmt;
 mod render;
@@ -82,7 +82,6 @@ pub mod default_tags {
 
     pub use super::render::default_styling;
 
-
     ///The class of the svg tag.
     pub const CLASS: &str = "poloto";
     ///The width of the svg tag.
@@ -90,7 +89,7 @@ pub mod default_tags {
     ///The height of the svg tag.
     pub const HEIGHT: f64 = 500.0;
 
-    pub const XMLNS:&str="http://www.w3.org/2000/svg";
+    pub const XMLNS: &str = "http://www.w3.org/2000/svg";
     ///Returns a function that will write the attributes.
     pub fn default_svg_attrs<T: fmt::Write>(
     ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
@@ -106,49 +105,55 @@ pub mod default_tags {
         }
     }
     use core::fmt::Write;
-    pub fn default_svg_and_styling<T:Write>(writer:T,func:impl FnOnce(&mut tagger::Element<T>)->Result<&mut tagger::Element<T>,fmt::Error>)
-    ->Result<T,fmt::Error>{
-    let mut root = tagger::Element::new(writer);
+    pub fn default_svg_and_styling<T: Write>(
+        writer: T,
+        func: impl FnOnce(&mut tagger::Element<T>) -> Result<&mut tagger::Element<T>, fmt::Error>,
+    ) -> Result<T, fmt::Error> {
+        let mut root = tagger::Element::new(writer);
 
-    root.elem("svg", |writer| {
-        let mut svg = writer.write(|w| {
-            default_svg_attrs()(w)?;
-            
-            Ok(w)
+        root.elem("svg", |writer| {
+            let mut svg = writer.write(|w| {
+                default_svg_attrs()(w)?;
+
+                Ok(w)
+            })?;
+            default_styling(&mut svg)?;
+            func(svg)
         })?;
-        default_styling(&mut svg)?;
-        func(svg)
-    })?;
 
-    Ok(root.into_writer())
-
+        Ok(root.into_writer())
     }
-
 }
 
-struct Wrapper<I,F,T> {
+struct Wrapper<I, F, T> {
     it: Option<I>,
-    func:Option<F>,
-    _p:PhantomData<T>
+    func: Option<F>,
+    _p: PhantomData<T>,
 }
-impl<I: Iterator<Item = [f64; 2]> ,F:FnOnce(&mut T)->fmt::Result,T> Wrapper<I,F,T> {
-    fn new(it: I,func:F) -> Self {
-        Wrapper { it:Some(it),func:Some(func),_p:PhantomData }
+impl<I: Iterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrapper<I, F, T> {
+    fn new(it: I, func: F) -> Self {
+        Wrapper {
+            it: Some(it),
+            func: Some(func),
+            _p: PhantomData,
+        }
     }
 }
 
-impl<'a,I: Iterator<Item = [f64; 2]> +'a,F:FnOnce(&mut T)->fmt::Result,T:fmt::Write> PlotTrait<'a,T> for Wrapper<I,F,T> {
-    fn write_name(&mut self,a:&mut T)->fmt::Result{
+impl<'a, I: Iterator<Item = [f64; 2]> + 'a, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write>
+    PlotTrait<'a, T> for Wrapper<I, F, T>
+{
+    fn write_name(&mut self, a: &mut T) -> fmt::Result {
         self.func.take().unwrap()(a)
     }
-    fn iter(&mut self)->Box<dyn Iterator<Item=[f64;2]>+'a>{
+    fn iter(&mut self) -> Box<dyn Iterator<Item = [f64; 2]> + 'a> {
         Box::new(self.it.take().unwrap())
     }
 }
 
-trait PlotTrait<'a,T:Write> {
-    fn write_name(&mut self,a:&mut T)->fmt::Result;
-    fn iter(&mut self)->Box<dyn Iterator<Item=[f64;2]>+'a>;
+trait PlotTrait<'a, T: Write> {
+    fn write_name(&mut self, a: &mut T) -> fmt::Result;
+    fn iter(&mut self) -> Box<dyn Iterator<Item = [f64; 2]> + 'a>;
 }
 
 enum PlotType {
@@ -158,14 +163,14 @@ enum PlotType {
     LineFill,
 }
 
-struct Plot<'a,T> {
+struct Plot<'a, T> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait<'a,T> + 'a>,
+    plots: Box<dyn PlotTrait<'a, T> + 'a>,
 }
 
-struct PlotDecomp<'a,T> {
+struct PlotDecomp<'a, T> {
     plot_type: PlotType,
-    name_writer:Box<dyn PlotTrait<'a,T> + 'a>,
+    name_writer: Box<dyn PlotTrait<'a, T> + 'a>,
     plots: Vec<[f64; 2]>,
 }
 
@@ -178,17 +183,15 @@ struct PlotDecomp<'a,T> {
 //So inefficiencies in dynamically allocating strings using format!() to then
 //be just passed to a writer are not that bad seeing as the solution
 //would involve passing a lot of closures around.
-pub struct Plotter<'a,T> {
-    writer:T,
-    plots: PlotData<'a,T>
+pub struct Plotter<'a, T> {
+    writer: T,
+    plots: PlotData<'a, T>,
 }
 
-
-struct PlotData<'a,T>(Vec<Plot<'a,T>>);
-
+struct PlotData<'a, T>(Vec<Plot<'a, T>>);
 
 ///Convenience function for [`Plotter::new()`]
-pub fn plot<'a,T:fmt::Write+'a>(writer:T) -> Plotter<'a,T> {
+pub fn plot<'a, T: fmt::Write + 'a>(writer: T) -> Plotter<'a, T> {
     Plotter::new(writer)
 }
 
@@ -202,11 +205,11 @@ pub fn plot<'a,T:fmt::Write+'a>(writer:T) -> Plotter<'a,T> {
 /// ```
 /// let plotter = poloto::plot_io(std::io::stdout());
 /// ```
-pub fn plot_io<'a,T:std::io::Write+'a>(writer:T) -> Plotter<'a,tagger::WriterAdaptor<T>> {
+pub fn plot_io<'a, T: std::io::Write + 'a>(writer: T) -> Plotter<'a, tagger::WriterAdaptor<T>> {
     Plotter::new(tagger::upgrade(writer))
 }
 
-impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
+impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// Create a plotter
     ///
     /// # Example
@@ -215,10 +218,10 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     /// let mut s=String::new();
     /// let plotter = poloto::Plotter::new(&mut s);
     /// ```
-    pub fn new(writer:T)->Plotter<'a,T>{
-        Plotter{
+    pub fn new(writer: T) -> Plotter<'a, T> {
+        Plotter {
             writer,
-            plots:PlotData(Vec::new())
+            plots: PlotData(Vec::new()),
         }
     }
 
@@ -237,14 +240,17 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     /// let mut plotter = poloto::Plotter::new(&mut s);
     /// plotter.line(|w|write!(w,"cow"),data.iter().map(|&x|x))
     /// ```
-    pub fn line(&mut self, name: impl FnOnce(&mut T)->fmt::Result+'a, plots: impl IntoIterator<Item = [f64; 2]>+'a ) {
+    pub fn line(
+        &mut self,
+        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
+        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
+    ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(Wrapper::new(plots.into_iter(),name)),
+            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
         })
     }
 
-    
     /// Create a line from plots that will be filled underneath.
     ///
     /// # Example
@@ -262,12 +268,12 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     /// ```
     pub fn line_fill(
         &mut self,
-        name: impl FnOnce(&mut T)->fmt::Result+'a,
+        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl IntoIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(Wrapper::new(plots.into_iter(),name)),
+            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
         })
     }
 
@@ -288,12 +294,12 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     /// ```
     pub fn scatter(
         &mut self,
-        name: impl FnOnce(&mut T)->fmt::Result+'a,
+        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl IntoIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(Wrapper::new(plots.into_iter(),name)),
+            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
         })
     }
 
@@ -315,15 +321,14 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     /// ```
     pub fn histogram(
         &mut self,
-        name: impl FnOnce(&mut T)->fmt::Result+'a,
+        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl IntoIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(Wrapper::new(plots.into_iter(),name)),
+            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
         })
     }
-
 
     ///You can override the css in regular html if you embed the generated svg.
     ///This gives you a lot of flexibility giving your the power to dynamically
@@ -337,37 +342,30 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
     ///
     pub fn render_no_default_tags(
         self,
-        title:impl FnOnce(&mut T)->fmt::Result,
-        xname:impl FnOnce(&mut T)->fmt::Result,
-        yname:impl FnOnce(&mut T)->fmt::Result,
+        title: impl FnOnce(&mut T) -> fmt::Result,
+        xname: impl FnOnce(&mut T) -> fmt::Result,
+        yname: impl FnOnce(&mut T) -> fmt::Result,
     ) -> Result<T, fmt::Error> {
-        let Plotter{
-            mut writer,
-            plots
-        }=self;
+        let Plotter { mut writer, plots } = self;
 
-        render::render(&mut writer,plots,title,xname,yname)?;
+        render::render(&mut writer, plots, title, xname, yname)?;
         Ok(writer)
     }
-    
+
     pub fn render(
         self,
-        title:impl FnOnce(&mut T)->fmt::Result,
-        xname:impl FnOnce(&mut T)->fmt::Result,
-        yname:impl FnOnce(&mut T)->fmt::Result,
+        title: impl FnOnce(&mut T) -> fmt::Result,
+        xname: impl FnOnce(&mut T) -> fmt::Result,
+        yname: impl FnOnce(&mut T) -> fmt::Result,
     ) -> Result<T, fmt::Error> {
-        let Plotter{
-            writer,
-            plots
-        }=self;
+        let Plotter { writer, plots } = self;
 
-        default_tags::default_svg_and_styling(writer,|e|{
-            render::render(e.get_writer(),plots,title,xname,yname)?;
+        default_tags::default_svg_and_styling(writer, |e| {
+            render::render(e.get_writer(), plots, title, xname, yname)?;
             Ok(e)
         })
     }
 }
-
 
 /*
 ///Function to write to a T that implements `std::fmt::Write`

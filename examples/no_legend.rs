@@ -7,11 +7,7 @@ fn main() -> core::fmt::Result {
 
     s.scatter(wr!(""), data.iter().map(|x| *x));
 
-    s.render(
-        wr!("Cows Per Year"),
-        wr!("Year"),
-        wr!("Cow")
-    )?;
+    s.render(wr!("Cows Per Year"), wr!("Year"), wr!("Cow"))?;
 
     Ok(())
 }

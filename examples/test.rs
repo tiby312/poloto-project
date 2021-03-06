@@ -31,12 +31,11 @@ fn main() -> fmt::Result {
 
             for test in generate_test().iter() {
                 div.elem("svg", |writer| {
-
                     //Build the svg tag from scratch so we can use our own
                     //width and height
                     let mut svg = writer.write(|w| {
                         use poloto::default_tags::*;
-                        w.attr("class",CLASS)?;
+                        w.attr("class", CLASS)?;
                         w.attr("xmlns", XMLNS)?;
                         w.with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?;
                         w.attr("width", "500px")?.attr("height", "100%")?;
@@ -52,7 +51,7 @@ fn main() -> fmt::Result {
                     s.render(
                         wr!("Demo: you can use CSS patterns if you embed SVG!"),
                         wr!("x"),
-                        wr!("y")
+                        wr!("y"),
                     )
                 })?;
             }
