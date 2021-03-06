@@ -3,7 +3,7 @@ use tagger::prelude::*;
 
 const NUM_COLORS: usize = 8;
 
-pub fn add_styling<T: Write>(
+pub fn default_styling<T: Write>(
     svg: T,
 ) -> Result<T, fmt::Error> {
     //Default colors if CSS is not overriden with user colors.
@@ -25,7 +25,7 @@ pub fn add_styling<T: Write>(
     svg.elem_no_attr("style", |w| {
         write_ret!(
             w,
-            r###"<style>.poloto {{
+            r###".poloto {{
             font-family: "Arial";
             stroke-width:2;
             }}
@@ -47,7 +47,7 @@ pub fn add_styling<T: Write>(
             .poloto4fill{{fill:var(--poloto_color4,{6});}}
             .poloto5fill{{fill:var(--poloto_color5,{7});}}
             .poloto6fill{{fill:var(--poloto_color6,{8});}}
-            .poloto7fill{{fill:var(--poloto_color7,{9});}}</style>"###,
+            .poloto7fill{{fill:var(--poloto_color7,{9});}}"###,
             text_color,
             background_color,
             colors[0],
@@ -73,7 +73,7 @@ pub(super) fn render<'a,'x, T: Write>(
     xname:impl FnOnce(&mut T)->fmt::Result,
     yname:impl FnOnce(&mut T)->fmt::Result,
 ) -> Result<&'x mut T, fmt::Error> {
-    use super::default_svg_tag::*;
+    use super::default_tags::*;
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;

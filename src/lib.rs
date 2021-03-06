@@ -73,12 +73,15 @@ pub mod prelude{
     pub use core::fmt::Write;
 }
 use core::fmt;
-pub mod render;
+mod render;
 
 /// [`render_svg`] creates its own svg tag, and then calls [`Plotter::render`].
 /// The default attributes set in that svg tag are in this module.
-pub mod default_svg_tag {
+pub mod default_tags {
     use core::fmt;
+
+    pub use super::render::default_styling;
+
 
     ///The class of the svg tag.
     pub const CLASS: &str = "poloto";
@@ -89,7 +92,7 @@ pub mod default_svg_tag {
 
     pub const XMLNS:&str="http://www.w3.org/2000/svg";
     ///Returns a function that will write the attributes.
-    pub fn default<T: fmt::Write>(
+    pub fn default_svg_attrs<T: fmt::Write>(
     ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
         use tagger::prelude::*;
 
@@ -102,6 +105,25 @@ pub mod default_svg_tag {
             Ok(())
         }
     }
+    use core::fmt::Write;
+    pub fn default_svg_and_styling<T:Write>(writer:T,func:impl FnOnce(&mut tagger::Element<T>)->Result<&mut tagger::Element<T>,fmt::Error>)
+    ->Result<T,fmt::Error>{
+    let mut root = tagger::Element::new(writer);
+
+    root.elem("svg", |writer| {
+        let mut svg = writer.write(|w| {
+            default_svg_attrs()(w)?;
+            
+            Ok(w)
+        })?;
+        default_styling(&mut svg)?;
+        func(svg)
+    })?;
+
+    Ok(root.into_writer())
+
+    }
+
 }
 
 struct Wrapper<I,F,T> {
@@ -339,29 +361,11 @@ impl<'a,T:fmt::Write+'a> Plotter<'a,T> {
             plots
         }=self;
 
-        default_svg(writer,|e|{
+        default_tags::default_svg_and_styling(writer,|e|{
             render::render(e.get_writer(),plots,title,xname,yname)?;
             Ok(e)
         })
     }
-}
-
-pub fn default_svg<T:Write>(writer:T,func:impl FnOnce(&mut tagger::Element<T>)->Result<&mut tagger::Element<T>,fmt::Error>)
-    ->Result<T,fmt::Error>{
-    let mut root = tagger::Element::new(writer);
-
-    root.elem("svg", |writer| {
-        let mut svg = writer.write(|w| {
-            default_svg_tag::default()(w)?;
-            
-            Ok(w)
-        })?;
-        render::add_styling(&mut svg)?;
-        func(svg)
-    })?;
-
-    Ok(root.into_writer())
-
 }
 
 

@@ -35,7 +35,7 @@ fn main() -> fmt::Result {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
                     let mut svg = writer.write(|w| {
-                        use poloto::default_svg_tag::*;
+                        use poloto::default_tags::*;
                         w.attr("class",CLASS)?;
                         w.attr("xmlns", XMLNS)?;
                         w.with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?;
@@ -43,7 +43,7 @@ fn main() -> fmt::Result {
                         Ok(w)
                     })?;
 
-                    poloto::render::add_styling(&mut svg)?;
+                    poloto::default_tags::default_styling(&mut svg)?;
 
                     let mut s = poloto::plot(svg);
 

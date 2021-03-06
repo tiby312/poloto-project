@@ -9,7 +9,7 @@ fn main()->std::fmt::Result{
 
     let mut buffer=String::new();
 
-    poloto::default_svg(&mut buffer,|svg|{
+    poloto::default_tags::default_svg_and_styling(&mut buffer,|svg|{
         svg.elem_no_attr("style",|w|{
             write_ret!(w,"{}","<style>.poloto{--poloto_color0:purple;}</style>")
         })?;
