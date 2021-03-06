@@ -124,6 +124,72 @@ pub mod default_tags {
     }
 }
 
+mod iter{
+    pub struct TwiceIter<I>{
+        inner:I
+    }
+    impl<I:Iterator+Clone > PlotIter for TwiceIter<I>{
+        type Item=I::Item;
+        fn first_iter(&mut self,mut func:impl FnMut(&I::Item)){
+            for a in self.inner.clone(){
+                func(&a);
+            }
+        }
+        fn second_iter(&mut self,mut func:impl FnMut(&I::Item)){
+            for a in &mut self.inner{
+                func(&a);
+            }
+        }
+    }
+    /* TODO add this.
+    pub struct FileBufferIter<I>{
+
+    }
+    */
+    pub struct BufferIter<I:Iterator>{
+        inner:I,
+        buffer:Vec<I::Item>
+    }
+
+    impl<I:Iterator+Clone > PlotIter for BufferIter<I> {
+        type Item=I::Item;
+        fn first_iter(&mut self,mut func:impl FnMut(&I::Item)){
+            for a in &mut self.inner{
+                func(&a);
+                self.buffer.push(a);
+            }
+        }
+        fn second_iter(&mut self,mut func:impl FnMut(&I::Item)){
+            for a in self.buffer.drain(..){
+                func(&a);
+            }
+        }
+    }
+
+    pub trait PlotIter{
+        type Item;
+        fn first_iter(&mut self,func:impl FnMut(&Self::Item));
+        fn second_iter(&mut self,func:impl FnMut(&Self::Item));
+    }
+
+    impl<I:IntoIterator> PlotIterAdaptor for I {}
+
+    pub trait PlotIterAdaptor:IntoIterator+Sized {
+        fn plot_buffer(self)->BufferIter<Self::IntoIter>{
+            BufferIter{
+                inner:self.into_iter(),
+                buffer:Vec::new()
+            }
+        }
+        fn plot_no_buffer(self)->TwiceIter<Self::IntoIter> where Self::IntoIter:Clone{
+            TwiceIter{
+                inner:self.into_iter()
+            }
+        }
+    }
+}
+
+
 struct Wrapper<I, F, T> {
     it: Option<I>,
     func: Option<F>,
