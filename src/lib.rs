@@ -76,8 +76,6 @@ pub mod prelude {
 use core::fmt;
 mod render;
 
-/// [`render_svg`] creates its own svg tag, and then calls [`Plotter::render`].
-/// The default attributes set in that svg tag are in this module.
 pub mod default_tags {
     use core::fmt;
 
