@@ -67,6 +67,7 @@
 use core::fmt::Write;
 use core::marker::PhantomData;
 
+pub use tagger;
 mod util;
 pub mod prelude {
     pub use core::fmt::Write;
