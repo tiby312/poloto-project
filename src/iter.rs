@@ -1,26 +1,38 @@
-///A third option is to use the iterator only once, but instead
-///of storing in memory, we use a file as a buffer.
-///
-///We dont auto implement this for iterator types since
-///it is specilized for `[f64;2]`.
-pub mod file{
+
+pub use file::*;
+mod file{
+    use std::path::Path;
     use super::*;
-    pub struct FileBuffer<'a,I:Iterator<Item=[f64;2]>>{
-        path:&'a std::path::Path,
+    ///A third option is to use the iterator only once, but instead
+    ///of storing in memory, we use a file as a buffer.
+    ///
+    ///We dont auto implement this for iterator types since
+    ///it is specilized for `[f64;2]`.
+    pub struct FileBuffer<P: AsRef<Path>,I:Iterator<Item=[f64;2]>>{
+        path:P,
         file:std::fs::File,
         inner:I
     }
-    impl<'a,I:Iterator<Item=[f64;2]>> FileBuffer<'a,I>{
-        pub fn new(inner:I,path:&'a std::path::Path)->Self{
+
+
+    pub fn file_buffer<P: AsRef<Path>,I:Iterator<Item=[f64;2]>>(inner:I,path:P)->FileBuffer<P,I>{
+        FileBuffer::new(
+            inner,
+            path
+        )
+    }
+    impl<P: AsRef<Path>,I:Iterator<Item=[f64;2]>> FileBuffer<P,I>{
+        fn new(inner:I,path:P)->Self{
+            let file=std::fs::File::create(&path).unwrap();
             FileBuffer{
                 path,
-                file:std::fs::File::create(path).unwrap(),
+                file,
                 inner
             }
         }
     }
 
-    impl<I:Iterator<Item=[f64;2]>> Iterator for FileBuffer<'_,I>{
+    impl<P: AsRef<Path>,I:Iterator<Item=[f64;2]>> Iterator for FileBuffer<P,I>{
         type Item=[f64;2];
         fn next(&mut self)->Option<Self::Item>{
             if let Some(a)=self.inner.next(){
@@ -33,7 +45,7 @@ pub mod file{
         }
     }
 
-    impl<I: Iterator<Item=[f64;2]>> DoubleIter for FileBuffer<'_,I>
+    impl<P: AsRef<Path>,I: Iterator<Item=[f64;2]>> DoubleIter for FileBuffer<P,I>
     {
         type Next = Reverse;
         fn finish_first(mut self) -> Self::Next {
@@ -75,8 +87,8 @@ pub mod file{
 
         }
     }
-
 }
+
 impl<I: Iterator + Sized> PlotIterator for I {}
 
 pub trait PlotIterator: IntoIterator + Sized {
