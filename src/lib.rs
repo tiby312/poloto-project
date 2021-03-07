@@ -133,8 +133,8 @@ trait PlotTrait<T: fmt::Write> {
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
 }
+
 struct Wrapper2<D: DoubleIter, F, T> {
-    //TODO use enum instead.
     a: Option<D>,
     b: Option<D::Next>,
     func: Option<F>,

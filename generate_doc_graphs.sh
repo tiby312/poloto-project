@@ -7,4 +7,5 @@ cargo run --example no_legend > assets/no_legend.svg &&
 cargo run --example simple > assets/simple.svg &&
 cargo run --example test > assets/test.html
 cargo run --example write_to_file
+cargo run --example file_iter > assets/file_iter.svg
 

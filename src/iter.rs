@@ -1,6 +1,86 @@
+///A third option is to use the iterator only once, but instead
+///of storing in memory, we use a file as a buffer.
+///
+///We dont auto implement this for iterator types since
+///it is specilized for `[f64;2]`.
+pub mod file{
+    use super::*;
+    pub struct FileBuffer<'a,I:Iterator<Item=[f64;2]>>{
+        path:&'a std::path::Path,
+        file:std::fs::File,
+        inner:I
+    }
+    impl<'a,I:Iterator<Item=[f64;2]>> FileBuffer<'a,I>{
+        pub fn new(inner:I,path:&'a std::path::Path)->Self{
+            FileBuffer{
+                path,
+                file:std::fs::File::create(path).unwrap(),
+                inner
+            }
+        }
+    }
+
+    impl<I:Iterator<Item=[f64;2]>> Iterator for FileBuffer<'_,I>{
+        type Item=[f64;2];
+        fn next(&mut self)->Option<Self::Item>{
+            if let Some(a)=self.inner.next(){
+                use std::io::Write;
+                writeln!(self.file,"{},{}",a[0],a[1]).unwrap();
+                Some(a)
+            }else{
+                None
+            }
+        }
+    }
+
+    impl<I: Iterator<Item=[f64;2]>> DoubleIter for FileBuffer<'_,I>
+    {
+        type Next = Reverse;
+        fn finish_first(mut self) -> Self::Next {
+            use std::io::BufRead;
+            use std::io::SeekFrom;
+            use std::io::Seek;
+            self.file.seek(SeekFrom::Start(0)).unwrap();
+            self.file.sync_all().unwrap();
+            let f=std::fs::File::open(self.path).unwrap();
+            Reverse{
+                lines:std::io::BufReader::new(f).lines()
+            }
+        }
+    }
+
+    pub struct Reverse{
+        lines:std::io::Lines<std::io::BufReader<std::fs::File>>
+    }
+
+    impl Iterator for Reverse{
+        type Item=[f64;2];
+        fn next(&mut self)->Option<Self::Item>{
+            
+            if let Some(a)=self.lines.next(){
+                match a{
+                    Ok(a)=>{
+                        let mut i=a.split(",");
+                        let aa:f64=i.next().unwrap().parse().unwrap();
+                        let bb:f64=i.next().unwrap().parse().unwrap();
+                        Some([aa,bb])
+                    },
+                    Err(e)=>{
+                        panic!("parse error {:?}",e);
+                    }
+                }
+            }else{
+                None
+            }
+
+        }
+    }
+
+}
 impl<I: Iterator + Sized> PlotIterator for I {}
 
 pub trait PlotIterator: IntoIterator + Sized {
+    
     fn buffer_iter(self) -> BufferIter<Self::IntoIter> {
         let i = self.into_iter();
         let ll = i.size_hint().0;
