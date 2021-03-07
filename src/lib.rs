@@ -128,7 +128,7 @@ pub mod default_tags {
     }
 }
 
-trait PlotTrait2<T: fmt::Write> {
+trait PlotTrait<T: fmt::Write> {
     fn write_name(&mut self, a: &mut T) -> fmt::Result;
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
@@ -152,7 +152,7 @@ impl<I: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrappe
     }
 }
 
-impl<D: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write> PlotTrait2<T>
+impl<D: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write> PlotTrait<T>
     for Wrapper2<D, F, T>
 {
     fn write_name(&mut self, a: &mut T) -> fmt::Result {
@@ -177,7 +177,7 @@ enum PlotType {
 
 struct Plot<'a, T> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait2<T> + 'a>,
+    plots: Box<dyn PlotTrait<T> + 'a>,
 }
 
 ///Keeps track of plots.

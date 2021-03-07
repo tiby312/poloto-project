@@ -1,20 +1,22 @@
 impl<I: Iterator + Sized> PlotIterator for I {}
 
-pub trait PlotIterator: Iterator + Sized {
-    fn buffer_iter(self) -> BufferIter<Self> {
-        let ll = self.size_hint().0;
+pub trait PlotIterator: IntoIterator + Sized {
+    fn buffer_iter(self) -> BufferIter<Self::IntoIter> {
+        let i=self.into_iter();
+        let ll = i.size_hint().0;
         BufferIter {
-            inner: self,
+            inner: i,
             buffer: Vec::with_capacity(ll),
         }
     }
-    fn twice_iter(self) -> NoBufferIter<Self>
+    fn twice_iter(self) -> NoBufferIter<Self::IntoIter>
     where
-        Self: Clone,
+        Self::IntoIter:Clone,
     {
-        let sec = self.clone();
+        let i=self.into_iter();
+        let sec = i.clone();
         NoBufferIter {
-            inner: self,
+            inner: i,
             inner2: sec,
         }
     }
