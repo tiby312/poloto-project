@@ -1,4 +1,4 @@
-use tagger::prelude::*;
+use poloto::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
@@ -35,10 +35,10 @@ fn main() -> core::fmt::Result {
 
         let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-        s.line(wr!("cos"), x.clone().map(|x| [x, x.cos()]));
+        s.line(wr!("cos"), x.clone().map(|x| [x, x.cos()]).twice_iter());
         s.histogram(
             wr!("sin-10"),
-            x.clone().step_by(3).map(|x| [x, x.sin() - 10.]),
+            x.clone().step_by(3).map(|x| [x, x.sin() - 10.]).twice_iter(),
         );
         s.render_no_default_tags(
             wr!("Demo: you can change the style of the svg file itself!"),

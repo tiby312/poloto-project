@@ -19,6 +19,7 @@ const fn generate_test() -> [&'static [[f64; 2]]; 8] {
 }
 
 use core::fmt;
+use poloto::prelude::*;
 use tagger::prelude::*;
 fn main() -> fmt::Result {
     let mut root = tagger::Element::new(tagger::upgrade(std::io::stdout()));
@@ -46,7 +47,7 @@ fn main() -> fmt::Result {
 
                     let mut s = poloto::plot(svg);
 
-                    s.scatter(wr!("test"), test.iter().copied());
+                    s.scatter(wr!("test"), test.iter().copied().twice_iter());
 
                     s.render(
                         wr!("Demo: you can use CSS patterns if you embed SVG!"),
