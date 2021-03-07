@@ -251,10 +251,10 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use core::fmt::Write;
+    /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.line(|w|write!(w,"cow"),data.iter().map(|&x|x))
+    /// plotter.line(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
     /// ```
     pub fn line(
         &mut self,
@@ -277,10 +277,10 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use core::fmt::Write;
+    /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.line_fill(|w|write!(w,"cow"),data.iter().map(|&x|x))
+    /// plotter.line_fill(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
     /// ```
     pub fn line_fill(
         &mut self,
@@ -303,10 +303,10 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use core::fmt::Write;
+    /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.scatter(|w|write!(w,"cow"),data.iter().map(|&x|x))
+    /// plotter.scatter(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
     /// ```
     pub fn scatter(
         &mut self,
@@ -330,10 +330,10 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use core::fmt::Write;
+    /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.histogram(|w|write!(w,"cow"),data.iter().map(|&x|x))
+    /// plotter.histogram(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
     /// ```
     pub fn histogram(
         &mut self,
