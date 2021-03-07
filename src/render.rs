@@ -274,7 +274,7 @@ pub(super) fn render<'a, 'x, T: Write>(
     for (
         i,
         colori,
-        Plot{
+        Plot {
             plot_type,
             mut plots,
         },

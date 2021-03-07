@@ -70,15 +70,12 @@ use core::marker::PhantomData;
 pub use tagger;
 mod util;
 pub mod prelude {
+    pub use super::iter::PlotIterator;
     pub use core::fmt::Write;
     pub use tagger::wr;
-    pub use super::iter::PlotIterator;
-
 }
 use core::fmt;
 mod render;
-
-
 
 use iter::DoubleIter;
 pub mod iter;
@@ -131,22 +128,17 @@ pub mod default_tags {
     }
 }
 
-
-
-
-
-
-trait PlotTrait2<T:fmt::Write>{
+trait PlotTrait2<T: fmt::Write> {
     fn write_name(&mut self, a: &mut T) -> fmt::Result;
-    fn iter_first(&mut self)->&mut dyn Iterator<Item=[f64;2]>;
-    fn iter_second(&mut self)->&mut dyn Iterator<Item=[f64;2]>;
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
 }
-struct Wrapper2<D:DoubleIter,F,T>{
+struct Wrapper2<D: DoubleIter, F, T> {
     //TODO use enum instead.
-    a:Option<D>,
-    b:Option<D::Next>,
-    func:Option<F>,
-    _p:PhantomData<T>
+    a: Option<D>,
+    b: Option<D::Next>,
+    func: Option<F>,
+    _p: PhantomData<T>,
 }
 
 impl<I: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrapper2<I, F, T> {
@@ -160,22 +152,21 @@ impl<I: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrappe
     }
 }
 
-impl<D:DoubleIter<Item=[f64;2]>,F:FnOnce(&mut T) -> fmt::Result,T:fmt::Write> PlotTrait2<T> for Wrapper2<D,F,T>{
+impl<D: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write> PlotTrait2<T>
+    for Wrapper2<D, F, T>
+{
     fn write_name(&mut self, a: &mut T) -> fmt::Result {
         self.func.take().unwrap()(a)
     }
-    fn iter_first(&mut self)->&mut dyn Iterator<Item=[f64;2]>{
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
         self.a.as_mut().unwrap()
     }
-    
-    fn iter_second(&mut self)->&mut dyn Iterator<Item=[f64;2]>{
-        self.b=Some(self.a.take().unwrap().finish_first());
+
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
+        self.b = Some(self.a.take().unwrap().finish_first());
         self.b.as_mut().unwrap()
     }
-    
 }
-
-
 
 enum PlotType {
     Scatter,
@@ -188,7 +179,6 @@ struct Plot<'a, T> {
     plot_type: PlotType,
     plots: Box<dyn PlotTrait2<T> + 'a>,
 }
-
 
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when

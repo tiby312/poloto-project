@@ -11,9 +11,15 @@ fn main() -> core::fmt::Result {
     s.scatter(wr!("sin"), x.clone().map(|x| [x, x.sin()]).twice_iter());
     s.histogram(
         wr!("sin-10"),
-        x.clone().step_by(3).map(|x| [x, x.sin() - 10.]).twice_iter(),
+        x.clone()
+            .step_by(3)
+            .map(|x| [x, x.sin() - 10.])
+            .twice_iter(),
     );
-    s.line_fill(wr!("sin-20"), x.clone().map(|x| [x, x.sin() - 20.]).twice_iter());
+    s.line_fill(
+        wr!("sin-20"),
+        x.clone().map(|x| [x, x.sin() - 20.]).twice_iter(),
+    );
 
     s.render(
         wr!("Demo: Some Trigonometry Plots"),

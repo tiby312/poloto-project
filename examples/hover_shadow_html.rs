@@ -10,7 +10,10 @@ fn main() -> core::fmt::Result {
         wr!("sin-3"),
         x.clone().step_by(3).map(|x| [x, x.sin() - 3.]).twice_iter(),
     );
-    s.scatter(wr!("sin"), x.clone().step_by(3).map(|x| [x, x.sin()]).twice_iter());
+    s.scatter(
+        wr!("sin"),
+        x.clone().step_by(3).map(|x| [x, x.sin()]).twice_iter(),
+    );
 
     s.render(wr!("Demo: Hovering and shadows"), wr!("x"), wr!("y"))?;
 
