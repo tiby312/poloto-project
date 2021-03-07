@@ -72,9 +72,16 @@ mod util;
 pub mod prelude {
     pub use core::fmt::Write;
     pub use tagger::wr;
+    pub use super::iter::PlotIterator;
+
 }
 use core::fmt;
 mod render;
+
+
+
+use iter::DoubleIter;
+pub mod iter;
 
 pub mod default_tags {
     use core::fmt;
@@ -124,36 +131,51 @@ pub mod default_tags {
     }
 }
 
-struct Wrapper<I, F, T> {
-    it: Option<I>,
-    func: Option<F>,
-    _p: PhantomData<T>,
+
+
+
+
+
+trait PlotTrait2<T:fmt::Write>{
+    fn write_name(&mut self, a: &mut T) -> fmt::Result;
+    fn iter_first(&mut self)->&mut dyn Iterator<Item=[f64;2]>;
+    fn iter_second(&mut self)->&mut dyn Iterator<Item=[f64;2]>;
 }
-impl<I: Iterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrapper<I, F, T> {
+struct Wrapper2<D:DoubleIter,F,T>{
+    //TODO use enum instead.
+    a:Option<D>,
+    b:Option<D::Next>,
+    func:Option<F>,
+    _p:PhantomData<T>
+}
+
+impl<I: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrapper2<I, F, T> {
     fn new(it: I, func: F) -> Self {
-        Wrapper {
-            it: Some(it),
+        Wrapper2 {
+            a: Some(it),
+            b: None,
             func: Some(func),
             _p: PhantomData,
         }
     }
 }
 
-impl<'a, I: Iterator<Item = [f64; 2]> + 'a, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write>
-    PlotTrait<'a, T> for Wrapper<I, F, T>
-{
+impl<D:DoubleIter<Item=[f64;2]>,F:FnOnce(&mut T) -> fmt::Result,T:fmt::Write> PlotTrait2<T> for Wrapper2<D,F,T>{
     fn write_name(&mut self, a: &mut T) -> fmt::Result {
         self.func.take().unwrap()(a)
     }
-    fn iter(&mut self) -> Box<dyn Iterator<Item = [f64; 2]> + 'a> {
-        Box::new(self.it.take().unwrap())
+    fn iter_first(&mut self)->&mut dyn Iterator<Item=[f64;2]>{
+        self.a.as_mut().unwrap()
     }
+    
+    fn iter_second(&mut self)->&mut dyn Iterator<Item=[f64;2]>{
+        self.b=Some(self.a.take().unwrap().finish_first());
+        self.b.as_mut().unwrap()
+    }
+    
 }
 
-trait PlotTrait<'a, T: Write> {
-    fn write_name(&mut self, a: &mut T) -> fmt::Result;
-    fn iter(&mut self) -> Box<dyn Iterator<Item = [f64; 2]> + 'a>;
-}
+
 
 enum PlotType {
     Scatter,
@@ -164,14 +186,9 @@ enum PlotType {
 
 struct Plot<'a, T> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait<'a, T> + 'a>,
+    plots: Box<dyn PlotTrait2<T> + 'a>,
 }
 
-struct PlotDecomp<'a, T> {
-    plot_type: PlotType,
-    name_writer: Box<dyn PlotTrait<'a, T> + 'a>,
-    plots: Vec<[f64; 2]>,
-}
 
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
@@ -242,11 +259,11 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn line(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })
     }
 
@@ -268,11 +285,11 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn line_fill(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })
     }
 
@@ -294,11 +311,11 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn scatter(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })
     }
 
@@ -321,11 +338,11 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn histogram(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl IntoIterator<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
         self.plots.0.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(Wrapper::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })
     }
 
@@ -365,35 +382,3 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         })
     }
 }
-
-/*
-///Function to write to a T that implements `std::fmt::Write`
-///Makes a svg tag with the defaults defined in [`default_svg_tag`].
-pub fn render_svg<T: Write>(writer: T, a: Plotter) -> fmt::Result {
-    let mut root = tagger::Element::new(writer);
-
-    root.elem("svg", |writer| {
-        let svg = writer.write(|w| {
-            default_svg_tag::default()(w)?;
-            Ok(w)
-        })?;
-        a.render(svg)
-    })?;
-
-    Ok(())
-}
-
-///Function to write to a T that implements `std::io::Write`
-///Makes a svg tag with the defaults defined in [`default_svg_tag`].
-pub fn render_svg_io<T: std::io::Write>(writer: T, a: Plotter) -> fmt::Result {
-    render_svg(tagger::upgrade(writer), a)
-}
-
-///Convenience function to just write to a string.
-pub fn render_to_string(a: Plotter) -> Result<String, fmt::Error> {
-    let mut s = String::new();
-    render_svg(&mut s, a)?;
-    Ok(s)
-}
-
-*/

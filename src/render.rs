@@ -90,13 +90,14 @@ pub(super) fn render<'a, 'x, T: Write>(
             .attr("height", height)
     })?;
 
+    /*
     //TODO BIIIIG data structure. what to do?
     let plots: Vec<_> = plots
         .drain(..)
         .map(|mut x| {
             let plots: Vec<_> = x
                 .plots
-                .iter()
+                .iter_first()
                 .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite()))
                 .collect();
 
@@ -107,10 +108,11 @@ pub(super) fn render<'a, 'x, T: Write>(
             }
         })
         .collect();
+    */
 
     //Find range.
     let [minx, maxx, miny, maxy] =
-        if let Some(m) = util::find_bounds(plots.iter().flat_map(|x| x.plots.iter().copied())) {
+        if let Some(m) = util::find_bounds(plots.iter_mut().flat_map(|x| x.plots.iter_first())) {
             m
         } else {
             //TODO test that this looks ok
@@ -272,10 +274,9 @@ pub(super) fn render<'a, 'x, T: Write>(
     for (
         i,
         colori,
-        PlotDecomp {
+        Plot{
             plot_type,
-            mut name_writer,
-            plots,
+            mut plots,
         },
     ) in plots
         .into_iter()
@@ -295,7 +296,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                     .attr("x", width - padding / 1.2)?
                     .attr("y", paddingy + (i as f64) * spacing)
             })?;
-            name_writer.write_name(text.get_writer())?;
+            plots.write_name(text.get_writer())?;
             Ok(text)
         })?;
         //}
@@ -305,7 +306,7 @@ pub(super) fn render<'a, 'x, T: Write>(
 
         //Draw plots
 
-        let it = plots.into_iter().map(|[x, y]| {
+        let it = plots.iter_second().map(|[x, y]| {
             [
                 padding + (x - minx) * scalex,
                 height - paddingy - (y - miny) * scaley,
