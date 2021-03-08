@@ -13,7 +13,7 @@ mod file {
     ///it is specilized for `[f64;2]`.
     pub struct FileBuffer<P: AsRef<Path>, I: Iterator<Item = [f64; 2]>> {
         path: P,
-        file: std::fs::File,
+        file: std::io::BufWriter<std::fs::File>,
         inner: I,
     }
 
@@ -29,7 +29,11 @@ mod file {
         /// Constructor
         fn new(inner: I, path: P) -> Self {
             let file = std::fs::File::create(&path).unwrap();
-            FileBuffer { path, file, inner }
+            FileBuffer {
+                path,
+                file: std::io::BufWriter::new(file),
+                inner,
+            }
         }
     }
 
@@ -52,8 +56,9 @@ mod file {
             use std::io::BufRead;
             use std::io::Seek;
             use std::io::SeekFrom;
+            use std::io::Write;
+            self.file.flush().unwrap();
             self.file.seek(SeekFrom::Start(0)).unwrap();
-            self.file.sync_all().unwrap();
             let f = std::fs::File::open(self.path).unwrap();
             FileBufferRead {
                 lines: std::io::BufReader::new(f).lines(),
