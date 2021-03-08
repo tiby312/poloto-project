@@ -191,10 +191,8 @@ struct Plot<'a, T> {
 //would involve passing a lot of closures around.
 pub struct Plotter<'a, T> {
     writer: T,
-    plots: PlotData<'a, T>,
+    plots: Vec<Plot<'a, T>>,
 }
-
-struct PlotData<'a, T>(Vec<Plot<'a, T>>);
 
 ///Convenience function for [`Plotter::new()`]
 pub fn plot<'a, T: fmt::Write + 'a>(writer: T) -> Plotter<'a, T> {
@@ -227,7 +225,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn new(writer: T) -> Plotter<'a, T> {
         Plotter {
             writer,
-            plots: PlotData(Vec::new()),
+            plots: Vec::new(),
         }
     }
 
@@ -251,7 +249,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
-        self.plots.0.push(Plot {
+        self.plots.push(Plot {
             plot_type: PlotType::Line,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })
@@ -277,7 +275,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
-        self.plots.0.push(Plot {
+        self.plots.push(Plot {
             plot_type: PlotType::LineFill,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })
@@ -303,7 +301,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
-        self.plots.0.push(Plot {
+        self.plots.push(Plot {
             plot_type: PlotType::Scatter,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })
@@ -330,7 +328,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIter<Item = [f64; 2]> + 'a,
     ) {
-        self.plots.0.push(Plot {
+        self.plots.push(Plot {
             plot_type: PlotType::Histo,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
         })

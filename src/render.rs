@@ -66,7 +66,7 @@ pub fn default_styling<T: Write>(svg: T) -> Result<T, fmt::Error> {
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
-    plots: PlotData<'a, T>,
+    mut plots: Vec<Plot<'a, T>>,
     title: impl FnOnce(&mut T) -> fmt::Result,
     xname: impl FnOnce(&mut T) -> fmt::Result,
     yname: impl FnOnce(&mut T) -> fmt::Result,
@@ -77,8 +77,7 @@ pub(super) fn render<'a, 'x, T: Write>(
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let mut plots = plots.0;
-
+    
     let svg = &mut tagger::Element::new(&mut writer);
 
     svg.single("rect", |w| {
