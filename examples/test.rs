@@ -21,6 +21,8 @@ const fn generate_test() -> [&'static [[f64; 2]]; 8] {
 use core::fmt;
 use poloto::prelude::*;
 use tagger::prelude::*;
+
+//Create a bunch of graphs with different scales to try to expose corner cases.
 fn main() -> fmt::Result {
     let mut root = tagger::Element::new(tagger::upgrade(std::io::stdout()));
 

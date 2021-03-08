@@ -1,5 +1,6 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
+    //Write the graph to a file
     let file = std::fs::File::create("assets/write_to_file.svg").unwrap();
 
     let mut s = poloto::plot_io(file);
