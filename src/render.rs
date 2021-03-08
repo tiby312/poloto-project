@@ -78,7 +78,6 @@ pub(super) fn render<'a, 'x, T: Write>(
     let padding = 150.0;
     let paddingy = 100.0;
 
-    
     let svg = &mut tagger::Element::new(&mut writer);
 
     svg.single("rect", |w| {
@@ -89,7 +88,6 @@ pub(super) fn render<'a, 'x, T: Write>(
             .attr("width", width)?
             .attr("height", height)
     })?;
-
 
     //Find range.
     let [minx, maxx, miny, maxy] =

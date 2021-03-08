@@ -6,7 +6,7 @@
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 6 plots, the colors cycle back and are repeated.
-//! 
+//!
 //!
 //! ### Units
 //!
@@ -159,8 +159,8 @@ impl<I: DoubleIterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wr
     }
 }
 
-impl<D: DoubleIterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write> PlotTrait<T>
-    for Wrapper2<D, F, T>
+impl<D: DoubleIterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write>
+    PlotTrait<T> for Wrapper2<D, F, T>
 {
     fn write_name(&mut self, a: &mut T) -> fmt::Result {
         self.func.take().unwrap()(a)
