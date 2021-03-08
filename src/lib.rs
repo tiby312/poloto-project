@@ -80,7 +80,7 @@ mod render;
 
 use iter::DoubleIterator;
 
-///Contains the [`DoubleIterator`] trait and tree different
+///Contains the [`DoubleIterator`] trait and three different
 ///implementers of it.
 pub mod iter;
 

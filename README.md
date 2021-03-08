@@ -10,12 +10,12 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 ### Iterating plots twice
 
-In order to calculate the right size view to view all the plots, poloto has to iterate over all the plot
+In order to calculate the right size view to scale all the plots, poloto has to iterate over all the plot
 points twice. Once to find the min and max bounds, and once to scale all the points by the scale determined
 by the first iteration. There are two options here. Either we use the same iterator twice, or we run an iterator
 once and store the results to be iterated a second time. Which method to use depends a lot of how slow
 the iterator function is. If the user wants to do something expensive to calculate the next plot, then
-you might want to stores the results. In contrast, if you iterating over values already calculated
+you might want to store the results. In contrast, if you iterating over values already calculated
 then you might have no problem using the iterator twice. Poloto forces the user to choose which method to use
 by either calling `twice_iter` or `buffer_iter` on an iterator. A third `file_buffer` is also provided that
 uses a temporary file to store the iterator results.
