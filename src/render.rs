@@ -3,6 +3,7 @@ use tagger::prelude::*;
 
 const NUM_COLORS: usize = 8;
 
+///Add the default css styling.
 pub fn default_styling<T: Write>(svg: T) -> Result<T, fmt::Error> {
     //Default colors if CSS is not overriden with user colors.
     let text_color = "black";
@@ -89,25 +90,6 @@ pub(super) fn render<'a, 'x, T: Write>(
             .attr("height", height)
     })?;
 
-    /*
-    //TODO BIIIIG data structure. what to do?
-    let plots: Vec<_> = plots
-        .drain(..)
-        .map(|mut x| {
-            let plots: Vec<_> = x
-                .plots
-                .iter_first()
-                .filter(|[x, y]| !(x.is_nan() || y.is_nan() || x.is_infinite() || y.is_infinite()))
-                .collect();
-
-            PlotDecomp {
-                plot_type: x.plot_type,
-                name_writer: x.plots,
-                plots,
-            }
-        })
-        .collect();
-    */
 
     //Find range.
     let [minx, maxx, miny, maxy] =
@@ -115,7 +97,7 @@ pub(super) fn render<'a, 'x, T: Write>(
             m
         } else {
             //TODO test that this looks ok
-            return Ok(writer); //No plots at all. dont need to draw anything
+            return Ok(writer); //No plots at all. don't need to draw anything
         };
 
     const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;

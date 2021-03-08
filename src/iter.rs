@@ -3,8 +3,12 @@ pub use file::*;
 mod file{
     use std::path::Path;
     use super::*;
+    ///[`PlotIterator`] provides two ways to create a [`DoubleIterator`].
     ///A third option is to use the iterator only once, but instead
     ///of storing in memory, we use a file as a buffer.
+    ///
+    ///This way we only use the iterator once, and also don't need to store all the results
+    ///in memory. 
     ///
     ///We dont auto implement this for iterator types since
     ///it is specilized for `[f64;2]`.
@@ -15,13 +19,16 @@ mod file{
     }
 
 
+    /// Create a [`FileBuffer`]
     pub fn file_buffer<P: AsRef<Path>,I:Iterator<Item=[f64;2]>>(inner:I,path:P)->FileBuffer<P,I>{
         FileBuffer::new(
             inner,
             path
         )
     }
+
     impl<P: AsRef<Path>,I:Iterator<Item=[f64;2]>> FileBuffer<P,I>{
+        /// Constructor
         fn new(inner:I,path:P)->Self{
             let file=std::fs::File::create(&path).unwrap();
             FileBuffer{
@@ -45,9 +52,9 @@ mod file{
         }
     }
 
-    impl<P: AsRef<Path>,I: Iterator<Item=[f64;2]>> DoubleIter for FileBuffer<P,I>
+    impl<P: AsRef<Path>,I: Iterator<Item=[f64;2]>> DoubleIterator for FileBuffer<P,I>
     {
-        type Next = Reverse;
+        type Next = FileBufferRead;
         fn finish_first(mut self) -> Self::Next {
             use std::io::BufRead;
             use std::io::SeekFrom;
@@ -55,17 +62,19 @@ mod file{
             self.file.seek(SeekFrom::Start(0)).unwrap();
             self.file.sync_all().unwrap();
             let f=std::fs::File::open(self.path).unwrap();
-            Reverse{
+            FileBufferRead{
                 lines:std::io::BufReader::new(f).lines()
             }
         }
     }
 
-    pub struct Reverse{
+    
+    /// Iterate over the plots that were stored to a file.
+    pub struct FileBufferRead{
         lines:std::io::Lines<std::io::BufReader<std::fs::File>>
     }
 
-    impl Iterator for Reverse{
+    impl Iterator for FileBufferRead{
         type Item=[f64;2];
         fn next(&mut self)->Option<Self::Item>{
             
@@ -91,8 +100,11 @@ mod file{
 
 impl<I: Iterator + Sized> PlotIterator for I {}
 
+///Trait that is implemented for all iterators through a blanket impl.
 pub trait PlotIterator: IntoIterator + Sized {
     
+    ///Create a [`DoubleIterator`] that uses an iterator just once,
+    ///and stores the plots in a Vec for the second iteration.
     fn buffer_iter(self) -> BufferIter<Self::IntoIter> {
         let i = self.into_iter();
         let ll = i.size_hint().0;
@@ -101,6 +113,9 @@ pub trait PlotIterator: IntoIterator + Sized {
             buffer: Vec::with_capacity(ll),
         }
     }
+
+    ///Create a [`DoubleIterator`] that uses an iterator twice
+    ///by cloning it once.
     fn twice_iter(self) -> NoBufferIter<Self::IntoIter>
     where
         Self::IntoIter: Clone,
@@ -114,17 +129,27 @@ pub trait PlotIterator: IntoIterator + Sized {
     }
 }
 
-pub trait DoubleIter: Iterator {
+///The trait that plot functions accept.
+///All plots must be iterated through twice.
+///Once to find the right scale to fit all the plots in the graph.
+///And a second time to scale all the plots by the scale we found
+///on the first iteration.
+///A [`DoubleIterator`] is itself an iterator
+///that represents its first iteration. Once that is done,
+///the user can call [`finish_first`](DoubleIterator::finish_first) to
+///produce the second iterator.
+pub trait DoubleIterator: Iterator {
     type Next: Iterator<Item = Self::Item>;
     fn finish_first(self) -> Self::Next;
 }
 
+/// Created by [`PlotIterator::buffer_iter`]
 pub struct BufferIter<I: Iterator> {
     inner: I,
     buffer: Vec<I::Item>,
 }
 
-impl<I: Iterator> DoubleIter for BufferIter<I>
+impl<I: Iterator> DoubleIterator for BufferIter<I>
 where
     I::Item: Copy,
 {
@@ -148,12 +173,14 @@ where
     }
 }
 
+
+/// Created by [`PlotIterator::buffer_iter`]
 pub struct NoBufferIter<I: Iterator> {
     inner: I,
     inner2: I,
 }
 
-impl<I: Iterator> DoubleIter for NoBufferIter<I>
+impl<I: Iterator> DoubleIterator for NoBufferIter<I>
 where
     I::Item: Copy,
 {

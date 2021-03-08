@@ -34,6 +34,7 @@
 //! Depending on whether you are adding a new style attribute or overriding
 //! an existing one, you might have to increase the specificty of your css clause to make sure it overrides
 //! the svg css clause.
+//!
 //! ### Usage
 //!
 //! * Plots containing NaN or Infinity are ignored.
@@ -69,6 +70,8 @@ use core::marker::PhantomData;
 
 pub use tagger;
 mod util;
+
+///The poloto prelude.
 pub mod prelude {
     pub use super::iter::PlotIterator;
     pub use core::fmt::Write;
@@ -77,9 +80,13 @@ pub mod prelude {
 use core::fmt;
 mod render;
 
-use iter::DoubleIter;
+use iter::DoubleIterator;
+
+///Contains the [`DoubleIterator`] trait and tree different
+///implementers of it.
 pub mod iter;
 
+///Contains building blocks for create the default svg an styling tags from scratch.
 pub mod default_tags {
     use core::fmt;
 
@@ -91,9 +98,10 @@ pub mod default_tags {
     pub const WIDTH: f64 = 800.0;
     ///The height of the svg tag.
     pub const HEIGHT: f64 = 500.0;
-
+    ///The xmlns: `http://www.w3.org/2000/svg`
     pub const XMLNS: &str = "http://www.w3.org/2000/svg";
-    ///Returns a function that will write the attributes.
+
+    ///Returns a function that will write default svg tag attributes.
     pub fn default_svg_attrs<T: fmt::Write>(
     ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
         use tagger::prelude::*;
@@ -108,6 +116,7 @@ pub mod default_tags {
         }
     }
     use core::fmt::Write;
+    ///Add the svg tag and css styling.
     pub fn default_svg_and_styling<T: Write>(
         writer: T,
         func: impl FnOnce(&mut tagger::Element<T>) -> Result<&mut tagger::Element<T>, fmt::Error>,
@@ -134,14 +143,14 @@ trait PlotTrait<T: fmt::Write> {
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
 }
 
-struct Wrapper2<D: DoubleIter, F, T> {
+struct Wrapper2<D: DoubleIterator, F, T> {
     a: Option<D>,
     b: Option<D::Next>,
     func: Option<F>,
     _p: PhantomData<T>,
 }
 
-impl<I: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrapper2<I, F, T> {
+impl<I: DoubleIterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrapper2<I, F, T> {
     fn new(it: I, func: F) -> Self {
         Wrapper2 {
             a: Some(it),
@@ -152,7 +161,7 @@ impl<I: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrappe
     }
 }
 
-impl<D: DoubleIter<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write> PlotTrait<T>
+impl<D: DoubleIterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write> PlotTrait<T>
     for Wrapper2<D, F, T>
 {
     fn write_name(&mut self, a: &mut T) -> fmt::Result {
@@ -247,7 +256,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn line(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -273,7 +282,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn line_fill(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -299,7 +308,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn scatter(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -326,7 +335,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     pub fn histogram(
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
-        plots: impl DoubleIter<Item = [f64; 2]> + 'a,
+        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,

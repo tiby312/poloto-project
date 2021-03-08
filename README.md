@@ -8,17 +8,23 @@ Poloto graphs can be stylized using css either directly in the SVG, or from insi
 
 You can see it in action in this rust book [broccoli-book](https://tiby312.github.io/broccoli_report/)
 
-### Features
+### Iterating plots twice
 
 In order to calculate the right size view to view all the plots, poloto has to iterate over all the plot
 points twice. Once to find the min and max bounds, and once to scale all the points by the scale determined
-by the first iteration. There are two options here, either use the same iterator twice, or run an iterator
-once and stores the results to be iterated a second time. Which method to use depends a lot of how slow
+by the first iteration. There are two options here. Either we use the same iterator twice, or we run an iterator
+once and store the results to be iterated a second time. Which method to use depends a lot of how slow
 the iterator function is. If the user wants to do something expensive to calculate the next plot, then
 you might want to stores the results. In contrast, if you iterating over values already calculated
 then you might have no problem using the iterator twice. Poloto forces the user to choose which method to use
-by either calling `twice_iter` or `buffer_iter` on an iterator.
+by either calling `twice_iter` or `buffer_iter` on an iterator. A third `file_buffer` is also provided that
+uses a temporary file to store the iterator results.
 
+### Passing closures instead of strings
+
+Instead of passing strings, the user passes closures on how to make a string for things like the title, xaxis name
+y axis name, and plot names. This allows as to inject formatted strings directly into the svg file as it is being
+written on the fly. This allows us to avoid the dynamic allocation of calling `format!`.
 
 ### Example 
 
