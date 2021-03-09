@@ -375,25 +375,25 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         });
         self
     }
-/*
-    /// Hardcode into the svg the text colors.
-    pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
-        self.text_color = s;
-        self
-    }
+    /* Deliberately disable these. The user should use css to override the default colors.
+        /// Hardcode into the svg the text colors.
+        pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
+            self.text_color = s;
+            self
+        }
 
-    /// Hardcode into the svg the background colors.
-    pub fn with_back_color(&mut self, s: &'a str) -> &mut Self {
-        self.back_color = s;
-        self
-    }
+        /// Hardcode into the svg the background colors.
+        pub fn with_back_color(&mut self, s: &'a str) -> &mut Self {
+            self.back_color = s;
+            self
+        }
 
-    /// Hardcode into the svg the plot colors.
-    pub fn with_plot_colors(&mut self, colors: &[&'a str; 8]) -> &mut Self {
-        self.colors = *colors;
-        self
-    }
-*/
+        /// Hardcode into the svg the plot colors.
+        pub fn with_plot_colors(&mut self, colors: &[&'a str; 8]) -> &mut Self {
+            self.colors = *colors;
+            self
+        }
+    */
 
     /// User can inject some svg elements using this function.
     /// They will be inserted right after the svg and default svg tags.
@@ -443,7 +443,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// Render the svg to the writer.
     ///
     /// Up until now, nothing has been written to the writer. We
-    /// have just accumulated a list of commands and closures. This call will 
+    /// have just accumulated a list of commands and closures. This call will
     /// actually call all the closures and consume all the plot iterators.
     pub fn render<A, B, C>(self, title: A, xname: B, yname: C) -> Result<T, fmt::Error>
     where
