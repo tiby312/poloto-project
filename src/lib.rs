@@ -375,7 +375,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         });
         self
     }
-
+/*
     /// Hardcode into the svg the text colors.
     pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
         self.text_color = s;
@@ -393,6 +393,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         self.colors = *colors;
         self
     }
+*/
 
     /// User can inject some svg elements using this function.
     /// They will be inserted right after the svg and default svg tags.

@@ -63,7 +63,7 @@ fn main() -> core::fmt::Result {
         x.clone().map(|x| [x, x.sin() - 20.]).buffer_iter(),
     );
 
-    s.with_back_color("rgba(255,255,255,0.8)");
+    s.with_raw_text(wr!("{}","<style>.poloto_background{fill:rgba(200,255,200,0.8);}</style>"));
 
     s.render(
         wr!("Demo: Some Trigonometry Plots {}", 5),
