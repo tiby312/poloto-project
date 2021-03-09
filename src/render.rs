@@ -3,7 +3,7 @@ use tagger::prelude::*;
 
 pub const NUM_COLORS: usize = 8;
 
-///Add the default css styling.
+///Add the default css styling with css variables.
 pub fn default_styling_variables<T: Write>(
     svg: T,
     text_color: &str,
@@ -54,6 +54,7 @@ pub fn default_styling_variables<T: Write>(
     Ok(svg.into_writer())
 }
 
+///Add the default css styling.
 pub fn default_styling<T: Write>(
     svg: T,
     text_color: &str,
@@ -110,14 +111,13 @@ pub fn default_styling<T: Write>(
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
-    data:Vec<Box<dyn TextWriter<T>+'a>>,
+    data: Vec<Box<dyn TextWriter<T> + 'a>>,
     mut plots: Vec<Plot<'a, T>>,
     title: impl FnOnce(&mut T) -> fmt::Result,
     xname: impl FnOnce(&mut T) -> fmt::Result,
     yname: impl FnOnce(&mut T) -> fmt::Result,
 ) -> Result<&'x mut T, fmt::Error> {
-
-    for mut a in data.into_iter(){
+    for mut a in data.into_iter() {
         a.write_name(writer)?;
     }
     use super::default_tags::*;

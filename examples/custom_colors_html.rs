@@ -2,6 +2,7 @@ use poloto::prelude::*;
 fn main() -> core::fmt::Result {
     let mut fs = String::new();
     let mut s = poloto::plot(&mut fs);
+    s.with_css_variables();
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 

@@ -48,6 +48,5 @@ fn main() -> core::fmt::Result {
         wr!("y"),
     )?;
 
-
     Ok(())
 }

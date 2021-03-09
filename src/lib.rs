@@ -20,25 +20,6 @@
 //! are all really close together (small step size). In this case, there isnt a really good way to format it.
 //! In this instance, poloto will fall back to making the number relative to the first number.
 //!
-//! ### How do I change the color of the plots?
-//!
-//! You can doing it by overriding the css. If you embed the generated svg into a html file,
-//! then you can add this example:
-//! ```css
-//! .poloto{
-//!    --poloto_bg_color:"black";
-//!    --poloto_fg_color:"white;
-//!    --poloto_color0:"red";
-//!    --poloto_color1:"green";
-//!    --poloto_color2:"yellow";
-//!    --poloto_color3:"orange";
-//!    --poloto_color4:"purple";
-//!    --poloto_color5:"pink";
-//!    --poloto_color6:"aqua";
-//!    --poloto_color7:"red";
-//! }
-//! ```  
-//! By default these variables are not defined, so the svg falls back on some default colors.
 //!
 //! ### Can I change the styling of the plots?
 //!
@@ -102,39 +83,35 @@ pub mod default_tags {
 
     ///Returns a function that will write default svg tag attributes.
     pub fn default_svg_attrs<T: fmt::Write>(
-        width: f64,
-        height: f64,
     ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
         use tagger::prelude::*;
 
         move |w| {
             w.attr("class", CLASS)?
-                .attr("width", width)?
-                .attr("height", height)?
-                .with_attr("viewBox", wr!("0 0 {} {}", width, height))?
+                .attr("width", WIDTH)?
+                .attr("height", HEIGHT)?
+                .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
                 .attr("xmlns", XMLNS)?;
             Ok(())
         }
     }
-    
 }
 
-
-struct SvgData<T,F:FnOnce(&mut T)->fmt::Result>{
-    inner:Option<F>,
-    _p:PhantomData<T>
+struct SvgData<T, F: FnOnce(&mut T) -> fmt::Result> {
+    inner: Option<F>,
+    _p: PhantomData<T>,
 }
-impl<T:fmt::Write,F:FnOnce(&mut T)->fmt::Result> TextWriter<T> for SvgData<T,F>{
-    fn write_name(&mut self,a:&mut T)->fmt::Result{
+impl<T: fmt::Write, F: FnOnce(&mut T) -> fmt::Result> TextWriter<T> for SvgData<T, F> {
+    fn write_name(&mut self, a: &mut T) -> fmt::Result {
         (self.inner.take().unwrap())(a)
     }
 }
 
-trait TextWriter<T:fmt::Write>{
+trait TextWriter<T: fmt::Write> {
     fn write_name(&mut self, a: &mut T) -> fmt::Result;
 }
 
-trait PlotTrait<T: fmt::Write>{
+trait PlotTrait<T: fmt::Write> {
     fn write_name(&mut self, a: &mut T) -> fmt::Result;
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
@@ -198,13 +175,11 @@ struct Plot<'a, T> {
 pub struct Plotter<'a, T> {
     writer: T,
     plots: Vec<Plot<'a, T>>,
-    data:Vec<Box<dyn TextWriter<T>+'a>>,
+    data: Vec<Box<dyn TextWriter<T> + 'a>>,
     css_variables: bool,
     text_color: &'a str,
     back_color: &'a str,
     colors: [&'a str; render::NUM_COLORS],
-    width: f64,
-    height: f64,
     nostyle: bool,
     nosvgtag: bool,
 }
@@ -229,23 +204,6 @@ pub fn plot_io<'a, T: std::io::Write + 'a>(writer: T) -> Plotter<'a, tagger::Wri
 }
 
 impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
-    pub fn with_no_svg_tag_or_style_tag(writer: T) -> Plotter<'a, T> {
-        let mut s = Plotter::new(writer);
-        s.nosvgtag = true;
-        s.nostyle = true;
-        s
-    }
-    pub fn with_no_svg_tag(writer: T) -> Plotter<'a, T> {
-        let mut s = Plotter::new(writer);
-        s.nosvgtag = true;
-        s
-    }
-    pub fn with_dim(writer: T, width: f64, height: f64) -> Plotter<'a, T> {
-        let mut s = Plotter::new(writer);
-        s.width = width;
-        s.height = height;
-        s
-    }
     /// Create a plotter
     ///
     /// # Example
@@ -271,12 +229,42 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
                 "lime",
                 "chocolate",
             ],
-            width: default_tags::WIDTH,
-            height: default_tags::HEIGHT,
             nostyle: false,
             nosvgtag: false,
-            data:Vec::new()
+            data: Vec::new(),
         }
+    }
+
+    /// Create a plotter with no outer svg tag. This is useful
+    /// when you want to create your own svg tag with additional attributes.
+    /// The default attributes can be retrived from the [`default_tags`] module.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut s=String::new();
+    /// let plotter = poloto::Plotter::with_no_svg_tag(&mut s);
+    /// ```
+    pub fn with_no_svg_tag(writer: T) -> Plotter<'a, T> {
+        let mut s = Plotter::new(writer);
+        s.nosvgtag = true;
+        s
+    }
+
+    /// Create a plotter with no outer svg tag or default style tag.
+    /// The default style can be found in the [`default_tags`] module.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut s=String::new();
+    /// let plotter = poloto::Plotter::with_no_svg_style_tags(&mut s);
+    /// ```
+    pub fn with_no_svg_style_tags(writer: T) -> Plotter<'a, T> {
+        let mut s = Plotter::new(writer);
+        s.nosvgtag = true;
+        s.nostyle = true;
+        s
     }
 
     /// Create a line from plots.
@@ -292,7 +280,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.line(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
+    /// plotter.line(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn line(
         &mut self,
@@ -319,7 +307,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.line_fill(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
+    /// plotter.line_fill(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn line_fill(
         &mut self,
@@ -346,7 +334,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.scatter(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
+    /// plotter.scatter(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn scatter(
         &mut self,
@@ -374,7 +362,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.histogram(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter())
+    /// plotter.histogram(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn histogram(
         &mut self,
@@ -388,14 +376,19 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         self
     }
 
+    // Hardcode into the svg the text colors.
     pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
         self.text_color = s;
         self
     }
+
+    // Hardcode into the svg the background colors.
     pub fn with_back_color(&mut self, s: &'a str) -> &mut Self {
         self.back_color = s;
         self
     }
+
+    // Hardcode into the svg the plot colors.
     pub fn with_plot_colors(&mut self, colors: &[&'a str; 8]) -> &mut Self {
         self.colors = *colors;
         self
@@ -403,15 +396,36 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
 
     //Use can inject some svg elements using this function.
     //They will be inserted right after the svg and default svg tags.
-    pub fn with_raw_text(&mut self,func:impl FnOnce(&mut T)->fmt::Result+'a)->&mut Self{
-        self.data.push(Box::new(SvgData{
-            inner:Some(func),
-            _p:PhantomData
+    pub fn with_raw_text(&mut self, func: impl FnOnce(&mut T) -> fmt::Result + 'a) -> &mut Self {
+        self.data.push(Box::new(SvgData {
+            inner: Some(func),
+            _p: PhantomData,
         }));
         self
     }
 
-    //If made with no styling, this panics.
+    /// Instead of the default style, use one that adds variables.
+    ///
+    /// This injects [`default_tags::default_styling_variables`] instead of
+    /// the default [`default_tags::default_styling`].
+    ///
+    /// If you embed the generated svg into a html file,
+    /// then you can add this example:
+    /// ```css
+    /// .poloto{
+    ///    --poloto_bg_color:"black";
+    ///    --poloto_fg_color:"white;
+    ///    --poloto_color0:"red";
+    ///    --poloto_color1:"green";
+    ///    --poloto_color2:"yellow";
+    ///    --poloto_color3:"orange";
+    ///    --poloto_color4:"purple";
+    ///    --poloto_color5:"pink";
+    ///    --poloto_color6:"aqua";
+    ///    --poloto_color7:"red";
+    /// }
+    /// ```  
+    /// By default these variables are not defined, so the svg falls back on some default colors.
     pub fn with_css_variables(&mut self) -> &mut Self {
         self.css_variables = true;
         self
@@ -440,11 +454,9 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
             text_color,
             back_color,
             colors,
-            width,
-            height,
             nostyle,
             nosvgtag,
-            data
+            data,
         } = self;
         let mut root = tagger::Element::new(writer);
 
@@ -459,11 +471,11 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
                 }
             }
 
-            render::render(root.get_writer(), data,plots, title, xname, yname)?;
+            render::render(root.get_writer(), data, plots, title, xname, yname)?;
         } else {
             root.elem("svg", |writer| {
                 let mut svg = writer.write(|w| {
-                    default_svg_attrs(width, height)(w)?;
+                    default_svg_attrs()(w)?;
 
                     Ok(w)
                 })?;
@@ -475,7 +487,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
                     }
                 }
 
-                render::render(svg.get_writer(), data,plots, title, xname, yname)?;
+                render::render(svg.get_writer(), data, plots, title, xname, yname)?;
                 Ok(svg)
             })?;
         }
