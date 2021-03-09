@@ -34,6 +34,8 @@ fn main() -> fmt::Result {
 
             for test in generate_test().iter() {
                 div.elem("svg", |writer| {
+
+
                     //Build the svg tag from scratch so we can use our own
                     //width and height
                     let mut svg = writer.write(|w| {
@@ -45,9 +47,7 @@ fn main() -> fmt::Result {
                         Ok(w)
                     })?;
 
-                    poloto::default_tags::default_styling(&mut svg)?;
-
-                    let mut s = poloto::plot(svg);
+                    let mut s = poloto::Plotter::with_no_svg_tag(svg);
 
                     s.scatter(wr!("test"), test.iter().copied().twice_iter());
 

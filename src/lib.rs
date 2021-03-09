@@ -89,6 +89,7 @@ pub mod default_tags {
     use core::fmt;
 
     pub use super::render::default_styling;
+    pub use super::render::default_styling_variables;
 
     ///The class of the svg tag.
     pub const CLASS: &str = "poloto";
@@ -101,41 +102,39 @@ pub mod default_tags {
 
     ///Returns a function that will write default svg tag attributes.
     pub fn default_svg_attrs<T: fmt::Write>(
+        width: f64,
+        height: f64,
     ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
         use tagger::prelude::*;
 
-        |w| {
+        move |w| {
             w.attr("class", CLASS)?
-                .attr("width", WIDTH)?
-                .attr("height", HEIGHT)?
-                .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
+                .attr("width", width)?
+                .attr("height", height)?
+                .with_attr("viewBox", wr!("0 0 {} {}", width, height))?
                 .attr("xmlns", XMLNS)?;
             Ok(())
         }
     }
-    use core::fmt::Write;
-    ///Add the svg tag and css styling.
-    pub fn default_svg_and_styling<T: Write>(
-        writer: T,
-        func: impl FnOnce(&mut tagger::Element<T>) -> Result<&mut tagger::Element<T>, fmt::Error>,
-    ) -> Result<T, fmt::Error> {
-        let mut root = tagger::Element::new(writer);
+    
+}
 
-        root.elem("svg", |writer| {
-            let mut svg = writer.write(|w| {
-                default_svg_attrs()(w)?;
 
-                Ok(w)
-            })?;
-            default_styling(&mut svg)?;
-            func(svg)
-        })?;
-
-        Ok(root.into_writer())
+struct SvgData<T,F:FnOnce(&mut T)->fmt::Result>{
+    inner:Option<F>,
+    _p:PhantomData<T>
+}
+impl<T:fmt::Write,F:FnOnce(&mut T)->fmt::Result> TextWriter<T> for SvgData<T,F>{
+    fn write_name(&mut self,a:&mut T)->fmt::Result{
+        (self.inner.take().unwrap())(a)
     }
 }
 
-trait PlotTrait<T: fmt::Write> {
+trait TextWriter<T:fmt::Write>{
+    fn write_name(&mut self, a: &mut T) -> fmt::Result;
+}
+
+trait PlotTrait<T: fmt::Write>{
     fn write_name(&mut self, a: &mut T) -> fmt::Result;
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
@@ -199,6 +198,15 @@ struct Plot<'a, T> {
 pub struct Plotter<'a, T> {
     writer: T,
     plots: Vec<Plot<'a, T>>,
+    data:Vec<Box<dyn TextWriter<T>+'a>>,
+    css_variables: bool,
+    text_color: &'a str,
+    back_color: &'a str,
+    colors: [&'a str; render::NUM_COLORS],
+    width: f64,
+    height: f64,
+    nostyle: bool,
+    nosvgtag: bool,
 }
 
 ///Convenience function for [`Plotter::new()`]
@@ -221,6 +229,23 @@ pub fn plot_io<'a, T: std::io::Write + 'a>(writer: T) -> Plotter<'a, tagger::Wri
 }
 
 impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
+    pub fn with_no_svg_tag_or_style_tag(writer: T) -> Plotter<'a, T> {
+        let mut s = Plotter::new(writer);
+        s.nosvgtag = true;
+        s.nostyle = true;
+        s
+    }
+    pub fn with_no_svg_tag(writer: T) -> Plotter<'a, T> {
+        let mut s = Plotter::new(writer);
+        s.nosvgtag = true;
+        s
+    }
+    pub fn with_dim(writer: T, width: f64, height: f64) -> Plotter<'a, T> {
+        let mut s = Plotter::new(writer);
+        s.width = width;
+        s.height = height;
+        s
+    }
     /// Create a plotter
     ///
     /// # Example
@@ -233,6 +258,24 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         Plotter {
             writer,
             plots: Vec::new(),
+            css_variables: false,
+            text_color: "black",
+            back_color: "aliceblue",
+            colors: [
+                "blue",
+                "red",
+                "green",
+                "gold",
+                "aqua",
+                "brown",
+                "lime",
+                "chocolate",
+            ],
+            width: default_tags::WIDTH,
+            height: default_tags::HEIGHT,
+            nostyle: false,
+            nosvgtag: false,
+            data:Vec::new()
         }
     }
 
@@ -255,11 +298,12 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) {
+    ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
-        })
+        });
+        self
     }
 
     /// Create a line from plots that will be filled underneath.
@@ -281,11 +325,12 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) {
+    ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
-        })
+        });
+        self
     }
 
     /// Create a scatter plot from plots.
@@ -307,11 +352,12 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) {
+    ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
-        })
+        });
+        self
     }
 
     /// Create a histogram from plots.
@@ -334,11 +380,41 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         &mut self,
         name: impl FnOnce(&mut T) -> fmt::Result + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) {
+    ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
             plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
-        })
+        });
+        self
+    }
+
+    pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
+        self.text_color = s;
+        self
+    }
+    pub fn with_back_color(&mut self, s: &'a str) -> &mut Self {
+        self.back_color = s;
+        self
+    }
+    pub fn with_plot_colors(&mut self, colors: &[&'a str; 8]) -> &mut Self {
+        self.colors = *colors;
+        self
+    }
+
+    //Use can inject some svg elements using this function.
+    //They will be inserted right after the svg and default svg tags.
+    pub fn with_raw_text(&mut self,func:impl FnOnce(&mut T)->fmt::Result+'a)->&mut Self{
+        self.data.push(Box::new(SvgData{
+            inner:Some(func),
+            _p:PhantomData
+        }));
+        self
+    }
+
+    //If made with no styling, this panics.
+    pub fn with_css_variables(&mut self) -> &mut Self {
+        self.css_variables = true;
+        self
     }
 
     ///You can override the css in regular html if you embed the generated svg.
@@ -351,29 +427,58 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     ///All the plot functions don't actually add anything to the document until a  `render` function is called.
     ///So calls to this will append elements to the start of the document.
     ///
-    pub fn render_no_default_tags(
-        self,
-        title: impl FnOnce(&mut T) -> fmt::Result,
-        xname: impl FnOnce(&mut T) -> fmt::Result,
-        yname: impl FnOnce(&mut T) -> fmt::Result,
-    ) -> Result<T, fmt::Error> {
-        let Plotter { mut writer, plots } = self;
+    pub fn render<A, B, C>(self, title: A, xname: B, yname: C) -> Result<T, fmt::Error>
+    where
+        A: FnOnce(&mut T) -> fmt::Result,
+        B: FnOnce(&mut T) -> fmt::Result,
+        C: FnOnce(&mut T) -> fmt::Result,
+    {
+        let Plotter {
+            writer,
+            plots,
+            css_variables,
+            text_color,
+            back_color,
+            colors,
+            width,
+            height,
+            nostyle,
+            nosvgtag,
+            data
+        } = self;
+        let mut root = tagger::Element::new(writer);
 
-        render::render(&mut writer, plots, title, xname, yname)?;
-        Ok(writer)
-    }
+        use default_tags::*;
 
-    pub fn render(
-        self,
-        title: impl FnOnce(&mut T) -> fmt::Result,
-        xname: impl FnOnce(&mut T) -> fmt::Result,
-        yname: impl FnOnce(&mut T) -> fmt::Result,
-    ) -> Result<T, fmt::Error> {
-        let Plotter { writer, plots } = self;
+        if nosvgtag {
+            if !nostyle {
+                if css_variables {
+                    default_styling_variables(&mut root, text_color, back_color, &colors)?;
+                } else {
+                    default_styling(&mut root, text_color, back_color, &colors)?;
+                }
+            }
 
-        default_tags::default_svg_and_styling(writer, |e| {
-            render::render(e.get_writer(), plots, title, xname, yname)?;
-            Ok(e)
-        })
+            render::render(root.get_writer(), data,plots, title, xname, yname)?;
+        } else {
+            root.elem("svg", |writer| {
+                let mut svg = writer.write(|w| {
+                    default_svg_attrs(width, height)(w)?;
+
+                    Ok(w)
+                })?;
+                if !nostyle {
+                    if css_variables {
+                        default_styling_variables(&mut svg, text_color, back_color, &colors)?;
+                    } else {
+                        default_styling(&mut svg, text_color, back_color, &colors)?;
+                    }
+                }
+
+                render::render(svg.get_writer(), data,plots, title, xname, yname)?;
+                Ok(svg)
+            })?;
+        }
+        Ok(root.into_writer())
     }
 }

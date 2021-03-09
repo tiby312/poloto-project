@@ -1,24 +1,15 @@
 use super::*;
 use tagger::prelude::*;
 
-const NUM_COLORS: usize = 8;
+pub const NUM_COLORS: usize = 8;
 
 ///Add the default css styling.
-pub fn default_styling<T: Write>(svg: T) -> Result<T, fmt::Error> {
-    //Default colors if CSS is not overriden with user colors.
-    let text_color = "black";
-    let background_color = "aliceblue";
-
-    let colors = [
-        "blue",
-        "red",
-        "green",
-        "gold",
-        "aqua",
-        "brown",
-        "lime",
-        "chocolate",
-    ];
+pub fn default_styling_variables<T: Write>(
+    svg: T,
+    text_color: &str,
+    background_color: &str,
+    colors: &[&str],
+) -> Result<T, fmt::Error> {
     let mut svg = tagger::Element::new(svg);
 
     svg.elem_no_attr("style", |w| {
@@ -63,15 +54,72 @@ pub fn default_styling<T: Write>(svg: T) -> Result<T, fmt::Error> {
     Ok(svg.into_writer())
 }
 
+pub fn default_styling<T: Write>(
+    svg: T,
+    text_color: &str,
+    background_color: &str,
+    colors: &[&str],
+) -> Result<T, fmt::Error> {
+    //Default colors if CSS is not overriden with user colors.
+
+    let mut svg = tagger::Element::new(svg);
+
+    svg.elem_no_attr("style", |w| {
+        write_ret!(
+            w,
+            r###".poloto {{
+            font-family: "Arial";
+            stroke-width:2;
+            }}
+            .poloto_text{{fill: {0};  }}
+            .poloto_axis_lines{{stroke: {0};stoke-width:3;fill:none}}
+            .poloto_background{{fill: {1}; }}
+            .poloto0stroke{{stroke:  {2}; }}
+            .poloto1stroke{{stroke:  {3}; }}
+            .poloto2stroke{{stroke:  {4}; }}
+            .poloto3stroke{{stroke:  {5}; }}
+            .poloto4stroke{{stroke:  {6}; }}
+            .poloto5stroke{{stroke:  {7}; }}
+            .poloto6stroke{{stroke:  {8}; }}
+            .poloto7stroke{{stroke:  {9}; }}
+            .poloto0fill{{fill:{2};}}
+            .poloto1fill{{fill:{3};}}
+            .poloto2fill{{fill:{4};}}
+            .poloto3fill{{fill:{5};}}
+            .poloto4fill{{fill:{6};}}
+            .poloto5fill{{fill:{7};}}
+            .poloto6fill{{fill:{8};}}
+            .poloto7fill{{fill:{9};}}"###,
+            text_color,
+            background_color,
+            colors[0],
+            colors[1],
+            colors[2],
+            colors[3],
+            colors[4],
+            colors[5],
+            colors[6],
+            colors[7],
+        )
+    })?;
+
+    Ok(svg.into_writer())
+}
+
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
+    data:Vec<Box<dyn TextWriter<T>+'a>>,
     mut plots: Vec<Plot<'a, T>>,
     title: impl FnOnce(&mut T) -> fmt::Result,
     xname: impl FnOnce(&mut T) -> fmt::Result,
     yname: impl FnOnce(&mut T) -> fmt::Result,
 ) -> Result<&'x mut T, fmt::Error> {
+
+    for mut a in data.into_iter(){
+        a.write_name(writer)?;
+    }
     use super::default_tags::*;
     let width = WIDTH;
     let height = HEIGHT;
