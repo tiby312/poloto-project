@@ -189,7 +189,7 @@ pub fn plot<'a, T: fmt::Write + 'a>(writer: T) -> Plotter<'a, T> {
     Plotter::new(writer)
 }
 
-///Convenience function for
+///Convenience function for plotting with writers that only implement [`std::io::Write`].
 ///
 /// Instead of this
 /// ```
@@ -376,26 +376,34 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         self
     }
 
-    // Hardcode into the svg the text colors.
+    /// Hardcode into the svg the text colors.
     pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
         self.text_color = s;
         self
     }
 
-    // Hardcode into the svg the background colors.
+    /// Hardcode into the svg the background colors.
     pub fn with_back_color(&mut self, s: &'a str) -> &mut Self {
         self.back_color = s;
         self
     }
 
-    // Hardcode into the svg the plot colors.
+    /// Hardcode into the svg the plot colors.
     pub fn with_plot_colors(&mut self, colors: &[&'a str; 8]) -> &mut Self {
         self.colors = *colors;
         self
     }
 
-    //Use can inject some svg elements using this function.
-    //They will be inserted right after the svg and default svg tags.
+    /// User can inject some svg elements using this function.
+    /// They will be inserted right after the svg and default svg tags.
+    ///
+    /// You can override the css in regular html if you embed the generated svg.
+    /// This gives you a lot of flexibility giving your the power to dynamically
+    /// change the theme of your svg.
+    ///
+    /// However, if you want to embed the svg as an image, you lose this ability.
+    /// If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
+    ///
     pub fn with_raw_text(&mut self, func: impl FnOnce(&mut T) -> fmt::Result + 'a) -> &mut Self {
         self.data.push(Box::new(SvgData {
             inner: Some(func),
@@ -431,16 +439,11 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         self
     }
 
-    ///You can override the css in regular html if you embed the generated svg.
-    ///This gives you a lot of flexibility giving your the power to dynamically
-    ///change the theme of your svg.
+    /// Render the svg to the writer.
     ///
-    ///However, if you want to embed the svg as an image, you lose this ability.
-    ///If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
-    ///
-    ///All the plot functions don't actually add anything to the document until a  `render` function is called.
-    ///So calls to this will append elements to the start of the document.
-    ///
+    /// Up until now, nothing has been written to the writer. We
+    /// have just accumulated a list of commands and closures. This call will 
+    /// actually call all the closures and consume all the plot iterators.
     pub fn render<A, B, C>(self, title: A, xname: B, yname: C) -> Result<T, fmt::Error>
     where
         A: FnOnce(&mut T) -> fmt::Result,
