@@ -17,22 +17,22 @@ mod file {
         inner: I,
     }
 
-    /// Create a [`FileBuffer`]
-    pub fn file_buffer<P: AsRef<Path>, I: Iterator<Item = [f64; 2]>>(
+    /// Create a [`DoubleIterator`] that uses a file buffer.
+    pub fn file_buffer<P: AsRef<Path>, I: IntoIterator<Item = [f64; 2]>>(
         inner: I,
         path: P,
-    ) -> FileBuffer<P, I> {
+    ) -> FileBuffer<P, I::IntoIter> {
         FileBuffer::new(inner, path)
     }
 
     impl<P: AsRef<Path>, I: Iterator<Item = [f64; 2]>> FileBuffer<P, I> {
         /// Constructor
-        fn new(inner: I, path: P) -> Self {
+        fn new<J>(inner: J, path: P) -> Self where J:IntoIterator<IntoIter=I> {
             let file = std::fs::File::create(&path).unwrap();
             FileBuffer {
                 path,
                 file: std::io::BufWriter::new(file),
-                inner,
+                inner:inner.into_iter(),
             }
         }
     }
@@ -93,6 +93,29 @@ mod file {
     }
 }
 
+///Create a [`DoubleIterator`] that uses an iterator just once,
+///and stores the plots in a Vec for the second iteration.
+pub fn buffer_iter<I:IntoIterator>(a:I)->BufferIter<I::IntoIter>{
+    let i = a.into_iter();
+    let ll = i.size_hint().0;
+    BufferIter {
+        inner: i,
+        buffer: Vec::with_capacity(ll),
+    }
+}
+
+///Create a [`DoubleIterator`] that uses an iterator twice
+///by cloning it once.
+pub fn twice_iter<I:IntoIterator>(a:I)->NoBufferIter<I::IntoIter> where I::IntoIter:Clone{
+    let i = a.into_iter();
+    let sec = i.clone();
+    NoBufferIter {
+        inner: i,
+        inner2: sec,
+    }
+}
+
+
 impl<I: Iterator + Sized> PlotIterator for I {}
 
 ///Trait that is implemented for all iterators through a blanket impl.
@@ -100,12 +123,7 @@ pub trait PlotIterator: IntoIterator + Sized {
     ///Create a [`DoubleIterator`] that uses an iterator just once,
     ///and stores the plots in a Vec for the second iteration.
     fn buffer_iter(self) -> BufferIter<Self::IntoIter> {
-        let i = self.into_iter();
-        let ll = i.size_hint().0;
-        BufferIter {
-            inner: i,
-            buffer: Vec::with_capacity(ll),
-        }
+        self::buffer_iter(self)
     }
 
     ///Create a [`DoubleIterator`] that uses an iterator twice
@@ -114,12 +132,7 @@ pub trait PlotIterator: IntoIterator + Sized {
     where
         Self::IntoIter: Clone,
     {
-        let i = self.into_iter();
-        let sec = i.clone();
-        NoBufferIter {
-            inner: i,
-            inner2: sec,
-        }
+        self::twice_iter(self)
     }
 }
 

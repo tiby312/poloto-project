@@ -7,43 +7,6 @@
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 6 plots, the colors cycle back and are repeated.
 //!
-//!
-//! ### Units
-//!
-//! Poloto will first print intervals is normal decimal at the precision required to capture the differences
-//! in the step size between the intervals. If the magnitude of a number is detected to be too big or small, it
-//! may switch to scientific notation, still at the required precision. It will only switch if the scientific
-//! notation version is actually less characters than the normal decimal format which is not always the case
-//! when you consider the precision that might be required to capture the step size.
-//!
-//! Even with the above system, there are cases where the numbers all have a really big magnitude, but
-//! are all really close together (small step size). In this case, there isnt a really good way to format it.
-//! In this instance, poloto will fall back to making the number relative to the first number.
-//!
-//!
-//! ### Can I change the styling of the plots?
-//!
-//! Yes! You can harness the power of CSS both in the svg, or outside
-//! in html with an embeded svg. Some things you can do:
-//!
-//! * Change the color scheme to fit your html theme.
-//! * Highlight one plot, make it dashed, or add hover effect
-//! * Animate things using @keyframes
-//!
-//! Depending on whether you are adding a new style attribute or overriding
-//! an existing one, you might have to increase the specificty of your css clause to make sure it overrides
-//! the svg css clause.
-//! ### Why not scale the intervals to end nicely with the ends of the axis lines?
-//!
-//! Doing this you would have to either have more dead space, or exclude
-//! plots that the user would expect to get plotted. Neither of these sounded
-//! better than the option of just having the intervals stop not necessarily
-//! at the end of the axis lines.
-//!
-//! ### Example
-//!
-//! See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
-//!
 use core::fmt::Write;
 use core::marker::PhantomData;
 
