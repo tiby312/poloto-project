@@ -3,21 +3,9 @@ use tagger::prelude::*;
 
 pub const NUM_COLORS: usize = 8;
 
-/*
-struct NameFormatter<'a>(&'a dyn PlotTrait);
-impl fmt::Display for NameFormatter<'_>{
-    fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
-        self.0.write_name(a)
-    }
-}
-*/
-
 use core::fmt::Display;
 
-
-
-pub fn default_styling_variables2<T: Write>(
-    svg: T,
+pub fn default_styling_variables(
     text_color: impl Display,
     background_color: impl Display,
     colors: [impl Display;NUM_COLORS],
@@ -61,70 +49,18 @@ pub fn default_styling_variables2<T: Write>(
     })
 }
 
-///Add the default css styling with css variables.
-pub fn default_styling_variables<T: Write>(
-    svg: T,
-    text_color: impl Display,
-    background_color: impl Display,
-    colors: [impl Display;NUM_COLORS],
-) -> Result<T, fmt::Error> {
-    let mut svg = tagger::Element::new(svg);
-
-    svg.elem_no_attr("style", |w| {
-        write_ret!(
-            w,
-            r###".poloto {{
-            font-family: "Arial";
-            stroke-width:2;
-            }}
-            .poloto_text{{fill: var(--poloto_fg_color,{0});  }}
-            .poloto_axis_lines{{stroke: var(--poloto_fg_color,{0});stoke-width:3;fill:none}}
-            .poloto_background{{fill: var(--poloto_bg_color,{1}); }}
-            .poloto0stroke{{stroke:  var(--poloto_color0,{2}); }}
-            .poloto1stroke{{stroke:  var(--poloto_color1,{3}); }}
-            .poloto2stroke{{stroke:  var(--poloto_color2,{4}); }}
-            .poloto3stroke{{stroke:  var(--poloto_color3,{5}); }}
-            .poloto4stroke{{stroke:  var(--poloto_color4,{6}); }}
-            .poloto5stroke{{stroke:  var(--poloto_color5,{7}); }}
-            .poloto6stroke{{stroke:  var(--poloto_color6,{8}); }}
-            .poloto7stroke{{stroke:  var(--poloto_color7,{9}); }}
-            .poloto0fill{{fill:var(--poloto_color0,{2});}}
-            .poloto1fill{{fill:var(--poloto_color1,{3});}}
-            .poloto2fill{{fill:var(--poloto_color2,{4});}}
-            .poloto3fill{{fill:var(--poloto_color3,{5});}}
-            .poloto4fill{{fill:var(--poloto_color4,{6});}}
-            .poloto5fill{{fill:var(--poloto_color5,{7});}}
-            .poloto6fill{{fill:var(--poloto_color6,{8});}}
-            .poloto7fill{{fill:var(--poloto_color7,{9});}}"###,
-            text_color,
-            background_color,
-            colors[0],
-            colors[1],
-            colors[2],
-            colors[3],
-            colors[4],
-            colors[5],
-            colors[6],
-            colors[7],
-        )
-    })?;
-
-    Ok(svg.into_writer())
-}
 
 ///Add the default css styling.
-pub fn default_styling<T: Write>(
-    svg: T,
+pub fn default_styling(
     text_color: impl Display,
     background_color: impl Display,
     colors: [impl Display;NUM_COLORS],
-) -> Result<T, fmt::Error> {
+) -> impl Display {
     //Default colors if CSS is not overriden with user colors.
 
-    let mut svg = tagger::Element::new(svg);
+    movable_format(move |w|{
 
-    svg.elem_no_attr("style", |w| {
-        write_ret!(
+        write!(
             w,
             r###".poloto {{
             font-family: "Arial";
@@ -160,9 +96,7 @@ pub fn default_styling<T: Write>(
             colors[6],
             colors[7],
         )
-    })?;
-
-    Ok(svg.into_writer())
+    })
 }
 
 //Returns error if the user supplied format functions don't work.
