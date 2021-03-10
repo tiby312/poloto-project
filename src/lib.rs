@@ -432,9 +432,9 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         if nosvgtag {
             if !nostyle {
                 if css_variables {
-                    default_styling_variables(&mut root, text_color, back_color, &colors)?;
+                    default_styling_variables(&mut root, text_color, back_color, colors)?;
                 } else {
-                    default_styling(&mut root, text_color, back_color, &colors)?;
+                    default_styling(&mut root, text_color, back_color, colors)?;
                 }
             }
 
@@ -448,9 +448,9 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
                 })?;
                 if !nostyle {
                     if css_variables {
-                        default_styling_variables(&mut svg, text_color, back_color, &colors)?;
+                        default_styling_variables(&mut svg, text_color, back_color, colors)?;
                     } else {
-                        default_styling(&mut svg, text_color, back_color, &colors)?;
+                        default_styling(&mut svg, text_color, back_color, colors)?;
                     }
                 }
 

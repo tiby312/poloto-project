@@ -3,12 +3,13 @@ use tagger::prelude::*;
 
 pub const NUM_COLORS: usize = 8;
 
+use core::fmt::Display;
 ///Add the default css styling with css variables.
 pub fn default_styling_variables<T: Write>(
     svg: T,
-    text_color: &str,
-    background_color: &str,
-    colors: &[&str],
+    text_color: impl Display,
+    background_color: impl Display,
+    colors: [impl Display;NUM_COLORS],
 ) -> Result<T, fmt::Error> {
     let mut svg = tagger::Element::new(svg);
 
@@ -57,9 +58,9 @@ pub fn default_styling_variables<T: Write>(
 ///Add the default css styling.
 pub fn default_styling<T: Write>(
     svg: T,
-    text_color: &str,
-    background_color: &str,
-    colors: &[&str],
+    text_color: impl Display,
+    background_color: impl Display,
+    colors: [impl Display;NUM_COLORS],
 ) -> Result<T, fmt::Error> {
     //Default colors if CSS is not overriden with user colors.
 

@@ -24,7 +24,7 @@ uses a temporary file to store the iterator results.
 
 Instead of passing strings, the user passes closures on how to make a string. This allows us to inject formatted strings directly into the svg file as it is being written on the fly. This allows us to avoid the dynamic allocation of calling `format!`.
 
-### Units
+### Formatting Tick Intervals
 
 Poloto will first print intervals in normal decimal at the precision required to capture the differences
 in the step size between the intervals. If the magnitude of a number is detected to be too big or small, it
