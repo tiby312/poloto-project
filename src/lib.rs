@@ -31,7 +31,7 @@ pub mod iter;
 ///Contains building blocks for create the default svg an styling tags from scratch.
 pub mod default_tags {
     use core::fmt;
-
+    pub use super::render::NUM_COLORS;
     pub use super::render::default_styling;
     pub use super::render::default_styling_variables;
 
@@ -58,6 +58,7 @@ pub mod default_tags {
             Ok(())
         }
     }
+
 }
 
 struct SvgData<T, F: FnOnce(&mut T) -> fmt::Result> {
