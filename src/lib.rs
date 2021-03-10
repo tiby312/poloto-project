@@ -32,8 +32,7 @@ pub mod iter;
 pub mod default_tags {
     use core::fmt;
     pub use super::render::NUM_COLORS;
-    pub use super::render::default_styling;
-    pub use super::render::default_styling_variables;
+    pub use super::render::StyleBuilder;
 
     ///The class of the svg tag.
     pub const CLASS: &str = "poloto";
@@ -128,9 +127,6 @@ pub struct Plotter<'a> {
     plots: Vec<Plot<'a>>,
     data: Vec<Box<dyn Display + 'a>>,
     css_variables: bool,
-    text_color: &'a str,
-    back_color: &'a str,
-    colors: [&'a str; render::NUM_COLORS],
     nostyle: bool,
     nosvgtag: bool,
 }
@@ -187,6 +183,7 @@ pub trait Names{
 }
 
 
+
 ///Convenience function for [`Plotter::new()`]
 pub fn plot<'a>(title:impl Display+'a,xname:impl Display+'a,yname:impl Display+'a) -> Plotter<'a> {
     Plotter::new(title,xname,yname)
@@ -211,23 +208,17 @@ impl<'a> Plotter<'a> {
             }),
             plots: Vec::new(),
             css_variables: false,
-            text_color: "black",
-            back_color: "aliceblue",
-            colors: [
-                "blue",
-                "red",
-                "green",
-                "gold",
-                "aqua",
-                "brown",
-                "lime",
-                "chocolate",
-            ],
             nostyle: false,
             nosvgtag: false,
             data: Vec::new(),
         }
     }
+
+    /*
+    pub fn with_options(title:impl Display+'a,xname:impl Display+'a,yname:impl Display+'a,p:Options)->Plotter<'a>{
+
+    }
+    */
 
     /* TODO turn these into flags
     /// Create a plotter with no outer svg tag. This is useful
@@ -372,25 +363,6 @@ impl<'a> Plotter<'a> {
         self
     }
     
-    /* Deliberately disable these. The user should use css to override the default colors.
-        /// Hardcode into the svg the text colors.
-        pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
-            self.text_color = s;
-            self
-        }
-
-        /// Hardcode into the svg the background colors.
-        pub fn with_back_color(&mut self, s: &'a str) -> &mut Self {
-            self.back_color = s;
-            self
-        }
-
-        /// Hardcode into the svg the plot colors.
-        pub fn with_plot_colors(&mut self, colors: &[&'a str; 8]) -> &mut Self {
-            self.colors = *colors;
-            self
-        }
-    */
 
     /// User can inject some svg elements using this function.
     /// They will be inserted right after the svg and default svg tags.
@@ -459,9 +431,6 @@ impl<'a> Plotter<'a> {
             names,
             plots,
             css_variables,
-            text_color,
-            back_color,
-            colors,
             nostyle,
             nosvgtag,
             data,
@@ -473,9 +442,9 @@ impl<'a> Plotter<'a> {
         if nosvgtag {
             if !nostyle {
                 if css_variables {
-                    write!(root,"{}",default_styling_variables(text_color, back_color, colors))?;
+                    write!(root,"{}",StyleBuilder::new().build_with_css_variables())?;
                 } else {
-                    write!(root,"{}",default_styling( text_color, back_color, colors))?;
+                    write!(root,"{}",StyleBuilder::new().build())?;
                 }
             }
 
@@ -489,9 +458,9 @@ impl<'a> Plotter<'a> {
                 })?;
                 if !nostyle {
                     if css_variables {
-                        write!(svg,"{}",default_styling_variables(text_color, back_color, colors))?;
+                        write!(svg,"{}",StyleBuilder::new().build_with_css_variables())?;
                     } else {
-                        write!(svg,"{}",default_styling(text_color, back_color, colors))?;
+                        write!(svg,"{}",StyleBuilder::new().build())?;
                     }
                 }
 
