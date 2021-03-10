@@ -8,13 +8,13 @@
 //! * After 6 plots, the colors cycle back and are repeated.
 //!
 use core::fmt::Write;
-use core::marker::PhantomData;
 
 pub use tagger;
 mod util;
 
 ///The poloto prelude.
 pub mod prelude {
+    pub use super::wr2;
     pub use super::iter::PlotIterator;
     pub use core::fmt::Write;
     pub use tagger::wr;
@@ -137,8 +137,20 @@ pub struct Plotter<'a> {
 
 
 
+
+/// Convenience macro to reduce code.
+/// Shorthand for 'move |w|write!(w,...)`
+/// Create a closure that will use write!() with the formatting arguments.
+#[macro_export]
+macro_rules! wr2 {
+    ($($arg:tt)*) => {
+        $crate::moveable_format(move |w| write!(w,$($arg)*))
+    }
+}
+
+
 //turn this into a macro.
-pub fn movable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
+pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
     struct Foo<F>(F);
     impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -424,6 +436,15 @@ impl<'a> Plotter<'a> {
         self
     }
 
+    pub fn render_to_string(self)->Result<String,fmt::Error>{
+        let mut s=String::new();
+        self.render(&mut s)?;
+        Ok(s)
+    }
+    pub fn render_fmt(self,f:&mut fmt::Formatter)->fmt::Result{
+        self.render(f)?;
+        Ok(())
+    }
     pub fn render_io<T:std::io::Write>(self,writer:T)->Result<T,fmt::Error>{
         self.render(tagger::upgrade(writer)).map(|x|x.inner)
     }
@@ -461,7 +482,7 @@ impl<'a> Plotter<'a> {
             render::render(root.get_writer(), data, plots, names)?;
         } else {
             root.elem("svg", |writer| {
-                let mut svg = writer.write(|w| {
+                let svg = writer.write(|w| {
                     default_svg_attrs()(w)?;
 
                     Ok(w)

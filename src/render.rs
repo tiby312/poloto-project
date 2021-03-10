@@ -10,7 +10,7 @@ pub fn default_styling_variables(
     background_color: impl Display,
     colors: [impl Display;NUM_COLORS],
 ) -> impl Display {
-    movable_format(move |w|{
+    moveable_format(move |w|{
         write!(w,
             r###"<style>.poloto {{
                 font-family: "Arial";
@@ -58,7 +58,7 @@ pub fn default_styling(
 ) -> impl Display {
     //Default colors if CSS is not overriden with user colors.
 
-    movable_format(move |w|{
+    moveable_format(move |w|{
 
         write!(
             w,
@@ -107,7 +107,7 @@ pub(super) fn render<'a, 'x, T: Write>(
     mut plots: Vec<Plot<'a>>,
     names:Box<dyn Names+'a>
 ) -> Result<&'x mut T, fmt::Error> {
-    for mut a in data.into_iter() {
+    for a in data.into_iter() {
         write!(writer,"{}",a)?;
     }
     use super::default_tags::*;
@@ -314,7 +314,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                     .attr("y", paddingy + (i as f64) * spacing)
             })?;
             
-            write!(text,"{}",movable_format(|w|plots.write_name(w)))?;
+            write!(text,"{}",moveable_format(|w|plots.write_name(w)))?;
 
             Ok(text)
         })?;
@@ -455,7 +455,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("y", padding / 4.0)
         })?;
         
-        write!(text,"{}",movable_format(|f|names.write_title(f)))?;
+        write!(text,"{}",moveable_format(|f|names.write_title(f)))?;
         Ok(text)
     })?;
 
@@ -468,7 +468,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", height - padding / 8.)
         })?;
-        write!(text,"{}",movable_format(|f|names.write_xname(f)))?;
+        write!(text,"{}",moveable_format(|f|names.write_xname(f)))?;
         
         Ok(text)
     })?;
@@ -486,7 +486,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", padding / 4.0)?
                 .attr("y", height / 2.0)
         })?;
-        write!(text,"{}",movable_format(|f|names.write_yname(f)))?;
+        write!(text,"{}",moveable_format(|f|names.write_yname(f)))?;
         
         Ok(text)
     })?;

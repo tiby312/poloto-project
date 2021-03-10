@@ -1,9 +1,7 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
-    //Write the graph to a file
-    let file = std::fs::File::create("assets/write_to_file.svg").unwrap();
-
-    let mut s = poloto::plot_io(file);
+    
+    let mut s = poloto::plot_io("test","x","y");
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -22,10 +20,10 @@ fn main() -> core::fmt::Result {
         x.clone().map(|x| [x, x.sin() - 20.]).twice_iter(),
     );
 
-    s.render(
-        wr!("Demo: Some Trigonometry Plots"),
-        wr!("This is the x label"),
-        wr!("This is the y label"),
-    )
-    .map(|_| ())
+    //Write the graph to a file
+    let file = std::fs::File::create("assets/write_to_file.svg").unwrap();
+
+    s.render(file)?;
+
+    Ok(()
 }

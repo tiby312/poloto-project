@@ -1,30 +1,6 @@
 use poloto::prelude::*;
 
 
-
-/// Convenience macro to reduce code.
-/// Shorthand for 'move |w|write!(w,...)`
-/// Create a closure that will use write!() with the formatting arguments.
-#[macro_export]
-macro_rules! wr2 {
-    ($($arg:tt)*) => {
-        moveable_format(move |w| write!(w,$($arg)*))
-    }
-}
-
-//turn this into a macro.
-fn moveable_format(func: impl Fn(&mut core::fmt::Formatter) -> core::fmt::Result) -> impl core::fmt::Display {
-    struct Foo<F>(F);
-    impl<F: Fn(&mut core::fmt::Formatter) -> core::fmt::Result> core::fmt::Display for Foo<F> {
-        fn fmt(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-            (self.0)(formatter)
-        }
-    }
-    Foo(func)
-}
-
-
-
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
     let mut s = poloto::plot(
