@@ -1,8 +1,7 @@
 use poloto::prelude::*;
 fn main() -> std::fmt::Result {
     
-
-
+    
     let mut buffer = String::new();
 
     let mut root=tagger::Element::new(&mut buffer);

@@ -3,6 +3,13 @@ use tagger::prelude::*;
 
 pub const NUM_COLORS: usize = 8;
 
+struct NameFormatter<'a>(&'a dyn PlotTrait);
+impl fmt::Display for NameFormatter<'_>{
+    fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
+        self.0.write_name(a)
+    }
+}
+
 use core::fmt::Display;
 ///Add the default css styling with css variables.
 pub fn default_styling_variables<T: Write>(
@@ -112,14 +119,12 @@ pub fn default_styling<T: Write>(
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
-    data: Vec<Box<dyn TextWriter<T> + 'a>>,
-    mut plots: Vec<Plot<'a, T>>,
-    title: impl FnOnce(&mut T) -> fmt::Result,
-    xname: impl FnOnce(&mut T) -> fmt::Result,
-    yname: impl FnOnce(&mut T) -> fmt::Result,
+    data: Vec<Box<dyn Display + 'a>>,
+    mut plots: Vec<Plot<'a>>,
+    names:Box<dyn Names+'a>
 ) -> Result<&'x mut T, fmt::Error> {
     for mut a in data.into_iter() {
-        a.write_name(writer)?;
+        write!(writer,"{}",a)?;
     }
     use super::default_tags::*;
     let width = WIDTH;
@@ -324,7 +329,11 @@ pub(super) fn render<'a, 'x, T: Write>(
                     .attr("x", width - padding / 1.2)?
                     .attr("y", paddingy + (i as f64) * spacing)
             })?;
-            plots.write_name(text.get_writer())?;
+            
+            use core::convert::AsRef;
+            write!(text,"{}",NameFormatter(plots.as_ref()))?;
+
+            //plots.write_name(text.get_writer())?;
             Ok(text)
         })?;
         //}
@@ -463,7 +472,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", padding / 4.0)
         })?;
-        title(text.get_writer())?;
+        
+        write!(text,"{}",movable_format(|f|names.write_title(f)))?;
         Ok(text)
     })?;
 
@@ -476,7 +486,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", height - padding / 8.)
         })?;
-        xname(text.get_writer())?;
+        write!(text,"{}",movable_format(|f|names.write_xname(f)))?;
+        
         Ok(text)
     })?;
 
@@ -493,7 +504,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", padding / 4.0)?
                 .attr("y", height / 2.0)
         })?;
-        yname(text.get_writer())?;
+        write!(text,"{}",movable_format(|f|names.write_yname(f)))?;
+        
         Ok(text)
     })?;
 

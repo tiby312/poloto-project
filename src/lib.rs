@@ -61,49 +61,36 @@ pub mod default_tags {
 
 }
 
-struct SvgData<T, F: FnOnce(&mut T) -> fmt::Result> {
-    inner: Option<F>,
-    _p: PhantomData<T>,
-}
-impl<T: fmt::Write, F: FnOnce(&mut T) -> fmt::Result> TextWriter<T> for SvgData<T, F> {
-    fn write_name(&mut self, a: &mut T) -> fmt::Result {
-        (self.inner.take().unwrap())(a)
-    }
-}
 
-trait TextWriter<T: fmt::Write> {
-    fn write_name(&mut self, a: &mut T) -> fmt::Result;
-}
 
-trait PlotTrait<T: fmt::Write> {
-    fn write_name(&mut self, a: &mut T) -> fmt::Result;
+trait PlotTrait {
+    fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
 }
 
-struct Wrapper2<D: DoubleIterator, F, T> {
+use fmt::Display;
+struct Wrapper2<D: DoubleIterator, F:Display> {
     a: Option<D>,
     b: Option<D::Next>,
-    func: Option<F>,
-    _p: PhantomData<T>,
+    func:F
 }
 
-impl<I: DoubleIterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T> Wrapper2<I, F, T> {
+impl<I: DoubleIterator<Item = [f64; 2]>, F: Display> Wrapper2<I, F> {
     fn new(it: I, func: F) -> Self {
         Wrapper2 {
             a: Some(it),
             b: None,
-            func: Some(func),
-            _p: PhantomData,
+            func
         }
     }
 }
 
-impl<D: DoubleIterator<Item = [f64; 2]>, F: FnOnce(&mut T) -> fmt::Result, T: fmt::Write>
-    PlotTrait<T> for Wrapper2<D, F, T>
+impl<D: DoubleIterator<Item = [f64; 2]>, F:Display>
+    PlotTrait for Wrapper2<D, F>
 {
-    fn write_name(&mut self, a: &mut T) -> fmt::Result {
-        self.func.take().unwrap()(a)
+    fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result {
+        self.func.fmt(a)
     }
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
         self.a.as_mut().unwrap()
@@ -122,9 +109,9 @@ enum PlotType {
     LineFill,
 }
 
-struct Plot<'a, T> {
+struct Plot<'a> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait<T> + 'a>,
+    plots: Box<dyn PlotTrait + 'a>,
 }
 
 ///Keeps track of plots.
@@ -136,10 +123,10 @@ struct Plot<'a, T> {
 //So inefficiencies in dynamically allocating strings using format!() to then
 //be just passed to a writer are not that bad seeing as the solution
 //would involve passing a lot of closures around.
-pub struct Plotter<'a, T> {
-    writer: T,
-    plots: Vec<Plot<'a, T>>,
-    data: Vec<Box<dyn TextWriter<T> + 'a>>,
+pub struct Plotter<'a> {
+    names:Box<dyn Names+'a>,
+    plots: Vec<Plot<'a>>,
+    data: Vec<Box<dyn Display + 'a>>,
     css_variables: bool,
     text_color: &'a str,
     back_color: &'a str,
@@ -148,26 +135,53 @@ pub struct Plotter<'a, T> {
     nosvgtag: bool,
 }
 
+
+
+//turn this into a macro.
+pub fn movable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
+    struct Foo<F>(F);
+    impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            (self.0)(formatter)
+        }
+    }
+    Foo(func)
+}
+
+struct NamesStruct<A,B,C>{
+    title:A,
+    xname:B,
+    yname:C
+}
+impl<A:Display,B:Display,C:Display> Names for NamesStruct<A,B,C>{
+    fn write_title(&self,fm:&mut fmt::Formatter)->fmt::Result{
+        self.title.fmt(fm)
+    }
+    fn write_xname(&self,fm:&mut fmt::Formatter)->fmt::Result{
+        self.xname.fmt(fm)
+    }
+    fn write_yname(&self,fm:&mut fmt::Formatter)->fmt::Result{
+        self.yname.fmt(fm)
+    }
+    
+    
+}
+
+pub trait Names{
+    fn write_title(&self,fm:&mut fmt::Formatter)->fmt::Result;
+    fn write_xname(&self,fm:&mut fmt::Formatter)->fmt::Result;
+    fn write_yname(&self,fm:&mut fmt::Formatter)->fmt::Result;
+    
+}
+
+
 ///Convenience function for [`Plotter::new()`]
-pub fn plot<'a, T: fmt::Write + 'a>(writer: T) -> Plotter<'a, T> {
-    Plotter::new(writer)
+pub fn plot<'a>(title:impl Display+'a,xname:impl Display+'a,yname:impl Display+'a) -> Plotter<'a> {
+    Plotter::new(title,xname,yname)
 }
 
-///Convenience function for plotting with writers that only implement [`std::io::Write`].
-///
-/// Instead of this
-/// ```
-/// let plotter = poloto::plot(tagger::upgrade(std::io::stdout()));
-/// ```
-/// You can call this function like this
-/// ```
-/// let plotter = poloto::plot_io(std::io::stdout());
-/// ```
-pub fn plot_io<'a, T: std::io::Write + 'a>(writer: T) -> Plotter<'a, tagger::WriterAdaptor<T>> {
-    Plotter::new(tagger::upgrade(writer))
-}
 
-impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
+impl<'a> Plotter<'a> {
     /// Create a plotter
     ///
     /// # Example
@@ -176,9 +190,13 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// let mut s=String::new();
     /// let plotter = poloto::Plotter::new(&mut s);
     /// ```
-    pub fn new(writer: T) -> Plotter<'a, T> {
+    pub fn new(title:impl Display+'a,xname:impl Display+'a,yname:impl Display+'a) -> Plotter<'a> {
         Plotter {
-            writer,
+            names:Box::new(NamesStruct{
+                title,
+                xname,
+                yname
+            }),
             plots: Vec::new(),
             css_variables: false,
             text_color: "black",
@@ -199,6 +217,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         }
     }
 
+    /* TODO turn these into flags
     /// Create a plotter with no outer svg tag. This is useful
     /// when you want to create your own svg tag with additional attributes.
     /// The default attributes can be retrived from the [`default_tags`] module.
@@ -209,8 +228,8 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// let mut s=String::new();
     /// let plotter = poloto::Plotter::with_no_svg_tag(&mut s);
     /// ```
-    pub fn with_no_svg_tag(writer: T) -> Plotter<'a, T> {
-        let mut s = Plotter::new(writer);
+    pub fn with_no_svg_tag() -> Plotter<'a> {
+        let mut s = Plotter::new();
         s.nosvgtag = true;
         s
     }
@@ -224,12 +243,13 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// let mut s=String::new();
     /// let plotter = poloto::Plotter::with_no_svg_style_tags(&mut s);
     /// ```
-    pub fn with_no_svg_style_tags(writer: T) -> Plotter<'a, T> {
-        let mut s = Plotter::new(writer);
+    pub fn with_no_svg_style_tags() -> Plotter<'a> {
+        let mut s = Plotter::new();
         s.nosvgtag = true;
         s.nostyle = true;
         s
     }
+    */
 
     /// Create a line from plots.
     ///
@@ -248,7 +268,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// ```
     pub fn line(
         &mut self,
-        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
+        name: impl Display + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) -> &mut Self {
         self.plots.push(Plot {
@@ -275,7 +295,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// ```
     pub fn line_fill(
         &mut self,
-        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
+        name:impl Display + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) -> &mut Self {
         self.plots.push(Plot {
@@ -302,7 +322,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// ```
     pub fn scatter(
         &mut self,
-        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
+        name: impl Display + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) -> &mut Self {
         self.plots.push(Plot {
@@ -330,7 +350,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// ```
     pub fn histogram(
         &mut self,
-        name: impl FnOnce(&mut T) -> fmt::Result + 'a,
+        name: impl Display + 'a,
         plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
     ) -> &mut Self {
         self.plots.push(Plot {
@@ -339,6 +359,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         });
         self
     }
+    
     /* Deliberately disable these. The user should use css to override the default colors.
         /// Hardcode into the svg the text colors.
         pub fn with_text_color(&mut self, s: &'a str) -> &mut Self {
@@ -369,11 +390,10 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
     /// However, if you want to embed the svg as an image, you lose this ability.
     /// If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
     ///
-    pub fn with_raw_text(&mut self, func: impl FnOnce(&mut T) -> fmt::Result + 'a) -> &mut Self {
-        self.data.push(Box::new(SvgData {
-            inner: Some(func),
-            _p: PhantomData,
-        }));
+    pub fn with_raw_text(&mut self, inner:impl Display + 'a) -> &mut Self {
+        self.data.push(Box::new(
+            inner,
+        ));
         self
     }
 
@@ -404,19 +424,18 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
         self
     }
 
+    pub fn render_io<T:std::io::Write>(self,writer:T)->Result<T,fmt::Error>{
+        self.render(tagger::upgrade(writer)).map(|x|x.inner)
+    }
     /// Render the svg to the writer.
     ///
     /// Up until now, nothing has been written to the writer. We
     /// have just accumulated a list of commands and closures. This call will
     /// actually call all the closures and consume all the plot iterators.
-    pub fn render<A, B, C>(self, title: A, xname: B, yname: C) -> Result<T, fmt::Error>
-    where
-        A: FnOnce(&mut T) -> fmt::Result,
-        B: FnOnce(&mut T) -> fmt::Result,
-        C: FnOnce(&mut T) -> fmt::Result,
+    pub fn render<T:fmt::Write>(self, writer:T) -> Result<T, fmt::Error>
     {
         let Plotter {
-            writer,
+            names,
             plots,
             css_variables,
             text_color,
@@ -439,7 +458,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
                 }
             }
 
-            render::render(root.get_writer(), data, plots, title, xname, yname)?;
+            render::render(root.get_writer(), data, plots, names)?;
         } else {
             root.elem("svg", |writer| {
                 let mut svg = writer.write(|w| {
@@ -455,7 +474,7 @@ impl<'a, T: fmt::Write + 'a> Plotter<'a, T> {
                     }
                 }
 
-                render::render(svg.get_writer(), data, plots, title, xname, yname)?;
+                render::render(svg.get_writer(), data, plots, names)?;
                 Ok(svg)
             })?;
         }
