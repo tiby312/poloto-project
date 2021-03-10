@@ -390,7 +390,7 @@ impl<'a> Plotter<'a> {
     /// However, if you want to embed the svg as an image, you lose this ability.
     /// If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
     ///
-    pub fn with_raw_text(&mut self, inner:impl Display + 'a) -> &mut Self {
+    pub fn with_text(&mut self, inner:impl Display + 'a) -> &mut Self {
         self.data.push(Box::new(
             inner,
         ));

@@ -3,14 +3,64 @@ use tagger::prelude::*;
 
 pub const NUM_COLORS: usize = 8;
 
+/*
 struct NameFormatter<'a>(&'a dyn PlotTrait);
 impl fmt::Display for NameFormatter<'_>{
     fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
         self.0.write_name(a)
     }
 }
+*/
 
 use core::fmt::Display;
+
+
+
+pub fn default_styling_variables2<T: Write>(
+    svg: T,
+    text_color: impl Display,
+    background_color: impl Display,
+    colors: [impl Display;NUM_COLORS],
+) -> impl Display {
+    movable_format(move |w|{
+        write!(w,
+            r###"<style>.poloto {{
+                font-family: "Arial";
+                stroke-width:2;
+                }}
+                .poloto_text{{fill: var(--poloto_fg_color,{0});  }}
+                .poloto_axis_lines{{stroke: var(--poloto_fg_color,{0});stoke-width:3;fill:none}}
+                .poloto_background{{fill: var(--poloto_bg_color,{1}); }}
+                .poloto0stroke{{stroke:  var(--poloto_color0,{2}); }}
+                .poloto1stroke{{stroke:  var(--poloto_color1,{3}); }}
+                .poloto2stroke{{stroke:  var(--poloto_color2,{4}); }}
+                .poloto3stroke{{stroke:  var(--poloto_color3,{5}); }}
+                .poloto4stroke{{stroke:  var(--poloto_color4,{6}); }}
+                .poloto5stroke{{stroke:  var(--poloto_color5,{7}); }}
+                .poloto6stroke{{stroke:  var(--poloto_color6,{8}); }}
+                .poloto7stroke{{stroke:  var(--poloto_color7,{9}); }}
+                .poloto0fill{{fill:var(--poloto_color0,{2});}}
+                .poloto1fill{{fill:var(--poloto_color1,{3});}}
+                .poloto2fill{{fill:var(--poloto_color2,{4});}}
+                .poloto3fill{{fill:var(--poloto_color3,{5});}}
+                .poloto4fill{{fill:var(--poloto_color4,{6});}}
+                .poloto5fill{{fill:var(--poloto_color5,{7});}}
+                .poloto6fill{{fill:var(--poloto_color6,{8});}}
+                .poloto7fill{{fill:var(--poloto_color7,{9});}}</style>"###,
+                text_color,
+                background_color,
+                colors[0],
+                colors[1],
+                colors[2],
+                colors[3],
+                colors[4],
+                colors[5],
+                colors[6],
+                colors[7])
+        
+    })
+}
+
 ///Add the default css styling with css variables.
 pub fn default_styling_variables<T: Write>(
     svg: T,
@@ -330,10 +380,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                     .attr("y", paddingy + (i as f64) * spacing)
             })?;
             
-            use core::convert::AsRef;
-            write!(text,"{}",NameFormatter(plots.as_ref()))?;
+            write!(text,"{}",movable_format(|w|plots.write_name(w)))?;
 
-            //plots.write_name(text.get_writer())?;
             Ok(text)
         })?;
         //}

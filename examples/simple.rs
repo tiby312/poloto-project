@@ -61,9 +61,10 @@ fn main() -> core::fmt::Result {
         x.clone().map(|x| [x, x.sin() - 20.]).buffer_iter(),
     );
 
-    s.with_raw_text(wr2!(
-        "{}",
-        "<style>.poloto_background{fill:rgba(200,255,200,0.8);}</style>"
+
+    s.with_text(wr2!(
+        "<style>{}</style>",
+        ".poloto_background{fill:rgba(200,255,200,0.8);}"
     ));
 
     s.render_io(
