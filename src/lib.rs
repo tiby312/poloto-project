@@ -315,47 +315,46 @@ impl<D: Display> DataBuilder<D> {
     }
 }
 
-
-pub struct PlotterBuilder<D:fmt::Display>{
-    data:DataBuilder<D>,
-    svgtag:bool
+///Plotter Builder. [`Plotter::new`] can do everything this does.
+///But sometimes you want to pass around a builder instead of a list of arguments.
+pub struct PlotterBuilder<D: fmt::Display> {
+    data: DataBuilder<D>,
+    svgtag: bool,
 }
-impl Default for PlotterBuilder<&'static str>{
+impl Default for PlotterBuilder<&'static str> {
     fn default() -> Self {
         Self::new()
     }
 }
-impl PlotterBuilder<&'static str>{
-    pub fn new()->Self{
-        PlotterBuilder{
-            data:DataBuilder::new(),
-            svgtag:true
+impl PlotterBuilder<&'static str> {
+    pub fn new() -> Self {
+        PlotterBuilder {
+            data: DataBuilder::new(),
+            svgtag: true,
         }
     }
-    pub fn with_data<J:Display>(self,data:DataBuilder<J>)->PlotterBuilder<J>{
-        PlotterBuilder{
+    pub fn with_data<J: Display>(self, data: DataBuilder<J>) -> PlotterBuilder<J> {
+        PlotterBuilder {
             data,
-            svgtag:self.svgtag
+            svgtag: self.svgtag,
         }
     }
-    pub fn with_svg(mut self,svg:bool)->Self{
-        self.svgtag=svg;
+    pub fn with_svg(mut self, svg: bool) -> Self {
+        self.svgtag = svg;
         self
     }
-
 }
 
-impl<'a,D:Display+'a> PlotterBuilder<D>{
+impl<'a, D: Display + 'a> PlotterBuilder<D> {
     pub fn build(
         self,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    )->Plotter<'a>{
-        Plotter::new(title,xname,yname,self.svgtag,self.data)
+    ) -> Plotter<'a> {
+        Plotter::new(title, xname, yname, self.svgtag, self.data)
     }
 }
-
 
 impl<'a> Plotter<'a> {
     /// Create a plotter
@@ -363,7 +362,7 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let plotter = poloto::Plotter::new("title","x","y",true,poloto::DataBuilder::new().add_default());
+    /// let plotter = poloto::Plotter::new("title","x","y",true,poloto::DataBuilder::new().push_css_default());
     /// ```
     pub fn new(
         title: impl Display + 'a,

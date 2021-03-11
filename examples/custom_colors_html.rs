@@ -5,7 +5,7 @@ fn main() -> core::fmt::Result {
         "x",
         "y",
         true,
-        poloto::DataBuilder::new().add_default_variable(),
+        poloto::DataBuilder::new().push_default_css_with_variable(),
     );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);

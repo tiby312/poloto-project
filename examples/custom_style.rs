@@ -7,7 +7,7 @@ fn main() -> core::fmt::Result {
         "x",
         "y",
         true,
-        poloto::DataBuilder::new().add_default().add(
+        poloto::DataBuilder::new().push_css_default().push(
             r###"
             <defs>
                 <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">

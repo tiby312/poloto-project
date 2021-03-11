@@ -11,7 +11,7 @@ fn main() -> std::fmt::Result {
         "year",
         "cows",
         true,
-        poloto::DataBuilder::new().add(s),
+        poloto::DataBuilder::new().push(s),
     );
 
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);

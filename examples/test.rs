@@ -50,7 +50,7 @@ fn main() -> fmt::Result {
                         "x",
                         "y",
                         false,
-                        poloto::DataBuilder::new().add_default(),
+                        poloto::DataBuilder::new().push_css_default(),
                     );
 
                     s.scatter("test", test.iter().copied().twice_iter());

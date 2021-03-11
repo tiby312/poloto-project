@@ -9,7 +9,7 @@ fn main() -> std::fmt::Result {
         "year",
         "cows",
         true,
-        DataBuilder::new().add(
+        DataBuilder::new().push(
             StyleBuilder::new()
                 .with_colors(["purple"; NUM_COLORS])
                 .build(),
