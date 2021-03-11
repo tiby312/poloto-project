@@ -1,18 +1,15 @@
 use poloto::prelude::*;
+use poloto::*;
 fn main() -> std::fmt::Result {
-    let s = poloto::StyleBuilder::new()
+    let s = StyleBuilder::new()
         .with_text_color("white")
         .with_back_color("black")
-        .with_colors(["red"; poloto::default_tags::NUM_COLORS])
+        .with_colors(["red"; default_tags::NUM_COLORS])
         .build();
 
-    let mut plotter = poloto::Plotter::new(
-        "cows per year",
-        "year",
-        "cows",
-        true,
-        poloto::DataBuilder::new().push(s),
-    );
+    let mut plotter = PlotterBuilder::new()
+        .with_data(DataBuilder::new().push(s))
+        .build("cows per year", "year", "cows");
 
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
