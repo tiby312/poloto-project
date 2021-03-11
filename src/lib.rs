@@ -315,6 +315,48 @@ impl<D: Display> DataBuilder<D> {
     }
 }
 
+
+pub struct PlotterBuilder<D:fmt::Display>{
+    data:DataBuilder<D>,
+    svgtag:bool
+}
+impl Default for PlotterBuilder<&'static str>{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl PlotterBuilder<&'static str>{
+    pub fn new()->Self{
+        PlotterBuilder{
+            data:DataBuilder::new(),
+            svgtag:true
+        }
+    }
+    pub fn with_data<J:Display>(self,data:DataBuilder<J>)->PlotterBuilder<J>{
+        PlotterBuilder{
+            data,
+            svgtag:self.svgtag
+        }
+    }
+    pub fn with_svg(mut self,svg:bool)->Self{
+        self.svgtag=svg;
+        self
+    }
+
+}
+
+impl<'a,D:Display+'a> PlotterBuilder<D>{
+    pub fn build(
+        self,
+        title: impl Display + 'a,
+        xname: impl Display + 'a,
+        yname: impl Display + 'a,
+    )->Plotter<'a>{
+        Plotter::new(title,xname,yname,self.svgtag,self.data)
+    }
+}
+
+
 impl<'a> Plotter<'a> {
     /// Create a plotter
     ///
