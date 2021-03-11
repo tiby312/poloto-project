@@ -16,8 +16,6 @@ mod util;
 pub mod prelude {
     pub use super::iter::PlotIterator;
     pub use super::move_format;
-    pub use core::fmt::Write;
-    pub use tagger::wr;
 }
 use core::fmt;
 
@@ -126,7 +124,6 @@ pub struct Plotter<'a> {
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
-/// Create a closure that will use write!() with the formatting arguments.
 #[macro_export]
 macro_rules! move_format {
     ($($arg:tt)*) => {
@@ -137,7 +134,7 @@ macro_rules! move_format {
 
 ///Convert a moved closure into a impl fmt::Display.
 ///This is useful because std's `format_args!()` macro
-///can't be stored for long.
+///has a shorter lifetime.
 pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
     struct Foo<F>(F);
     impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
