@@ -91,7 +91,7 @@ fn main() -> core::fmt::Result {
 
 ## Output
 
-<img src="./assets/simple.svg" alt="demo">
+<img src="./assets/trig.svg" alt="demo">
 
 ## CSS Usage Example
 
