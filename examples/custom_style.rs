@@ -2,35 +2,35 @@ use poloto::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut s = poloto::Plotter::new(
-        "Demo: you can change the style of the svg file itself!",
-        "x",
-        "y",
-        true,
-        poloto::DataBuilder::new().push_css_default().push(
+    let mut s = poloto::PlotterBuilder::new()
+        .with_data(poloto::DataBuilder::new().push_css_default().push(
             r###"
-            <defs>
-                <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
-                    <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
-                </pattern>
-                <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
-                    <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
-                    </pattern> 
-            </defs>
-            <style>
-            .poloto_background.poloto_background{
-                fill: url(#pattern);
-            }
-            .poloto0stroke.poloto0stroke{
-                stroke-dasharray:10 2 2;
-            }
-            .poloto1fill.poloto1fill{
-                fill: url(#pattern2);
-            }
-            </style>
-            "###,
-        ),
-    );
+        <defs>
+            <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
+                <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
+            </pattern>
+            <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
+                <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
+                </pattern> 
+        </defs>
+        <style>
+        .poloto_background.poloto_background{
+            fill: url(#pattern);
+        }
+        .poloto0stroke.poloto0stroke{
+            stroke-dasharray:10 2 2;
+        }
+        .poloto1fill.poloto1fill{
+            fill: url(#pattern2);
+        }
+        </style>
+        "###,
+        ))
+        .build(
+            "Demo: you can change the style of the svg file itself!",
+            "x",
+            "y",
+        );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 

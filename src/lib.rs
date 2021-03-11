@@ -219,19 +219,16 @@ trait Names {
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
 }
 
-///Convenience function for [`Plotter::new()`] with default css tag, and with svg tag.
+///Convenience function for [`PlotterBuilder`] with default css tag, and with svg tag.
+///In most cases, these defaults are good enough.
 pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
 ) -> Plotter<'a> {
-    Plotter::new(
-        title,
-        xname,
-        yname,
-        true,
-        DataBuilder::new().push_css_default(),
-    )
+    PlotterBuilder::new()
+        .with_data(DataBuilder::new().push_css_default())
+        .build(title, xname, yname)
 }
 
 #[derive(Copy, Clone)]
@@ -315,8 +312,7 @@ impl<D: Display> DataBuilder<D> {
     }
 }
 
-///Plotter Builder. [`Plotter::new`] can do everything this does.
-///But sometimes you want to pass around a builder instead of a list of arguments.
+///If [`plot`] isn't good enough, use this struct for more control.
 pub struct PlotterBuilder<D: fmt::Display> {
     data: DataBuilder<D>,
     svgtag: bool,
@@ -352,11 +348,27 @@ impl<'a, D: Display + 'a> PlotterBuilder<D> {
         xname: impl Display + 'a,
         yname: impl Display + 'a,
     ) -> Plotter<'a> {
-        Plotter::new(title, xname, yname, self.svgtag, self.data)
+        let svgtag = if self.svgtag {
+            SvgTagOption::Svg
+        } else {
+            SvgTagOption::NoSvg
+        };
+
+        Plotter {
+            names: Box::new(NamesStruct {
+                title,
+                xname,
+                yname,
+            }),
+            plots: Vec::new(),
+            svgtag,
+            data: Box::new(self.data.finish()),
+        }
     }
 }
 
 impl<'a> Plotter<'a> {
+    /*
     /// Create a plotter
     ///
     /// # Example
@@ -388,6 +400,7 @@ impl<'a> Plotter<'a> {
             data: Box::new(data.finish()),
         }
     }
+    */
 
     /// Create a line from plots.
     ///
