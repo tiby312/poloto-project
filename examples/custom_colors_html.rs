@@ -1,7 +1,10 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
-    let mut s = poloto::plot("Demo: you can use CSS patterns if you embed SVG!","x","y");
-    s.with_css_variables();
+    let mut s = poloto::PlotterBuilder::new().with_variable_style().build(
+        "Demo: you can use CSS patterns if you embed SVG!",
+        "x",
+        "y",
+    );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -13,8 +16,8 @@ fn main() -> core::fmt::Result {
             .map(|x| [x, x.sin() - 10.])
             .twice_iter(),
     );
-    
-    let fs=s.render_to_string()?;
+
+    let fs = s.render_to_string()?;
 
     println!(
         r###"

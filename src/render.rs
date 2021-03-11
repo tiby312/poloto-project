@@ -5,17 +5,16 @@ pub const NUM_COLORS: usize = 8;
 
 use core::fmt::Display;
 
-
-pub struct StyleBuilder<A,B,C>{
-    text_color:A,
-    back_color:B,
-    colors:[C;NUM_COLORS]
+pub struct StyleBuilder<A, B, C> {
+    text_color: A,
+    back_color: B,
+    colors: [C; NUM_COLORS],
 }
-impl StyleBuilder<&'static str,&'static str,&'static str>{
-    pub fn new()->Self{
-        StyleBuilder{
-            text_color:"black",
-            back_color:"aliceblue",
+impl StyleBuilder<&'static str, &'static str, &'static str> {
+    pub fn new() -> Self {
+        StyleBuilder {
+            text_color: "black",
+            back_color: "aliceblue",
             colors: [
                 "blue",
                 "red",
@@ -25,43 +24,42 @@ impl StyleBuilder<&'static str,&'static str,&'static str>{
                 "brown",
                 "lime",
                 "chocolate",
-            ]
+            ],
         }
     }
 }
-impl<A:Display,B:Display,C:Display> StyleBuilder<A,B,C>{
-
-
-    pub fn with_text_color<X:Display>(self,text_color:X)->StyleBuilder<X,B,C>{
-        StyleBuilder{
+impl<A: Display, B: Display, C: Display> StyleBuilder<A, B, C> {
+    pub fn with_text_color<X: Display>(self, text_color: X) -> StyleBuilder<X, B, C> {
+        StyleBuilder {
             text_color,
-            back_color:self.back_color,
-            colors:self.colors
+            back_color: self.back_color,
+            colors: self.colors,
         }
     }
-    pub fn with_back_color<X:Display>(self,back_color:X)->StyleBuilder<A,X,C>{
-        StyleBuilder{
-            text_color:self.text_color,
+    pub fn with_back_color<X: Display>(self, back_color: X) -> StyleBuilder<A, X, C> {
+        StyleBuilder {
+            text_color: self.text_color,
             back_color,
-            colors:self.colors
+            colors: self.colors,
         }
     }
 
-    pub fn with_colors<X:Display>(self,colors:[X;NUM_COLORS])->StyleBuilder<A,B,X>{
-        StyleBuilder{
-            text_color:self.text_color,
-            back_color:self.back_color,
-            colors
+    pub fn with_colors<X: Display>(self, colors: [X; NUM_COLORS]) -> StyleBuilder<A, B, X> {
+        StyleBuilder {
+            text_color: self.text_color,
+            back_color: self.back_color,
+            colors,
         }
     }
-    pub fn build_with_css_variables(self)->impl Display{
-        let StyleBuilder{
+    pub fn build_with_css_variables(self) -> impl Display {
+        let StyleBuilder {
             text_color,
             back_color,
-            colors
-        }=self;
-        moveable_format(move |w|{
-            write!(w,
+            colors,
+        } = self;
+        moveable_format(move |w| {
+            write!(
+                w,
                 r###"<style>.poloto {{
                     font-family: "Arial";
                     stroke-width:2;
@@ -85,30 +83,29 @@ impl<A:Display,B:Display,C:Display> StyleBuilder<A,B,C>{
                     .poloto5fill{{fill:var(--poloto_color5,{7});}}
                     .poloto6fill{{fill:var(--poloto_color6,{8});}}
                     .poloto7fill{{fill:var(--poloto_color7,{9});}}</style>"###,
-                    text_color,
-                    back_color,
-                    colors[0],
-                    colors[1],
-                    colors[2],
-                    colors[3],
-                    colors[4],
-                    colors[5],
-                    colors[6],
-                    colors[7])
-            
+                text_color,
+                back_color,
+                colors[0],
+                colors[1],
+                colors[2],
+                colors[3],
+                colors[4],
+                colors[5],
+                colors[6],
+                colors[7]
+            )
         })
     }
-    pub fn build(self)->impl Display{
-        let StyleBuilder{
+    pub fn build(self) -> impl Display {
+        let StyleBuilder {
             text_color,
             back_color,
-            colors
-        }=self;
-        moveable_format(move |w|{
-
+            colors,
+        } = self;
+        moveable_format(move |w| {
             write!(
                 w,
-                r###".poloto {{
+                r###"<style>.poloto {{
                 font-family: "Arial";
                 stroke-width:2;
                 }}
@@ -130,7 +127,7 @@ impl<A:Display,B:Display,C:Display> StyleBuilder<A,B,C>{
                 .poloto4fill{{fill:{6};}}
                 .poloto5fill{{fill:{7};}}
                 .poloto6fill{{fill:{8};}}
-                .poloto7fill{{fill:{9};}}"###,
+                .poloto7fill{{fill:{9};}}</style>"###,
                 text_color,
                 back_color,
                 colors[0],
@@ -146,17 +143,16 @@ impl<A:Display,B:Display,C:Display> StyleBuilder<A,B,C>{
     }
 }
 
-
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
     data: Vec<Box<dyn Display + 'a>>,
     mut plots: Vec<Plot<'a>>,
-    names:Box<dyn Names+'a>
+    names: Box<dyn Names + 'a>,
 ) -> Result<&'x mut T, fmt::Error> {
     for a in data.into_iter() {
-        write!(writer,"{}",a)?;
+        write!(writer, "{}", a)?;
     }
     use super::default_tags::*;
     let width = WIDTH;
@@ -361,8 +357,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                     .attr("x", width - padding / 1.2)?
                     .attr("y", paddingy + (i as f64) * spacing)
             })?;
-            
-            write!(text,"{}",moveable_format(|w|plots.write_name(w)))?;
+
+            write!(text, "{}", moveable_format(|w| plots.write_name(w)))?;
 
             Ok(text)
         })?;
@@ -502,8 +498,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", padding / 4.0)
         })?;
-        
-        write!(text,"{}",moveable_format(|f|names.write_title(f)))?;
+
+        write!(text, "{}", moveable_format(|f| names.write_title(f)))?;
         Ok(text)
     })?;
 
@@ -516,8 +512,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", height - padding / 8.)
         })?;
-        write!(text,"{}",moveable_format(|f|names.write_xname(f)))?;
-        
+        write!(text, "{}", moveable_format(|f| names.write_xname(f)))?;
+
         Ok(text)
     })?;
 
@@ -534,8 +530,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", padding / 4.0)?
                 .attr("y", height / 2.0)
         })?;
-        write!(text,"{}",moveable_format(|f|names.write_yname(f)))?;
-        
+        write!(text, "{}", moveable_format(|f| names.write_yname(f)))?;
+
         Ok(text)
     })?;
 

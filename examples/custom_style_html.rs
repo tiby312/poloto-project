@@ -4,7 +4,7 @@ use poloto::prelude::*;
 ///The svg is embeded in the html, and we can modify its style by
 ///using styles that override the svg's style.
 fn main() -> core::fmt::Result {
-    let mut s = poloto::plot("Demo: you can use CSS patterns if you embed SVG!","x","y");
+    let mut s = poloto::plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -17,7 +17,7 @@ fn main() -> core::fmt::Result {
             .twice_iter(),
     );
 
-    let fs=s.render_to_string()?;
+    let fs = s.render_to_string()?;
 
     println!(
         r###"

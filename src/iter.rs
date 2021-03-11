@@ -27,12 +27,15 @@ mod file {
 
     impl<P: AsRef<Path>, I: Iterator<Item = [f64; 2]>> FileBuffer<P, I> {
         /// Constructor
-        fn new<J>(inner: J, path: P) -> Self where J:IntoIterator<IntoIter=I> {
+        fn new<J>(inner: J, path: P) -> Self
+        where
+            J: IntoIterator<IntoIter = I>,
+        {
             let file = std::fs::File::create(&path).unwrap();
             FileBuffer {
                 path,
                 file: std::io::BufWriter::new(file),
-                inner:inner.into_iter(),
+                inner: inner.into_iter(),
             }
         }
     }
@@ -95,7 +98,7 @@ mod file {
 
 ///Create a [`DoubleIterator`] that uses an iterator just once,
 ///and stores the plots in a Vec for the second iteration.
-pub fn buffer_iter<I:IntoIterator>(a:I)->BufferIter<I::IntoIter>{
+pub fn buffer_iter<I: IntoIterator>(a: I) -> BufferIter<I::IntoIter> {
     let i = a.into_iter();
     let ll = i.size_hint().0;
     BufferIter {
@@ -106,7 +109,10 @@ pub fn buffer_iter<I:IntoIterator>(a:I)->BufferIter<I::IntoIter>{
 
 ///Create a [`DoubleIterator`] that uses an iterator twice
 ///by cloning it once.
-pub fn twice_iter<I:IntoIterator>(a:I)->NoBufferIter<I::IntoIter> where I::IntoIter:Clone{
+pub fn twice_iter<I: IntoIterator>(a: I) -> NoBufferIter<I::IntoIter>
+where
+    I::IntoIter: Clone,
+{
     let i = a.into_iter();
     let sec = i.clone();
     NoBufferIter {
@@ -114,7 +120,6 @@ pub fn twice_iter<I:IntoIterator>(a:I)->NoBufferIter<I::IntoIter> where I::IntoI
         inner2: sec,
     }
 }
-
 
 impl<I: Iterator + Sized> PlotIterator for I {}
 

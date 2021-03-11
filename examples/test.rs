@@ -32,7 +32,7 @@ fn main() -> fmt::Result {
         html.elem("div", |writer| {
             let div = writer.write(|w| w.attr("style", "display:flex;flex-wrap:wrap;"))?;
 
-            for (i,test) in generate_test().iter().enumerate() {
+            for (i, test) in generate_test().iter().enumerate() {
                 div.elem("svg", |writer| {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
@@ -45,7 +45,11 @@ fn main() -> fmt::Result {
                         Ok(w)
                     })?;
 
-                    let mut s = poloto::Plotter::with_no_svg_tag(wr2!("test {}",i),"x","y");
+                    let mut s = poloto::PlotterBuilder::new().with_no_svg_tag().build(
+                        wr2!("test {}", i),
+                        "x",
+                        "y",
+                    );
 
                     s.scatter("test", test.iter().copied().twice_iter());
 

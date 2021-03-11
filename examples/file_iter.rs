@@ -3,11 +3,7 @@ use poloto::prelude::*;
 use poloto::iter::*;
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut s = poloto::plot(
-        wr2!("Demo: Some Trigonometry Plots {}", 5),
-        "x",
-        "y"
-    );
+    let mut s = poloto::plot(wr2!("Demo: Some Trigonometry Plots {}", 5), "x", "y");
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 

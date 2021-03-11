@@ -2,8 +2,11 @@ use poloto::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    
-    let mut s = poloto::plot("Demo: you can change the style of the svg file itself!","x","y");
+    let mut s = poloto::plot(
+        "Demo: you can change the style of the svg file itself!",
+        "x",
+        "y",
+    );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -16,7 +19,8 @@ fn main() -> core::fmt::Result {
             .twice_iter(),
     );
 
-    s.with_text(r###"
+    s.with_text(
+        r###"
     <defs>
         <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
             <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
@@ -36,7 +40,8 @@ fn main() -> core::fmt::Result {
         fill: url(#pattern2);
     }
     </style>
-    "###);
+    "###,
+    );
 
     s.render_io(std::io::stdout())?;
 
