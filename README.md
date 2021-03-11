@@ -20,10 +20,6 @@ then you might have no problem using the iterator twice. Poloto forces the user 
 by either calling `twice_iter` or `buffer_iter` on an iterator. A third `file_buffer` is also provided that
 uses a temporary file to store the iterator results.
 
-### Passing closures instead of strings
-
-Instead of passing strings, the user passes closures on how to make a string. This allows us to inject formatted strings directly into the svg file as it is being written on the fly. This allows us to avoid the dynamic allocation of calling `format!`.
-
 ### Formatting Tick Intervals
 
 Poloto will first print intervals in normal decimal at the precision required to capture the differences
