@@ -1,13 +1,13 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
-    let mut s = poloto::plot_io(std::io::stdout());
+    let mut s = poloto::plot("cows per year", "year", "cow");
 
     // TEST 3
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    s.scatter(wr!("data"), data.iter().map(|x| *x).twice_iter());
+    s.scatter("data", data.iter().map(|x| *x).twice_iter());
 
-    s.render(wr!("Cows Per Year"), wr!("Year"), wr!("Cow"))?;
+    s.render_io(std::io::stdout())?;
 
     Ok(())
 }

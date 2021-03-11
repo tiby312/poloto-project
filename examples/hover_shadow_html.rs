@@ -1,21 +1,20 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
-    let mut fs = String::new();
-    let mut s = poloto::plot(&mut fs);
+    let mut s = poloto::plot("Demo: Hovering and shadows", "x", "y");
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    s.line(wr!("cos"), x.clone().map(|x| [x, x.cos()]).twice_iter());
+    s.line("cos", x.clone().map(|x| [x, x.cos()]).twice_iter());
     s.histogram(
-        wr!("sin-3"),
+        "sin-3",
         x.clone().step_by(3).map(|x| [x, x.sin() - 3.]).twice_iter(),
     );
     s.scatter(
-        wr!("sin"),
+        "sin",
         x.clone().step_by(3).map(|x| [x, x.sin()]).twice_iter(),
     );
 
-    s.render(wr!("Demo: Hovering and shadows"), wr!("x"), wr!("y"))?;
+    let fs = s.render_to_string()?;
 
     println!(
         r###"

@@ -4,122 +4,156 @@ use tagger::prelude::*;
 pub const NUM_COLORS: usize = 8;
 
 use core::fmt::Display;
-///Add the default css styling with css variables.
-pub fn default_styling_variables<T: Write>(
-    svg: T,
-    text_color: impl Display,
-    background_color: impl Display,
-    colors: [impl Display;NUM_COLORS],
-) -> Result<T, fmt::Error> {
-    let mut svg = tagger::Element::new(svg);
 
-    svg.elem_no_attr("style", |w| {
-        write_ret!(
-            w,
-            r###".poloto {{
-            font-family: "Arial";
-            stroke-width:2;
-            }}
-            .poloto_text{{fill: var(--poloto_fg_color,{0});  }}
-            .poloto_axis_lines{{stroke: var(--poloto_fg_color,{0});stoke-width:3;fill:none}}
-            .poloto_background{{fill: var(--poloto_bg_color,{1}); }}
-            .poloto0stroke{{stroke:  var(--poloto_color0,{2}); }}
-            .poloto1stroke{{stroke:  var(--poloto_color1,{3}); }}
-            .poloto2stroke{{stroke:  var(--poloto_color2,{4}); }}
-            .poloto3stroke{{stroke:  var(--poloto_color3,{5}); }}
-            .poloto4stroke{{stroke:  var(--poloto_color4,{6}); }}
-            .poloto5stroke{{stroke:  var(--poloto_color5,{7}); }}
-            .poloto6stroke{{stroke:  var(--poloto_color6,{8}); }}
-            .poloto7stroke{{stroke:  var(--poloto_color7,{9}); }}
-            .poloto0fill{{fill:var(--poloto_color0,{2});}}
-            .poloto1fill{{fill:var(--poloto_color1,{3});}}
-            .poloto2fill{{fill:var(--poloto_color2,{4});}}
-            .poloto3fill{{fill:var(--poloto_color3,{5});}}
-            .poloto4fill{{fill:var(--poloto_color4,{6});}}
-            .poloto5fill{{fill:var(--poloto_color5,{7});}}
-            .poloto6fill{{fill:var(--poloto_color6,{8});}}
-            .poloto7fill{{fill:var(--poloto_color7,{9});}}"###,
-            text_color,
-            background_color,
-            colors[0],
-            colors[1],
-            colors[2],
-            colors[3],
-            colors[4],
-            colors[5],
-            colors[6],
-            colors[7],
-        )
-    })?;
-
-    Ok(svg.into_writer())
+///Create a custom style
+pub struct StyleBuilder<A, B, C> {
+    text_color: A,
+    back_color: B,
+    colors: [C; NUM_COLORS],
 }
-
-///Add the default css styling.
-pub fn default_styling<T: Write>(
-    svg: T,
-    text_color: impl Display,
-    background_color: impl Display,
-    colors: [impl Display;NUM_COLORS],
-) -> Result<T, fmt::Error> {
-    //Default colors if CSS is not overriden with user colors.
-
-    let mut svg = tagger::Element::new(svg);
-
-    svg.elem_no_attr("style", |w| {
-        write_ret!(
-            w,
-            r###".poloto {{
-            font-family: "Arial";
-            stroke-width:2;
-            }}
-            .poloto_text{{fill: {0};  }}
-            .poloto_axis_lines{{stroke: {0};stoke-width:3;fill:none}}
-            .poloto_background{{fill: {1}; }}
-            .poloto0stroke{{stroke:  {2}; }}
-            .poloto1stroke{{stroke:  {3}; }}
-            .poloto2stroke{{stroke:  {4}; }}
-            .poloto3stroke{{stroke:  {5}; }}
-            .poloto4stroke{{stroke:  {6}; }}
-            .poloto5stroke{{stroke:  {7}; }}
-            .poloto6stroke{{stroke:  {8}; }}
-            .poloto7stroke{{stroke:  {9}; }}
-            .poloto0fill{{fill:{2};}}
-            .poloto1fill{{fill:{3};}}
-            .poloto2fill{{fill:{4};}}
-            .poloto3fill{{fill:{5};}}
-            .poloto4fill{{fill:{6};}}
-            .poloto5fill{{fill:{7};}}
-            .poloto6fill{{fill:{8};}}
-            .poloto7fill{{fill:{9};}}"###,
+impl StyleBuilder<&'static str, &'static str, &'static str> {
+    pub fn new() -> Self {
+        StyleBuilder {
+            text_color: "black",
+            back_color: "aliceblue",
+            colors: [
+                "blue",
+                "red",
+                "green",
+                "gold",
+                "aqua",
+                "brown",
+                "lime",
+                "chocolate",
+            ],
+        }
+    }
+}
+impl<A: Display, B: Display, C: Display> StyleBuilder<A, B, C> {
+    pub fn with_text_color<X: Display>(self, text_color: X) -> StyleBuilder<X, B, C> {
+        StyleBuilder {
             text_color,
-            background_color,
-            colors[0],
-            colors[1],
-            colors[2],
-            colors[3],
-            colors[4],
-            colors[5],
-            colors[6],
-            colors[7],
-        )
-    })?;
+            back_color: self.back_color,
+            colors: self.colors,
+        }
+    }
+    pub fn with_back_color<X: Display>(self, back_color: X) -> StyleBuilder<A, X, C> {
+        StyleBuilder {
+            text_color: self.text_color,
+            back_color,
+            colors: self.colors,
+        }
+    }
 
-    Ok(svg.into_writer())
+    pub fn with_colors<X: Display>(self, colors: [X; NUM_COLORS]) -> StyleBuilder<A, B, X> {
+        StyleBuilder {
+            text_color: self.text_color,
+            back_color: self.back_color,
+            colors,
+        }
+    }
+    pub fn build_with_css_variables(self) -> impl Display {
+        let StyleBuilder {
+            text_color,
+            back_color,
+            colors,
+        } = self;
+        moveable_format(move |w| {
+            write!(
+                w,
+                r###"<style>.poloto {{
+                    font-family: "Arial";
+                    stroke-width:2;
+                    }}
+                    .poloto_text{{fill: var(--poloto_fg_color,{0});  }}
+                    .poloto_axis_lines{{stroke: var(--poloto_fg_color,{0});stoke-width:3;fill:none}}
+                    .poloto_background{{fill: var(--poloto_bg_color,{1}); }}
+                    .poloto0stroke{{stroke:  var(--poloto_color0,{2}); }}
+                    .poloto1stroke{{stroke:  var(--poloto_color1,{3}); }}
+                    .poloto2stroke{{stroke:  var(--poloto_color2,{4}); }}
+                    .poloto3stroke{{stroke:  var(--poloto_color3,{5}); }}
+                    .poloto4stroke{{stroke:  var(--poloto_color4,{6}); }}
+                    .poloto5stroke{{stroke:  var(--poloto_color5,{7}); }}
+                    .poloto6stroke{{stroke:  var(--poloto_color6,{8}); }}
+                    .poloto7stroke{{stroke:  var(--poloto_color7,{9}); }}
+                    .poloto0fill{{fill:var(--poloto_color0,{2});}}
+                    .poloto1fill{{fill:var(--poloto_color1,{3});}}
+                    .poloto2fill{{fill:var(--poloto_color2,{4});}}
+                    .poloto3fill{{fill:var(--poloto_color3,{5});}}
+                    .poloto4fill{{fill:var(--poloto_color4,{6});}}
+                    .poloto5fill{{fill:var(--poloto_color5,{7});}}
+                    .poloto6fill{{fill:var(--poloto_color6,{8});}}
+                    .poloto7fill{{fill:var(--poloto_color7,{9});}}</style>"###,
+                text_color,
+                back_color,
+                colors[0],
+                colors[1],
+                colors[2],
+                colors[3],
+                colors[4],
+                colors[5],
+                colors[6],
+                colors[7]
+            )
+        })
+    }
+    pub fn build(self) -> impl Display {
+        let StyleBuilder {
+            text_color,
+            back_color,
+            colors,
+        } = self;
+        moveable_format(move |w| {
+            write!(
+                w,
+                r###"<style>.poloto {{
+                font-family: "Arial";
+                stroke-width:2;
+                }}
+                .poloto_text{{fill: {0};  }}
+                .poloto_axis_lines{{stroke: {0};stoke-width:3;fill:none}}
+                .poloto_background{{fill: {1}; }}
+                .poloto0stroke{{stroke:  {2}; }}
+                .poloto1stroke{{stroke:  {3}; }}
+                .poloto2stroke{{stroke:  {4}; }}
+                .poloto3stroke{{stroke:  {5}; }}
+                .poloto4stroke{{stroke:  {6}; }}
+                .poloto5stroke{{stroke:  {7}; }}
+                .poloto6stroke{{stroke:  {8}; }}
+                .poloto7stroke{{stroke:  {9}; }}
+                .poloto0fill{{fill:{2};}}
+                .poloto1fill{{fill:{3};}}
+                .poloto2fill{{fill:{4};}}
+                .poloto3fill{{fill:{5};}}
+                .poloto4fill{{fill:{6};}}
+                .poloto5fill{{fill:{7};}}
+                .poloto6fill{{fill:{8};}}
+                .poloto7fill{{fill:{9};}}</style>"###,
+                text_color,
+                back_color,
+                colors[0],
+                colors[1],
+                colors[2],
+                colors[3],
+                colors[4],
+                colors[5],
+                colors[6],
+                colors[7],
+            )
+        })
+    }
 }
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
-    data: Vec<Box<dyn TextWriter<T> + 'a>>,
-    mut plots: Vec<Plot<'a, T>>,
-    title: impl FnOnce(&mut T) -> fmt::Result,
-    xname: impl FnOnce(&mut T) -> fmt::Result,
-    yname: impl FnOnce(&mut T) -> fmt::Result,
+    data: Vec<Box<dyn Display + 'a>>,
+    mut plots: Vec<Plot<'a>>,
+    names: Box<dyn Names + 'a>,
 ) -> Result<&'x mut T, fmt::Error> {
-    for mut a in data.into_iter() {
-        a.write_name(writer)?;
+    for a in data.into_iter() {
+        write!(writer, "{}", a)?;
     }
     use super::default_tags::*;
     let width = WIDTH;
@@ -324,7 +358,9 @@ pub(super) fn render<'a, 'x, T: Write>(
                     .attr("x", width - padding / 1.2)?
                     .attr("y", paddingy + (i as f64) * spacing)
             })?;
-            plots.write_name(text.get_writer())?;
+
+            write!(text, "{}", moveable_format(|w| plots.write_name(w)))?;
+
             Ok(text)
         })?;
         //}
@@ -463,7 +499,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", padding / 4.0)
         })?;
-        title(text.get_writer())?;
+
+        write!(text, "{}", moveable_format(|f| names.write_title(f)))?;
         Ok(text)
     })?;
 
@@ -476,7 +513,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", width / 2.0)?
                 .attr("y", height - padding / 8.)
         })?;
-        xname(text.get_writer())?;
+        write!(text, "{}", moveable_format(|f| names.write_xname(f)))?;
+
         Ok(text)
     })?;
 
@@ -493,7 +531,8 @@ pub(super) fn render<'a, 'x, T: Write>(
                 .attr("x", padding / 4.0)?
                 .attr("y", height / 2.0)
         })?;
-        yname(text.get_writer())?;
+        write!(text, "{}", moveable_format(|f| names.write_yname(f)))?;
+
         Ok(text)
     })?;
 

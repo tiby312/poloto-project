@@ -1,35 +1,27 @@
 use poloto::prelude::*;
 fn main() -> std::fmt::Result {
-    
+    let mut plotter =
+        poloto::PlotterBuilder::new()
+            .with_no_style()
+            .build("cows per year", "year", "cows");
 
+    plotter.with_text(
+        poloto::StyleBuilder::new()
+            .with_text_color("white")
+            .with_back_color("black")
+            .with_colors(["red"; poloto::default_tags::NUM_COLORS])
+            .build(),
+    );
 
-    let mut buffer = String::new();
+    let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let mut root=tagger::Element::new(&mut buffer);
-    root.elem("svg", |writer| {
-        let mut svg = writer.write(|w| {
-            poloto::default_tags::default_svg_attrs()(w)?;
+    plotter.line("test1", x.clone().map(|x| [x, x.cos()]).twice_iter());
 
-            Ok(w)
-        })?;
+    plotter.line("test2", x.clone().map(|x| [x, x.sin()]).twice_iter());
 
-        poloto::default_tags::default_styling(&mut svg,"white","black",[
-            "red";poloto::default_tags::NUM_COLORS
-        ])?;
+    plotter.line("test3", x.clone().map(|x| [x, x.tan()]).twice_iter());
 
-        let mut plotter = poloto::Plotter::with_no_svg_style_tags(svg);
+    plotter.render_io(std::io::stdout())?;
 
-        let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
-
-        plotter.line(wr!("test1"), x.clone().map(|x| [x,x.cos()]).twice_iter());
-    
-        plotter.line(wr!("test1"), x.clone().map(|x| [x,x.sin()]).twice_iter());
-    
-        
-        plotter.render(wr!("cows per year"), wr!("year"), wr!("cows"))
-
-    })?;
-    
-    println!("{}", buffer);
     Ok(())
 }

@@ -1,25 +1,23 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
-    let mut fs = String::new();
-    let mut s = poloto::plot(&mut fs);
-    s.with_css_variables();
+    let mut s = poloto::PlotterBuilder::new().with_variable_style().build(
+        "Demo: you can use CSS patterns if you embed SVG!",
+        "x",
+        "y",
+    );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    s.line(wr!("cos"), x.clone().map(|x| [x, x.cos()]).twice_iter());
+    s.line("cos", x.clone().map(|x| [x, x.cos()]).twice_iter());
     s.histogram(
-        wr!("sin-10"),
+        "sin-10",
         x.clone()
             .step_by(3)
             .map(|x| [x, x.sin() - 10.])
             .twice_iter(),
     );
 
-    s.render(
-        wr!("Demo: you can use CSS patterns if you embed SVG!"),
-        wr!("x"),
-        wr!("y"),
-    )?;
+    let fs = s.render_to_string()?;
 
     println!(
         r###"
