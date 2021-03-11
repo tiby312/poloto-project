@@ -1,9 +1,7 @@
-use poloto::prelude::*;
-
 use poloto::iter::*;
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut s = poloto::plot(wr2!("Demo: Some Trigonometry Plots {}", 5), "x", "y");
+    let mut s = poloto::plot("Demo: Some Trigonometry Plots", "x", "y");
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -11,7 +9,7 @@ fn main() -> core::fmt::Result {
 
     //Use a temporary file to store the plots
     s.line(
-        wr2!("{}os", 'c'),
+        "cos",
         file_buffer(x.clone().map(|x| [x, x.cos()]), temp_file),
     );
 

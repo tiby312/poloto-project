@@ -4,7 +4,7 @@ use poloto::prelude::*;
 fn main() -> core::fmt::Result {
     let mut s = poloto::plot(
         "Demo: Some Trigonometry Plots",
-        wr2!("This is the {} label", 'x'),
+        move_format!("This is the {} label", 'x'),
         "This is the y label",
     );
 
@@ -18,7 +18,7 @@ fn main() -> core::fmt::Result {
     s.scatter("sin", x.clone().map(|x| [x, x.sin()]).buffer_iter());
 
     s.histogram(
-        wr2!("sin-{}", 10),
+        move_format!("sin-{}", 10),
         x.clone()
             .step_by(3)
             .map(|x| [x, x.sin() - 10.])
@@ -26,11 +26,11 @@ fn main() -> core::fmt::Result {
     );
 
     s.line_fill(
-        wr2!("sin-{}", 20),
+        move_format!("sin-{}", 20),
         x.clone().map(|x| [x, x.sin() - 20.]).buffer_iter(),
     );
 
-    s.with_text(wr2!(
+    s.with_text(move_format!(
         "<style>{}</style>",
         ".poloto_background{fill:rgba(200,255,200,0.8);}"
     ));

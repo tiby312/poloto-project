@@ -46,7 +46,7 @@ fn main() -> fmt::Result {
                     })?;
 
                     let mut s = poloto::PlotterBuilder::new().with_no_svg_tag().build(
-                        wr2!("test {}", i),
+                        move_format!("test {}", i),
                         "x",
                         "y",
                     );

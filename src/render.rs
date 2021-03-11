@@ -5,6 +5,7 @@ pub const NUM_COLORS: usize = 8;
 
 use core::fmt::Display;
 
+///Create a custom style
 pub struct StyleBuilder<A, B, C> {
     text_color: A,
     back_color: B,

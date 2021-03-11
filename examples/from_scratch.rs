@@ -6,7 +6,7 @@ fn main() -> std::fmt::Result {
             .build("cows per year", "year", "cows");
 
     plotter.with_text(
-        poloto::default_tags::StyleBuilder::new()
+        poloto::StyleBuilder::new()
             .with_text_color("white")
             .with_back_color("black")
             .with_colors(["red"; poloto::default_tags::NUM_COLORS])

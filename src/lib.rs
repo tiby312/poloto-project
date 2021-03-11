@@ -15,12 +15,16 @@ mod util;
 ///The poloto prelude.
 pub mod prelude {
     pub use super::iter::PlotIterator;
-    pub use super::wr2;
+    pub use super::move_format;
     pub use core::fmt::Write;
     pub use tagger::wr;
 }
 use core::fmt;
+
+
 mod render;
+pub use render::StyleBuilder;
+    
 
 use iter::DoubleIterator;
 
@@ -30,7 +34,6 @@ pub mod iter;
 
 ///Contains building blocks for create the default svg an styling tags from scratch.
 pub mod default_tags {
-    pub use super::render::StyleBuilder;
     pub use super::render::NUM_COLORS;
     use core::fmt;
 
@@ -43,19 +46,16 @@ pub mod default_tags {
     ///The xmlns: `http://www.w3.org/2000/svg`
     pub const XMLNS: &str = "http://www.w3.org/2000/svg";
 
-    ///Returns a function that will write default svg tag attributes.
-    pub fn default_svg_attrs<T: fmt::Write>(
-    ) -> impl FnOnce(&mut tagger::AttributeWriter<T>) -> Result<(), fmt::Error> {
+    ///Write default svg tag attributes.
+    pub fn default_svg_attrs<'a,'b,T: fmt::Write>(w:&'a mut tagger::AttributeWriter<'b,T>) -> Result<&'a mut tagger::AttributeWriter<'b,T>, fmt::Error> {
         use tagger::prelude::*;
 
-        move |w| {
-            w.attr("class", CLASS)?
-                .attr("width", WIDTH)?
-                .attr("height", HEIGHT)?
-                .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
-                .attr("xmlns", XMLNS)?;
-            Ok(())
-        }
+        w.attr("class", CLASS)?
+            .attr("width", WIDTH)?
+            .attr("height", HEIGHT)?
+            .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
+            .attr("xmlns", XMLNS)
+    
     }
 }
 
@@ -124,17 +124,20 @@ pub struct Plotter<'a> {
     svgtag: SvgTagOption,
 }
 
-/// Convenience macro to reduce code.
-/// Shorthand for 'move |w|write!(w,...)`
+/// Shorthand for `moveable_format(move |w|write!(w,...))`
+/// Similar to `format_args!()` except has a more flexible lifetime.
 /// Create a closure that will use write!() with the formatting arguments.
 #[macro_export]
-macro_rules! wr2 {
+macro_rules! move_format {
     ($($arg:tt)*) => {
         $crate::moveable_format(move |w| write!(w,$($arg)*))
     }
 }
 
-//turn this into a macro.
+
+///Convert a moved closure into a impl fmt::Display.
+///This is useful because std's `format_args!()` macro
+///can't be stored for long.
 pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
     struct Foo<F>(F);
     impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
@@ -162,7 +165,7 @@ impl<A: Display, B: Display, C: Display> Names for NamesStruct<A, B, C> {
     }
 }
 
-pub trait Names {
+trait Names {
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
@@ -183,28 +186,6 @@ enum SvgTagOption {
     NoSvg,
 }
 
-/// Instead of the default style, use one that adds variables.
-///
-/// This injects [`default_tags::default_styling_variables`] instead of
-/// the default [`default_tags::default_styling`].
-///
-/// If you embed the generated svg into a html file,
-/// then you can add this example:
-/// ```css
-/// .poloto{
-///    --poloto_bg_color:"black";
-///    --poloto_fg_color:"white;
-///    --poloto_color0:"red";
-///    --poloto_color1:"green";
-///    --poloto_color2:"yellow";
-///    --poloto_color3:"orange";
-///    --poloto_color4:"purple";
-///    --poloto_color5:"pink";
-///    --poloto_color6:"aqua";
-///    --poloto_color7:"red";
-/// }
-/// ```  
-/// By default these variables are not defined, so the svg falls back on some default colors.
 #[derive(Copy, Clone)]
 enum StyleOption {
     RegularStyle,
@@ -212,6 +193,7 @@ enum StyleOption {
     NoStyle,
 }
 
+///Builder for a Plotter.
 pub struct PlotterBuilder {
     style: StyleOption,
     tag: SvgTagOption,
@@ -223,14 +205,43 @@ impl PlotterBuilder {
             style: StyleOption::RegularStyle,
         }
     }
+
+    /// Do not inject a svg tag. Useful for cases where you want custom attributes.
+    /// See the [`default_tags`] module for the default svg attributes.
+    /// See the `test` example.
     pub fn with_no_svg_tag(&mut self) -> &mut Self {
         self.tag = SvgTagOption::NoSvg;
         self
     }
+
+    /// Instead of the default style, use one that adds variables.
+    ///
+    /// This injects what is produced by [`StyleBuilder::build_with_css_variables`] instead of
+    /// the default [`StyleBuilder::build`].
+    ///
+    /// If you embed the generated svg into a html file,
+    /// then you can add this example:
+    /// ```css
+    /// .poloto{
+    ///    --poloto_bg_color:"black";
+    ///    --poloto_fg_color:"white;
+    ///    --poloto_color0:"red";
+    ///    --poloto_color1:"green";
+    ///    --poloto_color2:"yellow";
+    ///    --poloto_color3:"orange";
+    ///    --poloto_color4:"purple";
+    ///    --poloto_color5:"pink";
+    ///    --poloto_color6:"aqua";
+    ///    --poloto_color7:"red";
+    /// }
+    /// ```  
+    /// By default these variables are not defined, so the svg falls back on some default colors.
     pub fn with_variable_style(&mut self) -> &mut Self {
         self.style = StyleOption::VariableStyle;
         self
     }
+
+    ///Do not inject any styling. See the `from_scratch` example.
     pub fn with_no_style(&mut self) -> &mut Self {
         self.style = StyleOption::NoStyle;
         self
@@ -255,7 +266,6 @@ impl PlotterBuilder {
             svgtag,
             data: Vec::new(),
         };
-        use default_tags::*;
         match style {
             StyleOption::RegularStyle => {
                 p.with_text(StyleBuilder::new().build());
@@ -275,8 +285,7 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let mut s=String::new();
-    /// let plotter = poloto::Plotter::new(&mut s);
+    /// let plotter = poloto::Plotter::new("title","x","y");
     /// ```
     pub fn new(
         title: impl Display + 'a,
@@ -297,9 +306,8 @@ impl<'a> Plotter<'a> {
     ///         [3.0,6.0]
     /// ];
     /// use poloto::prelude::*;
-    /// let mut s=String::new();
-    /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.line(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
+    /// let mut plotter = poloto::plot("title","x","y");
+    /// plotter.line("data",data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn line(
         &mut self,
@@ -324,9 +332,8 @@ impl<'a> Plotter<'a> {
     ///         [3.0,6.0]
     /// ];
     /// use poloto::prelude::*;
-    /// let mut s=String::new();
-    /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.line_fill(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
+    /// let mut plotter = poloto::plot("title","x","y");
+    /// plotter.line_fill("data",data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn line_fill(
         &mut self,
@@ -351,9 +358,8 @@ impl<'a> Plotter<'a> {
     ///         [3.0,6.0]
     /// ];
     /// use poloto::prelude::*;
-    /// let mut s=String::new();
-    /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.scatter(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
+    /// let mut plotter = poloto::plot("title","x","y");
+    /// plotter.scatter("data",data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn scatter(
         &mut self,
@@ -380,8 +386,8 @@ impl<'a> Plotter<'a> {
     /// ];
     /// use poloto::prelude::*;
     /// let mut s=String::new();
-    /// let mut plotter = poloto::Plotter::new(&mut s);
-    /// plotter.histogram(|w|write!(w,"cow"),data.iter().map(|&x|x).twice_iter());
+    /// let mut plotter = poloto::plot("title","x","y");
+    /// plotter.histogram("data",data.iter().map(|&x|x).twice_iter());
     /// ```
     pub fn histogram(
         &mut self,
@@ -442,9 +448,7 @@ impl<'a> Plotter<'a> {
             SvgTagOption::Svg => {
                 root.elem("svg", |writer| {
                     let svg = writer.write(|w| {
-                        default_svg_attrs()(w)?;
-
-                        Ok(w)
+                        default_svg_attrs(w)
                     })?;
 
                     render::render(svg.get_writer(), data, plots, names)?;
