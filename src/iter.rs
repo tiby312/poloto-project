@@ -121,7 +121,7 @@ where
     }
 }
 
-impl<I: Iterator + Sized> PlotIterator for I {}
+impl<I: IntoIterator + Sized> PlotIterator for I {}
 
 ///Trait that is implemented for all iterators through a blanket impl.
 pub trait PlotIterator: IntoIterator + Sized {
