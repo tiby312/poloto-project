@@ -219,7 +219,7 @@ trait Names {
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
 }
 
-///Convenience function for [`Plotter::new()`].
+///Convenience function for [`Plotter::new()`] with default css tag, and with svg tag.
 pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
