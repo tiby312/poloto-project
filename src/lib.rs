@@ -5,7 +5,7 @@
 //!
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! * Plots containing NaN or Infinity are ignored.
-//! * After 6 plots, the colors cycle back and are repeated.
+//! * After 8 plots, the colors cycle back and are repeated.
 //!
 use core::fmt::Write;
 
@@ -19,10 +19,8 @@ pub mod prelude {
 }
 use core::fmt;
 
-
 mod render;
 pub use render::StyleBuilder;
-    
 
 use iter::DoubleIterator;
 
@@ -45,7 +43,9 @@ pub mod default_tags {
     pub const XMLNS: &str = "http://www.w3.org/2000/svg";
 
     ///Write default svg tag attributes.
-    pub fn default_svg_attrs<'a,'b,T: fmt::Write>(w:&'a mut tagger::AttributeWriter<'b,T>) -> Result<&'a mut tagger::AttributeWriter<'b,T>, fmt::Error> {
+    pub fn default_svg_attrs<'a, 'b, T: fmt::Write>(
+        w: &'a mut tagger::AttributeWriter<'b, T>,
+    ) -> Result<&'a mut tagger::AttributeWriter<'b, T>, fmt::Error> {
         use tagger::prelude::*;
 
         w.attr("class", CLASS)?
@@ -53,7 +53,6 @@ pub mod default_tags {
             .attr("height", HEIGHT)?
             .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
             .attr("xmlns", XMLNS)
-    
     }
 }
 
@@ -118,7 +117,7 @@ struct Plot<'a> {
 pub struct Plotter<'a> {
     names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
-    data: Vec<Box<dyn Display + 'a>>,
+    data: Box<dyn Display + 'a>,
     svgtag: SvgTagOption,
 }
 
@@ -131,6 +130,58 @@ macro_rules! move_format {
     }
 }
 
+/*
+pub struct DisplayList<'a, T> {
+    seperator: T,
+    a: Vec<Box<dyn Display + 'a>>,
+}
+impl<'a, T: fmt::Display> DisplayList<'a, T> {
+    pub fn new(seperator: T) -> Self {
+        DisplayList {
+            seperator,
+            a: Vec::new(),
+        }
+    }
+    pub fn add(&mut self, a: impl Display + 'a) {
+        self.a.push(Box::new(a));
+    }
+}
+impl<'a, T: fmt::Display> fmt::Display for DisplayList<'a, T> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        for a in self.a.iter() {
+            a.fmt(formatter)?;
+            self.seperator.fmt(formatter)?;
+        }
+        Ok(())
+    }
+}
+*/
+
+///Concatenate two display objects with the specified spacing inbetween.
+pub fn concatenate_display(
+    spacing: impl fmt::Display,
+    a: impl fmt::Display,
+    b: impl fmt::Display,
+) -> impl fmt::Display {
+    struct Foo<A, B, C> {
+        spacing: A,
+        a: B,
+        b: C,
+    }
+    impl<A, B, C> fmt::Display for Foo<A, B, C>
+    where
+        A: fmt::Display,
+        B: fmt::Display,
+        C: fmt::Display,
+    {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            self.a.fmt(formatter)?;
+            self.spacing.fmt(formatter)?;
+            self.b.fmt(formatter)
+        }
+    }
+    Foo { spacing, a, b }
+}
 
 ///Convert a moved closure into a impl fmt::Display.
 ///This is useful because std's `format_args!()` macro
@@ -174,7 +225,13 @@ pub fn plot<'a>(
     xname: impl Display + 'a,
     yname: impl Display + 'a,
 ) -> Plotter<'a> {
-    Plotter::new(title, xname, yname)
+    Plotter::new(
+        title,
+        xname,
+        yname,
+        true,
+        DataBuilder::new().push_css_default(),
+    )
 }
 
 #[derive(Copy, Clone)]
@@ -183,32 +240,28 @@ enum SvgTagOption {
     NoSvg,
 }
 
-#[derive(Copy, Clone)]
-enum StyleOption {
-    RegularStyle,
-    VariableStyle,
-    NoStyle,
+///Insert svg data after the svg element, but before the plot elements.
+pub struct DataBuilder<D: Display> {
+    style: D,
 }
 
-///Builder for a Plotter.
-pub struct PlotterBuilder {
-    style: StyleOption,
-    tag: SvgTagOption,
-}
-impl PlotterBuilder {
-    pub fn new() -> Self {
-        PlotterBuilder {
-            tag: SvgTagOption::Svg,
-            style: StyleOption::RegularStyle,
-        }
+impl Default for DataBuilder<&'static str> {
+    fn default() -> Self {
+        Self::new()
     }
+}
 
-    /// Do not inject a svg tag. Useful for cases where you want custom attributes.
-    /// See the [`default_tags`] module for the default svg attributes.
-    /// See the `test` example.
-    pub fn with_no_svg_tag(&mut self) -> &mut Self {
-        self.tag = SvgTagOption::NoSvg;
-        self
+impl DataBuilder<&'static str> {
+    pub fn new() -> Self {
+        DataBuilder { style: "" }
+    }
+}
+impl<D: Display> DataBuilder<D> {
+    ///Push the default poloto css styling.
+    pub fn push_css_default(self) -> DataBuilder<impl Display> {
+        DataBuilder {
+            style: concatenate_display("", self.style, StyleBuilder::new().build()),
+        }
     }
 
     /// Instead of the default style, use one that adds variables.
@@ -233,46 +286,32 @@ impl PlotterBuilder {
     /// }
     /// ```  
     /// By default these variables are not defined, so the svg falls back on some default colors.
-    pub fn with_variable_style(&mut self) -> &mut Self {
-        self.style = StyleOption::VariableStyle;
-        self
-    }
-
-    ///Do not inject any styling. See the `from_scratch` example.
-    pub fn with_no_style(&mut self) -> &mut Self {
-        self.style = StyleOption::NoStyle;
-        self
-    }
-
-    pub fn build<'a>(
-        &self,
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-    ) -> Plotter<'a> {
-        let svgtag = self.tag;
-        let style = self.style;
-
-        let mut p = Plotter {
-            names: Box::new(NamesStruct {
-                title,
-                xname,
-                yname,
-            }),
-            plots: Vec::new(),
-            svgtag,
-            data: Vec::new(),
-        };
-        match style {
-            StyleOption::RegularStyle => {
-                p.with_text(StyleBuilder::new().build());
-            }
-            StyleOption::VariableStyle => {
-                p.with_text(StyleBuilder::new().build_with_css_variables());
-            }
-            StyleOption::NoStyle => {}
+    pub fn push_default_css_with_variable(self) -> DataBuilder<impl Display> {
+        DataBuilder {
+            style: concatenate_display(
+                "",
+                self.style,
+                StyleBuilder::new().build_with_css_variables(),
+            ),
         }
-        p
+    }
+    /// User can inject some svg elements using this function.
+    /// They will be inserted right after the svg and default svg tags.
+    ///
+    /// You can override the css in regular html if you embed the generated svg.
+    /// This gives you a lot of flexibility giving your the power to dynamically
+    /// change the theme of your svg.
+    ///
+    /// However, if you want to embed the svg as an image, you lose this ability.
+    /// If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
+    ///
+    pub fn push(self, a: impl fmt::Display) -> DataBuilder<impl Display> {
+        DataBuilder {
+            style: concatenate_display("", self.style, a),
+        }
+    }
+    fn finish(self) -> D {
+        self.style
     }
 }
 
@@ -282,14 +321,31 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let plotter = poloto::Plotter::new("title","x","y");
+    /// let plotter = poloto::Plotter::new("title","x","y",true,poloto::DataBuilder::new().add_default());
     /// ```
     pub fn new(
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
+        svgtag: bool,
+        data: DataBuilder<impl Display + 'a>,
     ) -> Plotter<'a> {
-        PlotterBuilder::new().build(title, xname, yname)
+        let svgtag = if svgtag {
+            SvgTagOption::Svg
+        } else {
+            SvgTagOption::NoSvg
+        };
+
+        Plotter {
+            names: Box::new(NamesStruct {
+                title,
+                xname,
+                yname,
+            }),
+            plots: Vec::new(),
+            svgtag,
+            data: Box::new(data.finish()),
+        }
     }
 
     /// Create a line from plots.
@@ -313,7 +369,7 @@ impl<'a> Plotter<'a> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots, name)),
         });
         self
     }
@@ -339,7 +395,7 @@ impl<'a> Plotter<'a> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots, name)),
         });
         self
     }
@@ -365,7 +421,7 @@ impl<'a> Plotter<'a> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots, name)),
         });
         self
     }
@@ -393,23 +449,8 @@ impl<'a> Plotter<'a> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(Wrapper2::new(plots.into_iter(), name)),
+            plots: Box::new(Wrapper2::new(plots, name)),
         });
-        self
-    }
-
-    /// User can inject some svg elements using this function.
-    /// They will be inserted right after the svg and default svg tags.
-    ///
-    /// You can override the css in regular html if you embed the generated svg.
-    /// This gives you a lot of flexibility giving your the power to dynamically
-    /// change the theme of your svg.
-    ///
-    /// However, if you want to embed the svg as an image, you lose this ability.
-    /// If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
-    ///
-    pub fn with_text(&mut self, inner: impl Display + 'a) -> &mut Self {
-        self.data.push(Box::new(inner));
         self
     }
 
@@ -444,9 +485,7 @@ impl<'a> Plotter<'a> {
         match svgtag {
             SvgTagOption::Svg => {
                 root.elem("svg", |writer| {
-                    let svg = writer.write(|w| {
-                        default_svg_attrs(w)
-                    })?;
+                    let svg = writer.write(|w| default_svg_attrs(w))?;
 
                     render::render(svg.get_writer(), data, plots, names)?;
                     Ok(svg)

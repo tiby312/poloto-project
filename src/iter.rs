@@ -80,7 +80,7 @@ mod file {
             if let Some(a) = self.lines.next() {
                 match a {
                     Ok(a) => {
-                        let mut i = a.split(",");
+                        let mut i = a.split(',');
                         let aa: f64 = i.next().unwrap().parse().unwrap();
                         let bb: f64 = i.next().unwrap().parse().unwrap();
                         Some([aa, bb])

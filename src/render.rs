@@ -5,12 +5,18 @@ pub const NUM_COLORS: usize = 8;
 
 use core::fmt::Display;
 
-///Create a custom style
+///Create a custom style poloto style
 pub struct StyleBuilder<A, B, C> {
     text_color: A,
     back_color: B,
     colors: [C; NUM_COLORS],
 }
+impl Default for render::StyleBuilder<&'static str, &'static str, &'static str> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StyleBuilder<&'static str, &'static str, &'static str> {
     pub fn new() -> Self {
         StyleBuilder {
@@ -148,13 +154,12 @@ impl<A: Display, B: Display, C: Display> StyleBuilder<A, B, C> {
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
-    data: Vec<Box<dyn Display + 'a>>,
+    data: Box<dyn Display + 'a>,
     mut plots: Vec<Plot<'a>>,
     names: Box<dyn Names + 'a>,
 ) -> Result<&'x mut T, fmt::Error> {
-    for a in data.into_iter() {
-        write!(writer, "{}", a)?;
-    }
+    write!(writer, "{}", data)?;
+
     use super::default_tags::*;
     let width = WIDTH;
     let height = HEIGHT;

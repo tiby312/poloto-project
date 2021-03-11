@@ -45,10 +45,12 @@ fn main() -> fmt::Result {
                         Ok(w)
                     })?;
 
-                    let mut s = poloto::PlotterBuilder::new().with_no_svg_tag().build(
+                    let mut s = poloto::Plotter::new(
                         move_format!("test {}", i),
                         "x",
                         "y",
+                        false,
+                        poloto::DataBuilder::new().add_default(),
                     );
 
                     s.scatter("test", test.iter().copied().twice_iter());

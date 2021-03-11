@@ -1,9 +1,11 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
-    let mut s = poloto::PlotterBuilder::new().with_variable_style().build(
+    let mut s = poloto::Plotter::new(
         "Demo: you can use CSS patterns if you embed SVG!",
         "x",
         "y",
+        true,
+        poloto::DataBuilder::new().add_default_variable(),
     );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
