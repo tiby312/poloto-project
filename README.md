@@ -54,12 +54,12 @@ use poloto::prelude::*;
 //PIPE me to a file!
 fn main() {
     let data = vec![
-        [0.0, 1.0],
-        [1.0, 20.0],
-        [2.0, 15.0],
-        [3.0, 7.0],
-        [5.0, 20.0],
-        [6.0, 14.0],
+        [1850.0, 1.0],
+        [1940.0, 20.0],
+        [1945.0, 15.0],
+        [1989.0, 7.0],
+        [1995.0, 20.0],
+        [207.0, 14.0],
     ];
 
     let mut s = poloto::plot("simple", "x", "y");
@@ -79,48 +79,34 @@ fn main() {
 
 ```rust
 use poloto::prelude::*;
+use poloto::*;
+fn main() -> std::fmt::Result {
+    
+    let s = StyleBuilder::new()
+        .with_text_color("white")
+        .with_back_color("black")
+        .build();
 
-//PIPE me to a file!
-fn main() -> core::fmt::Result {
-    let mut s = poloto::plot(
-        "Demo: Some Trigonometry Plots",
-        move_format!("This is the {} label", 'x'),
-        "This is the y label",
-    );
+    let mut plotter = PlotterBuilder::new()
+        .with_data(DataBuilder::new().push(s))
+        .build("cows per year", "year", "cows");
 
-    let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
+    let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    //Call twice_iter to allow the iterator to be cloned and ran twice.
-    s.line("cos", x.clone().map(|x| [x, x.cos()]).twice_iter());
+    plotter.line(move_format!("test {}",1), x.clone().map(|x| [x, x.cos()]).twice_iter());
 
-    //Call `buffer_iter` to communicate that iterator results
-    //should be stored to a Vec buffer for the second iteration.
-    s.scatter("sin", x.clone().map(|x| [x, x.sin()]).buffer_iter());
+    plotter.line(move_format!("test {}",2), x.clone().map(|x| [x, x.sin()]).twice_iter());
 
-    s.histogram(
-        move_format!("sin-{}", 10),
-        x.clone()
-            .step_by(3)
-            .map(|x| [x, x.sin() - 10.])
-            .buffer_iter(),
-    );
-
-    s.line_fill(
-        move_format!("sin-{}", 20),
-        x.clone().map(|x| [x, x.sin() - 20.]).buffer_iter(),
-    );
-
-    s.render_io(std::io::stdout())?;
+    plotter.render_io(std::io::stdout())?;
 
     Ok(())
 }
-
 
 ```
 
 ## Output
 
-<img src="./assets/trig.svg" alt="demo">
+<img src="./assets/from_scratch.svg" alt="demo">
 
 ## CSS Usage Example
 
