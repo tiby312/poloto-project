@@ -63,15 +63,15 @@ trait PlotTrait {
 }
 
 use fmt::Display;
-struct Wrapper2<D: DoubleIterator, F: Display> {
+struct PlotStruct<D: DoubleIterator, F: Display> {
     a: Option<D>,
     b: Option<D::Next>,
     func: F,
 }
 
-impl<I: DoubleIterator<Item = [f64; 2]>, F: Display> Wrapper2<I, F> {
+impl<I: DoubleIterator<Item = [f64; 2]>, F: Display> PlotStruct<I, F> {
     fn new(it: I, func: F) -> Self {
-        Wrapper2 {
+        PlotStruct {
             a: Some(it),
             b: None,
             func,
@@ -79,7 +79,7 @@ impl<I: DoubleIterator<Item = [f64; 2]>, F: Display> Wrapper2<I, F> {
     }
 }
 
-impl<D: DoubleIterator<Item = [f64; 2]>, F: Display> PlotTrait for Wrapper2<D, F> {
+impl<D: DoubleIterator<Item = [f64; 2]>, F: Display> PlotTrait for PlotStruct<D, F> {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result {
         self.func.fmt(a)
     }
@@ -394,7 +394,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(Wrapper2::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots, name)),
         });
         self
     }
@@ -420,7 +420,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(Wrapper2::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots, name)),
         });
         self
     }
@@ -446,7 +446,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(Wrapper2::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots, name)),
         });
         self
     }
@@ -474,7 +474,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     ) -> &mut Self {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(Wrapper2::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots, name)),
         });
         self
     }
