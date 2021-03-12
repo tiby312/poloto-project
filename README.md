@@ -46,7 +46,36 @@ Depending on whether you are adding a new style attribute or overriding
 an existing one, you might have to increase the specificty of your css clause to make sure it overrides
 the svg css clause.
 
-## Example 
+## Simple Example
+
+```rust
+use poloto::prelude::*;
+
+//PIPE me to a file!
+fn main() {
+    let data = vec![
+        [0.0, 1.0],
+        [1.0, 20.0],
+        [2.0, 15.0],
+        [3.0, 7.0],
+        [5.0, 20.0],
+        [6.0, 14.0],
+    ];
+
+    let mut s = poloto::plot("simple", "x", "y");
+
+    s.line_fill("data", data.twice_iter());
+
+    s.render_io(std::io::stdout()).unwrap();
+}
+```
+
+## Output
+
+<img src="./assets/simple.svg" alt="demo">
+
+
+## Another Example 
 
 ```rust
 use poloto::prelude::*;
