@@ -1,30 +1,25 @@
 use super::*;
 use tagger::prelude::*;
 
-
-struct WriteCounter<T:fmt::Write>{
-    inner:T,
-    counter:usize
+struct WriteCounter<T: fmt::Write> {
+    inner: T,
+    counter: usize,
 }
-impl<T:fmt::Write> WriteCounter<T>{
-    fn new(inner:T)->WriteCounter<T>{
-        WriteCounter{
-            inner,
-            counter:0
-        }
+impl<T: fmt::Write> WriteCounter<T> {
+    fn new(inner: T) -> WriteCounter<T> {
+        WriteCounter { inner, counter: 0 }
     }
-    fn get_counter(&self)->usize{
+    fn get_counter(&self) -> usize {
         self.counter
     }
 }
-impl<T:fmt::Write> fmt::Write for WriteCounter<T>{
-    fn write_str(&mut self,s:&str)->fmt::Result{
-        let k=self.inner.write_str(s);
-        self.counter+=s.len();
+impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        let k = self.inner.write_str(s);
+        self.counter += s.len();
         k
     }
 }
-
 
 pub const NUM_COLORS: usize = 8;
 
@@ -379,7 +374,7 @@ pub(super) fn render<'a, 'x, T: Write>(
 
         //TODO how to check for this???
         //if !name.is_empty() {
-        let mut name_exists=true;
+        let mut name_exists = true;
         svg.elem("text", |writer| {
             let mut text = writer.write(|w| {
                 w.attr("class", "poloto_text")?
@@ -390,15 +385,13 @@ pub(super) fn render<'a, 'x, T: Write>(
                     .attr("y", paddingy + (i as f64) * spacing)
             })?;
 
-            
-            
-            let mut c=WriteCounter::new(&mut text);
-            
+            let mut c = WriteCounter::new(&mut text);
+
             write!(&mut c, "{}", moveable_format(|w| plots.write_name(w)))?;
 
             //TODO fix this.
-            if c.get_counter()==0{
-                name_exists=false;
+            if c.get_counter() == 0 {
+                name_exists = false;
             }
             Ok(text)
         })?;
@@ -420,14 +413,14 @@ pub(super) fn render<'a, 'x, T: Write>(
             PlotType::Line => {
                 //TODO better way to modularize this if statement for all plots?
                 if name_exists {
-                svg.single("line", |w| {
-                    w.with_attr("class", wr!("poloto{}stroke", colori))?
-                        .attr("stroke", "black")?
-                        .attr("x1", legendx1)?
-                        .attr("x2", legendx1 + padding / 3.0)?
-                        .attr("y1", legendy1)?
-                        .attr("y2", legendy1)
-                })?;
+                    svg.single("line", |w| {
+                        w.with_attr("class", wr!("poloto{}stroke", colori))?
+                            .attr("stroke", "black")?
+                            .attr("x1", legendx1)?
+                            .attr("x2", legendx1 + padding / 3.0)?
+                            .attr("y1", legendy1)?
+                            .attr("y2", legendy1)
+                    })?;
                 }
 
                 svg.single("polyline", |w| {
@@ -444,12 +437,12 @@ pub(super) fn render<'a, 'x, T: Write>(
             }
             PlotType::Scatter => {
                 if name_exists {
-                svg.single("circle", |w| {
-                    w.with_attr("class", wr!("poloto{}fill", colori))?
-                        .attr("cx", legendx1 + padding / 30.0)?
-                        .attr("cy", legendy1)?
-                        .attr("r", padding / 30.0)
-                })?;
+                    svg.single("circle", |w| {
+                        w.with_attr("class", wr!("poloto{}fill", colori))?
+                            .attr("cx", legendx1 + padding / 30.0)?
+                            .attr("cy", legendy1)?
+                            .attr("r", padding / 30.0)
+                    })?;
                 }
 
                 svg.elem("g", |w| {
@@ -466,15 +459,15 @@ pub(super) fn render<'a, 'x, T: Write>(
             }
             PlotType::Histo => {
                 if name_exists {
-                svg.single("rect", |w| {
-                    w.with_attr("class", wr!("poloto{}fill", colori))?
-                        .attr("x", legendx1)?
-                        .attr("y", legendy1 - padding / 30.0)?
-                        .attr("width", padding / 3.0)?
-                        .attr("height", padding / 20.0)?
-                        .attr("rx", padding / 30.0)?
-                        .attr("ry", padding / 30.0)
-                })?;
+                    svg.single("rect", |w| {
+                        w.with_attr("class", wr!("poloto{}fill", colori))?
+                            .attr("x", legendx1)?
+                            .attr("y", legendy1 - padding / 30.0)?
+                            .attr("width", padding / 3.0)?
+                            .attr("height", padding / 20.0)?
+                            .attr("rx", padding / 30.0)?
+                            .attr("ry", padding / 30.0)
+                    })?;
                 }
 
                 svg.elem("g", |w| {
@@ -502,14 +495,14 @@ pub(super) fn render<'a, 'x, T: Write>(
             PlotType::LineFill => {
                 if name_exists {
                     svg.single("rect", |w| {
-                    w.with_attr("class", wr!("poloto{}fill", colori))?
-                        .attr("x", legendx1)?
-                        .attr("y", legendy1 - padding / 30.0)?
-                        .attr("width", padding / 3.0)?
-                        .attr("height", padding / 20.0)?
-                        .attr("rx", padding / 30.0)?
-                        .attr("ry", padding / 30.0)
-                })?;
+                        w.with_attr("class", wr!("poloto{}fill", colori))?
+                            .attr("x", legendx1)?
+                            .attr("y", legendy1 - padding / 30.0)?
+                            .attr("width", padding / 3.0)?
+                            .attr("height", padding / 20.0)?
+                            .attr("rx", padding / 30.0)?
+                            .attr("ry", padding / 30.0)
+                    })?;
                 }
                 svg.single("path", |w| {
                     w.with_attr("class", wr!("poloto{}fill", colori))?

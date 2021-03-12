@@ -130,8 +130,6 @@ macro_rules! move_format {
     }
 }
 
-
-
 /*
 pub struct DisplayList<'a, T> {
     seperator: T,
