@@ -1,5 +1,6 @@
 use poloto::prelude::*;
 use poloto::*;
+
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
     let s = StyleBuilder::new()
@@ -10,7 +11,7 @@ fn main() -> core::fmt::Result {
     let mut plotter = PlotterBuilder::new()
         .with_data(DataBuilder::new().push(s))
         .build(
-            "Demo: Some Trigonometry Plots",
+            "Some Trigonometry Plots 🥳",
             move_format!("This is the {} label", 'x'),
             "This is the y label",
         );
