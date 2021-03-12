@@ -130,7 +130,7 @@ pub fn interval_float<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> f
     Ok(())
 }
 
-pub fn find_bounds(it: impl IntoIterator<Item = [f64; 2]>) -> Option<[f64; 4]> {
+pub fn find_bounds<K:PartialOrd+Copy>(it: impl IntoIterator<Item = [K; 2]>) -> Option<[K; 4]> {
     let mut ii = it.into_iter();
     if let Some([x, y]) = ii.next() {
         let mut val = [x, x, y, y];
