@@ -483,10 +483,7 @@ impl<'a, D: Names> Plotter<'a, D> {
         self.render(&mut s)?;
         Ok(s)
     }
-    pub fn render_fmt(self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.render(f)?;
-        Ok(())
-    }
+    
     pub fn render_io<T: std::io::Write>(self, writer: T) -> Result<T, fmt::Error> {
         self.render(tagger::upgrade(writer)).map(|x| x.inner)
     }
