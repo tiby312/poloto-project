@@ -2,9 +2,9 @@
                 font-family: "Arial";
                 stroke-width:2;
                 }
-                .poloto_text{fill: black;  }
-                .poloto_axis_lines{stroke: black;stoke-width:3;fill:none}
-                .poloto_background{fill: aliceblue; }
+                .poloto_text{fill: white;  }
+                .poloto_axis_lines{stroke: white;stoke-width:3;fill:none}
+                .poloto_background{fill: black; }
                 .poloto0stroke{stroke:  blue; }
                 .poloto1stroke{stroke:  red; }
                 .poloto2stroke{stroke:  green; }
