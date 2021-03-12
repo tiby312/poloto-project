@@ -12,7 +12,7 @@ fn main() {
 
     let mut s = poloto::plot("simple", "x", "y");
 
-    s.line_fill("data", data.twice_iter());
+    s.line_fill("", data.twice_iter());
 
     s.render_io(std::io::stdout()).unwrap();
 }
