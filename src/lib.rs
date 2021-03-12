@@ -105,21 +105,6 @@ struct Plot<'a> {
     plots: Box<dyn PlotTrait + 'a>,
 }
 
-///Keeps track of plots.
-///User supplies iterators that will be iterated on when
-///render is called.
-
-//Its important to note that most of the time when this library is used,
-//every run through the code is first accompanied by one compilation of the code.
-//So inefficiencies in dynamically allocating strings using format!() to then
-//be just passed to a writer are not that bad seeing as the solution
-//would involve passing a lot of closures around.
-pub struct Plotter<'a> {
-    names: Box<dyn Names + 'a>,
-    plots: Vec<Plot<'a>>,
-    data: Box<dyn Display + 'a>,
-    svgtag: SvgTagOption,
-}
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
@@ -196,12 +181,16 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
     Foo(func)
 }
 
-struct NamesStruct<A, B, C> {
+struct NamesStruct<A, B, C,D> {
     title: A,
     xname: B,
     yname: C,
+    header: D
 }
-impl<A: Display, B: Display, C: Display> Names for NamesStruct<A, B, C> {
+impl<A: Display, B: Display, C: Display,D:Display> Names for NamesStruct<A, B, C,D> {
+    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result {
+        self.header.fmt(fm)
+    }
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result {
         self.title.fmt(fm)
     }
@@ -213,7 +202,9 @@ impl<A: Display, B: Display, C: Display> Names for NamesStruct<A, B, C> {
     }
 }
 
-trait Names {
+///Used internally to write out the header/title/xname/yname.
+pub trait Names {
+    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
@@ -225,7 +216,7 @@ pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a> {
+) -> Plotter<'a,impl Names> {
     PlotterBuilder::new()
         .with_data(DataBuilder::new().push_css_default())
         .build(title, xname, yname)
@@ -239,7 +230,7 @@ enum SvgTagOption {
 
 ///Insert svg data after the svg element, but before the plot elements.
 pub struct DataBuilder<D: Display> {
-    style: D,
+    header: D,
 }
 
 impl Default for DataBuilder<&'static str> {
@@ -250,14 +241,14 @@ impl Default for DataBuilder<&'static str> {
 
 impl DataBuilder<&'static str> {
     pub fn new() -> Self {
-        DataBuilder { style: "" }
+        DataBuilder { header: "" }
     }
 }
 impl<D: Display> DataBuilder<D> {
     ///Push the default poloto css styling.
     pub fn push_css_default(self) -> DataBuilder<impl Display> {
         DataBuilder {
-            style: concatenate_display("", self.style, StyleBuilder::new().build()),
+            header: concatenate_display("", self.header, StyleBuilder::new().build()),
         }
     }
 
@@ -285,9 +276,9 @@ impl<D: Display> DataBuilder<D> {
     /// By default these variables are not defined, so the svg falls back on some default colors.
     pub fn push_default_css_with_variable(self) -> DataBuilder<impl Display> {
         DataBuilder {
-            style: concatenate_display(
+            header: concatenate_display(
                 "",
-                self.style,
+                self.header,
                 StyleBuilder::new().build_with_css_variables(),
             ),
         }
@@ -304,11 +295,11 @@ impl<D: Display> DataBuilder<D> {
     ///
     pub fn push(self, a: impl fmt::Display) -> DataBuilder<impl Display> {
         DataBuilder {
-            style: concatenate_display("", self.style, a),
+            header: concatenate_display("", self.header, a),
         }
     }
     fn finish(self) -> D {
-        self.style
+        self.header
     }
 }
 
@@ -347,7 +338,7 @@ impl<'a, D: Display + 'a> PlotterBuilder<D> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a> {
+    ) -> Plotter<'a,impl Names> {
         let svgtag = if self.svgtag {
             SvgTagOption::Svg
         } else {
@@ -355,53 +346,35 @@ impl<'a, D: Display + 'a> PlotterBuilder<D> {
         };
 
         Plotter {
-            names: Box::new(NamesStruct {
+            names: NamesStruct {
                 title,
                 xname,
                 yname,
-            }),
+                header:self.data.finish()
+            },
             plots: Vec::new(),
             svgtag,
-            data: Box::new(self.data.finish()),
         }
     }
 }
 
-impl<'a> Plotter<'a> {
-    /*
-    /// Create a plotter
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let plotter = poloto::Plotter::new("title","x","y",true,poloto::DataBuilder::new().push_css_default());
-    /// ```
-    pub fn new(
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-        svgtag: bool,
-        data: DataBuilder<impl Display + 'a>,
-    ) -> Plotter<'a> {
-        let svgtag = if svgtag {
-            SvgTagOption::Svg
-        } else {
-            SvgTagOption::NoSvg
-        };
 
-        Plotter {
-            names: Box::new(NamesStruct {
-                title,
-                xname,
-                yname,
-            }),
-            plots: Vec::new(),
-            svgtag,
-            data: Box::new(data.finish()),
-        }
-    }
-    */
+///Keeps track of plots.
+///User supplies iterators that will be iterated on when
+///render is called.
+//Its important to note that most of the time when this library is used,
+//every run through the code is first accompanied by one compilation of the code.
+//So inefficiencies in dynamically allocating strings using format!() to then
+//be just passed to a writer are not that bad seeing as the solution
+//would involve passing a lot of closures around.
+pub struct Plotter<'a,D:Names> {
+    names:D,
+    plots: Vec<Plot<'a>>,
+    svgtag: SvgTagOption,
+}
 
+impl<'a,D:Names> Plotter<'a,D> {
+    
     /// Create a line from plots.
     ///
     /// # Example
@@ -530,7 +503,6 @@ impl<'a> Plotter<'a> {
             names,
             plots,
             svgtag,
-            data,
         } = self;
         let mut root = tagger::Element::new(writer);
 
@@ -541,12 +513,12 @@ impl<'a> Plotter<'a> {
                 root.elem("svg", |writer| {
                     let svg = writer.write(|w| default_svg_attrs(w))?;
 
-                    render::render(svg.get_writer(), data, plots, names)?;
+                    render::render(svg.get_writer(), plots, names)?;
                     Ok(svg)
                 })?;
             }
             SvgTagOption::NoSvg => {
-                render::render(root.get_writer(), data, plots, names)?;
+                render::render(root.get_writer(), plots, names)?;
             }
         }
         Ok(root.into_writer())
