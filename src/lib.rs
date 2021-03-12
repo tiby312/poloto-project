@@ -180,7 +180,8 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
     Foo(func)
 }
 
-struct NamesStruct<A, B, C, D> {
+///Used internally to implement [`Names`]
+pub struct NamesStruct<A, B, C, D> {
     title: A,
     xname: B,
     yname: C,
@@ -332,12 +333,12 @@ impl PlotterBuilder<&'static str> {
 }
 
 impl<'a, D: Display + 'a> PlotterBuilder<D> {
-    pub fn build(
+    pub fn build<A: Display + 'a, B: Display + 'a, C: Display + 'a>(
         self,
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-    ) -> Plotter<'a, impl Names> {
+        title: A,
+        xname: B,
+        yname: C,
+    ) -> Plotter<'a, NamesStruct<A, B, C, D>> {
         let svgtag = if self.svgtag {
             SvgTagOption::Svg
         } else {
@@ -483,7 +484,7 @@ impl<'a, D: Names> Plotter<'a, D> {
         self.render(&mut s)?;
         Ok(s)
     }
-    
+
     pub fn render_io<T: std::io::Write>(self, writer: T) -> Result<T, fmt::Error> {
         self.render(tagger::upgrade(writer)).map(|x| x.inner)
     }
