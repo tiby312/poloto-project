@@ -1,7 +1,10 @@
-
+//!
+//! Build blocks for making custom plots
+//!
 use super::*;
-pub const NUM_COLORS: usize = 8;
 
+///The number of unique colors.
+pub const NUM_COLORS: usize = 8;
 
 ///Used internally to implement [`Names`]
 pub struct NamesStruct<A, B, C, D> {
@@ -33,11 +36,8 @@ pub trait Names {
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
 }
 
-
-
 ///Contains building blocks for create the default svg an styling tags from scratch.
 pub mod default_tags {
-    pub use super::NUM_COLORS;
     use core::fmt;
 
     ///The class of the svg tag.

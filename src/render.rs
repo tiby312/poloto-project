@@ -21,7 +21,6 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
     }
 }
 
-
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
 pub(super) fn render<'a, 'x, T: Write>(

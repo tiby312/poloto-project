@@ -1,5 +1,5 @@
-use poloto::prelude::*;
 use poloto::build::*;
+use poloto::prelude::*;
 fn main() -> std::fmt::Result {
     let s = StyleBuilder::new()
         .with_text_color("white")

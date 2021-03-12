@@ -9,10 +9,9 @@
 //!
 use core::fmt::Write;
 
-
 pub use tagger;
-mod util;
 pub mod build;
+mod util;
 use build::*;
 
 ///The poloto prelude.
@@ -29,7 +28,6 @@ use iter::DoubleIterator;
 ///Contains the [`DoubleIterator`] trait and three different
 ///implementers of it.
 pub mod iter;
-
 
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
@@ -154,7 +152,6 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
     }
     Foo(func)
 }
-
 
 ///Convenience function for [`PlotterBuilder`] with default css tag, and with svg tag.
 ///In most cases, these defaults are good enough.

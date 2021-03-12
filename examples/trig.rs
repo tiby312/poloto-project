@@ -1,5 +1,5 @@
-use poloto::prelude::*;
 use poloto::build::*;
+use poloto::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
