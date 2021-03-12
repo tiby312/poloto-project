@@ -2,9 +2,9 @@ use poloto::prelude::*;
 fn main() -> std::fmt::Result {
     let data = [[1.0f64, 4.0], [2.0, 5.0], [3.0, 6.0]];
 
-    use poloto::{default_tags::NUM_COLORS, DataBuilder, StyleBuilder};
+    use poloto::build::{default_tags::NUM_COLORS, DataBuilder, StyleBuilder,PlotterBuilder};
     //Make line purple.
-    let mut plotter = poloto::PlotterBuilder::new()
+    let mut plotter = PlotterBuilder::new()
         .with_data(
             DataBuilder::new().push(
                 StyleBuilder::new()

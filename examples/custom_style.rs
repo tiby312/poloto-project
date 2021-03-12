@@ -2,8 +2,8 @@ use poloto::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let mut s = poloto::PlotterBuilder::new()
-        .with_data(poloto::DataBuilder::new().push_css_default().push(
+    let mut s = poloto::build::PlotterBuilder::new()
+        .with_data(poloto::build::DataBuilder::new().push_css_default().push(
             r###"
         <defs>
             <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">

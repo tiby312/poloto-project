@@ -37,7 +37,7 @@ fn main() -> fmt::Result {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
                     let svg = writer.write(|w| {
-                        use poloto::default_tags::*;
+                        use poloto::build::default_tags::*;
                         w.attr("class", CLASS)?;
                         w.attr("xmlns", XMLNS)?;
                         w.with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?;
@@ -45,9 +45,9 @@ fn main() -> fmt::Result {
                         Ok(w)
                     })?;
 
-                    let mut s = poloto::PlotterBuilder::new()
+                    let mut s = poloto::build::PlotterBuilder::new()
                         .with_svg(false)
-                        .with_data(poloto::DataBuilder::new().push_css_default())
+                        .with_data(poloto::build::DataBuilder::new().push_css_default())
                         .build(move_format!("test {}", i), "x", "y");
 
                     s.scatter("test", test.iter().copied().twice_iter());

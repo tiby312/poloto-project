@@ -9,8 +9,11 @@
 //!
 use core::fmt::Write;
 
+
 pub use tagger;
 mod util;
+pub mod build;
+use build::*;
 
 ///The poloto prelude.
 pub mod prelude {
@@ -20,7 +23,6 @@ pub mod prelude {
 use core::fmt;
 
 mod render;
-pub use render::StyleBuilder;
 
 use iter::DoubleIterator;
 
@@ -28,33 +30,6 @@ use iter::DoubleIterator;
 ///implementers of it.
 pub mod iter;
 
-///Contains building blocks for create the default svg an styling tags from scratch.
-pub mod default_tags {
-    pub use super::render::NUM_COLORS;
-    use core::fmt;
-
-    ///The class of the svg tag.
-    pub const CLASS: &str = "poloto";
-    ///The width of the svg tag.
-    pub const WIDTH: f64 = 800.0;
-    ///The height of the svg tag.
-    pub const HEIGHT: f64 = 500.0;
-    ///The xmlns: `http://www.w3.org/2000/svg`
-    pub const XMLNS: &str = "http://www.w3.org/2000/svg";
-
-    ///Write default svg tag attributes.
-    pub fn default_svg_attrs<'a, 'b, T: fmt::Write>(
-        w: &'a mut tagger::AttributeWriter<'b, T>,
-    ) -> Result<&'a mut tagger::AttributeWriter<'b, T>, fmt::Error> {
-        use tagger::prelude::*;
-
-        w.attr("class", CLASS)?
-            .attr("width", WIDTH)?
-            .attr("height", HEIGHT)?
-            .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
-            .attr("xmlns", XMLNS)
-    }
-}
 
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
@@ -142,7 +117,7 @@ impl<'a, T: fmt::Display> fmt::Display for DisplayList<'a, T> {
 */
 
 ///Concatenate two display objects with the specified spacing inbetween.
-pub fn concatenate_display(
+fn concatenate_display(
     spacing: impl fmt::Display,
     a: impl fmt::Display,
     b: impl fmt::Display,
@@ -180,35 +155,6 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
     Foo(func)
 }
 
-///Used internally to implement [`Names`]
-pub struct NamesStruct<A, B, C, D> {
-    title: A,
-    xname: B,
-    yname: C,
-    header: D,
-}
-impl<A: Display, B: Display, C: Display, D: Display> Names for NamesStruct<A, B, C, D> {
-    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.header.fmt(fm)
-    }
-    fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.title.fmt(fm)
-    }
-    fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.xname.fmt(fm)
-    }
-    fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.yname.fmt(fm)
-    }
-}
-
-///Used internally to write out the header/title/xname/yname.
-pub trait Names {
-    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-}
 
 ///Convenience function for [`PlotterBuilder`] with default css tag, and with svg tag.
 ///In most cases, these defaults are good enough.
@@ -217,8 +163,8 @@ pub fn plot<'a>(
     xname: impl Display + 'a,
     yname: impl Display + 'a,
 ) -> Plotter<'a, impl Names> {
-    PlotterBuilder::new()
-        .with_data(DataBuilder::new().push_css_default())
+    build::PlotterBuilder::new()
+        .with_data(build::DataBuilder::new().push_css_default())
         .build(title, xname, yname)
 }
 
@@ -226,136 +172,6 @@ pub fn plot<'a>(
 enum SvgTagOption {
     Svg,
     NoSvg,
-}
-
-///Insert svg data after the svg element, but before the plot elements.
-pub struct DataBuilder<D: Display> {
-    header: D,
-}
-
-impl Default for DataBuilder<&'static str> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl DataBuilder<&'static str> {
-    pub fn new() -> Self {
-        DataBuilder { header: "" }
-    }
-}
-impl<D: Display> DataBuilder<D> {
-    ///Push the default poloto css styling.
-    pub fn push_css_default(self) -> DataBuilder<impl Display> {
-        DataBuilder {
-            header: concatenate_display("", self.header, StyleBuilder::new().build()),
-        }
-    }
-
-    /// Instead of the default style, use one that adds variables.
-    ///
-    /// This injects what is produced by [`StyleBuilder::build_with_css_variables`] instead of
-    /// the default [`StyleBuilder::build`].
-    ///
-    /// If you embed the generated svg into a html file,
-    /// then you can add this example:
-    /// ```css
-    /// .poloto{
-    ///    --poloto_bg_color:"black";
-    ///    --poloto_fg_color:"white;
-    ///    --poloto_color0:"red";
-    ///    --poloto_color1:"green";
-    ///    --poloto_color2:"yellow";
-    ///    --poloto_color3:"orange";
-    ///    --poloto_color4:"purple";
-    ///    --poloto_color5:"pink";
-    ///    --poloto_color6:"aqua";
-    ///    --poloto_color7:"red";
-    /// }
-    /// ```  
-    /// By default these variables are not defined, so the svg falls back on some default colors.
-    pub fn push_default_css_with_variable(self) -> DataBuilder<impl Display> {
-        DataBuilder {
-            header: concatenate_display(
-                "",
-                self.header,
-                StyleBuilder::new().build_with_css_variables(),
-            ),
-        }
-    }
-    /// User can inject some svg elements using this function.
-    /// They will be inserted right after the svg and default svg tags.
-    ///
-    /// You can override the css in regular html if you embed the generated svg.
-    /// This gives you a lot of flexibility giving your the power to dynamically
-    /// change the theme of your svg.
-    ///
-    /// However, if you want to embed the svg as an image, you lose this ability.
-    /// If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
-    ///
-    pub fn push(self, a: impl fmt::Display) -> DataBuilder<impl Display> {
-        DataBuilder {
-            header: concatenate_display("", self.header, a),
-        }
-    }
-    fn finish(self) -> D {
-        self.header
-    }
-}
-
-///If [`plot`] isn't good enough, use this struct for more control.
-pub struct PlotterBuilder<D: fmt::Display> {
-    data: DataBuilder<D>,
-    svgtag: bool,
-}
-impl Default for PlotterBuilder<&'static str> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-impl PlotterBuilder<&'static str> {
-    pub fn new() -> Self {
-        PlotterBuilder {
-            data: DataBuilder::new(),
-            svgtag: true,
-        }
-    }
-    pub fn with_data<J: Display>(self, data: DataBuilder<J>) -> PlotterBuilder<J> {
-        PlotterBuilder {
-            data,
-            svgtag: self.svgtag,
-        }
-    }
-    pub fn with_svg(mut self, svg: bool) -> Self {
-        self.svgtag = svg;
-        self
-    }
-}
-
-impl<'a, D: Display + 'a> PlotterBuilder<D> {
-    pub fn build<A: Display + 'a, B: Display + 'a, C: Display + 'a>(
-        self,
-        title: A,
-        xname: B,
-        yname: C,
-    ) -> Plotter<'a, NamesStruct<A, B, C, D>> {
-        let svgtag = if self.svgtag {
-            SvgTagOption::Svg
-        } else {
-            SvgTagOption::NoSvg
-        };
-
-        Plotter {
-            names: NamesStruct {
-                title,
-                xname,
-                yname,
-                header: self.data.finish(),
-            },
-            plots: Vec::new(),
-            svgtag,
-        }
-    }
 }
 
 ///Keeps track of plots.
@@ -501,7 +317,7 @@ impl<'a, D: Names> Plotter<'a, D> {
         } = self;
         let mut root = tagger::Element::new(writer);
 
-        use default_tags::*;
+        use crate::build::default_tags::*;
 
         match svgtag {
             SvgTagOption::Svg => {
