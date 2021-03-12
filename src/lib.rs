@@ -105,7 +105,6 @@ struct Plot<'a> {
     plots: Box<dyn PlotTrait + 'a>,
 }
 
-
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
 #[macro_export]
@@ -181,13 +180,13 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
     Foo(func)
 }
 
-struct NamesStruct<A, B, C,D> {
+struct NamesStruct<A, B, C, D> {
     title: A,
     xname: B,
     yname: C,
-    header: D
+    header: D,
 }
-impl<A: Display, B: Display, C: Display,D:Display> Names for NamesStruct<A, B, C,D> {
+impl<A: Display, B: Display, C: Display, D: Display> Names for NamesStruct<A, B, C, D> {
     fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result {
         self.header.fmt(fm)
     }
@@ -216,7 +215,7 @@ pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a,impl Names> {
+) -> Plotter<'a, impl Names> {
     PlotterBuilder::new()
         .with_data(DataBuilder::new().push_css_default())
         .build(title, xname, yname)
@@ -338,7 +337,7 @@ impl<'a, D: Display + 'a> PlotterBuilder<D> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a,impl Names> {
+    ) -> Plotter<'a, impl Names> {
         let svgtag = if self.svgtag {
             SvgTagOption::Svg
         } else {
@@ -350,14 +349,13 @@ impl<'a, D: Display + 'a> PlotterBuilder<D> {
                 title,
                 xname,
                 yname,
-                header:self.data.finish()
+                header: self.data.finish(),
             },
             plots: Vec::new(),
             svgtag,
         }
     }
 }
-
 
 ///Keeps track of plots.
 ///User supplies iterators that will be iterated on when
@@ -367,14 +365,13 @@ impl<'a, D: Display + 'a> PlotterBuilder<D> {
 //So inefficiencies in dynamically allocating strings using format!() to then
 //be just passed to a writer are not that bad seeing as the solution
 //would involve passing a lot of closures around.
-pub struct Plotter<'a,D:Names> {
-    names:D,
+pub struct Plotter<'a, D: Names> {
+    names: D,
     plots: Vec<Plot<'a>>,
     svgtag: SvgTagOption,
 }
 
-impl<'a,D:Names> Plotter<'a,D> {
-    
+impl<'a, D: Names> Plotter<'a, D> {
     /// Create a line from plots.
     ///
     /// # Example

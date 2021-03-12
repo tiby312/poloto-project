@@ -175,10 +175,9 @@ impl<A: Display, B: Display, C: Display> StyleBuilder<A, B, C> {
 pub(super) fn render<'a, 'x, T: Write>(
     mut writer: &'x mut T,
     mut plots: Vec<Plot<'a>>,
-    names: impl Names,//Box<dyn Names + 'a>,
+    names: impl Names, //Box<dyn Names + 'a>,
 ) -> Result<&'x mut T, fmt::Error> {
-
-    write!(writer, "{}",  moveable_format(|w|names.write_header(w)))?;
+    write!(writer, "{}", moveable_format(|w| names.write_header(w)))?;
 
     use super::default_tags::*;
     let width = WIDTH;
