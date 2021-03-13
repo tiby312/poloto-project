@@ -68,6 +68,15 @@ fn main() {
     s.render_io(std::io::stdout()).unwrap();
 }
 
+```
+
+## Output
+
+<img src="./assets/simple.svg" alt="demo">
+
+
+## Another Example 
+
 ```rust
 use poloto::build::*;
 use poloto::prelude::*;
@@ -115,6 +124,7 @@ fn main() -> core::fmt::Result {
 
     Ok(())
 }
+
 
 ```
 
