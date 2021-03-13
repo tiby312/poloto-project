@@ -161,7 +161,7 @@ pub fn plot<'a>(
     yname: impl Display + 'a,
 ) -> Plotter<'a, impl Names> {
     build::PlotterBuilder::new()
-        .with_data(build::DataBuilder::new().push_css_default())
+        .with_header(build::HeaderBuilder::new().push_css_default().build())
         .build(title, xname, yname)
 }
 

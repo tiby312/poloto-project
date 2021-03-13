@@ -3,8 +3,11 @@ use poloto::prelude::*;
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
     let mut s = poloto::build::PlotterBuilder::new()
-        .with_data(poloto::build::DataBuilder::new().push_css_default().push(
-            r###"
+        .with_header(
+            poloto::build::HeaderBuilder::new()
+                .push_css_default()
+                .push(
+                    r###"
         <defs>
             <pattern id="pattern" patternUnits="userSpaceOnUse" width="10" height="10">
                 <circle cx="5" cy="5" r="5" fill="black" fill-opacity="0.2"/>
@@ -25,7 +28,9 @@ fn main() -> core::fmt::Result {
         }
         </style>
         "###,
-        ))
+                )
+                .build(),
+        )
         .build(
             "Demo: you can change the style of the svg file itself!",
             "x",

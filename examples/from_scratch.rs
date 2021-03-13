@@ -7,7 +7,7 @@ fn main() -> std::fmt::Result {
         .build();
 
     let mut plotter = PlotterBuilder::new()
-        .with_data(DataBuilder::new().push(s))
+        .with_header(HeaderBuilder::new().push(s).build())
         .build("cows per year", "year", "cows");
 
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);

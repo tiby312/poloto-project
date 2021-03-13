@@ -69,32 +69,25 @@ fn main() {
 }
 
 ```
-
-## Output
-
-<img src="./assets/simple.svg" alt="demo">
-
-
-## Another Example 
-
-```rust
 use poloto::build::*;
 use poloto::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let s = StyleBuilder::new()
-        .with_text_color("white")
-        .with_back_color("black")
+    let header = HeaderBuilder::new()
+        .push(
+            StyleBuilder::new()
+                .with_text_color("white")
+                .with_back_color("black")
+                .build(),
+        )
         .build();
 
-    let mut plotter = PlotterBuilder::new()
-        .with_data(DataBuilder::new().push(s))
-        .build(
-            "Some Trigonometry Plots 🥳",
-            move_format!("This is the {} label", 'x'),
-            "This is the y label",
-        );
+    let mut plotter = PlotterBuilder::new().with_header(header).build(
+        "Some Trigonometry Plots 🥳",
+        move_format!("This is the {} label", 'x'),
+        "This is the y label",
+    );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 

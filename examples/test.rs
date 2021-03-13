@@ -47,7 +47,11 @@ fn main() -> fmt::Result {
 
                     let mut s = poloto::build::PlotterBuilder::new()
                         .with_svg(false)
-                        .with_data(poloto::build::DataBuilder::new().push_css_default())
+                        .with_header(
+                            poloto::build::HeaderBuilder::new()
+                                .push_css_default()
+                                .build(),
+                        )
                         .build(move_format!("test {}", i), "x", "y");
 
                     s.scatter("test", test.iter().copied().twice_iter());

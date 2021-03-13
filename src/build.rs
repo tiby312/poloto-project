@@ -208,25 +208,25 @@ impl<A: Display, B: Display, C: Display> StyleBuilder<A, B, C> {
 }
 
 ///Insert svg data after the svg element, but before the plot elements.
-pub struct DataBuilder<D: Display> {
+pub struct HeaderBuilder<D: Display> {
     header: D,
 }
 
-impl Default for DataBuilder<&'static str> {
+impl Default for HeaderBuilder<&'static str> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl DataBuilder<&'static str> {
+impl HeaderBuilder<&'static str> {
     pub fn new() -> Self {
-        DataBuilder { header: "" }
+        HeaderBuilder { header: "" }
     }
 }
-impl<D: Display> DataBuilder<D> {
+impl<D: Display> HeaderBuilder<D> {
     ///Push the default poloto css styling.
-    pub fn push_css_default(self) -> DataBuilder<impl Display> {
-        DataBuilder {
+    pub fn push_css_default(self) -> HeaderBuilder<impl Display> {
+        HeaderBuilder {
             header: concatenate_display("", self.header, StyleBuilder::new().build()),
         }
     }
@@ -253,8 +253,8 @@ impl<D: Display> DataBuilder<D> {
     /// }
     /// ```  
     /// By default these variables are not defined, so the svg falls back on some default colors.
-    pub fn push_default_css_with_variable(self) -> DataBuilder<impl Display> {
-        DataBuilder {
+    pub fn push_default_css_with_variable(self) -> HeaderBuilder<impl Display> {
+        HeaderBuilder {
             header: concatenate_display(
                 "",
                 self.header,
@@ -272,19 +272,19 @@ impl<D: Display> DataBuilder<D> {
     /// However, if you want to embed the svg as an image, you lose this ability.
     /// If embedding as IMG is desired, instead the user can insert a custom style into the generated svg itself.
     ///
-    pub fn push(self, a: impl fmt::Display) -> DataBuilder<impl Display> {
-        DataBuilder {
+    pub fn push(self, a: impl fmt::Display) -> HeaderBuilder<impl Display> {
+        HeaderBuilder {
             header: concatenate_display("", self.header, a),
         }
     }
-    fn finish(self) -> D {
+    pub fn build(self) -> D {
         self.header
     }
 }
 
 ///If [`plot`] isn't good enough, use this struct for more control.
 pub struct PlotterBuilder<D: fmt::Display> {
-    data: DataBuilder<D>,
+    header: D,
     svgtag: bool,
 }
 impl Default for PlotterBuilder<&'static str> {
@@ -295,13 +295,13 @@ impl Default for PlotterBuilder<&'static str> {
 impl PlotterBuilder<&'static str> {
     pub fn new() -> Self {
         PlotterBuilder {
-            data: DataBuilder::new(),
+            header: "",
             svgtag: true,
         }
     }
-    pub fn with_data<J: Display>(self, data: DataBuilder<J>) -> PlotterBuilder<J> {
+    pub fn with_header<J: Display>(self, header: J) -> PlotterBuilder<J> {
         PlotterBuilder {
-            data,
+            header,
             svgtag: self.svgtag,
         }
     }
@@ -329,7 +329,7 @@ impl<'a, D: Display + 'a> PlotterBuilder<D> {
                 title,
                 xname,
                 yname,
-                header: self.data.finish(),
+                header: self.header,
             },
             plots: Vec::new(),
             svgtag,
