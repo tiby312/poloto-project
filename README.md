@@ -68,7 +68,7 @@ fn main() {
     s.render_io(std::io::stdout()).unwrap();
 }
 
-```
+```rust
 use poloto::build::*;
 use poloto::prelude::*;
 
