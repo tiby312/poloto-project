@@ -319,10 +319,10 @@ impl<'a, D: Names> Plotter<'a, D> {
         match svgtag {
             SvgTagOption::Svg => {
                 root.elem("svg", |writer| {
-                    let svg = writer.write(|w| default_svg_attrs(w))?;
+                    let (svg,()) = writer.write(|w| default_svg_attrs(w)?.empty_ok())?;
 
                     render::render(svg.get_writer(), plots, names)?;
-                    Ok(svg)
+                    svg.empty_ok()
                 })?;
             }
             SvgTagOption::NoSvg => {

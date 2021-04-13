@@ -44,7 +44,7 @@ pub(super) fn render<'a, 'x, T: Write>(
             .attr("x", 0)?
             .attr("y", 0)?
             .attr("width", width)?
-            .attr("height", height)
+            .attr("height", height)?.empty_ok()
     })?;
 
     //Find range.
@@ -100,17 +100,17 @@ pub(super) fn render<'a, 'x, T: Write>(
                 xstep,
             )? {
                 svg.elem("text", |writer| {
-                    let text = writer.write(|w| {
+                    let (text,()) = writer.write(|w| {
                         w.attr("class", "poloto_text")?
                             .attr("alignment-baseline", "middle")?
                             .attr("text-anchor", "start")?
                             .attr("x", width * 0.55)?
-                            .attr("y", paddingy * 0.7)
+                            .attr("y", paddingy * 0.7)?.empty_ok()
                     })?;
                     write!(text, "Where j = ")?;
 
                     crate::util::interval_float(text, xstart_step, None)?; //Some(xstep)
-                    Ok(text)
+                    text.empty_ok()
                 })?;
 
                 ("j+", 0.0)
@@ -130,21 +130,21 @@ pub(super) fn render<'a, 'x, T: Write>(
                         .attr("x1", xx)?
                         .attr("x2", xx)?
                         .attr("y1", height - paddingy)?
-                        .attr("y2", height - paddingy * 0.95) //TODO operations of order?
+                        .attr("y2", height - paddingy * 0.95)?.empty_ok() //TODO operations of order?
                 })?;
 
                 svg.elem("text", |writer| {
-                    let text = writer.write(|w| {
+                    let (text,()) = writer.write(|w| {
                         w.attr("class", "poloto_text")?
                             .attr("alignment-baseline", "start")?
                             .attr("text-anchor", "middle")?
                             .attr("x", xx)?
-                            .attr("y", height - paddingy + texty_padding)
+                            .attr("y", height - paddingy + texty_padding)?.empty_ok()
                     })?;
                     write!(text, "{}", extra)?;
 
                     util::interval_float(text, p + xstart_step, Some(xstep))?;
-                    Ok(text)
+                    text.empty_ok()
                 })?;
             }
         }
@@ -157,18 +157,17 @@ pub(super) fn render<'a, 'x, T: Write>(
                 ystep,
             )? {
                 svg.elem("text", |writer| {
-                    let text = writer.write(|w| {
+                    let (text,()) = writer.write(|w| {
                         w.attr("class", "poloto_text")?
                             .attr("alignment-baseline", "middle")?
                             .attr("text-anchor", "start")?
                             .attr("x", padding)?
-                            .attr("y", paddingy * 0.7)
+                            .attr("y", paddingy * 0.7)?.empty_ok()
                     })?;
                     write!(text, "Where k = ")?;
 
                     crate::util::interval_float(text, ystart_step, None)?; //Some(ystep)
-
-                    Ok(text)
+                    text.empty_ok()
                 })?;
 
                 ("k+", 0.0)
@@ -188,21 +187,21 @@ pub(super) fn render<'a, 'x, T: Write>(
                         .attr("x1", padding)?
                         .attr("x2", padding * 0.96)?
                         .attr("y1", yy)?
-                        .attr("y2", yy)
+                        .attr("y2", yy)?.empty_ok()
                 })?;
 
                 svg.elem("text", |writer| {
-                    let text = writer.write(|w| {
+                    let (text,()) = writer.write(|w| {
                         w.attr("class", "poloto_text")?
                             .attr("alignment-baseline", "middle")?
                             .attr("text-anchor", "end")?
                             .attr("x", padding - textx_padding)?
-                            .attr("y", yy)
+                            .attr("y", yy)?.empty_ok()
                     })?;
                     write!(text, "{}", extra)?;
 
                     util::interval_float(text, p + ystart_step, Some(ystep))?;
-                    Ok(text)
+                    text.empty_ok()
                 })?;
             }
         }
@@ -222,30 +221,24 @@ pub(super) fn render<'a, 'x, T: Write>(
     {
         let spacing = padding / 3.0;
 
-        //TODO how to check for this???
-        //if !name.is_empty() {
-        let mut name_exists = true;
-        svg.elem("text", |writer| {
-            let mut text = writer.write(|w| {
+        let name_exists=svg.elem("text", |writer| {
+            let (mut text,()) = writer.write(|w| {
                 w.attr("class", "poloto_text")?
                     .attr("alignment-baseline", "middle")?
                     .attr("text-anchor", "start")?
                     .attr("font-size", "large")?
                     .attr("x", width - padding / 1.2)?
-                    .attr("y", paddingy + (i as f64) * spacing)
+                    .attr("y", paddingy + (i as f64) * spacing)?
+                    .empty_ok()
             })?;
 
             let mut c = WriteCounter::new(&mut text);
 
             write!(&mut c, "{}", moveable_format(|w| plots.write_name(w)))?;
 
-            //TODO fix this.
-            if c.get_counter() == 0 {
-                name_exists = false;
-            }
-            Ok(text)
+            let name_exists= c.get_counter() != 0 ;
+            Ok((text,name_exists))
         })?;
-        //}
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
@@ -269,7 +262,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                             .attr("x1", legendx1)?
                             .attr("x2", legendx1 + padding / 3.0)?
                             .attr("y1", legendy1)?
-                            .attr("y2", legendy1)
+                            .attr("y2", legendy1)?.empty_ok()
                     })?;
                 }
 
@@ -282,7 +275,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                                 w.add_point(x, y)?;
                             }
                             Ok(w)
-                        })
+                        })?.empty_ok()
                 })?;
             }
             PlotType::Scatter => {
@@ -291,20 +284,20 @@ pub(super) fn render<'a, 'x, T: Write>(
                         w.with_attr("class", wr!("poloto{}fill", colori))?
                             .attr("cx", legendx1 + padding / 30.0)?
                             .attr("cy", legendy1)?
-                            .attr("r", padding / 30.0)
+                            .attr("r", padding / 30.0)?.empty_ok()
                     })?;
                 }
 
                 svg.elem("g", |w| {
-                    let g = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori)))?;
+                    let (g,()) = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori))?.empty_ok())?;
 
                     for [x, y] in it {
                         g.single("circle", |w| {
                             //TODO use a g element!!!!
-                            w.attr("cx", x)?.attr("cy", y)?.attr("r", padding / 30.0)
+                            w.attr("cx", x)?.attr("cy", y)?.attr("r", padding / 30.0)?.empty_ok()
                         })?;
                     }
-                    Ok(g)
+                    g.empty_ok()
                 })?;
             }
             PlotType::Histo => {
@@ -316,12 +309,12 @@ pub(super) fn render<'a, 'x, T: Write>(
                             .attr("width", padding / 3.0)?
                             .attr("height", padding / 20.0)?
                             .attr("rx", padding / 30.0)?
-                            .attr("ry", padding / 30.0)
+                            .attr("ry", padding / 30.0)?.empty_ok()
                     })?;
                 }
 
                 svg.elem("g", |w| {
-                    let g = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori)))?;
+                    let (g,()) = w.write(|w| w.with_attr("class", wr!("poloto{}fill", colori))?.empty_ok() )?;
 
                     let mut last = None;
                     for [x, y] in it {
@@ -333,13 +326,12 @@ pub(super) fn render<'a, 'x, T: Write>(
                                         "width",
                                         (padding * 0.02).max((x - lx) - (padding * 0.02)),
                                     )?
-                                    .attr("height", height - paddingy - ly)
+                                    .attr("height", height - paddingy - ly)?.empty_ok()
                             })?;
                         }
                         last = Some((x, y))
                     }
-
-                    Ok(g)
+                    g.empty_ok()
                 })?;
             }
             PlotType::LineFill => {
@@ -351,7 +343,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                             .attr("width", padding / 3.0)?
                             .attr("height", padding / 20.0)?
                             .attr("rx", padding / 30.0)?
-                            .attr("ry", padding / 30.0)
+                            .attr("ry", padding / 30.0)?.empty_ok()
                     })?;
                 }
                 svg.single("path", |w| {
@@ -366,42 +358,41 @@ pub(super) fn render<'a, 'x, T: Write>(
 
                             data.draw(L(width - padding, height - paddingy))?;
                             data.draw_z()
-                        })
+                        })?.empty_ok()
                 })?;
             }
         }
     }
 
     svg.elem("text", |writer| {
-        let text = writer.write(|w| {
+        let (text,()) = writer.write(|w| {
             w.attr("class", "poloto_text")?
                 .attr("alignment-baseline", "start")?
                 .attr("text-anchor", "middle")?
                 .attr("font-size", "x-large")?
                 .attr("x", width / 2.0)?
-                .attr("y", padding / 4.0)
+                .attr("y", padding / 4.0)?.empty_ok()
         })?;
 
         write!(text, "{}", moveable_format(|f| names.write_title(f)))?;
-        Ok(text)
+        text.empty_ok()
     })?;
 
     svg.elem("text", |writer| {
-        let text = writer.write(|w| {
+        let (text,()) = writer.write(|w| {
             w.attr("class", "poloto_text")?
                 .attr("alignment-baseline", "start")?
                 .attr("text-anchor", "middle")?
                 .attr("font-size", "x-large")?
                 .attr("x", width / 2.0)?
-                .attr("y", height - padding / 8.)
+                .attr("y", height - padding / 8.)?.empty_ok()
         })?;
         write!(text, "{}", moveable_format(|f| names.write_xname(f)))?;
-
-        Ok(text)
+        text.empty_ok()
     })?;
 
     svg.elem("text", |writer| {
-        let text = writer.write(|w| {
+        let (text,()) = writer.write(|w| {
             w.attr("class", "poloto_text")?
                 .attr("alignment-baseline", "start")?
                 .attr("text-anchor", "middle")?
@@ -411,11 +402,10 @@ pub(super) fn render<'a, 'x, T: Write>(
                     wr!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
                 )?
                 .attr("x", padding / 4.0)?
-                .attr("y", height / 2.0)
+                .attr("y", height / 2.0)?.empty_ok()
         })?;
         write!(text, "{}", moveable_format(|f| names.write_yname(f)))?;
-
-        Ok(text)
+        text.empty_ok()
     })?;
 
     svg.single("path", |w| {
@@ -427,7 +417,7 @@ pub(super) fn render<'a, 'x, T: Write>(
                 p.draw(M(padding, paddingy))?
                     .draw(L(padding, height - paddingy))?
                     .draw(L(width - padding, height - paddingy))
-            })
+            })?.empty_ok()
     })?;
 
     Ok(writer)

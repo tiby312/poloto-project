@@ -27,22 +27,22 @@ fn main() -> fmt::Result {
     let mut root = tagger::Element::new(tagger::upgrade(std::io::stdout()));
 
     root.elem("html", |writer| {
-        let html = writer.write(|w| Ok(w))?;
+        let (html,()) = writer.write(|w| w.empty_ok())?;
 
         html.elem("div", |writer| {
-            let div = writer.write(|w| w.attr("style", "display:flex;flex-wrap:wrap;"))?;
+            let (div,()) = writer.write(|w| w.attr("style", "display:flex;flex-wrap:wrap;")?.empty_ok())?;
 
             for (i, test) in generate_test().iter().enumerate() {
                 div.elem("svg", |writer| {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
-                    let svg = writer.write(|w| {
+                    let (svg,()) = writer.write(|w| {
                         use poloto::build::default_tags::*;
                         w.attr("class", CLASS)?;
                         w.attr("xmlns", XMLNS)?;
                         w.with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?;
                         w.attr("width", "500px")?.attr("height", "100%")?;
-                        Ok(w)
+                        w.empty_ok()
                     })?;
 
                     let mut s = poloto::build::PlotterBuilder::new()
@@ -54,15 +54,15 @@ fn main() -> fmt::Result {
                         )
                         .build(move_format!("test {}", i), "x", "y");
 
-                    s.scatter("test", test.iter().copied().twice_iter());
+                    s.scatter("", test.iter().copied().twice_iter());
 
-                    s.render(svg)
+                    let svg=s.render(svg)?;
+                    svg.empty_ok()
                 })?;
             }
-            Ok(div)
+            div.empty_ok()
         })?;
-
-        Ok(html)
+        html.empty_ok()
     })?;
     Ok(())
 }
