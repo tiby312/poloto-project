@@ -14,6 +14,7 @@ mod build;
 mod util;
 pub use build::default_tags;
 use build::*;
+pub use build::Names;
 
 ///The poloto prelude.
 pub mod prelude {
