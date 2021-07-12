@@ -1,21 +1,12 @@
-use poloto::build::*;
 use poloto::prelude::*;
 
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let header = HeaderBuilder::new()
-        .push(
-            StyleBuilder::new()
-                .with_text_color("white")
-                .with_back_color("black")
-                .build(),
-        )
-        .build();
-
-    let mut plotter = PlotterBuilder::new().with_header(header).build(
+    let mut plotter = poloto::plot_with_html(
         "Some Trigonometry Plots 🥳",
         move_format!("This is the {} label", 'x'),
         "This is the y label",
+        poloto::HTML_CONFIG_DARK_DEFAULT,
     );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);

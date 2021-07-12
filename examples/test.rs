@@ -27,17 +27,18 @@ fn main() -> fmt::Result {
     let mut root = tagger::Element::new(tagger::upgrade(std::io::stdout()));
 
     root.elem("html", |writer| {
-        let (html,()) = writer.write(|w| w.empty_ok())?;
+        let (html, ()) = writer.write(|w| w.empty_ok())?;
 
         html.elem("div", |writer| {
-            let (div,()) = writer.write(|w| w.attr("style", "display:flex;flex-wrap:wrap;")?.empty_ok())?;
+            let (div, ()) =
+                writer.write(|w| w.attr("style", "display:flex;flex-wrap:wrap;")?.empty_ok())?;
 
             for (i, test) in generate_test().iter().enumerate() {
                 div.elem("svg", |writer| {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
-                    let (svg,()) = writer.write(|w| {
-                        use poloto::build::default_tags::*;
+                    let (svg, ()) = writer.write(|w| {
+                        use poloto::default_tags::*;
                         w.attr("class", CLASS)?;
                         w.attr("xmlns", XMLNS)?;
                         w.with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?;
@@ -45,18 +46,16 @@ fn main() -> fmt::Result {
                         w.empty_ok()
                     })?;
 
-                    let mut s = poloto::build::PlotterBuilder::new()
-                        .with_svg(false)
-                        .with_header(
-                            poloto::build::HeaderBuilder::new()
-                                .push_css_default()
-                                .build(),
-                        )
-                        .build(move_format!("test {}", i), "x", "y");
-
+                    let mut s = poloto::plot_with_html(
+                        move_format!("test {}", i),
+                        "x",
+                        "y",
+                        poloto::HTML_CONFIG_LIGHT_DEFAULT,
+                    );
+                    s.without_svg();
                     s.scatter("", test.iter().copied().twice_iter());
 
-                    let svg=s.render(svg)?;
+                    let svg = s.render(svg)?;
                     svg.empty_ok()
                 })?;
             }

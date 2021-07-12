@@ -1,12 +1,11 @@
 use poloto::prelude::*;
 fn main() -> core::fmt::Result {
-    let mut s = poloto::build::PlotterBuilder::new()
-        .with_header(
-            poloto::build::HeaderBuilder::new()
-                .push_default_css_with_variable()
-                .build(),
-        )
-        .build("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
+    let mut s = poloto::plot_with_html(
+        "Demo: you can use CSS patterns if you embed SVG!",
+        "x",
+        "y",
+        poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT,
+    );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 

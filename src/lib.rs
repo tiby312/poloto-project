@@ -10,8 +10,9 @@
 use core::fmt::Write;
 
 pub use tagger;
-pub mod build;
+mod build;
 mod util;
+pub use build::default_tags;
 use build::*;
 
 ///The poloto prelude.
@@ -87,59 +88,6 @@ macro_rules! move_format {
     }
 }
 
-/*
-pub struct DisplayList<'a, T> {
-    seperator: T,
-    a: Vec<Box<dyn Display + 'a>>,
-}
-impl<'a, T: fmt::Display> DisplayList<'a, T> {
-    pub fn new(seperator: T) -> Self {
-        DisplayList {
-            seperator,
-            a: Vec::new(),
-        }
-    }
-    pub fn add(&mut self, a: impl Display + 'a) {
-        self.a.push(Box::new(a));
-    }
-}
-impl<'a, T: fmt::Display> fmt::Display for DisplayList<'a, T> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        for a in self.a.iter() {
-            a.fmt(formatter)?;
-            self.seperator.fmt(formatter)?;
-        }
-        Ok(())
-    }
-}
-*/
-
-///Concatenate two display objects with the specified spacing inbetween.
-fn concatenate_display(
-    spacing: impl fmt::Display,
-    a: impl fmt::Display,
-    b: impl fmt::Display,
-) -> impl fmt::Display {
-    struct Foo<A, B, C> {
-        spacing: A,
-        a: B,
-        b: C,
-    }
-    impl<A, B, C> fmt::Display for Foo<A, B, C>
-    where
-        A: fmt::Display,
-        B: fmt::Display,
-        C: fmt::Display,
-    {
-        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            self.a.fmt(formatter)?;
-            self.spacing.fmt(formatter)?;
-            self.b.fmt(formatter)
-        }
-    }
-    Foo { spacing, a, b }
-}
-
 ///Convert a moved closure into a impl fmt::Display.
 ///This is useful because std's `format_args!()` macro
 ///has a shorter lifetime.
@@ -153,16 +101,101 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
     Foo(func)
 }
 
-///Convenience function for [`PlotterBuilder`] with default css tag, and with svg tag.
-///In most cases, these defaults are good enough.
+/// Default theme using css variables (with light theme defaults if the variables are not set).
+pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
+    font-family: "Arial";
+    stroke-width:2;
+    }
+    .poloto_text{fill: var(--poloto_fg_color,black);  }
+    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stoke-width:3;fill:none}
+    .poloto_background{fill: var(--poloto_bg_color,aliceblue); }
+    .poloto0stroke{stroke:  var(--poloto_color0,blue); }
+    .poloto1stroke{stroke:  var(--poloto_color1,red); }
+    .poloto2stroke{stroke:  var(--poloto_color2,green); }
+    .poloto3stroke{stroke:  var(--poloto_color3,gold); }
+    .poloto4stroke{stroke:  var(--poloto_color4,aqua); }
+    .poloto5stroke{stroke:  var(--poloto_color5,brown); }
+    .poloto6stroke{stroke:  var(--poloto_color6,lime); }
+    .poloto7stroke{stroke:  var(--poloto_color7,chocolate); }
+    .poloto0fill{fill:var(--poloto_color0,blue);}
+    .poloto1fill{fill:var(--poloto_color1,red);}
+    .poloto2fill{fill:var(--poloto_color2,green);}
+    .poloto3fill{fill:var(--poloto_color3,gold);}
+    .poloto4fill{fill:var(--poloto_color4,aqua);}
+    .poloto5fill{fill:var(--poloto_color5,brown);}
+    .poloto6fill{fill:var(--poloto_color6,lime);}
+    .poloto7fill{fill:var(--poloto_color7,chocolate);}</style>"###;
+
+/// Default light theme
+pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
+    font-family: "Arial";
+    stroke-width:2;
+    }
+    .poloto_text{fill: black;  }
+    .poloto_axis_lines{stroke: black;stoke-width:3;fill:none}
+    .poloto_background{fill: aliceblue; }
+    .poloto0stroke{stroke:  blue; }
+    .poloto1stroke{stroke:  red; }
+    .poloto2stroke{stroke:  green; }
+    .poloto3stroke{stroke:  gold; }
+    .poloto4stroke{stroke:  aqua; }
+    .poloto5stroke{stroke:  brown; }
+    .poloto6stroke{stroke:  lime; }
+    .poloto7stroke{stroke:  chocolate; }
+    .poloto0fill{fill:blue;}
+    .poloto1fill{fill:red;}
+    .poloto2fill{fill:green;}
+    .poloto3fill{fill:gold;}
+    .poloto4fill{fill:aqua;}
+    .poloto5fill{fill:brown;}
+    .poloto6fill{fill:lime;}
+    .poloto7fill{fill:chocolate;}</style>"###;
+
+/// Default dark theme
+pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
+    font-family: "Arial";
+    stroke-width:2;
+    }
+    .poloto_text{fill: white;  }
+    .poloto_axis_lines{stroke: white;stoke-width:3;fill:none}
+    .poloto_background{fill: black; }
+    .poloto0stroke{stroke:  blue; }
+    .poloto1stroke{stroke:  red; }
+    .poloto2stroke{stroke:  green; }
+    .poloto3stroke{stroke:  gold; }
+    .poloto4stroke{stroke:  aqua; }
+    .poloto5stroke{stroke:  brown; }
+    .poloto6stroke{stroke:  lime; }
+    .poloto7stroke{stroke:  chocolate; }
+    .poloto0fill{fill:blue;}
+    .poloto1fill{fill:red;}
+    .poloto2fill{fill:green;}
+    .poloto3fill{fill:gold;}
+    .poloto4fill{fill:aqua;}
+    .poloto5fill{fill:brown;}
+    .poloto6fill{fill:lime;}
+    .poloto7fill{fill:chocolate;}</style>"###;
+
+/// Create a [`Plotter`] with the specified title,xname,yname, and custom html
+/// Consider using some of the default html tags.
+pub fn plot_with_html<'a>(
+    title: impl Display + 'a,
+    xname: impl Display + 'a,
+    yname: impl Display + 'a,
+    style: impl Display + 'a,
+) -> Plotter<'a, impl Names> {
+    build::PlotterBuilder::new()
+        .with_header(style)
+        .build(title, xname, yname)
+}
+
+/// Convenience function for `plot_with_html(title,xnam,yname,HTML_CONFIG_LIGHT_DEFAULT)`
 pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
 ) -> Plotter<'a, impl Names> {
-    build::PlotterBuilder::new()
-        .with_header(build::HeaderBuilder::new().push_css_default().build())
-        .build(title, xname, yname)
+    plot_with_html(title, xname, yname, HTML_CONFIG_LIGHT_DEFAULT)
 }
 
 #[derive(Copy, Clone)]
@@ -292,15 +325,25 @@ impl<'a, D: Names> Plotter<'a, D> {
         self
     }
 
+    /// When render is called, do not add the default svg tag at the
+    /// start and end.
+    pub fn without_svg(&mut self) -> &mut Self {
+        self.svgtag = SvgTagOption::NoSvg;
+        self
+    }
+
+    /// Render to a `String`
     pub fn render_to_string(self) -> Result<String, fmt::Error> {
         let mut s = String::new();
         self.render(&mut s)?;
         Ok(s)
     }
 
+    /// Render to a `std::io::Write`
     pub fn render_io<T: std::io::Write>(self, writer: T) -> Result<T, fmt::Error> {
         self.render(tagger::upgrade(writer)).map(|x| x.inner)
     }
+
     /// Render the svg to the writer.
     ///
     /// Up until now, nothing has been written to the writer. We
@@ -319,7 +362,7 @@ impl<'a, D: Names> Plotter<'a, D> {
         match svgtag {
             SvgTagOption::Svg => {
                 root.elem("svg", |writer| {
-                    let (svg,()) = writer.write(|w| default_svg_attrs(w)?.empty_ok())?;
+                    let (svg, ()) = writer.write(|w| default_svg_attrs(w)?.empty_ok())?;
 
                     render::render(svg.get_writer(), plots, names)?;
                     svg.empty_ok()
