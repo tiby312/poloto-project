@@ -53,7 +53,7 @@ fn main() -> fmt::Result {
                         poloto::HTML_CONFIG_LIGHT_DEFAULT,
                     );
                     s.without_svg();
-                    s.scatter("", test.iter().copied().twice_iter());
+                    s.scatter("", test.iter().copied());
 
                     let svg = s.render(svg)?;
                     svg.empty_ok()

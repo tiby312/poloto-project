@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 ///This displays the same exact image as in the `custom_style.rs`,
 ///with the exception that the styles are not in the svg itself.
 ///The svg is embeded in the html, and we can modify its style by
@@ -8,14 +7,8 @@ fn main() -> core::fmt::Result {
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    s.line("cos", x.clone().map(|x| [x, x.cos()]).twice_iter());
-    s.histogram(
-        "sin-10",
-        x.clone()
-            .step_by(3)
-            .map(|x| [x, x.sin() - 10.])
-            .twice_iter(),
-    );
+    s.line("cos", x.clone().map(|x| [x, x.cos()]));
+    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     let fs = s.render_to_string()?;
 

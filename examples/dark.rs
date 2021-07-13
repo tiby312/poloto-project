@@ -9,15 +9,9 @@ fn main() -> std::fmt::Result {
 
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    plotter.line(
-        move_format!("test {}", 1),
-        x.clone().map(|x| [x, x.cos()]).twice_iter(),
-    );
+    plotter.line(move_format!("test {}", 1), x.clone().map(|x| [x, x.cos()]));
 
-    plotter.line(
-        move_format!("test {}", 2),
-        x.clone().map(|x| [x, x.sin()]).twice_iter(),
-    );
+    plotter.line(move_format!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
 
     plotter.render_io(std::io::stdout())?;
 

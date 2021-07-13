@@ -23,9 +23,9 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub(super) fn render<'a, 'x, T: Write>(
+pub(super) fn render<'x, T: Write>(
     mut writer: &'x mut T,
-    mut plots: Vec<Plot<'a>>,
+    mut plots: Vec<Plot>,
     names: impl Names, //Box<dyn Names + 'a>,
 ) -> Result<&'x mut T, fmt::Error> {
     write!(writer, "{}", moveable_format(|w| names.write_header(w)))?;

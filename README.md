@@ -12,13 +12,10 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 In order to calculate the right size view to scale all the plots, poloto has to iterate over all the plot
 points twice. Once to find the min and max bounds, and once to scale all the points by the scale determined
-by the first iteration. There are two options here. Either we use the same iterator twice, or we run an iterator
-once and store the results to be iterated a second time. Which method to use depends a lot of how slow
-the iterator function is. If the user wants to do something expensive to calculate the next plot, then
-you might want to store the results. In contrast, if you are iterating over values already calculated
-then you might have no problem using the iterator twice. Poloto forces the user to choose which method to use
-by either calling `twice_iter` or `buffer_iter` on an iterator. A third `file_buffer` is also provided that
-uses a temporary file to store the iterator results.
+by the first iteration. 
+
+If you are using an iterator where each iteration is expensive, consider running the iterator just once,
+collecting the results in a Vec. Then pass that Vec to the plotting functions.
 
 ## Formatting Tick Intervals
 
@@ -49,11 +46,9 @@ the svg css clause.
 ## Simple Example
 
 ```rust
-use poloto::prelude::*;
-
 //PIPE me to a file!
 fn main() {
-    let data = vec![
+    let data = [
         [1850.0, 10.0],
         [1940.0, 12.0],
         [1945.0, 12.2],
@@ -63,11 +58,10 @@ fn main() {
 
     let mut s = poloto::plot("simple", "x", "y");
 
-    s.line_fill("", data.twice_iter());
+    s.line_fill("", data);
 
     s.render_io(std::io::stdout()).unwrap();
 }
-
 ```
 
 ## Output
@@ -91,24 +85,21 @@ fn main() -> core::fmt::Result {
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    //Call twice_iter to allow the iterator to be cloned and ran twice.
-    plotter.line("cos", x.clone().map(|x| [x, x.cos()]).twice_iter());
+    //The iterator will be cloned and ran twice.
+    plotter.line("cos", x.clone().map(|x| [x, x.cos()]));
 
-    //Call `buffer_iter` to communicate that iterator results
-    //should be stored to a Vec buffer for the second iteration.
-    plotter.scatter("sin", x.clone().map(|x| [x, x.sin()]).buffer_iter());
+    //Collect the iterator before passing it to a plot function
+    //if you are using an expensive iterator.
+    plotter.scatter("sin", x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>());
 
     plotter.histogram(
         move_format!("sin-{}", 10),
-        x.clone()
-            .step_by(3)
-            .map(|x| [x, x.sin() - 10.])
-            .buffer_iter(),
+        x.clone().step_by(3).map(|x| [x, x.sin() - 10.]),
     );
 
     plotter.line_fill(
         move_format!("sin-{}", 20),
-        x.clone().map(|x| [x, x.sin() - 20.]).buffer_iter(),
+        x.clone().map(|x| [x, x.sin() - 20.]),
     );
 
     plotter.render_io(std::io::stdout())?;

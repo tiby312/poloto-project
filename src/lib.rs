@@ -13,23 +13,17 @@ pub use tagger;
 mod build;
 mod util;
 pub use build::default_tags;
-use build::*;
 pub use build::Names;
+use build::*;
 
 ///The poloto prelude.
 pub mod prelude {
-    pub use super::iter::PlotIterator;
     pub use super::move_format;
 }
+
 use core::fmt;
 
 mod render;
-
-use iter::DoubleIterator;
-
-///Contains the [`DoubleIterator`] trait and three different
-///implementers of it.
-pub mod iter;
 
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
@@ -38,33 +32,33 @@ trait PlotTrait {
 }
 
 use fmt::Display;
-struct PlotStruct<D: DoubleIterator, F: Display> {
-    a: Option<D>,
-    b: Option<D::Next>,
+struct PlotStruct<I: Iterator<Item = [f64; 2]> + Clone, F: Display> {
+    first: I,
+    second: I,
     func: F,
 }
 
-impl<I: DoubleIterator<Item = [f64; 2]>, F: Display> PlotStruct<I, F> {
+impl<I: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotStruct<I, F> {
     fn new(it: I, func: F) -> Self {
+        let it2 = it.clone();
         PlotStruct {
-            a: Some(it),
-            b: None,
+            first: it,
+            second: it2,
             func,
         }
     }
 }
 
-impl<D: DoubleIterator<Item = [f64; 2]>, F: Display> PlotTrait for PlotStruct<D, F> {
+impl<D: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotTrait for PlotStruct<D, F> {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result {
         self.func.fmt(a)
     }
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
-        self.a.as_mut().unwrap()
+        &mut self.first
     }
 
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
-        self.b = Some(self.a.take().unwrap().finish_first());
-        self.b.as_mut().unwrap()
+        &mut self.second
     }
 }
 
@@ -232,16 +226,16 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     /// use poloto::prelude::*;
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.line("data",data.iter().map(|&x|x).twice_iter());
+    /// plotter.line("data",data);
     /// ```
-    pub fn line(
-        &mut self,
-        name: impl Display + 'a,
-        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) -> &mut Self {
+    pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    where
+        I: IntoIterator<Item = [f64; 2]>,
+        I::IntoIter: Clone + 'a,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(PlotStruct::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
         });
         self
     }
@@ -258,16 +252,16 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     /// use poloto::prelude::*;
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.line_fill("data",data.iter().map(|&x|x).twice_iter());
+    /// plotter.line_fill("data",data);
     /// ```
-    pub fn line_fill(
-        &mut self,
-        name: impl Display + 'a,
-        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) -> &mut Self {
+    pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    where
+        I: IntoIterator<Item = [f64; 2]>,
+        I::IntoIter: Clone + 'a,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(PlotStruct::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
         });
         self
     }
@@ -284,16 +278,16 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     /// use poloto::prelude::*;
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.scatter("data",data.iter().map(|&x|x).twice_iter());
+    /// plotter.scatter("data",data);
     /// ```
-    pub fn scatter(
-        &mut self,
-        name: impl Display + 'a,
-        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) -> &mut Self {
+    pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    where
+        I: IntoIterator<Item = [f64; 2]>,
+        I::IntoIter: Clone + 'a,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(PlotStruct::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
         });
         self
     }
@@ -312,16 +306,16 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.histogram("data",data.iter().map(|&x|x).twice_iter());
+    /// plotter.histogram("data",data);
     /// ```
-    pub fn histogram(
-        &mut self,
-        name: impl Display + 'a,
-        plots: impl DoubleIterator<Item = [f64; 2]> + 'a,
-    ) -> &mut Self {
+    pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    where
+        I: IntoIterator<Item = [f64; 2]>,
+        I::IntoIter: Clone + 'a,
+    {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(PlotStruct::new(plots, name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
         });
         self
     }

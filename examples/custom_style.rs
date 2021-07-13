@@ -1,5 +1,3 @@
-use poloto::prelude::*;
-
 //PIPE me to a file!
 fn main() -> core::fmt::Result {
     let mut s = poloto::plot_with_html(
@@ -11,14 +9,8 @@ fn main() -> core::fmt::Result {
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    s.line("cos", x.clone().map(|x| [x, x.cos()]).twice_iter());
-    s.histogram(
-        "sin-10",
-        x.clone()
-            .step_by(3)
-            .map(|x| [x, x.sin() - 10.])
-            .twice_iter(),
-    );
+    s.line("cos", x.clone().map(|x| [x, x.cos()]));
+    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     s.render_io(std::io::stdout())?;
 
