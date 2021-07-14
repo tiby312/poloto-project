@@ -287,9 +287,9 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ```
     pub fn scatter<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = J>+'a,
+        I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J:Borrow<[f64;2]>+'a
+        J:Borrow<[f64;2]>
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
