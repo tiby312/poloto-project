@@ -14,6 +14,8 @@ mod build;
 mod util;
 pub use build::default_tags;
 pub use build::Names;
+use core::borrow::Borrow;
+
 use build::*;
 
 ///The poloto prelude.
@@ -61,6 +63,7 @@ impl<D: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotTrait for PlotStruct<
         &mut self.second
     }
 }
+
 
 enum PlotType {
     Scatter,
@@ -174,10 +177,10 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
 /// Create a [`Plotter`] with the specified title,xname,yname, and custom html
 /// Consider using some of the default html tags.
 pub fn plot_with_html<'a>(
-    title: impl Display + 'a,
-    xname: impl Display + 'a,
-    yname: impl Display + 'a,
-    style: impl Display + 'a,
+    title: impl Display,
+    xname: impl Display,
+    yname: impl Display,
+    style: impl Display,
 ) -> Plotter<'a, impl Names> {
     build::PlotterBuilder::new()
         .with_header(style)
@@ -186,9 +189,9 @@ pub fn plot_with_html<'a>(
 
 /// Convenience function for `plot_with_html(title,xnam,yname,HTML_CONFIG_LIGHT_DEFAULT)`
 pub fn plot<'a>(
-    title: impl Display + 'a,
-    xname: impl Display + 'a,
-    yname: impl Display + 'a,
+    title: impl Display,
+    xname: impl Display,
+    yname: impl Display,
 ) -> Plotter<'a, impl Names> {
     plot_with_html(title, xname, yname, HTML_CONFIG_LIGHT_DEFAULT)
 }
@@ -226,16 +229,17 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     /// use poloto::prelude::*;
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.line("data",data);
+    /// plotter.line("data",&data);
     /// ```
-    pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = [f64; 2]>,
+        I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
+        J:Borrow<[f64;2]>
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow() ), name)),
         });
         self
     }
@@ -252,16 +256,17 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     /// use poloto::prelude::*;
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.line_fill("data",data);
+    /// plotter.line_fill("data",&data);
     /// ```
-    pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line_fill<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = [f64; 2]>,
+        I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
+        J:Borrow<[f64;2]>
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow()), name)),
         });
         self
     }
@@ -278,16 +283,17 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     /// use poloto::prelude::*;
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.scatter("data",data);
+    /// plotter.scatter("data",&data);
     /// ```
-    pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn scatter<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = [f64; 2]>,
+        I: IntoIterator<Item = J>+'a,
         I::IntoIter: Clone + 'a,
+        J:Borrow<[f64;2]>+'a
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow()), name)),
         });
         self
     }
@@ -306,16 +312,17 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// use poloto::prelude::*;
     /// let mut s=String::new();
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.histogram("data",data);
+    /// plotter.histogram("data",&data);
     /// ```
-    pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn histogram<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = [f64; 2]>,
+        I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
+        J:Borrow<[f64;2]>
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(PlotStruct::new(plots.into_iter(), name)),
+            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow()), name)),
         });
         self
     }

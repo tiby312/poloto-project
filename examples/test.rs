@@ -33,7 +33,7 @@ fn main() -> fmt::Result {
             let (div, ()) =
                 writer.write(|w| w.attr("style", "display:flex;flex-wrap:wrap;")?.empty_ok())?;
 
-            for (i, test) in generate_test().iter().enumerate() {
+            for (i, &test) in generate_test().iter().enumerate() {
                 div.elem("svg", |writer| {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
@@ -53,7 +53,7 @@ fn main() -> fmt::Result {
                         poloto::HTML_CONFIG_LIGHT_DEFAULT,
                     );
                     s.without_svg();
-                    s.scatter("", test.iter().copied());
+                    s.scatter("", test);
 
                     let svg = s.render(svg)?;
                     svg.empty_ok()

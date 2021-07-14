@@ -1,6 +1,6 @@
 //PIPE me to a file!
 fn main() {
-    let data = [
+    let data = vec![
         [1850.0, 10.0],
         [1940.0, 12.0],
         [1945.0, 12.2],
@@ -10,7 +10,7 @@ fn main() {
 
     let mut s = poloto::plot("simple", "x", "y");
 
-    s.line_fill("", data);
+    s.line_fill("", &data);
 
     s.render_io(std::io::stdout()).unwrap();
 }
