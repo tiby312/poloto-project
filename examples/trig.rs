@@ -3,24 +3,20 @@ use poloto::prelude::*;
 
 // PIPE me to a file!
 fn main() -> core::fmt::Result {
-    
-
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     // Collect the iterator before passing it to a plot function
     // if you are using an expensive iterator.
     // The buffer has to live longer than the plotter, so we collect it here.
-    let buffer=x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>();
-    
-    
+    let buffer = x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>();
+
     let mut plotter = poloto::plot_with_html(
         "Some Trigonometry Plots 🥳",
         move_format!("This is the {} label", 'x'),
         "This is the y label",
         poloto::HTML_CONFIG_DARK_DEFAULT,
     );
-    
-    
+
     // The iterator will be cloned and ran twice.
     plotter.line("cos", x.clone().map(|x| [x, x.cos()]));
 

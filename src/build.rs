@@ -89,7 +89,7 @@ impl PlotterBuilder<&'static str> {
 }
 
 impl<D: Display> PlotterBuilder<D> {
-    pub fn build<'a,A: Display, B: Display , C: Display>(
+    pub fn build<'a, A: Display, B: Display, C: Display>(
         self,
         title: A,
         xname: B,

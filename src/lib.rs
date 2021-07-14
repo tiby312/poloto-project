@@ -64,7 +64,6 @@ impl<D: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotTrait for PlotStruct<
     }
 }
 
-
 enum PlotType {
     Scatter,
     Line,
@@ -222,19 +221,22 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// 
+    ///
     /// let mut plotter = poloto::plot("title","x","y");
     /// plotter.line("",&data);
     /// ```
-    pub fn line<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J:Borrow<[f64;2]>
+        J: Borrow<[f64; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow() ), name)),
+            plots: Box::new(PlotStruct::new(
+                plots.into_iter().map(|x| *x.borrow()),
+                name,
+            )),
         });
         self
     }
@@ -249,19 +251,22 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// 
+    ///
     /// let mut plotter = poloto::plot("title","x","y");
     /// plotter.line_fill("",&data);
     /// ```
-    pub fn line_fill<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line_fill<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J:Borrow<[f64;2]>
+        J: Borrow<[f64; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow()), name)),
+            plots: Box::new(PlotStruct::new(
+                plots.into_iter().map(|x| *x.borrow()),
+                name,
+            )),
         });
         self
     }
@@ -276,19 +281,22 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// 
+    ///
     /// let mut plotter = poloto::plot("title","x","y");
     /// plotter.scatter("",&data);
     /// ```
-    pub fn scatter<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn scatter<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J:Borrow<[f64;2]>
+        J: Borrow<[f64; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow()), name)),
+            plots: Box::new(PlotStruct::new(
+                plots.into_iter().map(|x| *x.borrow()),
+                name,
+            )),
         });
         self
     }
@@ -304,19 +312,22 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// 
+    ///
     /// let mut plotter = poloto::plot("title","x","y");
     /// plotter.histogram("",&data);
     /// ```
-    pub fn histogram<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn histogram<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J:Borrow<[f64;2]>
+        J: Borrow<[f64; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(PlotStruct::new(plots.into_iter().map(|x|*x.borrow()), name)),
+            plots: Box::new(PlotStruct::new(
+                plots.into_iter().map(|x| *x.borrow()),
+                name,
+            )),
         });
         self
     }
