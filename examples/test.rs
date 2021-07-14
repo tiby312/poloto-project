@@ -37,7 +37,7 @@ fn main() -> fmt::Result {
                 div.elem("svg", |writer| {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
-                    let (svg, ()) = writer.write(|w| {
+                    let (mut svg, ()) = writer.write(|w| {
                         use poloto::default_tags::*;
                         w.attr("class", CLASS)?;
                         w.attr("xmlns", XMLNS)?;
@@ -55,7 +55,7 @@ fn main() -> fmt::Result {
                     s.without_svg();
                     s.scatter("", test);
 
-                    let svg = s.render(svg)?;
+                    s.render(&mut svg)?;
                     svg.empty_ok()
                 })?;
             }

@@ -39,7 +39,5 @@ fn main() -> core::fmt::Result {
         x.clone().map(|x| [x, x.sin() - 20.]),
     );
 
-    plotter.render_io(std::io::stdout())?;
-
-    Ok(())
+    plotter.render_io(std::io::stdout())
 }

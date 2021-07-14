@@ -14,7 +14,5 @@ fn main() -> std::fmt::Result {
 
     plotter.line(move_format!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
 
-    plotter.render_io(std::io::stdout())?;
-
-    Ok(())
+    plotter.render_io(std::io::stdout())
 }

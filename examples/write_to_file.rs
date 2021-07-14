@@ -13,7 +13,5 @@ fn main() -> core::fmt::Result {
     //Write the graph to a file
     let file = std::fs::File::create("assets/write_to_file.svg").unwrap();
 
-    s.render_io(file)?;
-
-    Ok(())
+    s.render_io(file)
 }

@@ -336,8 +336,8 @@ impl<'a, D: Names> Plotter<'a, D> {
     }
 
     /// Render to a `std::io::Write`
-    pub fn render_io<T: std::io::Write>(self, writer: T) -> Result<T, fmt::Error> {
-        self.render(tagger::upgrade(writer)).map(|x| x.inner)
+    pub fn render_io<T: std::io::Write>(self, writer: T) -> fmt::Result {
+        self.render(tagger::upgrade(writer))
     }
 
     /// Render the svg to the writer.
@@ -345,7 +345,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// Up until now, nothing has been written to the writer. We
     /// have just accumulated a list of commands and closures. This call will
     /// actually call all the closures and consume all the plot iterators.
-    pub fn render<T: fmt::Write>(self, writer: T) -> Result<T, fmt::Error> {
+    pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
         let Plotter {
             names,
             plots,
@@ -368,6 +368,6 @@ impl<'a, D: Names> Plotter<'a, D> {
                 render::render(root.get_writer(), plots, names)?;
             }
         }
-        Ok(root.into_writer())
+        Ok(())
     }
 }

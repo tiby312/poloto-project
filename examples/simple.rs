@@ -1,5 +1,5 @@
 // PIPE me to a file!
-fn main() {
+fn main() -> std::fmt::Result {
     let data = [
         [1850.0, 10.0],
         [1940.0, 12.0],
@@ -12,5 +12,5 @@ fn main() {
 
     s.line_fill("", &data);
 
-    s.render_io(std::io::stdout()).unwrap();
+    s.render_io(std::io::stdout())
 }

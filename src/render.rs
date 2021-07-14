@@ -23,11 +23,11 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub(super) fn render<'x, T: Write>(
-    mut writer: &'x mut T,
+pub(super) fn render<T: Write>(
+    mut writer: T,
     mut plots: Vec<Plot>,
-    names: impl Names, //Box<dyn Names + 'a>,
-) -> Result<&'x mut T, fmt::Error> {
+    names: impl Names,
+) -> fmt::Result {
     write!(writer, "{}", moveable_format(|w| names.write_header(w)))?;
 
     use crate::build::default_tags::*;
@@ -54,7 +54,7 @@ pub(super) fn render<'x, T: Write>(
             m
         } else {
             //TODO test that this looks ok
-            return Ok(writer); //No plots at all. don't need to draw anything
+            return Ok(()); //No plots at all. don't need to draw anything
         };
 
     const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
@@ -447,5 +447,5 @@ pub(super) fn render<'x, T: Write>(
             .empty_ok()
     })?;
 
-    Ok(writer)
+    Ok(())
 }
