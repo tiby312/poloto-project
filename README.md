@@ -1,6 +1,6 @@
 
 You can find poloto on [github](https://github.com/tiby312/poloto) and [crates.io](https://crates.io/crates/poloto).
-Docs at [docs.rs](https://docs.rs/poloto)
+Documentation at [docs.rs](https://docs.rs/poloto)
 
 A simple 2D plotting library that outputs graphs to SVG that can be styled using CSS.
 
