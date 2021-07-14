@@ -18,7 +18,7 @@ use core::borrow::Borrow;
 
 use build::*;
 
-///The poloto prelude.
+/// The poloto prelude.
 pub mod prelude {
     pub use super::move_format;
 }
@@ -86,9 +86,9 @@ macro_rules! move_format {
     }
 }
 
-///Convert a moved closure into a impl fmt::Display.
-///This is useful because std's `format_args!()` macro
-///has a shorter lifetime.
+/// Convert a moved closure into a impl fmt::Display.
+/// This is useful because std's `format_args!()` macro
+/// has a shorter lifetime.
 pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
     struct Foo<F>(F);
     impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
@@ -202,14 +202,9 @@ enum SvgTagOption {
     NoSvg,
 }
 
-///Keeps track of plots.
-///User supplies iterators that will be iterated on when
-///render is called.
-//Its important to note that most of the time when this library is used,
-//every run through the code is first accompanied by one compilation of the code.
-//So inefficiencies in dynamically allocating strings using format!() to then
-//be just passed to a writer are not that bad seeing as the solution
-//would involve passing a lot of closures around.
+/// Keeps track of plots.
+/// User supplies iterators that will be iterated on when
+/// render is called.
 pub struct Plotter<'a, D: Names> {
     names: D,
     plots: Vec<Plot<'a>>,
@@ -310,7 +305,6 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [3.0,6.0]
     /// ];
     /// use poloto::prelude::*;
-    /// let mut s=String::new();
     /// let mut plotter = poloto::plot("title","x","y");
     /// plotter.histogram("data",&data);
     /// ```
