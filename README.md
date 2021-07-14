@@ -49,9 +49,9 @@ the svg css clause.
 ## Simple Example
 
 ```rust
-//PIPE me to a file!
+// PIPE me to a file!
 fn main() {
-    let data = vec![
+    let data = [
         [1850.0, 10.0],
         [1940.0, 12.0],
         [1945.0, 12.2],
@@ -65,6 +65,7 @@ fn main() {
 
     s.render_io(std::io::stdout()).unwrap();
 }
+
 ```
 
 ## Output
@@ -75,17 +76,18 @@ fn main() {
 ## Another Example 
 
 ```rust
+// Include prelude for acess to move_format macro
 use poloto::prelude::*;
 
-//PIPE me to a file!
+// PIPE me to a file!
 fn main() -> core::fmt::Result {
     
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    //Collect the iterator before passing it to a plot function
-    //if you are using an expensive iterator.
-    //The buffer has to live longer than the plotter, so we collect it here.
+    // Collect the iterator before passing it to a plot function
+    // if you are using an expensive iterator.
+    // The buffer has to live longer than the plotter, so we collect it here.
     let buffer=x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>();
     
     
@@ -97,12 +99,12 @@ fn main() -> core::fmt::Result {
     );
     
     
-    //The iterator will be cloned and ran twice.
+    // The iterator will be cloned and ran twice.
     plotter.line("cos", x.clone().map(|x| [x, x.cos()]));
 
-    //When passing the buffer, make sure you pass it as a reference.
-    //If you don't do this, then the buffer will be duplicated in memory as
-    //the plotter will call `.clone()` on the iterator.
+    // When passing the buffer, make sure you pass it as a reference.
+    // If you don't do this, then the buffer will be duplicated in memory as
+    // the plotter will call `.clone()` on the iterator.
     plotter.scatter("sin", &buffer);
 
     plotter.histogram(

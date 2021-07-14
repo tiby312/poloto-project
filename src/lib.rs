@@ -222,9 +222,9 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use poloto::prelude::*;
+    /// 
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.line("data",&data);
+    /// plotter.line("",&data);
     /// ```
     pub fn line<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
@@ -249,9 +249,9 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use poloto::prelude::*;
+    /// 
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.line_fill("data",&data);
+    /// plotter.line_fill("",&data);
     /// ```
     pub fn line_fill<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
@@ -276,9 +276,9 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use poloto::prelude::*;
+    /// 
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.scatter("data",&data);
+    /// plotter.scatter("",&data);
     /// ```
     pub fn scatter<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
@@ -304,9 +304,9 @@ impl<'a, D: Names> Plotter<'a, D> {
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
-    /// use poloto::prelude::*;
+    /// 
     /// let mut plotter = poloto::plot("title","x","y");
-    /// plotter.histogram("data",&data);
+    /// plotter.histogram("",&data);
     /// ```
     pub fn histogram<I,J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where

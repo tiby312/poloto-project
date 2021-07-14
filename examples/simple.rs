@@ -1,6 +1,6 @@
-//PIPE me to a file!
+// PIPE me to a file!
 fn main() {
-    let data = vec![
+    let data = [
         [1850.0, 10.0],
         [1940.0, 12.0],
         [1945.0, 12.2],
