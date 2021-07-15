@@ -1,6 +1,6 @@
 //!
 //! Plot to SVG and style with CSS
-//! 
+//!
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 8 plots, the colors cycle back and are repeated.
@@ -187,7 +187,6 @@ pub const HTML_CONFIG_LIGHT_DEFAULT: &str = "<style>.poloto {\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
 
-
 /// Default dark theme
 pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     font-family: \"Arial\";\
@@ -287,11 +286,7 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let data=[
-    ///         [1.0f32,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    /// ];
+    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
     ///
@@ -318,11 +313,7 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let data=[
-    ///         [1.0f32,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    /// ];
+    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
     ///
@@ -349,11 +340,7 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let data=[
-    ///         [1.0f32,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    /// ];
+    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
     ///
@@ -381,11 +368,7 @@ impl<'a> Plotter<'a> {
     /// # Example
     ///
     /// ```
-    /// let data=[
-    ///         [1.0f32,4.0],
-    ///         [2.0,5.0],
-    ///         [3.0,6.0]
-    /// ];
+    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
     ///

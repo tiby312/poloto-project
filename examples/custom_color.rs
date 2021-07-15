@@ -1,5 +1,5 @@
 fn main() -> std::fmt::Result {
-    let data = [[1.0f32, 4.0], [2.0, 5.0], [3.0, 6.0]];
+    let data = [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]];
 
     let mut plotter = poloto::plot_with_html("cows per year", "year", "cows", MY_STYLE);
     plotter.line("cow", &data);
