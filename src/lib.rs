@@ -288,17 +288,20 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
     /// ```
-    pub fn line<I, J,K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K:Into<f64>+Copy
+        K: Into<f64> + Copy,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| *x.borrow()).map(|[x,y]|[x.into(),y.into()]),
+                plots
+                    .into_iter()
+                    .map(|x| *x.borrow())
+                    .map(|[x, y]| [x.into(), y.into()]),
                 name,
             )),
         });
@@ -312,17 +315,20 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line_fill("", &data);
     /// ```
-    pub fn line_fill<I, J,K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line_fill<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K:Into<f64>+Copy
+        K: Into<f64> + Copy,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
             plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| *x.borrow()).map(|[x,y]|[x.into(),y.into()]),
+                plots
+                    .into_iter()
+                    .map(|x| *x.borrow())
+                    .map(|[x, y]| [x.into(), y.into()]),
                 name,
             )),
         });
@@ -336,17 +342,20 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.scatter("", &data);
     /// ```
-    pub fn scatter<I, J,K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn scatter<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K:Into<f64>+Copy
+        K: Into<f64> + Copy,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
             plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| *x.borrow()).map(|[x,y]|[x.into(),y.into()]),
+                plots
+                    .into_iter()
+                    .map(|x| *x.borrow())
+                    .map(|[x, y]| [x.into(), y.into()]),
                 name,
             )),
         });
@@ -361,17 +370,20 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.histogram("", &data);
     /// ```
-    pub fn histogram<I, J,K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn histogram<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K:Into<f64>+Copy
+        K: Into<f64> + Copy,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
             plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| *x.borrow()).map(|[x,y]|[x.into(),y.into()]),
+                plots
+                    .into_iter()
+                    .map(|x| *x.borrow())
+                    .map(|[x, y]| [x.into(), y.into()]),
                 name,
             )),
         });
@@ -400,7 +412,7 @@ impl<'a> Plotter<'a> {
     /// plotter.line("", &data);
     /// plotter.render_io(std::io::stdout()).unwrap();
     /// ```
-    
+
     pub fn render_io<T: std::io::Write>(self, writer: T) -> fmt::Result {
         self.render(tagger::upgrade(writer))
     }
@@ -418,7 +430,7 @@ impl<'a> Plotter<'a> {
     /// let mut s = String::new();
     /// plotter.render(&mut s).unwrap();
     /// ```
-    
+
     pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
         let mut root = tagger::Element::new(writer);
 

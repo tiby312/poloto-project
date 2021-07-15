@@ -1,6 +1,5 @@
 // PIPE me to a file!
 fn main() -> std::fmt::Result {
-    
     let data = [
         [1850.0, 10.0],
         [1940.0, 12.0],
@@ -8,7 +7,7 @@ fn main() -> std::fmt::Result {
         [1989.0, 16.0],
         [2001.0, 20.0],
     ];
-    
+
     let mut s = poloto::plot("simple", "x", "y");
 
     s.line("", &data);
