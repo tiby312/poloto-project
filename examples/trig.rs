@@ -1,9 +1,9 @@
 // Include prelude for acess to move_format macro
-use poloto::prelude::*;
+use poloto::move_format;
 
 // PIPE me to a file!
 fn main() -> core::fmt::Result {
-    let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
+    let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
     // Collect the iterator before passing it to a plot function
     // if you are using an expensive iterator.

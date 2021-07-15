@@ -9,59 +9,41 @@
 //!
 use core::fmt::Write;
 
-pub use tagger;
+//pub use tagger;
 mod util;
 use core::borrow::Borrow;
 
 ///The number of unique colors.
-pub const NUM_COLORS: usize = 8;
+const NUM_COLORS: usize = 8;
 
-///Contains building blocks for create the default svg an styling tags from scratch.
-pub mod default_tags {
-    use core::fmt;
+///The width of the svg tag.
+const WIDTH: f32 = 800.0;
+///The height of the svg tag.
+const HEIGHT: f32 = 500.0;
 
-    ///The class of the svg tag.
-    pub const CLASS: &str = "poloto";
-    ///The width of the svg tag.
-    pub const WIDTH: f64 = 800.0;
-    ///The height of the svg tag.
-    pub const HEIGHT: f64 = 500.0;
-    ///The xmlns: `http://www.w3.org/2000/svg`
-    pub const XMLNS: &str = "http://www.w3.org/2000/svg";
-
-    ///Write default svg tag attributes.
-    pub fn default_svg_attrs<'a, 'b, T: fmt::Write>(
-        w: &'a mut tagger::AttributeWriter<'b, T>,
-    ) -> Result<&'a mut tagger::AttributeWriter<'b, T>, fmt::Error> {
-        use tagger::prelude::*;
-
-        w.attr("class", CLASS)?
-            .attr("width", WIDTH)?
-            .attr("height", HEIGHT)?
-            .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
-            .attr("xmlns", XMLNS)
-    }
-}
-
-/// The poloto prelude.
-pub mod prelude {
-    pub use super::move_format;
-}
 
 use core::fmt;
 
 mod render;
 
 ///Used internally to implement [`Names`]
-struct NamesStruct<A, B, C, D> {
+struct NamesStruct<A, B, C, D,E,F> {
     title: A,
     xname: B,
     yname: C,
     header: D,
+    body:E,
+    footer:F
 }
-impl<A: Display, B: Display, C: Display, D: Display> Names for NamesStruct<A, B, C, D> {
+impl<A: Display, B: Display, C: Display, D: Display,E:Display,F:Display> Names for NamesStruct<A, B, C, D,E,F> {
     fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result {
         self.header.fmt(fm)
+    }
+    fn write_body(&self, fm: &mut fmt::Formatter) -> fmt::Result {
+        self.body.fmt(fm)
+    }
+    fn write_footer(&self, fm: &mut fmt::Formatter) -> fmt::Result {
+        self.footer.fmt(fm)
     }
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result {
         self.title.fmt(fm)
@@ -77,6 +59,9 @@ impl<A: Display, B: Display, C: Display, D: Display> Names for NamesStruct<A, B,
 ///Used internally to write out the header/title/xname/yname.
 trait Names {
     fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+    fn write_body(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+    fn write_footer(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+    
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
@@ -84,18 +69,18 @@ trait Names {
 
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f32; 2]>;
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f32; 2]>;
 }
 
 use fmt::Display;
-struct PlotStruct<I: Iterator<Item = [f64; 2]> + Clone, F: Display> {
+struct PlotStruct<I: Iterator<Item = [f32; 2]> + Clone, F: Display> {
     first: I,
     second: I,
     func: F,
 }
 
-impl<I: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotStruct<I, F> {
+impl<I: Iterator<Item = [f32; 2]> + Clone, F: Display> PlotStruct<I, F> {
     fn new(it: I, func: F) -> Self {
         let it2 = it.clone();
         PlotStruct {
@@ -106,15 +91,15 @@ impl<I: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotStruct<I, F> {
     }
 }
 
-impl<D: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotTrait for PlotStruct<D, F> {
+impl<D: Iterator<Item = [f32; 2]> + Clone, F: Display> PlotTrait for PlotStruct<D, F> {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result {
         self.func.fmt(a)
     }
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f32; 2]> {
         &mut self.first
     }
 
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f32; 2]> {
         &mut self.second
     }
 }
@@ -228,13 +213,44 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
     .poloto6fill{fill:lime;}
     .poloto7fill{fill:chocolate;}</style>"###;
 
-/// Create a [`Plotter`] with the specified title,xname,yname, and custom html
-/// Consider using some of the default html tags.
+    /// The default SVG Header tag
+    pub const SVG_HEADER_DEFAULT:&str=r###"<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"###;
+    /// The default SVG Header: attributes only.
+    pub const SVG_HEADER_DEFAULT_WITHOUT_TAG:&str=r###"class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg""###;
+    
+    /// The default SVG ending tag.
+    pub const SVG_FOOTER_DEFAULT:&str="</svg>";
+
+
+/// Shorthand for `plot_with_html_raw(title,xname,yname,SVG_HEADER_DEFAULT,body,SVG_FOOT_DEFAULT);`
 pub fn plot_with_html<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
+    body:  impl Display +'a
+)->Plotter<'a>{
+    Plotter {
+        names: Box::new(NamesStruct {
+            title,
+            xname,
+            yname,
+            header:SVG_HEADER_DEFAULT,
+            body,
+            footer:SVG_FOOTER_DEFAULT
+        }),
+        plots: Vec::new()
+    }
+}
+
+/// Create a [`Plotter`] with the specified title,xname,yname, and custom header,body, and footer.
+/// Consider using some of the default html tags.
+pub fn plot_with_html_raw<'a>(
+    title: impl Display + 'a,
+    xname: impl Display + 'a,
+    yname: impl Display + 'a,
     header: impl Display + 'a,
+    body: impl Display + 'a,
+    footer: impl Display + 'a
 ) -> Plotter<'a> {
     Plotter {
         names: Box::new(NamesStruct {
@@ -242,13 +258,14 @@ pub fn plot_with_html<'a>(
             xname,
             yname,
             header,
+            body,
+            footer
         }),
-        plots: Vec::new(),
-        svgtag: SvgTagOption::Svg,
+        plots: Vec::new()
     }
 }
 
-/// Convenience function for `plot_with_html(title,xnam,yname,HTML_CONFIG_LIGHT_DEFAULT)`
+/// Shorthand for `plot_with_html(title,xname,yname,HTML_CONFIG_LIGHT_DEFAULT);`
 pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
@@ -257,11 +274,6 @@ pub fn plot<'a>(
     plot_with_html(title, xname, yname, HTML_CONFIG_LIGHT_DEFAULT)
 }
 
-#[derive(Copy, Clone)]
-enum SvgTagOption {
-    Svg,
-    NoSvg,
-}
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -269,7 +281,6 @@ enum SvgTagOption {
 pub struct Plotter<'a> {
     names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
-    svgtag: SvgTagOption,
 }
 
 impl<'a> Plotter<'a> {
@@ -279,7 +290,7 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f64,4.0],
+    ///         [1.0f32,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
@@ -292,7 +303,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[f64; 2]>,
+        J: Borrow<[f32; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -310,7 +321,7 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f64,4.0],
+    ///         [1.0f32,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
@@ -323,7 +334,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[f64; 2]>,
+        J: Borrow<[f32; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -341,7 +352,7 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f64,4.0],
+    ///         [1.0f32,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
@@ -354,7 +365,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[f64; 2]>,
+        J: Borrow<[f32; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -373,7 +384,7 @@ impl<'a> Plotter<'a> {
     ///
     /// ```
     /// let data=[
-    ///         [1.0f64,4.0],
+    ///         [1.0f32,4.0],
     ///         [2.0,5.0],
     ///         [3.0,6.0]
     /// ];
@@ -386,7 +397,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[f64; 2]>,
+        J: Borrow<[f32; 2]>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
@@ -395,13 +406,6 @@ impl<'a> Plotter<'a> {
                 name,
             )),
         });
-        self
-    }
-
-    /// When render is called, do not add the default svg tag at the
-    /// start and end.
-    pub fn without_svg(&mut self) -> &mut Self {
-        self.svgtag = SvgTagOption::NoSvg;
         self
     }
 
@@ -423,29 +427,11 @@ impl<'a> Plotter<'a> {
     /// have just accumulated a list of commands and closures. This call will
     /// actually call all the closures and consume all the plot iterators.
     pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
-        let Plotter {
-            names,
-            plots,
-            svgtag,
-        } = self;
+        
         let mut root = tagger::Element::new(writer);
 
-        let names: &dyn Names = names.as_ref();
-        use crate::default_tags::*;
-
-        match svgtag {
-            SvgTagOption::Svg => {
-                root.elem("svg", |writer| {
-                    let (svg, ()) = writer.write(|w| default_svg_attrs(w)?.empty_ok())?;
-
-                    render::render(svg.get_writer(), plots, names)?;
-                    svg.empty_ok()
-                })?;
-            }
-            SvgTagOption::NoSvg => {
-                render::render(root.get_writer(), plots, names)?;
-            }
-        }
+        render::render(root.get_writer(), self)?;
+            
         Ok(())
     }
 }

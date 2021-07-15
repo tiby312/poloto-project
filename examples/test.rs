@@ -1,4 +1,4 @@
-const fn generate_test() -> [&'static [[f64; 2]]; 8] {
+const fn generate_test() -> [&'static [[f32; 2]]; 8] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
     let test1 = &[[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
@@ -19,7 +19,7 @@ const fn generate_test() -> [&'static [[f64; 2]]; 8] {
 }
 
 use core::fmt;
-use poloto::prelude::*;
+use poloto::move_format;
 use tagger::prelude::*;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
@@ -38,21 +38,21 @@ fn main() -> fmt::Result {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
                     let (mut svg, ()) = writer.write(|w| {
-                        use poloto::default_tags::*;
-                        w.attr("class", CLASS)?;
-                        w.attr("xmlns", XMLNS)?;
-                        w.with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?;
+                        write!(w," {} ",poloto::SVG_HEADER_DEFAULT_WITHOUT_TAG)?;
                         w.attr("width", "500px")?.attr("height", "100%")?;
                         w.empty_ok()
                     })?;
 
-                    let mut s = poloto::plot_with_html(
+                    let mut s = poloto::plot_with_html_raw(
                         move_format!("test {}", i),
                         "x",
                         "y",
+                        "",
                         poloto::HTML_CONFIG_LIGHT_DEFAULT,
+                        ""
                     );
-                    s.without_svg();
+
+                    
                     s.scatter("", test);
 
                     s.render(&mut svg)?;
