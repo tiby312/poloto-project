@@ -10,13 +10,38 @@
 use core::fmt::Write;
 
 pub use tagger;
-mod build;
 mod util;
-pub use build::default_tags;
-pub use build::Names;
 use core::borrow::Borrow;
 
-use build::*;
+///The number of unique colors.
+pub const NUM_COLORS: usize = 8;
+
+///Contains building blocks for create the default svg an styling tags from scratch.
+pub mod default_tags {
+    use core::fmt;
+
+    ///The class of the svg tag.
+    pub const CLASS: &str = "poloto";
+    ///The width of the svg tag.
+    pub const WIDTH: f64 = 800.0;
+    ///The height of the svg tag.
+    pub const HEIGHT: f64 = 500.0;
+    ///The xmlns: `http://www.w3.org/2000/svg`
+    pub const XMLNS: &str = "http://www.w3.org/2000/svg";
+
+    ///Write default svg tag attributes.
+    pub fn default_svg_attrs<'a, 'b, T: fmt::Write>(
+        w: &'a mut tagger::AttributeWriter<'b, T>,
+    ) -> Result<&'a mut tagger::AttributeWriter<'b, T>, fmt::Error> {
+        use tagger::prelude::*;
+
+        w.attr("class", CLASS)?
+            .attr("width", WIDTH)?
+            .attr("height", HEIGHT)?
+            .with_attr("viewBox", wr!("0 0 {} {}", WIDTH, HEIGHT))?
+            .attr("xmlns", XMLNS)
+    }
+}
 
 /// The poloto prelude.
 pub mod prelude {
@@ -26,6 +51,36 @@ pub mod prelude {
 use core::fmt;
 
 mod render;
+
+///Used internally to implement [`Names`]
+struct NamesStruct<A, B, C, D> {
+    title: A,
+    xname: B,
+    yname: C,
+    header: D,
+}
+impl<A: Display, B: Display, C: Display, D: Display> Names for NamesStruct<A, B, C, D> {
+    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result {
+        self.header.fmt(fm)
+    }
+    fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result {
+        self.title.fmt(fm)
+    }
+    fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result {
+        self.xname.fmt(fm)
+    }
+    fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result {
+        self.yname.fmt(fm)
+    }
+}
+
+///Used internally to write out the header/title/xname/yname.
+trait Names {
+    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+    fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+    fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+    fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+}
 
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
@@ -176,22 +231,29 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
 /// Create a [`Plotter`] with the specified title,xname,yname, and custom html
 /// Consider using some of the default html tags.
 pub fn plot_with_html<'a>(
-    title: impl Display,
-    xname: impl Display,
-    yname: impl Display,
-    style: impl Display,
-) -> Plotter<'a, impl Names> {
-    build::PlotterBuilder::new()
-        .with_header(style)
-        .build(title, xname, yname)
+    title: impl Display + 'a,
+    xname: impl Display + 'a,
+    yname: impl Display + 'a,
+    header: impl Display + 'a,
+) -> Plotter<'a> {
+    Plotter {
+        names: Box::new(NamesStruct {
+            title,
+            xname,
+            yname,
+            header,
+        }),
+        plots: Vec::new(),
+        svgtag: SvgTagOption::Svg,
+    }
 }
 
 /// Convenience function for `plot_with_html(title,xnam,yname,HTML_CONFIG_LIGHT_DEFAULT)`
 pub fn plot<'a>(
-    title: impl Display,
-    xname: impl Display,
-    yname: impl Display,
-) -> Plotter<'a, impl Names> {
+    title: impl Display + 'a,
+    xname: impl Display + 'a,
+    yname: impl Display + 'a,
+) -> Plotter<'a> {
     plot_with_html(title, xname, yname, HTML_CONFIG_LIGHT_DEFAULT)
 }
 
@@ -204,13 +266,13 @@ enum SvgTagOption {
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
 /// render is called.
-pub struct Plotter<'a, D: Names> {
-    names: D,
+pub struct Plotter<'a> {
+    names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
     svgtag: SvgTagOption,
 }
 
-impl<'a, D: Names> Plotter<'a, D> {
+impl<'a> Plotter<'a> {
     /// Create a line from plots.
     ///
     /// # Example
@@ -223,6 +285,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
+    ///
     /// plotter.line("",&data);
     /// ```
     pub fn line<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -253,6 +316,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
+    ///
     /// plotter.line_fill("",&data);
     /// ```
     pub fn line_fill<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -283,6 +347,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
+    ///
     /// plotter.scatter("",&data);
     /// ```
     pub fn scatter<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -314,6 +379,7 @@ impl<'a, D: Names> Plotter<'a, D> {
     /// ];
     ///
     /// let mut plotter = poloto::plot("title","x","y");
+    ///
     /// plotter.histogram("",&data);
     /// ```
     pub fn histogram<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -364,7 +430,8 @@ impl<'a, D: Names> Plotter<'a, D> {
         } = self;
         let mut root = tagger::Element::new(writer);
 
-        use crate::build::default_tags::*;
+        let names: &dyn Names = names.as_ref();
+        use crate::default_tags::*;
 
         match svgtag {
             SvgTagOption::Svg => {

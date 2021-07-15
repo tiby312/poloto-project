@@ -26,11 +26,11 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
 pub(super) fn render<T: Write>(
     mut writer: T,
     mut plots: Vec<Plot>,
-    names: impl Names,
+    names: &dyn Names,
 ) -> fmt::Result {
     write!(writer, "{}", moveable_format(|w| names.write_header(w)))?;
 
-    use crate::build::default_tags::*;
+    use crate::default_tags::*;
     let width = WIDTH;
     let height = HEIGHT;
     let padding = 150.0;
