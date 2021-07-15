@@ -138,79 +138,80 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
 }
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
-pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
-    font-family: "Arial";
-    stroke-width:2;
-    }
-    .poloto_text{fill: var(--poloto_fg_color,black);  }
-    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stoke-width:3;fill:none}
-    .poloto_background{fill: var(--poloto_bg_color,aliceblue); }
-    .poloto0stroke{stroke:  var(--poloto_color0,blue); }
-    .poloto1stroke{stroke:  var(--poloto_color1,red); }
-    .poloto2stroke{stroke:  var(--poloto_color2,green); }
-    .poloto3stroke{stroke:  var(--poloto_color3,gold); }
-    .poloto4stroke{stroke:  var(--poloto_color4,aqua); }
-    .poloto5stroke{stroke:  var(--poloto_color5,brown); }
-    .poloto6stroke{stroke:  var(--poloto_color6,lime); }
-    .poloto7stroke{stroke:  var(--poloto_color7,chocolate); }
-    .poloto0fill{fill:var(--poloto_color0,blue);}
-    .poloto1fill{fill:var(--poloto_color1,red);}
-    .poloto2fill{fill:var(--poloto_color2,green);}
-    .poloto3fill{fill:var(--poloto_color3,gold);}
-    .poloto4fill{fill:var(--poloto_color4,aqua);}
-    .poloto5fill{fill:var(--poloto_color5,brown);}
-    .poloto6fill{fill:var(--poloto_color6,lime);}
-    .poloto7fill{fill:var(--poloto_color7,chocolate);}</style>"###;
+pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
+    font-family: \"Arial\";\
+    stroke-width:2;\
+    }\
+    .poloto_text{fill: var(--poloto_fg_color,black);}\
+    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stoke-width:3;fill:none}\
+    .poloto_background{fill: var(--poloto_bg_color,aliceblue);}\
+    .poloto0stroke{stroke:  var(--poloto_color0,blue);}\
+    .poloto1stroke{stroke:  var(--poloto_color1,red);}\
+    .poloto2stroke{stroke:  var(--poloto_color2,green);}\
+    .poloto3stroke{stroke:  var(--poloto_color3,gold);}\
+    .poloto4stroke{stroke:  var(--poloto_color4,aqua);}\
+    .poloto5stroke{stroke:  var(--poloto_color5,brown);}\
+    .poloto6stroke{stroke:  var(--poloto_color6,lime);}\
+    .poloto7stroke{stroke:  var(--poloto_color7,chocolate);}\
+    .poloto0fill{fill:var(--poloto_color0,blue);}\
+    .poloto1fill{fill:var(--poloto_color1,red);}\
+    .poloto2fill{fill:var(--poloto_color2,green);}\
+    .poloto3fill{fill:var(--poloto_color3,gold);}\
+    .poloto4fill{fill:var(--poloto_color4,aqua);}\
+    .poloto5fill{fill:var(--poloto_color5,brown);}\
+    .poloto6fill{fill:var(--poloto_color6,lime);}\
+    .poloto7fill{fill:var(--poloto_color7,chocolate);}</style>";
 
 /// Default light theme
-pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
-    font-family: "Arial";
-    stroke-width:2;
-    }
-    .poloto_text{fill: black;  }
-    .poloto_axis_lines{stroke: black;stoke-width:3;fill:none}
-    .poloto_background{fill: aliceblue; }
-    .poloto0stroke{stroke:  blue; }
-    .poloto1stroke{stroke:  red; }
-    .poloto2stroke{stroke:  green; }
-    .poloto3stroke{stroke:  gold; }
-    .poloto4stroke{stroke:  aqua; }
-    .poloto5stroke{stroke:  brown; }
-    .poloto6stroke{stroke:  lime; }
-    .poloto7stroke{stroke:  chocolate; }
-    .poloto0fill{fill:blue;}
-    .poloto1fill{fill:red;}
-    .poloto2fill{fill:green;}
-    .poloto3fill{fill:gold;}
-    .poloto4fill{fill:aqua;}
-    .poloto5fill{fill:brown;}
-    .poloto6fill{fill:lime;}
-    .poloto7fill{fill:chocolate;}</style>"###;
+pub const HTML_CONFIG_LIGHT_DEFAULT: &str = "<style>.poloto {\
+    font-family: \"Arial\";\
+    stroke-width:2;\
+    }\
+    .poloto_text{fill: black;}\
+    .poloto_axis_lines{stroke: black;stoke-width:3;fill:none}\
+    .poloto_background{fill: aliceblue;}\
+    .poloto0stroke{stroke:  blue;}\
+    .poloto1stroke{stroke:  red;}\
+    .poloto2stroke{stroke:  green;}\
+    .poloto3stroke{stroke:  gold;}\
+    .poloto4stroke{stroke:  aqua;}\
+    .poloto5stroke{stroke:  brown;}\
+    .poloto6stroke{stroke:  lime;}\
+    .poloto7stroke{stroke:  chocolate;}\
+    .poloto0fill{fill:blue;}\
+    .poloto1fill{fill:red;}\
+    .poloto2fill{fill:green;}\
+    .poloto3fill{fill:gold;}\
+    .poloto4fill{fill:aqua;}\
+    .poloto5fill{fill:brown;}\
+    .poloto6fill{fill:lime;}\
+    .poloto7fill{fill:chocolate;}</style>";
+
 
 /// Default dark theme
-pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
-    font-family: "Arial";
-    stroke-width:2;
-    }
-    .poloto_text{fill: white;  }
-    .poloto_axis_lines{stroke: white;stoke-width:3;fill:none}
-    .poloto_background{fill: black; }
-    .poloto0stroke{stroke:  blue; }
-    .poloto1stroke{stroke:  red; }
-    .poloto2stroke{stroke:  green; }
-    .poloto3stroke{stroke:  gold; }
-    .poloto4stroke{stroke:  aqua; }
-    .poloto5stroke{stroke:  brown; }
-    .poloto6stroke{stroke:  lime; }
-    .poloto7stroke{stroke:  chocolate; }
-    .poloto0fill{fill:blue;}
-    .poloto1fill{fill:red;}
-    .poloto2fill{fill:green;}
-    .poloto3fill{fill:gold;}
-    .poloto4fill{fill:aqua;}
-    .poloto5fill{fill:brown;}
-    .poloto6fill{fill:lime;}
-    .poloto7fill{fill:chocolate;}</style>"###;
+pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
+    font-family: \"Arial\";\
+    stroke-width:2;\
+    }\
+    .poloto_text{fill: white;}\
+    .poloto_axis_lines{stroke: white;stoke-width:3;fill:none}\
+    .poloto_background{fill: black;}\
+    .poloto0stroke{stroke:  blue;}\
+    .poloto1stroke{stroke:  red;}\
+    .poloto2stroke{stroke:  green;}\
+    .poloto3stroke{stroke:  gold;}\
+    .poloto4stroke{stroke:  aqua;}\
+    .poloto5stroke{stroke:  brown;}\
+    .poloto6stroke{stroke:  lime;}\
+    .poloto7stroke{stroke:  chocolate;}\
+    .poloto0fill{fill:blue;}\
+    .poloto1fill{fill:red;}\
+    .poloto2fill{fill:green;}\
+    .poloto3fill{fill:gold;}\
+    .poloto4fill{fill:aqua;}\
+    .poloto5fill{fill:brown;}\
+    .poloto6fill{fill:lime;}\
+    .poloto7fill{fill:chocolate;}</style>";
 
 /// The default SVG Header tag
 pub const SVG_HEADER_DEFAULT: &str = r###"<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"###;
