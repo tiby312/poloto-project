@@ -283,14 +283,10 @@ pub struct Plotter<'a> {
 impl<'a> Plotter<'a> {
     /// Create a line from plots.
     ///
-    /// # Example
-    ///
     /// ```
-    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
-    ///
-    /// let mut plotter = poloto::plot("title","x","y");
-    ///
-    /// plotter.line("",&data);
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
     /// ```
     pub fn line<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
@@ -310,14 +306,10 @@ impl<'a> Plotter<'a> {
 
     /// Create a line from plots that will be filled underneath.
     ///
-    /// # Example
-    ///
     /// ```
-    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
-    ///
-    /// let mut plotter = poloto::plot("title","x","y");
-    ///
-    /// plotter.line_fill("",&data);
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line_fill("", &data);
     /// ```
     pub fn line_fill<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
@@ -337,14 +329,10 @@ impl<'a> Plotter<'a> {
 
     /// Create a scatter plot from plots.
     ///
-    /// # Example
-    ///
     /// ```
-    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
-    ///
-    /// let mut plotter = poloto::plot("title","x","y");
-    ///
-    /// plotter.scatter("",&data);
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.scatter("", &data);
     /// ```
     pub fn scatter<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
@@ -365,14 +353,10 @@ impl<'a> Plotter<'a> {
     /// Create a histogram from plots.
     /// Each bar's left side will line up with a point
     ///
-    /// # Example
-    ///
     /// ```
-    /// let data = [ [1.0,4.0] , [2.0,5.0] , [3.0,6.0] ];
-    ///
-    /// let mut plotter = poloto::plot("title","x","y");
-    ///
-    /// plotter.histogram("",&data);
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.histogram("", &data);
     /// ```
     pub fn histogram<I, J>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
@@ -391,6 +375,13 @@ impl<'a> Plotter<'a> {
     }
 
     /// Render to a `String`
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// let s:String = plotter.render_to_string().unwrap();
+    /// ```
     pub fn render_to_string(self) -> Result<String, fmt::Error> {
         let mut s = String::new();
         self.render(&mut s)?;
@@ -398,6 +389,14 @@ impl<'a> Plotter<'a> {
     }
 
     /// Render to a `std::io::Write`
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// plotter.render_io(std::io::stdout()).unwrap();
+    /// ```
+    
     pub fn render_io<T: std::io::Write>(self, writer: T) -> fmt::Result {
         self.render(tagger::upgrade(writer))
     }
@@ -407,6 +406,15 @@ impl<'a> Plotter<'a> {
     /// Up until now, nothing has been written to the writer. We
     /// have just accumulated a list of commands and closures. This call will
     /// actually call all the closures and consume all the plot iterators.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// let mut s = String::new();
+    /// plotter.render(&mut s).unwrap();
+    /// ```
+    
     pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
         let mut root = tagger::Element::new(writer);
 
