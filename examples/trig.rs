@@ -1,4 +1,3 @@
-// Include prelude for acess to move_format macro
 use poloto::move_format;
 
 // PIPE me to a file!

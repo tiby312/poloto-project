@@ -1,8 +1,6 @@
 //!
-//! poloto - plot to SVG and style with CSS
-//!
-//! ### Usage
-//!
+//! Plot to SVG and style with CSS
+//! 
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 8 plots, the colors cycle back and are repeated.
@@ -21,21 +19,22 @@ const WIDTH: f32 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f32 = 500.0;
 
-
 use core::fmt;
 
 mod render;
 
 ///Used internally to implement [`Names`]
-struct NamesStruct<A, B, C, D,E,F> {
+struct NamesStruct<A, B, C, D, E, F> {
     title: A,
     xname: B,
     yname: C,
     header: D,
-    body:E,
-    footer:F
+    body: E,
+    footer: F,
 }
-impl<A: Display, B: Display, C: Display, D: Display,E:Display,F:Display> Names for NamesStruct<A, B, C, D,E,F> {
+impl<A: Display, B: Display, C: Display, D: Display, E: Display, F: Display> Names
+    for NamesStruct<A, B, C, D, E, F>
+{
     fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result {
         self.header.fmt(fm)
     }
@@ -61,7 +60,7 @@ trait Names {
     fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_body(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_footer(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    
+
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
@@ -213,32 +212,31 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
     .poloto6fill{fill:lime;}
     .poloto7fill{fill:chocolate;}</style>"###;
 
-    /// The default SVG Header tag
-    pub const SVG_HEADER_DEFAULT:&str=r###"<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"###;
-    /// The default SVG Header: attributes only.
-    pub const SVG_HEADER_DEFAULT_WITHOUT_TAG:&str=r###"class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg""###;
-    
-    /// The default SVG ending tag.
-    pub const SVG_FOOTER_DEFAULT:&str="</svg>";
+/// The default SVG Header tag
+pub const SVG_HEADER_DEFAULT: &str = r###"<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"###;
+/// The default SVG Header: attributes only.
+pub const SVG_HEADER_DEFAULT_WITHOUT_TAG: &str = r###"class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg""###;
 
+/// The default SVG ending tag.
+pub const SVG_FOOTER_DEFAULT: &str = "</svg>";
 
 /// Shorthand for `plot_with_html_raw(title,xname,yname,SVG_HEADER_DEFAULT,body,SVG_FOOT_DEFAULT);`
 pub fn plot_with_html<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-    body:  impl Display +'a
-)->Plotter<'a>{
+    body: impl Display + 'a,
+) -> Plotter<'a> {
     Plotter {
         names: Box::new(NamesStruct {
             title,
             xname,
             yname,
-            header:SVG_HEADER_DEFAULT,
+            header: SVG_HEADER_DEFAULT,
             body,
-            footer:SVG_FOOTER_DEFAULT
+            footer: SVG_FOOTER_DEFAULT,
         }),
-        plots: Vec::new()
+        plots: Vec::new(),
     }
 }
 
@@ -250,7 +248,7 @@ pub fn plot_with_html_raw<'a>(
     yname: impl Display + 'a,
     header: impl Display + 'a,
     body: impl Display + 'a,
-    footer: impl Display + 'a
+    footer: impl Display + 'a,
 ) -> Plotter<'a> {
     Plotter {
         names: Box::new(NamesStruct {
@@ -259,9 +257,9 @@ pub fn plot_with_html_raw<'a>(
             yname,
             header,
             body,
-            footer
+            footer,
         }),
-        plots: Vec::new()
+        plots: Vec::new(),
     }
 }
 
@@ -273,7 +271,6 @@ pub fn plot<'a>(
 ) -> Plotter<'a> {
     plot_with_html(title, xname, yname, HTML_CONFIG_LIGHT_DEFAULT)
 }
-
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -427,11 +424,10 @@ impl<'a> Plotter<'a> {
     /// have just accumulated a list of commands and closures. This call will
     /// actually call all the closures and consume all the plot iterators.
     pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
-        
         let mut root = tagger::Element::new(writer);
 
         render::render(root.get_writer(), self)?;
-            
+
         Ok(())
     }
 }

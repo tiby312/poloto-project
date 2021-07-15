@@ -38,7 +38,7 @@ fn main() -> fmt::Result {
                     //Build the svg tag from scratch so we can use our own
                     //width and height
                     let (mut svg, ()) = writer.write(|w| {
-                        write!(w," {} ",poloto::SVG_HEADER_DEFAULT_WITHOUT_TAG)?;
+                        write!(w, " {} ", poloto::SVG_HEADER_DEFAULT_WITHOUT_TAG)?;
                         w.attr("width", "500px")?.attr("height", "100%")?;
                         w.empty_ok()
                     })?;
@@ -49,10 +49,9 @@ fn main() -> fmt::Result {
                         "y",
                         "",
                         poloto::HTML_CONFIG_LIGHT_DEFAULT,
-                        ""
+                        "",
                     );
 
-                    
                     s.scatter("", test);
 
                     s.render(&mut svg)?;

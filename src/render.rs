@@ -23,26 +23,20 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub(super) fn render<T: Write>(
-    mut writer: T,
-    plotter:Plotter
-) -> fmt::Result {
-    let Plotter {
-        names,
-        mut plots
-    } = plotter;
+pub(super) fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
+    let Plotter { names, mut plots } = plotter;
 
     write!(writer, "{}", moveable_format(|w| names.write_header(w)))?;
 
     write!(writer, "{}", moveable_format(|w| names.write_body(w)))?;
-    
+
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;
     let padding = 150.0;
     let paddingy = 100.0;
 
     let svg = &mut tagger::Element::new(&mut writer);
-    
+
     svg.single("rect", |w| {
         w.attr("class", "poloto_background")?
             .attr("fill", "white")?
@@ -52,16 +46,18 @@ pub(super) fn render<T: Write>(
             .attr("height", height)?
             .empty_ok()
     })?;
-    
 
     //Find range.
-    let [minx, maxx, miny, maxy] =
-        if let Some(m) = util::find_bounds(plots.iter_mut().flat_map(|x| x.plots.iter_first().map(|[x,y]|[x as f64,y as f64]))) {
-            m
-        } else {
-            //TODO test that this looks ok
-            return Ok(()); //No plots at all. don't need to draw anything
-        };
+    let [minx, maxx, miny, maxy] = if let Some(m) = util::find_bounds(
+        plots
+            .iter_mut()
+            .flat_map(|x| x.plots.iter_first().map(|[x, y]| [x as f64, y as f64])),
+    ) {
+        m
+    } else {
+        //TODO test that this looks ok
+        return Ok(()); //No plots at all. don't need to draw anything
+    };
 
     const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
 
@@ -452,7 +448,6 @@ pub(super) fn render<T: Write>(
             })?
             .empty_ok()
     })?;
-
 
     write!(writer, "{}", moveable_format(|w| names.write_footer(w)))?;
 
