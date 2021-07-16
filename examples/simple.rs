@@ -10,7 +10,7 @@ fn main() -> std::fmt::Result {
 
     let mut s = poloto::plot("simple", "x", "y");
 
-    s.line("", &data);
+    s.line_fill("", &data);
 
     s.render_io(std::io::stdout())
 }
