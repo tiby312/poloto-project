@@ -139,7 +139,7 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
-    font-family: \"Arial\";\
+    font-family: sans-serif;\
     stroke-width:2;\
     }\
     .poloto_text{fill: var(--poloto_fg_color,black);}\
@@ -164,7 +164,7 @@ pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
 
 /// Default light theme
 pub const HTML_CONFIG_LIGHT_DEFAULT: &str = "<style>.poloto {\
-    font-family: \"Arial\";\
+    font-family: sans-serif;\
     stroke-width:2;\
     }\
     .poloto_text{fill: black;}\
@@ -189,7 +189,7 @@ pub const HTML_CONFIG_LIGHT_DEFAULT: &str = "<style>.poloto {\
 
 /// Default dark theme
 pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
-    font-family: \"Arial\";\
+    font-family: sans-serif;\
     stroke-width:2;\
     }\
     .poloto_text{fill: white;}\
@@ -282,7 +282,8 @@ pub struct Plotter<'a> {
 
 impl<'a> Plotter<'a> {
     /// Create a line from plots.
-    ///
+    /// Can be stylized using the `.poloto[N]stroke` css class.
+    /// 
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
@@ -309,7 +310,8 @@ impl<'a> Plotter<'a> {
     }
 
     /// Create a line from plots that will be filled underneath.
-    ///
+    /// Can be stylized using the `.poloto[N]fill` css class.
+    /// 
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
@@ -335,7 +337,7 @@ impl<'a> Plotter<'a> {
         self
     }
 
-    /// Create a scatter plot from plots.
+    /// Create a scatter plot from plots. Can be stylized using the `.poloto[N]fill` css class.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
@@ -363,7 +365,7 @@ impl<'a> Plotter<'a> {
     }
 
     /// Create a histogram from plots.
-    /// Each bar's left side will line up with a point
+    /// Each bar's left side will line up with a point. Can be stylized using the `.poloto[N]fill` css class.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
@@ -412,7 +414,6 @@ impl<'a> Plotter<'a> {
     /// plotter.line("", &data);
     /// plotter.render_io(std::io::stdout()).unwrap();
     /// ```
-
     pub fn render_io<T: std::io::Write>(self, writer: T) -> fmt::Result {
         self.render(tagger::upgrade(writer))
     }
@@ -430,7 +431,6 @@ impl<'a> Plotter<'a> {
     /// let mut s = String::new();
     /// plotter.render(&mut s).unwrap();
     /// ```
-
     pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
         let mut root = tagger::Element::new(writer);
 
