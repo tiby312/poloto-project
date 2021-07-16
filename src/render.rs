@@ -23,7 +23,7 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub(super) fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
+pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
     let Plotter { names, mut plots } = plotter;
 
     write!(writer, "{}", moveable_format(|w| names.write_header(w)))?;
