@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 use tagger::prelude::*;
 
 struct WriteCounter<T: fmt::Write> {

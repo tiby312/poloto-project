@@ -1,8 +1,11 @@
-//Specify ideal number of steps and range.
-//Returns:
-//number of intervals.
-//size of each interval
-//first interval location.
+use core::fmt;
+
+
+/// Specify ideal number of steps and range.
+/// Returns:
+/// number of intervals.
+/// size of each interval
+/// first interval location.
 pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64) {
     let range_all = [range_all[0] as f64, range_all[1] as f64];
     let range = range_all[1] - range_all[0];
@@ -53,14 +56,12 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
     };
     assert!(num_step >= 1);
 
-    //Because of the requirement for the num step to be atleast one, this assertion isnt
-    //necessarily true.
-    //assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
+    // Because of the requirement for the num step to be atleast one, this assertion isnt
+    // necessarily true.
+    // assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
 
     (num_step, step as f64, start_step as f64)
 }
-
-use core::fmt;
 
 fn write_normal<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
     if let Some(step) = step {
@@ -71,6 +72,7 @@ fn write_normal<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Re
         write!(fm, "{0:e}", a)
     }
 }
+
 fn write_science<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
     if let Some(step) = step {
         let precision = if a == 0.0 {

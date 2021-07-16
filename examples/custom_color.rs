@@ -1,8 +1,14 @@
 fn main() -> std::fmt::Result {
-    let data = [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]];
+    let data = [[1.0, 4.5], [2.0, 5.5], [3.0, 6.5]];
+
+    let data_int = [[1, 4], [2, 5], [3, 6]];
 
     let mut plotter = poloto::plot_with_html("cows per year", "year", "cows", MY_STYLE);
-    plotter.line("cow", &data);
+    
+    plotter.line_fill("ints", &data_int);
+    
+    plotter.line("floats", &data);
+    
     plotter.render_io(std::io::stdout())
 }
 
@@ -15,7 +21,7 @@ const MY_STYLE: &str = r###"<style>
     .poloto_axis_lines{stroke: black;stoke-width:3;fill:none}
     .poloto_background{fill: aliceblue; }
     .poloto0stroke{stroke:  purple; }
-    .poloto1stroke{stroke:  purple; }
+    .poloto1stroke{stroke:  green; }
     .poloto2stroke{stroke:  purple; }
     .poloto3stroke{stroke:  purple; }
     .poloto4stroke{stroke:  purple; }
@@ -23,7 +29,7 @@ const MY_STYLE: &str = r###"<style>
     .poloto6stroke{stroke:  purple; }
     .poloto7stroke{stroke:  purple; }
     .poloto0fill{fill:purple;}
-    .poloto1fill{fill:purple;}
+    .poloto1fill{fill:green;}
     .poloto2fill{fill:purple;}
     .poloto3fill{fill:purple;}
     .poloto4fill{fill:purple;}

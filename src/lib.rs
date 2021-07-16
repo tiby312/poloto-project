@@ -5,11 +5,13 @@
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 8 plots, the colors cycle back and are repeated.
 //!
-use core::fmt::Write;
 
-//pub use tagger;
+mod render;
 mod util;
-use core::borrow::Borrow;
+
+use std::borrow::Borrow;
+use std::fmt;
+
 
 ///The number of unique colors.
 const NUM_COLORS: usize = 8;
@@ -19,9 +21,7 @@ const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
-use core::fmt;
 
-mod render;
 
 ///Used internally to implement [`Names`]
 struct NamesStruct<A, B, C, D, E, F> {
