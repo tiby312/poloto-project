@@ -12,7 +12,6 @@ mod util;
 use std::borrow::Borrow;
 use std::fmt;
 
-
 ///The number of unique colors.
 const NUM_COLORS: usize = 8;
 
@@ -20,8 +19,6 @@ const NUM_COLORS: usize = 8;
 const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
-
-
 
 ///Used internally to implement [`Names`]
 struct NamesStruct<A, B, C, D, E, F> {
@@ -283,7 +280,7 @@ pub struct Plotter<'a> {
 impl<'a> Plotter<'a> {
     /// Create a line from plots.
     /// Can be stylized using the `.poloto[N]stroke` css class.
-    /// 
+    ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
@@ -311,7 +308,7 @@ impl<'a> Plotter<'a> {
 
     /// Create a line from plots that will be filled underneath.
     /// Can be stylized using the `.poloto[N]fill` css class.
-    /// 
+    ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");

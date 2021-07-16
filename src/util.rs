@@ -1,6 +1,5 @@
 use core::fmt;
 
-
 /// Specify ideal number of steps and range.
 /// Returns:
 /// number of intervals.
