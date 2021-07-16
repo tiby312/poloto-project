@@ -26,7 +26,7 @@ fn main() -> core::fmt::Result {
 
     plotter.histogram(
         move_format!("sin-{}", 10),
-        x.clone().step_by(3).map(|x| [x, x.sin() - 10.]),
+        x.clone().step_by(3).map(|x| [x, (x.sin() - 10.).round()]),
     );
 
     plotter.line_fill(
