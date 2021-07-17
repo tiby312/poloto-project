@@ -9,6 +9,8 @@
 mod render;
 mod util;
 
+use num_traits::AsPrimitive;
+
 use std::borrow::Borrow;
 use std::fmt;
 
@@ -291,7 +293,7 @@ impl<'a> Plotter<'a> {
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K: Into<f64>+Copy,
+        K: AsPrimitive<f64>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -299,7 +301,7 @@ impl<'a> Plotter<'a> {
                 plots
                     .into_iter()
                     .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.into(), y.into()]),
+                    .map(|[x, y]| [x.as_(), y.as_()]),
                 name,
             )),
         });
@@ -319,7 +321,7 @@ impl<'a> Plotter<'a> {
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K: Into<f64>+Copy,
+        K: AsPrimitive<f64>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -327,7 +329,7 @@ impl<'a> Plotter<'a> {
                 plots
                     .into_iter()
                     .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.into(), y.into()]),
+                    .map(|[x, y]| [x.as_(), y.as_()]),
                 name,
             )),
         });
@@ -346,7 +348,7 @@ impl<'a> Plotter<'a> {
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K: Into<f64>+Copy,
+        K: AsPrimitive<f64>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -354,7 +356,7 @@ impl<'a> Plotter<'a> {
                 plots
                     .into_iter()
                     .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.into(), y.into()]),
+                    .map(|[x, y]| [x.as_(), y.as_()]),
                 name,
             )),
         });
@@ -374,7 +376,7 @@ impl<'a> Plotter<'a> {
         I: IntoIterator<Item = J>,
         I::IntoIter: Clone + 'a,
         J: Borrow<[K; 2]>,
-        K: Into<f64>+Copy,
+        K: AsPrimitive<f64>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
@@ -382,7 +384,7 @@ impl<'a> Plotter<'a> {
                 plots
                     .into_iter()
                     .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.into(), y.into()]),
+                    .map(|[x, y]| [x.as_(), y.as_()]),
                 name,
             )),
         });
