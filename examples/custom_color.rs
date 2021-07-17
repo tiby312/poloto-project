@@ -1,7 +1,7 @@
 fn main() -> std::fmt::Result {
     let data = [(1.0, 4.5), (2.0, 5.5), (3.0, 6.5)];
 
-    let data_int = [[1, 4], [2, 5], [3, 6]];
+    let data_int = [[1usize, 4], [2, 5], [3, 6]];
 
     let mut plotter = poloto::plot_with_html("cows per year", "year", "cows", MY_STYLE);
 
