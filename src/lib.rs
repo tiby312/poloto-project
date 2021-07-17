@@ -8,9 +8,6 @@
 
 mod render;
 mod util;
-
-use num_traits::AsPrimitive;
-
 use std::fmt;
 
 ///The number of unique colors.
@@ -225,34 +222,65 @@ pub trait Plottable {
     fn make_plot(self) -> [f64; 2];
 }
 
-impl<T: AsPrimitive<f64>> Plottable for [T; 2] {
+/// Poloto works with f64 numbers to scale/plot the graph
+/// Therefore all the number types supplied by the user must be convertable
+/// to f64. Precision loss is considered acceptable, since this is just for visual human eyes.
+pub trait IntoPlotNum: Copy {
+    fn into_plotnum(self) -> f64;
+}
+
+macro_rules! impl_into_plotnum {
+    ($U: ty ) => {
+        impl IntoPlotNum for $U {
+            fn into_plotnum(self) -> f64 {
+                self as f64
+            }
+        }
+    };
+}
+
+impl_into_plotnum!(f32);
+impl_into_plotnum!(f64);
+impl_into_plotnum!(i8);
+impl_into_plotnum!(u8);
+impl_into_plotnum!(i16);
+impl_into_plotnum!(u16);
+impl_into_plotnum!(i32);
+impl_into_plotnum!(u32);
+impl_into_plotnum!(i64);
+impl_into_plotnum!(u64);
+impl_into_plotnum!(i128);
+impl_into_plotnum!(u128);
+impl_into_plotnum!(isize);
+impl_into_plotnum!(usize);
+
+impl<T: IntoPlotNum> Plottable for [T; 2] {
     fn make_plot(self) -> [f64; 2] {
         let [x, y] = self;
-        [x.as_(), y.as_()]
+        [x.into_plotnum(), y.into_plotnum()]
     }
 }
 
-impl<T: AsPrimitive<f64>> Plottable for &[T; 2] {
+impl<T: IntoPlotNum> Plottable for &[T; 2] {
     fn make_plot(self) -> [f64; 2] {
         let [x, y] = self;
-        [x.as_(), y.as_()]
+        [x.into_plotnum(), y.into_plotnum()]
     }
 }
 
-impl<T: AsPrimitive<f64>> Plottable for (T,T) {
+impl<T: IntoPlotNum> Plottable for (T, T) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
-        [x.as_(), y.as_()]
+        [x.into_plotnum(), y.into_plotnum()]
     }
 }
 
-impl<T: AsPrimitive<f64>> Plottable for &(T,T) {
+impl<T: IntoPlotNum> Plottable for &(T, T) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
-        [x.as_(), y.as_()]
+        [x.into_plotnum(), y.into_plotnum()]
     }
 }
-
 
 /// Shorthand for `plot_with_html_raw(title,xname,yname,SVG_HEADER_DEFAULT,body,SVG_FOOT_DEFAULT);`
 pub fn plot_with_html<'a>(
