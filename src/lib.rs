@@ -239,6 +239,21 @@ impl<T: AsPrimitive<f64>> Plottable for &[T; 2] {
     }
 }
 
+impl<T: AsPrimitive<f64>> Plottable for (T,T) {
+    fn make_plot(self) -> [f64; 2] {
+        let (x, y) = self;
+        [x.as_(), y.as_()]
+    }
+}
+
+impl<T: AsPrimitive<f64>> Plottable for &(T,T) {
+    fn make_plot(self) -> [f64; 2] {
+        let (x, y) = self;
+        [x.as_(), y.as_()]
+    }
+}
+
+
 /// Shorthand for `plot_with_html_raw(title,xname,yname,SVG_HEADER_DEFAULT,body,SVG_FOOT_DEFAULT);`
 pub fn plot_with_html<'a>(
     title: impl Display + 'a,
