@@ -11,7 +11,6 @@ mod util;
 
 use num_traits::AsPrimitive;
 
-use std::borrow::Borrow;
 use std::fmt;
 
 ///The number of unique colors.
@@ -219,6 +218,27 @@ pub const SVG_HEADER_DEFAULT_WITHOUT_TAG: &str = r###"class="poloto" width="800"
 /// The default SVG ending tag.
 pub const SVG_FOOTER_DEFAULT: &str = "</svg>";
 
+/// Iterators that are passed to the [`Plotter`] plot functions must produce
+/// items that implement this trait.
+pub trait Plottable {
+    /// Produce one plot
+    fn make_plot(self) -> [f64; 2];
+}
+
+impl<T: AsPrimitive<f64>> Plottable for [T; 2] {
+    fn make_plot(self) -> [f64; 2] {
+        let [x, y] = self;
+        [x.as_(), y.as_()]
+    }
+}
+
+impl<T: AsPrimitive<f64>> Plottable for &[T; 2] {
+    fn make_plot(self) -> [f64; 2] {
+        let [x, y] = self;
+        [x.as_(), y.as_()]
+    }
+}
+
 /// Shorthand for `plot_with_html_raw(title,xname,yname,SVG_HEADER_DEFAULT,body,SVG_FOOT_DEFAULT);`
 pub fn plot_with_html<'a>(
     title: impl Display + 'a,
@@ -288,20 +308,16 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
     /// ```
-    pub fn line<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = J>,
+        I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[K; 2]>,
-        K: AsPrimitive<f64>,
+        I::Item: Plottable,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
             plots: Box::new(PlotStruct::new(
-                plots
-                    .into_iter()
-                    .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.as_(), y.as_()]),
+                plots.into_iter().map(|x| x.make_plot()),
                 name,
             )),
         });
@@ -316,20 +332,16 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line_fill("", &data);
     /// ```
-    pub fn line_fill<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = J>,
+        I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[K; 2]>,
-        K: AsPrimitive<f64>,
+        I::Item: Plottable,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
             plots: Box::new(PlotStruct::new(
-                plots
-                    .into_iter()
-                    .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.as_(), y.as_()]),
+                plots.into_iter().map(|x| x.make_plot()),
                 name,
             )),
         });
@@ -343,20 +355,16 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.scatter("", &data);
     /// ```
-    pub fn scatter<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = J>,
+        I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[K; 2]>,
-        K: AsPrimitive<f64>,
+        I::Item: Plottable,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
             plots: Box::new(PlotStruct::new(
-                plots
-                    .into_iter()
-                    .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.as_(), y.as_()]),
+                plots.into_iter().map(|x| x.make_plot()),
                 name,
             )),
         });
@@ -371,20 +379,16 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.histogram("", &data);
     /// ```
-    pub fn histogram<I, J, K>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator<Item = J>,
+        I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        J: Borrow<[K; 2]>,
-        K: AsPrimitive<f64>,
+        I::Item: Plottable,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
             plots: Box::new(PlotStruct::new(
-                plots
-                    .into_iter()
-                    .map(|x| *x.borrow())
-                    .map(|[x, y]| [x.as_(), y.as_()]),
+                plots.into_iter().map(|x| x.make_plot()),
                 name,
             )),
         });
