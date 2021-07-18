@@ -100,19 +100,6 @@ Beware of passing the buffer directly to the plotter! If you do this, you'll use
 the plotter will clone the whole buffer. Instead pass a reference to the buffer. See the second example below.
 
 
-## Formatting Tick Intervals
-
-Poloto will first print intervals in normal decimal at the precision required to capture the differences
-in the step size between the intervals. If the magnitude of a number is detected to be too big or small, it
-may switch to scientific notation, still at the required precision. It will only switch if the scientific
-notation version is actually less characters than the normal decimal format which is not always the case
-when you consider the precision that might be required to capture the step size.
-
-Even with the above system, there are cases where the numbers all have a really big magnitude, but
-are all really close together (small step size). In this case, there isn't really a good way to format it.
-In these cases, poloto will fall back to making the number relative to the first number.
-
-
 ## Can I change the styling of the plots?
 
 Yes! You can harness the power of CSS both in the svg, or outside
@@ -128,10 +115,15 @@ Each plot function documents which css classes you can modify to change that spe
 Scatter plots are done using SVG paths made up of lines of zero length. This allows you to change
 the radius of the scatter dots by changing the stroke width.
 
-## Why not scale the intervals to end nicely with the ends of the axis lines?
 
-Doing this you would have to either have more dead space, or exclude
-plots that the user would expect to get plotted. Neither of these sounded
-better than the option of just having the intervals stop not necessarily
-at the end of the axis lines.
+## Formatting Tick Intervals
 
+Poloto will first print intervals in normal decimal at the precision required to capture the differences
+in the step size between the intervals. If the magnitude of a number is detected to be too big or small, it
+may switch to scientific notation, still at the required precision. It will only switch if the scientific
+notation version is actually less characters than the normal decimal format which is not always the case
+when you consider the precision that might be required to capture the step size.
+
+Even with the above system, there are cases where the numbers all have a really big magnitude, but
+are all really close together (small step size). In this case, there isn't really a good way to format it.
+In these cases, poloto will fall back to making the number relative to the first number.
