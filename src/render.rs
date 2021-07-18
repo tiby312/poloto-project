@@ -263,7 +263,6 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
 
         match plot_type {
             PlotType::Line => {
-                //TODO better way to modularize this if statement for all plots?
                 if name_exists {
                     svg.single("line", |w| {
                         w.with_attr("class", wr!("poloto{}stroke", colori))?
@@ -300,21 +299,19 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
                     })?;
                 }
 
-                svg.elem("g", |w| {
-                    let (g, ()) = w.write(|w| {
-                        w.with_attr("class", wr!("poloto{}fill", colori))?
-                            .empty_ok()
-                    })?;
+                svg.single("path", |w| {
+                    w.with_attr("class", wr!("scatter poloto{}stroke", colori))?
+                        .path_data(|data| {
+                            use tagger::svg::PathCommand::*;
+                            data.draw(M(padding, height - paddingy))?;
 
-                    for [x, y] in it {
-                        g.single("circle", |w| {
-                            w.attr("cx", x)?
-                                .attr("cy", y)?
-                                .attr("r", padding / 50.0)?
-                                .empty_ok()
-                        })?;
-                    }
-                    g.empty_ok()
+                            for [x, y] in it {
+                                data.draw(M(x,y))?;
+                                data.draw(H_(0))?;
+                            }
+                            data.draw_z()
+                        })?
+                        .empty_ok()
                 })?;
             }
             PlotType::Histo => {

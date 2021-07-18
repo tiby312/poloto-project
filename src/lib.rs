@@ -134,9 +134,11 @@ pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> imp
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
+    stroke-linecap:round;\
     font-family: sans-serif;\
     stroke-width:2;\
     }\
+    .scatter{stroke-width:7}\
     .poloto_text{fill: var(--poloto_fg_color,black);}\
     .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stoke-width:3;fill:none}\
     .poloto_background{fill: var(--poloto_bg_color,aliceblue);}\
@@ -159,9 +161,11 @@ pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
 
 /// Default light theme
 pub const HTML_CONFIG_LIGHT_DEFAULT: &str = "<style>.poloto {\
+    stroke-linecap:round;\
     font-family: sans-serif;\
     stroke-width:2;\
     }\
+    .scatter{stroke-width:7}\
     .poloto_text{fill: black;}\
     .poloto_axis_lines{stroke: black;stoke-width:3;fill:none}\
     .poloto_background{fill: aliceblue;}\
@@ -184,9 +188,11 @@ pub const HTML_CONFIG_LIGHT_DEFAULT: &str = "<style>.poloto {\
 
 /// Default dark theme
 pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
+    stroke-linecap:round;\
     font-family: sans-serif;\
     stroke-width:2;\
     }\
+    .scatter{stroke-width:7}\
     .poloto_text{fill: white;}\
     .poloto_axis_lines{stroke: white;stoke-width:3;fill:none}\
     .poloto_background{fill: black;}\
@@ -342,8 +348,8 @@ pub struct Plotter<'a> {
 }
 
 impl<'a> Plotter<'a> {
-    /// Create a line from plots.
-    /// Can be stylized using the `.poloto[N]stroke` css class.
+    /// Create a line from plots using a SVG polyline element.
+    /// The element belongs to the `.poloto[N]stroke` css class.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
@@ -366,8 +372,8 @@ impl<'a> Plotter<'a> {
         self
     }
 
-    /// Create a line from plots that will be filled underneath.
-    /// Can be stylized using the `.poloto[N]fill` css class.
+    /// Create a line from plots that will be filled underneath using a SVG path element.
+    /// The path element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
@@ -390,7 +396,10 @@ impl<'a> Plotter<'a> {
         self
     }
 
-    /// Create a scatter plot from plots. Can be stylized using the `.poloto[N]fill` css class.
+    /// Create a scatter plot from plots, using a SVG path with lines with zero length.
+    /// Each point can be sized using the stroke width.
+    /// The path belongs to the CSS classes `scatter` and `.poloto[N]fill` css class
+    /// with the latter class overriding the former.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
@@ -413,8 +422,9 @@ impl<'a> Plotter<'a> {
         self
     }
 
-    /// Create a histogram from plots.
-    /// Each bar's left side will line up with a point. Can be stylized using the `.poloto[N]fill` css class.
+    /// Create a histogram from plots using SVG rect elements.
+    /// Each bar's left side will line up with a point. 
+    /// Each rect element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];

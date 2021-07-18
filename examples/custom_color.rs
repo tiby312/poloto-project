@@ -5,7 +5,7 @@ fn main() -> std::fmt::Result {
 
     let mut plotter = poloto::plot_with_html("cows per year", "year", "cows", MY_STYLE);
 
-    plotter.line_fill("ints", &data_int);
+    plotter.scatter("ints", &data_int);
 
     plotter.line("floats", &data);
 
@@ -14,9 +14,11 @@ fn main() -> std::fmt::Result {
 
 const MY_STYLE: &str = "<style>\
 .poloto { \
+    stroke-linecap:round;\
     font-family: sans-serif;\
     stroke-width:2;\
     }\
+    .scatter{stroke-width:33}\
     .poloto_text{fill: black;  }\
     .poloto_axis_lines{stroke: black;stoke-width:3;fill:none}\
     .poloto_background{fill: aliceblue; }\

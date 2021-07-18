@@ -126,9 +126,8 @@ Depending on whether you are adding a new style attribute or overriding
 an existing one, you might have to increase the specificty of your css clause to make sure it overrides
 the svg css clause.
 
-When SVG 2 is more widely supported by browsers, this will unlock more properties that you
-can change through CSS. For example, you will be able to change the radius of scatter dots.
-
+Scatter plots are done using SVG paths made up of lines of zero length. This allows you to change
+the radius of the scatter dots by changing the stroke width.
 
 ## Why not scale the intervals to end nicely with the ends of the axis lines?
 
