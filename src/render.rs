@@ -306,7 +306,7 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
                             data.draw(M(padding, height - paddingy))?;
 
                             for [x, y] in it {
-                                data.draw(M(x,y))?;
+                                data.draw(M(x, y))?;
                                 data.draw(H_(0))?;
                             }
                             data.draw_z()

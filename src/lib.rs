@@ -423,7 +423,7 @@ impl<'a> Plotter<'a> {
     }
 
     /// Create a histogram from plots using SVG rect elements.
-    /// Each bar's left side will line up with a point. 
+    /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
