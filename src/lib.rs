@@ -222,17 +222,16 @@ pub trait Plottable {
     fn make_plot(self) -> [f64; 2];
 }
 
-/// Poloto works with f64 numbers to scale/plot the graph
-/// Therefore all the number types supplied by the user must be convertable
-/// to f64. Precision loss is considered acceptable, since this is just for visual human eyes.
-pub trait IntoPlotNum: Copy {
-    fn into_plotnum(self) -> f64;
+/// Convert other primitive types to f64 using this trait.
+/// Precision loss is considered acceptable, since this is just for visual human eyes.
+pub trait IntoF64: Copy {
+    fn into_f64(self) -> f64;
 }
 
 macro_rules! impl_into_plotnum {
     ($U: ty ) => {
-        impl IntoPlotNum for $U {
-            fn into_plotnum(self) -> f64 {
+        impl IntoF64 for $U {
+            fn into_f64(self) -> f64 {
                 self as f64
             }
         }
@@ -254,31 +253,31 @@ impl_into_plotnum!(u128);
 impl_into_plotnum!(isize);
 impl_into_plotnum!(usize);
 
-impl<T: IntoPlotNum> Plottable for [T; 2] {
+impl<T: IntoF64> Plottable for [T; 2] {
     fn make_plot(self) -> [f64; 2] {
         let [x, y] = self;
-        [x.into_plotnum(), y.into_plotnum()]
+        [x.into_f64(), y.into_f64()]
     }
 }
 
-impl<T: IntoPlotNum> Plottable for &[T; 2] {
+impl<T: IntoF64> Plottable for &[T; 2] {
     fn make_plot(self) -> [f64; 2] {
         let [x, y] = self;
-        [x.into_plotnum(), y.into_plotnum()]
+        [x.into_f64(), y.into_f64()]
     }
 }
 
-impl<T: IntoPlotNum> Plottable for (T, T) {
+impl<T: IntoF64> Plottable for (T, T) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
-        [x.into_plotnum(), y.into_plotnum()]
+        [x.into_f64(), y.into_f64()]
     }
 }
 
-impl<T: IntoPlotNum> Plottable for &(T, T) {
+impl<T: IntoF64> Plottable for &(T, T) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
-        [x.into_plotnum(), y.into_plotnum()]
+        [x.into_f64(), y.into_f64()]
     }
 }
 
