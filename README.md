@@ -130,7 +130,7 @@ When SVG 2 is more widely supported by browsers, this will unlock more propertie
 can change through CSS. For example, you will be able to change the radius of scatter dots.
 
 
-### Why not scale the intervals to end nicely with the ends of the axis lines?
+## Why not scale the intervals to end nicely with the ends of the axis lines?
 
 Doing this you would have to either have more dead space, or exclude
 plots that the user would expect to get plotted. Neither of these sounded
