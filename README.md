@@ -122,9 +122,8 @@ in html with an embeded svg. Some things you can do:
  * Highlight one plot, make it dashed, or add hover effect
  * Animate things using @keyframes
 
-Depending on whether you are adding a new style attribute or overriding
-an existing one, you might have to increase the specificty of your css clause to make sure it overrides
-the svg css clause.
+The [`Plotter`] struct documents which css classes you can modify for the graph as a whole.
+Each plot function documents which css classes you can modify to change that specific plot.
 
 Scatter plots are done using SVG paths made up of lines of zero length. This allows you to change
 the radius of the scatter dots by changing the stroke width.

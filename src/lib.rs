@@ -342,6 +342,12 @@ pub fn plot<'a>(
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
 /// render is called.
+/// 
+/// * The svg element belongs to the `poloto` css class.
+/// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
+/// * The axis line SVG elements belong to the `poloto_axis_lines` class.
+/// * The background belongs to the `poloto_background` class.
+/// 
 pub struct Plotter<'a> {
     names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
