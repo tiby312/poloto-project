@@ -8,51 +8,13 @@ Poloto graphs can be stylized using css either directly in the SVG, or from insi
 
 You can see it in action in this rust book [broccoli-book](https://tiby312.github.io/broccoli_report/)
 
-## Iterating plots twice
-
-In order to calculate the right size view to scale all the plots, poloto has to iterate over all the plot
-points twice. Once to find the min and max bounds, and once to scale all the points by the scale determined
-by the first iteration. 
-
-If you are using an iterator where each iteration is expensive, consider running the iterator just once,
-collecting the results in a Vec. Then pass that Vec to the plotting functions. 
-Beware of passing the buffer directly to the plotter! If you do this, you'll use a lot of memory since 
-the plotter will clone the whole buffer. Instead pass a reference to the buffer. See the second example below.
-
-
-## Formatting Tick Intervals
-
-Poloto will first print intervals in normal decimal at the precision required to capture the differences
-in the step size between the intervals. If the magnitude of a number is detected to be too big or small, it
-may switch to scientific notation, still at the required precision. It will only switch if the scientific
-notation version is actually less characters than the normal decimal format which is not always the case
-when you consider the precision that might be required to capture the step size.
-
-Even with the above system, there are cases where the numbers all have a really big magnitude, but
-are all really close together (small step size). In this case, there isn't really a good way to format it.
-In these cases, poloto will fall back to making the number relative to the first number.
-
-
-## Can I change the styling of the plots?
-
-Yes! You can harness the power of CSS both in the svg, or outside
-in html with an embeded svg. Some things you can do:
-
- * Change the color scheme to fit your html theme.
- * Highlight one plot, make it dashed, or add hover effect
- * Animate things using @keyframes
-
-Depending on whether you are adding a new style attribute or overriding
-an existing one, you might have to increase the specificty of your css clause to make sure it overrides
-the svg css clause.
-
 ## Simple Example
 
 ```rust
 // PIPE me to a file!
 fn main() -> std::fmt::Result {
     let data = [
-        [1850.0, 10.0],
+        [1850.0f64, 10.0],
         [1940.0, 12.0],
         [1945.0, 12.2],
         [1989.0, 16.0],
@@ -65,6 +27,7 @@ fn main() -> std::fmt::Result {
 
     s.render_io(std::io::stdout())
 }
+
 ```
 
 ## Output
@@ -103,7 +66,7 @@ fn main() -> core::fmt::Result {
 
     plotter.histogram(
         move_format!("sin-{}", 10),
-        x.clone().step_by(3).map(|x| [x, x.sin() - 10.]),
+        x.clone().step_by(3).map(|x| [x, (x.sin() - 10.).round()]),
     );
 
     plotter.line_fill(
@@ -113,6 +76,7 @@ fn main() -> core::fmt::Result {
 
     plotter.render_io(std::io::stdout())
 }
+
 ```
 
 ## Output
@@ -122,6 +86,48 @@ fn main() -> core::fmt::Result {
 ## CSS Usage Example
 
 See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
+
+
+## Iterating plots twice
+
+In order to calculate the right size view to scale all the plots, poloto has to iterate over all the plot
+points twice. Once to find the min and max bounds, and once to scale all the points by the scale determined
+by the first iteration. 
+
+If you are using an iterator where each iteration is expensive, consider running the iterator just once,
+collecting the results in a Vec. Then pass that Vec to the plotting functions. 
+Beware of passing the buffer directly to the plotter! If you do this, you'll use a lot of memory since 
+the plotter will clone the whole buffer. Instead pass a reference to the buffer. See the second example below.
+
+
+## Formatting Tick Intervals
+
+Poloto will first print intervals in normal decimal at the precision required to capture the differences
+in the step size between the intervals. If the magnitude of a number is detected to be too big or small, it
+may switch to scientific notation, still at the required precision. It will only switch if the scientific
+notation version is actually less characters than the normal decimal format which is not always the case
+when you consider the precision that might be required to capture the step size.
+
+Even with the above system, there are cases where the numbers all have a really big magnitude, but
+are all really close together (small step size). In this case, there isn't really a good way to format it.
+In these cases, poloto will fall back to making the number relative to the first number.
+
+
+## Can I change the styling of the plots?
+
+Yes! You can harness the power of CSS both in the svg, or outside
+in html with an embeded svg. Some things you can do:
+
+ * Change the color scheme to fit your html theme.
+ * Highlight one plot, make it dashed, or add hover effect
+ * Animate things using @keyframes
+
+Depending on whether you are adding a new style attribute or overriding
+an existing one, you might have to increase the specificty of your css clause to make sure it overrides
+the svg css clause.
+
+When SVG 2 is more widely supported by browsers, this will unlock more properties that you
+can change through CSS. For example, you will be able to change the radius of scatter dots.
 
 
 ### Why not scale the intervals to end nicely with the ends of the axis lines?

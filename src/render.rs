@@ -308,10 +308,9 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
 
                     for [x, y] in it {
                         g.single("circle", |w| {
-                            //TODO use a g element!!!!
                             w.attr("cx", x)?
                                 .attr("cy", y)?
-                                .attr("r", padding / 30.0)?
+                                .attr("r", padding / 50.0)?
                                 .empty_ok()
                         })?;
                     }
