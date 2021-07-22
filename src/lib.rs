@@ -9,6 +9,7 @@
 mod render;
 mod util;
 use std::fmt;
+use tagger::prelude::*;
 
 ///The number of unique colors.
 const NUM_COLORS: usize = 8;
@@ -19,26 +20,15 @@ const WIDTH: f64 = 800.0;
 const HEIGHT: f64 = 500.0;
 
 ///Used internally to implement [`Names`]
-struct NamesStruct<A, B, C, D, E, F> {
+struct NamesStruct<A, B, C> {
     title: A,
     xname: B,
-    yname: C,
-    header: D,
-    body: E,
-    footer: F,
+    yname: C
 }
-impl<A: Display, B: Display, C: Display, D: Display, E: Display, F: Display> Names
-    for NamesStruct<A, B, C, D, E, F>
+impl<A: Display, B: Display, C: Display> Names
+    for NamesStruct<A, B, C>
 {
-    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.header.fmt(fm)
-    }
-    fn write_body(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.body.fmt(fm)
-    }
-    fn write_footer(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.footer.fmt(fm)
-    }
+    
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result {
         self.title.fmt(fm)
     }
@@ -52,10 +42,6 @@ impl<A: Display, B: Display, C: Display, D: Display, E: Display, F: Display> Nam
 
 ///Used internally to write out the header/title/xname/yname.
 trait Names {
-    fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    fn write_body(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    fn write_footer(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
@@ -63,6 +49,7 @@ trait Names {
 
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
+    
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
 }
@@ -109,6 +96,24 @@ struct Plot<'a> {
     plot_type: PlotType,
     plots: Box<dyn PlotTrait + 'a>,
 }
+
+
+
+pub fn default_svg<'a>()->tagger::Element<'a>{
+    elem!("svg",default_svg_attr().build())
+}
+pub fn default_svg_attr<'a>()->tagger::AttrBuilder<'a>{
+    use tagger::prelude::*;
+        
+    let mut k=tagger::attr_builder();
+        k.attr("class","poloto")
+        .attr("width",DIMENSIONS[0])
+        .attr("height",DIMENSIONS[1])
+        .attr("viewBox",formatm!("0 0 {} {}",DIMENSIONS[0],DIMENSIONS[1]))
+        .attr("xmlns","http://www.w3.org/2000/svg");
+    k
+}
+
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
@@ -191,13 +196,10 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
 
-/// The default SVG Header tag
-pub const SVG_HEADER_DEFAULT: &str = r###"<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"###;
-/// The default SVG Header: attributes only.
-pub const SVG_HEADER_DEFAULT_WITHOUT_TAG: &str = r###"class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg""###;
 
-/// The default SVG ending tag.
-pub const SVG_FOOTER_DEFAULT: &str = "</svg>";
+const DIMENSIONS:[usize;2]=[800,500];
+
+
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
@@ -265,57 +267,22 @@ impl<T: IntoF64> Plottable for &(T, T) {
     }
 }
 
-/// Shorthand for `plot_with_html_raw(title,xname,yname,SVG_HEADER_DEFAULT,body,SVG_FOOT_DEFAULT);`
-pub fn plot_with_html<'a>(
-    title: impl Display + 'a,
-    xname: impl Display + 'a,
-    yname: impl Display + 'a,
-    body: impl Display + 'a,
-) -> Plotter<'a> {
-    Plotter {
-        names: Box::new(NamesStruct {
-            title,
-            xname,
-            yname,
-            header: SVG_HEADER_DEFAULT,
-            body,
-            footer: SVG_FOOTER_DEFAULT,
-        }),
-        plots: Vec::new(),
-    }
-}
-
-/// Create a [`Plotter`] with the specified title,xname,yname, and custom header,body, and footer.
-/// Consider using some of the default html tags.
-pub fn plot_with_html_raw<'a>(
-    title: impl Display + 'a,
-    xname: impl Display + 'a,
-    yname: impl Display + 'a,
-    header: impl Display + 'a,
-    body: impl Display + 'a,
-    footer: impl Display + 'a,
-) -> Plotter<'a> {
-    Plotter {
-        names: Box::new(NamesStruct {
-            title,
-            xname,
-            yname,
-            header,
-            body,
-            footer,
-        }),
-        plots: Vec::new(),
-    }
-}
-
-/// Shorthand for `plot_with_html(title,xname,yname,HTML_CONFIG_LIGHT_DEFAULT);`
 pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
-    yname: impl Display + 'a,
+    yname: impl Display + 'a
 ) -> Plotter<'a> {
-    plot_with_html(title, xname, yname, HTML_CONFIG_LIGHT_DEFAULT)
+    Plotter {
+        element:default_svg().add(single!(HTML_CONFIG_LIGHT_DEFAULT)),
+        names: Box::new(NamesStruct {
+            title,
+            xname,
+            yname
+        }),
+        plots: Vec::new(),
+    }
 }
+
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -327,11 +294,27 @@ pub fn plot<'a>(
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a> {
+    element:tagger::Element<'a>,
     names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
 }
 
 impl<'a> Plotter<'a> {
+    pub fn new(
+        element:tagger::Element<'a>,
+        title: impl Display + 'a,
+        xname: impl Display + 'a,
+        yname: impl Display + 'a)->Plotter<'a>{
+        Plotter {
+            element,
+            names: Box::new(NamesStruct {
+                title,
+                xname,
+                yname
+            }),
+            plots: Vec::new(),
+        }
+    }
     /// Create a line from plots using a SVG polyline element.
     /// The element belongs to the `.poloto[N]stroke` css class.
     ///
@@ -432,7 +415,7 @@ impl<'a> Plotter<'a> {
     }
 
     ///
-    /// Use the plot iterators and generate out a [`RenderResult`] which implements [`std::fmt::Display`]
+    /// Use the plot iterators and generate out a [`tagger::Element`] which implements [`std::fmt::Display`]
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
@@ -441,18 +424,8 @@ impl<'a> Plotter<'a> {
     /// let s = plotter.render().unwrap();
     /// println!("{}",s);
     /// ```
-    pub fn render(self) -> Result<RenderResult<'a>, fmt::Error> {
+    pub fn render(self) -> Result<tagger::Element<'a>, fmt::Error> {
         render::render(self)
     }
 }
 
-///
-/// A rendered plot graph that implements [`std::fmt::Display`]
-///
-pub struct RenderResult<'a>(tagger::Element<'a>);
-
-impl fmt::Display for RenderResult<'_> {
-    fn fmt(&self, a: &mut fmt::Formatter) -> fmt::Result {
-        self.0.fmt(a)
-    }
-}

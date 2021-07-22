@@ -8,6 +8,7 @@ fn main() {
         [2001.0, 20.0],
     ];
 
+    
     let mut s = poloto::plot("simple", "x", "y");
 
     s.line_fill("", &data);

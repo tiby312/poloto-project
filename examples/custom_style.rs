@@ -1,13 +1,12 @@
+use tagger::prelude::*;
+use poloto::*;
+
 //PIPE me to a file!
 fn main() {
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
-    let mut s = poloto::plot_with_html(
-        "Demo: you can change the style of the svg file itself!",
-        "x",
-        "y",
-        style_string(),
-    );
+    let mut s = Plotter::new(default_svg().add(single!(style_string())),"Demo: you can change the style of the svg file itself!", "x", "y");
+
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));

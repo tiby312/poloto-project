@@ -1,10 +1,8 @@
+use tagger::prelude::*;
+use poloto::*;
 fn main() -> core::fmt::Result {
-    let mut s = poloto::plot_with_html(
-        "Demo: you can use CSS patterns if you embed SVG!",
-        "x",
-        "y",
-        poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT,
-    );
+    let mut s = Plotter::new(default_svg().add(single!(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT)),"Demo: you can use CSS patterns if you embed SVG!", "x", "y");
+
 
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 

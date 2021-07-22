@@ -1,9 +1,11 @@
+use tagger::prelude::*;
+use poloto::*;
 fn main() {
     let data = [(1.0f32, 4.5), (2.0, 5.5), (3.0, 6.5)];
 
     let data_int = [[1usize, 4], [2, 5], [3, 6]];
 
-    let mut plotter = poloto::plot_with_html("cows per year", "year", "cows", MY_STYLE);
+    let mut plotter = Plotter::new(default_svg().add(single!(MY_STYLE)),"cows per year", "year", "cows");
 
     plotter.scatter("ints", &data_int);
 

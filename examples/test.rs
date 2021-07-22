@@ -33,27 +33,22 @@ fn main() {
     );
 
     for (i, &test) in generate_test().iter().enumerate() {
-        let d = attr_builder()
-            .attr_whole(poloto::SVG_HEADER_DEFAULT_WITHOUT_TAG)
+        let mut svg=elem!("svg",poloto::default_svg_attr()
             .attr("width", "500px")
             .attr("height", "100%")
-            .build();
+            .build());
 
-        let mut svg = elem!("svg", d);
-
-        let mut s = poloto::plot_with_html_raw(
+        svg.append(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT));
+        
+        let mut s = poloto::Plotter::new(svg,
             formatm!("test {}", i),
             "x",
-            "y",
-            "",
-            poloto::HTML_CONFIG_LIGHT_DEFAULT,
-            "",
+            "y"
         );
 
         s.scatter("", test);
 
-        svg.append(single!(s.render().unwrap()));
-        div.append(svg);
+        div.append(s.render().unwrap());
     }
 
     html.append(div);

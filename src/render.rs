@@ -6,15 +6,17 @@ use std::fmt;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<'b>(plotter: Plotter) -> Result<RenderResult<'b>, fmt::Error> {
-    let Plotter { names, mut plots } = plotter;
+pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
+    let Plotter {element, names, mut plots } = plotter;
 
-    let header = format!("{}", tagger::moveable_format(|f| names.write_header(f)));
-    let body = format!("{}", tagger::moveable_format(|f| names.write_body(f)));
-    let footer = format!("{}", tagger::moveable_format(|f| names.write_footer(f)));
+    //let header = format!("{}", tagger::moveable_format(|f| names.write_header(f)));
+    //let body = format!("{}", tagger::moveable_format(|f| names.write_body(f)));
+    //let footer = format!("{}", tagger::moveable_format(|f| names.write_footer(f)));
 
-    let mut svg = single!(header);
-    svg.append(single!(body));
+    //let mut svg = single!(header);
+    //svg.append(single!(body));
+
+    let mut svg=element;
 
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;
@@ -41,7 +43,7 @@ pub fn render<'b>(plotter: Plotter) -> Result<RenderResult<'b>, fmt::Error> {
         m
     } else {
         //TODO test that this looks ok
-        return Ok(RenderResult(svg)); //No plots at all. don't need to draw anything
+        return Ok(svg); //No plots at all. don't need to draw anything
     };
 
     const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
@@ -429,6 +431,5 @@ pub fn render<'b>(plotter: Plotter) -> Result<RenderResult<'b>, fmt::Error> {
 
     svg.append(single!("path", d));
 
-    svg.append(single!(footer));
-    Ok(RenderResult(svg))
+    Ok(svg)
 }
