@@ -9,7 +9,7 @@ fn main() {
 
     plotter.line("floats", &data);
 
-    println!("{}",plotter.render().unwrap())
+    println!("{}", plotter.render().unwrap())
 }
 
 const MY_STYLE: &str = "<style>\

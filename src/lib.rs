@@ -52,7 +52,6 @@ impl<A: Display, B: Display, C: Display, D: Display, E: Display, F: Display> Nam
 
 ///Used internally to write out the header/title/xname/yname.
 trait Names {
-    
     fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_body(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_footer(&self, fm: &mut fmt::Formatter) -> fmt::Result;
@@ -60,7 +59,6 @@ trait Names {
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    
 }
 
 trait PlotTrait {
@@ -111,7 +109,6 @@ struct Plot<'a> {
     plot_type: PlotType,
     plots: Box<dyn PlotTrait + 'a>,
 }
-
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
@@ -323,12 +320,12 @@ pub fn plot<'a>(
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
 /// render is called.
-/// 
+///
 /// * The svg element belongs to the `poloto` css class.
 /// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
-/// 
+///
 pub struct Plotter<'a> {
     names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
@@ -434,7 +431,7 @@ impl<'a> Plotter<'a> {
         self
     }
 
-    pub fn render(self)->Result<RenderResult<'a>,fmt::Error>{
+    pub fn render(self) -> Result<RenderResult<'a>, fmt::Error> {
         render::render(self)
     }
 
@@ -488,12 +485,10 @@ impl<'a> Plotter<'a> {
     */
 }
 
-pub struct RenderResult<'a>(
-    tagger::Element<'a>
-);
+pub struct RenderResult<'a>(tagger::Element<'a>);
 
-impl fmt::Display for RenderResult<'_>{
-    fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
+impl fmt::Display for RenderResult<'_> {
+    fn fmt(&self, a: &mut fmt::Formatter) -> fmt::Result {
         self.0.fmt(a)
     }
 }

@@ -12,7 +12,7 @@ fn main() -> core::fmt::Result {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     let fs = s.render()?;
-    
+
     println!(
         r###"
 <html>

@@ -6,5 +6,5 @@ fn main() {
 
     let mut s = poloto::plot("cows per year", "year", "cow");
     s.scatter("", &data);
-    println!("{}",s.render().unwrap())
+    println!("{}", s.render().unwrap())
 }

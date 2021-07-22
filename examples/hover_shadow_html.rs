@@ -8,7 +8,7 @@ fn main() -> core::fmt::Result {
     s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
 
     let fs = s.render()?;
-    
+
     println!(
         r###"
 <html>

@@ -1,5 +1,5 @@
 //PIPE me to a file!
-fn main(){
+fn main() {
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
     let mut s = poloto::plot_with_html(
@@ -12,7 +12,7 @@ fn main(){
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    println!("{}",s.render().unwrap())
+    println!("{}", s.render().unwrap())
 }
 
 fn style_string() -> String {
