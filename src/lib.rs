@@ -110,28 +110,6 @@ struct Plot<'a> {
     plots: Box<dyn PlotTrait + 'a>,
 }
 
-/// Shorthand for `moveable_format(move |w|write!(w,...))`
-/// Similar to `format_args!()` except has a more flexible lifetime.
-#[macro_export]
-macro_rules! move_format {
-    ($($arg:tt)*) => {
-        $crate::moveable_format(move |w| write!(w,$($arg)*))
-    }
-}
-
-/// Convert a moved closure into a impl fmt::Display.
-/// This is useful because std's `format_args!()` macro
-/// has a shorter lifetime.
-pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
-    struct Foo<F>(F);
-    impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
-        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            (self.0)(formatter)
-        }
-    }
-    Foo(func)
-}
-
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
     stroke-linecap:round;\
@@ -342,12 +320,12 @@ pub fn plot<'a>(
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
 /// render is called.
-/// 
+///
 /// * The svg element belongs to the `poloto` css class.
 /// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
-/// 
+///
 pub struct Plotter<'a> {
     names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
@@ -453,50 +431,28 @@ impl<'a> Plotter<'a> {
         self
     }
 
-    /// Render to a `String`
+    ///
+    /// Use the plot iterators and generate out a [`RenderResult`] which implements [`std::fmt::Display`]
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// let s:String = plotter.render_to_string().unwrap();
+    /// let s = plotter.render().unwrap();
+    /// println!("{}",s);
     /// ```
-    pub fn render_to_string(self) -> Result<String, fmt::Error> {
-        let mut s = String::new();
-        self.render(&mut s)?;
-        Ok(s)
+    pub fn render(self) -> Result<RenderResult<'a>, fmt::Error> {
+        render::render(self)
     }
+}
 
-    /// Render to a `std::io::Write`
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// plotter.render_io(std::io::stdout()).unwrap();
-    /// ```
-    pub fn render_io<T: std::io::Write>(self, writer: T) -> fmt::Result {
-        self.render(tagger::upgrade(writer))
-    }
+///
+/// A rendered plot graph that implements [`std::fmt::Display`]
+///
+pub struct RenderResult<'a>(tagger::Element<'a>);
 
-    /// Render the svg to the writer.
-    ///
-    /// Up until now, nothing has been written to the writer. We
-    /// have just accumulated a list of commands and closures. This call will
-    /// actually call all the closures and consume all the plot iterators.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// let mut s = String::new();
-    /// plotter.render(&mut s).unwrap();
-    /// ```
-    pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
-        let mut root = tagger::Element::new(writer);
-
-        render::render(root.get_writer(), self)?;
-
-        Ok(())
+impl fmt::Display for RenderResult<'_> {
+    fn fmt(&self, a: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(a)
     }
 }

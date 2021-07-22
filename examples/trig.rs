@@ -1,7 +1,7 @@
-use poloto::move_format;
+use tagger::prelude::*;
 
 // PIPE me to a file!
-fn main() -> core::fmt::Result {
+fn main() {
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
     // Collect the iterator before passing it to a plot function
@@ -11,7 +11,7 @@ fn main() -> core::fmt::Result {
 
     let mut plotter = poloto::plot_with_html(
         "Some Trigonometry Plots 🥳",
-        move_format!("This is the {} label", 'x'),
+        formatm!("This is the {} label", 'x'),
         "This is the y label",
         poloto::HTML_CONFIG_DARK_DEFAULT,
     );
@@ -25,14 +25,14 @@ fn main() -> core::fmt::Result {
     plotter.scatter("sin", &buffer);
 
     plotter.histogram(
-        move_format!("sin-{}", 10),
+        formatm!("sin-{}", 10),
         x.clone().step_by(3).map(|x| [x, (x.sin() - 10.).round()]),
     );
 
     plotter.line_fill(
-        move_format!("sin-{}", 20),
+        formatm!("sin-{}", 20),
         x.clone().map(|x| [x, x.sin() - 20.]),
     );
 
-    plotter.render_io(std::io::stdout())
+    println!("{}", plotter.render().unwrap());
 }

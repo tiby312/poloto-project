@@ -18,49 +18,45 @@ const fn generate_test() -> [&'static [[f32; 2]]; 8] {
     [test0, test1, test2, test3, test4, test5, test6, test7]
 }
 
-use core::fmt;
-use poloto::move_format;
+use tagger::attr_builder;
 use tagger::prelude::*;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
-fn main() -> fmt::Result {
-    let mut root = tagger::Element::new(tagger::upgrade(std::io::stdout()));
+fn main() {
+    let mut html = elem!("html");
 
-    root.elem("html", |writer| {
-        let (html, ()) = writer.write(|w| w.empty_ok())?;
+    let mut div = elem!(
+        "div",
+        attr_builder()
+            .attr("style", "display:flex;flex-wrap:wrap;")
+            .build()
+    );
 
-        html.elem("div", |writer| {
-            let (div, ()) =
-                writer.write(|w| w.attr("style", "display:flex;flex-wrap:wrap;")?.empty_ok())?;
+    for (i, &test) in generate_test().iter().enumerate() {
+        let d = attr_builder()
+            .attr_whole(poloto::SVG_HEADER_DEFAULT_WITHOUT_TAG)
+            .attr("width", "500px")
+            .attr("height", "100%")
+            .build();
 
-            for (i, &test) in generate_test().iter().enumerate() {
-                div.elem("svg", |writer| {
-                    //Build the svg tag from scratch so we can use our own
-                    //width and height
-                    let (mut svg, ()) = writer.write(|w| {
-                        write!(w, " {} ", poloto::SVG_HEADER_DEFAULT_WITHOUT_TAG)?;
-                        w.attr("width", "500px")?.attr("height", "100%")?;
-                        w.empty_ok()
-                    })?;
+        let mut svg = elem!("svg", d);
 
-                    let mut s = poloto::plot_with_html_raw(
-                        move_format!("test {}", i),
-                        "x",
-                        "y",
-                        "",
-                        poloto::HTML_CONFIG_LIGHT_DEFAULT,
-                        "",
-                    );
+        let mut s = poloto::plot_with_html_raw(
+            formatm!("test {}", i),
+            "x",
+            "y",
+            "",
+            poloto::HTML_CONFIG_LIGHT_DEFAULT,
+            "",
+        );
 
-                    s.scatter("", test);
+        s.scatter("", test);
 
-                    s.render(&mut svg)?;
-                    svg.empty_ok()
-                })?;
-            }
-            div.empty_ok()
-        })?;
-        html.empty_ok()
-    })?;
-    Ok(())
+        svg.append(single!(s.render().unwrap()));
+        div.append(svg);
+    }
+
+    html.append(div);
+
+    println!("{}", html);
 }
