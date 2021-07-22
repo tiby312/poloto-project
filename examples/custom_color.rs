@@ -1,4 +1,4 @@
-fn main() -> std::fmt::Result {
+fn main() {
     let data = [(1.0f32, 4.5), (2.0, 5.5), (3.0, 6.5)];
 
     let data_int = [[1usize, 4], [2, 5], [3, 6]];
@@ -9,7 +9,7 @@ fn main() -> std::fmt::Result {
 
     plotter.line("floats", &data);
 
-    plotter.render_io(std::io::stdout())
+    println!("{}",plotter.render().unwrap())
 }
 
 const MY_STYLE: &str = "<style>\

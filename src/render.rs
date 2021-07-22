@@ -1,51 +1,40 @@
 use crate::*;
 use tagger::prelude::*;
+use tagger::attr_builder;
 
-struct WriteCounter<T: fmt::Write> {
-    inner: T,
-    counter: usize,
-}
-impl<T: fmt::Write> WriteCounter<T> {
-    fn new(inner: T) -> WriteCounter<T> {
-        WriteCounter { inner, counter: 0 }
-    }
-    fn get_counter(&self) -> usize {
-        self.counter
-    }
-}
-impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
-    fn write_str(&mut self, s: &str) -> fmt::Result {
-        let k = self.inner.write_str(s);
-        self.counter += s.len();
-        k
-    }
-}
+use std::fmt;
+
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
+pub fn render<'b>(plotter: Plotter) -> Result<RenderResult<'b>,fmt::Error> {
     let Plotter { names, mut plots } = plotter;
 
-    write!(writer, "{}", moveable_format(|w| names.write_header(w)))?;
+    let header=format!("{}",tagger::moveable_format(|f|names.write_header(f)));
+    let body=format!("{}",tagger::moveable_format(|f|names.write_body(f)));
+    let footer=format!("{}",tagger::moveable_format(|f|names.write_footer(f)));
+    
 
-    write!(writer, "{}", moveable_format(|w| names.write_body(w)))?;
+    let mut svg=single!(header);
+    svg.append(single!(body));
 
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let svg = &mut tagger::Element::new(&mut writer);
 
-    svg.single("rect", |w| {
-        w.attr("class", "poloto_background")?
-            .attr("fill", "white")?
-            .attr("x", 0)?
-            .attr("y", 0)?
-            .attr("width", width)?
-            .attr("height", height)?
-            .empty_ok()
-    })?;
+
+    let d=attr_builder().attr("class", "poloto_background")
+    .attr("fill", "white")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", width)
+    .attr("height", height)
+    .build();
+
+    svg.append(single!("rect",d));
+
 
     //Find range.
     let [minx, maxx, miny, maxy] = if let Some(m) = util::find_bounds(
@@ -56,7 +45,7 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
         m
     } else {
         //TODO test that this looks ok
-        return Ok(()); //No plots at all. don't need to draw anything
+        return Ok(RenderResult(svg)); //No plots at all. don't need to draw anything
     };
 
     const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
@@ -102,21 +91,19 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
                 xstart_step + ((xstep_num - 1) as f64) * xstep,
                 xstep,
             )? {
-                svg.elem("text", |writer| {
-                    let (text, ()) = writer.write(|w| {
-                        w.attr("class", "poloto_text")?
-                            .attr("alignment-baseline", "middle")?
-                            .attr("text-anchor", "start")?
-                            .attr("x", width * 0.55)?
-                            .attr("y", paddingy * 0.7)?
-                            .empty_ok()
-                    })?;
-                    write!(text, "Where j = ")?;
 
-                    crate::util::interval_float(text, xstart_step, None)?; //Some(xstep)
-                    text.empty_ok()
-                })?;
+                let d=attr_builder().attr("class", "poloto_text")
+                .attr("alignment-baseline", "middle")
+                .attr("text-anchor", "start")
+                .attr("x", width * 0.55)
+                .attr("y", paddingy * 0.7)
+                .build();
 
+                svg.append(elem!("text",d).add(single!(tagger::moveable_format(move |w|{
+                    write!(w, "Where j = ")?;
+                    crate::util::interval_float(w, xstart_step, None)
+                }))));
+                
                 ("j+", 0.0)
             } else {
                 ("", xstart_step)
@@ -128,54 +115,49 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
 
                 let xx = (distance_to_firstx + p) * scalex + padding;
 
-                svg.single("line", |w| {
-                    w.attr("class", "poloto_axis_lines")?
-                        .attr("stroke", "black")?
-                        .attr("x1", xx)?
-                        .attr("x2", xx)?
-                        .attr("y1", height - paddingy)?
-                        .attr("y2", height - paddingy * 0.95)?
-                        .empty_ok() //TODO operations of order?
-                })?;
+                let d=attr_builder().attr("class", "poloto_axis_lines")
+                .attr("stroke", "black")
+                .attr("x1", xx)
+                .attr("x2", xx)
+                .attr("y1", height - paddingy)
+                .attr("y2", height - paddingy * 0.95)
+                .build();
 
-                svg.elem("text", |writer| {
-                    let (text, ()) = writer.write(|w| {
-                        w.attr("class", "poloto_text")?
-                            .attr("alignment-baseline", "start")?
-                            .attr("text-anchor", "middle")?
-                            .attr("x", xx)?
-                            .attr("y", height - paddingy + texty_padding)?
-                            .empty_ok()
-                    })?;
-                    write!(text, "{}", extra)?;
+                svg.append(single!("line",d));
+                
+                let d=attr_builder().attr("class", "poloto_text")
+                .attr("alignment-baseline", "start")
+                .attr("text-anchor", "middle")
+                .attr("x", xx)
+                .attr("y", height - paddingy + texty_padding)
+                .build();
 
-                    util::interval_float(text, p + xstart_step, Some(xstep))?;
-                    text.empty_ok()
-                })?;
+                svg.append(elem!("text",d).add(single!(tagger::moveable_format(move |w|{
+                    write!(w, "{}", extra)?;
+                    util::interval_float(w, p + xstart_step, Some(xstep))
+                }))));
+
             }
         }
 
         {
+            //TODO remove unwrap()???
             //step num is assured to be atleast 1.
             let (extra, ystart_step) = if crate::util::determine_if_should_use_strat(
                 ystart_step,
                 ystart_step + ((ystep_num - 1) as f64) * ystep,
                 ystep,
-            )? {
-                svg.elem("text", |writer| {
-                    let (text, ()) = writer.write(|w| {
-                        w.attr("class", "poloto_text")?
-                            .attr("alignment-baseline", "middle")?
-                            .attr("text-anchor", "start")?
-                            .attr("x", padding)?
-                            .attr("y", paddingy * 0.7)?
-                            .empty_ok()
-                    })?;
-                    write!(text, "Where k = ")?;
-
-                    crate::util::interval_float(text, ystart_step, None)?; //Some(ystep)
-                    text.empty_ok()
-                })?;
+            ).unwrap() {
+                let e=attr_builder().attr("class", "poloto_text")
+                .attr("alignment-baseline", "middle")
+                .attr("text-anchor", "start")
+                .attr("x", padding)
+                .attr("y", paddingy * 0.7).build();
+                
+                svg.append(elem!("text",e).add(single!(tagger::moveable_format(move |w|{
+                    write!(w, "Where k = ")?;
+                    crate::util::interval_float(w, ystart_step, None)
+                }))));
 
                 ("k+", 0.0)
             } else {
@@ -187,31 +169,30 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
                 let p = (a as f64) * ystep;
 
                 let yy = height - (distance_to_firsty + p) * scaley - paddingy;
+                let e=attr_builder().attr("class", "poloto_axis_lines")
+                .attr("stroke", "black")
+                .attr("x1", padding)
+                .attr("x2", padding * 0.96)
+                .attr("y1", yy)
+                .attr("y2", yy)
+                .build();
 
-                svg.single("line", |w| {
-                    w.attr("class", "poloto_axis_lines")?
-                        .attr("stroke", "black")?
-                        .attr("x1", padding)?
-                        .attr("x2", padding * 0.96)?
-                        .attr("y1", yy)?
-                        .attr("y2", yy)?
-                        .empty_ok()
-                })?;
+                svg.append(single!("line",e));
 
-                svg.elem("text", |writer| {
-                    let (text, ()) = writer.write(|w| {
-                        w.attr("class", "poloto_text")?
-                            .attr("alignment-baseline", "middle")?
-                            .attr("text-anchor", "end")?
-                            .attr("x", padding - textx_padding)?
-                            .attr("y", yy)?
-                            .empty_ok()
-                    })?;
-                    write!(text, "{}", extra)?;
-
-                    util::interval_float(text, p + ystart_step, Some(ystep))?;
-                    text.empty_ok()
-                })?;
+                let e=attr_builder().attr("class", "poloto_text")
+                .attr("alignment-baseline", "middle")
+                .attr("text-anchor", "end")
+                .attr("x", padding - textx_padding)
+                .attr("y", yy)
+                .build();
+             
+                
+                svg.append(single!("text",e).add(single!(tagger::moveable_format(move |w|{
+                    write!(w, "{}", extra)?;
+                    util::interval_float(w, p + ystart_step, Some(ystep))
+                    
+                }))));
+                
             }
         }
     }
@@ -230,25 +211,24 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
     {
         let spacing = padding / 3.0;
 
-        let name_exists = svg.elem("text", |writer| {
-            let (mut text, ()) = writer.write(|w| {
-                w.attr("class", "poloto_text")?
-                    .attr("alignment-baseline", "middle")?
-                    .attr("text-anchor", "start")?
-                    .attr("font-size", "large")?
-                    .attr("x", width - padding / 1.2)?
-                    .attr("y", paddingy + (i as f64) * spacing)?
-                    .empty_ok()
-            })?;
+        
+        
+        let name=format!("{}",tagger::moveable_format(|w|{
+            plots.write_name(w)
+        }));
+        let name_exists=!name.is_empty();
 
-            let mut c = WriteCounter::new(&mut text);
+        let d=attr_builder().attr("class", "poloto_text")
+        .attr("alignment-baseline", "middle")
+        .attr("text-anchor", "start")
+        .attr("font-size", "large")
+        .attr("x", width - padding / 1.2)
+        .attr("y", paddingy + (i as f64) * spacing)
+        .build();
 
-            write!(&mut c, "{}", moveable_format(|w| plots.write_name(w)))?;
+        svg.append(elem!("text",d).add(single!(name)));
 
-            let name_exists = c.get_counter() != 0;
-            Ok((text, name_exists))
-        })?;
-
+        
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
 
@@ -264,188 +244,187 @@ pub fn render<T: Write>(mut writer: T, plotter: Plotter) -> fmt::Result {
         match plot_type {
             PlotType::Line => {
                 if name_exists {
-                    svg.single("line", |w| {
-                        w.with_attr("class", wr!("poloto{}stroke", colori))?
-                            .attr("stroke", "black")?
-                            .attr("x1", legendx1)?
-                            .attr("x2", legendx1 + padding / 3.0)?
-                            .attr("y1", legendy1)?
-                            .attr("y2", legendy1)?
-                            .empty_ok()
-                    })?;
+                    let d=attr_builder()
+                            .attr("class", formatm!("poloto{}stroke", colori))
+                            .attr("stroke", "black")
+                            .attr("x1", legendx1)
+                            .attr("x2", legendx1 + padding / 3.0)
+                            .attr("y1", legendy1)
+                            .attr("y2", legendy1)
+                            .build();
+
+                    svg.append(single!("line",d));
+                    
                 }
 
-                svg.single("polyline", |w| {
-                    w.with_attr("class", wr!("poloto{}stroke", colori))?
-                        .attr("fill", "none")?
-                        .attr("stroke", "black")?
-                        .points_data(|w| {
-                            for [x, y] in it {
-                                w.add_point(x, y)?;
-                            }
-                            Ok(w)
-                        })?
-                        .empty_ok()
-                })?;
+                let mut pp=tagger::points_builder();
+                for [x,y] in it{
+                    pp.add(x,y);
+                }
+
+                let d=attr_builder()
+                    .attr("class",formatm!("poloto{}stroke",colori))
+                    .attr("fill","none")
+                    .attr("stroke","black")
+                    .attr_whole(pp.build())
+                    .build();
+
+                svg.append(single!("polyline",d));
+                
             }
             PlotType::Scatter => {
                 if name_exists {
-                    svg.single("circle", |w| {
-                        w.with_attr("class", wr!("poloto{}fill", colori))?
-                            .attr("cx", legendx1 + padding / 30.0)?
-                            .attr("cy", legendy1)?
-                            .attr("r", padding / 30.0)?
-                            .empty_ok()
-                    })?;
+                    let d=attr_builder()
+                            .attr("class", formatm!("poloto{}fill", colori))
+                            .attr("cx", legendx1 + padding / 30.0)
+                            .attr("cy", legendy1)
+                            .attr("r", padding / 30.0).build();
+                    svg.append(single!("circle",d));
                 }
 
-                svg.single("path", |w| {
-                    w.with_attr("class", wr!("scatter poloto{}stroke", colori))?
-                        .path_data(|data| {
-                            use tagger::svg::PathCommand::*;
-                            data.draw(M(padding, height - paddingy))?;
+                use tagger::PathCommand::*;
+                let mut d=tagger::path_builder();
+                d.add(M(padding,height-paddingy));
+                for [x, y] in it {
+                    d.add(M(x, y));
+                    d.add(H_(0));
+                }
+                d.add(Z(""));
 
-                            for [x, y] in it {
-                                data.draw(M(x, y))?;
-                                data.draw(H_(0))?;
-                            }
-                            data.draw_z()
-                        })?
-                        .empty_ok()
-                })?;
+                let e=attr_builder().attr("class",formatm!("scatter poloto{}stroke",colori)).attr_whole(d.build()).build();
+
+                svg.append(single!("path",e));
             }
             PlotType::Histo => {
                 if name_exists {
-                    svg.single("rect", |w| {
-                        w.with_attr("class", wr!("poloto{}fill", colori))?
-                            .attr("x", legendx1)?
-                            .attr("y", legendy1 - padding / 30.0)?
-                            .attr("width", padding / 3.0)?
-                            .attr("height", padding / 20.0)?
-                            .attr("rx", padding / 30.0)?
-                            .attr("ry", padding / 30.0)?
-                            .empty_ok()
-                    })?;
+                    let d=attr_builder()
+                            .attr("class", formatm!("poloto{}fill", colori))
+                            .attr("x", legendx1)
+                            .attr("y", legendy1 - padding / 30.0)
+                            .attr("width", padding / 3.0)
+                            .attr("height", padding / 20.0)
+                            .attr("rx", padding / 30.0)
+                            .attr("ry", padding / 30.0)
+                            .build();
+
+                    svg.append(single!("rect",d));
                 }
 
-                svg.elem("g", |w| {
-                    let (g, ()) = w.write(|w| {
-                        w.with_attr("class", wr!("poloto{}fill", colori))?
-                            .empty_ok()
-                    })?;
+                
+                let mut g=elem!("g",attr_builder().attr("class",formatm!("poloto{}fill",colori)).build());
 
-                    let mut last = None;
-                    for [x, y] in it {
-                        if let Some((lx, ly)) = last {
-                            g.single("rect", |w| {
-                                w.attr("x", lx)?
-                                    .attr("y", ly)?
-                                    .attr(
-                                        "width",
-                                        (padding * 0.02).max((x - lx) - (padding * 0.02)),
-                                    )?
-                                    .attr("height", height - paddingy - ly)?
-                                    .empty_ok()
-                            })?;
-                        }
-                        last = Some((x, y))
+
+                let mut last = None;
+                for [x, y] in it {
+                    if let Some((lx, ly)) = last {
+                        let d=attr_builder()
+                                .attr("x", lx)
+                                .attr("y", ly)
+                                .attr(
+                                    "width",
+                                    (padding * 0.02).max((x - lx) - (padding * 0.02)),
+                                )
+                                .attr("height", height - paddingy - ly)
+                                .build();
+
+                        g.append(single!("rect",d));
+                        
                     }
-                    g.empty_ok()
-                })?;
+                    last = Some((x, y))
+                }
+
+                svg.append(g);
+
             }
             PlotType::LineFill => {
                 if name_exists {
-                    svg.single("rect", |w| {
-                        w.with_attr("class", wr!("poloto{}fill", colori))?
-                            .attr("x", legendx1)?
-                            .attr("y", legendy1 - padding / 30.0)?
-                            .attr("width", padding / 3.0)?
-                            .attr("height", padding / 20.0)?
-                            .attr("rx", padding / 30.0)?
-                            .attr("ry", padding / 30.0)?
-                            .empty_ok()
-                    })?;
+                    let d=attr_builder()
+                            .attr("class", formatm!("poloto{}fill", colori))
+                            .attr("x", legendx1)
+                            .attr("y", legendy1 - padding / 30.0)
+                            .attr("width", padding / 3.0)
+                            .attr("height", padding / 20.0)
+                            .attr("rx", padding / 30.0)
+                            .attr("ry", padding / 30.0)
+                            .build();
+
+                    svg.append(single!("rect",d));
                 }
-                svg.single("path", |w| {
-                    w.with_attr("class", wr!("poloto{}fill", colori))?
-                        .path_data(|data| {
-                            use tagger::svg::PathCommand::*;
-                            data.draw(M(padding, height - paddingy))?;
 
-                            for [x, y] in it {
-                                data.draw(L(x, y))?;
-                            }
+                let mut path=tagger::path_builder();
+                use tagger::PathCommand::*;
+                path.add(M(padding, height - paddingy));
 
-                            data.draw(L(width - padding, height - paddingy))?;
-                            data.draw_z()
-                        })?
-                        .empty_ok()
-                })?;
+                for [x, y] in it {
+                    path.add(L(x, y));
+                }
+
+                path.add(L(width - padding, height - paddingy));
+                path.add(Z(""));
+
+                let d=attr_builder().attr("class",formatm!("poloto{}fill",colori)).attr_whole(path.build()).build();
+                svg.append(elem!("path",d));
             }
         }
     }
 
-    svg.elem("text", |writer| {
-        let (text, ()) = writer.write(|w| {
-            w.attr("class", "poloto_text")?
-                .attr("alignment-baseline", "start")?
-                .attr("text-anchor", "middle")?
-                .attr("font-size", "x-large")?
-                .attr("x", width / 2.0)?
-                .attr("y", padding / 4.0)?
-                .empty_ok()
-        })?;
+    let title=format!("{}",tagger::moveable_format(|f|names.write_title(f)));
+    let xname=format!("{}",tagger::moveable_format(|f|names.write_xname(f)));
+    let yname=format!("{}",tagger::moveable_format(|f|names.write_yname(f)));
 
-        write!(text, "{}", moveable_format(|f| names.write_title(f)))?;
-        text.empty_ok()
-    })?;
+    let d=attr_builder()
+        .attr("class", "poloto_text")
+        .attr("alignment-baseline", "start")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "x-large")
+        .attr("x", width / 2.0)
+        .attr("y", padding / 4.0)
+        .build();
+    svg.append(elem!("text",d).add(single!(title)));
 
-    svg.elem("text", |writer| {
-        let (text, ()) = writer.write(|w| {
-            w.attr("class", "poloto_text")?
-                .attr("alignment-baseline", "start")?
-                .attr("text-anchor", "middle")?
-                .attr("font-size", "x-large")?
-                .attr("x", width / 2.0)?
-                .attr("y", height - padding / 8.)?
-                .empty_ok()
-        })?;
-        write!(text, "{}", moveable_format(|f| names.write_xname(f)))?;
-        text.empty_ok()
-    })?;
+    let d=attr_builder()
+        .attr("class", "poloto_text")
+        .attr("alignment-baseline", "start")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "x-large")
+        .attr("x", width / 2.0)
+        .attr("y", height - padding / 8.)
+        .build();
+    svg.append(elem!("text",d).add(single!(xname)));
 
-    svg.elem("text", |writer| {
-        let (text, ()) = writer.write(|w| {
-            w.attr("class", "poloto_text")?
-                .attr("alignment-baseline", "start")?
-                .attr("text-anchor", "middle")?
-                .attr("font-size", "x-large")?
-                .with_attr(
-                    "transform",
-                    wr!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
-                )?
-                .attr("x", padding / 4.0)?
-                .attr("y", height / 2.0)?
-                .empty_ok()
-        })?;
-        write!(text, "{}", moveable_format(|f| names.write_yname(f)))?;
-        text.empty_ok()
-    })?;
 
-    svg.single("path", |w| {
-        w.attr("stroke", "black")?
-            .attr("fill", "none")?
-            .attr("class", "poloto_axis_lines")?
-            .path_data(|p| {
-                use tagger::svg::PathCommand::*;
-                p.draw(M(padding, paddingy))?
-                    .draw(L(padding, height - paddingy))?
-                    .draw(L(width - padding, height - paddingy))
-            })?
-            .empty_ok()
-    })?;
+    let d=attr_builder()
+        .attr("class", "poloto_text")
+        .attr("alignment-baseline", "start")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "x-large")
+        .attr(
+            "transform",
+            formatm!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
+        )
+        .attr("x", padding / 4.0)
+        .attr("y", height / 2.0)
+        .build();
+    
+    svg.append(elem!("text",d).add(single!(yname)));
+    
 
-    write!(writer, "{}", moveable_format(|w| names.write_footer(w)))?;
+    let mut pp=tagger::path_builder();
+    use tagger::PathCommand::*;
+    pp.add(M(padding, paddingy));
+    pp.add(L(padding, height - paddingy));
+    pp.add(L(width - padding, height - paddingy));
 
-    Ok(())
+
+    let d=attr_builder()
+        .attr("stroke", "black")
+        .attr("fill", "none")
+        .attr("class", "poloto_axis_lines")
+        .attr_whole(pp.build()).build();
+
+
+    svg.append(single!("path",d));
+
+    svg.append(single!(footer));
+    Ok(RenderResult(svg))
 }

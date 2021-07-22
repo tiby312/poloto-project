@@ -52,6 +52,7 @@ impl<A: Display, B: Display, C: Display, D: Display, E: Display, F: Display> Nam
 
 ///Used internally to write out the header/title/xname/yname.
 trait Names {
+    
     fn write_header(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_body(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_footer(&self, fm: &mut fmt::Formatter) -> fmt::Result;
@@ -59,6 +60,7 @@ trait Names {
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
     fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
+    
 }
 
 trait PlotTrait {
@@ -110,27 +112,6 @@ struct Plot<'a> {
     plots: Box<dyn PlotTrait + 'a>,
 }
 
-/// Shorthand for `moveable_format(move |w|write!(w,...))`
-/// Similar to `format_args!()` except has a more flexible lifetime.
-#[macro_export]
-macro_rules! move_format {
-    ($($arg:tt)*) => {
-        $crate::moveable_format(move |w| write!(w,$($arg)*))
-    }
-}
-
-/// Convert a moved closure into a impl fmt::Display.
-/// This is useful because std's `format_args!()` macro
-/// has a shorter lifetime.
-pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
-    struct Foo<F>(F);
-    impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
-        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            (self.0)(formatter)
-        }
-    }
-    Foo(func)
-}
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
@@ -453,6 +434,11 @@ impl<'a> Plotter<'a> {
         self
     }
 
+    pub fn render(self)->Result<RenderResult<'a>,fmt::Error>{
+        render::render(self)
+    }
+
+    /*
     /// Render to a `String`
     ///
     /// ```
@@ -498,5 +484,16 @@ impl<'a> Plotter<'a> {
         render::render(root.get_writer(), self)?;
 
         Ok(())
+    }
+    */
+}
+
+pub struct RenderResult<'a>(
+    tagger::Element<'a>
+);
+
+impl fmt::Display for RenderResult<'_>{
+    fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
+        self.0.fmt(a)
     }
 }

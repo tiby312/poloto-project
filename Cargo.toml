@@ -14,7 +14,8 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tagger = "1.0"
+tagger = {path="../tagger"}
+#tagger = "1.0"
 
 [package.metadata.docs.rs]
 # This sets the default target to `x86_64-unknown-linux-gnu`

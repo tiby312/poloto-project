@@ -1,3 +1,7 @@
+fn main(){
+    
+}
+/*
 const fn generate_test() -> [&'static [[f32; 2]]; 8] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
@@ -64,3 +68,5 @@ fn main() -> fmt::Result {
     })?;
     Ok(())
 }
+
+*/
