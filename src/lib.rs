@@ -431,60 +431,24 @@ impl<'a> Plotter<'a> {
         self
     }
 
+    ///
+    /// Use the plot iterators and generate out a [`RenderResult`] which implements [`std::fmt::Display`]
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// let s = plotter.render().unwrap();
+    /// println!("{}",s);
+    /// ```
     pub fn render(self) -> Result<RenderResult<'a>, fmt::Error> {
         render::render(self)
     }
-
-    /*
-    /// Render to a `String`
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// let s:String = plotter.render_to_string().unwrap();
-    /// ```
-    pub fn render_to_string(self) -> Result<String, fmt::Error> {
-        let mut s = String::new();
-        self.render(&mut s)?;
-        Ok(s)
-    }
-
-    /// Render to a `std::io::Write`
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// plotter.render_io(std::io::stdout()).unwrap();
-    /// ```
-    pub fn render_io<T: std::io::Write>(self, writer: T) -> fmt::Result {
-        self.render(tagger::upgrade(writer))
-    }
-
-    /// Render the svg to the writer.
-    ///
-    /// Up until now, nothing has been written to the writer. We
-    /// have just accumulated a list of commands and closures. This call will
-    /// actually call all the closures and consume all the plot iterators.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// let mut s = String::new();
-    /// plotter.render(&mut s).unwrap();
-    /// ```
-    pub fn render<T: fmt::Write>(self, writer: T) -> fmt::Result {
-        let mut root = tagger::Element::new(writer);
-
-        render::render(root.get_writer(), self)?;
-
-        Ok(())
-    }
-    */
 }
 
+///
+/// A rendered plot graph that implements [`std::fmt::Display`]
+///
 pub struct RenderResult<'a>(tagger::Element<'a>);
 
 impl fmt::Display for RenderResult<'_> {
