@@ -7,7 +7,11 @@ use std::fmt;
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
 pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
-    let Plotter {element, names, mut plots } = plotter;
+    let Plotter {
+        element,
+        names,
+        mut plots,
+    } = plotter;
 
     //let header = format!("{}", tagger::moveable_format(|f| names.write_header(f)));
     //let body = format!("{}", tagger::moveable_format(|f| names.write_body(f)));
@@ -16,7 +20,7 @@ pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Erro
     //let mut svg = single!(header);
     //svg.append(single!(body));
 
-    let mut svg=element;
+    let mut svg = element;
 
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;

@@ -23,12 +23,9 @@ const HEIGHT: f64 = 500.0;
 struct NamesStruct<A, B, C> {
     title: A,
     xname: B,
-    yname: C
+    yname: C,
 }
-impl<A: Display, B: Display, C: Display> Names
-    for NamesStruct<A, B, C>
-{
-    
+impl<A: Display, B: Display, C: Display> Names for NamesStruct<A, B, C> {
     fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result {
         self.title.fmt(fm)
     }
@@ -49,7 +46,7 @@ trait Names {
 
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
-    
+
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
 }
@@ -97,23 +94,33 @@ struct Plot<'a> {
     plots: Box<dyn PlotTrait + 'a>,
 }
 
-
-
-pub fn default_svg<'a>()->tagger::Element<'a>{
-    elem!("svg",default_svg_attr().build())
+///
+/// The default svg tag element with the default attributes
+///
+pub fn default_svg<'a>() -> tagger::Element<'a> {
+    elem!("svg", default_svg_attr().build())
 }
-pub fn default_svg_attr<'a>()->tagger::AttrBuilder<'a>{
+
+///
+/// The default svg tag attributes
+///
+/// They are as follows:
+/// `class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"`
+///
+pub fn default_svg_attr<'a>() -> tagger::AttrBuilder<'a> {
     use tagger::prelude::*;
-        
-    let mut k=tagger::attr_builder();
-        k.attr("class","poloto")
-        .attr("width",DIMENSIONS[0])
-        .attr("height",DIMENSIONS[1])
-        .attr("viewBox",formatm!("0 0 {} {}",DIMENSIONS[0],DIMENSIONS[1]))
-        .attr("xmlns","http://www.w3.org/2000/svg");
+
+    let mut k = tagger::attr_builder();
+    k.attr("class", "poloto")
+        .attr("width", DIMENSIONS[0])
+        .attr("height", DIMENSIONS[1])
+        .attr(
+            "viewBox",
+            formatm!("0 0 {} {}", DIMENSIONS[0], DIMENSIONS[1]),
+        )
+        .attr("xmlns", "http://www.w3.org/2000/svg");
     k
 }
-
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = "<style>.poloto {\
@@ -196,10 +203,7 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
 
-
-const DIMENSIONS:[usize;2]=[800,500];
-
-
+const DIMENSIONS: [usize; 2] = [800, 500];
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
@@ -267,22 +271,27 @@ impl<T: IntoF64> Plottable for &(T, T) {
     }
 }
 
+///
+/// Create a Plotter with preset styling and svg tag.
+///
+/// Shorthand for
+/// ```
+/// use tagger::prelude::*;
+/// let p =poloto::Plotter::new(poloto::default_svg().add(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT)),"title","xname","yname");
+/// ```
+///
 pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
-    yname: impl Display + 'a
+    yname: impl Display + 'a,
 ) -> Plotter<'a> {
-    Plotter {
-        element:default_svg().add(single!(HTML_CONFIG_LIGHT_DEFAULT)),
-        names: Box::new(NamesStruct {
-            title,
-            xname,
-            yname
-        }),
-        plots: Vec::new(),
-    }
+    Plotter::new(
+        default_svg().add(single!(HTML_CONFIG_LIGHT_DEFAULT)),
+        title,
+        xname,
+        yname,
+    )
 }
-
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -294,23 +303,31 @@ pub fn plot<'a>(
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a> {
-    element:tagger::Element<'a>,
+    element: tagger::Element<'a>,
     names: Box<dyn Names + 'a>,
     plots: Vec<Plot<'a>>,
 }
 
 impl<'a> Plotter<'a> {
+    ///
+    /// Create a plotter with the specified element.
+    ///
+    /// ```
+    /// let svg=poloto::default_svg();
+    /// let p=poloto::Plotter::new(svg,"title","x","y");
+    /// ```
     pub fn new(
-        element:tagger::Element<'a>,
+        element: tagger::Element<'a>,
         title: impl Display + 'a,
         xname: impl Display + 'a,
-        yname: impl Display + 'a)->Plotter<'a>{
+        yname: impl Display + 'a,
+    ) -> Plotter<'a> {
         Plotter {
             element,
             names: Box::new(NamesStruct {
                 title,
                 xname,
-                yname
+                yname,
             }),
             plots: Vec::new(),
         }
@@ -428,4 +445,3 @@ impl<'a> Plotter<'a> {
         render::render(self)
     }
 }
-

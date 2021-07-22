@@ -9,10 +9,11 @@ fn main() {
     // The buffer has to live longer than the plotter, so we collect it here.
     let buffer = x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>();
 
-    let mut plotter = poloto::Plotter::new(poloto::default_svg().add(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
+    let mut plotter = poloto::Plotter::new(
+        poloto::default_svg().add(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
-        "This is the y label"
+        "This is the y label",
     );
 
     // The iterator will be cloned and ran twice.

@@ -33,18 +33,17 @@ fn main() {
     );
 
     for (i, &test) in generate_test().iter().enumerate() {
-        let mut svg=elem!("svg",poloto::default_svg_attr()
-            .attr("width", "500px")
-            .attr("height", "100%")
-            .build());
+        let mut svg = elem!(
+            "svg",
+            poloto::default_svg_attr()
+                .attr("width", "500px")
+                .attr("height", "100%")
+                .build()
+        );
 
         svg.append(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT));
-        
-        let mut s = poloto::Plotter::new(svg,
-            formatm!("test {}", i),
-            "x",
-            "y"
-        );
+
+        let mut s = poloto::Plotter::new(svg, formatm!("test {}", i), "x", "y");
 
         s.scatter("", test);
 
