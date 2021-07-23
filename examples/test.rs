@@ -47,7 +47,7 @@ fn main() {
 
         s.scatter("", test);
 
-        div.append(s.render().unwrap());
+        div.append(s.render());
     }
 
     html.append(div);

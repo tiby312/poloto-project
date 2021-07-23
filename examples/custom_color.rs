@@ -16,7 +16,7 @@ fn main() {
 
     plotter.line("floats", &data);
 
-    println!("{}", plotter.render().unwrap())
+    println!("{}", plotter.render())
 }
 
 const MY_STYLE: &str = "<style>\

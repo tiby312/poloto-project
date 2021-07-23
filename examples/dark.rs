@@ -14,5 +14,5 @@ fn main() {
 
     plotter.line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
 
-    println!("{}", plotter.render().unwrap())
+    println!("{}", plotter.render())
 }

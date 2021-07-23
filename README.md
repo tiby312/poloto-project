@@ -25,7 +25,7 @@ fn main() {
 
     s.line_fill("", &data);
 
-    println!("{}", s.render().unwrap());
+    println!("{}", s.render());
 }
 
 ```
@@ -49,11 +49,11 @@ fn main() {
     // The buffer has to live longer than the plotter, so we collect it here.
     let buffer = x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>();
 
-    let mut plotter = poloto::plot_with_html(
+    let mut plotter = poloto::Plotter::new(
+        poloto::default_svg().add(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        poloto::HTML_CONFIG_DARK_DEFAULT,
     );
 
     // The iterator will be cloned and ran twice.
@@ -74,9 +74,8 @@ fn main() {
         x.clone().map(|x| [x, x.sin() - 20.]),
     );
 
-    println!("{}", plotter.render().unwrap());
+    println!("{}", plotter.render());
 }
-
 
 ```
 

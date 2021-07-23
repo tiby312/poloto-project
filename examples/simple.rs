@@ -12,5 +12,5 @@ fn main() {
 
     s.line_fill("", &data);
 
-    println!("{}", s.render().unwrap());
+    println!("{}", s.render());
 }

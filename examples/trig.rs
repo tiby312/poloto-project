@@ -34,5 +34,5 @@ fn main() {
         x.clone().map(|x| [x, x.sin() - 20.]),
     );
 
-    println!("{}", plotter.render().unwrap());
+    println!("{}", plotter.render());
 }

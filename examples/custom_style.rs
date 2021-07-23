@@ -15,7 +15,7 @@ fn main() {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    println!("{}", s.render().unwrap())
+    println!("{}", s.render())
 }
 
 fn style_string() -> String {

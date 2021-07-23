@@ -6,6 +6,18 @@
 //! * After 8 plots, the colors cycle back and are repeated.
 //!
 
+#[cfg(doctest)]
+mod test_readme {
+    macro_rules! external_doc_test {
+        ($x:expr) => {
+            #[doc = $x]
+            extern "C" {}
+        };
+    }
+
+    external_doc_test!(include_str!("../README.md"));
+}
+
 mod render;
 mod util;
 use std::fmt;
@@ -434,14 +446,31 @@ impl<'a> Plotter<'a> {
     ///
     /// Use the plot iterators and generate out a [`tagger::Element`] which implements [`std::fmt::Display`]
     ///
+    /// Panics if the render fails.
+    ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// let s = plotter.render().unwrap();
+    /// println!("{}",plotter.render());
+    /// ```
+    pub fn render(self) -> tagger::Element<'a> {
+        render::render(self).unwrap()
+    }
+
+    ///
+    /// Use the plot iterators and generate out a [`tagger::Element`] which implements [`std::fmt::Display`]
+    ///
+    /// Returns a fmt::Error if the render fails.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// let s = plotter.try_render().unwrap();
     /// println!("{}",s);
     /// ```
-    pub fn render(self) -> Result<tagger::Element<'a>, fmt::Error> {
+    pub fn try_render(self) -> Result<tagger::Element<'a>, fmt::Error> {
         render::render(self)
     }
 }
