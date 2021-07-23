@@ -9,7 +9,9 @@ use std::fmt;
 pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
     let Plotter {
         element,
-        names,
+        title,
+        xname,
+        yname,
         mut plots,
     } = plotter;
 
@@ -225,24 +227,20 @@ pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Erro
     {
         let spacing = padding / 3.0;
 
-        let name = format!("{}", tagger::moveable_format(|w| { plots.write_name(w) }));
-        let name_exists = !name.is_empty();
-
-        let d = attr_builder()
-            .attr("class", "poloto_text")
-            .attr("alignment-baseline", "middle")
-            .attr("text-anchor", "start")
-            .attr("font-size", "large")
-            .attr("x", width - padding / 1.2)
-            .attr("y", paddingy + (i as f64) * spacing)
-            .build();
-
-        svg.append(elem!("text", d).add(single!(name)));
-
         let legendx1 = width - padding / 1.2 + padding / 30.0;
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
 
         //Draw plots
+        let name_exists = {
+            use fmt::Write;
+            let mut wc = WriteCounter::new();
+            write!(
+                wc,
+                "{}",
+                tagger::moveable_format(|w| { plots.write_name(w) })
+            )?;
+            wc.get_counter() != 0
+        };
 
         let it = plots.iter_second().map(|[x, y]| {
             [
@@ -379,11 +377,22 @@ pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Erro
                 svg.append(elem!("path", d));
             }
         }
-    }
 
-    let title = format!("{}", tagger::moveable_format(|f| names.write_title(f)));
-    let xname = format!("{}", tagger::moveable_format(|f| names.write_xname(f)));
-    let yname = format!("{}", tagger::moveable_format(|f| names.write_yname(f)));
+        //let name = format!("{}", tagger::moveable_format(|w| { plots.write_name(w) }));
+        //let name_exists = !name.is_empty();
+        let name = tagger::moveable_format(move |w| plots.write_name(w));
+
+        let d = attr_builder()
+            .attr("class", "poloto_text")
+            .attr("alignment-baseline", "middle")
+            .attr("text-anchor", "start")
+            .attr("font-size", "large")
+            .attr("x", width - padding / 1.2)
+            .attr("y", paddingy + (i as f64) * spacing)
+            .build();
+
+        svg.append(elem!("text", d).add(single!(name)));
+    }
 
     let d = attr_builder()
         .attr("class", "poloto_text")
@@ -436,4 +445,22 @@ pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Erro
     svg.append(single!("path", d));
 
     Ok(svg)
+}
+
+struct WriteCounter {
+    counter: usize,
+}
+impl WriteCounter {
+    fn new() -> WriteCounter {
+        WriteCounter { counter: 0 }
+    }
+    fn get_counter(&self) -> usize {
+        self.counter
+    }
+}
+impl fmt::Write for WriteCounter {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.counter += s.len();
+        Ok(())
+    }
 }

@@ -31,31 +31,6 @@ const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
-///Used internally to implement [`Names`]
-struct NamesStruct<A, B, C> {
-    title: A,
-    xname: B,
-    yname: C,
-}
-impl<A: Display, B: Display, C: Display> Names for NamesStruct<A, B, C> {
-    fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.title.fmt(fm)
-    }
-    fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.xname.fmt(fm)
-    }
-    fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result {
-        self.yname.fmt(fm)
-    }
-}
-
-///Used internally to write out the header/title/xname/yname.
-trait Names {
-    fn write_title(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    fn write_xname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-    fn write_yname(&self, fm: &mut fmt::Formatter) -> fmt::Result;
-}
-
 trait PlotTrait {
     fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
 
@@ -316,7 +291,9 @@ pub fn plot<'a>(
 ///
 pub struct Plotter<'a> {
     element: tagger::Element<'a>,
-    names: Box<dyn Names + 'a>,
+    title: Box<dyn fmt::Display + 'a>,
+    xname: Box<dyn fmt::Display + 'a>,
+    yname: Box<dyn fmt::Display + 'a>,
     plots: Vec<Plot<'a>>,
 }
 
@@ -336,11 +313,9 @@ impl<'a> Plotter<'a> {
     ) -> Plotter<'a> {
         Plotter {
             element,
-            names: Box::new(NamesStruct {
-                title,
-                xname,
-                yname,
-            }),
+            title: Box::new(title),
+            xname: Box::new(xname),
+            yname: Box::new(yname),
             plots: Vec::new(),
         }
     }
