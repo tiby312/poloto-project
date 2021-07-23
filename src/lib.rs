@@ -302,8 +302,8 @@ impl<'a> Plotter<'a> {
     /// Create a plotter with the specified element.
     ///
     /// ```
-    /// let svg=poloto::default_svg();
-    /// let p=poloto::Plotter::new(svg,"title","x","y");
+    /// let svg = poloto::default_svg();
+    /// let p = poloto::Plotter::new(svg, "title", "x", "y");
     /// ```
     pub fn new(
         element: tagger::Element<'a>,
