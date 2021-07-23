@@ -190,7 +190,8 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
 
-const DIMENSIONS: [usize; 2] = [800, 500];
+/// The demsions of the svg graph `[800,500]`.
+pub const DIMENSIONS: [usize; 2] = [800, 500];
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
