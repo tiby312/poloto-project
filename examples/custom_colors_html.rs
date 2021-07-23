@@ -2,7 +2,7 @@ use poloto::*;
 use tagger::prelude::*;
 fn main() -> core::fmt::Result {
     let mut s = Plotter::new(
-        default_svg().add(single!(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT)),
+        default_svg().appendm(single!(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT)),
         "Demo: you can use CSS patterns if you embed SVG!",
         "x",
         "y",

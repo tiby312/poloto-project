@@ -101,7 +101,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                     .build();
 
                 svg.append(
-                    elem!("text", d).add(single!(tagger::moveable_format(move |w| {
+                    elem!("text", d).appendm(single!(tagger::moveable_format(move |w| {
                         write!(w, "Where j = ")?;
                         crate::util::interval_float(w, xstart_step, None)
                     }))),
@@ -138,7 +138,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                     .build();
 
                 svg.append(
-                    elem!("text", d).add(single!(tagger::moveable_format(move |w| {
+                    elem!("text", d).appendm(single!(tagger::moveable_format(move |w| {
                         write!(w, "{}", extra)?;
                         util::interval_float(w, p + xstart_step, Some(xstep))
                     }))),
@@ -165,7 +165,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                     .build();
 
                 svg.append(
-                    elem!("text", e).add(single!(tagger::moveable_format(move |w| {
+                    elem!("text", e).appendm(single!(tagger::moveable_format(move |w| {
                         write!(w, "Where k = ")?;
                         crate::util::interval_float(w, ystart_step, None)
                     }))),
@@ -201,7 +201,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                     .build();
 
                 svg.append(
-                    single!("text", e).add(single!(tagger::moveable_format(move |w| {
+                    single!("text", e).appendm(single!(tagger::moveable_format(move |w| {
                         write!(w, "{}", extra)?;
                         util::interval_float(w, p + ystart_step, Some(ystep))
                     }))),
@@ -388,7 +388,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
             .attr("y", paddingy + (i as f64) * spacing)
             .build();
 
-        svg.append(elem!("text", d).add(single!(name)));
+        svg.append(elem!("text", d).appendm(single!(name)));
     }
 
     let d = attr_builder()
@@ -399,7 +399,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         .attr("x", width / 2.0)
         .attr("y", padding / 4.0)
         .build();
-    svg.append(elem!("text", d).add(single!(title)));
+    svg.append(elem!("text", d).appendm(single!(title)));
 
     let d = attr_builder()
         .attr("class", "poloto_text")
@@ -409,7 +409,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         .attr("x", width / 2.0)
         .attr("y", height - padding / 8.)
         .build();
-    svg.append(elem!("text", d).add(single!(xname)));
+    svg.append(elem!("text", d).appendm(single!(xname)));
 
     let d = attr_builder()
         .attr("class", "poloto_text")
@@ -424,7 +424,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         .attr("y", height / 2.0)
         .build();
 
-    svg.append(elem!("text", d).add(single!(yname)));
+    svg.append(elem!("text", d).appendm(single!(yname)));
 
     let mut pp = tagger::path_builder();
     use tagger::PathCommand::*;

@@ -6,7 +6,7 @@ fn main() {
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
     let mut s = Plotter::new(
-        default_svg().add(single!(style_string())),
+        default_svg().appendm(single!(style_string())),
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",

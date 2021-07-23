@@ -10,7 +10,7 @@ fn main() {
     let buffer = x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>();
 
     let mut plotter = poloto::Plotter::new(
-        poloto::default_svg().add(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
+        poloto::default_svg().appendm(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

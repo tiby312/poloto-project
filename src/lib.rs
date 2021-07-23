@@ -264,7 +264,7 @@ impl<T: IntoF64> Plottable for &(T, T) {
 /// Shorthand for
 /// ```
 /// use tagger::prelude::*;
-/// let p =poloto::Plotter::new(poloto::default_svg().add(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT)),"title","xname","yname");
+/// let p =poloto::Plotter::new(poloto::default_svg().appendm(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT)),"title","xname","yname");
 /// ```
 ///
 pub fn plot<'a>(
@@ -273,7 +273,7 @@ pub fn plot<'a>(
     yname: impl Display + 'a,
 ) -> Plotter<'a> {
     Plotter::new(
-        default_svg().add(single!(HTML_CONFIG_LIGHT_DEFAULT)),
+        default_svg().appendm(single!(HTML_CONFIG_LIGHT_DEFAULT)),
         title,
         xname,
         yname,

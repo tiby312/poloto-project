@@ -6,7 +6,7 @@ fn main() {
     let data_int = [[1usize, 4], [2, 5], [3, 6]];
 
     let mut plotter = Plotter::new(
-        default_svg().add(single!(MY_STYLE)),
+        default_svg().appendm(single!(MY_STYLE)),
         "cows per year",
         "year",
         "cows",
