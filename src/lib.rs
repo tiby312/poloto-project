@@ -429,7 +429,7 @@ impl<'a> Plotter<'a> {
     /// plotter.line("", &data);
     /// println!("{}",plotter.render());
     /// ```
-    pub fn render(self) -> tagger::Element<'a> {
+    pub fn render(&mut self) -> tagger::Element<'a> {
         render::render(self).unwrap()
     }
 
@@ -445,7 +445,7 @@ impl<'a> Plotter<'a> {
     /// let s = plotter.try_render().unwrap();
     /// println!("{}",s);
     /// ```
-    pub fn try_render(self) -> Result<tagger::Element<'a>, fmt::Error> {
+    pub fn try_render(&mut self) -> Result<tagger::Element<'a>, fmt::Error> {
         render::render(self)
     }
 }

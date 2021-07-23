@@ -6,21 +6,19 @@ use std::fmt;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<'b>(plotter: Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
-    let Plotter {
-        element,
-        title,
-        xname,
-        yname,
-        mut plots,
-    } = plotter;
+pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
+    let mut element=elem!("");
+    let mut title:Box<dyn fmt::Display>=Box::new("");
+    let mut xname:Box<dyn fmt::Display>=Box::new("");
+    let mut yname:Box<dyn fmt::Display>=Box::new("");
+    let mut plots=Vec::new();
 
-    //let header = format!("{}", tagger::moveable_format(|f| names.write_header(f)));
-    //let body = format!("{}", tagger::moveable_format(|f| names.write_body(f)));
-    //let footer = format!("{}", tagger::moveable_format(|f| names.write_footer(f)));
-
-    //let mut svg = single!(header);
-    //svg.append(single!(body));
+    core::mem::swap(&mut element,&mut plotter.element);
+    core::mem::swap(&mut title,&mut plotter.title);
+    core::mem::swap(&mut xname,&mut plotter.xname);
+    core::mem::swap(&mut yname,&mut plotter.yname);
+    core::mem::swap(&mut plots,&mut plotter.plots);
+    
 
     let mut svg = element;
 

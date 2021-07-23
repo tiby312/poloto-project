@@ -4,7 +4,6 @@ fn main() {
         [0.000001000000001, 0.000001000000001],
     ];
 
-    let mut s = poloto::plot("cows per year", "year", "cow");
-    s.scatter("", &data);
-    println!("{}", s.render())
+    let s = poloto::plot("cows per year", "year", "cow").scatter("", &data).render();
+    println!("{}", s)
 }
