@@ -68,147 +68,6 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
     let scalex = (width - padding * 2.0) / (maxx - minx);
     let scaley = (height - paddingy * 2.0) / (maxy - miny);
 
-    {
-        //Draw step lines
-        //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
-
-        let ideal_num_xsteps = 9;
-        let ideal_num_ysteps = 10;
-
-        let texty_padding = paddingy * 0.3;
-        let textx_padding = padding * 0.1;
-
-        let (xstep_num, xstep, xstart_step) = util::find_good_step(ideal_num_xsteps, [minx, maxx]);
-        let (ystep_num, ystep, ystart_step) = util::find_good_step(ideal_num_ysteps, [miny, maxy]);
-
-        let distance_to_firstx = xstart_step - minx;
-
-        let distance_to_firsty = ystart_step - miny;
-
-        {
-            //step num is assured to be atleast 1.
-            let (extra, xstart_step) = if crate::util::determine_if_should_use_strat(
-                xstart_step,
-                xstart_step + ((xstep_num - 1) as f64) * xstep,
-                xstep,
-            )? {
-                let d = attr_builder()
-                    .attr("class", "poloto_text")
-                    .attr("alignment-baseline", "middle")
-                    .attr("text-anchor", "start")
-                    .attr("x", width * 0.55)
-                    .attr("y", paddingy * 0.7)
-                    .build();
-
-                svg.append(
-                    elem!("text", d).appendm(single!(tagger::moveable_format(move |w| {
-                        write!(w, "Where j = ")?;
-                        crate::util::interval_float(w, xstart_step, None)
-                    }))),
-                );
-
-                ("j+", 0.0)
-            } else {
-                ("", xstart_step)
-            };
-
-            //Draw interva`l x text
-            for a in 0..xstep_num {
-                let p = (a as f64) * xstep;
-
-                let xx = (distance_to_firstx + p) * scalex + padding;
-
-                let d = attr_builder()
-                    .attr("class", "poloto_axis_lines")
-                    .attr("stroke", "black")
-                    .attr("x1", xx)
-                    .attr("x2", xx)
-                    .attr("y1", height - paddingy)
-                    .attr("y2", height - paddingy * 0.95)
-                    .build();
-
-                svg.append(single!("line", d));
-
-                let d = attr_builder()
-                    .attr("class", "poloto_text")
-                    .attr("alignment-baseline", "start")
-                    .attr("text-anchor", "middle")
-                    .attr("x", xx)
-                    .attr("y", height - paddingy + texty_padding)
-                    .build();
-
-                svg.append(
-                    elem!("text", d).appendm(single!(tagger::moveable_format(move |w| {
-                        write!(w, "{}", extra)?;
-                        util::interval_float(w, p + xstart_step, Some(xstep))
-                    }))),
-                );
-            }
-        }
-
-        {
-            //TODO remove unwrap()???
-            //step num is assured to be atleast 1.
-            let (extra, ystart_step) = if crate::util::determine_if_should_use_strat(
-                ystart_step,
-                ystart_step + ((ystep_num - 1) as f64) * ystep,
-                ystep,
-            )
-            .unwrap()
-            {
-                let e = attr_builder()
-                    .attr("class", "poloto_text")
-                    .attr("alignment-baseline", "middle")
-                    .attr("text-anchor", "start")
-                    .attr("x", padding)
-                    .attr("y", paddingy * 0.7)
-                    .build();
-
-                svg.append(
-                    elem!("text", e).appendm(single!(tagger::moveable_format(move |w| {
-                        write!(w, "Where k = ")?;
-                        crate::util::interval_float(w, ystart_step, None)
-                    }))),
-                );
-
-                ("k+", 0.0)
-            } else {
-                ("", ystart_step)
-            };
-
-            //Draw interval y text
-            for a in 0..ystep_num {
-                let p = (a as f64) * ystep;
-
-                let yy = height - (distance_to_firsty + p) * scaley - paddingy;
-                let e = attr_builder()
-                    .attr("class", "poloto_axis_lines")
-                    .attr("stroke", "black")
-                    .attr("x1", padding)
-                    .attr("x2", padding * 0.96)
-                    .attr("y1", yy)
-                    .attr("y2", yy)
-                    .build();
-
-                svg.append(single!("line", e));
-
-                let e = attr_builder()
-                    .attr("class", "poloto_text")
-                    .attr("alignment-baseline", "middle")
-                    .attr("text-anchor", "end")
-                    .attr("x", padding - textx_padding)
-                    .attr("y", yy)
-                    .build();
-
-                svg.append(
-                    elem!("text", e).appendm(single!(tagger::moveable_format(move |w| {
-                        write!(w, "{}", extra)?;
-                        util::interval_float(w, p + ystart_step, Some(ystep))
-                    }))),
-                );
-            }
-        }
-    }
 
     for (
         i,
@@ -391,6 +250,149 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         svg.append(elem!("text", d).appendm(single!(name)));
     }
 
+
+    {
+        //Draw step lines
+        //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
+
+        let ideal_num_xsteps = 9;
+        let ideal_num_ysteps = 10;
+
+        let texty_padding = paddingy * 0.3;
+        let textx_padding = padding * 0.1;
+
+        let (xstep_num, xstep, xstart_step) = util::find_good_step(ideal_num_xsteps, [minx, maxx]);
+        let (ystep_num, ystep, ystart_step) = util::find_good_step(ideal_num_ysteps, [miny, maxy]);
+
+        let distance_to_firstx = xstart_step - minx;
+
+        let distance_to_firsty = ystart_step - miny;
+
+        {
+            //step num is assured to be atleast 1.
+            let (extra, xstart_step) = if crate::util::determine_if_should_use_strat(
+                xstart_step,
+                xstart_step + ((xstep_num - 1) as f64) * xstep,
+                xstep,
+            )? {
+                let d = attr_builder()
+                    .attr("class", "poloto_text")
+                    .attr("alignment-baseline", "middle")
+                    .attr("text-anchor", "start")
+                    .attr("x", width * 0.55)
+                    .attr("y", paddingy * 0.7)
+                    .build();
+
+                svg.append(
+                    elem!("text", d).appendm(single!(tagger::moveable_format(move |w| {
+                        write!(w, "Where j = ")?;
+                        crate::util::interval_float(w, xstart_step, None)
+                    }))),
+                );
+
+                ("j+", 0.0)
+            } else {
+                ("", xstart_step)
+            };
+
+            //Draw interva`l x text
+            for a in 0..xstep_num {
+                let p = (a as f64) * xstep;
+
+                let xx = (distance_to_firstx + p) * scalex + padding;
+
+                let d = attr_builder()
+                    .attr("class", "poloto_axis_lines")
+                    .attr("stroke", "black")
+                    .attr("x1", xx)
+                    .attr("x2", xx)
+                    .attr("y1", height - paddingy)
+                    .attr("y2", height - paddingy * 0.95)
+                    .build();
+
+                svg.append(single!("line", d));
+
+                let d = attr_builder()
+                    .attr("class", "poloto_text")
+                    .attr("alignment-baseline", "start")
+                    .attr("text-anchor", "middle")
+                    .attr("x", xx)
+                    .attr("y", height - paddingy + texty_padding)
+                    .build();
+
+                svg.append(
+                    elem!("text", d).appendm(single!(tagger::moveable_format(move |w| {
+                        write!(w, "{}", extra)?;
+                        util::interval_float(w, p + xstart_step, Some(xstep))
+                    }))),
+                );
+            }
+        }
+
+        {
+            //TODO remove unwrap()???
+            //step num is assured to be atleast 1.
+            let (extra, ystart_step) = if crate::util::determine_if_should_use_strat(
+                ystart_step,
+                ystart_step + ((ystep_num - 1) as f64) * ystep,
+                ystep,
+            )
+            .unwrap()
+            {
+                let e = attr_builder()
+                    .attr("class", "poloto_text")
+                    .attr("alignment-baseline", "middle")
+                    .attr("text-anchor", "start")
+                    .attr("x", padding)
+                    .attr("y", paddingy * 0.7)
+                    .build();
+
+                svg.append(
+                    elem!("text", e).appendm(single!(tagger::moveable_format(move |w| {
+                        write!(w, "Where k = ")?;
+                        crate::util::interval_float(w, ystart_step, None)
+                    }))),
+                );
+
+                ("k+", 0.0)
+            } else {
+                ("", ystart_step)
+            };
+
+            //Draw interval y text
+            for a in 0..ystep_num {
+                let p = (a as f64) * ystep;
+
+                let yy = height - (distance_to_firsty + p) * scaley - paddingy;
+                let e = attr_builder()
+                    .attr("class", "poloto_axis_lines")
+                    .attr("stroke", "black")
+                    .attr("x1", padding)
+                    .attr("x2", padding * 0.96)
+                    .attr("y1", yy)
+                    .attr("y2", yy)
+                    .build();
+
+                svg.append(single!("line", e));
+
+                let e = attr_builder()
+                    .attr("class", "poloto_text")
+                    .attr("alignment-baseline", "middle")
+                    .attr("text-anchor", "end")
+                    .attr("x", padding - textx_padding)
+                    .attr("y", yy)
+                    .build();
+
+                svg.append(
+                    elem!("text", e).appendm(single!(tagger::moveable_format(move |w| {
+                        write!(w, "{}", extra)?;
+                        util::interval_float(w, p + ystart_step, Some(ystep))
+                    }))),
+                );
+            }
+        }
+    }
+    
     let d = attr_builder()
         .attr("class", "poloto_text")
         .attr("alignment-baseline", "start")
