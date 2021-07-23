@@ -201,7 +201,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                     .build();
 
                 svg.append(
-                    single!("text", e).appendm(single!(tagger::moveable_format(move |w| {
+                    elem!("text", e).appendm(single!(tagger::moveable_format(move |w| {
                         write!(w, "{}", extra)?;
                         util::interval_float(w, p + ystart_step, Some(ystep))
                     }))),
