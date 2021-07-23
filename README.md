@@ -109,7 +109,7 @@ in html with an embeded svg. Some things you can do:
  * Highlight one plot, make it dashed, or add hover effect
  * Animate things using @keyframes
 
-The [`Plotter`] struct documents which css classes you can modify for the graph as a whole.
+The `Plotter` struct documents which css classes you can modify for the graph as a whole.
 Each plot function documents which css classes you can modify to change that specific plot.
 
 Scatter plots are done using SVG paths made up of lines of zero length. This allows you to change

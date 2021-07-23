@@ -201,14 +201,14 @@ pub trait Plottable {
 
 /// Convert other primitive types to f64 using this trait.
 /// Precision loss is considered acceptable, since this is just for visual human eyes.
-pub trait IntoF64: Copy {
-    fn into_f64(self) -> f64;
+pub trait AsF64: Copy {
+    fn as_f64(self) -> f64;
 }
 
 macro_rules! impl_into_plotnum {
     ($U: ty ) => {
-        impl IntoF64 for $U {
-            fn into_f64(self) -> f64 {
+        impl AsF64 for $U {
+            fn as_f64(self) -> f64 {
                 self as f64
             }
         }
@@ -230,31 +230,31 @@ impl_into_plotnum!(u128);
 impl_into_plotnum!(isize);
 impl_into_plotnum!(usize);
 
-impl<T: IntoF64> Plottable for [T; 2] {
+impl<T: AsF64> Plottable for [T; 2] {
     fn make_plot(self) -> [f64; 2] {
         let [x, y] = self;
-        [x.into_f64(), y.into_f64()]
+        [x.as_f64(), y.as_f64()]
     }
 }
 
-impl<T: IntoF64> Plottable for &[T; 2] {
+impl<T: AsF64> Plottable for &[T; 2] {
     fn make_plot(self) -> [f64; 2] {
         let [x, y] = self;
-        [x.into_f64(), y.into_f64()]
+        [x.as_f64(), y.as_f64()]
     }
 }
 
-impl<T: IntoF64> Plottable for (T, T) {
+impl<T: AsF64> Plottable for (T, T) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
-        [x.into_f64(), y.into_f64()]
+        [x.as_f64(), y.as_f64()]
     }
 }
 
-impl<T: IntoF64> Plottable for &(T, T) {
+impl<T: AsF64> Plottable for &(T, T) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
-        [x.into_f64(), y.into_f64()]
+        [x.as_f64(), y.as_f64()]
     }
 }
 
