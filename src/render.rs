@@ -7,10 +7,9 @@ use std::fmt;
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
 pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
-
-    let mut plotter={
-        let mut empty=crate::Plotter::new(elem!(""),"","","");
-        core::mem::swap(&mut empty,plotter);
+    let mut plotter = {
+        let mut empty = crate::Plotter::new(elem!(""), "", "", "");
+        core::mem::swap(&mut empty, plotter);
         empty
     };
 
@@ -34,7 +33,8 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
     //Find range.
     let [minx, maxx, miny, maxy] = if let Some(m) = util::find_bounds(
-        plotter.plots
+        plotter
+            .plots
             .iter_mut()
             .flat_map(|x| x.plots.iter_first().map(|[x, y]| [x as f64, y as f64])),
         plotter.xmarkers,
@@ -72,7 +72,8 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
             plot_type,
             mut plots,
         },
-    ) in plotter.plots
+    ) in plotter
+        .plots
         .into_iter()
         .enumerate()
         .map(|(i, x)| (i, i % NUM_COLORS, x))

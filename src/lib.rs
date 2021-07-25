@@ -6,7 +6,7 @@
 //!
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
-//! 
+//!
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 8 plots, the colors cycle back and are repeated.
 //!
@@ -466,12 +466,12 @@ impl<'a> Plotter<'a> {
 
     ///
     /// Use the plot iterators and generate out a [`tagger::Element`] which implements [`std::fmt::Display`]
-    /// 
+    ///
     /// Panics if the render fails.
     ///
     /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
     /// this function will mutable borrow the Plotter and leave it with empty data.
-    /// 
+    ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
