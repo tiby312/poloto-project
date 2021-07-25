@@ -12,12 +12,16 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
     let mut xname: Box<dyn fmt::Display> = Box::new("");
     let mut yname: Box<dyn fmt::Display> = Box::new("");
     let mut plots = Vec::new();
+    let mut xmarkers=Vec::new();
+    let mut ymarkers=Vec::new();
 
     core::mem::swap(&mut element, &mut plotter.element);
     core::mem::swap(&mut title, &mut plotter.title);
     core::mem::swap(&mut xname, &mut plotter.xname);
     core::mem::swap(&mut yname, &mut plotter.yname);
     core::mem::swap(&mut plots, &mut plotter.plots);
+    core::mem::swap(&mut xmarkers, &mut plotter.xmarkers);
+    core::mem::swap(&mut ymarkers, &mut plotter.ymarkers);
 
     let mut svg = element;
 
@@ -42,6 +46,8 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         plots
             .iter_mut()
             .flat_map(|x| x.plots.iter_first().map(|[x, y]| [x as f64, y as f64])),
+        xmarkers,
+        ymarkers,
     ) {
         m
     } else {
@@ -234,8 +240,6 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
             }
         }
 
-        //let name = format!("{}", tagger::moveable_format(|w| { plots.write_name(w) }));
-        //let name_exists = !name.is_empty();
         let name = tagger::moveable_format(move |w| plots.write_name(w));
 
         let d = attr_builder()
