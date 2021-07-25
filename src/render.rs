@@ -222,16 +222,24 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                 }
 
                 let mut path = tagger::path_builder();
-                use tagger::PathCommand::*;
-                path.add(M(padding, height - paddingy));
+                
+                let mut it=it;
+                if let Some([startx,starty])=it.next(){
+                    use tagger::PathCommand::*;
+                    path.add(M(startx, height - paddingy));
+                    path.add(L(startx,starty));
+                    let mut final_x=startx;
 
-                for [x, y] in it {
-                    path.add(L(x, y));
+                    for [x, y] in it {
+                        path.add(L(x, y));
+                        final_x=x;
+                    }
+                    path.add(L(final_x, height - paddingy));
+                    path.add(Z(""));
                 }
 
-                path.add(L(width - padding, height - paddingy));
-                path.add(Z(""));
-
+                
+                
                 let d = attr_builder()
                     .attr("class", formatm!("poloto{}fill", colori))
                     .attr_whole(path.build())
