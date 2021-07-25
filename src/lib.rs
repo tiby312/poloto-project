@@ -464,9 +464,12 @@ impl<'a> Plotter<'a> {
 
     ///
     /// Use the plot iterators and generate out a [`tagger::Element`] which implements [`std::fmt::Display`]
-    ///
+    /// 
     /// Panics if the render fails.
     ///
+    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
+    /// this function will mutable borrow the Plotter and leave it with empty data.
+    /// 
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
@@ -478,9 +481,7 @@ impl<'a> Plotter<'a> {
     }
 
     ///
-    /// Use the plot iterators and generate out a [`tagger::Element`] which implements [`std::fmt::Display`]
-    ///
-    /// Returns a fmt::Error if the render fails.
+    /// Like [`Plotter::render()`], but returns a `Result` instead of panicking on error.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];

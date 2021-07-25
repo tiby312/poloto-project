@@ -7,23 +7,14 @@ use std::fmt;
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
 pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
-    let mut element = elem!("");
-    let mut title: Box<dyn fmt::Display> = Box::new("");
-    let mut xname: Box<dyn fmt::Display> = Box::new("");
-    let mut yname: Box<dyn fmt::Display> = Box::new("");
-    let mut plots = Vec::new();
-    let mut xmarkers = Vec::new();
-    let mut ymarkers = Vec::new();
 
-    core::mem::swap(&mut element, &mut plotter.element);
-    core::mem::swap(&mut title, &mut plotter.title);
-    core::mem::swap(&mut xname, &mut plotter.xname);
-    core::mem::swap(&mut yname, &mut plotter.yname);
-    core::mem::swap(&mut plots, &mut plotter.plots);
-    core::mem::swap(&mut xmarkers, &mut plotter.xmarkers);
-    core::mem::swap(&mut ymarkers, &mut plotter.ymarkers);
+    let mut plotter={
+        let mut empty=crate::Plotter::new(elem!(""),"","","");
+        core::mem::swap(&mut empty,plotter);
+        empty
+    };
 
-    let mut svg = element;
+    let mut svg = plotter.element;
 
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;
@@ -43,11 +34,11 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
     //Find range.
     let [minx, maxx, miny, maxy] = if let Some(m) = util::find_bounds(
-        plots
+        plotter.plots
             .iter_mut()
             .flat_map(|x| x.plots.iter_first().map(|[x, y]| [x as f64, y as f64])),
-        xmarkers,
-        ymarkers,
+        plotter.xmarkers,
+        plotter.ymarkers,
     ) {
         m
     } else {
@@ -81,7 +72,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
             plot_type,
             mut plots,
         },
-    ) in plots
+    ) in plotter.plots
         .into_iter()
         .enumerate()
         .map(|(i, x)| (i, i % NUM_COLORS, x))
@@ -409,7 +400,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         .attr("x", width / 2.0)
         .attr("y", padding / 4.0)
         .build();
-    svg.append(elem!("text", d).appendm(single!(title)));
+    svg.append(elem!("text", d).appendm(single!(plotter.title)));
 
     let d = attr_builder()
         .attr("class", "poloto_text")
@@ -419,7 +410,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         .attr("x", width / 2.0)
         .attr("y", height - padding / 8.)
         .build();
-    svg.append(elem!("text", d).appendm(single!(xname)));
+    svg.append(elem!("text", d).appendm(single!(plotter.xname)));
 
     let d = attr_builder()
         .attr("class", "poloto_text")
@@ -434,7 +425,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
         .attr("y", height / 2.0)
         .build();
 
-    svg.append(elem!("text", d).appendm(single!(yname)));
+    svg.append(elem!("text", d).appendm(single!(plotter.yname)));
 
     let mut pp = tagger::path_builder();
     use tagger::PathCommand::*;
