@@ -5,6 +5,8 @@
 //! Documentation at [docs.rs](https://docs.rs/poloto)
 //!
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
+//! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
+//! 
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 8 plots, the colors cycle back and are repeated.
 //!
