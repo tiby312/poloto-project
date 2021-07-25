@@ -11,9 +11,6 @@ fn main() {
     let mut s = poloto::plot("simple", "x", "y");
 
     s.line_fill("", &data);
-    
+
     println!("{}", s.render());
 }
-
-
-

@@ -38,8 +38,6 @@ trait PlotTrait {
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
 }
 
-
-
 use fmt::Display;
 struct PlotStruct<I: Iterator<Item = [f64; 2]> + Clone, F: Display> {
     first: I,
@@ -205,14 +203,19 @@ pub trait Plottable {
 /// Convert other primitive types to f64 using this trait.
 /// Precision loss is considered acceptable, since this is just for visual human eyes.
 pub trait AsF64: Copy {
-    fn as_f64(self) -> f64;
+    fn as_f64(&self) -> f64;
 }
 
+impl<T: AsF64> AsF64 for &T {
+    fn as_f64(&self) -> f64 {
+        AsF64::as_f64(*self)
+    }
+}
 macro_rules! impl_into_plotnum {
     ($U: ty ) => {
         impl AsF64 for $U {
-            fn as_f64(self) -> f64 {
-                self as f64
+            fn as_f64(&self) -> f64 {
+                *self as f64
             }
         }
     };
@@ -298,8 +301,8 @@ pub struct Plotter<'a> {
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
     plots: Vec<Plot<'a>>,
-    xmarkers:Vec<f64>,
-    ymarkers:Vec<f64>
+    xmarkers: Vec<f64>,
+    ymarkers: Vec<f64>,
 }
 
 impl<'a> Plotter<'a> {
@@ -322,8 +325,8 @@ impl<'a> Plotter<'a> {
             xname: Box::new(xname),
             yname: Box::new(yname),
             plots: Vec::new(),
-            xmarkers:Vec::new(),
-            ymarkers:Vec::new()
+            xmarkers: Vec::new(),
+            ymarkers: Vec::new(),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -425,34 +428,33 @@ impl<'a> Plotter<'a> {
         self
     }
 
-
     /// Add x values that the scaled graph must fit.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// 
+    ///
     /// // Include origin in the graph.
     /// plotter.xmarker(0).ymarker(0);
     /// ```
-    pub fn xmarker<A:std::borrow::Borrow<B>,B:AsF64>(&mut self,marker:A)->&mut Self{
-        self.xmarkers.push(marker.borrow().as_f64());
+    pub fn xmarker<A: AsF64>(&mut self, marker: A) -> &mut Self {
+        self.xmarkers.push(marker.as_f64());
         self
     }
-    
+
     /// Add y values that the scaled graph must fit.
-    /// 
+    ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// 
+    ///
     /// // Include origin in the graph.
     /// plotter.xmarker(0).ymarker(0);
     /// ```
-    pub fn ymarker<A:std::borrow::Borrow<B>,B:AsF64>(&mut self,marker:A)->&mut Self{
-        self.ymarkers.push(marker.borrow().as_f64());
+    pub fn ymarker<A: AsF64>(&mut self, marker: A) -> &mut Self {
+        self.ymarkers.push(marker.as_f64());
         self
     }
 
@@ -486,5 +488,4 @@ impl<'a> Plotter<'a> {
     pub fn try_render(&mut self) -> Result<tagger::Element<'a>, fmt::Error> {
         render::render(self)
     }
-
 }

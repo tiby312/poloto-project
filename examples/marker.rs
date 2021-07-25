@@ -7,17 +7,13 @@ fn main() {
         [1989.0, 16.0],
         [2001.0, 20.0],
     ];
-
     let mut s = poloto::plot("marker example", "x", "y");
 
     s.line_fill("", &data);
-    
+
     //Scale grpah to include everything from year 0 and year 3000.
     //Also scale to include y value of 0.
-    s.xmarker(0).xmarker(3000).ymarker(0);
+    s.xmarker(0).xmarker(3000).ymarker(&0.0);
 
     println!("{}", s.render());
 }
-
-
-

@@ -12,8 +12,8 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
     let mut xname: Box<dyn fmt::Display> = Box::new("");
     let mut yname: Box<dyn fmt::Display> = Box::new("");
     let mut plots = Vec::new();
-    let mut xmarkers=Vec::new();
-    let mut ymarkers=Vec::new();
+    let mut xmarkers = Vec::new();
+    let mut ymarkers = Vec::new();
 
     core::mem::swap(&mut element, &mut plotter.element);
     core::mem::swap(&mut title, &mut plotter.title);
@@ -73,7 +73,6 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
     let scalex = (width - padding * 2.0) / (maxx - minx);
     let scaley = (height - paddingy * 2.0) / (maxy - miny);
-
 
     for (
         i,
@@ -222,24 +221,22 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                 }
 
                 let mut path = tagger::path_builder();
-                
-                let mut it=it;
-                if let Some([startx,starty])=it.next(){
+
+                let mut it = it;
+                if let Some([startx, starty]) = it.next() {
                     use tagger::PathCommand::*;
                     path.add(M(startx, height - paddingy));
-                    path.add(L(startx,starty));
-                    let mut final_x=startx;
+                    path.add(L(startx, starty));
+                    let mut final_x = startx;
 
                     for [x, y] in it {
                         path.add(L(x, y));
-                        final_x=x;
+                        final_x = x;
                     }
                     path.add(L(final_x, height - paddingy));
                     path.add(Z(""));
                 }
 
-                
-                
                 let d = attr_builder()
                     .attr("class", formatm!("poloto{}fill", colori))
                     .attr_whole(path.build())
@@ -261,7 +258,6 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
         svg.append(elem!("text", d).appendm(single!(name)));
     }
-
 
     {
         //Draw step lines
@@ -404,7 +400,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
             }
         }
     }
-    
+
     let d = attr_builder()
         .attr("class", "poloto_text")
         .attr("alignment-baseline", "start")
