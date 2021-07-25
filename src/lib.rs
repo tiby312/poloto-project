@@ -1,6 +1,9 @@
 //!
 //! Plot to SVG and style with CSS
 //!
+//! You can find poloto on [github](https://github.com/tiby312/poloto) and [crates.io](https://crates.io/crates/poloto).
+//! Documentation at [docs.rs](https://docs.rs/poloto)
+//!
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! * Plots containing NaN or Infinity are ignored.
 //! * After 8 plots, the colors cycle back and are repeated.
@@ -310,7 +313,8 @@ impl<'a> Plotter<'a> {
     /// Create a plotter with the specified element.
     ///
     /// ```
-    /// let svg = poloto::default_svg();
+    /// let mut svg = poloto::default_svg();
+    /// svg.append(tagger::single!(poloto::HTML_CONFIG_LIGHT_DEFAULT));
     /// let p = poloto::Plotter::new(svg, "title", "x", "y");
     /// ```
     pub fn new(
