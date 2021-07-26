@@ -11,10 +11,10 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 ## Gaussian Example
 
 ```rust
-use std::f64::consts::PI;
+use std::f64::consts::TAU;
 fn gaussian(sigma: f64, mu: f64) -> impl Fn(f64) -> f64 {
-    let aa = (sigma * (2.0 * PI).sqrt()).recip();
-    move |x| aa * (-0.5 * (x - mu).powi(2) / sigma.powi(2)).exp()
+    let aa = (sigma * TAU).sqrt().recip();
+    move |x| (-0.5 * (x - mu).powi(2) / sigma.powi(2)).exp() * aa
 }
 
 // PIPE me to a file!
