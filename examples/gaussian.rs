@@ -14,10 +14,10 @@ fn main() {
     let range=(0..10000).map(|x|x as f64/10000.0).map(|x|x*2.0-1.0);
 
     let mut s = poloto::plot("gaussian", "x", "y");
-    
-    s.line("",range.clone().map(|x|[x,a(x)]));
-    s.line("",range.clone().map(|x|[x,c(x)]));
-    s.line("",range.clone().map(|x|[x,b(x)]));
+   
+    s.line("a=10.0 c=0.3",range.clone().map(|x|[x,a(x)]));
+    s.line("a= 5.0 c=0.2",range.clone().map(|x|[x,c(x)]));
+    s.line("a=15.0 c=0.1",range.clone().map(|x|[x,b(x)]));
     
     println!("{}", s.render());
 }
