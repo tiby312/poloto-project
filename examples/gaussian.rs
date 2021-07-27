@@ -6,9 +6,7 @@ fn gaussian(sigma: f64, mu: f64) -> impl Fn(f64) -> f64 {
 
 // PIPE me to a file!
 fn main() {
-    let range = (0..10000)
-        .map(|x| x as f64 / 10000.0)
-        .map(|x| x * 10.0 - 5.0);
+    let range = (0..200).map(|x| x as f64 / 200.0).map(|x| x * 10.0 - 5.0);
 
     let mut s = poloto::plot("gaussian", "x", "y");
 
