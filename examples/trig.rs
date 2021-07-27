@@ -12,9 +12,14 @@ fn main() {
     );
 
     use poloto::Croppable;
+    // Using poloto::Croppable, we can filter out plots and still have discontinuity.
     plotter.line(
         "tan(x)",
-        x.iter().map(|&x|[x,x.tan()]).crop_above(10.0).crop_below(-10.0)
+        x.iter()
+            .map(|&x| [x, x.tan()])
+            .crop_above(10.0)
+            .crop_below(-10.0)
+            .crop_left(2.0),
     );
 
     plotter.line("sin(2x)", x.iter().map(|&x| [x, (2.0 * x).sin()]));

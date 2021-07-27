@@ -466,8 +466,8 @@ fn line_fill(
             ) {
                 (true, true) => {
                     if first {
-                        path.add(M(startx, base_line));
-                        path.add(L(startx, starty));
+                        path.add(M(last[0], base_line));
+                        path.add(L(last[0], last[1]));
 
                         first = false;
                     }
@@ -503,7 +503,7 @@ fn line(path: &mut tagger::PathBuilder, mut it: impl Iterator<Item = [f64; 2]>) 
             ) {
                 (true, true) => {
                     if first {
-                        path.add(M(startx, starty));
+                        path.add(M(last[0], last[1]));
                         first = false;
                     }
                     path.add(L(newx, newy));
