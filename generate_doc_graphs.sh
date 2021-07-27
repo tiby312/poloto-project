@@ -9,7 +9,6 @@ cargo run --example hover_shadow_html > assets/hover_shadow.html
 cargo run --example magnitude > assets/magnitude.svg
 cargo run --example trig > assets/trig.svg
 cargo run --example simple > assets/simple.svg
-cargo run --example marker > assets/marker.svg
 cargo run --example test > assets/test.html
 cargo run --example write_to_file
 cargo run --example dark > assets/dark.svg
