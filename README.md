@@ -107,7 +107,7 @@ fn main() {
 <img src="./assets/heart.svg" alt="demo">
 
 
-## Another Example 
+## Trig Example 
 
 ```rust
 use tagger::prelude::*;
