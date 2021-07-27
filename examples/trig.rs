@@ -11,20 +11,10 @@ fn main() {
         "This is the y label",
     );
 
-    // Filter out large asymptotic values manually before feeding it to the plotter
-    // by setting them to Nan or Inf.
+    use poloto::Croppable;
     plotter.line(
         "tan(x)",
-        x.iter().map(|&x| {
-            [x, {
-                let j = x.tan();
-                if j > 10.0 || j < -10.0 {
-                    f64::NAN
-                } else {
-                    j
-                }
-            }]
-        }),
+        x.iter().map(|&x|[x,x.tan()]).crop_above(10.0).crop_below(-10.0)
     );
 
     plotter.line("sin(2x)", x.iter().map(|&x| [x, (2.0 * x).sin()]));

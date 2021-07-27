@@ -23,6 +23,12 @@ mod test_readme {
     external_doc_test!(include_str!("../README.md"));
 }
 
+
+pub use crop::Croppable;
+pub use crop::Crop;
+mod crop;
+
+
 mod render;
 mod util;
 use std::fmt;
