@@ -14,7 +14,7 @@ fn main() {
         [2019, 5773600],
         [2020, 5989400],
         [2021, 6219700],
-        [2022, 0]  //To complete our histogram, we manually specify when 2021 ends.
+        [2022, 0], //To complete our histogram, we manually specify when 2021 ends.
     ];
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
