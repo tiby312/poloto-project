@@ -111,12 +111,7 @@ use tagger::prelude::*;
 
 // PIPE me to a file!
 fn main() {
-    let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
-
-    // Collect the iterator before passing it to a plot function
-    // if you are using an expensive iterator.
-    // The buffer has to live longer than the plotter, so we collect it here.
-    let buffer = x.clone().map(|x| [x, x.sin()]).collect::<Vec<_>>();
+    let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
 
     let mut plotter = poloto::Plotter::new(
         poloto::default_svg().appendm(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
@@ -125,26 +120,21 @@ fn main() {
         "This is the y label",
     );
 
-    // The iterator will be cloned and ran twice.
-    plotter.line("cos", x.clone().map(|x| [x, x.cos()]));
-
-    // When passing the buffer, make sure you pass it as a reference.
-    // If you don't do this, then the buffer will be duplicated in memory as
-    // the plotter will call `.clone()` on the iterator.
-    plotter.scatter("sin", &buffer);
-
-    plotter.histogram(
-        formatm!("sin-{}", 10),
-        x.clone().step_by(3).map(|x| [x, (x.sin() - 10.).round()]),
+    // Filter out large asymptotic manually before feeding it to the plotter.
+    plotter.line(
+        "tan(x)",
+        x.iter()
+            .map(|&x| [x, x.tan()])
+            .filter(|&[_, y]| y < 10.0 && y > -10.0),
     );
 
-    plotter.line_fill(
-        formatm!("sin-{}", 20),
-        x.clone().map(|x| [x, x.sin() - 20.]),
-    );
+    plotter.line("sin(2x)", x.iter().map(|&x| [x, (2.0 * x).sin()]));
+
+    plotter.line("2*cos(x)", x.iter().map(|&x| [x, 2.0 * x.cos()]));
 
     println!("{}", plotter.render());
 }
+
 
 ```
 
