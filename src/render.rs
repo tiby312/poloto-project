@@ -33,10 +33,11 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
     //Find range.
     let [minx, maxx, miny, maxy] = if let Some(m) = util::find_bounds(
-        plotter
-            .plots
-            .iter_mut()
-            .flat_map(|x| x.plots.iter_first().map(|[x, y]| [x as f64, y as f64])),
+        plotter.plots.iter_mut().flat_map(|x| {
+            x.plots
+                .iter_first()
+                .filter(|[x, y]| x.is_finite() && y.is_finite())
+        }),
         plotter.xmarkers,
         plotter.ymarkers,
     ) {
@@ -117,19 +118,41 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                     svg.append(single!("line", d));
                 }
 
-                let mut pp = tagger::points_builder();
-                for [x, y] in it {
-                    pp.add(x, y);
+                let mut path = tagger::path_builder();
+                let mut it = it;
+                if let Some([startx, starty]) = it.next() {
+                    use tagger::PathCommand::*;
+
+                    let mut last = [startx, starty];
+                    let mut first = true;
+                    for [newx, newy] in it {
+                        match (
+                            newx.is_finite() && newy.is_finite(),
+                            last[0].is_finite() && last[1].is_finite(),
+                        ) {
+                            (true, true) => {
+                                if first {
+                                    path.add(M(startx, starty));
+                                    first = false;
+                                }
+                                path.add(L(newx, newy));
+                            }
+                            (true, false) => {
+                                path.add(M(newx, newy));
+                            }
+                            _ => {}
+                        };
+                        last = [newx, newy];
+                    }
                 }
 
                 let d = attr_builder()
                     .attr("class", formatm!("poloto{}stroke", colori))
                     .attr("fill", "none")
                     .attr("stroke", "black")
-                    .attr_whole(pp.build())
+                    .attr_whole(path.build())
                     .build();
-
-                svg.append(single!("polyline", d));
+                svg.append(elem!("path", d));
             }
             PlotType::Scatter => {
                 if name_exists {
@@ -144,12 +167,12 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
                 use tagger::PathCommand::*;
                 let mut d = tagger::path_builder();
-                d.add(M(padding, height - paddingy));
+                //d.add(M(padding, height - paddingy));
                 for [x, y] in it {
                     d.add(M(x, y));
                     d.add(H_(0));
                 }
-                d.add(Z(""));
+                //d.add(Z(""));
 
                 let e = attr_builder()
                     .attr("class", formatm!("scatter poloto{}stroke", colori))

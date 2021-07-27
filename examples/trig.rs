@@ -11,12 +11,20 @@ fn main() {
         "This is the y label",
     );
 
-    // Filter out large asymptotic manually before feeding it to the plotter.
+    // Filter out large asymptotic values manually before feeding it to the plotter
+    // by setting them to Nan or Inf.
     plotter.line(
         "tan(x)",
-        x.iter()
-            .map(|&x| [x, x.tan()])
-            .filter(|&[_, y]| y < 10.0 && y > -10.0),
+        x.iter().map(|&x| {
+            [x, {
+                let j = x.tan();
+                if j > 10.0 || j < -10.0 {
+                    f64::NAN
+                } else {
+                    j
+                }
+            }]
+        }),
     );
 
     plotter.line("sin(2x)", x.iter().map(|&x| [x, (2.0 * x).sin()]));
