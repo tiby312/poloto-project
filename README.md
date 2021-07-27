@@ -59,7 +59,7 @@ fn main() {
         [2021,6219700]
     ];
 
-    let mut s = poloto::plot("Number of Wikipedia Articles On Jan 1st", "Year", "Number of Articles");
+    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
     s.line_fill("", &data);
 
