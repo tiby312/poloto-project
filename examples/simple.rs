@@ -18,7 +18,7 @@ fn main() {
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
-    s.line_fill("", &data);
+    s.histogram("", &data);
 
     //Scale grpah to include up to the year 2025.
     //Also scale to include a value of 0 articles.
