@@ -77,7 +77,7 @@ fn main() {
 <img src="./assets/simple.svg" alt="demo">
 
 
-## Another example
+## Parmetric Example
 
 ```rust
 // https://mathworld.wolfram.com/HeartCurve.html
