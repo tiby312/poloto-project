@@ -57,11 +57,12 @@ fn main() {
         [2019, 5773600],
         [2020, 5989400],
         [2021, 6219700],
+        [2022, 0]  //To complete our histogram, we manually specify when 2021 ends.
     ];
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
-    s.line_fill("", &data);
+    s.histogram("", &data);
 
     //Scale grpah to include up to the year 2025.
     //Also scale to include a value of 0 articles.
@@ -69,7 +70,6 @@ fn main() {
 
     println!("{}", s.render());
 }
-
 ```
 
 ## Output
