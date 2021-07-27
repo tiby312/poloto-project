@@ -119,32 +119,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                 }
 
                 let mut path = tagger::path_builder();
-                let mut it = it;
-                if let Some([startx, starty]) = it.next() {
-                    use tagger::PathCommand::*;
-
-                    let mut last = [startx, starty];
-                    let mut first = true;
-                    for [newx, newy] in it {
-                        match (
-                            newx.is_finite() && newy.is_finite(),
-                            last[0].is_finite() && last[1].is_finite(),
-                        ) {
-                            (true, true) => {
-                                if first {
-                                    path.add(M(startx, starty));
-                                    first = false;
-                                }
-                                path.add(L(newx, newy));
-                            }
-                            (true, false) => {
-                                path.add(M(newx, newy));
-                            }
-                            _ => {}
-                        };
-                        last = [newx, newy];
-                    }
-                }
+                line(&mut path, it);
 
                 let d = attr_builder()
                     .attr("class", formatm!("poloto{}stroke", colori))
@@ -167,12 +142,10 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
                 use tagger::PathCommand::*;
                 let mut d = tagger::path_builder();
-                //d.add(M(padding, height - paddingy));
-                for [x, y] in it {
+                for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                     d.add(M(x, y));
                     d.add(H_(0));
                 }
-                //d.add(Z(""));
 
                 let e = attr_builder()
                     .attr("class", formatm!("scatter poloto{}stroke", colori))
@@ -204,7 +177,8 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
                 );
 
                 let mut last = None;
-                for [x, y] in it {
+                //TODO dont necesarily filter?
+                for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                     if let Some((lx, ly)) = last {
                         let d = attr_builder()
                             .attr("x", lx)
@@ -237,20 +211,7 @@ pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt:
 
                 let mut path = tagger::path_builder();
 
-                let mut it = it;
-                if let Some([startx, starty]) = it.next() {
-                    use tagger::PathCommand::*;
-                    path.add(M(startx, height - paddingy));
-                    path.add(L(startx, starty));
-                    let mut final_x = startx;
-
-                    for [x, y] in it {
-                        path.add(L(x, y));
-                        final_x = x;
-                    }
-                    path.add(L(final_x, height - paddingy));
-                    path.add(Z(""));
-                }
+                line_fill(&mut path, it, height - paddingy);
 
                 let d = attr_builder()
                     .attr("class", formatm!("poloto{}fill", colori))
@@ -484,5 +445,75 @@ impl fmt::Write for WriteCounter {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.counter += s.len();
         Ok(())
+    }
+}
+
+fn line_fill(
+    path: &mut tagger::PathBuilder,
+    mut it: impl Iterator<Item = [f64; 2]>,
+    base_line: f64,
+) {
+    if let Some([startx, starty]) = it.next() {
+        use tagger::PathCommand::*;
+
+        let mut last = [startx, starty];
+        let mut last_finite = None;
+        let mut first = true;
+        for [newx, newy] in it {
+            match (
+                newx.is_finite() && newy.is_finite(),
+                last[0].is_finite() && last[1].is_finite(),
+            ) {
+                (true, true) => {
+                    if first {
+                        path.add(M(startx, base_line));
+                        path.add(L(startx, starty));
+
+                        first = false;
+                    }
+                    last_finite = Some([newx, newy]);
+                    path.add(L(newx, newy));
+                }
+                (true, false) => {
+                    path.add(M(newx, newy));
+                }
+                (false, true) => {
+                    path.add(L(last[0], base_line));
+                }
+                _ => {}
+            };
+            last = [newx, newy];
+        }
+        if let Some([x, _]) = last_finite {
+            path.add(L(x, base_line));
+            path.add(Z(""));
+        }
+    }
+}
+fn line(path: &mut tagger::PathBuilder, mut it: impl Iterator<Item = [f64; 2]>) {
+    if let Some([startx, starty]) = it.next() {
+        use tagger::PathCommand::*;
+
+        let mut last = [startx, starty];
+        let mut first = true;
+        for [newx, newy] in it {
+            match (
+                newx.is_finite() && newy.is_finite(),
+                last[0].is_finite() && last[1].is_finite(),
+            ) {
+                (true, true) => {
+                    if first {
+                        path.add(M(startx, starty));
+                        first = false;
+                    }
+                    path.add(L(newx, newy));
+                }
+                (true, false) => {
+                    path.add(M(newx, newy));
+                }
+                _ => {}
+            };
+            last = [newx, newy];
+        }
     }
 }
