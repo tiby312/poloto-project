@@ -133,7 +133,10 @@ fn main() {
 
     plotter.line("sin(2x)", x.iter().map(|&x| [x, (2.0 * x).sin()]));
 
-    plotter.line("2*cos(x)", x.iter().map(|&x| [x, 2.0 * x.cos()]));
+    plotter.line(
+        "2*cos(x)",
+        x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
+    );
 
     println!("{}", plotter.render());
 }
