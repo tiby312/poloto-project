@@ -1,7 +1,7 @@
-use std::f64::consts::TAU;
+// See https://en.wikipedia.org/wiki/Gaussian_function
 fn gaussian(sigma: f64, mu: f64) -> impl Fn(f64) -> f64 {
-    let aa = (sigma * TAU).sqrt().recip();
-    move |x| (-0.5 * (x - mu).powi(2) / sigma.powi(2)).exp() * aa
+    use std::f64::consts::TAU;
+    move |x| (-0.5 * (x - mu).powi(2) / sigma.powi(2)).exp() * (sigma * TAU).sqrt().recip()
 }
 
 // PIPE me to a file!
