@@ -208,7 +208,7 @@ pub fn simple_render<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
 pub fn simple_render_dark<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
     mut a: T,
 ) -> tagger::OwnedDisplayableElement<'a> {
-    theme_light().appendm(a.borrow_mut().render()).displaym()
+    theme_dark().appendm(a.borrow_mut().render()).displaym()
 }
 
 pub fn theme_css_variable<'a>() -> tagger::Element<'a> {
