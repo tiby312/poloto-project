@@ -18,7 +18,8 @@ fn main() -> core::fmt::Result {
 </div>
 </html>
         "###,
-        HEADER, fs
+        HEADER,
+        fs.display()
     );
     Ok(())
 }

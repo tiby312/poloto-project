@@ -1,5 +1,4 @@
 use poloto::*;
-use tagger::prelude::*;
 
 //PIPE me to a file!
 fn main() {
@@ -14,7 +13,7 @@ fn main() {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let theme = theme_css_variable().appendm(single!(
+    let theme = theme_css_variable().appendm(
         r###"
         <defs>
             <pattern id="pattern" patternUnits="userSpaceOnUse" width="50" height="50">
@@ -35,7 +34,7 @@ fn main() {
             fill: url(#pattern2);
         }
         </style>
-        "###
-    ));
-    println!("{}", theme.appendm(s.render()))
+        "###,
+    );
+    println!("{}", theme.appendm(s.render()).display())
 }

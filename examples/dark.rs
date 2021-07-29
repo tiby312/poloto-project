@@ -9,5 +9,5 @@ fn main() {
 
     plotter.line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
 
-    println!("{}", theme_dark().appendm(plotter.render()))
+    println!("{}", simple_render_dark(plotter))
 }

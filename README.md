@@ -27,7 +27,7 @@ fn main() {
     s.line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]));
     s.line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]));
 
-    println!("{}", s.render(poloto::theme_light()));
+    println!("{}", poloto::simple_render(s));
 }
 
 ```
@@ -66,8 +66,9 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0.0);
 
-    println!("{}", s.render(poloto::theme_dark()));
+    println!("{}", poloto::simple_render_dark(s));
 }
+
 
 ```
 
@@ -95,7 +96,7 @@ fn main() {
 
     s.line_fill("", range.map(|x| heart(x)));
 
-    println!("{}", s.render(poloto::theme_light()));
+    println!("{}", poloto::simple_render(s));
 }
 
 ```
@@ -138,7 +139,7 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", plotter.render(poloto::theme_light()));
+    println!("{}", poloto::simple_render(plotter));
 }
 
 ```

@@ -1,5 +1,4 @@
 use poloto::*;
-use tagger::prelude::*;
 fn main() {
     let data = [(1.0f32, 4.5), (2.0, 5.5), (3.0, 6.5)];
 
@@ -14,8 +13,9 @@ fn main() {
     println!(
         "{}",
         default_svg()
-            .appendm(single!(MY_STYLE))
+            .appendm(MY_STYLE)
             .appendm(plotter.render())
+            .display()
     )
 }
 

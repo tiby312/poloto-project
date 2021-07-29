@@ -41,7 +41,7 @@ fn main() {
                 .build()
         );
 
-        svg.append(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT));
+        svg.append(poloto::HTML_CONFIG_LIGHT_DEFAULT);
 
         let mut s = poloto::plot(formatm!("test {}", i), "x", "y");
 
@@ -52,5 +52,5 @@ fn main() {
 
     html.append(div);
 
-    println!("{}", html);
+    println!("{}", html.display());
 }

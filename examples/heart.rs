@@ -14,5 +14,5 @@ fn main() {
 
     s.line_fill("", range.map(|x| heart(x)));
 
-    println!("{}", poloto::theme_light().appendm(s.render()));
+    println!("{}", poloto::simple_render(s));
 }

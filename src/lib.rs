@@ -199,14 +199,26 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
 
+pub fn simple_render<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
+    mut a: T,
+) -> tagger::OwnedDisplayableElement<'a> {
+    theme_light().appendm(a.borrow_mut().render()).displaym()
+}
+
+pub fn simple_render_dark<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
+    mut a: T,
+) -> tagger::OwnedDisplayableElement<'a> {
+    theme_light().appendm(a.borrow_mut().render()).displaym()
+}
+
 pub fn theme_css_variable<'a>() -> tagger::Element<'a> {
-    default_svg().appendm(single!(HTML_CONFIG_CSS_VARIABLE_DEFAULT))
+    default_svg().appendm(HTML_CONFIG_CSS_VARIABLE_DEFAULT)
 }
 pub fn theme_light<'a>() -> tagger::Element<'a> {
-    default_svg().appendm(single!(HTML_CONFIG_LIGHT_DEFAULT))
+    default_svg().appendm(HTML_CONFIG_LIGHT_DEFAULT)
 }
 pub fn theme_dark<'a>() -> tagger::Element<'a> {
-    default_svg().appendm(single!(HTML_CONFIG_DARK_DEFAULT))
+    default_svg().appendm(HTML_CONFIG_DARK_DEFAULT)
 }
 
 /// The demsions of the svg graph `[800,500]`.
@@ -474,7 +486,7 @@ impl<'a> Plotter<'a> {
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// println!("{}",plotter.render(poloto::theme_light()));
+    /// println!("{}",plotter.render().display());
     /// ```
     pub fn render(&mut self) -> tagger::Element<'a> {
         self.try_render().unwrap()
@@ -487,8 +499,8 @@ impl<'a> Plotter<'a> {
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// let s = plotter.try_render(poloto::theme_light()).unwrap();
-    /// println!("{}",s);
+    /// let s = plotter.try_render().unwrap();
+    /// println!("{}",s.display());
     /// ```
     pub fn try_render(&mut self) -> Result<tagger::Element<'a>, fmt::Error> {
         render::render(self)

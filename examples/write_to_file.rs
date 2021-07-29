@@ -13,5 +13,5 @@ fn main() {
     let mut file = std::fs::File::create("assets/write_to_file.svg").unwrap();
 
     use std::io::Write;
-    write!(file, "{}", poloto::theme_light().appendm(s.render())).unwrap();
+    write!(file, "{}", poloto::simple_render(s)).unwrap();
 }
