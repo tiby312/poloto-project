@@ -6,6 +6,6 @@ fn main() {
 
     let s = poloto::plot("cows per year", "year", "cow")
         .scatter("", &data)
-        .render();
+        .render(poloto::theme_dark());
     println!("{}", s)
 }

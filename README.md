@@ -27,7 +27,7 @@ fn main() {
     s.line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]));
     s.line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]));
 
-    println!("{}", s.render());
+    println!("{}", s.render(poloto::theme_light()));
 }
 
 ```
@@ -55,7 +55,7 @@ fn main() {
         [2019, 5773600],
         [2020, 5989400],
         [2021, 6219700],
-        [2022, 0]  //To complete our histogram, we manually specify when 2021 ends.
+        [2022, 0], //To complete our histogram, we manually specify when 2021 ends.
     ];
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
@@ -66,8 +66,9 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0.0);
 
-    println!("{}", s.render());
+    println!("{}", s.render(poloto::theme_dark()));
 }
+
 ```
 
 ## Output
@@ -94,7 +95,7 @@ fn main() {
 
     s.line_fill("", range.map(|x| heart(x)));
 
-    println!("{}", s.render());
+    println!("{}", s.render(poloto::theme_light()));
 }
 
 ```
@@ -113,8 +114,7 @@ use tagger::prelude::*;
 fn main() {
     let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
 
-    let mut plotter = poloto::Plotter::new(
-        poloto::default_svg().appendm(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
+    let mut plotter = poloto::plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -138,7 +138,7 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", plotter.render());
+    println!("{}", plotter.render(poloto::theme_light()));
 }
 
 ```

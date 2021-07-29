@@ -43,11 +43,11 @@ fn main() {
 
         svg.append(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT));
 
-        let mut s = poloto::Plotter::new(svg, formatm!("test {}", i), "x", "y");
+        let mut s = poloto::plot(formatm!("test {}", i), "x", "y");
 
         s.scatter("", test);
 
-        div.append(s.render());
+        div.append(s.render(svg));
     }
 
     html.append(div);

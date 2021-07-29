@@ -85,6 +85,26 @@ enum PlotType {
     LineFill,
 }
 
+pub trait Renderable<'a> {
+    //fn write_stroke_class<T:fmt::Write>(&self,write:T,index:usize) -> fmt::Result;
+    //fn write_fill_class<T:fmt::Write>(&self,write:T,index:usize) -> fmt::Result;
+    fn create(self, num_plots: usize) -> tagger::Element<'a>;
+}
+
+impl<'a> Renderable<'a> for tagger::Element<'a> {
+    /*
+    fn write_stroke_class<T:fmt::Write>(&self,mut w:T,index:usize) -> fmt::Result{
+        write!(w,"poloto{}stroke",index)
+    }
+    fn write_fill_class<T:fmt::Write>(&self,mut w:T,index:usize) -> fmt::Result{
+        write!(w,"poloto{}fill",index)
+    }
+    */
+    fn create(self, _num_plots: usize) -> tagger::Element<'a> {
+        self
+    }
+}
+
 struct Plot<'a> {
     plot_type: PlotType,
     plots: Box<dyn PlotTrait + 'a>,
@@ -199,6 +219,16 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
 
+pub fn theme_css_variable<'a>() -> tagger::Element<'a> {
+    default_svg().appendm(single!(HTML_CONFIG_CSS_VARIABLE_DEFAULT))
+}
+pub fn theme_light<'a>() -> tagger::Element<'a> {
+    default_svg().appendm(single!(HTML_CONFIG_LIGHT_DEFAULT))
+}
+pub fn theme_dark<'a>() -> tagger::Element<'a> {
+    default_svg().appendm(single!(HTML_CONFIG_DARK_DEFAULT))
+}
+
 /// The demsions of the svg graph `[800,500]`.
 pub const DIMENSIONS: [usize; 2] = [800, 500];
 
@@ -274,25 +304,14 @@ impl<T: AsF64> Plottable for &(T, T) {
 }
 
 ///
-/// Create a Plotter with preset styling and svg tag.
-///
-/// Shorthand for
-/// ```
-/// use tagger::prelude::*;
-/// let p =poloto::Plotter::new(poloto::default_svg().appendm(single!(poloto::HTML_CONFIG_LIGHT_DEFAULT)),"title","xname","yname");
-/// ```
+/// Create a Plotter
 ///
 pub fn plot<'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
 ) -> Plotter<'a> {
-    Plotter::new(
-        default_svg().appendm(single!(HTML_CONFIG_LIGHT_DEFAULT)),
-        title,
-        xname,
-        yname,
-    )
+    Plotter::new(title, xname, yname)
 }
 
 /// Keeps track of plots.
@@ -305,7 +324,6 @@ pub fn plot<'a>(
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a> {
-    element: tagger::Element<'a>,
     title: Box<dyn fmt::Display + 'a>,
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
@@ -319,18 +337,14 @@ impl<'a> Plotter<'a> {
     /// Create a plotter with the specified element.
     ///
     /// ```
-    /// let mut svg = poloto::default_svg();
-    /// svg.append(tagger::single!(poloto::HTML_CONFIG_LIGHT_DEFAULT));
-    /// let p = poloto::Plotter::new(svg, "title", "x", "y");
+    /// let p = poloto::Plotter::new("title", "x", "y");
     /// ```
     pub fn new(
-        element: tagger::Element<'a>,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
     ) -> Plotter<'a> {
         Plotter {
-            element,
             title: Box::new(title),
             xname: Box::new(xname),
             yname: Box::new(yname),
@@ -480,10 +494,10 @@ impl<'a> Plotter<'a> {
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// println!("{}",plotter.render());
+    /// println!("{}",plotter.render(poloto::theme_light()));
     /// ```
-    pub fn render(&mut self) -> tagger::Element<'a> {
-        render::render(self).unwrap()
+    pub fn render(&mut self, element: impl Renderable<'a>) -> tagger::Element<'a> {
+        self.try_render(element).unwrap()
     }
 
     ///
@@ -493,10 +507,13 @@ impl<'a> Plotter<'a> {
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// let s = plotter.try_render().unwrap();
+    /// let s = plotter.try_render(poloto::theme_light()).unwrap();
     /// println!("{}",s);
     /// ```
-    pub fn try_render(&mut self) -> Result<tagger::Element<'a>, fmt::Error> {
-        render::render(self)
+    pub fn try_render(
+        &mut self,
+        element: impl Renderable<'a>,
+    ) -> Result<tagger::Element<'a>, fmt::Error> {
+        render::render(self, element)
     }
 }

@@ -6,14 +6,17 @@ use std::fmt;
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<'b>(plotter: &mut Plotter<'b>) -> Result<tagger::Element<'b>, fmt::Error> {
+pub fn render<'a>(
+    plotter: &mut Plotter<'a>,
+    element: impl Renderable<'a>,
+) -> Result<tagger::Element<'a>, fmt::Error> {
     let mut plotter = {
-        let mut empty = crate::Plotter::new(elem!(""), "", "", "");
+        let mut empty = crate::Plotter::new("", "", "");
         core::mem::swap(&mut empty, plotter);
         empty
     };
 
-    let mut svg = plotter.element;
+    let mut svg = element.create(plotter.plots.len());
 
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;

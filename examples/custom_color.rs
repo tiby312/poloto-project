@@ -5,18 +5,16 @@ fn main() {
 
     let data_int = [[1usize, 4], [2, 5], [3, 6]];
 
-    let mut plotter = Plotter::new(
-        default_svg().appendm(single!(MY_STYLE)),
-        "cows per year",
-        "year",
-        "cows",
-    );
+    let mut plotter = plot("cows per year", "year", "cows");
 
     plotter.scatter("ints", &data_int);
 
     plotter.line("floats", &data);
 
-    println!("{}", plotter.render())
+    println!(
+        "{}",
+        plotter.render(default_svg().appendm(single!(MY_STYLE)))
+    )
 }
 
 const MY_STYLE: &str = "<style>\

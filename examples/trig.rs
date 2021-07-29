@@ -4,8 +4,7 @@ use tagger::prelude::*;
 fn main() {
     let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
 
-    let mut plotter = poloto::Plotter::new(
-        poloto::default_svg().appendm(single!(poloto::HTML_CONFIG_DARK_DEFAULT)),
+    let mut plotter = poloto::plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -29,5 +28,5 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", plotter.render());
+    println!("{}", plotter.render(poloto::theme_light()));
 }

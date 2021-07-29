@@ -1,19 +1,13 @@
 use poloto::*;
-use tagger::prelude::*;
 fn main() -> core::fmt::Result {
-    let mut s = Plotter::new(
-        default_svg().appendm(single!(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT)),
-        "Demo: you can use CSS patterns if you embed SVG!",
-        "x",
-        "y",
-    );
+    let mut s = plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let fs = s.try_render()?;
+    let fs = s.try_render(poloto::theme_css_variable())?;
 
     println!(
         r###"
