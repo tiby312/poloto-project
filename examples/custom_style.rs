@@ -37,5 +37,5 @@ fn main() {
         </style>
         "###
     ));
-    println!("{}", s.render(theme))
+    println!("{}", theme.appendm(s.render()))
 }

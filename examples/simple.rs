@@ -25,5 +25,5 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0.0);
 
-    println!("{}", s.render(poloto::theme_dark()));
+    println!("{}", poloto::theme_dark().appendm(s.render()));
 }

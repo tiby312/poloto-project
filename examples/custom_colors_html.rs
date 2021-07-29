@@ -7,7 +7,7 @@ fn main() -> core::fmt::Result {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let fs = s.try_render(poloto::theme_css_variable())?;
+    let fs = poloto::theme_css_variable().appendm(s.try_render()?);
 
     println!(
         r###"

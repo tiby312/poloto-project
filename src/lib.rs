@@ -85,26 +85,6 @@ enum PlotType {
     LineFill,
 }
 
-pub trait Renderable<'a> {
-    //fn write_stroke_class<T:fmt::Write>(&self,write:T,index:usize) -> fmt::Result;
-    //fn write_fill_class<T:fmt::Write>(&self,write:T,index:usize) -> fmt::Result;
-    fn create(self, num_plots: usize) -> tagger::Element<'a>;
-}
-
-impl<'a> Renderable<'a> for tagger::Element<'a> {
-    /*
-    fn write_stroke_class<T:fmt::Write>(&self,mut w:T,index:usize) -> fmt::Result{
-        write!(w,"poloto{}stroke",index)
-    }
-    fn write_fill_class<T:fmt::Write>(&self,mut w:T,index:usize) -> fmt::Result{
-        write!(w,"poloto{}fill",index)
-    }
-    */
-    fn create(self, _num_plots: usize) -> tagger::Element<'a> {
-        self
-    }
-}
-
 struct Plot<'a> {
     plot_type: PlotType,
     plots: Box<dyn PlotTrait + 'a>,
@@ -496,8 +476,8 @@ impl<'a> Plotter<'a> {
     /// plotter.line("", &data);
     /// println!("{}",plotter.render(poloto::theme_light()));
     /// ```
-    pub fn render(&mut self, element: impl Renderable<'a>) -> tagger::Element<'a> {
-        self.try_render(element).unwrap()
+    pub fn render(&mut self) -> tagger::Element<'a> {
+        self.try_render().unwrap()
     }
 
     ///
@@ -510,10 +490,7 @@ impl<'a> Plotter<'a> {
     /// let s = plotter.try_render(poloto::theme_light()).unwrap();
     /// println!("{}",s);
     /// ```
-    pub fn try_render(
-        &mut self,
-        element: impl Renderable<'a>,
-    ) -> Result<tagger::Element<'a>, fmt::Error> {
-        render::render(self, element)
+    pub fn try_render(&mut self) -> Result<tagger::Element<'a>, fmt::Error> {
+        render::render(self)
     }
 }

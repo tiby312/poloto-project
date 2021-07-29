@@ -47,7 +47,7 @@ fn main() {
 
         s.scatter("", test);
 
-        div.append(s.render(svg));
+        div.append(svg.appendm(s.render()));
     }
 
     html.append(div);

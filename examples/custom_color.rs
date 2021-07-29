@@ -13,7 +13,9 @@ fn main() {
 
     println!(
         "{}",
-        plotter.render(default_svg().appendm(single!(MY_STYLE)))
+        default_svg()
+            .appendm(single!(MY_STYLE))
+            .appendm(plotter.render())
     )
 }
 
