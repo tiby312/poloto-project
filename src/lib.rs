@@ -199,24 +199,41 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
 
+///
+/// Create a svg graph with a default theme.
+///
 pub fn simple_render<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
     mut a: T,
 ) -> tagger::OwnedDisplayableElement<'a> {
     theme_light().appendm(a.borrow_mut().render()).displaym()
 }
 
+///
+/// Create a svg graph with a default dark theme.
+///
 pub fn simple_render_dark<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
     mut a: T,
 ) -> tagger::OwnedDisplayableElement<'a> {
     theme_dark().appendm(a.borrow_mut().render()).displaym()
 }
 
+///
+/// Create a svg element that has a css variable default theme.
+///
 pub fn theme_css_variable<'a>() -> tagger::Element<'a> {
     default_svg().appendm(HTML_CONFIG_CSS_VARIABLE_DEFAULT)
 }
+
+///
+/// Create a svg element that has a default theme.
+///
 pub fn theme_light<'a>() -> tagger::Element<'a> {
     default_svg().appendm(HTML_CONFIG_LIGHT_DEFAULT)
 }
+
+///
+/// Create a svg element that has a default dark theme.
+///
 pub fn theme_dark<'a>() -> tagger::Element<'a> {
     default_svg().appendm(HTML_CONFIG_DARK_DEFAULT)
 }
