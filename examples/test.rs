@@ -18,7 +18,6 @@ const fn generate_test() -> [&'static [[f32; 2]]; 8] {
     [test0, test1, test2, test3, test4, test5, test6, test7]
 }
 
-use tagger::attr_builder;
 use tagger::prelude::*;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
@@ -27,18 +26,14 @@ fn main() {
 
     let mut div = elem!(
         "div",
-        attr_builder()
-            .attr("style", "display:flex;flex-wrap:wrap;")
-            .build()
+        ("style","display:flex;flex-wrap:wrap;")
     );
 
     for (i, &test) in generate_test().iter().enumerate() {
         let mut svg = elem!(
             "svg",
-            poloto::default_svg_attr()
-                .attr("width", "500px")
-                .attr("height", "100%")
-                .build()
+            ("width","500px"),
+            ("height","100%")
         );
 
         svg.append(poloto::HTML_CONFIG_LIGHT_DEFAULT);

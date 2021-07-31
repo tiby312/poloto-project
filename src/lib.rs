@@ -94,7 +94,10 @@ struct Plot<'a> {
 /// The default svg tag element with the default attributes
 ///
 pub fn default_svg<'a>() -> tagger::Element<'a> {
-    elem!("svg", default_svg_attr().build())
+    tagger::elem_from_builder!(
+        "svg",
+        default_svg_attr().build()
+    )
 }
 
 ///
