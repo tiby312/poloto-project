@@ -7,7 +7,13 @@ fn main() -> core::fmt::Result {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let fs = poloto::theme_css_variable().appendm(s.try_render()?);
+    let mut buffer = String::new();
+    let mut e = tagger::new(&mut buffer);
+
+    default_svg(&mut e, tagger::no_attr(), |d| {
+        d.put_raw(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT);
+        s.render(d);
+    });
 
     println!(
         r###"
@@ -19,8 +25,7 @@ fn main() -> core::fmt::Result {
 </div>
 </html>
         "###,
-        HEADER,
-        fs.display()
+        HEADER, buffer
     );
 
     Ok(())

@@ -10,13 +10,12 @@ fn main() {
 
     plotter.line("floats", &data);
 
-    println!(
-        "{}",
-        default_svg()
-            .appendm(MY_STYLE)
-            .appendm(plotter.render())
-            .display()
-    )
+    let mut e = tagger::from_io(std::io::stdout());
+
+    default_svg(&mut e, tagger::no_attr(), |d| {
+        d.put_raw(MY_STYLE);
+        plotter.render(d);
+    });
 }
 
 const MY_STYLE: &str = "<style>\

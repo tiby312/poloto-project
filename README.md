@@ -27,7 +27,7 @@ fn main() {
     s.line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]));
     s.line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]));
 
-    println!("{}", poloto::simple_render(s));
+    s.simple_theme(&mut tagger::from_io(std::io::stdout()));
 }
 
 ```
@@ -66,9 +66,8 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0.0);
 
-    println!("{}", poloto::simple_render_dark(s));
+    s.simple_theme_dark(&mut tagger::from_io(std::io::stdout()));
 }
-
 
 ```
 
@@ -96,7 +95,7 @@ fn main() {
 
     s.line_fill("", range.map(|x| heart(x)));
 
-    println!("{}", poloto::simple_render(s));
+    s.simple_theme(&mut tagger::from_io(std::io::stdout()));
 }
 
 ```
@@ -109,7 +108,7 @@ fn main() {
 ## Trig Example 
 
 ```rust
-use tagger::prelude::*;
+use poloto::formatm;
 
 // PIPE me to a file!
 fn main() {
@@ -139,7 +138,7 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", poloto::simple_render(plotter));
+    plotter.simple_theme(&mut tagger::from_io(std::io::stdout()));
 }
 
 ```

@@ -7,7 +7,10 @@ fn main() -> core::fmt::Result {
     s.histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
     s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
 
-    let fs = poloto::theme_light().appendm(s.try_render()?);
+    let mut buffer = String::new();
+    let mut e = tagger::new(&mut buffer);
+
+    s.simple_theme(&mut e);
 
     println!(
         r###"
@@ -18,8 +21,7 @@ fn main() -> core::fmt::Result {
 </div>
 </html>
         "###,
-        HEADER,
-        fs.display()
+        HEADER, buffer
     );
     Ok(())
 }

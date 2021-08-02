@@ -1,10 +1,8 @@
-use poloto::*;
-
 //PIPE me to a file!
 fn main() {
     let x = (0..50).map(|x| (x as f32 / 50.0) * 10.0);
 
-    let mut s = plot(
+    let mut s = poloto::plot(
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
@@ -13,8 +11,12 @@ fn main() {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let theme = theme_css_variable().appendm(
-        r###"
+    let mut e = tagger::from_io(std::io::stdout());
+
+    poloto::default_svg(&mut e, tagger::no_attr(), |d| {
+        d.put_raw(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT);
+        d.put_raw(
+            r###"
         <defs>
             <pattern id="pattern" patternUnits="userSpaceOnUse" width="50" height="50">
                 <circle cx="25" cy="25" r="25" fill="black" fill-opacity="0.2"/>
@@ -35,6 +37,7 @@ fn main() {
         }
         </style>
         "###,
-    );
-    println!("{}", theme.appendm(s.render()).display())
+        );
+        s.render(d);
+    });
 }
