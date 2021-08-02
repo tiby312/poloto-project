@@ -1,4 +1,4 @@
-use tagger::prelude::*;
+use poloto::formatm;
 
 // PIPE me to a file!
 fn main() {
@@ -28,5 +28,5 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", poloto::simple_render(plotter));
+    plotter.simple_theme(&mut tagger::from_io(std::io::stdout()));
 }

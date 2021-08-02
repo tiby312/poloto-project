@@ -72,7 +72,7 @@ fn write_normal<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Re
     }
 }
 
-fn write_science<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
+fn write_science<T: std::fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
     if let Some(step) = step {
         let precision = if a == 0.0 {
             0
@@ -109,7 +109,7 @@ const SCIENCE: usize = 4;
 
 /// The step amount dictates the precision we need to show at each interval
 /// in order to capture the changes from each step
-pub fn interval_float<T: fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
+pub fn interval_float<T: std::fmt::Write>(fm: &mut T, a: f64, step: Option<f64>) -> fmt::Result {
     //TODO handle zero???
     //want to display zero with a formatting that is cosistent with others
 

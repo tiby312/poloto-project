@@ -18,34 +18,33 @@ const fn generate_test() -> [&'static [[f32; 2]]; 8] {
     [test0, test1, test2, test3, test4, test5, test6, test7]
 }
 
-use tagger::prelude::*;
+use poloto::formatm;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
 fn main() {
-    let mut html = elem!("html");
+    let mut e = tagger::from_io(std::io::stdout());
 
-    let mut div = elem!(
-        "div",
-        ("style","display:flex;flex-wrap:wrap;")
-    );
+    e.elem("html", tagger::no_attr()).build(|e| {
+        e.elem("div", |d| {
+            d.attr("style", "display:flex;flex-wrap:wrap;");
+        })
+        .build(|e| {
+            for (i, &test) in generate_test().iter().enumerate() {
+                poloto::default_svg(
+                    e,
+                    |d| {
+                        d.attr("width", "500px").attr("height", "100%");
+                    },
+                    |e| {
+                        e.put_raw(poloto::HTML_CONFIG_LIGHT_DEFAULT);
 
-    for (i, &test) in generate_test().iter().enumerate() {
-        let mut svg = elem!(
-            "svg",
-            ("width","500px"),
-            ("height","100%")
-        );
+                        let mut s = poloto::plot(formatm!("test {}", i), "x", "y");
 
-        svg.append(poloto::HTML_CONFIG_LIGHT_DEFAULT);
-
-        let mut s = poloto::plot(formatm!("test {}", i), "x", "y");
-
-        s.scatter("", test);
-
-        div.append(svg.appendm(s.render()));
-    }
-
-    html.append(div);
-
-    println!("{}", html.display());
+                        s.scatter("", test);
+                        s.render(e);
+                    },
+                );
+            }
+        })
+    });
 }

@@ -30,7 +30,6 @@ mod crop;
 mod render;
 mod util;
 use std::fmt;
-use tagger::prelude::*;
 
 ///The number of unique colors.
 const NUM_COLORS: usize = 8;
@@ -41,7 +40,7 @@ const WIDTH: f64 = 800.0;
 const HEIGHT: f64 = 500.0;
 
 trait PlotTrait {
-    fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result;
+    fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
 
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
@@ -66,8 +65,8 @@ impl<I: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotStruct<I, F> {
 }
 
 impl<D: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotTrait for PlotStruct<D, F> {
-    fn write_name(&self, a: &mut fmt::Formatter) -> fmt::Result {
-        self.func.fmt(a)
+    fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
+        write!(a, "{}", self.func)
     }
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
         &mut self.first
@@ -91,34 +90,28 @@ struct Plot<'a> {
 }
 
 ///
-/// The default svg tag element with the default attributes
-///
-pub fn default_svg<'a>() -> tagger::Element<'a> {
-    tagger::elem_from_builder!(
-        "svg",
-        default_svg_attr().build()
-    )
-}
-
-///
-/// The default svg tag attributes
+/// The default svg tag
 ///
 /// They are as follows:
 /// `class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"`
 ///
-pub fn default_svg_attr<'a>() -> tagger::AttrBuilder<'a> {
-    use tagger::prelude::*;
-
-    let mut k = tagger::attr_builder();
-    k.attr("class", "poloto")
-        .attr("width", DIMENSIONS[0])
-        .attr("height", DIMENSIONS[1])
-        .attr(
-            "viewBox",
-            formatm!("0 0 {} {}", DIMENSIONS[0], DIMENSIONS[1]),
-        )
-        .attr("xmlns", "http://www.w3.org/2000/svg");
-    k
+pub fn default_svg<T: std::fmt::Write, K>(
+    e: &mut tagger::ElemWriter<T>,
+    extra: impl FnOnce(&mut tagger::AttrWriter<T>),
+    func: impl FnOnce(&mut tagger::ElemWriter<T>) -> K,
+) -> K {
+    e.elem("svg", |d| {
+        d.attr("width", DIMENSIONS[0])
+            .attr("class", "poloto")
+            .attr("height", DIMENSIONS[1])
+            .attr(
+                "viewBox",
+                format_args!("0 0 {} {}", DIMENSIONS[0], DIMENSIONS[1]),
+            )
+            .attr("xmlns", "http://www.w3.org/2000/svg");
+        extra(d);
+    })
+    .build(|d| func(d))
 }
 
 /// Default theme using css variables (with light theme defaults if the variables are not set).
@@ -201,45 +194,6 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = "<style>.poloto {\
     .poloto5fill{fill:brown;}\
     .poloto6fill{fill:lime;}\
     .poloto7fill{fill:chocolate;}</style>";
-
-///
-/// Create a svg graph with a default theme.
-///
-pub fn simple_render<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
-    mut a: T,
-) -> tagger::OwnedDisplayableElement<'a> {
-    theme_light().appendm(a.borrow_mut().render()).displaym()
-}
-
-///
-/// Create a svg graph with a default dark theme.
-///
-pub fn simple_render_dark<'a, T: std::borrow::BorrowMut<Plotter<'a>>>(
-    mut a: T,
-) -> tagger::OwnedDisplayableElement<'a> {
-    theme_dark().appendm(a.borrow_mut().render()).displaym()
-}
-
-///
-/// Create a svg element that has a css variable default theme.
-///
-pub fn theme_css_variable<'a>() -> tagger::Element<'a> {
-    default_svg().appendm(HTML_CONFIG_CSS_VARIABLE_DEFAULT)
-}
-
-///
-/// Create a svg element that has a default theme.
-///
-pub fn theme_light<'a>() -> tagger::Element<'a> {
-    default_svg().appendm(HTML_CONFIG_LIGHT_DEFAULT)
-}
-
-///
-/// Create a svg element that has a default dark theme.
-///
-pub fn theme_dark<'a>() -> tagger::Element<'a> {
-    default_svg().appendm(HTML_CONFIG_DARK_DEFAULT)
-}
 
 /// The demsions of the svg graph `[800,500]`.
 pub const DIMENSIONS: [usize; 2] = [800, 500];
@@ -495,7 +449,7 @@ impl<'a> Plotter<'a> {
     }
 
     ///
-    /// Use the plot iterators and generate out a [`tagger::Element`] which implements [`std::fmt::Display`]
+    /// Use the plot iterators to write out the graph elements.
     ///
     /// Panics if the render fails.
     ///
@@ -506,23 +460,46 @@ impl<'a> Plotter<'a> {
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
-    /// println!("{}",plotter.render().display());
+    /// let mut k=String::new();
+    /// plotter.render(&mut tagger::new(&mut k));
     /// ```
-    pub fn render(&mut self) -> tagger::Element<'a> {
-        self.try_render().unwrap()
+    pub fn render<T: std::fmt::Write>(&mut self, a: &mut tagger::ElemWriter<T>) {
+        render::render(self, a)
     }
 
-    ///
-    /// Like [`Plotter::render()`], but returns a `Result` instead of panicking on error.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// let s = plotter.try_render().unwrap();
-    /// println!("{}",s.display());
-    /// ```
-    pub fn try_render(&mut self) -> Result<tagger::Element<'a>, fmt::Error> {
-        render::render(self)
+    pub fn simple_theme<T: std::fmt::Write>(&mut self, mut a: &mut tagger::ElemWriter<T>) {
+        default_svg(&mut a, tagger::no_attr(), |d| {
+            d.put_raw(HTML_CONFIG_LIGHT_DEFAULT);
+            self.render(d);
+        });
     }
+
+    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, mut a: &mut tagger::ElemWriter<T>) {
+        default_svg(&mut a, tagger::no_attr(), |d| {
+            d.put_raw(HTML_CONFIG_DARK_DEFAULT);
+            self.render(d);
+        });
+    }
+}
+
+/// Shorthand for `moveable_format(move |w|write!(w,...))`
+/// Similar to `format_args!()` except has a more flexible lifetime.
+#[macro_export]
+macro_rules! formatm {
+    ($($arg:tt)*) => {
+        $crate::moveable_format(move |w| write!(w,$($arg)*))
+    }
+}
+
+/// Convert a moved closure into a impl fmt::Display.
+/// This is useful because std's `format_args!()` macro
+/// has a shorter lifetime.
+pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
+    struct Foo<F>(F);
+    impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            (self.0)(formatter)
+        }
+    }
+    Foo(func)
 }

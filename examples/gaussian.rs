@@ -14,5 +14,5 @@ fn main() {
     s.line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]));
     s.line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]));
 
-    println!("{}", poloto::simple_render(s));
+    s.simple_theme(&mut tagger::from_io(std::io::stdout()));
 }

@@ -14,5 +14,5 @@ fn main() {
 
     s.line_fill("", range.map(|x| heart(x)));
 
-    println!("{}", poloto::simple_render(s));
+    s.simple_theme(&mut tagger::from_io(std::io::stdout()));
 }
