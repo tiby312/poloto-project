@@ -461,24 +461,36 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
     /// let mut k=String::new();
-    /// plotter.render(&mut tagger::new(&mut k));
+    /// plotter.render(tagger::new(&mut k));
     /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, a: &mut tagger::ElemWriter<T>) {
-        render::render(self, a)
+    pub fn render<T: std::fmt::Write, K>(&mut self, mut a: K) -> K
+    where
+        K: std::borrow::BorrowMut<tagger::ElemWriter<T>>,
+    {
+        render::render(self, a.borrow_mut());
+        a
     }
 
-    pub fn simple_theme<T: std::fmt::Write>(&mut self, mut a: &mut tagger::ElemWriter<T>) {
-        default_svg(&mut a, tagger::no_attr(), |d| {
+    pub fn simple_theme<T: std::fmt::Write, K>(&mut self, mut a: K) -> K
+    where
+        K: std::borrow::BorrowMut<tagger::ElemWriter<T>>,
+    {
+        default_svg(a.borrow_mut(), tagger::no_attr(), |d| {
             d.put_raw(HTML_CONFIG_LIGHT_DEFAULT);
             self.render(d);
         });
+        a
     }
 
-    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, mut a: &mut tagger::ElemWriter<T>) {
-        default_svg(&mut a, tagger::no_attr(), |d| {
+    pub fn simple_theme_dark<T: std::fmt::Write, K>(&mut self, mut a: K) -> K
+    where
+        K: std::borrow::BorrowMut<tagger::ElemWriter<T>>,
+    {
+        default_svg(a.borrow_mut(), tagger::no_attr(), |d| {
             d.put_raw(HTML_CONFIG_DARK_DEFAULT);
             self.render(d);
         });
+        a
     }
 }
 

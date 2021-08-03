@@ -8,11 +8,9 @@ fn gaussian(sigma: f64, mu: f64) -> impl Fn(f64) -> f64 {
 fn main() {
     let range = (0..200).map(|x| x as f64 / 200.0).map(|x| x * 10.0 - 5.0);
 
-    let mut s = poloto::plot("gaussian", "x", "y");
-
-    s.line("σ = 1.0", range.clone().map(|x| [x, gaussian(1.0, 0.0)(x)]));
-    s.line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]));
-    s.line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]));
-
-    s.simple_theme(&mut tagger::from_io(std::io::stdout()));
+    poloto::plot("gaussian", "x", "y")
+        .line("σ = 1.0", range.clone().map(|x| [x, gaussian(1.0, 0.0)(x)]))
+        .line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]))
+        .line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]))
+        .simple_theme(tagger::from_io(std::io::stdout()));
 }

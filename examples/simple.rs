@@ -25,5 +25,5 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0.0);
 
-    s.simple_theme_dark(&mut tagger::from_io(std::io::stdout()));
+    s.simple_theme_dark(tagger::from_io(std::io::stdout()));
 }

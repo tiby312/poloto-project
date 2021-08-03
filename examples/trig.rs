@@ -28,5 +28,5 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    plotter.simple_theme(&mut tagger::from_io(std::io::stdout()));
+    plotter.simple_theme(tagger::from_io(std::io::stdout()));
 }

@@ -10,9 +10,7 @@ fn heart(t: f64) -> [f64; 2] {
 fn main() {
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let mut s = poloto::plot("Heart Graph", "x", "y");
-
-    s.line_fill("", range.map(|x| heart(x)));
-
-    s.simple_theme(&mut tagger::from_io(std::io::stdout()));
+    poloto::plot("Heart Graph", "x", "y")
+        .line_fill("", range.map(|x| heart(x)))
+        .simple_theme(tagger::from_io(std::io::stdout()));
 }

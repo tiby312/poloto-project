@@ -38,10 +38,9 @@ fn main() {
                     |e| {
                         e.put_raw(poloto::HTML_CONFIG_LIGHT_DEFAULT);
 
-                        let mut s = poloto::plot(formatm!("test {}", i), "x", "y");
-
-                        s.scatter("", test);
-                        s.render(e);
+                        poloto::plot(formatm!("test {}", i), "x", "y")
+                            .scatter("", test)
+                            .render(e);
                     },
                 );
             }
