@@ -12,5 +12,5 @@ fn main() {
     //Write the graph to a file
     let file = std::fs::File::create("assets/write_to_file.svg").unwrap();
 
-    s.simple_theme(tagger::from_io(file));
+    s.simple_theme(poloto::upgrade_write(file));
 }

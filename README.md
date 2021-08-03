@@ -25,7 +25,7 @@ fn main() {
         .line("σ = 1.0", range.clone().map(|x| [x, gaussian(1.0, 0.0)(x)]))
         .line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]))
         .line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]))
-        .simple_theme(tagger::from_io(std::io::stdout()));
+        .simple_theme(poloto::upgrade_write(std::io::stdout()));
 }
 
 ```
@@ -64,7 +64,7 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0.0);
 
-    s.simple_theme_dark(tagger::from_io(std::io::stdout()));
+    s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }
 
 ```
@@ -91,7 +91,7 @@ fn main() {
 
     poloto::plot("Heart Graph", "x", "y")
         .line_fill("", range.map(|x| heart(x)))
-        .simple_theme(tagger::from_io(std::io::stdout()));
+        .simple_theme(poloto::upgrade_write(std::io::stdout()));
 }
 
 ```
@@ -134,7 +134,7 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    plotter.simple_theme(tagger::from_io(std::io::stdout()));
+    plotter.simple_theme(poloto::upgrade_write(std::io::stdout()));
 }
 
 ```

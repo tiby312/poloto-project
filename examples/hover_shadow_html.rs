@@ -8,9 +8,8 @@ fn main() -> core::fmt::Result {
     s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
 
     let mut buffer = String::new();
-    let mut e = tagger::new(&mut buffer);
 
-    s.simple_theme(&mut e);
+    s.simple_theme(&mut buffer);
 
     println!(
         r###"

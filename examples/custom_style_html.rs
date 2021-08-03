@@ -13,9 +13,8 @@ fn main() -> core::fmt::Result {
     //    let fs = poloto::theme_light().appendm(s.try_render()?);
 
     let mut buffer = String::new();
-    let mut e = tagger::new(&mut buffer);
 
-    s.simple_theme(&mut e);
+    s.simple_theme(&mut buffer);
 
     println!(
         r###"

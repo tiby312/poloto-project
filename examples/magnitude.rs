@@ -6,5 +6,5 @@ fn main() {
 
     poloto::plot("cows per year", "year", "cow")
         .scatter("", &data)
-        .simple_theme(tagger::from_io(std::io::stdout()));
+        .simple_theme(poloto::upgrade_write(std::io::stdout()));
 }

@@ -12,7 +12,7 @@ fn main() -> core::fmt::Result {
 
     default_svg(&mut e, tagger::no_attr(), |d| {
         d.put_raw(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT);
-        s.render(d);
+        s.render(d.writer());
     });
 
     println!(

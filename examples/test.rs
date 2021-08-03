@@ -22,7 +22,7 @@ use poloto::formatm;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
 fn main() {
-    let mut e = tagger::from_io(std::io::stdout());
+    let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
 
     e.elem("html", tagger::no_attr()).build(|e| {
         e.elem("div", |d| {
@@ -40,7 +40,7 @@ fn main() {
 
                         poloto::plot(formatm!("test {}", i), "x", "y")
                             .scatter("", test)
-                            .render(e);
+                            .render(e.writer());
                     },
                 );
             }

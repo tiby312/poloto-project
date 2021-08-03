@@ -23,6 +23,8 @@ mod test_readme {
     external_doc_test!(include_str!("../README.md"));
 }
 
+pub use tagger::upgrade_write;
+
 pub use crop::Crop;
 pub use crop::Croppable;
 mod crop;
@@ -450,6 +452,7 @@ impl<'a> Plotter<'a> {
 
     ///
     /// Use the plot iterators to write out the graph elements.
+    /// Does not add a svg tag, or any styling elements.
     ///
     /// Panics if the render fails.
     ///
@@ -461,36 +464,48 @@ impl<'a> Plotter<'a> {
     /// let mut plotter = poloto::plot("title", "x", "y");
     /// plotter.line("", &data);
     /// let mut k=String::new();
-    /// plotter.render(tagger::new(&mut k));
+    /// plotter.render(&mut k);
     /// ```
-    pub fn render<T: std::fmt::Write, K>(&mut self, mut a: K) -> K
-    where
-        K: std::borrow::BorrowMut<tagger::ElemWriter<T>>,
-    {
-        render::render(self, a.borrow_mut());
-        a
+    pub fn render<T: std::fmt::Write>(&mut self, a: T) -> T {
+        render::render(self, a)
     }
 
-    pub fn simple_theme<T: std::fmt::Write, K>(&mut self, mut a: K) -> K
-    where
-        K: std::borrow::BorrowMut<tagger::ElemWriter<T>>,
-    {
-        default_svg(a.borrow_mut(), tagger::no_attr(), |d| {
+    ///
+    /// Make a graph with a svg tag and a simple dark css theme.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// let mut k=String::new();
+    /// plotter.simple_theme(&mut k);
+    /// ```
+    pub fn simple_theme<T: std::fmt::Write>(&mut self, a: T) -> T {
+        let mut w = tagger::new(a);
+        default_svg(&mut w, tagger::no_attr(), |d| {
             d.put_raw(HTML_CONFIG_LIGHT_DEFAULT);
-            self.render(d);
+            self.render(d.writer());
         });
-        a
+        w.into_writer()
     }
 
-    pub fn simple_theme_dark<T: std::fmt::Write, K>(&mut self, mut a: K) -> K
-    where
-        K: std::borrow::BorrowMut<tagger::ElemWriter<T>>,
-    {
-        default_svg(a.borrow_mut(), tagger::no_attr(), |d| {
+    ///
+    /// Make a graph with a svg tag and a simple dark css theme.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// let mut k=String::new();
+    /// plotter.simple_theme_dark(&mut k);
+    /// ```
+    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, a: T) -> T {
+        let mut w = tagger::new(a);
+        default_svg(&mut w, tagger::no_attr(), |d| {
             d.put_raw(HTML_CONFIG_DARK_DEFAULT);
-            self.render(d);
+            self.render(d.writer());
         });
-        a
+        w.into_writer()
     }
 }
 

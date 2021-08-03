@@ -3,11 +3,9 @@ use crate::*;
 use std::fmt;
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<'a, T: std::fmt::Write>(
-    plotter: &mut Plotter<'a>,
-    mut writer: &mut tagger::ElemWriter<T>,
-) {
-    let writer = &mut writer;
+pub fn render<'a, T: std::fmt::Write>(plotter: &mut Plotter<'a>, writer: T) -> T {
+    let mut writer = tagger::new(writer);
+
     let plotter = {
         let mut empty = crate::Plotter::new("", "", "");
         core::mem::swap(&mut empty, plotter);
@@ -48,7 +46,7 @@ pub fn render<'a, T: std::fmt::Write>(
         m
     } else {
         //TODO test that this looks ok
-        return; //No plots at all. don't need to draw anything
+        return writer.into_writer(); //No plots at all. don't need to draw anything
     };
 
     const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
@@ -399,6 +397,8 @@ pub fn render<'a, T: std::fmt::Write>(
                 p.put(L(width - padding, height - paddingy));
             });
     });
+
+    writer.into_writer()
 }
 
 struct WriteCounter<T> {

@@ -10,11 +10,11 @@ fn main() {
 
     plotter.line("floats", &data);
 
-    let mut e = tagger::from_io(std::io::stdout());
+    let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
 
     default_svg(&mut e, tagger::no_attr(), |d| {
         d.put_raw(MY_STYLE);
-        plotter.render(d);
+        plotter.render(d.writer());
     });
 }
 

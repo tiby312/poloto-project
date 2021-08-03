@@ -11,7 +11,7 @@ fn main() {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let mut e = tagger::from_io(std::io::stdout());
+    let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
 
     poloto::default_svg(&mut e, tagger::no_attr(), |d| {
         d.put_raw(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT);
@@ -38,6 +38,6 @@ fn main() {
         </style>
         "###,
         );
-        s.render(d);
+        s.render(d.writer());
     });
 }
