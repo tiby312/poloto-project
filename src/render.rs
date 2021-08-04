@@ -3,7 +3,7 @@ use crate::*;
 use std::fmt;
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<'a, T: std::fmt::Write>(plotter: &mut Plotter<'a>, writer: T) -> T {
+pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let mut writer = tagger::new(writer);
 
     let plotter = {
