@@ -79,7 +79,13 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     ) in plots
         .into_iter()
         .enumerate()
-        .map(|(i, x)| (i, i % num_css_classes, x))
+        .map(|(i, x)| {
+            if let Some(nn)=num_css_classes{
+                (i, i % nn, x)
+            }else{
+                (i, i , x)
+            }
+        })
     {
         let spacing = padding / 3.0;
 
