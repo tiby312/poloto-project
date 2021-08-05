@@ -33,9 +33,6 @@ mod render;
 mod util;
 use std::fmt;
 
-///The number of unique colors.
-const NUM_COLORS: usize = 8;
-
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
@@ -298,6 +295,7 @@ pub struct Plotter<'a> {
     plots: Vec<Plot<'a>>,
     xmarkers: Vec<f64>,
     ymarkers: Vec<f64>,
+    num_css_classes: Option<usize>
 }
 
 impl<'a> Plotter<'a> {
@@ -319,6 +317,7 @@ impl<'a> Plotter<'a> {
             plots: Vec::new(),
             xmarkers: Vec::new(),
             ymarkers: Vec::new(),
+            num_css_classes: Some(8)
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -447,6 +446,24 @@ impl<'a> Plotter<'a> {
     /// ```
     pub fn ymarker<A: AsF64>(&mut self, marker: A) -> &mut Self {
         self.ymarkers.push(marker.as_f64());
+        self
+    }
+
+    ///
+    /// The number of distinct css classes. If there are more plots than
+    /// classes, then they will wrap around. The default value is 8.
+    /// 
+    /// A value of None, means it will never wrap around.
+    /// 
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line("", &data);
+    /// plotter.num_css_class(Some(30));
+    /// ```
+    /// 
+    pub fn num_css_class(&mut self,a:Option<usize>)->&mut Self{
+        self.num_css_classes=a;
         self
     }
 

@@ -18,7 +18,8 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let mut plots = plotter.plots;
     let xmarkers = plotter.xmarkers;
     let ymarkers = plotter.ymarkers;
-
+    let num_css_classes=plotter.num_css_classes;
+    
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;
     let padding = 150.0;
@@ -78,7 +79,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     ) in plots
         .into_iter()
         .enumerate()
-        .map(|(i, x)| (i, i % NUM_COLORS, x))
+        .map(|(i, x)| (i, i % num_css_classes, x))
     {
         let spacing = padding / 3.0;
 
