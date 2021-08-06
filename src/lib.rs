@@ -554,7 +554,7 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
 ///
 /// Remove all whitespace/newlines from a tring.
 ///
-pub fn minify(a: &str) -> impl fmt::Display + '_ {
+pub fn minify(a: &str) -> impl fmt::Display + '_ + Send + Sync {
     DisplayableClosure::new(move |w| {
         for a in a.split_whitespace() {
             write!(w, "{}", a)?;
