@@ -500,7 +500,7 @@ impl<'a> Plotter<'a> {
     pub fn simple_theme<T: std::fmt::Write>(&mut self, a: T) -> T {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(HTML_CONFIG_LIGHT_DEFAULT);
+            d.put_raw(minify(HTML_CONFIG_LIGHT_DEFAULT));
             self.render(d.writer());
         });
         w.into_writer()
@@ -519,7 +519,7 @@ impl<'a> Plotter<'a> {
     pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, a: T) -> T {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(HTML_CONFIG_DARK_DEFAULT);
+            d.put_raw(minify(HTML_CONFIG_DARK_DEFAULT));
             self.render(d.writer());
         });
         w.into_writer()
@@ -551,4 +551,17 @@ impl<F:Fn(&mut fmt::Formatter)->fmt::Result> fmt::Display for DisplayableClosure
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         (self.0)(formatter)
     }
+}
+
+
+///
+/// Remove all whitespace/newlines from a tring.
+/// 
+pub fn minify<'a>(a:&'a str)->impl fmt::Display+'a{
+    DisplayableClosure::new(move |w|{
+        for a in a.split_whitespace(){
+            write!(w,"{}",a)?;
+        }
+        Ok(())
+    })
 }

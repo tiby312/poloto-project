@@ -13,35 +13,35 @@ fn main() {
     let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
 
     default_svg(&mut e, tagger::no_attr(), |d| {
-        d.put_raw(MY_STYLE);
+        d.put_raw(poloto::minify(MY_STYLE));
         plotter.render(d.writer());
     });
 }
 
-const MY_STYLE: &str = "<style>\
-.poloto { \
-    stroke-linecap:round;\
-    font-family: sans-serif;\
-    stroke-width:2;\
-    }\
-    .scatter{stroke-width:33}\
-    .poloto_text{fill: black;  }\
-    .poloto_axis_lines{stroke: black;stroke-width:3;fill:none}\
-    .poloto_background{fill: aliceblue; }\
-    .poloto0stroke{stroke:  purple; }\
-    .poloto1stroke{stroke:  green; }\
-    .poloto2stroke{stroke:  purple; }\
-    .poloto3stroke{stroke:  purple; }\
-    .poloto4stroke{stroke:  purple; }\
-    .poloto5stroke{stroke:  purple; }\
-    .poloto6stroke{stroke:  purple; }\
-    .poloto7stroke{stroke:  purple; }\
-    .poloto0fill{fill:purple;}\
-    .poloto1fill{fill:green;}\
-    .poloto2fill{fill:purple;}\
-    .poloto3fill{fill:purple;}\
-    .poloto4fill{fill:purple;}\
-    .poloto5fill{fill:purple;}\
-    .poloto6fill{fill:purple;}\
-    .poloto7fill{fill:purple;}\
-</style>";
+const MY_STYLE: &str = r###"<style>
+.poloto { 
+    stroke-linecap:round;
+    font-family: sans-serif;
+    stroke-width:2;
+    }
+    .scatter{stroke-width:33}
+    .poloto_text{fill: black;  }
+    .poloto_axis_lines{stroke: black;stroke-width:3;fill:none}
+    .poloto_background{fill: aliceblue; }
+    .poloto0stroke{stroke:  purple; }
+    .poloto1stroke{stroke:  green; }
+    .poloto2stroke{stroke:  purple; }
+    .poloto3stroke{stroke:  purple; }
+    .poloto4stroke{stroke:  purple; }
+    .poloto5stroke{stroke:  purple; }
+    .poloto6stroke{stroke:  purple; }
+    .poloto7stroke{stroke:  purple; }
+    .poloto0fill{fill:purple;}
+    .poloto1fill{fill:green;}
+    .poloto2fill{fill:purple;}
+    .poloto3fill{fill:purple;}
+    .poloto4fill{fill:purple;}
+    .poloto5fill{fill:purple;}
+    .poloto6fill{fill:purple;}
+    .poloto7fill{fill:purple;}
+</style>"###;
