@@ -94,7 +94,7 @@ struct Plot<'a> {
 /// They are as follows:
 /// `class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"`
 ///
-pub fn default_svg< T: std::fmt::Write, K>(
+pub fn default_svg<T: std::fmt::Write, K>(
     e: &mut tagger::ElemWriter<T>,
     extra: impl FnOnce(&mut tagger::AttrWriter<T>),
     func: impl FnOnce(&mut tagger::ElemWriter<T>) -> K,
@@ -554,7 +554,7 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
 ///
 /// Remove all whitespace/newlines from a tring.
 ///
-pub fn minify(a: &str) -> impl fmt::Display + '_  {
+pub fn minify(a: &str) -> impl fmt::Display + '_ {
     DisplayableClosure::new(move |w| {
         for a in a.split_whitespace() {
             write!(w, "{}", a)?;
