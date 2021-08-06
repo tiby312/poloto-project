@@ -28,7 +28,7 @@ const MY_STYLE: &str = r###"<style>
     .scatter{stroke-width:33}
     .poloto_text{fill: black;  }
     .poloto_axis_lines{stroke: black;stroke-width:3;fill:none}
-    .poloto_background{fill: aliceblue; }
+    .poloto_background{background-color: rgba(100,0,0,0.5) }
     .poloto0stroke{stroke:  purple; }
     .poloto1stroke{stroke:  green; }
     .poloto2stroke{stroke:  purple; }

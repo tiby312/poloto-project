@@ -35,6 +35,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let padding = 150.0;
     let paddingy = 100.0;
 
+    /*
     writer.single("rect", |d| {
         d.attr("class", "poloto_background")
             .attr("fill", "white")
@@ -43,6 +44,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             .attr("width", width)
             .attr("height", height);
     });
+    */
 
     //Find range.
     let [minx, maxx, miny, maxy] = util::find_bounds(

@@ -101,7 +101,7 @@ pub fn default_svg<T: std::fmt::Write, K>(
 ) -> K {
     e.elem("svg", |d| {
         d.attr("width", DIMENSIONS[0])
-            .attr("class", "poloto")
+            .attr("class", "poloto_background poloto")
             .attr("height", DIMENSIONS[1])
             .attr(
                 "viewBox",
@@ -123,7 +123,7 @@ pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
     .scatter{stroke-width:7}
     .poloto_text{fill: var(--poloto_fg_color,black);}
     .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stroke-width:3;fill:none;stroke-dasharray:none}
-    .poloto_background{fill: var(--poloto_bg_color,aliceblue);}
+    .poloto_background{background-color: var(--poloto_bg_color,aliceblue);}
     .poloto0stroke{stroke:  var(--poloto_color0,blue);}
     .poloto1stroke{stroke:  var(--poloto_color1,red);}
     .poloto2stroke{stroke:  var(--poloto_color2,green);}
@@ -151,7 +151,7 @@ pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
     .scatter{stroke-width:7}
     .poloto_text{fill: black;}
     .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
-    .poloto_background{fill: aliceblue;}
+    .poloto_background{background-color: aliceblue;}
     .poloto0stroke{stroke:  blue;}
     .poloto1stroke{stroke:  red;}
     .poloto2stroke{stroke:  green;}
@@ -179,7 +179,7 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
     .scatter{stroke-width:7}
     .poloto_text{fill: white;}
     .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
-    .poloto_background{fill: #262626;}
+    .poloto_background{background-color: #262626;}
     .poloto0stroke{stroke:  blue;}
     .poloto1stroke{stroke:  red;}
     .poloto2stroke{stroke:  green;}
