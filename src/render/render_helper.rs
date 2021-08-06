@@ -173,14 +173,12 @@ pub(super) fn draw_base<T: fmt::Write>(
 
         {
             //step num is assured to be atleast 1.
-            let (extra, xstart_step) = if crate::util::determine_if_should_use_strat(
+            let (extra, xstart_step) = if util::determine_if_should_use_strat(
                 xstart_step,
                 xstart_step + ((xstep_num - 1) as f64) * xstep,
                 xstep,
             )
-            .unwrap()
             {
-                //TODO this panic okay?
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -190,8 +188,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", paddingy * 0.7);
                     })
                     .build(|d| {
-                        write!(d.writer(), "Where j = ").unwrap();
-                        crate::util::interval_float(d.writer(), xstart_step, None).unwrap()
+                        d.put_raw(format_args!("Where j = {}",crate::util::interval_float(xstart_step,None)));
                     });
 
                 ("j+", 0.0)
@@ -223,23 +220,18 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", height - paddingy + texty_padding);
                     })
                     .build(|w| {
-                        //TODO simplify
-                        write!(w.writer(), "{}", extra).unwrap();
-                        util::interval_float(w.writer(), p + xstart_step, Some(xstep)).unwrap()
+                        w.put_raw(format_args!("{}{}",extra,util::interval_float(p + xstart_step, Some(xstep))));
                     });
             }
         }
 
         {
-            //TODO remove unwrap()???
             //step num is assured to be atleast 1.
-            let (extra, ystart_step) = if crate::util::determine_if_should_use_strat(
+            let (extra, ystart_step) = if util::determine_if_should_use_strat(
                 ystart_step,
                 ystart_step + ((ystep_num - 1) as f64) * ystep,
                 ystep,
-            )
-            .unwrap()
-            {
+            ){
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -249,8 +241,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", paddingy * 0.7);
                     })
                     .build(|w| {
-                        write!(w.writer(), "Where k = ").unwrap();
-                        crate::util::interval_float(w.writer(), ystart_step, None).unwrap()
+                        w.put_raw(format_args!("Where k = {}",util::interval_float(ystart_step,None)));
                     });
 
                 ("k+", 0.0)
@@ -282,8 +273,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", yy);
                     })
                     .build(|w| {
-                        write!(w.writer(), "{}", extra).unwrap();
-                        util::interval_float(w.writer(), p + ystart_step, Some(ystep)).unwrap();
+                        w.put_raw(format_args!("{}{}",extra,util::interval_float(p + ystart_step, Some(ystep))));
                     });
             }
         }
