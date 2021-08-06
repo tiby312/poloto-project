@@ -64,7 +64,7 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
 }
 
 fn make_normal(a: f64, step: Option<f64>) -> impl fmt::Display {
-    crate::DisplayableClosure::new(move |fm|{
+    crate::DisplayableClosure::new(move |fm| {
         if let Some(step) = step {
             let k = (-step.log10()).ceil();
             let k = k.max(0.0);
@@ -76,7 +76,7 @@ fn make_normal(a: f64, step: Option<f64>) -> impl fmt::Display {
 }
 
 fn make_science(a: f64, step: Option<f64>) -> impl fmt::Display {
-    crate::DisplayableClosure::new(move |fm|{
+    crate::DisplayableClosure::new(move |fm| {
         if let Some(step) = step {
             let precision = if a == 0.0 {
                 0
@@ -85,10 +85,10 @@ fn make_science(a: f64, step: Option<f64>) -> impl fmt::Display {
                 let k2 = -a.abs().log10().ceil();
                 let k1 = k1 as isize;
                 let k2 = k2 as isize;
-    
+
                 (k1 - k2).max(0) as usize
             };
-    
+
             write!(fm, "{0:.1$e}", a, precision)
         } else {
             write!(fm, "{}", a)
@@ -100,8 +100,8 @@ pub fn determine_if_should_use_strat(start: f64, end: f64, step: f64) -> bool {
     let mut start_s = String::new();
     let mut end_s = String::new();
 
-    write!(&mut start_s,"{}",interval_float(start,Some(step))).unwrap();
-    write!(&mut end_s,"{}",interval_float(end,Some(step))).unwrap();
+    write!(&mut start_s, "{}", interval_float(start, Some(step))).unwrap();
+    write!(&mut end_s, "{}", interval_float(end, Some(step))).unwrap();
 
     start_s.len() > 7 || end_s.len() > 7
 }
@@ -113,21 +113,21 @@ const SCIENCE: usize = 4;
 pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
     //TODO handle zero???
     //want to display zero with a formatting that is cosistent with others
-    crate::DisplayableClosure::new(move |fm|{
+    crate::DisplayableClosure::new(move |fm| {
         if a.abs().log10().floor().abs() > SCIENCE as f64 {
             let mut k = String::new();
-            write!(&mut k,"{}",make_science(a, step))?;
-    
+            write!(&mut k, "{}", make_science(a, step))?;
+
             let mut j = String::new();
-            write!(&mut j,"{}",make_normal(a,step))?;
-    
+            write!(&mut j, "{}", make_normal(a, step))?;
+
             //Even if we use scientific notation,
             //it could end up as more characters
             //because of the needed precision.
             let ans = if k.len() < j.len() { k } else { j };
             write!(fm, "{}", ans)?;
         } else {
-            write!(fm,"{}",make_normal(a, step))?;
+            write!(fm, "{}", make_normal(a, step))?;
         }
         Ok(())
     })

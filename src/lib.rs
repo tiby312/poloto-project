@@ -94,7 +94,7 @@ struct Plot<'a> {
 /// They are as follows:
 /// `class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"`
 ///
-pub fn default_svg<'a,T: std::fmt::Write, K>(
+pub fn default_svg< T: std::fmt::Write, K>(
     e: &mut tagger::ElemWriter<T>,
     extra: impl FnOnce(&mut tagger::AttrWriter<T>),
     func: impl FnOnce(&mut tagger::ElemWriter<T>) -> K,
@@ -526,8 +526,6 @@ impl<'a> Plotter<'a> {
     }
 }
 
-
-
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
 #[macro_export]
@@ -542,25 +540,24 @@ macro_rules! formatm {
 /// has a shorter lifetime.
 pub struct DisplayableClosure<F>(pub F);
 
-impl<F:Fn(&mut fmt::Formatter)->fmt::Result> DisplayableClosure<F>{
-    pub fn new(a:F)->Self{
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
+    pub fn new(a: F) -> Self {
         DisplayableClosure(a)
     }
 }
-impl<F:Fn(&mut fmt::Formatter)->fmt::Result> fmt::Display for DisplayableClosure<F>{
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         (self.0)(formatter)
     }
 }
 
-
 ///
 /// Remove all whitespace/newlines from a tring.
-/// 
-pub fn minify<'a>(a:&'a str)->impl fmt::Display+'a{
-    DisplayableClosure::new(move |w|{
-        for a in a.split_whitespace(){
-            write!(w,"{}",a)?;
+///
+pub fn minify(a: &str) -> impl fmt::Display + '_  {
+    DisplayableClosure::new(move |w| {
+        for a in a.split_whitespace() {
+            write!(w, "{}", a)?;
         }
         Ok(())
     })

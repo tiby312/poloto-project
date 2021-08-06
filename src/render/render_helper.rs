@@ -177,8 +177,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                 xstart_step,
                 xstart_step + ((xstep_num - 1) as f64) * xstep,
                 xstep,
-            )
-            {
+            ) {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -188,7 +187,10 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", paddingy * 0.7);
                     })
                     .build(|d| {
-                        d.put_raw(format_args!("Where j = {}",crate::util::interval_float(xstart_step,None)));
+                        d.put_raw(format_args!(
+                            "Where j = {}",
+                            crate::util::interval_float(xstart_step, None)
+                        ));
                     });
 
                 ("j+", 0.0)
@@ -220,7 +222,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", height - paddingy + texty_padding);
                     })
                     .build(|w| {
-                        w.put_raw(format_args!("{}{}",extra,util::interval_float(p + xstart_step, Some(xstep))));
+                        w.put_raw(format_args!(
+                            "{}{}",
+                            extra,
+                            util::interval_float(p + xstart_step, Some(xstep))
+                        ));
                     });
             }
         }
@@ -231,7 +237,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                 ystart_step,
                 ystart_step + ((ystep_num - 1) as f64) * ystep,
                 ystep,
-            ){
+            ) {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -241,7 +247,10 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", paddingy * 0.7);
                     })
                     .build(|w| {
-                        w.put_raw(format_args!("Where k = {}",util::interval_float(ystart_step,None)));
+                        w.put_raw(format_args!(
+                            "Where k = {}",
+                            util::interval_float(ystart_step, None)
+                        ));
                     });
 
                 ("k+", 0.0)
@@ -273,7 +282,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                             .attr("y", yy);
                     })
                     .build(|w| {
-                        w.put_raw(format_args!("{}{}",extra,util::interval_float(p + ystart_step, Some(ystep))));
+                        w.put_raw(format_args!(
+                            "{}{}",
+                            extra,
+                            util::interval_float(p + ystart_step, Some(ystep))
+                        ));
                     });
             }
         }
