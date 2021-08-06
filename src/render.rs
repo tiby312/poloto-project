@@ -18,8 +18,8 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let mut plots = plotter.plots;
     let xmarkers = plotter.xmarkers;
     let ymarkers = plotter.ymarkers;
-    let num_css_classes=plotter.num_css_classes;
-    
+    let num_css_classes = plotter.num_css_classes;
+
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;
     let padding = 150.0;
@@ -76,17 +76,13 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             plot_type,
             mut plots,
         },
-    ) in plots
-        .into_iter()
-        .enumerate()
-        .map(|(i, x)| {
-            if let Some(nn)=num_css_classes{
-                (i, i % nn, x)
-            }else{
-                (i, i , x)
-            }
-        })
-    {
+    ) in plots.into_iter().enumerate().map(|(i, x)| {
+        if let Some(nn) = num_css_classes {
+            (i, i % nn, x)
+        } else {
+            (i, i, x)
+        }
+    }) {
         let spacing = padding / 3.0;
 
         let legendx1 = width - padding / 1.2 + padding / 30.0;
