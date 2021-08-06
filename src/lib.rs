@@ -540,7 +540,7 @@ macro_rules! formatm {
 /// Convert a moved closure into a impl fmt::Display.
 /// This is useful because std's `format_args!()` macro
 /// has a shorter lifetime.
-pub struct DisplayableClosure<F>(F);
+pub struct DisplayableClosure<F>(pub F);
 
 impl<F:Fn(&mut fmt::Formatter)->fmt::Result> DisplayableClosure<F>{
     pub fn new(a:F)->Self{
