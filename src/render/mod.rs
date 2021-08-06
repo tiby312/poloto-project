@@ -113,12 +113,22 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             }
             PlotType::Scatter => {
                 if name_exists {
+                    writer.single("line", |d| {
+                        d.attr("class", format_args!("scatter poloto{}stroke", colori))
+                            .attr("stroke", "black")
+                            .attr("x1", legendx1 + padding / 30.0)
+                            .attr("x2", legendx1 + padding / 30.0)
+                            .attr("y1", legendy1)
+                            .attr("y2", legendy1);
+                    });
+                    /*
                     writer.single("circle", |d| {
                         d.attr("class", format_args!("poloto{}fill", colori))
                             .attr("cx", legendx1 + padding / 30.0)
                             .attr("cy", legendy1)
                             .attr("r", padding / 30.0);
                     });
+                    */
                 }
 
                 writer.single("path", |d| {
