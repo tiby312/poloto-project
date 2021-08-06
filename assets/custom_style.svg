@@ -6,23 +6,23 @@
     }
     .scatter{stroke-width:7}
     .poloto_text{fill: var(--poloto_fg_color,black);}
-    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stroke-width:3;fill:none}
+    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stroke-width:3;fill:none;stroke-dasharray:none}
     .poloto_background{fill: var(--poloto_bg_color,aliceblue);}
     .poloto0stroke{stroke:  var(--poloto_color0,blue);}
     .poloto1stroke{stroke:  var(--poloto_color1,red);}
     .poloto2stroke{stroke:  var(--poloto_color2,green);}
     .poloto3stroke{stroke:  var(--poloto_color3,gold);}
     .poloto4stroke{stroke:  var(--poloto_color4,aqua);}
-    .poloto5stroke{stroke:  var(--poloto_color5,brown);}
-    .poloto6stroke{stroke:  var(--poloto_color6,lime);}
+    .poloto5stroke{stroke:  var(--poloto_color5,lime);}
+    .poloto6stroke{stroke:  var(--poloto_color6,orange);}
     .poloto7stroke{stroke:  var(--poloto_color7,chocolate);}
     .poloto0fill{fill:var(--poloto_color0,blue);}
     .poloto1fill{fill:var(--poloto_color1,red);}
     .poloto2fill{fill:var(--poloto_color2,green);}
     .poloto3fill{fill:var(--poloto_color3,gold);}
     .poloto4fill{fill:var(--poloto_color4,aqua);}
-    .poloto5fill{fill:var(--poloto_color5,brown);}
-    .poloto6fill{fill:var(--poloto_color6,lime);}
+    .poloto5fill{fill:var(--poloto_color5,lime);}
+    .poloto6fill{fill:var(--poloto_color6,orange);}
     .poloto7fill{fill:var(--poloto_color7,chocolate);}</style> 
         <defs>
             <pattern id="pattern" patternUnits="userSpaceOnUse" width="50" height="50">

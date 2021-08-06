@@ -122,23 +122,23 @@ pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
     }
     .scatter{stroke-width:7}
     .poloto_text{fill: var(--poloto_fg_color,black);}
-    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stroke-width:3;fill:none}
+    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stroke-width:3;fill:none;stroke-dasharray:none}
     .poloto_background{fill: var(--poloto_bg_color,aliceblue);}
     .poloto0stroke{stroke:  var(--poloto_color0,blue);}
     .poloto1stroke{stroke:  var(--poloto_color1,red);}
     .poloto2stroke{stroke:  var(--poloto_color2,green);}
     .poloto3stroke{stroke:  var(--poloto_color3,gold);}
     .poloto4stroke{stroke:  var(--poloto_color4,aqua);}
-    .poloto5stroke{stroke:  var(--poloto_color5,brown);}
-    .poloto6stroke{stroke:  var(--poloto_color6,lime);}
+    .poloto5stroke{stroke:  var(--poloto_color5,lime);}
+    .poloto6stroke{stroke:  var(--poloto_color6,orange);}
     .poloto7stroke{stroke:  var(--poloto_color7,chocolate);}
     .poloto0fill{fill:var(--poloto_color0,blue);}
     .poloto1fill{fill:var(--poloto_color1,red);}
     .poloto2fill{fill:var(--poloto_color2,green);}
     .poloto3fill{fill:var(--poloto_color3,gold);}
     .poloto4fill{fill:var(--poloto_color4,aqua);}
-    .poloto5fill{fill:var(--poloto_color5,brown);}
-    .poloto6fill{fill:var(--poloto_color6,lime);}
+    .poloto5fill{fill:var(--poloto_color5,lime);}
+    .poloto6fill{fill:var(--poloto_color6,orange);}
     .poloto7fill{fill:var(--poloto_color7,chocolate);}</style>"###;
 
 /// Default light theme
@@ -150,23 +150,23 @@ pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
     }
     .scatter{stroke-width:7}
     .poloto_text{fill: black;}
-    .poloto_axis_lines{stroke: black;stroke-width:3;fill:none}
+    .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
     .poloto_background{fill: aliceblue;}
     .poloto0stroke{stroke:  blue;}
     .poloto1stroke{stroke:  red;}
     .poloto2stroke{stroke:  green;}
     .poloto3stroke{stroke:  gold;}
     .poloto4stroke{stroke:  aqua;}
-    .poloto5stroke{stroke:  brown;}
-    .poloto6stroke{stroke:  lime;}
+    .poloto5stroke{stroke:  lime;}
+    .poloto6stroke{stroke:  orange;}
     .poloto7stroke{stroke:  chocolate;}
     .poloto0fill{fill:blue;}
     .poloto1fill{fill:red;}
     .poloto2fill{fill:green;}
     .poloto3fill{fill:gold;}
     .poloto4fill{fill:aqua;}
-    .poloto5fill{fill:brown;}
-    .poloto6fill{fill:lime;}
+    .poloto5fill{fill:lime;}
+    .poloto6fill{fill:orange;}
     .poloto7fill{fill:chocolate;}</style>"###;
 
 /// Default dark theme
@@ -178,23 +178,23 @@ pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
     }
     .scatter{stroke-width:7}
     .poloto_text{fill: white;}
-    .poloto_axis_lines{stroke: white;stroke-width:3;fill:none}
-    .poloto_background{fill: black;}
+    .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
+    .poloto_background{fill: #262626;}
     .poloto0stroke{stroke:  blue;}
     .poloto1stroke{stroke:  red;}
     .poloto2stroke{stroke:  green;}
     .poloto3stroke{stroke:  gold;}
     .poloto4stroke{stroke:  aqua;}
-    .poloto5stroke{stroke:  brown;}
-    .poloto6stroke{stroke:  lime;}
+    .poloto5stroke{stroke:  lime;}
+    .poloto6stroke{stroke:  orange;}
     .poloto7stroke{stroke:  chocolate;}
     .poloto0fill{fill:blue;}
     .poloto1fill{fill:red;}
     .poloto2fill{fill:green;}
     .poloto3fill{fill:gold;}
     .poloto4fill{fill:aqua;}
-    .poloto5fill{fill:brown;}
-    .poloto6fill{fill:lime;}
+    .poloto5fill{fill:lime;}
+    .poloto6fill{fill:orange;}
     .poloto7fill{fill:chocolate;}</style>"###;
 
 /// The demsions of the svg graph `[800,500]`.
@@ -523,6 +523,15 @@ impl<'a> Plotter<'a> {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
             d.put_raw(minify(HTML_CONFIG_DARK_DEFAULT));
+            self.render(d.writer());
+        });
+        w.into_writer()
+    }
+
+    pub fn simple_with_styling<T:std::fmt::Write,B:Display>(&mut self,a:T,b:B)->T{
+        let mut w = tagger::new(a);
+        default_svg(&mut w, tagger::no_attr(), |d| {
+            d.put_raw(b);
             self.render(d.writer());
         });
         w.into_writer()
