@@ -528,7 +528,7 @@ impl<'a> Plotter<'a> {
         w.into_writer()
     }
 
-    pub fn simple_with_styling<T:std::fmt::Write,B:Display>(&mut self,a:T,b:B)->T{
+    pub fn simple_with_element<T: std::fmt::Write, B: Display>(&mut self, a: T, b: B) -> T {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
             d.put_raw(b);

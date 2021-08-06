@@ -95,12 +95,15 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             PlotType::Line => {
                 if name_exists {
                     writer.single("line", |d| {
-                        d.attr("class", format_args!("poloto{}stroke poloto{}legend", colori,colori))
-                            .attr("stroke", "black")
-                            .attr("x1", legendx1)
-                            .attr("x2", legendx1 + padding / 3.0)
-                            .attr("y1", legendy1)
-                            .attr("y2", legendy1);
+                        d.attr(
+                            "class",
+                            format_args!("poloto{}stroke poloto{}legend", colori, colori),
+                        )
+                        .attr("stroke", "black")
+                        .attr("x1", legendx1)
+                        .attr("x2", legendx1 + padding / 3.0)
+                        .attr("y1", legendy1)
+                        .attr("y2", legendy1);
                     });
                 }
 
@@ -116,12 +119,15 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             PlotType::Scatter => {
                 if name_exists {
                     writer.single("line", |d| {
-                        d.attr("class", format_args!("scatter poloto{}stroke poloto{}legend", colori,colori))
-                            .attr("stroke", "black")
-                            .attr("x1", legendx1 + padding / 30.0)
-                            .attr("x2", legendx1 + padding / 30.0)
-                            .attr("y1", legendy1)
-                            .attr("y2", legendy1);
+                        d.attr(
+                            "class",
+                            format_args!("scatter poloto{}stroke poloto{}legend", colori, colori),
+                        )
+                        .attr("stroke", "black")
+                        .attr("x1", legendx1 + padding / 30.0)
+                        .attr("x2", legendx1 + padding / 30.0)
+                        .attr("y1", legendy1)
+                        .attr("y2", legendy1);
                     });
                 }
 
@@ -139,13 +145,16 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             PlotType::Histo => {
                 if name_exists {
                     writer.single("rect", |d| {
-                        d.attr("class", format_args!("poloto{}fill poloto{}legend", colori,colori))
-                            .attr("x", legendx1)
-                            .attr("y", legendy1 - padding / 30.0)
-                            .attr("width", padding / 3.0)
-                            .attr("height", padding / 20.0)
-                            .attr("rx", padding / 30.0)
-                            .attr("ry", padding / 30.0);
+                        d.attr(
+                            "class",
+                            format_args!("poloto{}fill poloto{}legend", colori, colori),
+                        )
+                        .attr("x", legendx1)
+                        .attr("y", legendy1 - padding / 30.0)
+                        .attr("width", padding / 3.0)
+                        .attr("height", padding / 20.0)
+                        .attr("rx", padding / 30.0)
+                        .attr("ry", padding / 30.0);
                     });
                 }
 
@@ -175,13 +184,16 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             PlotType::LineFill => {
                 if name_exists {
                     writer.single("rect", |d| {
-                        d.attr("class", format_args!("poloto{}fill poloto{}legend", colori,colori))
-                            .attr("x", legendx1)
-                            .attr("y", legendy1 - padding / 30.0)
-                            .attr("width", padding / 3.0)
-                            .attr("height", padding / 20.0)
-                            .attr("rx", padding / 30.0)
-                            .attr("ry", padding / 30.0);
+                        d.attr(
+                            "class",
+                            format_args!("poloto{}fill poloto{}legend", colori, colori),
+                        )
+                        .attr("x", legendx1)
+                        .attr("y", legendy1 - padding / 30.0)
+                        .attr("width", padding / 3.0)
+                        .attr("height", padding / 20.0)
+                        .attr("rx", padding / 30.0)
+                        .attr("ry", padding / 30.0);
                     });
                 }
 

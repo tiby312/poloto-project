@@ -20,6 +20,12 @@ fn main() {
         p.line(poloto::formatm!("c({})", i), collatz(i).enumerate());
     }
 
-    let w=poloto::upgrade_write(std::io::stdout());
-    p.simple_with_styling(w,format_args!("{}{}",poloto::HTML_CONFIG_DARK_DEFAULT,"<style>.poloto{stroke-dasharray:2;stroke-width:1;}</style>"));
+    p.simple_with_element(
+        poloto::upgrade_write(std::io::stdout()),
+        format_args!(
+            "{}{}",
+            poloto::HTML_CONFIG_DARK_DEFAULT,
+            "<style>.poloto{stroke-dasharray:2;stroke-width:1;}</style>"
+        ),
+    );
 }
