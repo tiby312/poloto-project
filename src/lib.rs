@@ -526,24 +526,29 @@ impl<'a> Plotter<'a> {
     }
 }
 
+
+
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
 #[macro_export]
 macro_rules! formatm {
     ($($arg:tt)*) => {
-        $crate::moveable_format(move |w| write!(w,$($arg)*))
+        $crate::DisplayableClosure::new(move |w| write!(w,$($arg)*))
     }
 }
 
 /// Convert a moved closure into a impl fmt::Display.
 /// This is useful because std's `format_args!()` macro
 /// has a shorter lifetime.
-pub fn moveable_format(func: impl Fn(&mut fmt::Formatter) -> fmt::Result) -> impl fmt::Display {
-    struct Foo<F>(F);
-    impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Foo<F> {
-        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            (self.0)(formatter)
-        }
+pub struct DisplayableClosure<F>(F);
+
+impl<F:Fn(&mut fmt::Formatter)->fmt::Result> DisplayableClosure<F>{
+    pub fn new(a:F)->Self{
+        DisplayableClosure(a)
     }
-    Foo(func)
+}
+impl<F:Fn(&mut fmt::Formatter)->fmt::Result> fmt::Display for DisplayableClosure<F>{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        (self.0)(formatter)
+    }
 }

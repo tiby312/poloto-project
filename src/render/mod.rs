@@ -58,9 +58,6 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let legendx1 = width - padding / 1.2 + padding / 30.0;
 
     for (i, mut p) in plotter.plots.drain(..).enumerate() {
-        
-
-
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
 
         let name_exists = writer
@@ -91,7 +88,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
         } else {
             i
         };
-        
+
         match p.plot_type {
             PlotType::Line => {
                 if name_exists {
