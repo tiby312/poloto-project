@@ -116,6 +116,7 @@ pub fn default_svg<T: std::fmt::Write, K>(
 /// Default theme using css variables (with light theme defaults if the variables are not set).
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
     stroke-linecap:round;
+    stroke-linejoin:round;
     font-family: sans-serif;
     stroke-width:2;
     }
@@ -143,6 +144,7 @@ pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
 /// Default light theme
 pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
     stroke-linecap:round;
+    stroke-linejoin:round;
     font-family: sans-serif;
     stroke-width:2;
     }
@@ -170,6 +172,7 @@ pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
 /// Default dark theme
 pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
     stroke-linecap:round;
+    stroke-linejoin:round;
     font-family: sans-serif;
     stroke-width:2;
     }

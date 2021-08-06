@@ -19,8 +19,9 @@ fn main() {
 }
 
 const MY_STYLE: &str = r###"<style>
-.poloto { 
+    .poloto { 
     stroke-linecap:round;
+    stroke-linejoin:round;
     font-family: sans-serif;
     stroke-width:2;
     }
