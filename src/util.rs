@@ -131,19 +131,33 @@ pub fn interval_float<T: std::fmt::Write>(fm: &mut T, a: f64, step: Option<f64>)
     Ok(())
 }
 
-pub fn find_bounds<K: PartialOrd + Copy>(
-    it: impl IntoIterator<Item = [K; 2]>,
+pub fn find_bounds<K: crate::AsF64>(
+    it: impl IntoIterator<Item = [f64; 2]>,
     xmarkers: impl IntoIterator<Item = K>,
     ymarkers: impl IntoIterator<Item = K>,
-) -> Option<[K; 4]> {
-    let mut ii = it.into_iter();
+) -> [f64; 4] {
+    let mut ii = it
+        .into_iter()
+        .filter(|[x, y]| x.is_finite() && y.is_finite());
 
     if let Some([x, y]) = ii.next() {
         let mut val = [x, x, y, y];
 
         let ii = ii
-            .chain(xmarkers.into_iter().map(|xx| [xx, y]))
-            .chain(ymarkers.into_iter().map(|yy| [x, yy]));
+            .chain(
+                xmarkers
+                    .into_iter()
+                    .map(|x| x.as_f64())
+                    .filter(|x| x.is_finite())
+                    .map(|xx| [xx, y]),
+            )
+            .chain(
+                ymarkers
+                    .into_iter()
+                    .map(|x| x.as_f64())
+                    .filter(|x| x.is_finite())
+                    .map(|yy| [x, yy]),
+            );
 
         ii.fold(&mut val, |val, [x, y]| {
             if x < val[0] {
@@ -158,9 +172,47 @@ pub fn find_bounds<K: PartialOrd + Copy>(
             }
             val
         });
-        Some(val)
+
+        let [minx, maxx, miny, maxy] = val;
+
+        const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
+
+        //Insert a range if the range is zero.
+        let [miny, maxy] = if (maxy - miny).abs() < EPSILON {
+            [miny - 1.0, miny + 1.0]
+        } else {
+            [miny, maxy]
+        };
+
+        //Insert a range if the range is zero.
+        let [minx, maxx] = if (maxx - minx).abs() < EPSILON {
+            [minx - 1.0, minx + 1.0]
+        } else {
+            [minx, maxx]
+        };
+
+        [minx, maxx, miny, maxy]
     } else {
-        //If there isnt any plots to draw, then no point looking at the markers.
-        None
+        //If there isnt any plots to draw, make up a range.
+        [-1.0, 1.0, -1.0, 1.0]
+    }
+}
+
+pub struct WriteCounter<T> {
+    counter: usize,
+    writer: T,
+}
+impl<T: fmt::Write> WriteCounter<T> {
+    pub fn new(writer: T) -> WriteCounter<T> {
+        WriteCounter { writer, counter: 0 }
+    }
+    pub fn get_counter(&self) -> usize {
+        self.counter
+    }
+}
+impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.counter += s.len();
+        self.writer.write_str(s)
     }
 }
