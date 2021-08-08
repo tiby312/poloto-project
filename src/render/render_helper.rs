@@ -171,7 +171,19 @@ pub(super) fn draw_base<T: fmt::Write>(
         
         
         let xdash_size=best_dash_size(xstep*scalex, good_normalized_stepx, 5.0);
-        //panic!("yo={}  one_step={}",xdash_size,xstep);
+        let ydash_size=best_dash_size(ystep*scaley, good_normalized_stepy, 5.0);
+        
+
+        writer.single("path", |d| {
+            d.attr("stroke", "black")
+                .attr("fill", "none")
+                .attr("class", "poloto_axis_lines")
+                .attr("style",format_args!("stroke-dasharray:{} {};",ydash_size,ydash_size))
+                .path(|p| {
+                    p.put(M(padding, paddingy));
+                    p.put(L(padding, height - paddingy));
+                });
+        });
 
 
         writer.single("path", |d| {
@@ -180,8 +192,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                 .attr("class", "poloto_axis_lines")
                 .attr("style",format_args!("stroke-dasharray:{} {};",xdash_size,xdash_size))
                 .path(|p| {
-                    p.put(M(padding, paddingy));
-                    p.put(L(padding, height - paddingy));
+                    p.put(M(padding, height - paddingy));
                     p.put(L(width - padding, height - paddingy));
                 });
         });
