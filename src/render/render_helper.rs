@@ -158,27 +158,36 @@ pub(super) fn draw_base<T: fmt::Write>(
         use tagger::PathCommand::*;
         
 
-        fn best_dash_size(one_step:f64,good_normalized_step:u8,target_dash_size:f64)->f64{
-            for x in 1..{
-                let dash_size=one_step/(good_normalized_step as f64 * x as f64);
+
+        fn best_dash_size(one_step:f64,mut good_normalized_step:u8,target_dash_size:f64)->f64{
+            assert!(good_normalized_step==2||good_normalized_step==5||good_normalized_step==10);
+            if good_normalized_step==10{
+                good_normalized_step=2;
+            }
+            
+            for x in 1..20{
+                let dash_size=one_step/((good_normalized_step * x) as f64);
                 
                 if dash_size<target_dash_size{
                     return dash_size
                 }
             }
-            unreachable!("Could not find a good dash step size!");    
+            unreachable!("Could not find a good dash step size! {:?}",(one_step,good_normalized_step,target_dash_size));    
         }
         
         
-        let xdash_size=best_dash_size(xstep*scalex, good_normalized_stepx, 5.0);
-        let ydash_size=best_dash_size(ystep*scaley, good_normalized_stepy, 5.0);
-        
+        //The target dash size will be halfed later.
+        //This ensures that its always an even number of dash and empty spaces which is needed
+        //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
+        let ydash_size=best_dash_size(ystep*scaley, good_normalized_stepy, 20.0);
+        let xdash_size=best_dash_size(xstep*scalex, good_normalized_stepx, 20.0);
+
         
         writer.single("path", |d| {
             d.attr("stroke", "black")
                 .attr("fill", "none")
                 .attr("class", "poloto_axis_lines")
-                .attr("style",format_args!("stroke-dasharray:{} {};stroke-dashoffset:{}",ydash_size,ydash_size,ystart_step*scaley))
+                .attr("style",format_args!("stroke-dasharray:{}",ydash_size/2.0))
                 .path(|p| {
                     p.put(M(padding, height - paddingy));
                     p.put(L(padding, paddingy));
@@ -191,7 +200,7 @@ pub(super) fn draw_base<T: fmt::Write>(
             d.attr("stroke", "black")
                 .attr("fill", "none")
                 .attr("class", "poloto_axis_lines")
-                .attr("style",format_args!("stroke-dasharray:{} {};",xdash_size,xdash_size))
+                .attr("style",format_args!("stroke-dasharray:{};",xdash_size/2.0))
                 .path(|p| {
                     p.put(M(padding, height - paddingy));
                     p.put(L(width - padding, height - paddingy));
