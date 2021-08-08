@@ -6,7 +6,7 @@ use fmt::Write;
 /// number of intervals.
 /// size of each interval
 /// first interval location.
-pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64) {
+pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64,u8) {
     let range_all = [range_all[0] as f64, range_all[1] as f64];
     let range = range_all[1] - range_all[0];
 
@@ -17,10 +17,10 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
     let step_power = 10.0f64.powf(-rough_step.abs().log10().floor()) as f64;
     let normalized_step = rough_step * step_power;
 
-    let good_steps = [1.0, 2.0, 5.0, 10.0];
-    let good_normalized_step = good_steps.iter().find(|a| **a > normalized_step).unwrap();
+    let good_steps = [1u8, 2, 5, 10];
+    let good_normalized_step = *good_steps.iter().find(|a| **a as f64> normalized_step).unwrap();
 
-    let step = good_normalized_step / step_power;
+    let step = good_normalized_step as f64 / step_power;
 
     let start_step = {
         //naively find starting point.
@@ -60,7 +60,7 @@ pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64
     // necessarily true.
     // assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
 
-    (num_step, step as f64, start_step as f64)
+    (num_step, step as f64, start_step as f64,good_normalized_step)
 }
 
 fn make_normal(a: f64, step: Option<f64>) -> impl fmt::Display {

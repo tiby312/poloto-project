@@ -141,19 +141,6 @@ pub(super) fn draw_base<T: fmt::Write>(
             write!(w.writer(), "{}", plotter.yname).unwrap();
         });
 
-    use tagger::PathCommand::*;
-
-    writer.single("path", |d| {
-        d.attr("stroke", "black")
-            .attr("fill", "none")
-            .attr("class", "poloto_axis_lines")
-            .path(|p| {
-                p.put(M(padding, paddingy));
-                p.put(L(padding, height - paddingy));
-                p.put(L(width - padding, height - paddingy));
-            });
-    });
-
     {
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
@@ -164,9 +151,43 @@ pub(super) fn draw_base<T: fmt::Write>(
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let (xstep_num, xstep, xstart_step) = util::find_good_step(ideal_num_xsteps, [minx, maxx]);
-        let (ystep_num, ystep, ystart_step) = util::find_good_step(ideal_num_ysteps, [miny, maxy]);
+        let (xstep_num, xstep, xstart_step,good_normalized_stepx) = util::find_good_step(ideal_num_xsteps, [minx, maxx]);
+        let (ystep_num, ystep, ystart_step,good_normalized_stepy) = util::find_good_step(ideal_num_ysteps, [miny, maxy]);
 
+
+        use tagger::PathCommand::*;
+        
+
+        fn best_dash_size(one_step:f64,good_normalized_step:u8,target_dash_size:f64)->f64{
+            for x in 1..{
+                let dash_size=one_step/(good_normalized_step as f64 * x as f64);
+                
+                if dash_size<target_dash_size{
+                    return dash_size
+                }
+            }
+            unreachable!("Could not find a good dash step size!");    
+        }
+        
+        
+        let xdash_size=best_dash_size(xstep*scalex, good_normalized_stepx, 5.0);
+        //panic!("yo={}  one_step={}",xdash_size,xstep);
+
+
+        writer.single("path", |d| {
+            d.attr("stroke", "black")
+                .attr("fill", "none")
+                .attr("class", "poloto_axis_lines")
+                .attr("style",format_args!("stroke-dasharray:{} {};",xdash_size,xdash_size))
+                .path(|p| {
+                    p.put(M(padding, paddingy));
+                    p.put(L(padding, height - paddingy));
+                    p.put(L(width - padding, height - paddingy));
+                });
+        });
+
+
+        
         let distance_to_firstx = xstart_step - minx;
 
         let distance_to_firsty = ystart_step - miny;
