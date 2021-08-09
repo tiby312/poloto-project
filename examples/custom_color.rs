@@ -22,7 +22,7 @@ const MY_STYLE: &str = r###"<style>
     .poloto { 
     stroke-linecap:round;
     stroke-linejoin:round;
-    font-family: sans-serif;
+    font-family: 'Tahoma', sans-serif;
     stroke-width:2;
     }
     .scatter{stroke-width:33}

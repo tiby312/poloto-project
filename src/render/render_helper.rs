@@ -151,41 +151,46 @@ pub(super) fn draw_base<T: fmt::Write>(
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let (xstep_num, xstep, xstart_step,good_normalized_stepx) = util::find_good_step(ideal_num_xsteps, [minx, maxx]);
-        let (ystep_num, ystep, ystart_step,good_normalized_stepy) = util::find_good_step(ideal_num_ysteps, [miny, maxy]);
-
+        let (xstep_num, xstep, xstart_step, good_normalized_stepx) =
+            util::find_good_step(ideal_num_xsteps, [minx, maxx]);
+        let (ystep_num, ystep, ystart_step, good_normalized_stepy) =
+            util::find_good_step(ideal_num_ysteps, [miny, maxy]);
 
         use tagger::PathCommand::*;
-        
 
-
-        fn best_dash_size(one_step:f64,mut good_normalized_step:u8,target_dash_size:f64)->f64{
-            assert!(good_normalized_step==2||good_normalized_step==5||good_normalized_step==10);
-            if good_normalized_step==10{
-                good_normalized_step=2;
+        fn best_dash_size(
+            one_step: f64,
+            mut good_normalized_step: u8,
+            target_dash_size: f64,
+        ) -> f64 {
+            assert!(
+                good_normalized_step == 2
+                    || good_normalized_step == 5
+                    || good_normalized_step == 10
+            );
+            if good_normalized_step == 10 {
+                good_normalized_step = 2;
             }
-            
-            for x in 1..20{
-                let dash_size=one_step/((good_normalized_step * x) as f64);
-                
-                if dash_size<target_dash_size{
-                    return dash_size
+
+            for x in 1..50 {
+                let dash_size = one_step / ((good_normalized_step * x) as f64);
+
+                if dash_size < target_dash_size {
+                    return dash_size;
                 }
             }
-            unreachable!("Could not find a good dash step size! {:?}",(one_step,good_normalized_step,target_dash_size));    
+            unreachable!(
+                "Could not find a good dash step size! {:?}",
+                (one_step, good_normalized_step, target_dash_size)
+            );
         }
-        
-        
+
         //The target dash size will be halfed later.
         //This ensures that its always an even number of dash and empty spaces which is needed
         //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
-        let ydash_size=best_dash_size(ystep*scaley, good_normalized_stepy, 20.0);
-        let xdash_size=best_dash_size(xstep*scalex, good_normalized_stepx, 20.0);
+        let ydash_size = best_dash_size(ystep * scaley, good_normalized_stepy, 20.0);
+        let xdash_size = best_dash_size(xstep * scalex, good_normalized_stepx, 20.0);
 
-        
-
-
-        
         let distance_to_firstx = xstart_step - minx;
 
         let distance_to_firsty = ystart_step - miny;
@@ -310,12 +315,18 @@ pub(super) fn draw_base<T: fmt::Write>(
             }
         }
 
-
         writer.single("path", |d| {
             d.attr("stroke", "black")
                 .attr("fill", "none")
                 .attr("class", "poloto_axis_lines")
-                .attr("style",format_args!("stroke-dasharray:{};stroke-dashoffset:{};",xdash_size/2.0,distance_to_firstx*scalex))
+                .attr(
+                    "style",
+                    format_args!(
+                        "stroke-dasharray:{};stroke-dashoffset:{};",
+                        xdash_size / 2.0,
+                        distance_to_firstx * scalex
+                    ),
+                )
                 .path(|p| {
                     p.put(M(padding, height - paddingy));
                     p.put(L(width - padding, height - paddingy));
@@ -325,14 +336,18 @@ pub(super) fn draw_base<T: fmt::Write>(
             d.attr("stroke", "black")
                 .attr("fill", "none")
                 .attr("class", "poloto_axis_lines")
-                .attr("style",format_args!("stroke-dasharray:{};stroke-dashoffset:{};",ydash_size/2.0,-distance_to_firsty*scaley))
+                .attr(
+                    "style",
+                    format_args!(
+                        "stroke-dasharray:{};stroke-dashoffset:{};",
+                        ydash_size / 2.0,
+                        -distance_to_firsty * scaley
+                    ),
+                )
                 .path(|p| {
                     p.put(M(padding, height - paddingy));
                     p.put(L(padding, paddingy));
                 });
         });
-        
-
-
     }
 }

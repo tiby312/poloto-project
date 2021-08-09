@@ -1,7 +1,7 @@
 <svg  width="800" class="poloto_background poloto" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" > <style>.poloto {
     stroke-linecap:round;
     stroke-linejoin:round;
-    font-family: sans-serif;
+    font-family: 'Tahoma', sans-serif;
     stroke-width:2;
     }
     .scatter{stroke-width:7}

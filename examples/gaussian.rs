@@ -8,7 +8,6 @@ fn gaussian(sigma: f64, mu: f64) -> impl Fn(f64) -> f64 {
 fn main() {
     let range = (0..200).map(|x| x as f64 / 200.0).map(|x| x * 10.0 - 5.0);
 
-
     //Write the graph to a file
     let file = std::fs::File::create("assets/gaussian.svg").unwrap();
 

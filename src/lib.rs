@@ -117,7 +117,7 @@ pub fn default_svg<T: std::fmt::Write, K>(
 pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
     stroke-linecap:round;
     stroke-linejoin:round;
-    font-family: sans-serif;
+    font-family: 'Tahoma', sans-serif;
     stroke-width:2;
     }
     .scatter{stroke-width:7}
@@ -145,7 +145,7 @@ pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
 pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
     stroke-linecap:round;
     stroke-linejoin:round;
-    font-family: sans-serif;
+    font-family: 'Tahoma', sans-serif;
     stroke-width:2;
     }
     .scatter{stroke-width:7}
@@ -173,7 +173,7 @@ pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
 pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
     stroke-linecap:round;
     stroke-linejoin:round;
-    font-family: sans-serif;
+    font-family: 'Tahoma', sans-serif;
     stroke-width:2;
     }
     .scatter{stroke-width:7}
