@@ -146,7 +146,7 @@ pub(super) fn draw_base<T: fmt::Write>(
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
         let ideal_num_xsteps = 9;
-        let ideal_num_ysteps = 8;
+        let ideal_num_ysteps = 7;
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
@@ -168,8 +168,9 @@ pub(super) fn draw_base<T: fmt::Write>(
                     || good_normalized_step == 5
                     || good_normalized_step == 10
             );
+            
             if good_normalized_step == 10 {
-                good_normalized_step = 2;
+                good_normalized_step = 5;
             }
 
             for x in 1..50 {
@@ -192,7 +193,6 @@ pub(super) fn draw_base<T: fmt::Write>(
         let xdash_size = best_dash_size(xstep * scalex, good_normalized_stepx, 20.0);
 
         let distance_to_firstx = xstart_step - minx;
-
         let distance_to_firsty = ystart_step - miny;
 
         {
