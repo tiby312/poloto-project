@@ -16,5 +16,6 @@ fn main() {
         .line("σ = 1.0", range.clone().map(|x| [x, gaussian(1.0, 0.0)(x)]))
         .line("σ = 0.5", range.clone().map(|x| [x, gaussian(0.5, 0.0)(x)]))
         .line("σ = 0.3", range.clone().map(|x| [x, gaussian(0.3, 0.0)(x)]))
+        .ymarker(0)
         .simple_theme(poloto::upgrade_write(file));
 }

@@ -20,7 +20,7 @@ fn main() {
         p.line(poloto::formatm!("c({})", i), collatz(i).enumerate());
     }
 
-    p.simple_with_element(
+    p.ymarker(0).simple_with_element(
         poloto::upgrade_write(std::io::stdout()),
         format_args!(
             "{}{}",

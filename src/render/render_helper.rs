@@ -183,29 +183,6 @@ pub(super) fn draw_base<T: fmt::Write>(
         let xdash_size=best_dash_size(xstep*scalex, good_normalized_stepx, 20.0);
 
         
-        writer.single("path", |d| {
-            d.attr("stroke", "black")
-                .attr("fill", "none")
-                .attr("class", "poloto_axis_lines")
-                .attr("style",format_args!("stroke-dasharray:{}",ydash_size/2.0))
-                .path(|p| {
-                    p.put(M(padding, height - paddingy));
-                    p.put(L(padding, paddingy));
-                });
-        });
-        
-
-
-        writer.single("path", |d| {
-            d.attr("stroke", "black")
-                .attr("fill", "none")
-                .attr("class", "poloto_axis_lines")
-                .attr("style",format_args!("stroke-dasharray:{};",xdash_size/2.0))
-                .path(|p| {
-                    p.put(M(padding, height - paddingy));
-                    p.put(L(width - padding, height - paddingy));
-                });
-        });
 
 
         
@@ -332,5 +309,30 @@ pub(super) fn draw_base<T: fmt::Write>(
                     });
             }
         }
+
+
+        writer.single("path", |d| {
+            d.attr("stroke", "black")
+                .attr("fill", "none")
+                .attr("class", "poloto_axis_lines")
+                .attr("style",format_args!("stroke-dasharray:{};stroke-dashoffset:{};",xdash_size/2.0,distance_to_firstx*scalex))
+                .path(|p| {
+                    p.put(M(padding, height - paddingy));
+                    p.put(L(width - padding, height - paddingy));
+                });
+        });
+        writer.single("path", |d| {
+            d.attr("stroke", "black")
+                .attr("fill", "none")
+                .attr("class", "poloto_axis_lines")
+                .attr("style",format_args!("stroke-dasharray:{};stroke-dashoffset:{};",ydash_size/2.0,-distance_to_firsty*scaley))
+                .path(|p| {
+                    p.put(M(padding, height - paddingy));
+                    p.put(L(padding, paddingy));
+                });
+        });
+        
+
+
     }
 }
