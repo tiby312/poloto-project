@@ -324,7 +324,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
                         xdash_size / 2.0,
-                        distance_to_firstx * scalex
+                        -distance_to_firstx * scalex
                     ),
                 )
                 .path(|p| {
@@ -332,6 +332,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                     p.put(L(width - padding, height - paddingy));
                 });
         });
+
         writer.single("path", |d| {
             d.attr("stroke", "black")
                 .attr("fill", "none")
