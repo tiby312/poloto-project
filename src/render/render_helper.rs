@@ -146,7 +146,7 @@ pub(super) fn draw_base<T: fmt::Write>(
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
         let ideal_num_xsteps = 9;
-        let ideal_num_ysteps = 10;
+        let ideal_num_ysteps = 8;
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
