@@ -112,6 +112,7 @@ fn main() {
 
 
 ```
+## Output
 
 
 <img src="./assets/collatz.svg" alt="demo">
