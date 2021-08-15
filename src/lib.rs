@@ -455,6 +455,14 @@ impl<'a> Plotter<'a> {
     }
 
     ///
+    /// Preserve the aspect ratio by drawing a smaller graph in the same area.
+    /// 
+    pub fn preserve_aspect(&mut self)->&mut Self{
+        self.preserve_aspect=true;
+        self
+    }
+    
+    ///
     /// The number of distinct css classes. If there are more plots than
     /// classes, then they will wrap around. The default value is 8.
     ///
@@ -471,6 +479,8 @@ impl<'a> Plotter<'a> {
         self.num_css_classes = a;
         self
     }
+
+
 
     ///
     /// Use the plot iterators to write out the graph elements.
@@ -539,13 +549,6 @@ impl<'a> Plotter<'a> {
         w.into_writer()
     }
 
-    ///
-    /// Preserve the aspect ratio by drawing a smaller graph in the same area.
-    /// 
-    pub fn preserve_aspect(&mut self)->&mut Self{
-        self.preserve_aspect=true;
-        self
-    }
 }
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
