@@ -96,7 +96,8 @@ pub(super) fn draw_base<T: fmt::Write>(
         maxy,
         scalex,
         scaley,
-        preserve_aspect
+        preserve_aspect,
+        aspect_offset
     } = sd;
 
     writer
@@ -237,8 +238,8 @@ pub(super) fn draw_base<T: fmt::Write>(
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
                         .attr("stroke", "black")
-                        .attr("x1", xx)
-                        .attr("x2", xx)
+                        .attr("x1", aspect_offset+xx)
+                        .attr("x2", aspect_offset+xx)
                         .attr("y1", height - paddingy)
                         .attr("y2", height - paddingy * 0.95);
                 });
@@ -248,7 +249,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                         d.attr("class", "poloto_text")
                             .attr("alignment-baseline", "start")
                             .attr("text-anchor", "middle")
-                            .attr("x", xx)
+                            .attr("x", aspect_offset+xx)
                             .attr("y", height - paddingy + texty_padding);
                     })
                     .build(|w| {
@@ -297,8 +298,8 @@ pub(super) fn draw_base<T: fmt::Write>(
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
                         .attr("stroke", "black")
-                        .attr("x1", padding)
-                        .attr("x2", padding * 0.96)
+                        .attr("x1", aspect_offset+padding)
+                        .attr("x2", aspect_offset+padding * 0.96)
                         .attr("y1", yy)
                         .attr("y2", yy);
                 });
@@ -308,7 +309,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                         d.attr("class", "poloto_text")
                             .attr("alignment-baseline", "middle")
                             .attr("text-anchor", "end")
-                            .attr("x", padding - textx_padding)
+                            .attr("x", aspect_offset+padding - textx_padding)
                             .attr("y", yy);
                     })
                     .build(|w| {
@@ -334,11 +335,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                     ),
                 )
                 .path(|p| {
-                    p.put(M(padding, height - paddingy));
+                    p.put(M(padding+aspect_offset, height - paddingy));
                     if preserve_aspect{
-                        p.put(L(height-paddingy/2.0 , height - paddingy));
+                        p.put(L(height-paddingy/2.0 +aspect_offset, height - paddingy));
                     }else{
-                        p.put(L(width - padding, height - paddingy));
+                        p.put(L(width - padding+aspect_offset, height - paddingy));
                     }
                 });
         });
@@ -356,8 +357,8 @@ pub(super) fn draw_base<T: fmt::Write>(
                     ),
                 )
                 .path(|p| {
-                    p.put(M(padding, height - paddingy));
-                    p.put(L(padding, paddingy));
+                    p.put(M(aspect_offset+padding, height - paddingy));
+                    p.put(L(aspect_offset+padding, paddingy));
                 });
         });
     }
