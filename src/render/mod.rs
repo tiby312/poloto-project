@@ -17,6 +17,7 @@ struct ScaleData {
     maxy: f64,
     scalex: f64,
     scaley: f64,
+    preserve_aspect:bool
 }
 
 //Returns error if the user supplied format functions don't work.
@@ -34,18 +35,8 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let height = crate::HEIGHT as f64;
     let padding = 150.0;
     let paddingy = 100.0;
-
-    /*
-    writer.single("rect", |d| {
-        d.attr("class", "poloto_background")
-            .attr("fill", "white")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", width)
-            .attr("height", height);
-    });
-    */
-
+        
+    
     //Find range.
     let [minx, maxx, miny, maxy] = util::find_bounds(
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
@@ -53,7 +44,14 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
         &plotter.ymarkers,
     );
 
-    let scalex = (width - padding * 2.0) / (maxx - minx);
+    let preserve_aspect = plotter.preserve_aspect;
+
+    let scalex =if preserve_aspect{
+        (height - paddingy * 2.0) / (maxx - minx)
+    }else{
+        (width-padding*2.0)/(maxx-minx)
+    };
+     
     let scaley = (height - paddingy * 2.0) / (maxy - miny);
 
     let spacing = padding / 3.0;
@@ -221,6 +219,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             maxy,
             scalex,
             scaley,
+            preserve_aspect
         },
     );
 

@@ -12,5 +12,6 @@ fn main() {
 
     poloto::plot("Heart Graph", "x", "y")
         .line_fill("", range.map(|x| heart(x)))
+        .preserve_aspect()
         .simple_theme(poloto::upgrade_write(std::io::stdout()));
 }

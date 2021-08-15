@@ -96,6 +96,7 @@ pub(super) fn draw_base<T: fmt::Write>(
         maxy,
         scalex,
         scaley,
+        preserve_aspect
     } = sd;
 
     writer
@@ -145,7 +146,12 @@ pub(super) fn draw_base<T: fmt::Write>(
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
-        let ideal_num_xsteps = 9;
+        let ideal_num_xsteps=if preserve_aspect{
+            5
+        }else{
+            9
+        };
+
         let ideal_num_ysteps = 7;
 
         let texty_padding = paddingy * 0.3;
@@ -329,7 +335,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                 )
                 .path(|p| {
                     p.put(M(padding, height - paddingy));
-                    p.put(L(width - padding, height - paddingy));
+                    if preserve_aspect{
+                        p.put(L(height-paddingy/2.0 , height - paddingy));
+                    }else{
+                        p.put(L(width - padding, height - paddingy));
+                    }
                 });
         });
 

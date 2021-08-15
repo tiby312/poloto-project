@@ -299,6 +299,7 @@ pub struct Plotter<'a> {
     xmarkers: Vec<f64>,
     ymarkers: Vec<f64>,
     num_css_classes: Option<usize>,
+    preserve_aspect:bool
 }
 
 impl<'a> Plotter<'a> {
@@ -321,6 +322,7 @@ impl<'a> Plotter<'a> {
             xmarkers: Vec::new(),
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
+            preserve_aspect:false
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -535,6 +537,14 @@ impl<'a> Plotter<'a> {
             self.render(d.writer());
         });
         w.into_writer()
+    }
+
+    ///
+    /// Preserve the aspect ratio by drawing a smaller graph in the same area.
+    /// 
+    pub fn preserve_aspect(&mut self)->&mut Self{
+        self.preserve_aspect=true;
+        self
     }
 }
 
