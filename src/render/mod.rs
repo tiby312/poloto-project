@@ -17,8 +17,8 @@ struct ScaleData {
     maxy: f64,
     scalex: f64,
     scaley: f64,
-    preserve_aspect:bool,
-    aspect_offset:f64
+    preserve_aspect: bool,
+    aspect_offset: f64,
 }
 
 //Returns error if the user supplied format functions don't work.
@@ -36,8 +36,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let height = crate::HEIGHT as f64;
     let padding = 150.0;
     let paddingy = 100.0;
-        
-    
+
     //Find range.
     let [minx, maxx, miny, maxy] = util::find_bounds(
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
@@ -47,19 +46,18 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
 
     let preserve_aspect = plotter.preserve_aspect;
 
-    let aspect_offset=if preserve_aspect{
-        width/2.0-height+paddingy*2.0
-    }else{
+    let aspect_offset = if preserve_aspect {
+        width / 2.0 - height + paddingy * 2.0
+    } else {
         0.0
     };
 
-
-    let scalex =if preserve_aspect{
+    let scalex = if preserve_aspect {
         (height - paddingy * 2.0) / (maxx - minx)
-    }else{
-        (width-padding*2.0)/(maxx-minx)
+    } else {
+        (width - padding * 2.0) / (maxx - minx)
     };
-     
+
     let scaley = (height - paddingy * 2.0) / (maxy - miny);
 
     let spacing = padding / 3.0;
@@ -86,7 +84,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
         // Scale all the plots here.
         let it = p.plots.iter_second().map(|[x, y]| {
             [
-                aspect_offset+padding + (x as f64 - minx) * scalex,
+                aspect_offset + padding + (x as f64 - minx) * scalex,
                 height - paddingy - (y as f64 - miny) * scaley,
             ]
         });
@@ -228,7 +226,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             scalex,
             scaley,
             preserve_aspect,
-            aspect_offset
+            aspect_offset,
         },
     );
 

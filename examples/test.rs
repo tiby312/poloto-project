@@ -17,7 +17,9 @@ const fn generate_test() -> [&'static [[f32; 2]]; 9] {
 
     let test8 = &[[-38.0, -38.0], [33.0, 33.0]];
 
-    [test0, test1, test2, test3, test4, test5, test6, test7,test8]
+    [
+        test0, test1, test2, test3, test4, test5, test6, test7, test8,
+    ]
 }
 
 use poloto::formatm;

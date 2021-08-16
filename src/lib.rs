@@ -299,7 +299,7 @@ pub struct Plotter<'a> {
     xmarkers: Vec<f64>,
     ymarkers: Vec<f64>,
     num_css_classes: Option<usize>,
-    preserve_aspect:bool
+    preserve_aspect: bool,
 }
 
 impl<'a> Plotter<'a> {
@@ -322,7 +322,7 @@ impl<'a> Plotter<'a> {
             xmarkers: Vec::new(),
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
-            preserve_aspect:false
+            preserve_aspect: false,
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -456,12 +456,12 @@ impl<'a> Plotter<'a> {
 
     ///
     /// Preserve the aspect ratio by drawing a smaller graph in the same area.
-    /// 
-    pub fn preserve_aspect(&mut self)->&mut Self{
-        self.preserve_aspect=true;
+    ///
+    pub fn preserve_aspect(&mut self) -> &mut Self {
+        self.preserve_aspect = true;
         self
     }
-    
+
     ///
     /// The number of distinct css classes. If there are more plots than
     /// classes, then they will wrap around. The default value is 8.
@@ -480,7 +480,15 @@ impl<'a> Plotter<'a> {
         self
     }
 
-
+    ///
+    /// Move a plotter out from behind a mutable reference leaving
+    /// an empty plotter.
+    ///
+    pub fn move_into(&mut self) -> Plotter<'a> {
+        let mut empty = crate::Plotter::new("", "", "");
+        core::mem::swap(&mut empty, self);
+        empty
+    }
 
     ///
     /// Use the plot iterators to write out the graph elements.
@@ -548,8 +556,51 @@ impl<'a> Plotter<'a> {
         });
         w.into_writer()
     }
-
 }
+
+/*
+pub struct SimpleThemeBuilder<'a, T> {
+    plotter: Plotter<'a>,
+    writer: T,
+    dark: bool,
+}
+impl<'a, T: fmt::Write> SimpleThemeBuilder<'a, T> {
+    pub fn render(&mut self) {
+        let mut w = tagger::new(&mut self.writer);
+        let dark = self.dark;
+        let plotter = &mut self.plotter;
+        default_svg(&mut w, tagger::no_attr(), move |d| {
+            if dark {
+                d.put_raw(minify(HTML_CONFIG_DARK_DEFAULT));
+            } else {
+                d.put_raw(minify(HTML_CONFIG_LIGHT_DEFAULT));
+            }
+            plotter.render(d.writer());
+        });
+    }
+
+    pub fn dark(&mut self) -> &mut Self {
+        self.dark = true;
+        self
+    }
+
+    pub fn light(&mut self) -> &mut Self {
+        self.dark = false;
+        self
+    }
+}
+
+pub fn simple_theme<'a, T: fmt::Write>(
+    plotter: Plotter<'a>,
+    writer: T,
+) -> SimpleThemeBuilder<'a, T> {
+    SimpleThemeBuilder {
+        plotter,
+        writer,
+        dark: false,
+    }
+}
+*/
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
