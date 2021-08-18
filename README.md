@@ -103,9 +103,9 @@ fn main() {
     p.ymarker(0).simple_with_element(
         poloto::upgrade_write(std::io::stdout()),
         format_args!(
-            "{}{}",
-            poloto::HTML_CONFIG_DARK_DEFAULT,
-            "<style>.poloto{stroke-dasharray:2;stroke-width:1;}</style>"
+            "<style>{}{}</style>",
+            poloto::STYLE_CONFIG_DARK_DEFAULT,
+            ".poloto{stroke-dasharray:2;stroke-width:1;}"
         ),
     );
 }
@@ -134,7 +134,8 @@ fn main() {
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
     poloto::plot("Heart Graph", "x", "y")
-        .line_fill("", range.map(|x| heart(x)))
+        .line_fill("heart", range.map(|x| heart(x)))
+        .preserve_aspect()
         .simple_theme(poloto::upgrade_write(std::io::stdout()));
 }
 

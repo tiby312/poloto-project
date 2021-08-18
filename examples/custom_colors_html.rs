@@ -14,8 +14,8 @@ fn main() -> core::fmt::Result {
         s.render(d.writer());
     });
 
-
-    println!(r###"
+    println!(
+        r###"
     <html>
     <head>
     <script>
@@ -44,9 +44,11 @@ fn main() -> core::fmt::Result {
     {2}
     </div>
     </htmls>
-    "###,poloto::STYLE_CONFIG_LIGHT_DEFAULT,poloto::STYLE_CONFIG_DARK_DEFAULT,buffer);
-
+    "###,
+        poloto::STYLE_CONFIG_LIGHT_DEFAULT,
+        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        buffer
+    );
 
     Ok(())
 }
-

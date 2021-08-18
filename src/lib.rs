@@ -497,7 +497,10 @@ impl<'a> Plotter<'a> {
     pub fn simple_theme<T: std::fmt::Write>(&mut self, a: T) -> T {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(format_args!("<style>{}</style>",STYLE_CONFIG_LIGHT_DEFAULT));
+            d.put_raw(format_args!(
+                "<style>{}</style>",
+                STYLE_CONFIG_LIGHT_DEFAULT
+            ));
             self.render(d.writer());
         });
         w.into_writer()
@@ -516,7 +519,7 @@ impl<'a> Plotter<'a> {
     pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, a: T) -> T {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(format_args!("<style>{}</style>",STYLE_CONFIG_DARK_DEFAULT));
+            d.put_raw(format_args!("<style>{}</style>", STYLE_CONFIG_DARK_DEFAULT));
             self.render(d.writer());
         });
         w.into_writer()
@@ -531,7 +534,6 @@ impl<'a> Plotter<'a> {
         w.into_writer()
     }
 }
-
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
@@ -557,7 +559,6 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
         (self.0)(formatter)
     }
 }
-
 
 /*
 ///
