@@ -23,9 +23,9 @@ fn main() {
     p.ymarker(0).simple_with_element(
         poloto::upgrade_write(std::io::stdout()),
         format_args!(
-            "{}{}",
-            poloto::HTML_CONFIG_DARK_DEFAULT,
-            "<style>.poloto{stroke-dasharray:2;stroke-width:1;}</style>"
+            "<style>{}{}</style>",
+            poloto::STYLE_CONFIG_DARK_DEFAULT,
+            ".poloto{stroke-dasharray:2;stroke-width:1;}"
         ),
     );
 }

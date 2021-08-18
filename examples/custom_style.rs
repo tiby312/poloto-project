@@ -14,7 +14,7 @@ fn main() {
     let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
 
     poloto::default_svg(&mut e, tagger::no_attr(), |d| {
-        d.put_raw(poloto::HTML_CONFIG_CSS_VARIABLE_DEFAULT);
+        d.put_raw(format_args!("<style>{}</style>",poloto::STYLE_CONFIG_LIGHT_DEFAULT));
         d.put_raw(
             r###"
         <defs>

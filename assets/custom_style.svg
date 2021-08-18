@@ -1,29 +1,4 @@
-<svg  width="800" class="poloto_background poloto" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" > <style>.poloto {
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    font-family: 'Tahoma', sans-serif;
-    stroke-width:2;
-    }
-    .scatter{stroke-width:7}
-    .poloto_text{fill: var(--poloto_fg_color,black);}
-    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stroke-width:3;fill:none;stroke-dasharray:none}
-    .poloto_background{background-color: var(--poloto_bg_color,AliceBlue);}
-    .poloto0stroke{stroke:  var(--poloto_color0,blue);}
-    .poloto1stroke{stroke:  var(--poloto_color1,red);}
-    .poloto2stroke{stroke:  var(--poloto_color2,green);}
-    .poloto3stroke{stroke:  var(--poloto_color3,gold);}
-    .poloto4stroke{stroke:  var(--poloto_color4,aqua);}
-    .poloto5stroke{stroke:  var(--poloto_color5,lime);}
-    .poloto6stroke{stroke:  var(--poloto_color6,orange);}
-    .poloto7stroke{stroke:  var(--poloto_color7,chocolate);}
-    .poloto0fill{fill:var(--poloto_color0,blue);}
-    .poloto1fill{fill:var(--poloto_color1,red);}
-    .poloto2fill{fill:var(--poloto_color2,green);}
-    .poloto3fill{fill:var(--poloto_color3,gold);}
-    .poloto4fill{fill:var(--poloto_color4,aqua);}
-    .poloto5fill{fill:var(--poloto_color5,lime);}
-    .poloto6fill{fill:var(--poloto_color6,orange);}
-    .poloto7fill{fill:var(--poloto_color7,chocolate);}</style> 
+<svg  width="800" class="poloto_background poloto" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" > <style>.poloto { stroke-linecap:round; stroke-linejoin:round; font-family: 'Tahoma', sans-serif; stroke-width:2; } .scatter{stroke-width:7} .poloto_text{fill: black;} .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none} .poloto_background{background-color: AliceBlue;} .poloto0stroke{stroke:  blue;} .poloto1stroke{stroke:  red;} .poloto2stroke{stroke:  green;} .poloto3stroke{stroke:  gold;} .poloto4stroke{stroke:  aqua;} .poloto5stroke{stroke:  lime;} .poloto6stroke{stroke:  orange;} .poloto7stroke{stroke:  chocolate;} .poloto0fill{fill:blue;} .poloto1fill{fill:red;} .poloto2fill{fill:green;} .poloto3fill{fill:gold;} .poloto4fill{fill:aqua;} .poloto5fill{fill:lime;} .poloto6fill{fill:orange;} .poloto7fill{fill:chocolate;}</style> 
         <defs>
             <pattern id="pattern" patternUnits="userSpaceOnUse" width="50" height="50">
                 <circle cx="25" cy="25" r="25" fill="black" fill-opacity="0.2"/>

@@ -13,7 +13,7 @@ fn main() {
     let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
 
     default_svg(&mut e, tagger::no_attr(), |d| {
-        d.put_raw(poloto::minify(MY_STYLE));
+        d.put_raw(MY_STYLE);
         plotter.render(d.writer());
     });
 }

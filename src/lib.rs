@@ -113,89 +113,61 @@ pub fn default_svg<T: std::fmt::Write, K>(
     .build(|d| func(d))
 }
 
-/// Default theme using css variables (with light theme defaults if the variables are not set).
-pub const HTML_CONFIG_CSS_VARIABLE_DEFAULT: &str = r###"<style>.poloto {
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    font-family: 'Tahoma', sans-serif;
-    stroke-width:2;
-    }
-    .scatter{stroke-width:7}
-    .poloto_text{fill: var(--poloto_fg_color,black);}
-    .poloto_axis_lines{stroke: var(--poloto_fg_color,black);stroke-width:3;fill:none;stroke-dasharray:none}
-    .poloto_background{background-color: var(--poloto_bg_color,AliceBlue);}
-    .poloto0stroke{stroke:  var(--poloto_color0,blue);}
-    .poloto1stroke{stroke:  var(--poloto_color1,red);}
-    .poloto2stroke{stroke:  var(--poloto_color2,green);}
-    .poloto3stroke{stroke:  var(--poloto_color3,gold);}
-    .poloto4stroke{stroke:  var(--poloto_color4,aqua);}
-    .poloto5stroke{stroke:  var(--poloto_color5,lime);}
-    .poloto6stroke{stroke:  var(--poloto_color6,orange);}
-    .poloto7stroke{stroke:  var(--poloto_color7,chocolate);}
-    .poloto0fill{fill:var(--poloto_color0,blue);}
-    .poloto1fill{fill:var(--poloto_color1,red);}
-    .poloto2fill{fill:var(--poloto_color2,green);}
-    .poloto3fill{fill:var(--poloto_color3,gold);}
-    .poloto4fill{fill:var(--poloto_color4,aqua);}
-    .poloto5fill{fill:var(--poloto_color5,lime);}
-    .poloto6fill{fill:var(--poloto_color6,orange);}
-    .poloto7fill{fill:var(--poloto_color7,chocolate);}</style>"###;
-
 /// Default light theme
-pub const HTML_CONFIG_LIGHT_DEFAULT: &str = r###"<style>.poloto {
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    font-family: 'Tahoma', sans-serif;
-    stroke-width:2;
-    }
-    .scatter{stroke-width:7}
-    .poloto_text{fill: black;}
-    .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
-    .poloto_background{background-color: AliceBlue;}
-    .poloto0stroke{stroke:  blue;}
-    .poloto1stroke{stroke:  red;}
-    .poloto2stroke{stroke:  green;}
-    .poloto3stroke{stroke:  gold;}
-    .poloto4stroke{stroke:  aqua;}
-    .poloto5stroke{stroke:  lime;}
-    .poloto6stroke{stroke:  orange;}
-    .poloto7stroke{stroke:  chocolate;}
-    .poloto0fill{fill:blue;}
-    .poloto1fill{fill:red;}
-    .poloto2fill{fill:green;}
-    .poloto3fill{fill:gold;}
-    .poloto4fill{fill:aqua;}
-    .poloto5fill{fill:lime;}
-    .poloto6fill{fill:orange;}
-    .poloto7fill{fill:chocolate;}</style>"###;
+pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
+    stroke-linecap:round; \
+    stroke-linejoin:round; \
+    font-family: 'Tahoma', sans-serif; \
+    stroke-width:2; \
+    } \
+    .scatter{stroke-width:7} \
+    .poloto_text{fill: black;} \
+    .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none} \
+    .poloto_background{background-color: AliceBlue;} \
+    .poloto0stroke{stroke:  blue;} \
+    .poloto1stroke{stroke:  red;} \
+    .poloto2stroke{stroke:  green;} \
+    .poloto3stroke{stroke:  gold;} \
+    .poloto4stroke{stroke:  aqua;} \
+    .poloto5stroke{stroke:  lime;} \
+    .poloto6stroke{stroke:  orange;} \
+    .poloto7stroke{stroke:  chocolate;} \
+    .poloto0fill{fill:blue;} \
+    .poloto1fill{fill:red;} \
+    .poloto2fill{fill:green;} \
+    .poloto3fill{fill:gold;} \
+    .poloto4fill{fill:aqua;} \
+    .poloto5fill{fill:lime;} \
+    .poloto6fill{fill:orange;} \
+    .poloto7fill{fill:chocolate;}";
 
 /// Default dark theme
-pub const HTML_CONFIG_DARK_DEFAULT: &str = r###"<style>.poloto {
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    font-family: 'Tahoma', sans-serif;
-    stroke-width:2;
-    }
-    .scatter{stroke-width:7}
-    .poloto_text{fill: white;}
-    .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
-    .poloto_background{background-color: #262626;}
-    .poloto0stroke{stroke:  blue;}
-    .poloto1stroke{stroke:  red;}
-    .poloto2stroke{stroke:  green;}
-    .poloto3stroke{stroke:  gold;}
-    .poloto4stroke{stroke:  aqua;}
-    .poloto5stroke{stroke:  lime;}
-    .poloto6stroke{stroke:  orange;}
-    .poloto7stroke{stroke:  chocolate;}
-    .poloto0fill{fill:blue;}
-    .poloto1fill{fill:red;}
-    .poloto2fill{fill:green;}
-    .poloto3fill{fill:gold;}
-    .poloto4fill{fill:aqua;}
-    .poloto5fill{fill:lime;}
-    .poloto6fill{fill:orange;}
-    .poloto7fill{fill:chocolate;}</style>"###;
+pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
+    stroke-linecap:round; \
+    stroke-linejoin:round; \
+    font-family: 'Tahoma', sans-serif; \
+    stroke-width:2; \
+    } \
+    .scatter{stroke-width:7} \
+    .poloto_text{fill: white;} \
+    .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none} \
+    .poloto_background{background-color: #262626;} \
+    .poloto0stroke{stroke:  blue;} \
+    .poloto1stroke{stroke:  red;} \
+    .poloto2stroke{stroke:  green;} \
+    .poloto3stroke{stroke:  gold;} \
+    .poloto4stroke{stroke:  aqua;} \
+    .poloto5stroke{stroke:  lime;} \
+    .poloto6stroke{stroke:  orange;} \
+    .poloto7stroke{stroke:  chocolate;} \
+    .poloto0fill{fill:blue;} \
+    .poloto1fill{fill:red;} \
+    .poloto2fill{fill:green;} \
+    .poloto3fill{fill:gold;} \
+    .poloto4fill{fill:aqua;} \
+    .poloto5fill{fill:lime;} \
+    .poloto6fill{fill:orange;} \
+    .poloto7fill{fill:chocolate;}";
 
 /// The demsions of the svg graph `[800,500]`.
 pub const DIMENSIONS: [usize; 2] = [800, 500];
@@ -493,6 +465,8 @@ impl<'a> Plotter<'a> {
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
+    /// Use this if you want to embed a svg into your html.
+    /// You will just have to add your own svg sag and then supply styling.
     ///
     /// Panics if the render fails.
     ///
@@ -523,7 +497,7 @@ impl<'a> Plotter<'a> {
     pub fn simple_theme<T: std::fmt::Write>(&mut self, a: T) -> T {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(minify(HTML_CONFIG_LIGHT_DEFAULT));
+            d.put_raw(format_args!("<style>{}</style>",STYLE_CONFIG_LIGHT_DEFAULT));
             self.render(d.writer());
         });
         w.into_writer()
@@ -542,7 +516,7 @@ impl<'a> Plotter<'a> {
     pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, a: T) -> T {
         let mut w = tagger::new(a);
         default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(minify(HTML_CONFIG_DARK_DEFAULT));
+            d.put_raw(format_args!("<style>{}</style>",STYLE_CONFIG_DARK_DEFAULT));
             self.render(d.writer());
         });
         w.into_writer()
@@ -558,49 +532,6 @@ impl<'a> Plotter<'a> {
     }
 }
 
-/*
-pub struct SimpleThemeBuilder<'a, T> {
-    plotter: Plotter<'a>,
-    writer: T,
-    dark: bool,
-}
-impl<'a, T: fmt::Write> SimpleThemeBuilder<'a, T> {
-    pub fn render(&mut self) {
-        let mut w = tagger::new(&mut self.writer);
-        let dark = self.dark;
-        let plotter = &mut self.plotter;
-        default_svg(&mut w, tagger::no_attr(), move |d| {
-            if dark {
-                d.put_raw(minify(HTML_CONFIG_DARK_DEFAULT));
-            } else {
-                d.put_raw(minify(HTML_CONFIG_LIGHT_DEFAULT));
-            }
-            plotter.render(d.writer());
-        });
-    }
-
-    pub fn dark(&mut self) -> &mut Self {
-        self.dark = true;
-        self
-    }
-
-    pub fn light(&mut self) -> &mut Self {
-        self.dark = false;
-        self
-    }
-}
-
-pub fn simple_theme<'a, T: fmt::Write>(
-    plotter: Plotter<'a>,
-    writer: T,
-) -> SimpleThemeBuilder<'a, T> {
-    SimpleThemeBuilder {
-        plotter,
-        writer,
-        dark: false,
-    }
-}
-*/
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
@@ -627,6 +558,8 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
     }
 }
 
+
+/*
 ///
 /// Remove all whitespace/newlines from a tring.
 ///
@@ -638,3 +571,4 @@ pub fn minify(a: &str) -> impl fmt::Display + '_ + Send + Sync {
         Ok(())
     })
 }
+*/

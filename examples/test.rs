@@ -40,7 +40,7 @@ fn main() {
                         d.attr("width", "500px").attr("height", "100%");
                     },
                     |e| {
-                        e.put_raw(poloto::HTML_CONFIG_LIGHT_DEFAULT);
+                        e.put_raw(format_args!("<style>{}</style>",poloto::STYLE_CONFIG_LIGHT_DEFAULT));
 
                         poloto::plot(formatm!("test {}", i), "x", "y")
                             .scatter("", test)
