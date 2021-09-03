@@ -229,14 +229,14 @@ impl<T: AsF64> Plottable for &[T; 2] {
     }
 }
 
-impl<T: AsF64> Plottable for (T, T) {
+impl<A: AsF64, B: AsF64> Plottable for (A, B) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
         [x.as_f64(), y.as_f64()]
     }
 }
 
-impl<T: AsF64> Plottable for &(T, T) {
+impl<A: AsF64, B: AsF64> Plottable for &(A, B) {
     fn make_plot(self) -> [f64; 2] {
         let (x, y) = self;
         [x.as_f64(), y.as_f64()]
