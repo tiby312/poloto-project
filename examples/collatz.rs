@@ -1,5 +1,7 @@
+use std::iter::FusedIterator;
+
 /// https://en.wikipedia.org/wiki/Collatz_conjecture
-fn collatz(mut a: usize) -> impl Iterator<Item = usize> + Clone {
+fn collatz(mut a: usize) -> impl Iterator<Item = usize> + FusedIterator + Clone + Send + Sync {
     std::iter::from_fn(move || {
         //Base case
         if a == 1 {
@@ -10,6 +12,7 @@ fn collatz(mut a: usize) -> impl Iterator<Item = usize> + Clone {
             Some(temp)
         }
     })
+    .fuse()
 }
 
 // PIPE me to a file!
