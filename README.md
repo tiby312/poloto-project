@@ -11,14 +11,14 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 ## Gaussian Example
 
 ```rust
-// See https://en.wikipedia.org/wiki/Gaussian_function
-fn gaussian(sigma: f64, mu: f64) -> impl Fn(f64) -> f64 {
-    use std::f64::consts::TAU;
-    move |x| (-0.5 * (x - mu).powi(2) / sigma.powi(2)).exp() * (sigma * TAU).sqrt().recip()
-}
-
 // PIPE me to a file!
 fn main() {
+    // See https://en.wikipedia.org/wiki/Gaussian_function
+    let gaussian = |sigma: f64, mu: f64| {
+        use std::f64::consts::TAU;
+        move |x: f64| (-0.5 * (x - mu).powi(2) / sigma.powi(2)).exp() * (sigma * TAU).sqrt().recip()
+    };
+
     let range = (0..200).map(|x| x as f64 / 200.0).map(|x| x * 10.0 - 5.0);
 
     poloto::plot("gaussian", "x", "y")
@@ -78,22 +78,22 @@ fn main() {
 ## Collatz Example
 
 ```rust
-/// https://en.wikipedia.org/wiki/Collatz_conjecture
-fn collatz(mut a: usize) -> impl Iterator<Item = usize> + Clone {
-    std::iter::from_fn(move || {
-        //Base case
-        if a == 1 {
-            None
-        } else {
-            let temp = a;
-            a = if a % 2 == 0 { a / 2 } else { 3 * a + 1 };
-            Some(temp)
-        }
-    })
-}
-
 // PIPE me to a file!
 fn main() {
+    let collatz = |mut a: usize| {
+        std::iter::from_fn(move || {
+            //Base case
+            if a == 1 {
+                None
+            } else {
+                let temp = a;
+                a = if a % 2 == 0 { a / 2 } else { 3 * a + 1 };
+                Some(temp)
+            }
+        })
+        .fuse()
+    };
+
     let mut p = poloto::plot("collatz", "x", "y");
 
     for i in 1000..1006 {
@@ -109,8 +109,6 @@ fn main() {
         ),
     );
 }
-
-
 ```
 ## Output
 
