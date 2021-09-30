@@ -86,9 +86,8 @@ fn main() {
             if a == 1 {
                 None
             } else {
-                let temp = a;
                 a = if a % 2 == 0 { a / 2 } else { 3 * a + 1 };
-                Some(temp)
+                Some(a)
             }
         })
         .fuse()
@@ -109,6 +108,7 @@ fn main() {
         ),
     );
 }
+
 ```
 ## Output
 

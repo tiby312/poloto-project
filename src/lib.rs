@@ -535,6 +535,18 @@ impl<'a> Plotter<'a> {
     }
 }
 
+pub struct Renderer {}
+impl Renderer {
+    pub fn render<T: fmt::Write>(&mut self, a: T) -> T {
+        let mut w = tagger::new(a);
+        default_svg(&mut w, tagger::no_attr(), |d| {
+            d.put_raw(format_args!("<style>{}</style>", STYLE_CONFIG_DARK_DEFAULT));
+            self.render(d.writer());
+        });
+        w.into_writer()
+    }
+}
+
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
 #[macro_export]
