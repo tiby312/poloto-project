@@ -30,7 +30,10 @@ pub use crop::Croppable;
 mod crop;
 
 mod render;
+
+pub use util::interval_float as default_val_formatter;
 mod util;
+
 use std::fmt;
 
 ///The width of the svg tag.
@@ -272,9 +275,54 @@ pub struct Plotter<'a> {
     ymarkers: Vec<f64>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
+    xinterval_formatter: Box<dyn MyFmt + 'a>,
+    yinterval_formatter: Box<dyn MyFmt + 'a>,
+}
+
+trait MyFmt {
+    fn write(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        value: f64,
+        step: Option<f64>,
+    ) -> std::fmt::Result;
+}
+struct Foo<A>(A);
+impl<A: Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result> Foo<A> {
+    fn new(a: A) -> Foo<A> {
+        Foo(a)
+    }
+}
+impl<A: Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result> MyFmt for Foo<A> {
+    fn write(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        value: f64,
+        step: Option<f64>,
+    ) -> std::fmt::Result {
+        (self.0)(formatter, value, step)
+    }
 }
 
 impl<'a> Plotter<'a> {
+    pub fn xinterval_fmt(
+        &mut self,
+        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
+    ) -> &mut Self {
+        let k = Box::new(Foo(a));
+        self.xinterval_formatter = k;
+        self
+    }
+
+    pub fn yinterval_fmt(
+        &mut self,
+        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
+    ) -> &mut Self {
+        let k = Box::new(Foo(a));
+        self.yinterval_formatter = k;
+        self
+    }
+
     ///
     /// Create a plotter with the specified element.
     ///
@@ -295,6 +343,12 @@ impl<'a> Plotter<'a> {
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
+            xinterval_formatter: Box::new(Foo::new(|a, b, c| {
+                write!(a, "{}", crate::util::interval_float(b, c))
+            })),
+            yinterval_formatter: Box::new(Foo::new(|a, b, c| {
+                write!(a, "{}", crate::util::interval_float(b, c))
+            })),
         }
     }
     /// Create a line from plots using a SVG polyline element.

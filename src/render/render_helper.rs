@@ -216,7 +216,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                     .build(|d| {
                         d.put_raw(format_args!(
                             "Where j = {}",
-                            crate::util::interval_float(xstart_step, None)
+                            DisplayableClosure::new(|w| plotter.xinterval_formatter.write(
+                                w,
+                                xstart_step,
+                                None
+                            ))
                         ));
                     });
 
@@ -252,7 +256,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            util::interval_float(p + xstart_step, Some(xstep))
+                            DisplayableClosure::new(|w| plotter.xinterval_formatter.write(
+                                w,
+                                p + xstart_step,
+                                Some(xstep)
+                            ))
                         ));
                     });
             }
@@ -276,7 +284,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                     .build(|w| {
                         w.put_raw(format_args!(
                             "Where k = {}",
-                            util::interval_float(ystart_step, None)
+                            DisplayableClosure::new(|w| plotter.yinterval_formatter.write(
+                                w,
+                                ystart_step,
+                                None
+                            ))
                         ));
                     });
 
@@ -312,7 +324,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            util::interval_float(p + ystart_step, Some(ystep))
+                            DisplayableClosure::new(|w| plotter.yinterval_formatter.write(
+                                w,
+                                p + ystart_step,
+                                Some(ystep)
+                            ))
                         ));
                     });
             }
