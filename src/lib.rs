@@ -539,7 +539,7 @@ impl<'a> Plotter<'a> {
     }
 
     ///
-    /// Make a graph with a svg tag and a simple dark css theme.
+    /// Make a graph with a svg tag and a simple css theme.
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
