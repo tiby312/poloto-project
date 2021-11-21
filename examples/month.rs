@@ -13,13 +13,15 @@ fn main() {
         ("Oct", 5773600),
         ("Nov", 5989400),
         ("Dec", 6219700),
-        ("Jan 2022", 0), 
+        ("Jan 2022", 0),
     ];
 
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
-    s.histogram("", data.iter().enumerate().map(|c| (c.0, c.1.1)));
+    //Map the strings to indexes
+    s.histogram("", data.iter().enumerate().map(|c| (c.0, c.1 .1)));
 
+    //Lookup the strings with the index
     s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[val as usize].0));
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));

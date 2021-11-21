@@ -305,24 +305,6 @@ impl<A: Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result> MyFm
 }
 
 impl<'a> Plotter<'a> {
-    pub fn xinterval_fmt(
-        &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
-    ) -> &mut Self {
-        let k = Box::new(Foo(a));
-        self.xinterval_formatter = k;
-        self
-    }
-
-    pub fn yinterval_fmt(
-        &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
-    ) -> &mut Self {
-        let k = Box::new(Foo(a));
-        self.yinterval_formatter = k;
-        self
-    }
-
     ///
     /// Create a plotter with the specified element.
     ///
@@ -514,6 +496,36 @@ impl<'a> Plotter<'a> {
         let mut empty = crate::Plotter::new("", "", "");
         core::mem::swap(&mut empty, self);
         empty
+    }
+
+    ///
+    /// Set a user defined function to display an interval's text.
+    /// The callback function is given, the value of the interval,
+    /// as well as the step-size. This function is also called to display
+    /// `k` and `j` values. In those cases, the step-size is not provided.
+    ///
+    pub fn xinterval_fmt(
+        &mut self,
+        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
+    ) -> &mut Self {
+        let k = Box::new(Foo(a));
+        self.xinterval_formatter = k;
+        self
+    }
+
+    ///
+    /// Set a user defined function to display an interval's text.
+    /// The callback function is given, the value of the interval,
+    /// as well as the step-size. This function is also called to display
+    /// `k` and `j` values. In those cases, the step-size is not provided.
+    ///
+    pub fn yinterval_fmt(
+        &mut self,
+        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
+    ) -> &mut Self {
+        let k = Box::new(Foo(a));
+        self.yinterval_formatter = k;
+        self
     }
 
     ///
