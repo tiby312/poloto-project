@@ -499,10 +499,12 @@ impl<'a> Plotter<'a> {
     }
 
     ///
-    /// Set a user defined function to display an interval's text.
-    /// The callback function is given, the value of the interval,
-    /// as well as the step-size. This function is also called to display
-    /// `k` and `j` values. In those cases, the step-size is not provided.
+    /// The callback function provided will get called on each 
+    /// interval tick to be drawn. The callback function is passed
+    /// the value of the interval, as well as the step-size.
+    /// This function is also called to display `k` and `j` values
+    /// for when the magnitudes of of the plots are extreme.
+    /// In those cases, the step-size is not provided and `None` is passed.
     ///
     pub fn xinterval_fmt(
         &mut self,
@@ -513,11 +515,14 @@ impl<'a> Plotter<'a> {
         self
     }
 
+
     ///
-    /// Set a user defined function to display an interval's text.
-    /// The callback function is given, the value of the interval,
-    /// as well as the step-size. This function is also called to display
-    /// `k` and `j` values. In those cases, the step-size is not provided.
+    /// The callback function provided will get called on each 
+    /// interval tick to be drawn. The callback function is passed
+    /// the value of the interval, as well as the step-size.
+    /// This function is also called to display `k` and `j` values
+    /// for when the magnitudes of of the plots are extreme.
+    /// In those cases, the step-size is not provided and `None` is passed.
     ///
     pub fn yinterval_fmt(
         &mut self,
