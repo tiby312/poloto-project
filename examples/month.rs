@@ -18,9 +18,9 @@ fn main() {
 
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
-    s.histogram("", data.iter().enumerate().map(|(c, e)| (c, e.1)));
+    s.histogram("", data.iter().enumerate().map(|c| (c.0, c.1.1)));
 
-    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[val.round() as usize].0));
+    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[val as usize].0));
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }
