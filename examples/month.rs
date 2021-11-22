@@ -22,7 +22,7 @@ fn main() {
     s.histogram("", data.iter().enumerate().map(|c| (c.0, c.1 .1)));
 
     //Lookup the strings with the index
-    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[val as usize].0));
+    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[unsafe{val.to_int_unchecked::<usize>()}].0));
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }
