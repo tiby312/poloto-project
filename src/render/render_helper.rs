@@ -154,16 +154,14 @@ pub(super) fn draw_base<T: fmt::Write>(
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        
-        
-        let (xstep,good_normalized_stepx)=util::find_good_step_f64(ideal_num_xsteps,[minx,maxx]);
-        let (xstart_step,xstep_num)=util::get_range_info_f64(xstep,[minx,maxx]).unwrap();
 
+        let (xstep,good_normalized_stepx)=util::PlotNumber::find_good_step(ideal_num_xsteps,[minx,maxx]);
+        let (xstart_step,xstep_num)=util::PlotNumber::get_range_info(xstep,[minx,maxx]);
 
-        let (ystep,good_normalized_stepy)=util::find_good_step_f64(ideal_num_ysteps,[miny,maxy]);
-        let (ystart_step,ystep_num)=util::get_range_info_f64(ystep,[miny,maxy]).unwrap();
+        let (ystep,good_normalized_stepy)=util::PlotNumber::find_good_step(ideal_num_ysteps,[miny,maxy]);
+        let (ystart_step,ystep_num)=util::PlotNumber::get_range_info(ystep,[miny,maxy]);
         
-        
+
         use tagger::PathCommand::*;
 
         fn best_dash_size(

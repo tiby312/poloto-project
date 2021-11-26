@@ -27,6 +27,29 @@ pub fn test_good_step_int(){
 }
 
 
+
+
+pub trait PlotNumber:Copy{
+    fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8);
+    fn get_range_info(step:Self,range:[Self;2])->(f64,usize);
+    fn is_hole(&self)->bool;
+}
+
+impl PlotNumber for f64{
+    fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
+        find_good_step_f64(ideal_num_steps,range)
+    }
+    fn get_range_info(step:Self,range:[Self;2])->(f64,usize){
+        get_range_info_f64(step,range)
+    }
+    
+    fn is_hole(&self)->bool{
+        self.is_nan()
+    }
+}
+
+
+
 pub fn round_up_to_nearest_multiple_int(val:i128,multiple:i128)->i128{
     let mut ss=multiple-1;
     
@@ -44,13 +67,11 @@ pub fn round_up_to_nearest_multiple_f64(val:f64,multiple:f64)->f64{
 }
 
 
-pub fn get_range_info_f64(step:f64,range_all:[f64;2])->Option<(f64,usize)>{
+
+//TODO handle case zero steps are found
+pub fn get_range_info_f64(step:f64,range_all:[f64;2])->(f64,usize){
     let start_step=round_up_to_nearest_multiple_f64(range_all[0],step);
     
-    if start_step>range_all[1]{
-        return None
-    }
-
     let step_num={
         let mut counter=start_step;
         let mut res=0;
@@ -64,9 +85,7 @@ pub fn get_range_info_f64(step:f64,range_all:[f64;2])->Option<(f64,usize)>{
         res
     };
 
-    Some((start_step,step_num))
-
-
+    (start_step,step_num)
 }
 
 
