@@ -1,6 +1,120 @@
 use core::fmt;
 use fmt::Write;
 
+
+
+struct Result<X>{
+    num_steps:usize,
+    step:X,
+    start_step:X,
+    good_normalized_step:usize
+}
+
+
+#[test]
+pub fn test_good_step_int(){
+    let a=[100,1231,3,2,1,444444,23];
+    
+    for &a in a.iter(){
+        let val=find_good_step_int(5,[0,a]);
+
+        dbg!(a,val);
+
+    }
+
+    assert!(false);
+   
+}
+
+
+pub fn round_up_to_nearest_multiple_int(val:i128,multiple:i128)->i128{
+    let mut ss=multiple-1;
+    
+    let ss=if val>=0{
+        multiple-1
+    }else{
+        0
+    };
+    
+    ((val+ss)/multiple)*multiple
+}
+
+pub fn round_up_to_nearest_multiple_f64(val:f64,multiple:f64)->f64{
+    ((val)/multiple).ceil()*multiple
+}
+
+
+pub fn get_range_info_f64(step:f64,range_all:[f64;2])->Option<(f64,usize)>{
+    let start_step=round_up_to_nearest_multiple_f64(range_all[0],step);
+    
+    if start_step>range_all[1]{
+        return None
+    }
+
+    let step_num={
+        let mut counter=start_step;
+        let mut res=0;
+        for a in 0..{
+            if counter>range_all[1]{
+                res=a;
+                break;
+            }
+            counter+=step;
+        }
+        res
+    };
+
+    Some((start_step,step_num))
+
+
+}
+
+
+
+
+pub fn find_good_step_int(num_steps: usize, range_all: [i128; 2])->(i128,u8){
+    let range=range_all[1]-range_all[0];
+
+    let rough_step = range / (num_steps - 1) as i128;
+
+    let step_power = 10.0f64.powf((rough_step as f64).log10().floor()) as i128;
+        
+    let normalized_step=rough_step/step_power;
+ 
+
+    let good_steps = [1, 2, 5, 10];
+    let good_normalized_step = *good_steps
+        .iter()
+        .find(|a| **a > normalized_step )
+        .unwrap();
+
+    (good_normalized_step * step_power,good_normalized_step as u8)
+}
+
+
+pub fn find_good_step_f64(num_steps: usize, range_all: [f64; 2])->(f64,u8){
+    let range=range_all[1]-range_all[0];
+
+    let rough_step = range / (num_steps - 1) as f64;
+
+    let step_power = 10.0f64.powf((rough_step as f64).log10().floor());
+        
+    let normalized_step=(rough_step/step_power) as usize;
+ 
+
+    let good_steps = [1, 2, 5, 10];
+    let good_normalized_step = *good_steps
+        .iter()
+        .find(|a| **a > normalized_step)
+        .unwrap();
+
+    (good_normalized_step as f64 * step_power,good_normalized_step as u8)
+}
+
+
+
+
+
 /// Specify ideal number of steps and range.
 /// Returns:
 /// number of intervals.

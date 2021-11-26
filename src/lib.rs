@@ -41,6 +41,9 @@ const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
+
+
+
 trait PlotTrait {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
 
