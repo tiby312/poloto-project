@@ -197,8 +197,8 @@ pub(super) fn draw_base<T: fmt::Write>(
         //The target dash size will be halfed later.
         //This ensures that its always an even number of dash and empty spaces which is needed
         //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
-        let xdash_size = best_dash_size(xstep.scale2([minx,maxx],scalex)/*xstep * scalex*/, good_normalized_stepx, 20.0);
-        let ydash_size = best_dash_size(ystep.scale2([miny,maxy],scaley)/* ystep * scaley*/, good_normalized_stepy, 20.0);
+        let xdash_size = best_dash_size(xstep.scale2([minx,maxx],scalex), good_normalized_stepx, 20.0);
+        let ydash_size = best_dash_size(ystep.scale2([miny,maxy],scaley), good_normalized_stepy, 20.0);
         
         let distance_to_firstx = xstart_step - minx;
         let distance_to_firsty = ystart_step - miny;

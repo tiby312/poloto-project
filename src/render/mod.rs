@@ -60,16 +60,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     };
 
     let scaley2=height-paddingy*2.0;
-    /*
-    let scalex = if preserve_aspect {
-        (height - paddingy * 2.0) / (maxx - minx)
-    } else {
-        (width - padding * 2.0) / (maxx - minx)
-    };
-
-    let scaley = (height - paddingy * 2.0) / (maxy - miny);
-    */
-
+   
     let spacing = padding / 3.0;
     let legendx1 = width - padding / 1.2 + padding / 30.0;
 
@@ -96,8 +87,6 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
         // Scale all the plots here.
         let it = p.plots.iter_second().map(|[x, y]| {
             [
-                //aspect_offset + padding + (x as f64 - minx) * scalex,
-                //height - paddingy - (y as f64 - miny) * scaley,
                 aspect_offset + padding + x.scale([minx,maxx],scalex2),
                 height - paddingy - y.scale([miny,maxy],scaley2),
 
