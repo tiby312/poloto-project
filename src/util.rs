@@ -33,6 +33,7 @@ pub trait PlotNumber:PartialOrd+Copy{
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8);
     fn get_range_info(step:Self,range:[Self;2])->(f64,usize);
     fn is_hole(&self)->bool;
+    fn unit_range()->[Self;2];
 }
 
 pub trait MetaPlotNumber{
@@ -64,6 +65,10 @@ impl PlotNumber for f64{
     
     fn is_hole(&self)->bool{
         self.is_nan()
+    }
+
+    fn unit_range()->[Self;2]{
+        [-1.0,1.0]
     }
 }
 
@@ -297,78 +302,11 @@ pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
 
 
 
-pub fn find_bounds<K: crate::AsF64>(
-    it: impl IntoIterator<Item = [f64; 2]>,
-    xmarkers: impl IntoIterator<Item = K>,
-    ymarkers: impl IntoIterator<Item = K>,
-) -> [f64; 4] {
-    let mut ii = it
-        .into_iter()
-        .filter(|[x, y]| x.is_finite() && y.is_finite());
-
-    if let Some([x, y]) = ii.next() {
-        let mut val = [x, x, y, y];
-
-        let ii = ii
-            .chain(
-                xmarkers
-                    .into_iter()
-                    .map(|x| x.as_f64())
-                    .filter(|x| x.is_finite())
-                    .map(|xx| [xx, y]),
-            )
-            .chain(
-                ymarkers
-                    .into_iter()
-                    .map(|x| x.as_f64())
-                    .filter(|x| x.is_finite())
-                    .map(|yy| [x, yy]),
-            );
-
-        ii.fold(&mut val, |val, [x, y]| {
-            if x < val[0] {
-                val[0] = x;
-            } else if x > val[1] {
-                val[1] = x;
-            }
-            if y < val[2] {
-                val[2] = y;
-            } else if y > val[3] {
-                val[3] = y;
-            }
-            val
-        });
-
-        let [minx, maxx, miny, maxy] = val;
-
-        const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
-
-        //Insert a range if the range is zero.
-        let [miny, maxy] = if (maxy - miny).abs() < EPSILON {
-            [miny - 1.0, miny + 1.0]
-        } else {
-            [miny, maxy]
-        };
-
-        //Insert a range if the range is zero.
-        let [minx, maxx] = if (maxx - minx).abs() < EPSILON {
-            [minx - 1.0, minx + 1.0]
-        } else {
-            [minx, maxx]
-        };
-
-        [minx, maxx, miny, maxy]
-    } else {
-        //If there isnt any plots to draw, make up a range.
-        [-1.0, 1.0, -1.0, 1.0]
-    }
-}
-
 pub fn find_bounds2<X:PlotNumber,Y:PlotNumber>(
     it: impl IntoIterator<Item = (X,Y)>,
     xmarkers: impl IntoIterator<Item = X>,
     ymarkers: impl IntoIterator<Item = Y>,
-) -> Option<([X;2],[Y;2])> {
+) -> ([X;2],[Y;2]) {
     let mut ii = it
         .into_iter()
         .filter(|(x, y)| !x.is_hole() && !y.is_hole());
@@ -376,7 +314,8 @@ pub fn find_bounds2<X:PlotNumber,Y:PlotNumber>(
     if let Some((x, y)) = ii.next() {
       
         let mut val=([x,x],[y,y]);
-        
+        let mut xmoved=false;
+        let mut ymoved=false;  
         let ii = ii
             .chain(
                 xmarkers
@@ -394,21 +333,32 @@ pub fn find_bounds2<X:PlotNumber,Y:PlotNumber>(
         ii.fold(&mut val, |val, (x, y)| {
             if x < val.0[0] {
                 val.0[0] = x;
+                xmoved=true;
             } else if x > val.0[1] {
                 val.0[1] = x;
+                xmoved=true;
             }
             if y < val.1[0] {
                 val.1[0] = y;
+                ymoved=true;
             } else if y > val.1[1] {
                 val.1[1] = y;
+                ymoved=true;
             }
             val
         });
 
-        Some(val)
+        if !xmoved {
+            val.0=X::unit_range();
+        }
+
+        if !ymoved {
+            val.1=Y::unit_range();
+        }
+
+        val
     } else {
-        //If there isnt any plots to draw, make up a range.
-        None
+        (X::unit_range(),Y::unit_range())
     }
 }
 

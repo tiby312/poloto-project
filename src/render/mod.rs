@@ -37,36 +37,11 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let res=util::find_bounds2(
+    let ([minx,maxx],[miny,maxy])=util::find_bounds2(
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()).map(|[x,y]|(x,y)),
         plotter.xmarkers.iter().map(|x|*x),
         plotter.ymarkers.iter().map(|x|*x),
     );
-    //Find range.
-    let ([minx,maxx],[miny,maxy])=if let Some(([minx,maxx],[miny,maxy])) = res{
-
-        const EPSILON: f64 = f64::MIN_POSITIVE * 10.0;
-
-        //Insert a range if the range is zero.
-        let [miny, maxy] = if (maxy - miny).abs() < EPSILON {
-            [miny - 1.0, miny + 1.0]
-        } else {
-            [miny, maxy]
-        };
-
-        //Insert a range if the range is zero.
-        let [minx, maxx] = if (maxx - minx).abs() < EPSILON {
-            [minx - 1.0, minx + 1.0]
-        } else {
-            [minx, maxx]
-        };
-        
-        ([minx,maxx],[miny,maxy])
-    }else{
-        //no plots
-        ([-1.0,1.0],[-1.0,1.0])
-    };
-
 
 
     let preserve_aspect = plotter.preserve_aspect;
