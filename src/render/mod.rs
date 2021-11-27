@@ -52,6 +52,15 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
         0.0
     };
 
+    //The range over which the data will be scalled to fit 
+    let scalex2=if preserve_aspect{
+        height-paddingy*2.0
+    }else{
+        width-padding*2.0
+    };
+
+    let scaley2=height-paddingy*2.0;
+    /*
     let scalex = if preserve_aspect {
         (height - paddingy * 2.0) / (maxx - minx)
     } else {
@@ -59,6 +68,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     };
 
     let scaley = (height - paddingy * 2.0) / (maxy - miny);
+    */
 
     let spacing = padding / 3.0;
     let legendx1 = width - padding / 1.2 + padding / 30.0;
@@ -81,11 +91,16 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
                 wc.get_counter() != 0
             });
 
+        use util::PlotNumber;
+
         // Scale all the plots here.
         let it = p.plots.iter_second().map(|[x, y]| {
             [
-                aspect_offset + padding + (x as f64 - minx) * scalex,
-                height - paddingy - (y as f64 - miny) * scaley,
+                //aspect_offset + padding + (x as f64 - minx) * scalex,
+                //height - paddingy - (y as f64 - miny) * scaley,
+                aspect_offset + padding + x.scale([minx,maxx],scalex2),
+                height - paddingy - y.scale([miny,maxy],scaley2),
+
             ]
         });
 
@@ -223,8 +238,8 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             maxx,
             miny,
             maxy,
-            scalex,
-            scaley,
+            scalex:scalex2,
+            scaley:scaley2,
             preserve_aspect,
             aspect_offset,
         },

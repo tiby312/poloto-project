@@ -34,6 +34,10 @@ pub trait PlotNumber:PartialOrd+Copy{
     fn get_range_info(step:Self,range:[Self;2])->(f64,usize);
     fn is_hole(&self)->bool;
     fn unit_range()->[Self;2];
+
+    fn scale(&self,val:[Self;2],max:f64)->f64;
+
+    fn scale2(&self,val:[Self;2],max:f64)->f64;
 }
 
 pub trait MetaPlotNumber{
@@ -69,6 +73,22 @@ impl PlotNumber for f64{
 
     fn unit_range()->[Self;2]{
         [-1.0,1.0]
+    }
+
+    fn scale(&self,val:[Self;2],max:f64)->f64{
+        let diff=val[1]-val[0];
+
+        let scale=max/diff;
+
+        (*self-val[0])*scale
+    }
+
+    fn scale2(&self,val:[Self;2],max:f64)->f64{
+        let diff=val[1]-val[0];
+
+        let scale=max/diff;
+
+        (*self)*scale
     }
 }
 

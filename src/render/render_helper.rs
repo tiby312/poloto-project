@@ -100,6 +100,7 @@ pub(super) fn draw_base<T: fmt::Write>(
         aspect_offset,
     } = sd;
 
+    
     writer
         .elem("text", |d| {
             d.attr("class", "poloto_text")
@@ -192,12 +193,13 @@ pub(super) fn draw_base<T: fmt::Write>(
             );
         }
 
+        use util::PlotNumber;
         //The target dash size will be halfed later.
         //This ensures that its always an even number of dash and empty spaces which is needed
         //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
-        let ydash_size = best_dash_size(ystep * scaley, good_normalized_stepy, 20.0);
-        let xdash_size = best_dash_size(xstep * scalex, good_normalized_stepx, 20.0);
-
+        let xdash_size = best_dash_size(xstep.scale2([minx,maxx],scalex)/*xstep * scalex*/, good_normalized_stepx, 20.0);
+        let ydash_size = best_dash_size(ystep.scale2([miny,maxy],scaley)/* ystep * scaley*/, good_normalized_stepy, 20.0);
+        
         let distance_to_firstx = xstart_step - minx;
         let distance_to_firsty = ystart_step - miny;
 
@@ -236,7 +238,7 @@ pub(super) fn draw_base<T: fmt::Write>(
             for a in 0..xstep_num {
                 let p = (a as f64) * xstep;
 
-                let xx = (distance_to_firstx + p) * scalex + padding;
+                let xx = (distance_to_firstx + p).scale2([minx,maxx],scalex) + padding;
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -304,7 +306,7 @@ pub(super) fn draw_base<T: fmt::Write>(
             for a in 0..ystep_num {
                 let p = (a as f64) * ystep;
 
-                let yy = height - (distance_to_firsty + p) * scaley - paddingy;
+                let yy = height - (distance_to_firsty + p).scale2([miny,maxy],scaley) - paddingy;
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -346,7 +348,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
                         xdash_size / 2.0,
-                        -distance_to_firstx * scalex
+                        -(distance_to_firstx).scale2([minx,maxx],scalex)
                     ),
                 )
                 .path(|p| {
@@ -371,7 +373,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
                         ydash_size / 2.0,
-                        -distance_to_firsty * scaley
+                        -(distance_to_firsty).scale2([miny,maxy],scaley)
                     ),
                 )
                 .path(|p| {
