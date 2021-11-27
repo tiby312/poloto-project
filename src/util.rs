@@ -29,12 +29,31 @@ pub fn test_good_step_int(){
 
 
 
-pub trait PlotNumber:Copy{
+pub trait PlotNumber:PartialOrd+Copy{
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8);
     fn get_range_info(step:Self,range:[Self;2])->(f64,usize);
     fn is_hole(&self)->bool;
 }
 
+pub trait MetaPlotNumber{
+    type T:PlotNumber;
+    fn as_inner(&self)->Self::T;
+}
+
+
+impl MetaPlotNumber for f64{
+    type T=f64;
+    fn as_inner(&self)->f64{
+        *self
+    }
+}
+
+impl MetaPlotNumber for &f64{
+    type T=f64;
+    fn as_inner(&self)->f64{
+        **self
+    }
+}
 impl PlotNumber for f64{
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
         find_good_step_f64(ideal_num_steps,range)
@@ -80,6 +99,8 @@ pub fn get_range_info_f64(step:f64,range_all:[f64;2])->(f64,usize){
                 res=a;
                 break;
             }
+
+            assert!(step+counter>counter,"{:?}",(step,range_all));
             counter+=step;
         }
         res
@@ -274,6 +295,8 @@ pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
     })
 }
 
+
+
 pub fn find_bounds<K: crate::AsF64>(
     it: impl IntoIterator<Item = [f64; 2]>,
     xmarkers: impl IntoIterator<Item = K>,
@@ -340,6 +363,55 @@ pub fn find_bounds<K: crate::AsF64>(
         [-1.0, 1.0, -1.0, 1.0]
     }
 }
+
+pub fn find_bounds2<X:PlotNumber,Y:PlotNumber>(
+    it: impl IntoIterator<Item = (X,Y)>,
+    xmarkers: impl IntoIterator<Item = X>,
+    ymarkers: impl IntoIterator<Item = Y>,
+) -> Option<([X;2],[Y;2])> {
+    let mut ii = it
+        .into_iter()
+        .filter(|(x, y)| !x.is_hole() && !y.is_hole());
+
+    if let Some((x, y)) = ii.next() {
+      
+        let mut val=([x,x],[y,y]);
+        
+        let ii = ii
+            .chain(
+                xmarkers
+                    .into_iter()
+                    .filter(|a| !a.is_hole())
+                    .map(|xx| (xx, y)),
+            )
+            .chain(
+                ymarkers
+                    .into_iter()
+                    .filter(|a| !a.is_hole())
+                    .map(|yy| (x, yy)),
+            );
+
+        ii.fold(&mut val, |val, (x, y)| {
+            if x < val.0[0] {
+                val.0[0] = x;
+            } else if x > val.0[1] {
+                val.0[1] = x;
+            }
+            if y < val.1[0] {
+                val.1[0] = y;
+            } else if y > val.1[1] {
+                val.1[1] = y;
+            }
+            val
+        });
+
+        Some(val)
+    } else {
+        //If there isnt any plots to draw, make up a range.
+        None
+    }
+}
+
 
 pub struct WriteCounter<T> {
     counter: usize,
