@@ -15,8 +15,6 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 
 [dependencies]
 tagger = "3.2"
-rust_decimal = "1.17"
-rust_decimal_macros = "1.17"
 
 
 [package.metadata.docs.rs]
