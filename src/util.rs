@@ -30,25 +30,48 @@ pub fn test_good_step_int(){
 
 
 pub trait PlotNumber:PartialOrd+Copy{
+
+    /// Find a good step using get_candidate_normalized_steps().
+    /// Returns the step value as well as the normalized step value.
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8);
+
+    /// Return the location of the first tick as well as the number of ticks.
     fn get_range_info(step:Self,range:[Self;2])->(Self,usize);
+
+    /// Create a hole value.
     fn hole()->Self;
+
+    /// Is this a hole value to inject discontinuty?
     fn is_hole(&self)->bool;
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
     fn unit_range()->[Self;2];
 
+    /// Get the locatin of the nth tick with the given step size.
     fn get_tick(&self,index:usize,step:Self)->Self;
     
+    /// Provided a min and max range, scale the current value against max.
     fn scale(&self,val:[Self;2],max:f64)->f64;
 
+    /// Zero value. Used in croppable, as will as i+j relative displaying.
     fn zero()->Self;
 
+    /// Used to display a tick
     fn fmt(
         &self,
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
     ) -> std::fmt::Result;
 
+    /// Return true if you want to use i+j relative display.
     fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool;
+
+    /// Default canditation normalized steps. 
+    /// They are: 1,2,5,10.
+    fn get_candidate_normalized_steps()->&'static [u8]{
+        &[1,2,5,10]
+    }
 }
 
 
@@ -79,7 +102,7 @@ impl PlotNumber for f64{
     }
 
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
-        find_good_step_f64(ideal_num_steps,range)
+        find_good_step_f64(Self::get_candidate_normalized_steps(),ideal_num_steps,range)
     }
     fn get_range_info(step:Self,range:[Self;2])->(Self,usize){
         get_range_info_f64(step,range)
@@ -141,7 +164,7 @@ impl PlotNumber for i128{
     }
 
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
-        find_good_step_int(ideal_num_steps,range)
+        find_good_step_int(Self::get_candidate_normalized_steps(),ideal_num_steps,range)
     }
     fn get_range_info(step:Self,range:[Self;2])->(Self,usize){
         get_range_info_int(step,range)
@@ -236,7 +259,7 @@ pub fn get_range_info_f64(step:f64,range_all:[f64;2])->(f64,usize){
 
 
 
-pub fn find_good_step_int(num_steps: usize, range_all: [i128; 2])->(i128,u8){
+pub fn find_good_step_int(good_steps:&[u8],num_steps: usize, range_all: [i128; 2])->(i128,u8){
     let range=range_all[1]-range_all[0];
 
     let rough_step = range / (num_steps - 1) as i128;
@@ -246,17 +269,16 @@ pub fn find_good_step_int(num_steps: usize, range_all: [i128; 2])->(i128,u8){
     let normalized_step=rough_step/step_power;
  
 
-    let good_steps = [1, 2, 5, 10];
     let good_normalized_step = *good_steps
         .iter()
-        .find(|a| **a > normalized_step )
-        .unwrap();
+        .find(|a| **a as i128 > normalized_step )
+        .unwrap() as i128;
 
     (good_normalized_step * step_power,good_normalized_step as u8)
 }
 
 
-pub fn find_good_step_f64(num_steps: usize, range_all: [f64; 2])->(f64,u8){
+pub fn find_good_step_f64(good_steps:&[u8],num_steps: usize, range_all: [f64; 2])->(f64,u8){
     let range=range_all[1]-range_all[0];
 
     let rough_step = range / (num_steps - 1) as f64;
@@ -266,10 +288,9 @@ pub fn find_good_step_f64(num_steps: usize, range_all: [f64; 2])->(f64,u8){
     let normalized_step=(rough_step/step_power) as usize;
  
 
-    let good_steps = [1, 2, 5, 10];
     let good_normalized_step = *good_steps
         .iter()
-        .find(|a| **a > normalized_step)
+        .find(|a| **a as usize> normalized_step)
         .unwrap();
 
     (good_normalized_step as f64 * step_power,good_normalized_step as u8)
