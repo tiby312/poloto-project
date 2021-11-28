@@ -1,4 +1,4 @@
-/*
+
 use crate::Plottable;
 
 #[derive(Copy, Clone)]
@@ -13,46 +13,46 @@ enum Dir {
 /// Represents one cropping.
 ///
 #[derive(Copy, Clone)]
-pub struct Crop<I> {
+pub struct Crop<X,Y,I> {
     dir: Dir,
-    val: f64,
+    val: (X,Y),
     inner: I,
 }
-impl<I: Iterator> Iterator for Crop<I>
+impl<X:PlotNumber,Y:PlotNumber,I: Iterator> Iterator for Crop<X,Y,I>
 where
-    I::Item: Plottable,
+    I::Item: Plottable<X,Y>,
 {
-    type Item = [f64; 2];
-    fn next(&mut self) -> Option<[f64; 2]> {
+    type Item = (X,Y);
+    fn next(&mut self) -> Option<(X,Y)> {
         if let Some(g) = self.inner.next() {
-            let [x, y] = g.make_plot();
+            let (x, y) = g.make_plot();
             Some(match self.dir {
                 Dir::Above => {
-                    if y > self.val {
-                        [x, f64::NAN]
+                    if y > self.val.1 {
+                        (x,Y::hole())
                     } else {
-                        [x, y]
+                        (x, y)
                     }
                 }
                 Dir::Below => {
-                    if y < self.val {
-                        [x, f64::NAN]
+                    if y < self.val.1 {
+                        (x, Y::hole())
                     } else {
-                        [x, y]
+                        (x, y)
                     }
                 }
                 Dir::Left => {
-                    if x < self.val {
-                        [f64::NAN, y]
+                    if x < self.val.0 {
+                        (X::hole(), y)
                     } else {
-                        [x, y]
+                        (x, y)
                     }
                 }
                 Dir::Right => {
-                    if x > self.val {
-                        [f64::NAN, y]
+                    if x > self.val.0 {
+                        (X::hole(), y)
                     } else {
-                        [x, y]
+                        (x, y)
                     }
                 }
             })
@@ -76,37 +76,38 @@ where
 /// automatically replace plots past certain bounds with NaN.
 ///
 ///
-pub trait Croppable: Sized {
-    fn crop_above<K: AsF64>(self, val: K) -> Crop<Self> {
+pub trait Croppable<X:PlotNumber,Y:PlotNumber>: Sized {
+    fn crop_above(self, val: Y) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Above,
-            val: val.as_f64(),
+            val:(X::zero(),val),
             inner: self,
         }
     }
-    fn crop_below<K: AsF64>(self, val: K) -> Crop<Self> {
+    fn crop_below(self, val: Y) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Below,
-            val: val.as_f64(),
+            val:(X::zero(),val),
             inner: self,
         }
     }
-    fn crop_left<K: AsF64>(self, val: K) -> Crop<Self> {
+    fn crop_left(self, val: X) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Left,
-            val: val.as_f64(),
+            val:(val,Y::zero()),
             inner: self,
         }
     }
-    fn crop_right<K: AsF64>(self, val: K) -> Crop<Self> {
+    fn crop_right(self, val: X) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Right,
-            val: val.as_f64(),
+            val:(val,Y::zero()),
             inner: self,
         }
     }
 }
 
-impl<T: Iterator> Croppable for T where T::Item: Plottable {}
+use crate::PlotNumber;
 
-*/
+impl<X:PlotNumber,Y:PlotNumber,T: Iterator> Croppable<X,Y> for T where T::Item: Plottable<X,Y> {}
+

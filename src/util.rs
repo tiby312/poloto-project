@@ -32,8 +32,7 @@ pub fn test_good_step_int(){
 pub trait PlotNumber:PartialOrd+Copy{
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8);
     fn get_range_info(step:Self,range:[Self;2])->(Self,usize);
-    fn make_hole(&mut self);
-    
+    fn hole()->Self;
     fn is_hole(&self)->bool;
     fn unit_range()->[Self;2];
 
@@ -88,8 +87,8 @@ impl PlotNumber for f64{
         get_range_info_f64(step,range)
     }
     
-    fn make_hole(&mut self){
-        *self=f64::NAN;
+    fn hole()->Self{
+        f64::NAN
     }
     fn is_hole(&self)->bool{
         self.is_nan()
@@ -158,8 +157,8 @@ impl PlotNumber for i128{
         get_range_info_int(step,range)
     }
     
-    fn make_hole(&mut self){
-        *self=i128::MAX
+    fn hole()->Self{
+        i128::MAX
     }
     fn is_hole(&self)->bool{
         *self==i128::MAX

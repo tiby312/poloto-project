@@ -25,8 +25,8 @@ mod test_readme {
 
 pub use tagger::upgrade_write;
 
-//pub use crop::Crop;
-//pub use crop::Croppable;
+pub use crop::Crop;
+pub use crop::Croppable;
 mod crop;
 
 mod render;
