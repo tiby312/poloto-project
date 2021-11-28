@@ -25,8 +25,8 @@ mod test_readme {
 
 pub use tagger::upgrade_write;
 
-pub use crop::Crop;
-pub use crop::Croppable;
+//pub use crop::Crop;
+//pub use crop::Croppable;
 mod crop;
 
 mod render;
@@ -44,40 +44,44 @@ const HEIGHT: f64 = 500.0;
 
 
 
-trait PlotTrait {
+trait PlotTrait<X:PlotNumber,Y:PlotNumber> {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
 
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]>;
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X,Y)>;
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X,Y)>;
 }
 
+use std::marker::PhantomData;
+
 use fmt::Display;
-struct PlotStruct<I: Iterator<Item = [f64; 2]> + Clone, F: Display> {
+struct PlotStruct<X:PlotNumber,Y:PlotNumber,I: Iterator<Item = (X,Y)> + Clone, F: Display> {
     first: I,
     second: I,
     func: F,
+    _p:PhantomData<(X,Y)>
 }
 
-impl<I: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotStruct<I, F> {
+impl<X:PlotNumber,Y:PlotNumber,I: Iterator<Item = (X,Y)> + Clone, F: Display> PlotStruct<X,Y,I, F> {
     fn new(it: I, func: F) -> Self {
         let it2 = it.clone();
         PlotStruct {
             first: it,
             second: it2,
             func,
+            _p:PhantomData
         }
     }
 }
 
-impl<D: Iterator<Item = [f64; 2]> + Clone, F: Display> PlotTrait for PlotStruct<D, F> {
+impl<X:PlotNumber,Y:PlotNumber,D: Iterator<Item = (X,Y)> + Clone, F: Display> PlotTrait<X,Y> for PlotStruct<X,Y,D, F> {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
         write!(a, "{}", self.func)
     }
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X,Y)> {
         &mut self.first
     }
 
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = [f64; 2]> {
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X,Y)> {
         &mut self.second
     }
 }
@@ -89,9 +93,9 @@ enum PlotType {
     LineFill,
 }
 
-struct Plot<'a> {
+struct Plot<'a,X:PlotNumber,Y:PlotNumber> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait + 'a>,
+    plots: Box<dyn PlotTrait<X,Y> + 'a>,
 }
 
 ///
@@ -180,11 +184,41 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
-pub trait Plottable {
+pub trait Plottable<X:PlotNumber,Y:PlotNumber> {
     /// Produce one plot
-    fn make_plot(self) -> [f64; 2];
+    fn make_plot(self) -> (X,Y);
 }
 
+impl<T:PlotNumber> Plottable<T,T> for [T; 2] {
+    fn make_plot(self) -> (T,T) {
+        let [x, y] = self;
+        (x,y)
+    }
+}
+
+impl<T:PlotNumber> Plottable<T,T> for &[T; 2] {
+    fn make_plot(self) -> (T,T) {
+        let [x, y] = *self;
+        (x,y)
+    }
+}
+
+
+
+impl<A: PlotNumber, B: PlotNumber> Plottable<A,B> for (A, B) {
+    fn make_plot(self) -> (A,B) {
+        self
+    }
+}
+
+impl<A: PlotNumber, B: PlotNumber> Plottable<A,B> for &(A, B) {
+    fn make_plot(self) -> (A,B) {
+        *self
+    }
+}
+
+
+/*
 /// Convert other primitive types to f64 using this trait.
 /// Precision loss is considered acceptable, since this is just for visual human eyes.
 pub trait AsF64: Copy {
@@ -248,15 +282,17 @@ impl<A: AsF64, B: AsF64> Plottable for &(A, B) {
         [x.as_f64(), y.as_f64()]
     }
 }
+*/
 
+pub use util::PlotNumber;
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a>(
+pub fn plot<'a,X:PlotNumber,Y:PlotNumber>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a> {
+) -> Plotter<'a,X,Y> {
     Plotter::new(title, xname, yname)
 }
 
@@ -269,45 +305,18 @@ pub fn plot<'a>(
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
 ///
-pub struct Plotter<'a> {
+pub struct Plotter<'a,X:PlotNumber+'a,Y:PlotNumber+'a> {
     title: Box<dyn fmt::Display + 'a>,
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
-    plots: Vec<Plot<'a>>,
-    xmarkers: Vec<f64>,
-    ymarkers: Vec<f64>,
+    plots: Vec<Plot<'a,X,Y>>,
+    xmarkers: Vec<X>,
+    ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xinterval_formatter: Box<dyn MyFmt + 'a>,
-    yinterval_formatter: Box<dyn MyFmt + 'a>,
 }
 
-trait MyFmt {
-    fn write(
-        &self,
-        formatter: &mut std::fmt::Formatter,
-        value: f64,
-        step: Option<f64>,
-    ) -> std::fmt::Result;
-}
-struct Foo<A>(A);
-impl<A: Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result> Foo<A> {
-    fn new(a: A) -> Foo<A> {
-        Foo(a)
-    }
-}
-impl<A: Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result> MyFmt for Foo<A> {
-    fn write(
-        &self,
-        formatter: &mut std::fmt::Formatter,
-        value: f64,
-        step: Option<f64>,
-    ) -> std::fmt::Result {
-        (self.0)(formatter, value, step)
-    }
-}
-
-impl<'a> Plotter<'a> {
+impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
     ///
     /// Create a plotter with the specified element.
     ///
@@ -318,7 +327,7 @@ impl<'a> Plotter<'a> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a> {
+    ) -> Plotter<'a,X,Y> {
         Plotter {
             title: Box::new(title),
             xname: Box::new(xname),
@@ -327,13 +336,7 @@ impl<'a> Plotter<'a> {
             xmarkers: Vec::new(),
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
-            preserve_aspect: false,
-            xinterval_formatter: Box::new(Foo::new(|a, b, c| {
-                write!(a, "{}", crate::util::interval_float(b, c))
-            })),
-            yinterval_formatter: Box::new(Foo::new(|a, b, c| {
-                write!(a, "{}", crate::util::interval_float(b, c))
-            })),
+            preserve_aspect: false
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -348,7 +351,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable,
+        I::Item: Plottable<X,Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -372,7 +375,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable,
+        I::Item: Plottable<X,Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -398,7 +401,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable,
+        I::Item: Plottable<X,Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -423,7 +426,7 @@ impl<'a> Plotter<'a> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable,
+        I::Item: Plottable<X,Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
@@ -445,8 +448,8 @@ impl<'a> Plotter<'a> {
     /// // Include origin in the graph.
     /// plotter.xmarker(0).ymarker(0);
     /// ```
-    pub fn xmarker<A: AsF64>(&mut self, marker: A) -> &mut Self {
-        self.xmarkers.push(marker.as_f64());
+    pub fn xmarker(&mut self, marker: X) -> &mut Self {
+        self.xmarkers.push(marker);
         self
     }
 
@@ -460,8 +463,8 @@ impl<'a> Plotter<'a> {
     /// // Include origin in the graph.
     /// plotter.xmarker(0).ymarker(0);
     /// ```
-    pub fn ymarker<A: AsF64>(&mut self, marker: A) -> &mut Self {
-        self.ymarkers.push(marker.as_f64());
+    pub fn ymarker(&mut self, marker: Y) -> &mut Self {
+        self.ymarkers.push(marker);
         self
     }
 
@@ -495,45 +498,10 @@ impl<'a> Plotter<'a> {
     /// Move a plotter out from behind a mutable reference leaving
     /// an empty plotter.
     ///
-    pub fn move_into(&mut self) -> Plotter<'a> {
+    pub fn move_into(&mut self) -> Plotter<'a,X,Y> {
         let mut empty = crate::Plotter::new("", "", "");
         core::mem::swap(&mut empty, self);
         empty
-    }
-
-    ///
-    /// The callback function provided will get called on each 
-    /// interval tick to be drawn. The callback function is passed
-    /// the value of the interval, as well as the step-size.
-    /// This function is also called to display `k` and `j` values
-    /// for when the magnitudes of of the plots are extreme.
-    /// In those cases, the step-size is not provided and `None` is passed.
-    ///
-    pub fn xinterval_fmt(
-        &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
-    ) -> &mut Self {
-        let k = Box::new(Foo(a));
-        self.xinterval_formatter = k;
-        self
-    }
-
-
-    ///
-    /// The callback function provided will get called on each 
-    /// interval tick to be drawn. The callback function is passed
-    /// the value of the interval, as well as the step-size.
-    /// This function is also called to display `k` and `j` values
-    /// for when the magnitudes of of the plots are extreme.
-    /// In those cases, the step-size is not provided and `None` is passed.
-    ///
-    pub fn yinterval_fmt(
-        &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, f64, Option<f64>) -> std::fmt::Result + 'a,
-    ) -> &mut Self {
-        let k = Box::new(Foo(a));
-        self.yinterval_formatter = k;
-        self
     }
 
     ///

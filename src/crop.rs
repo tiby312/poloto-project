@@ -1,4 +1,4 @@
-use crate::AsF64;
+/*
 use crate::Plottable;
 
 #[derive(Copy, Clone)]
@@ -108,3 +108,5 @@ pub trait Croppable: Sized {
 }
 
 impl<T: Iterator> Croppable for T where T::Item: Plottable {}
+
+*/

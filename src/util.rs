@@ -31,13 +31,27 @@ pub fn test_good_step_int(){
 
 pub trait PlotNumber:PartialOrd+Copy{
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8);
-    fn get_range_info(step:Self,range:[Self;2])->(f64,usize);
+    fn get_range_info(step:Self,range:[Self;2])->(Self,usize);
+    fn make_hole(&mut self);
+    
     fn is_hole(&self)->bool;
     fn unit_range()->[Self;2];
 
+    fn get_tick(&self,index:usize,step:Self)->Self;
+    
     fn scale(&self,val:[Self;2],max:f64)->f64;
 
     fn scale2(&self,val:[Self;2],max:f64)->f64;
+
+    fn zero()->Self;
+
+    fn fmt(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        step: Option<Self>,
+    ) -> std::fmt::Result;
+
+    fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool;
 }
 
 pub trait MetaPlotNumber{
@@ -60,19 +74,48 @@ impl MetaPlotNumber for &f64{
     }
 }
 impl PlotNumber for f64{
+    fn zero()->Self{
+        0.0
+    }
+
+    //Returns true if we should display all plots relativ to a base number
+    fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool{
+        determine_if_should_use_strat(
+            xstart_step,
+            xstart_step + ((step_num - 1) as f64) * xstep,
+            xstep,
+        )
+    }
+
+
+    fn fmt(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        step: Option<Self>,
+    ) -> std::fmt::Result{
+        write!(formatter, "{}", crate::util::interval_float(*self, step))
+    }
+
     fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
         find_good_step_f64(ideal_num_steps,range)
     }
-    fn get_range_info(step:Self,range:[Self;2])->(f64,usize){
+    fn get_range_info(step:Self,range:[Self;2])->(Self,usize){
         get_range_info_f64(step,range)
     }
     
+    fn make_hole(&mut self){
+        *self=f64::NAN;
+    }
     fn is_hole(&self)->bool{
         self.is_nan()
     }
 
     fn unit_range()->[Self;2]{
         [-1.0,1.0]
+    }
+
+    fn get_tick(&self,index:usize,step:Self)->Self{
+        self+step*(index as f64)
     }
 
     fn scale(&self,val:[Self;2],max:f64)->f64{

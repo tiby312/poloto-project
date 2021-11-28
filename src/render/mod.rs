@@ -10,11 +10,11 @@ struct DrawData {
     padding: f64,
     paddingy: f64,
 }
-struct ScaleData {
-    minx: f64,
-    maxx: f64,
-    miny: f64,
-    maxy: f64,
+struct ScaleData<X:PlotNumber,Y:PlotNumber> {
+    minx: X,
+    maxx: X,
+    miny: Y,
+    maxy: Y,
     scalex: f64,
     scaley: f64,
     preserve_aspect: bool,
@@ -23,7 +23,7 @@ struct ScaleData {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
+pub fn render<X:PlotNumber,Y:PlotNumber,T: std::fmt::Write>(plotter: &mut Plotter<X,Y>, writer: T) -> T {
     let mut writer = tagger::new(writer);
 
     let mut plotter = {
@@ -38,7 +38,7 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let paddingy = 100.0;
 
     let ([minx,maxx],[miny,maxy])=util::find_bounds2(
-        plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()).map(|[x,y]|(x,y)),
+        plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
         plotter.xmarkers.iter().map(|x|*x),
         plotter.ymarkers.iter().map(|x|*x),
     );
@@ -82,10 +82,8 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
                 wc.get_counter() != 0
             });
 
-        use util::PlotNumber;
-
         // Scale all the plots here.
-        let it = p.plots.iter_second().map(|[x, y]| {
+        let it = p.plots.iter_second().map(|(x, y)| {
             [
                 aspect_offset + padding + x.scale([minx,maxx],scalex2),
                 height - paddingy - y.scale([miny,maxy],scaley2),

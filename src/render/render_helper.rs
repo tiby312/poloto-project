@@ -77,11 +77,11 @@ pub fn line<T: std::fmt::Write>(
 ///
 /// Draw the axis lines, and tick intervals
 ///
-pub(super) fn draw_base<T: fmt::Write>(
-    plotter: &mut Plotter,
+pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
+    plotter: &mut Plotter<X,Y>,
     writer: &mut tagger::ElemWriter<T>,
     dd: DrawData,
-    sd: ScaleData,
+    sd: ScaleData<X,Y>,
 ) {
     let DrawData {
         width,
@@ -193,23 +193,19 @@ pub(super) fn draw_base<T: fmt::Write>(
             );
         }
 
-        use util::PlotNumber;
+
         //The target dash size will be halfed later.
         //This ensures that its always an even number of dash and empty spaces which is needed
         //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
         let xdash_size = best_dash_size(xstep.scale2([minx,maxx],scalex), good_normalized_stepx, 20.0);
         let ydash_size = best_dash_size(ystep.scale2([miny,maxy],scaley), good_normalized_stepy, 20.0);
         
-        let distance_to_firstx = xstart_step - minx;
-        let distance_to_firsty = ystart_step - miny;
+        //let distance_to_firstx = xstart_step - minx;
+        //let distance_to_firsty = ystart_step - miny;
 
         {
             //step num is assured to be atleast 1.
-            let (extra, xstart_step) = if util::determine_if_should_use_strat(
-                xstart_step,
-                xstart_step + ((xstep_num - 1) as f64) * xstep,
-                xstep,
-            ) {
+            let (extra, xstart_step) = if X::display_with_offset(xstart_step,xstep_num,xstep){
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -221,24 +217,21 @@ pub(super) fn draw_base<T: fmt::Write>(
                     .build(|d| {
                         d.put_raw(format_args!(
                             "Where j = {}",
-                            DisplayableClosure::new(|w| plotter.xinterval_formatter.write(
-                                w,
-                                xstart_step,
-                                None
-                            ))
+                            DisplayableClosure::new(|w| xstart_step.fmt(w,None))
                         ));
                     });
 
-                ("j+", 0.0)
+                ("j+", X::zero())
             } else {
                 ("", xstart_step)
             };
 
             //Draw interva`l x text
             for a in 0..xstep_num {
-                let p = (a as f64) * xstep;
+                
+                let v=xstart_step.get_tick(a,xstep);
 
-                let xx = (distance_to_firstx + p).scale2([minx,maxx],scalex) + padding;
+                let xx = v.scale([minx,maxx],scalex) + padding;
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -261,9 +254,8 @@ pub(super) fn draw_base<T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.xinterval_formatter.write(
+                            DisplayableClosure::new(|w|  v.fmt(
                                 w,
-                                p + xstart_step,
                                 Some(xstep)
                             ))
                         ));
@@ -273,11 +265,7 @@ pub(super) fn draw_base<T: fmt::Write>(
 
         {
             //step num is assured to be atleast 1.
-            let (extra, ystart_step) = if util::determine_if_should_use_strat(
-                ystart_step,
-                ystart_step + ((ystep_num - 1) as f64) * ystep,
-                ystep,
-            ) {
+            let (extra, ystart_step) = if Y::display_with_offset(ystart_step,ystep_num,ystep){
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -289,24 +277,21 @@ pub(super) fn draw_base<T: fmt::Write>(
                     .build(|w| {
                         w.put_raw(format_args!(
                             "Where k = {}",
-                            DisplayableClosure::new(|w| plotter.yinterval_formatter.write(
-                                w,
-                                ystart_step,
-                                None
-                            ))
+                            DisplayableClosure::new(|w| ystart_step.fmt(w,None))
                         ));
                     });
 
-                ("k+", 0.0)
+                ("k+", Y::zero())
             } else {
                 ("", ystart_step)
             };
 
             //Draw interval y text
             for a in 0..ystep_num {
-                let p = (a as f64) * ystep;
+                let v=ystart_step.get_tick(a,ystep);
 
-                let yy = height - (distance_to_firsty + p).scale2([miny,maxy],scaley) - paddingy;
+                let yy = height - v.scale([miny,maxy],scaley) - paddingy;
+
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -329,15 +314,15 @@ pub(super) fn draw_base<T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.yinterval_formatter.write(
-                                w,
-                                p + ystart_step,
-                                Some(ystep)
-                            ))
+                            DisplayableClosure::new(|w| v.fmt(w,Some(ystep)))
                         ));
                     });
             }
         }
+
+        let d1=minx.scale2([minx,maxx],scalex);
+        let d2=xstart_step.scale2([minx,maxx],scalex);
+        let distance_to_firstx=d2-d1;
 
         writer.single("path", |d| {
             d.attr("stroke", "black")
@@ -348,7 +333,8 @@ pub(super) fn draw_base<T: fmt::Write>(
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
                         xdash_size / 2.0,
-                        -(distance_to_firstx).scale2([minx,maxx],scalex)
+                        //-(distance_to_firstx).scale2([minx,maxx],scalex)
+                        -distance_to_firstx
                     ),
                 )
                 .path(|p| {
@@ -364,6 +350,11 @@ pub(super) fn draw_base<T: fmt::Write>(
                 });
         });
 
+        let d1=miny.scale2([miny,maxy],scaley);
+        let d2=ystart_step.scale2([miny,maxy],scaley);
+        let distance_to_firsty=d2-d1;
+        
+
         writer.single("path", |d| {
             d.attr("stroke", "black")
                 .attr("fill", "none")
@@ -373,7 +364,8 @@ pub(super) fn draw_base<T: fmt::Write>(
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
                         ydash_size / 2.0,
-                        -(distance_to_firsty).scale2([miny,maxy],scaley)
+                        //-(distance_to_firsty).scale2([miny,maxy],scaley)
+                        -distance_to_firsty
                     ),
                 )
                 .path(|p| {
