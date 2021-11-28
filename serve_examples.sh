@@ -8,7 +8,7 @@ mkdir assets -p
 #cargo run --example custom_style_html > assets/custom_style.html
 #cargo run --example hover_shadow_html > assets/hover_shadow.html
 #cargo run --example magnitude > assets/magnitude.svg
-#cargo run --example month > assets/month.svg
+cargo run --example month > assets/month.svg
 #cargo run --example trig > assets/trig.svg
 #cargo run --example simple > assets/simple.svg
 #cargo run --example test > assets/test.html

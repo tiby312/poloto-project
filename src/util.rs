@@ -54,25 +54,10 @@ pub trait PlotNumber:PartialOrd+Copy{
     fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool;
 }
 
-pub trait MetaPlotNumber{
-    type T:PlotNumber;
-    fn as_inner(&self)->Self::T;
-}
 
 
-impl MetaPlotNumber for f64{
-    type T=f64;
-    fn as_inner(&self)->f64{
-        *self
-    }
-}
 
-impl MetaPlotNumber for &f64{
-    type T=f64;
-    fn as_inner(&self)->f64{
-        **self
-    }
-}
+
 impl PlotNumber for f64{
     fn zero()->Self{
         0.0
@@ -135,6 +120,63 @@ impl PlotNumber for f64{
     }
 }
 
+impl PlotNumber for i128{
+    fn zero()->Self{
+        0
+    }
+
+    //Returns true if we should display all plots relativ to a base number
+    fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool{
+        false
+    }
+
+    fn fmt(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        step: Option<Self>,
+    ) -> std::fmt::Result{
+        write!(formatter, "{}", self)
+    }
+
+    fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
+        find_good_step_int(ideal_num_steps,range)
+    }
+    fn get_range_info(step:Self,range:[Self;2])->(Self,usize){
+        get_range_info_int(step,range)
+    }
+    
+    fn make_hole(&mut self){
+        *self=i128::MAX
+    }
+    fn is_hole(&self)->bool{
+        *self==i128::MAX
+    }
+
+    fn unit_range()->[Self;2]{
+        [0,1]
+    }
+
+    fn get_tick(&self,index:usize,step:Self)->Self{
+        self+step*(index as i128)
+    }
+
+    fn scale(&self,val:[Self;2],max:f64)->f64{
+        let diff=(val[1]-val[0]) as f64;
+
+        let scale=max/diff;
+
+        (*self-val[0]) as f64*scale
+    }
+
+    fn scale2(&self,val:[Self;2],max:f64)->f64{
+        let diff=(val[1]-val[0]) as f64;
+
+        let scale=max/diff;
+
+        (*self) as f64*scale
+    }
+}
+
 
 
 pub fn round_up_to_nearest_multiple_int(val:i128,multiple:i128)->i128{
@@ -154,6 +196,26 @@ pub fn round_up_to_nearest_multiple_f64(val:f64,multiple:f64)->f64{
 }
 
 
+pub fn get_range_info_int(step:i128,range_all:[i128;2])->(i128,usize){
+    let start_step=round_up_to_nearest_multiple_int(range_all[0],step);
+    
+    let step_num={
+        let mut counter=start_step;
+        let mut res=0;
+        for a in 0..{
+            if counter>range_all[1]{
+                res=a;
+                break;
+            }
+
+            assert!(step+counter>counter,"{:?}",(step,range_all));
+            counter+=step;
+        }
+        res
+    };
+
+    (start_step,step_num)
+}
 
 //TODO handle case zero steps are found
 pub fn get_range_info_f64(step:f64,range_all:[f64;2])->(f64,usize){
