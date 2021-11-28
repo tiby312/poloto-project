@@ -1,6 +1,6 @@
 use poloto::formatm;
 fn main() {
-    let x = (0..500).map(|x| (x as f32 / 500.0) * 10.0);
+    let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
     let mut plotter = poloto::plot("cos per year", "year", "cows");
 

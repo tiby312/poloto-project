@@ -16,7 +16,7 @@ fn main() {
     let mut p = poloto::plot("collatz", "x", "y");
 
     for i in 1000..1006 {
-        p.line(poloto::formatm!("c({})", i), collatz(i).enumerate().map(|(x,y)|(x as f64,y as f64)));
+        p.line(poloto::formatm!("c({})", i), collatz(i).enumerate().map(|(x,y)|(x as i128,y as i128)));
     }
 
     p.ymarker(0).simple_with_element(

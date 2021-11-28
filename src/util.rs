@@ -127,7 +127,20 @@ impl PlotNumber for i128{
 
     //Returns true if we should display all plots relativ to a base number
     fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool{
+        /*
+        const MAX_LEN:i128=1000;
+
+        if xstart_step.abs()>MAX_LEN{
+            return true
+        }
+
+        if xstart_step + ((step_num as i128 - 1) ) * xstep > MAX_LEN{
+            return true
+        }
+
         false
+        */
+        false  
     }
 
     fn fmt(
