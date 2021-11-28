@@ -197,8 +197,8 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         //The target dash size will be halfed later.
         //This ensures that its always an even number of dash and empty spaces which is needed
         //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
-        let xdash_size = best_dash_size(xstep.scale2([minx,maxx],scalex), good_normalized_stepx, 20.0);
-        let ydash_size = best_dash_size(ystep.scale2([miny,maxy],scaley), good_normalized_stepy, 20.0);
+        let xdash_size = best_dash_size(xstep.scale([minx,maxx],scalex), good_normalized_stepx, 20.0);
+        let ydash_size = best_dash_size(ystep.scale([miny,maxy],scaley), good_normalized_stepy, 20.0);
         
         //let distance_to_firstx = xstart_step - minx;
         //let distance_to_firsty = ystart_step - miny;
@@ -231,7 +231,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                 
                 let v=xstart_step.get_tick(a,xstep);
 
-                let xx = v.scale([minx,maxx],scalex) + padding;
+                let xx = (v.scale([minx,maxx],scalex) - minx.scale([minx,maxx],scalex)) + padding;
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -290,7 +290,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
             for a in 0..ystep_num {
                 let v=ystart_step.get_tick(a,ystep);
 
-                let yy = height - v.scale([miny,maxy],scaley) - paddingy;
+                let yy = height - (v.scale([miny,maxy],scaley) - miny.scale([miny,maxy],scaley) ) - paddingy;
 
 
                 writer.single("line", |d| {
@@ -320,8 +320,8 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
             }
         }
 
-        let d1=minx.scale2([minx,maxx],scalex);
-        let d2=xstart_step.scale2([minx,maxx],scalex);
+        let d1=minx.scale([minx,maxx],scalex);
+        let d2=xstart_step.scale([minx,maxx],scalex);
         let distance_to_firstx=d2-d1;
 
         writer.single("path", |d| {
@@ -350,8 +350,8 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                 });
         });
 
-        let d1=miny.scale2([miny,maxy],scaley);
-        let d2=ystart_step.scale2([miny,maxy],scaley);
+        let d1=miny.scale([miny,maxy],scaley);
+        let d2=ystart_step.scale([miny,maxy],scaley);
         let distance_to_firsty=d2-d1;
         
 

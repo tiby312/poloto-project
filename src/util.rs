@@ -40,8 +40,6 @@ pub trait PlotNumber:PartialOrd+Copy{
     
     fn scale(&self,val:[Self;2],max:f64)->f64;
 
-    fn scale2(&self,val:[Self;2],max:f64)->f64;
-
     fn zero()->Self;
 
     fn fmt(
@@ -107,14 +105,6 @@ impl PlotNumber for f64{
 
         let scale=max/diff;
 
-        (*self-val[0])*scale
-    }
-
-    fn scale2(&self,val:[Self;2],max:f64)->f64{
-        let diff=val[1]-val[0];
-
-        let scale=max/diff;
-
         (*self)*scale
     }
 }
@@ -125,7 +115,7 @@ impl PlotNumber for i128{
     }
 
     //Returns true if we should display all plots relativ to a base number
-    fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool{
+    fn display_with_offset(_xstart_step:Self,_step_num:usize,_xstep:Self)->bool{
         /*
         const MAX_LEN:i128=1000;
 
@@ -173,14 +163,6 @@ impl PlotNumber for i128{
     }
 
     fn scale(&self,val:[Self;2],max:f64)->f64{
-        let diff=(val[1]-val[0]) as f64;
-
-        let scale=max/diff;
-
-        (*self-val[0]) as f64*scale
-    }
-
-    fn scale2(&self,val:[Self;2],max:f64)->f64{
         let diff=(val[1]-val[0]) as f64;
 
         let scale=max/diff;

@@ -82,11 +82,14 @@ pub fn render<X:PlotNumber,Y:PlotNumber,T: std::fmt::Write>(plotter: &mut Plotte
                 wc.get_counter() != 0
             });
 
+        let aa=minx.scale([minx,maxx],scalex2);
+        let bb=miny.scale([miny,maxy],scaley2);
+        
         // Scale all the plots here.
         let it = p.plots.iter_second().map(|(x, y)| {
             [
-                aspect_offset + padding + x.scale([minx,maxx],scalex2),
-                height - paddingy - y.scale([miny,maxy],scaley2),
+                aspect_offset + padding + ( x.scale([minx,maxx],scalex2) - aa ),
+                height - paddingy - (y.scale([miny,maxy],scaley2) - bb),
 
             ]
         });
