@@ -3,28 +3,6 @@ use fmt::Write;
 
 
 
-struct Result<X>{
-    num_steps:usize,
-    step:X,
-    start_step:X,
-    good_normalized_step:usize
-}
-
-
-#[test]
-pub fn test_good_step_int(){
-    let a=[100,1231,3,2,1,444444,23];
-    
-    for &a in a.iter(){
-        let val=find_good_step_int(5,[0,a]);
-
-        dbg!(a,val);
-
-    }
-
-    assert!(false);
-   
-}
 
 
 
@@ -139,26 +117,13 @@ impl PlotNumber for i128{
 
     //Returns true if we should display all plots relativ to a base number
     fn display_with_offset(_xstart_step:Self,_step_num:usize,_xstep:Self)->bool{
-        /*
-        const MAX_LEN:i128=1000;
-
-        if xstart_step.abs()>MAX_LEN{
-            return true
-        }
-
-        if xstart_step + ((step_num as i128 - 1) ) * xstep > MAX_LEN{
-            return true
-        }
-
-        false
-        */
         false  
     }
 
     fn fmt(
         &self,
         formatter: &mut std::fmt::Formatter,
-        step: Option<Self>,
+        _step: Option<Self>,
     ) -> std::fmt::Result{
         write!(formatter, "{}", self)
     }
@@ -197,7 +162,6 @@ impl PlotNumber for i128{
 
 
 pub fn round_up_to_nearest_multiple_int(val:i128,multiple:i128)->i128{
-    let mut ss=multiple-1;
     
     let ss=if val>=0{
         multiple-1
@@ -298,77 +262,6 @@ pub fn find_good_step_f64(good_steps:&[u8],num_steps: usize, range_all: [f64; 2]
 
 
 
-
-
-/// Specify ideal number of steps and range.
-/// Returns:
-/// number of intervals.
-/// size of each interval
-/// first interval location.
-pub fn find_good_step(num_steps: usize, range_all: [f64; 2]) -> (usize, f64, f64, u8) {
-    let range_all = [range_all[0] as f64, range_all[1] as f64];
-    let range = range_all[1] - range_all[0];
-
-    //https://stackoverflow.com/questions/237220/tickmark-algorithm-for-a-graph-axis
-
-    let rough_step = range / (num_steps - 1) as f64;
-
-    let step_power = 10.0f64.powf(-rough_step.abs().log10().floor()) as f64;
-    let normalized_step = rough_step * step_power;
-
-    let good_steps = [1u8, 2, 5, 10];
-    let good_normalized_step = *good_steps
-        .iter()
-        .find(|a| **a as f64 > normalized_step)
-        .unwrap();
-
-    let step = good_normalized_step as f64 / step_power;
-
-    let start_step = {
-        //naively find starting point.
-        let aa = (range_all[0] / step).floor() * step;
-        let bb = (range_all[0] / step).ceil() * step;
-        if aa < bb {
-            if aa < range_all[0] {
-                bb
-            } else {
-                aa
-            }
-        } else if bb < range_all[0] {
-            aa
-        } else {
-            bb
-        }
-    };
-    assert!(start_step >= range_all[0]);
-
-    let num_step = {
-        //naively find number of steps
-        let mut counter = start_step;
-        let mut num = 0;
-        loop {
-            if counter > range_all[1] {
-                break;
-            }
-            counter += step;
-
-            num += 1;
-        }
-        num
-    };
-    assert!(num_step >= 1);
-
-    // Because of the requirement for the num step to be atleast one, this assertion isnt
-    // necessarily true.
-    // assert!(start_step + step * ((num_step - 1) as f64) <= range_all[1]);
-
-    (
-        num_step,
-        step as f64,
-        start_step as f64,
-        good_normalized_step,
-    )
-}
 
 fn make_normal(a: f64, step: Option<f64>) -> impl fmt::Display {
     crate::DisplayableClosure::new(move |fm| {
