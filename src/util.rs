@@ -6,14 +6,9 @@ use fmt::Write;
 
 
 
-pub trait PlotNumber:PartialOrd+Copy+std::fmt::Debug{
+pub trait PlotNumber:PartialOrd+Copy+std::fmt::Display{
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
-
-    fn tick_size(ideal_tick_size:f64,tick_info:&TickInfo<Self>,range:[Self;2],max:f64)->f64{
-        best_dash_size(tick_info.step.scale(range,max), tick_info.num_dash_between_ticks, ideal_tick_size)
-    }
-
 
     /// Create a hole value.
     fn hole()->Self;
@@ -32,29 +27,32 @@ pub trait PlotNumber:PartialOrd+Copy+std::fmt::Debug{
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
-        step: Option<Self>,
-    ) -> std::fmt::Result;
-
-}
-
-
-fn best_dash_size(
-    one_step: f64,
-    good_normalized_step: usize,
-    target_dash_size: f64,
-) -> f64 {
-    
-    for x in 1..50 {
-        let dash_size = one_step / ((good_normalized_step * x) as f64);
-        if dash_size < target_dash_size {
-            return dash_size;
-        }
+        _step: Option<Self>,
+    ) -> std::fmt::Result{
+        write!(formatter,"{}",self)
     }
-    unreachable!(
-        "Could not find a good dash step size! {:?}",
-        (one_step, good_normalized_step, target_dash_size)
-    );
+
+    fn tick_size(ideal_tick_size:f64,tick_info:&TickInfo<Self>,range:[Self;2],max:f64)->Option<f64>{
+        let one_step=tick_info.step.scale(range,max);
+        let good_normalized_step=tick_info.normalized_tick_step;
+
+
+        for x in 1..50 {
+            let dash_size = one_step / ((good_normalized_step * x) as f64);
+            if dash_size < ideal_tick_size {
+                return Some(dash_size);
+            }
+        }
+        unreachable!(
+            "Could not find a good dash step size! {:?}",
+            (one_step, good_normalized_step, ideal_tick_size)
+        );
+    }
+
+
 }
+
+
 
 
 
@@ -66,7 +64,7 @@ pub struct TickInfo<I>{
     pub ticks:Box<dyn Iterator<Item=Tick<I>>>,
     pub step:I,
     pub start_step:I,
-    pub num_dash_between_ticks:usize,
+    pub normalized_tick_step:usize,
     pub display_relative:Option<I>
 }
 
@@ -101,7 +99,7 @@ impl PlotNumber for f64{
 
         TickInfo{
             ticks:Box::new(ii),
-            num_dash_between_ticks:good_normalized_step as usize,
+            normalized_tick_step:good_normalized_step as usize,
             step,
             start_step,
             display_relative:display_relative.then(||start_step)
@@ -164,7 +162,7 @@ impl PlotNumber for i128{
             ticks:Box::new(ii),
             step,
             start_step,
-            num_dash_between_ticks:good_normalized_step as usize,
+            normalized_tick_step:good_normalized_step as usize,
             display_relative:None
         }
         

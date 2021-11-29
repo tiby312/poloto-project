@@ -159,13 +159,12 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         let xtick_info=util::PlotNumber::compute_ticks(ideal_num_xsteps,[minx,maxx]);
         let ytick_info=util::PlotNumber::compute_ticks(ideal_num_ysteps,[miny,maxy]);
 
+        let xdash_size=PlotNumber::tick_size(20.0,&xtick_info,[minx,maxx],scalex);
+        let ydash_size=PlotNumber::tick_size(20.0,&ytick_info,[miny,maxy],scaley);
 
         use tagger::PathCommand::*;
 
         
-        let xdash_size=PlotNumber::tick_size(20.0,&xtick_info,[minx,maxx],scalex);
-        let ydash_size=PlotNumber::tick_size(20.0,&ytick_info,[miny,maxy],scaley);
-
 
 
         {
@@ -284,6 +283,8 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
             }
         }
 
+
+
         let d1=minx.scale([minx,maxx],scalex);
         let d2=xtick_info.start_step.scale([minx,maxx],scalex);
         let distance_to_firstx=d2-d1;
@@ -291,8 +292,9 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         writer.single("path", |d| {
             d.attr("stroke", "black")
                 .attr("fill", "none")
-                .attr("class", "poloto_axis_lines")
-                .attr(
+                .attr("class", "poloto_axis_lines");
+            if let Some(xdash_size)=xdash_size{
+                d.attr(
                     "style",
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
@@ -300,8 +302,10 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                         //-(distance_to_firstx).scale2([minx,maxx],scalex)
                         -distance_to_firstx
                     ),
-                )
-                .path(|p| {
+                    
+                );
+            }
+                d.path(|p| {
                     p.put(M(padding + aspect_offset, height - paddingy));
                     if preserve_aspect {
                         p.put(L(
@@ -314,6 +318,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                 });
         });
 
+        
         let d1=miny.scale([miny,maxy],scaley);
         let d2=ytick_info.start_step.scale([miny,maxy],scaley);
         let distance_to_firsty=d2-d1;
@@ -322,8 +327,9 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         writer.single("path", |d| {
             d.attr("stroke", "black")
                 .attr("fill", "none")
-                .attr("class", "poloto_axis_lines")
-                .attr(
+                .attr("class", "poloto_axis_lines");
+                if let Some(ydash_size)=ydash_size{
+                d.attr(
                     "style",
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
@@ -331,8 +337,9 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                         //-(distance_to_firsty).scale2([miny,maxy],scaley)
                         -distance_to_firsty
                     ),
-                )
-                .path(|p| {
+                );
+                }
+                d.path(|p| {
                     p.put(M(aspect_offset + padding, height - paddingy));
                     p.put(L(aspect_offset + padding, paddingy));
                 });
