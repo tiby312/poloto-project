@@ -1,6 +1,6 @@
 use crate::Plottable;
 
-use crate::util::DisconectableNumber;
+use crate::DisconectableNumber;
 
 #[derive(Copy, Clone)]
 enum Dir {

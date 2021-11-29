@@ -1,95 +1,11 @@
 use core::fmt;
 use fmt::Write;
 
-pub trait DisconectableNumber: PlotNumber {
-    /// Create a hole value.
-    fn hole() -> Self;
-}
+use crate::DisconectableNumber;
+use crate::PlotNumber;
+use crate::TickInfo;
+use crate::Tick;
 
-pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
-    /// Is this a hole value to inject discontinuty?
-    fn is_hole(&self) -> bool {
-        false
-    }
-
-    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self>;
-
-    /// If there is only one point in a graph, or no point at all,
-    /// the range to display in the graph.
-    fn unit_range() -> [Self; 2];
-
-    /// Provided a min and max range, scale the current value against max.
-    fn scale(&self, val: [Self; 2], max: f64) -> f64;
-
-    /// Used to display a tick
-    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &self,
-        formatter: &mut std::fmt::Formatter,
-        _step: Option<Self>,
-    ) -> std::fmt::Result {
-        write!(formatter, "{}", self)
-    }
-
-    fn tick_size(
-        ideal_tick_size: f64,
-        tick_info: &TickInfo<Self>,
-        range: [Self; 2],
-        max: f64,
-    ) -> Option<f64> {
-        let one_step = tick_info.step.scale(range, max);
-        let good_normalized_step = tick_info.dash_multiple;
-
-        for x in 1..50 {
-            let dash_size = one_step / ((good_normalized_step * x) as f64);
-            if dash_size < ideal_tick_size {
-                return Some(dash_size);
-            }
-        }
-        unreachable!(
-            "Could not find a good dash step size! {:?}",
-            (one_step, good_normalized_step, ideal_tick_size)
-        );
-    }
-}
-
-pub struct Tick<I> {
-    pub position: I,
-    /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
-    pub value: I,
-}
-pub struct TickInfo<I> {
-    /// List of the position of each tick to be displayed.
-    pub ticks: Vec<Tick<I>>,
-    /// The difference between two adjacent ticks
-    pub step: I,
-    /// The starting tick position
-    pub start_step: I,
-    /// The number of dashes between two ticks must be a multiple of this number. 
-    pub dash_multiple: usize,
-
-    /// If we want to display the tick values relatively, this will
-    /// have the base start to start with.
-    pub display_relative: Option<I>,
-}
-impl<I> TickInfo<I> {
-    pub fn map<J>(self, func: impl Fn(I) -> J) -> TickInfo<J> {
-        TickInfo {
-            ticks: self
-                .ticks
-                .into_iter()
-                .map(|x| Tick {
-                    position: func(x.position),
-                    value: func(x.value),
-                })
-                .collect(),
-            step: func(self.step),
-            start_step: func(self.start_step),
-            dash_multiple: self.dash_multiple,
-            display_relative: self.display_relative.map(|x| func(x)),
-        }
-    }
-}
 
 impl DisconectableNumber for f64 {
     fn hole() -> Self {
@@ -226,17 +142,17 @@ impl PlotNumber for i128 {
     }
 }
 
-pub fn round_up_to_nearest_multiple_int(val: i128, multiple: i128) -> i128 {
+fn round_up_to_nearest_multiple_int(val: i128, multiple: i128) -> i128 {
     let ss = if val >= 0 { multiple - 1 } else { 0 };
 
     ((val + ss) / multiple) * multiple
 }
 
-pub fn round_up_to_nearest_multiple_f64(val: f64, multiple: f64) -> f64 {
+fn round_up_to_nearest_multiple_f64(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple
 }
 
-pub fn get_range_info_int(step: i128, range_all: [i128; 2]) -> (i128, usize) {
+fn get_range_info_int(step: i128, range_all: [i128; 2]) -> (i128, usize) {
     let start_step = round_up_to_nearest_multiple_int(range_all[0], step);
 
     let step_num = {
@@ -258,7 +174,7 @@ pub fn get_range_info_int(step: i128, range_all: [i128; 2]) -> (i128, usize) {
 }
 
 //TODO handle case zero steps are found
-pub fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, usize) {
+fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, usize) {
     let start_step = round_up_to_nearest_multiple_f64(range_all[0], step);
 
     let step_num = {
@@ -279,7 +195,7 @@ pub fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, usize) {
     (start_step, step_num)
 }
 
-pub fn find_good_step_int(good_steps: &[u8], num_steps: usize, range_all: [i128; 2]) -> (i128, u8) {
+fn find_good_step_int(good_steps: &[u8], num_steps: usize, range_all: [i128; 2]) -> (i128, u8) {
     let range = range_all[1] - range_all[0];
 
     let rough_step = range / (num_steps - 1) as i128;
@@ -299,7 +215,7 @@ pub fn find_good_step_int(good_steps: &[u8], num_steps: usize, range_all: [i128;
     )
 }
 
-pub fn find_good_step_f64(good_steps: &[u8], num_steps: usize, range_all: [f64; 2]) -> (f64, u8) {
+fn find_good_step_f64(good_steps: &[u8], num_steps: usize, range_all: [f64; 2]) -> (f64, u8) {
     let range = range_all[1] - range_all[0];
 
     let rough_step = range / (num_steps - 1) as f64;
@@ -352,7 +268,7 @@ fn make_science(a: f64, step: Option<f64>) -> impl fmt::Display {
     })
 }
 
-pub fn determine_if_should_use_strat(start: f64, end: f64, step: f64) -> bool {
+fn determine_if_should_use_strat(start: f64, end: f64, step: f64) -> bool {
     let mut start_s = String::new();
     let mut end_s = String::new();
 
@@ -389,7 +305,7 @@ pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
     })
 }
 
-pub fn find_bounds2<X: PlotNumber, Y: PlotNumber>(
+pub(crate) fn find_bounds2<X: PlotNumber, Y: PlotNumber>(
     it: impl IntoIterator<Item = (X, Y)>,
     xmarkers: impl IntoIterator<Item = X>,
     ymarkers: impl IntoIterator<Item = Y>,
@@ -446,7 +362,7 @@ pub fn find_bounds2<X: PlotNumber, Y: PlotNumber>(
     }
 }
 
-pub struct WriteCounter<T> {
+pub(crate) struct WriteCounter<T> {
     counter: usize,
     writer: T,
 }

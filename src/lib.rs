@@ -37,7 +37,6 @@ pub use util::interval_float as default_val_formatter;
 
 pub mod util;
 
-use util::PlotNumber;
 
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
@@ -577,7 +576,7 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
         w.into_writer()
     }
 }
-
+/*
 pub struct Renderer {}
 impl Renderer {
     pub fn render<T: fmt::Write>(&mut self, a: T) -> T {
@@ -589,6 +588,7 @@ impl Renderer {
         w.into_writer()
     }
 }
+*/
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
@@ -628,3 +628,95 @@ pub fn minify(a: &str) -> impl fmt::Display + '_ + Send + Sync {
     })
 }
 */
+
+
+
+pub trait DisconectableNumber: PlotNumber {
+    /// Create a hole value.
+    fn hole() -> Self;
+}
+
+pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
+    /// Is this a hole value to inject discontinuty?
+    fn is_hole(&self) -> bool {
+        false
+    }
+
+    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self>;
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range() -> [Self; 2];
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&self, val: [Self; 2], max: f64) -> f64;
+
+    /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
+    fn fmt_tick(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        _step: Option<Self>,
+    ) -> std::fmt::Result {
+        write!(formatter, "{}", self)
+    }
+
+    fn tick_size(
+        ideal_tick_size: f64,
+        tick_info: &TickInfo<Self>,
+        range: [Self; 2],
+        max: f64,
+    ) -> Option<f64> {
+        let one_step = tick_info.step.scale(range, max);
+        let good_normalized_step = tick_info.dash_multiple;
+
+        for x in 1..50 {
+            let dash_size = one_step / ((good_normalized_step * x) as f64);
+            if dash_size < ideal_tick_size {
+                return Some(dash_size);
+            }
+        }
+        unreachable!(
+            "Could not find a good dash step size! {:?}",
+            (one_step, good_normalized_step, ideal_tick_size)
+        );
+    }
+}
+
+pub struct Tick<I> {
+    pub position: I,
+    /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
+    pub value: I,
+}
+pub struct TickInfo<I> {
+    /// List of the position of each tick to be displayed.
+    pub ticks: Vec<Tick<I>>,
+    /// The difference between two adjacent ticks
+    pub step: I,
+    /// The starting tick position
+    pub start_step: I,
+    /// The number of dashes between two ticks must be a multiple of this number. 
+    pub dash_multiple: usize,
+
+    /// If we want to display the tick values relatively, this will
+    /// have the base start to start with.
+    pub display_relative: Option<I>,
+}
+impl<I> TickInfo<I> {
+    pub fn map<J>(self, func: impl Fn(I) -> J) -> TickInfo<J> {
+        TickInfo {
+            ticks: self
+                .ticks
+                .into_iter()
+                .map(|x| Tick {
+                    position: func(x.position),
+                    value: func(x.value),
+                })
+                .collect(),
+            step: func(self.step),
+            start_step: func(self.start_step),
+            dash_multiple: self.dash_multiple,
+            display_relative: self.display_relative.map(|x| func(x)),
+        }
+    }
+}

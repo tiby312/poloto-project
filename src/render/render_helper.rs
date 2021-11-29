@@ -154,8 +154,8 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let xtick_info = util::PlotNumber::compute_ticks(ideal_num_xsteps, [minx, maxx]);
-        let ytick_info = util::PlotNumber::compute_ticks(ideal_num_ysteps, [miny, maxy]);
+        let xtick_info = PlotNumber::compute_ticks(ideal_num_xsteps, [minx, maxx]);
+        let ytick_info = PlotNumber::compute_ticks(ideal_num_ysteps, [miny, maxy]);
 
         let xdash_size = PlotNumber::tick_size(20.0, &xtick_info, [minx, maxx], scalex);
         let ydash_size = PlotNumber::tick_size(20.0, &ytick_info, [miny, maxy], scaley);
@@ -186,7 +186,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
             };
 
             //Draw interva`l x text
-            for util::Tick { position, value } in xtick_info.ticks {
+            for Tick { position, value } in xtick_info.ticks {
                 let xx = (position.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex))
                     + padding;
 
@@ -242,7 +242,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
             };
 
             //Draw interval y text
-            for util::Tick { position, value } in ytick_info.ticks {
+            for Tick { position, value } in ytick_info.ticks {
                 let yy = height
                     - (position.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
                     - paddingy;
