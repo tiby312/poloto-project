@@ -285,7 +285,8 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     /// Create a plotter with the specified element.
     ///
     /// ```
-    /// let p = poloto::Plotter::new("title", "x", "y");
+    /// let mut p = poloto::Plotter::new("title", "x", "y");
+    /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
         title: impl Display + 'a,
@@ -412,7 +413,7 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     /// plotter.line("", &data);
     ///
     /// // Include origin in the graph.
-    /// plotter.xmarker(0).ymarker(0);
+    /// plotter.xmarker(0.0).ymarker(0.0);
     /// ```
     pub fn xmarker(&mut self, marker: X) -> &mut Self {
         self.xmarkers.push(marker);
@@ -427,7 +428,7 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     /// plotter.line("", &data);
     ///
     /// // Include origin in the graph.
-    /// plotter.xmarker(0).ymarker(0);
+    /// plotter.xmarker(0.0).ymarker(0.0);
     /// ```
     pub fn ymarker(&mut self, marker: Y) -> &mut Self {
         self.ymarkers.push(marker);

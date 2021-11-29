@@ -30,7 +30,7 @@ fn main() {
         .line("σ = 1.0", range.iter().map(|&x| [x, gaussian(1.0, 0.0)(x)]))
         .line("σ = 0.5", range.iter().map(|&x| [x, gaussian(0.5, 0.0)(x)]))
         .line("σ = 0.3", range.iter().map(|&x| [x, gaussian(0.3, 0.0)(x)]))
-        .ymarker(0)
+        .ymarker(0.0)
         .simple_theme(poloto::upgrade_write(std::io::stdout()));
 }
 
@@ -68,7 +68,7 @@ fn main() {
 
     //Scale grpah to include up to the year 2025.
     //Also scale to include a value of 0 articles.
-    s.xmarker(2025).ymarker(0.0);
+    s.xmarker(2025).ymarker(0);
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }
@@ -83,9 +83,11 @@ fn main() {
 ## Collatz Example
 
 ```rust
+use std::convert::TryFrom;
+
 // PIPE me to a file!
 fn main() {
-    let collatz = |mut a: usize| {
+    let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
             //Base case
             if a == 1 {
@@ -101,7 +103,12 @@ fn main() {
     let mut p = poloto::plot("collatz", "x", "y");
 
     for i in 1000..1006 {
-        p.line(poloto::formatm!("c({})", i), collatz(i).enumerate());
+        p.line(
+            poloto::formatm!("c({})", i),
+            collatz(i)
+                .enumerate()
+                .map(|(x, y)| (i128::try_from(x).unwrap(), y)),
+        );
     }
 
     p.ymarker(0).simple_with_element(
