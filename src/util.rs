@@ -77,44 +77,48 @@ impl DisconectableNumber for f64{
     }
 
 }
+
+pub fn compute_ticks_f64(ideal_num_steps:usize,range:[f64;2])->TickInfo<f64>{
+   
+    let (step,good_normalized_step)=find_good_step_f64(&[1,2,5,10],ideal_num_steps,range);
+    let (start_step,step_num)=get_range_info_f64(step,range);
+
+    let display_relative=determine_if_should_use_strat(
+        start_step,
+        start_step + ((step_num - 1) as f64) * step,
+        step,
+    );
+
+
+    let first_tick=if display_relative {0.0} else{start_step};
+
+    let mut counter=0;
+    let ii=std::iter::from_fn(move ||{
+        
+        if counter>=step_num{
+            None
+        }else{
+            let value=start_step+step*(counter as f64);
+            let label=first_tick+step*(counter as f64);
+            counter+=1;
+            Some(Tick{value,label})
+        }
+    }).fuse();  
+
+    TickInfo{
+        ticks:Box::new(ii),
+        normalized_tick_step:good_normalized_step as usize,
+        step,
+        start_step,
+        display_relative:display_relative.then(||start_step)
+    } 
+}
 impl PlotNumber for f64{
     fn is_hole(&self)->bool{
         self.is_nan()
     }
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
-        
-        let (step,good_normalized_step)=find_good_step_f64(&[1,2,5,10],ideal_num_steps,range);
-        let (start_step,step_num)=get_range_info_f64(step,range);
-
-        let display_relative=determine_if_should_use_strat(
-            start_step,
-            start_step + ((step_num - 1) as f64) * step,
-            step,
-        );
-
-
-        let first_tick=if display_relative {0.0} else{start_step};
-
-        let mut counter=0;
-        let ii=std::iter::from_fn(move ||{
-            
-            if counter>=step_num{
-                None
-            }else{
-                let value=start_step+step*(counter as f64);
-                let label=first_tick+step*(counter as f64);
-                counter+=1;
-                Some(Tick{value,label})
-            }
-        }).fuse();  
-
-        TickInfo{
-            ticks:Box::new(ii),
-            normalized_tick_step:good_normalized_step as usize,
-            step,
-            start_step,
-            display_relative:display_relative.then(||start_step)
-        }
+        compute_ticks_f64(ideal_num_steps,range)
     }
 
     fn fmt_tick(
@@ -136,37 +140,39 @@ impl PlotNumber for f64{
     }
 }
 
+pub fn compute_ticks_i128(ideal_num_steps:usize,range:[i128;2])->TickInfo<i128>{
+    let (step,good_normalized_step)=find_good_step_int(&[1,2,5,10],ideal_num_steps,range);
+    let (start_step,step_num)=get_range_info_int(step,range);
+
+    let mut counter=0;
+    let ii=std::iter::from_fn(move ||{
+        
+        if counter>=step_num{
+            None
+        }else{
+            let value=start_step+step*(counter as i128);
+            counter+=1;
+            Some(Tick{value,label:value})
+        }
+    }).fuse();
+
+    TickInfo{
+        ticks:Box::new(ii),
+        step,
+        start_step,
+        normalized_tick_step:good_normalized_step as usize,
+        display_relative:None
+    }
+
+}
+
 impl PlotNumber for i128{
     fn is_hole(&self)->bool{
         false
     }
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
-        
-        let (step,good_normalized_step)=find_good_step_int(&[1,2,5,10],ideal_num_steps,range);
-        let (start_step,step_num)=get_range_info_int(step,range);
-
-        let mut counter=0;
-        let ii=std::iter::from_fn(move ||{
-            
-            if counter>=step_num{
-                None
-            }else{
-                let value=start_step+step*(counter as i128);
-                counter+=1;
-                Some(Tick{value,label:value})
-            }
-        }).fuse();
-
-        TickInfo{
-            ticks:Box::new(ii),
-            step,
-            start_step,
-            normalized_tick_step:good_normalized_step as usize,
-            display_relative:None
-        }
-        
-
+        compute_ticks_i128(ideal_num_steps,range)
     }
 
 

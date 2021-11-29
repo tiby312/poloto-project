@@ -34,11 +34,10 @@ mod crop;
 mod render;
 
 pub use util::interval_float as default_val_formatter;
-mod util;
-pub use util::DisconectableNumber;
-pub use util::PlotNumber;
-pub use util::TickInfo;
-pub use util::Tick;
+
+pub mod util;
+
+use util::PlotNumber;
 
 
 
