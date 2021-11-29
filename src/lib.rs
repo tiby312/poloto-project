@@ -471,6 +471,7 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     }
 
     ///
+    /// Overrides the [`PlotNumber::fmt_tick`] function.
     /// The callback function provided will get called on each
     /// interval tick to be drawn. The callback function is passed
     /// the value of the interval, as well as the step-size.
@@ -487,6 +488,7 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     }
 
     ///
+    /// Overrides the [`PlotNumber::fmt_tick`] function.
     /// The callback function provided will get called on each
     /// interval tick to be drawn. The callback function is passed
     /// the value of the interval, as well as the step-size.
