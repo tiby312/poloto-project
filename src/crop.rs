@@ -1,6 +1,8 @@
 
 use crate::Plottable;
 
+use crate::util::DisconectableNumber;
+
 #[derive(Copy, Clone)]
 enum Dir {
     Above,
@@ -18,7 +20,7 @@ pub struct Crop<X,Y,I> {
     val: (X,Y),
     inner: I,
 }
-impl<X:PlotNumber,Y:PlotNumber,I: Iterator> Iterator for Crop<X,Y,I>
+impl<X:DisconectableNumber,Y:DisconectableNumber,I: Iterator> Iterator for Crop<X,Y,I>
 where
     I::Item: Plottable<X,Y>,
 {
@@ -76,7 +78,7 @@ where
 /// automatically replace plots past certain bounds with NaN.
 ///
 ///
-pub trait Croppable<X:PlotNumber,Y:PlotNumber>: Sized {
+pub trait Croppable<X:DisconectableNumber,Y:DisconectableNumber>: Sized {
     fn crop_above(self, val: Y) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Above,
@@ -107,7 +109,6 @@ pub trait Croppable<X:PlotNumber,Y:PlotNumber>: Sized {
     }
 }
 
-use crate::PlotNumber;
 
-impl<X:PlotNumber,Y:PlotNumber,T: Iterator> Croppable<X,Y> for T where T::Item: Plottable<X,Y> {}
+impl<X:DisconectableNumber,Y:DisconectableNumber,T: Iterator> Croppable<X,Y> for T where T::Item: Plottable<X,Y> {}
 

@@ -5,16 +5,18 @@ use fmt::Write;
 
 
 
-
-pub trait PlotNumber:PartialOrd+Copy+std::fmt::Display{
-
-    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
-
+pub trait DisconectableNumber:PlotNumber{
     /// Create a hole value.
     fn hole()->Self;
 
+}
+
+
+pub trait PlotNumber:PartialOrd+Copy+std::fmt::Display{
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self)->bool;
+
+    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
@@ -68,8 +70,17 @@ pub struct TickInfo<I>{
     pub display_relative:Option<I>
 }
 
-impl PlotNumber for f64{
+impl DisconectableNumber for f64{
 
+    fn hole()->Self{
+        f64::NAN
+    }
+
+}
+impl PlotNumber for f64{
+    fn is_hole(&self)->bool{
+        self.is_nan()
+    }
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
         
         let (step,good_normalized_step)=find_good_step_f64(&[1,2,5,10],ideal_num_steps,range);
@@ -118,12 +129,6 @@ impl PlotNumber for f64{
         write!(formatter, "{}", crate::util::interval_float(*self, step))
     }
     
-    fn hole()->Self{
-        f64::NAN
-    }
-    fn is_hole(&self)->bool{
-        self.is_nan()
-    }
 
     fn unit_range()->[Self;2]{
         [-1.0,1.0]
@@ -139,7 +144,9 @@ impl PlotNumber for f64{
 }
 
 impl PlotNumber for i128{
-
+    fn is_hole(&self)->bool{
+        false
+    }
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
         
@@ -178,12 +185,6 @@ impl PlotNumber for i128{
         write!(formatter, "{}", self)
     }
     
-    fn hole()->Self{
-        i128::MAX
-    }
-    fn is_hole(&self)->bool{
-        *self==i128::MAX
-    }
 
     fn unit_range()->[Self;2]{
         [0,1]
