@@ -164,7 +164,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
 
         
         let xdash_size=PlotNumber::tick_size(20.0,&xtick_info,[minx,maxx],scalex);
-        let ydash_size=PlotNumber::tick_size(20.0,&xtick_info,[minx,maxx],scaley);
+        let ydash_size=PlotNumber::tick_size(20.0,&ytick_info,[miny,maxy],scaley);
 
 
 
