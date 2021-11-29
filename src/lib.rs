@@ -33,8 +33,6 @@ mod crop;
 
 mod render;
 
-pub use util::interval_float as default_val_formatter;
-
 pub mod util;
 
 ///The width of the svg tag.
@@ -628,17 +626,29 @@ pub fn minify(a: &str) -> impl fmt::Display + '_ + Send + Sync {
 }
 */
 
-pub trait DisconectableNum: PlotNum {
+///
+/// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
+/// See [`Croppable`]
+/// 
+pub trait DiscNum: PlotNum {
     /// Create a hole value.
     fn hole() -> Self;
 }
 
+///
+/// A plottable number. In order to be able to plot a number, we need information on how
+/// to display it as well as the interval ticks.
+/// 
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
     }
 
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    /// 
     fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self>;
 
     /// If there is only one point in a graph, or no point at all,
@@ -658,6 +668,9 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
         write!(formatter, "{}", self)
     }
 
+    /// Compute the exact size of the ticks.
+    /// This can be overridden such that it always returns `None`.
+    /// This way there will be no dashes, and it will just be a solid line.
     fn tick_size(
         ideal_tick_size: f64,
         tick_info: &TickInfo<Self>,

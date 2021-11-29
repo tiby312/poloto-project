@@ -1,16 +1,14 @@
+//!
+//! Utility functions to help build numbers that implement [`PlotNum`] and [`DiscNum`].
+//! 
 use core::fmt;
 use fmt::Write;
 
-use crate::DisconectableNum;
+use crate::DiscNum;
 use crate::PlotNum;
 use crate::Tick;
 use crate::TickInfo;
 
-impl DisconectableNum for f64 {
-    fn hole() -> Self {
-        f64::NAN
-    }
-}
 
 pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f64> {
     let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
@@ -45,6 +43,13 @@ pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f6
         display_relative: display_relative.then(|| start_step),
     }
 }
+
+impl DiscNum for f64 {
+    fn hole() -> Self {
+        f64::NAN
+    }
+}
+
 impl PlotNum for f64 {
     fn is_hole(&self) -> bool {
         self.is_nan()
