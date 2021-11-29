@@ -14,7 +14,9 @@ pub trait DisconectableNumber:PlotNumber{
 
 pub trait PlotNumber:PartialOrd+Copy+std::fmt::Display{
     /// Is this a hole value to inject discontinuty?
-    fn is_hole(&self)->bool;
+    fn is_hole(&self)->bool{
+        false
+    }
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
 
@@ -68,6 +70,19 @@ pub struct TickInfo<I>{
     pub start_step:I,
     pub normalized_tick_step:usize,
     pub display_relative:Option<I>
+}
+impl<I> TickInfo<I>{
+    pub fn map<J>(self,func:impl Fn(I)->J+Clone+'static)->TickInfo<J> where I:'static{
+        
+        let func2=func.clone();
+        TickInfo{
+            ticks:Box::new(self.ticks.map(move|x|Tick{value:func2(x.value),label:func2(x.label)})),
+            step:func(self.step),
+            start_step:func(self.start_step),
+            normalized_tick_step:self.normalized_tick_step,
+            display_relative:self.display_relative.map(|x|func(x))
+        }
+    }
 }
 
 impl DisconectableNumber for f64{
@@ -167,9 +182,6 @@ pub fn compute_ticks_i128(ideal_num_steps:usize,range:[i128;2])->TickInfo<i128>{
 }
 
 impl PlotNumber for i128{
-    fn is_hole(&self)->bool{
-        false
-    }
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
         compute_ticks_i128(ideal_num_steps,range)
