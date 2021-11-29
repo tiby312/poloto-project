@@ -16,6 +16,7 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 [dependencies]
 tagger = "3.2"
 
+
 [package.metadata.docs.rs]
 # This sets the default target to `x86_64-unknown-linux-gnu`
 # and only builds that target

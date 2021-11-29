@@ -23,7 +23,7 @@ fn main() {
 
     //Scale grpah to include up to the year 2025.
     //Also scale to include a value of 0 articles.
-    s.xmarker(2025).ymarker(0.0);
+    s.xmarker(2025).ymarker(0);
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }

@@ -1,8 +1,8 @@
 use poloto::*;
 fn main() {
-    let data = [(1.0f32, 4.5f64), (2.0, 5.5), (3.0, 6.5)];
+    let data = [(1.0, 4.5), (2.0, 5.5), (3.0, 6.5)];
 
-    let data_int = [[1usize, 4], [2, 5], [3, 6]];
+    let data_int = [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]];
 
     let mut plotter = plot("cows per year", "year", "cows");
 

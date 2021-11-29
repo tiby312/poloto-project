@@ -10,11 +10,11 @@ struct DrawData {
     padding: f64,
     paddingy: f64,
 }
-struct ScaleData {
-    minx: f64,
-    maxx: f64,
-    miny: f64,
-    maxy: f64,
+struct ScaleData<X: PlotNumber, Y: PlotNumber> {
+    minx: X,
+    maxx: X,
+    miny: Y,
+    maxy: Y,
     scalex: f64,
     scaley: f64,
     preserve_aspect: bool,
@@ -23,7 +23,10 @@ struct ScaleData {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
+pub fn render<X: PlotNumber, Y: PlotNumber, T: std::fmt::Write>(
+    plotter: &mut Plotter<X, Y>,
+    writer: T,
+) -> T {
     let mut writer = tagger::new(writer);
 
     let mut plotter = {
@@ -37,11 +40,10 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
     let padding = 150.0;
     let paddingy = 100.0;
 
-    //Find range.
-    let [minx, maxx, miny, maxy] = util::find_bounds(
+    let ([minx, maxx], [miny, maxy]) = util::find_bounds2(
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-        &plotter.xmarkers,
-        &plotter.ymarkers,
+        plotter.xmarkers.iter().map(|x| *x),
+        plotter.ymarkers.iter().map(|x| *x),
     );
 
     let preserve_aspect = plotter.preserve_aspect;
@@ -52,13 +54,14 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
         0.0
     };
 
-    let scalex = if preserve_aspect {
-        (height - paddingy * 2.0) / (maxx - minx)
+    //The range over which the data will be scalled to fit
+    let scalex2 = if preserve_aspect {
+        height - paddingy * 2.0
     } else {
-        (width - padding * 2.0) / (maxx - minx)
+        width - padding * 2.0
     };
 
-    let scaley = (height - paddingy * 2.0) / (maxy - miny);
+    let scaley2 = height - paddingy * 2.0;
 
     let spacing = padding / 3.0;
     let legendx1 = width - padding / 1.2 + padding / 30.0;
@@ -81,11 +84,14 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
                 wc.get_counter() != 0
             });
 
+        let aa = minx.scale([minx, maxx], scalex2);
+        let bb = miny.scale([miny, maxy], scaley2);
+
         // Scale all the plots here.
-        let it = p.plots.iter_second().map(|[x, y]| {
+        let it = p.plots.iter_second().map(|(x, y)| {
             [
-                aspect_offset + padding + (x as f64 - minx) * scalex,
-                height - paddingy - (y as f64 - miny) * scaley,
+                aspect_offset + padding + (x.scale([minx, maxx], scalex2) - aa),
+                height - paddingy - (y.scale([miny, maxy], scaley2) - bb),
             ]
         });
 
@@ -223,8 +229,8 @@ pub fn render<T: std::fmt::Write>(plotter: &mut Plotter, writer: T) -> T {
             maxx,
             miny,
             maxy,
-            scalex,
-            scaley,
+            scalex: scalex2,
+            scaley: scaley2,
             preserve_aspect,
             aspect_offset,
         },

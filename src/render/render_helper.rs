@@ -77,11 +77,11 @@ pub fn line<T: std::fmt::Write>(
 ///
 /// Draw the axis lines, and tick intervals
 ///
-pub(super) fn draw_base<T: fmt::Write>(
-    plotter: &mut Plotter,
+pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
+    plotter: &mut Plotter<X, Y>,
     writer: &mut tagger::ElemWriter<T>,
     dd: DrawData,
-    sd: ScaleData,
+    sd: ScaleData<X, Y>,
 ) {
     let DrawData {
         width,
@@ -154,57 +154,17 @@ pub(super) fn draw_base<T: fmt::Write>(
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let (xstep_num, xstep, xstart_step, good_normalized_stepx) =
-            util::find_good_step(ideal_num_xsteps, [minx, maxx]);
-        let (ystep_num, ystep, ystart_step, good_normalized_stepy) =
-            util::find_good_step(ideal_num_ysteps, [miny, maxy]);
+        let xtick_info = util::PlotNumber::compute_ticks(ideal_num_xsteps, [minx, maxx]);
+        let ytick_info = util::PlotNumber::compute_ticks(ideal_num_ysteps, [miny, maxy]);
+
+        let xdash_size = PlotNumber::tick_size(20.0, &xtick_info, [minx, maxx], scalex);
+        let ydash_size = PlotNumber::tick_size(20.0, &ytick_info, [miny, maxy], scaley);
 
         use tagger::PathCommand::*;
 
-        fn best_dash_size(
-            one_step: f64,
-            mut good_normalized_step: u8,
-            target_dash_size: f64,
-        ) -> f64 {
-            assert!(
-                good_normalized_step == 2
-                    || good_normalized_step == 5
-                    || good_normalized_step == 10
-            );
-
-            if good_normalized_step == 10 {
-                good_normalized_step = 5;
-            }
-
-            for x in 1..50 {
-                let dash_size = one_step / ((good_normalized_step * x) as f64);
-
-                if dash_size < target_dash_size {
-                    return dash_size;
-                }
-            }
-            unreachable!(
-                "Could not find a good dash step size! {:?}",
-                (one_step, good_normalized_step, target_dash_size)
-            );
-        }
-
-        //The target dash size will be halfed later.
-        //This ensures that its always an even number of dash and empty spaces which is needed
-        //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
-        let ydash_size = best_dash_size(ystep * scaley, good_normalized_stepy, 20.0);
-        let xdash_size = best_dash_size(xstep * scalex, good_normalized_stepx, 20.0);
-
-        let distance_to_firstx = xstart_step - minx;
-        let distance_to_firsty = ystart_step - miny;
-
         {
             //step num is assured to be atleast 1.
-            let (extra, xstart_step) = if util::determine_if_should_use_strat(
-                xstart_step,
-                xstart_step + ((xstep_num - 1) as f64) * xstep,
-                xstep,
-            ) {
+            let extra = if let Some(base) = xtick_info.display_relative {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -216,24 +176,19 @@ pub(super) fn draw_base<T: fmt::Write>(
                     .build(|d| {
                         d.put_raw(format_args!(
                             "Where j = {}",
-                            DisplayableClosure::new(|w| plotter.xinterval_formatter.write(
-                                w,
-                                xstart_step,
-                                None
-                            ))
+                            DisplayableClosure::new(|w| base.fmt_tick(w, None))
                         ));
                     });
 
-                ("j+", 0.0)
+                "j+"
             } else {
-                ("", xstart_step)
+                ""
             };
 
             //Draw interva`l x text
-            for a in 0..xstep_num {
-                let p = (a as f64) * xstep;
-
-                let xx = (distance_to_firstx + p) * scalex + padding;
+            for util::Tick { value, label } in xtick_info.ticks {
+                let xx = (value.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex))
+                    + padding;
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -244,6 +199,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                         .attr("y2", height - paddingy * 0.95);
                 });
 
+                let s = xtick_info.step;
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -256,11 +212,7 @@ pub(super) fn draw_base<T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.xinterval_formatter.write(
-                                w,
-                                p + xstart_step,
-                                Some(xstep)
-                            ))
+                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w,label,Some(s))/*label.fmt_tick(w, Some(s))*/)
                         ));
                     });
             }
@@ -268,11 +220,7 @@ pub(super) fn draw_base<T: fmt::Write>(
 
         {
             //step num is assured to be atleast 1.
-            let (extra, ystart_step) = if util::determine_if_should_use_strat(
-                ystart_step,
-                ystart_step + ((ystep_num - 1) as f64) * ystep,
-                ystep,
-            ) {
+            let extra = if let Some(base) = ytick_info.display_relative {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -284,24 +232,20 @@ pub(super) fn draw_base<T: fmt::Write>(
                     .build(|w| {
                         w.put_raw(format_args!(
                             "Where k = {}",
-                            DisplayableClosure::new(|w| plotter.yinterval_formatter.write(
-                                w,
-                                ystart_step,
-                                None
-                            ))
+                            DisplayableClosure::new(|w| base.fmt_tick(w, None))
                         ));
                     });
 
-                ("k+", 0.0)
+                "k+"
             } else {
-                ("", ystart_step)
+                ""
             };
 
             //Draw interval y text
-            for a in 0..ystep_num {
-                let p = (a as f64) * ystep;
-
-                let yy = height - (distance_to_firsty + p) * scaley - paddingy;
+            for util::Tick { value, label } in ytick_info.ticks {
+                let yy = height
+                    - (value.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
+                    - paddingy;
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -311,6 +255,8 @@ pub(super) fn draw_base<T: fmt::Write>(
                         .attr("y1", yy)
                         .attr("y2", yy);
                 });
+
+                let s = ytick_info.step;
 
                 writer
                     .elem("text", |d| {
@@ -324,57 +270,67 @@ pub(super) fn draw_base<T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.yinterval_formatter.write(
-                                w,
-                                p + ystart_step,
-                                Some(ystep)
-                            ))
+                            DisplayableClosure::new(|w|  plotter.ytick_fmt.write(w,label,Some(s))/*label.fmt_tick(w, Some(s))*/)
                         ));
                     });
             }
         }
 
-        writer.single("path", |d| {
-            d.attr("stroke", "black")
-                .attr("fill", "none")
-                .attr("class", "poloto_axis_lines")
-                .attr(
-                    "style",
-                    format_args!(
-                        "stroke-dasharray:{};stroke-dashoffset:{};",
-                        xdash_size / 2.0,
-                        -distance_to_firstx * scalex
-                    ),
-                )
-                .path(|p| {
-                    p.put(M(padding + aspect_offset, height - paddingy));
-                    if preserve_aspect {
-                        p.put(L(
-                            height - paddingy / 2.0 + aspect_offset,
-                            height - paddingy,
-                        ));
-                    } else {
-                        p.put(L(width - padding + aspect_offset, height - paddingy));
-                    }
-                });
-        });
+        let d1 = minx.scale([minx, maxx], scalex);
+        let d2 = xtick_info.start_step.scale([minx, maxx], scalex);
+        let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
             d.attr("stroke", "black")
                 .attr("fill", "none")
-                .attr("class", "poloto_axis_lines")
-                .attr(
+                .attr("class", "poloto_axis_lines");
+            if let Some(xdash_size) = xdash_size {
+                d.attr(
+                    "style",
+                    format_args!(
+                        "stroke-dasharray:{};stroke-dashoffset:{};",
+                        xdash_size / 2.0,
+                        //-(distance_to_firstx).scale2([minx,maxx],scalex)
+                        -distance_to_firstx
+                    ),
+                );
+            }
+            d.path(|p| {
+                p.put(M(padding + aspect_offset, height - paddingy));
+                if preserve_aspect {
+                    p.put(L(
+                        height - paddingy / 2.0 + aspect_offset,
+                        height - paddingy,
+                    ));
+                } else {
+                    p.put(L(width - padding + aspect_offset, height - paddingy));
+                }
+            });
+        });
+
+        let d1 = miny.scale([miny, maxy], scaley);
+        let d2 = ytick_info.start_step.scale([miny, maxy], scaley);
+        let distance_to_firsty = d2 - d1;
+
+        writer.single("path", |d| {
+            d.attr("stroke", "black")
+                .attr("fill", "none")
+                .attr("class", "poloto_axis_lines");
+            if let Some(ydash_size) = ydash_size {
+                d.attr(
                     "style",
                     format_args!(
                         "stroke-dasharray:{};stroke-dashoffset:{};",
                         ydash_size / 2.0,
-                        -distance_to_firsty * scaley
+                        //-(distance_to_firsty).scale2([miny,maxy],scaley)
+                        -distance_to_firsty
                     ),
-                )
-                .path(|p| {
-                    p.put(M(aspect_offset + padding, height - paddingy));
-                    p.put(L(aspect_offset + padding, paddingy));
-                });
+                );
+            }
+            d.path(|p| {
+                p.put(M(aspect_offset + padding, height - paddingy));
+                p.put(L(aspect_offset + padding, paddingy));
+            });
         });
     }
 }

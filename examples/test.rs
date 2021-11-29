@@ -1,4 +1,4 @@
-const fn generate_test() -> [&'static [[f32; 2]]; 9] {
+const fn generate_test() -> [&'static [[f64; 2]]; 9] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
     let test1 = &[[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];

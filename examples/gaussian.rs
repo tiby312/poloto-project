@@ -17,6 +17,6 @@ fn main() {
         .line("σ = 1.0", range.iter().map(|&x| [x, gaussian(1.0, 0.0)(x)]))
         .line("σ = 0.5", range.iter().map(|&x| [x, gaussian(0.5, 0.0)(x)]))
         .line("σ = 0.3", range.iter().map(|&x| [x, gaussian(0.3, 0.0)(x)]))
-        .ymarker(0)
+        .ymarker(0.0)
         .simple_theme(poloto::upgrade_write(std::io::stdout()));
 }
