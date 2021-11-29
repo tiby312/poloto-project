@@ -30,6 +30,7 @@ fn main() {
     );
 
     s.ymarker(0);
+
     //Lookup the strings with the index
     s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[val as usize].0));
 
