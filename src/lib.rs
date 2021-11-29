@@ -230,6 +230,33 @@ pub fn plot<'a, X: PlotNumber, Y: PlotNumber>(
     Plotter::new(title, xname, yname)
 }
 
+
+trait MyFmt<X:PlotNumber> {
+    fn write(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        value: X,
+        step: Option<X>,
+    ) -> std::fmt::Result;
+}
+
+struct Foo<A,X>(A,PhantomData<X>);
+impl<X:PlotNumber,A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> Foo<A,X> {
+    fn new(a: A) -> Foo<A,X> {
+        Foo(a,PhantomData)
+    }
+}
+impl<X:PlotNumber,A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> MyFmt<X> for Foo<A,X> {
+    fn write(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        value: X,
+        step: Option<X>,
+    ) -> std::fmt::Result {
+        (self.0)(formatter, value, step)
+    }
+}
+
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
 /// render is called.
@@ -248,6 +275,8 @@ pub struct Plotter<'a, X: PlotNumber + 'a, Y: PlotNumber + 'a> {
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
+    xtick_fmt:Box< dyn MyFmt<X>+'a >,
+    ytick_fmt:Box< dyn MyFmt<Y>+'a >,
 }
 
 impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
@@ -271,6 +300,12 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
+            xtick_fmt:Box::new(Foo::<_,X>::new(move |a, b, c| {
+                b.fmt_tick(a,c)
+            })),
+            ytick_fmt:Box::new(Foo::<_,Y>::new(move |a, b, c| {
+                b.fmt_tick(a,c)
+            }))
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -436,6 +471,40 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
         let mut empty = crate::Plotter::new("", "", "");
         core::mem::swap(&mut empty, self);
         empty
+    }
+
+
+    ///
+    /// The callback function provided will get called on each 
+    /// interval tick to be drawn. The callback function is passed
+    /// the value of the interval, as well as the step-size.
+    /// This function is also called to display `k` and `j` values
+    /// for when the magnitudes of of the plots are extreme.
+    /// In those cases, the step-size is not provided and `None` is passed.
+    ///
+    pub fn xinterval_fmt(
+        &mut self,
+        a: impl Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result + 'a,
+    ) -> &mut Self {
+        self.xtick_fmt = Box::new(Foo::new(a));
+        self
+    }
+
+
+    ///
+    /// The callback function provided will get called on each 
+    /// interval tick to be drawn. The callback function is passed
+    /// the value of the interval, as well as the step-size.
+    /// This function is also called to display `k` and `j` values
+    /// for when the magnitudes of of the plots are extreme.
+    /// In those cases, the step-size is not provided and `None` is passed.
+    ///
+    pub fn yinterval_fmt(
+        &mut self,
+        a: impl Fn(&mut std::fmt::Formatter, Y, Option<Y>) -> std::fmt::Result + 'a,
+    ) -> &mut Self {
+        self.ytick_fmt = Box::new(Foo::new(a));
+        self
     }
 
     ///

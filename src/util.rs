@@ -22,6 +22,7 @@ pub trait PlotNumber: PartialOrd + Copy+ std::fmt::Display {
     fn scale(&self, val: [Self; 2], max: f64) -> f64;
 
     /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`]. 
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,

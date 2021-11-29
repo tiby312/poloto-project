@@ -212,7 +212,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| label.fmt_tick(w, Some(s)))
+                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w,label,Some(s))/*label.fmt_tick(w, Some(s))*/)
                         ));
                     });
             }
@@ -257,6 +257,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                 });
 
                 let s = ytick_info.step;
+                
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -269,7 +270,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| label.fmt_tick(w, Some(s)))
+                            DisplayableClosure::new(|w|  plotter.ytick_fmt.write(w,label,Some(s))/*label.fmt_tick(w, Some(s))*/)
                         ));
                     });
             }
