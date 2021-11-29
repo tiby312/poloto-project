@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 
 // PIPE me to a file!
 fn main() {
@@ -24,15 +25,19 @@ fn main() {
     //Map the strings to indexes
     s.histogram(
         "",
-        data.iter()
-            .enumerate()
-            .map(|c| (c.0 as i128 , c.1 .1)),
+        data.iter().enumerate().map(|c| {
+            let k: i128 = c.0.try_into().unwrap();
+            (k, c.1 .1)
+        }),
     );
 
     s.ymarker(0);
 
     //Lookup the strings with the index
-    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[val as usize].0));
+    s.xinterval_fmt(|fmt, val, _| {
+        let d: usize = val.try_into().unwrap();
+        write!(fmt, "{}", data[d].0)
+    });
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }

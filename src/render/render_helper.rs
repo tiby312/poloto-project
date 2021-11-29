@@ -257,7 +257,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                 });
 
                 let s = ytick_info.step;
-                
+
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")

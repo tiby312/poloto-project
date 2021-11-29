@@ -6,7 +6,7 @@ pub trait DisconectableNumber: PlotNumber {
     fn hole() -> Self;
 }
 
-pub trait PlotNumber: PartialOrd + Copy+ std::fmt::Display {
+pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -22,7 +22,7 @@ pub trait PlotNumber: PartialOrd + Copy+ std::fmt::Display {
     fn scale(&self, val: [Self; 2], max: f64) -> f64;
 
     /// Used to display a tick
-    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`]. 
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
@@ -65,10 +65,16 @@ pub struct TickInfo<I> {
     pub display_relative: Option<I>,
 }
 impl<I> TickInfo<I> {
-    pub fn map<J>(self, func: impl Fn(I) -> J) -> TickInfo<J>
-    {
+    pub fn map<J>(self, func: impl Fn(I) -> J) -> TickInfo<J> {
         TickInfo {
-            ticks: self.ticks.into_iter().map(|x|Tick{value:func(x.value),label:func(x.label)}).collect(),
+            ticks: self
+                .ticks
+                .into_iter()
+                .map(|x| Tick {
+                    value: func(x.value),
+                    label: func(x.label),
+                })
+                .collect(),
             step: func(self.step),
             start_step: func(self.start_step),
             normalized_tick_step: self.normalized_tick_step,
@@ -82,10 +88,6 @@ impl DisconectableNumber for f64 {
         f64::NAN
     }
 }
-
-
-
-
 
 pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f64> {
     let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
@@ -174,26 +176,6 @@ pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<
         display_relative: None,
     }
 }
-
-/*
-impl PlotNumber for usize {
-    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
-        compute_ticks_i128(ideal_num_steps, [range[0].into() as i128,range[1] as i128]).map(|x|x as usize)
-    }
-
-    fn unit_range() -> [Self; 2] {
-        [0, 1]
-    }
-
-    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
-        let diff = (val[1] - val[0]) as f64;
-
-        let scale = max / diff;
-
-        (*self) as f64 * scale
-    }
-}
-*/
 
 
 impl PlotNumber for i128 {

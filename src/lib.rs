@@ -230,8 +230,7 @@ pub fn plot<'a, X: PlotNumber, Y: PlotNumber>(
     Plotter::new(title, xname, yname)
 }
 
-
-trait MyFmt<X:PlotNumber> {
+trait MyFmt<X: PlotNumber> {
     fn write(
         &self,
         formatter: &mut std::fmt::Formatter,
@@ -240,13 +239,15 @@ trait MyFmt<X:PlotNumber> {
     ) -> std::fmt::Result;
 }
 
-struct Foo<A,X>(A,PhantomData<X>);
-impl<X:PlotNumber,A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> Foo<A,X> {
-    fn new(a: A) -> Foo<A,X> {
-        Foo(a,PhantomData)
+struct Foo<A, X>(A, PhantomData<X>);
+impl<X: PlotNumber, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> Foo<A, X> {
+    fn new(a: A) -> Foo<A, X> {
+        Foo(a, PhantomData)
     }
 }
-impl<X:PlotNumber,A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> MyFmt<X> for Foo<A,X> {
+impl<X: PlotNumber, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> MyFmt<X>
+    for Foo<A, X>
+{
     fn write(
         &self,
         formatter: &mut std::fmt::Formatter,
@@ -275,8 +276,8 @@ pub struct Plotter<'a, X: PlotNumber + 'a, Y: PlotNumber + 'a> {
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xtick_fmt:Box< dyn MyFmt<X>+'a >,
-    ytick_fmt:Box< dyn MyFmt<Y>+'a >,
+    xtick_fmt: Box<dyn MyFmt<X> + 'a>,
+    ytick_fmt: Box<dyn MyFmt<Y> + 'a>,
 }
 
 impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
@@ -300,12 +301,8 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xtick_fmt:Box::new(Foo::<_,X>::new(move |a, b, c| {
-                b.fmt_tick(a,c)
-            })),
-            ytick_fmt:Box::new(Foo::<_,Y>::new(move |a, b, c| {
-                b.fmt_tick(a,c)
-            }))
+            xtick_fmt: Box::new(Foo::<_, X>::new(move |a, b, c| b.fmt_tick(a, c))),
+            ytick_fmt: Box::new(Foo::<_, Y>::new(move |a, b, c| b.fmt_tick(a, c))),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -473,9 +470,8 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
         empty
     }
 
-
     ///
-    /// The callback function provided will get called on each 
+    /// The callback function provided will get called on each
     /// interval tick to be drawn. The callback function is passed
     /// the value of the interval, as well as the step-size.
     /// This function is also called to display `k` and `j` values
@@ -490,9 +486,8 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
         self
     }
 
-
     ///
-    /// The callback function provided will get called on each 
+    /// The callback function provided will get called on each
     /// interval tick to be drawn. The callback function is passed
     /// the value of the interval, as well as the step-size.
     /// This function is also called to display `k` and `j` values
