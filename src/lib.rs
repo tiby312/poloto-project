@@ -23,6 +23,8 @@ mod test_readme {
     external_doc_test!(include_str!("../README.md"));
 }
 
+use std::fmt;
+
 pub use tagger::upgrade_write;
 
 pub use crop::Crop;
@@ -33,8 +35,11 @@ mod render;
 
 pub use util::interval_float as default_val_formatter;
 mod util;
+pub use util::PlotNumber;
+pub use util::TickInfo;
+pub use util::Tick;
 
-use std::fmt;
+
 
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
@@ -219,7 +224,8 @@ impl<A: PlotNumber, B: PlotNumber> Plottable<A,B> for &(A, B) {
 
 
 
-pub use util::PlotNumber;
+
+
 ///
 /// Create a Plotter
 ///
