@@ -19,15 +19,9 @@ pub trait PlotNumber:PartialOrd+Copy+std::fmt::Debug{
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
     fn unit_range()->[Self;2];
-
-    /// Get the locatin of the nth tick with the given step size.
-    //fn get_tick(&self,index:usize,step:Self)->Self;
     
     /// Provided a min and max range, scale the current value against max.
     fn scale(&self,val:[Self;2],max:f64)->f64;
-
-    /// Zero value. Used in croppable, as will as i+j relative displaying.
-    fn zero()->Self;
 
     /// Used to display a tick
     fn fmt_tick(
@@ -36,11 +30,6 @@ pub trait PlotNumber:PartialOrd+Copy+std::fmt::Debug{
         step: Option<Self>,
     ) -> std::fmt::Result;
 
-    /// Default canditation normalized steps. 
-    /// They are: 1,2,5,10.
-    fn get_candidate_normalized_steps()->&'static [u8]{
-        &[1,2,5,10]
-    }
 }
 
 
@@ -62,7 +51,7 @@ impl PlotNumber for f64{
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
         
-        let (step,good_normalized_step)=find_good_step_f64(Self::get_candidate_normalized_steps(),ideal_num_steps,range);
+        let (step,good_normalized_step)=find_good_step_f64(&[1,2,5,10],ideal_num_steps,range);
         let (start_step,step_num)=get_range_info_f64(step,range);
 
         let display_relative=determine_if_should_use_strat(
@@ -99,10 +88,6 @@ impl PlotNumber for f64{
     }
 
 
-    fn zero()->Self{
-        0.0
-    }
-
 
     fn fmt_tick(
         &self,
@@ -137,7 +122,7 @@ impl PlotNumber for i128{
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
         
-        let (step,good_normalized_step)=find_good_step_int(Self::get_candidate_normalized_steps(),ideal_num_steps,range);
+        let (step,good_normalized_step)=find_good_step_int(&[1,2,5,10],ideal_num_steps,range);
         let (start_step,step_num)=get_range_info_int(step,range);
 
         let mut counter=0;
@@ -163,9 +148,6 @@ impl PlotNumber for i128{
 
     }
 
-    fn zero()->Self{
-        0
-    }
 
     fn fmt_tick(
         &self,
