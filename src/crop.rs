@@ -1,4 +1,3 @@
-
 use crate::Plottable;
 
 use crate::util::DisconectableNumber;
@@ -15,23 +14,23 @@ enum Dir {
 /// Represents one cropping.
 ///
 #[derive(Copy, Clone)]
-pub struct Crop<X,Y,I> {
+pub struct Crop<X, Y, I> {
     dir: Dir,
-    val: (X,Y),
+    val: (X, Y),
     inner: I,
 }
-impl<X:DisconectableNumber,Y:DisconectableNumber,I: Iterator> Iterator for Crop<X,Y,I>
+impl<X: DisconectableNumber, Y: DisconectableNumber, I: Iterator> Iterator for Crop<X, Y, I>
 where
-    I::Item: Plottable<X,Y>,
+    I::Item: Plottable<X, Y>,
 {
-    type Item = (X,Y);
-    fn next(&mut self) -> Option<(X,Y)> {
+    type Item = (X, Y);
+    fn next(&mut self) -> Option<(X, Y)> {
         if let Some(g) = self.inner.next() {
             let (x, y) = g.make_plot();
             Some(match self.dir {
                 Dir::Above => {
                     if y > self.val.1 {
-                        (x,Y::hole())
+                        (x, Y::hole())
                     } else {
                         (x, y)
                     }
@@ -78,37 +77,38 @@ where
 /// automatically replace plots past certain bounds with NaN.
 ///
 ///
-pub trait Croppable<X:DisconectableNumber,Y:DisconectableNumber>: Sized {
-    fn crop_above(self, val: Y) -> Crop<X,Y,Self> {
+pub trait Croppable<X: DisconectableNumber, Y: DisconectableNumber>: Sized {
+    fn crop_above(self, val: Y) -> Crop<X, Y, Self> {
         Crop {
             dir: Dir::Above,
-            val:(X::hole(),val),
+            val: (X::hole(), val),
             inner: self,
         }
     }
-    fn crop_below(self, val: Y) -> Crop<X,Y,Self> {
+    fn crop_below(self, val: Y) -> Crop<X, Y, Self> {
         Crop {
             dir: Dir::Below,
-            val:(X::hole(),val),
+            val: (X::hole(), val),
             inner: self,
         }
     }
-    fn crop_left(self, val: X) -> Crop<X,Y,Self> {
+    fn crop_left(self, val: X) -> Crop<X, Y, Self> {
         Crop {
             dir: Dir::Left,
-            val:(val,Y::hole()),
+            val: (val, Y::hole()),
             inner: self,
         }
     }
-    fn crop_right(self, val: X) -> Crop<X,Y,Self> {
+    fn crop_right(self, val: X) -> Crop<X, Y, Self> {
         Crop {
             dir: Dir::Right,
-            val:(val,Y::hole()),
+            val: (val, Y::hole()),
             inner: self,
         }
     }
 }
 
-
-impl<X:DisconectableNumber,Y:DisconectableNumber,T: Iterator> Croppable<X,Y> for T where T::Item: Plottable<X,Y> {}
-
+impl<X: DisconectableNumber, Y: DisconectableNumber, T: Iterator> Croppable<X, Y> for T where
+    T::Item: Plottable<X, Y>
+{
+}

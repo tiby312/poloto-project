@@ -39,55 +39,53 @@ pub mod util;
 
 use util::PlotNumber;
 
-
-
-
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
-
-
-
-trait PlotTrait<X:PlotNumber,Y:PlotNumber> {
+trait PlotTrait<X: PlotNumber, Y: PlotNumber> {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
 
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X,Y)>;
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X,Y)>;
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
 }
 
 use std::marker::PhantomData;
 
 use fmt::Display;
-struct PlotStruct<X:PlotNumber,Y:PlotNumber,I: Iterator<Item = (X,Y)> + Clone, F: Display> {
+struct PlotStruct<X: PlotNumber, Y: PlotNumber, I: Iterator<Item = (X, Y)> + Clone, F: Display> {
     first: I,
     second: I,
     func: F,
-    _p:PhantomData<(X,Y)>
+    _p: PhantomData<(X, Y)>,
 }
 
-impl<X:PlotNumber,Y:PlotNumber,I: Iterator<Item = (X,Y)> + Clone, F: Display> PlotStruct<X,Y,I, F> {
+impl<X: PlotNumber, Y: PlotNumber, I: Iterator<Item = (X, Y)> + Clone, F: Display>
+    PlotStruct<X, Y, I, F>
+{
     fn new(it: I, func: F) -> Self {
         let it2 = it.clone();
         PlotStruct {
             first: it,
             second: it2,
             func,
-            _p:PhantomData
+            _p: PhantomData,
         }
     }
 }
 
-impl<X:PlotNumber,Y:PlotNumber,D: Iterator<Item = (X,Y)> + Clone, F: Display> PlotTrait<X,Y> for PlotStruct<X,Y,D, F> {
+impl<X: PlotNumber, Y: PlotNumber, D: Iterator<Item = (X, Y)> + Clone, F: Display> PlotTrait<X, Y>
+    for PlotStruct<X, Y, D, F>
+{
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
         write!(a, "{}", self.func)
     }
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X,Y)> {
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
         &mut self.first
     }
 
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X,Y)> {
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
         &mut self.second
     }
 }
@@ -99,9 +97,9 @@ enum PlotType {
     LineFill,
 }
 
-struct Plot<'a,X:PlotNumber,Y:PlotNumber> {
+struct Plot<'a, X: PlotNumber, Y: PlotNumber> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait<X,Y> + 'a>,
+    plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
 
 ///
@@ -190,51 +188,45 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
-pub trait Plottable<X:PlotNumber,Y:PlotNumber> {
+pub trait Plottable<X: PlotNumber, Y: PlotNumber> {
     /// Produce one plot
-    fn make_plot(self) -> (X,Y);
+    fn make_plot(self) -> (X, Y);
 }
 
-impl<T:PlotNumber> Plottable<T,T> for [T; 2] {
-    fn make_plot(self) -> (T,T) {
+impl<T: PlotNumber> Plottable<T, T> for [T; 2] {
+    fn make_plot(self) -> (T, T) {
         let [x, y] = self;
-        (x,y)
+        (x, y)
     }
 }
 
-impl<T:PlotNumber> Plottable<T,T> for &[T; 2] {
-    fn make_plot(self) -> (T,T) {
+impl<T: PlotNumber> Plottable<T, T> for &[T; 2] {
+    fn make_plot(self) -> (T, T) {
         let [x, y] = *self;
-        (x,y)
+        (x, y)
     }
 }
 
-
-
-impl<A: PlotNumber, B: PlotNumber> Plottable<A,B> for (A, B) {
-    fn make_plot(self) -> (A,B) {
+impl<A: PlotNumber, B: PlotNumber> Plottable<A, B> for (A, B) {
+    fn make_plot(self) -> (A, B) {
         self
     }
 }
 
-impl<A: PlotNumber, B: PlotNumber> Plottable<A,B> for &(A, B) {
-    fn make_plot(self) -> (A,B) {
+impl<A: PlotNumber, B: PlotNumber> Plottable<A, B> for &(A, B) {
+    fn make_plot(self) -> (A, B) {
         *self
     }
 }
 
-
-
-
-
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a,X:PlotNumber,Y:PlotNumber>(
+pub fn plot<'a, X: PlotNumber, Y: PlotNumber>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a,X,Y> {
+) -> Plotter<'a, X, Y> {
     Plotter::new(title, xname, yname)
 }
 
@@ -247,18 +239,18 @@ pub fn plot<'a,X:PlotNumber,Y:PlotNumber>(
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
 ///
-pub struct Plotter<'a,X:PlotNumber+'a,Y:PlotNumber+'a> {
+pub struct Plotter<'a, X: PlotNumber + 'a, Y: PlotNumber + 'a> {
     title: Box<dyn fmt::Display + 'a>,
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
-    plots: Vec<Plot<'a,X,Y>>,
+    plots: Vec<Plot<'a, X, Y>>,
     xmarkers: Vec<X>,
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
 }
 
-impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
+impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     ///
     /// Create a plotter with the specified element.
     ///
@@ -269,7 +261,7 @@ impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a,X,Y> {
+    ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
             xname: Box::new(xname),
@@ -278,7 +270,7 @@ impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
             xmarkers: Vec::new(),
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
-            preserve_aspect: false
+            preserve_aspect: false,
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -293,7 +285,7 @@ impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X,Y>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -317,7 +309,7 @@ impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X,Y>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -343,7 +335,7 @@ impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X,Y>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -368,7 +360,7 @@ impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X,Y>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
@@ -440,7 +432,7 @@ impl<'a,X:PlotNumber,Y:PlotNumber> Plotter<'a,X,Y> {
     /// Move a plotter out from behind a mutable reference leaving
     /// an empty plotter.
     ///
-    pub fn move_into(&mut self) -> Plotter<'a,X,Y> {
+    pub fn move_into(&mut self) -> Plotter<'a, X, Y> {
         let mut empty = crate::Plotter::new("", "", "");
         core::mem::swap(&mut empty, self);
         empty

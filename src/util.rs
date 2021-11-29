@@ -1,45 +1,43 @@
 use core::fmt;
 use fmt::Write;
 
-
-
-
-
-pub trait DisconectableNumber:PlotNumber{
+pub trait DisconectableNumber: PlotNumber {
     /// Create a hole value.
-    fn hole()->Self;
-
+    fn hole() -> Self;
 }
 
-
-pub trait PlotNumber:PartialOrd+Copy+std::fmt::Display{
+pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
     /// Is this a hole value to inject discontinuty?
-    fn is_hole(&self)->bool{
+    fn is_hole(&self) -> bool {
         false
     }
 
-    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
+    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
-    fn unit_range()->[Self;2];
-    
+    fn unit_range() -> [Self; 2];
+
     /// Provided a min and max range, scale the current value against max.
-    fn scale(&self,val:[Self;2],max:f64)->f64;
+    fn scale(&self, val: [Self; 2], max: f64) -> f64;
 
     /// Used to display a tick
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
         _step: Option<Self>,
-    ) -> std::fmt::Result{
-        write!(formatter,"{}",self)
+    ) -> std::fmt::Result {
+        write!(formatter, "{}", self)
     }
 
-    fn tick_size(ideal_tick_size:f64,tick_info:&TickInfo<Self>,range:[Self;2],max:f64)->Option<f64>{
-        let one_step=tick_info.step.scale(range,max);
-        let good_normalized_step=tick_info.normalized_tick_step;
-
+    fn tick_size(
+        ideal_tick_size: f64,
+        tick_info: &TickInfo<Self>,
+        range: [Self; 2],
+        max: f64,
+    ) -> Option<f64> {
+        let one_step = tick_info.step.scale(range, max);
+        let good_normalized_step = tick_info.normalized_tick_step;
 
         for x in 1..50 {
             let dash_size = one_step / ((good_normalized_step * x) as f64);
@@ -52,268 +50,250 @@ pub trait PlotNumber:PartialOrd+Copy+std::fmt::Display{
             (one_step, good_normalized_step, ideal_tick_size)
         );
     }
-
-
 }
 
-
-
-
-
-pub struct Tick<I>{
-    pub value:I,
-    pub label:I
+pub struct Tick<I> {
+    pub value: I,
+    pub label: I,
 }
-pub struct TickInfo<I>{
-    pub ticks:Box<dyn Iterator<Item=Tick<I>>>,
-    pub step:I,
-    pub start_step:I,
-    pub normalized_tick_step:usize,
-    pub display_relative:Option<I>
+pub struct TickInfo<I> {
+    pub ticks: Box<dyn Iterator<Item = Tick<I>>>,
+    pub step: I,
+    pub start_step: I,
+    pub normalized_tick_step: usize,
+    pub display_relative: Option<I>,
 }
-impl<I> TickInfo<I>{
-    pub fn map<J>(self,func:impl Fn(I)->J+Clone+'static)->TickInfo<J> where I:'static{
-        
-        let func2=func.clone();
-        TickInfo{
-            ticks:Box::new(self.ticks.map(move|x|Tick{value:func2(x.value),label:func2(x.label)})),
-            step:func(self.step),
-            start_step:func(self.start_step),
-            normalized_tick_step:self.normalized_tick_step,
-            display_relative:self.display_relative.map(|x|func(x))
+impl<I> TickInfo<I> {
+    pub fn map<J>(self, func: impl Fn(I) -> J + Clone + 'static) -> TickInfo<J>
+    where
+        I: 'static,
+    {
+        let func2 = func.clone();
+        TickInfo {
+            ticks: Box::new(self.ticks.map(move |x| Tick {
+                value: func2(x.value),
+                label: func2(x.label),
+            })),
+            step: func(self.step),
+            start_step: func(self.start_step),
+            normalized_tick_step: self.normalized_tick_step,
+            display_relative: self.display_relative.map(|x| func(x)),
         }
     }
 }
 
-impl DisconectableNumber for f64{
-
-    fn hole()->Self{
+impl DisconectableNumber for f64 {
+    fn hole() -> Self {
         f64::NAN
     }
-
 }
 
-pub fn compute_ticks_f64(ideal_num_steps:usize,range:[f64;2])->TickInfo<f64>{
-   
-    let (step,good_normalized_step)=find_good_step_f64(&[1,2,5,10],ideal_num_steps,range);
-    let (start_step,step_num)=get_range_info_f64(step,range);
+pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f64> {
+    let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
+    let (start_step, step_num) = get_range_info_f64(step, range);
 
-    let display_relative=determine_if_should_use_strat(
+    let display_relative = determine_if_should_use_strat(
         start_step,
         start_step + ((step_num - 1) as f64) * step,
         step,
     );
 
+    let first_tick = if display_relative { 0.0 } else { start_step };
 
-    let first_tick=if display_relative {0.0} else{start_step};
-
-    let mut counter=0;
-    let ii=std::iter::from_fn(move ||{
-        
-        if counter>=step_num{
+    let mut counter = 0;
+    let ii = std::iter::from_fn(move || {
+        if counter >= step_num {
             None
-        }else{
-            let value=start_step+step*(counter as f64);
-            let label=first_tick+step*(counter as f64);
-            counter+=1;
-            Some(Tick{value,label})
+        } else {
+            let value = start_step + step * (counter as f64);
+            let label = first_tick + step * (counter as f64);
+            counter += 1;
+            Some(Tick { value, label })
         }
-    }).fuse();  
+    })
+    .fuse();
 
-    TickInfo{
-        ticks:Box::new(ii),
-        normalized_tick_step:good_normalized_step as usize,
+    TickInfo {
+        ticks: Box::new(ii),
+        normalized_tick_step: good_normalized_step as usize,
         step,
         start_step,
-        display_relative:display_relative.then(||start_step)
-    } 
+        display_relative: display_relative.then(|| start_step),
+    }
 }
-impl PlotNumber for f64{
-    fn is_hole(&self)->bool{
+impl PlotNumber for f64 {
+    fn is_hole(&self) -> bool {
         self.is_nan()
     }
-    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
-        compute_ticks_f64(ideal_num_steps,range)
+    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
+        compute_ticks_f64(ideal_num_steps, range)
     }
 
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
-    ) -> std::fmt::Result{
+    ) -> std::fmt::Result {
         write!(formatter, "{}", crate::util::interval_float(*self, step))
     }
-    
-    fn unit_range()->[Self;2]{
-        [-1.0,1.0]
+
+    fn unit_range() -> [Self; 2] {
+        [-1.0, 1.0]
     }
 
-    fn scale(&self,val:[Self;2],max:f64)->f64{
-        let diff=val[1]-val[0];
-        let scale=max/diff;
-        (*self)*scale
+    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
+        let diff = val[1] - val[0];
+        let scale = max / diff;
+        (*self) * scale
     }
 }
 
-pub fn compute_ticks_i128(ideal_num_steps:usize,range:[i128;2])->TickInfo<i128>{
-    let (step,good_normalized_step)=find_good_step_int(&[1,2,5,10],ideal_num_steps,range);
-    let (start_step,step_num)=get_range_info_int(step,range);
+pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<i128> {
+    let (step, good_normalized_step) = find_good_step_int(&[1, 2, 5, 10], ideal_num_steps, range);
+    let (start_step, step_num) = get_range_info_int(step, range);
 
-    let mut counter=0;
-    let ii=std::iter::from_fn(move ||{
-        
-        if counter>=step_num{
+    let mut counter = 0;
+    let ii = std::iter::from_fn(move || {
+        if counter >= step_num {
             None
-        }else{
-            let value=start_step+step*(counter as i128);
-            counter+=1;
-            Some(Tick{value,label:value})
+        } else {
+            let value = start_step + step * (counter as i128);
+            counter += 1;
+            Some(Tick {
+                value,
+                label: value,
+            })
         }
-    }).fuse();
+    })
+    .fuse();
 
-    TickInfo{
-        ticks:Box::new(ii),
+    TickInfo {
+        ticks: Box::new(ii),
         step,
         start_step,
-        normalized_tick_step:good_normalized_step as usize,
-        display_relative:None
+        normalized_tick_step: good_normalized_step as usize,
+        display_relative: None,
     }
-
 }
 
-impl PlotNumber for i128{
-
-    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
-        compute_ticks_i128(ideal_num_steps,range)
+impl PlotNumber for i128 {
+    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
+        compute_ticks_i128(ideal_num_steps, range)
     }
-
 
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
         _step: Option<Self>,
-    ) -> std::fmt::Result{
+    ) -> std::fmt::Result {
         write!(formatter, "{}", self)
     }
-    
 
-    fn unit_range()->[Self;2]{
-        [0,1]
+    fn unit_range() -> [Self; 2] {
+        [0, 1]
     }
 
+    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
+        let diff = (val[1] - val[0]) as f64;
 
-    fn scale(&self,val:[Self;2],max:f64)->f64{
-        let diff=(val[1]-val[0]) as f64;
+        let scale = max / diff;
 
-        let scale=max/diff;
-
-        (*self) as f64*scale
+        (*self) as f64 * scale
     }
 }
 
+pub fn round_up_to_nearest_multiple_int(val: i128, multiple: i128) -> i128 {
+    let ss = if val >= 0 { multiple - 1 } else { 0 };
 
-
-pub fn round_up_to_nearest_multiple_int(val:i128,multiple:i128)->i128{
-    
-    let ss=if val>=0{
-        multiple-1
-    }else{
-        0
-    };
-    
-    ((val+ss)/multiple)*multiple
+    ((val + ss) / multiple) * multiple
 }
 
-pub fn round_up_to_nearest_multiple_f64(val:f64,multiple:f64)->f64{
-    ((val)/multiple).ceil()*multiple
+pub fn round_up_to_nearest_multiple_f64(val: f64, multiple: f64) -> f64 {
+    ((val) / multiple).ceil() * multiple
 }
 
+pub fn get_range_info_int(step: i128, range_all: [i128; 2]) -> (i128, usize) {
+    let start_step = round_up_to_nearest_multiple_int(range_all[0], step);
 
-pub fn get_range_info_int(step:i128,range_all:[i128;2])->(i128,usize){
-    let start_step=round_up_to_nearest_multiple_int(range_all[0],step);
-    
-    let step_num={
-        let mut counter=start_step;
-        let mut res=0;
-        for a in 0..{
-            if counter>range_all[1]{
-                res=a;
+    let step_num = {
+        let mut counter = start_step;
+        let mut res = 0;
+        for a in 0.. {
+            if counter > range_all[1] {
+                res = a;
                 break;
             }
 
-            assert!(step+counter>counter,"{:?}",(step,range_all));
-            counter+=step;
+            assert!(step + counter > counter, "{:?}", (step, range_all));
+            counter += step;
         }
         res
     };
 
-    (start_step,step_num)
+    (start_step, step_num)
 }
 
 //TODO handle case zero steps are found
-pub fn get_range_info_f64(step:f64,range_all:[f64;2])->(f64,usize){
-    let start_step=round_up_to_nearest_multiple_f64(range_all[0],step);
-    
-    let step_num={
-        let mut counter=start_step;
-        let mut res=0;
-        for a in 0..{
-            if counter>range_all[1]{
-                res=a;
+pub fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, usize) {
+    let start_step = round_up_to_nearest_multiple_f64(range_all[0], step);
+
+    let step_num = {
+        let mut counter = start_step;
+        let mut res = 0;
+        for a in 0.. {
+            if counter > range_all[1] {
+                res = a;
                 break;
             }
 
-            assert!(step+counter>counter,"{:?}",(step,range_all));
-            counter+=step;
+            assert!(step + counter > counter, "{:?}", (step, range_all));
+            counter += step;
         }
         res
     };
 
-    (start_step,step_num)
+    (start_step, step_num)
 }
 
-
-
-
-pub fn find_good_step_int(good_steps:&[u8],num_steps: usize, range_all: [i128; 2])->(i128,u8){
-    let range=range_all[1]-range_all[0];
+pub fn find_good_step_int(good_steps: &[u8], num_steps: usize, range_all: [i128; 2]) -> (i128, u8) {
+    let range = range_all[1] - range_all[0];
 
     let rough_step = range / (num_steps - 1) as i128;
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor()) as i128;
-        
-    let normalized_step=rough_step/step_power;
- 
+
+    let normalized_step = rough_step / step_power;
 
     let good_normalized_step = *good_steps
         .iter()
-        .find(|a| **a as i128 > normalized_step )
+        .find(|a| **a as i128 > normalized_step)
         .unwrap() as i128;
 
-    (good_normalized_step * step_power,good_normalized_step as u8)
+    (
+        good_normalized_step * step_power,
+        good_normalized_step as u8,
+    )
 }
 
-
-pub fn find_good_step_f64(good_steps:&[u8],num_steps: usize, range_all: [f64; 2])->(f64,u8){
-    let range=range_all[1]-range_all[0];
+pub fn find_good_step_f64(good_steps: &[u8], num_steps: usize, range_all: [f64; 2]) -> (f64, u8) {
+    let range = range_all[1] - range_all[0];
 
     let rough_step = range / (num_steps - 1) as f64;
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor());
-        
-    let normalized_step=(rough_step/step_power) as usize;
- 
+
+    let normalized_step = (rough_step / step_power) as usize;
 
     let good_normalized_step = *good_steps
         .iter()
-        .find(|a| **a as usize> normalized_step)
+        .find(|a| **a as usize > normalized_step)
         .unwrap();
 
-    (good_normalized_step as f64 * step_power,good_normalized_step as u8)
+    (
+        good_normalized_step as f64 * step_power,
+        good_normalized_step as u8,
+    )
 }
-
-
-
 
 fn make_normal(a: f64, step: Option<f64>) -> impl fmt::Display {
     crate::DisplayableClosure::new(move |fm| {
@@ -385,22 +365,17 @@ pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
     })
 }
 
-
-
-pub fn find_bounds2<X:PlotNumber,Y:PlotNumber>(
-    it: impl IntoIterator<Item = (X,Y)>,
+pub fn find_bounds2<X: PlotNumber, Y: PlotNumber>(
+    it: impl IntoIterator<Item = (X, Y)>,
     xmarkers: impl IntoIterator<Item = X>,
     ymarkers: impl IntoIterator<Item = Y>,
-) -> ([X;2],[Y;2]) {
-    let mut ii = it
-        .into_iter()
-        .filter(|(x, y)| !x.is_hole() && !y.is_hole());
+) -> ([X; 2], [Y; 2]) {
+    let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
     if let Some((x, y)) = ii.next() {
-      
-        let mut val=([x,x],[y,y]);
-        let mut xmoved=false;
-        let mut ymoved=false;  
+        let mut val = ([x, x], [y, y]);
+        let mut xmoved = false;
+        let mut ymoved = false;
         let ii = ii
             .chain(
                 xmarkers
@@ -418,35 +393,34 @@ pub fn find_bounds2<X:PlotNumber,Y:PlotNumber>(
         ii.fold(&mut val, |val, (x, y)| {
             if x < val.0[0] {
                 val.0[0] = x;
-                xmoved=true;
+                xmoved = true;
             } else if x > val.0[1] {
                 val.0[1] = x;
-                xmoved=true;
+                xmoved = true;
             }
             if y < val.1[0] {
                 val.1[0] = y;
-                ymoved=true;
+                ymoved = true;
             } else if y > val.1[1] {
                 val.1[1] = y;
-                ymoved=true;
+                ymoved = true;
             }
             val
         });
 
         if !xmoved {
-            val.0=X::unit_range();
+            val.0 = X::unit_range();
         }
 
         if !ymoved {
-            val.1=Y::unit_range();
+            val.1 = Y::unit_range();
         }
 
         val
     } else {
-        (X::unit_range(),Y::unit_range())
+        (X::unit_range(), Y::unit_range())
     }
 }
-
 
 pub struct WriteCounter<T> {
     counter: usize,
