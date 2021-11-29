@@ -25,9 +25,9 @@ fn main() {
     //Map the strings to indexes
     s.histogram(
         "",
-        data.iter().enumerate().map(|c| {
-            let k: i128 = c.0.try_into().unwrap();
-            (k, c.1 .1)
+        data.iter().enumerate().map(|(i,&(_,y))| {
+            let i: i128 = i.try_into().unwrap();
+            (i, y)
         }),
     );
 
