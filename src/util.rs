@@ -177,6 +177,25 @@ pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<
     }
 }
 
+/*
+impl PlotNumber for usize {
+    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
+        compute_ticks_i128(ideal_num_steps, [range[0] as i128,range[1] as i128]).map(|x|x as usize)
+    }
+
+    fn unit_range() -> [Self; 2] {
+        [0, 1]
+    }
+
+    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
+        let diff = (val[1] - val[0]) as f64;
+
+        let scale = max / diff;
+
+        (*self) as f64 * scale
+    }
+}
+*/
 
 impl PlotNumber for i128 {
     fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
