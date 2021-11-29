@@ -1,6 +1,8 @@
+use std::convert::TryFrom;
+
 // PIPE me to a file!
 fn main() {
-    let collatz = |mut a: usize| {
+    let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
             //Base case
             if a == 1 {
@@ -18,7 +20,9 @@ fn main() {
     for i in 1000..1006 {
         p.line(
             poloto::formatm!("c({})", i),
-            collatz(i).enumerate().map(|(x, y)| (x as i128, y as i128)),
+            collatz(i)
+                .enumerate()
+                .map(|(x, y)| (i128::try_from(x).unwrap(), y)),
         );
     }
 
