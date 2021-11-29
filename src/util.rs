@@ -1,6 +1,6 @@
 //!
 //! Utility functions to help build numbers that implement [`PlotNum`] and [`DiscNum`].
-//! 
+//!
 use core::fmt;
 use fmt::Write;
 
@@ -10,39 +10,6 @@ use crate::Tick;
 use crate::TickInfo;
 
 
-pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f64> {
-    let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
-    let (start_step, step_num) = get_range_info_f64(step, range);
-
-    let display_relative = determine_if_should_use_strat(
-        start_step,
-        start_step + ((step_num - 1) as f64) * step,
-        step,
-    );
-
-    let first_tick = if display_relative { 0.0 } else { start_step };
-
-    let mut counter = 0;
-    let ii = std::iter::from_fn(move || {
-        if counter >= step_num {
-            None
-        } else {
-            let position = start_step + step * (counter as f64);
-            let value = first_tick + step * (counter as f64);
-            counter += 1;
-            Some(Tick { position, value })
-        }
-    })
-    .fuse();
-
-    TickInfo {
-        ticks: ii.collect(),
-        dash_multiple: good_normalized_step as usize,
-        step,
-        start_step,
-        display_relative: display_relative.then(|| start_step),
-    }
-}
 
 impl DiscNum for f64 {
     fn hole() -> Self {
@@ -77,6 +44,44 @@ impl PlotNum for f64 {
     }
 }
 
+
+/// Generate out good tick interval defaults for `f64`.
+pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f64> {
+    let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
+    let (start_step, step_num) = get_range_info_f64(step, range);
+
+    let display_relative = determine_if_should_use_strat(
+        start_step,
+        start_step + ((step_num - 1) as f64) * step,
+        step,
+    );
+
+    let first_tick = if display_relative { 0.0 } else { start_step };
+
+    let mut counter = 0;
+    let ii = std::iter::from_fn(move || {
+        if counter >= step_num {
+            None
+        } else {
+            let position = start_step + step * (counter as f64);
+            let value = first_tick + step * (counter as f64);
+            counter += 1;
+            Some(Tick { position, value })
+        }
+    })
+    .fuse();
+
+    TickInfo {
+        ticks: ii.collect(),
+        dash_multiple: good_normalized_step as usize,
+        step,
+        start_step,
+        display_relative: display_relative.then(|| start_step),
+    }
+}
+
+
+/// Generate out good tick interval defaults for `i128`.
 pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<i128> {
     let (step, good_normalized_step) = find_good_step_int(&[1, 2, 5, 10], ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_int(step, range);
@@ -281,8 +286,16 @@ fn determine_if_should_use_strat(start: f64, end: f64, step: f64) -> bool {
 
 const SCIENCE: usize = 4;
 
+///
+/// Format a f64 with the specified prevision. Formats using
+/// either decimal or scientific notation, whichever is shorter.
+/// 
 /// The step amount dictates the precision we need to show at each interval
 /// in order to capture the changes from each step
+///
+/// If the step size is not specified, the number will be formatted
+/// with no limit to the precision.
+/// 
 pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
     //TODO handle zero???
     //want to display zero with a formatting that is cosistent with others

@@ -108,7 +108,4 @@ pub trait Croppable<X: DiscNum, Y: DiscNum>: Sized {
     }
 }
 
-impl<X: DiscNum, Y: DiscNum, T: Iterator> Croppable<X, Y> for T where
-    T::Item: Plottable<X, Y>
-{
-}
+impl<X: DiscNum, Y: DiscNum, T: Iterator> Croppable<X, Y> for T where T::Item: Plottable<X, Y> {}

@@ -629,7 +629,7 @@ pub fn minify(a: &str) -> impl fmt::Display + '_ + Send + Sync {
 ///
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
 /// See [`Croppable`]
-/// 
+///
 pub trait DiscNum: PlotNum {
     /// Create a hole value.
     fn hole() -> Self;
@@ -638,7 +638,7 @@ pub trait DiscNum: PlotNum {
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
-/// 
+///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
@@ -648,7 +648,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     ///
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
-    /// 
+    ///
     fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self>;
 
     /// If there is only one point in a graph, or no point at all,
@@ -693,11 +693,18 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     }
 }
 
+///
+/// One interval tick
+/// 
 pub struct Tick<I> {
     pub position: I,
     /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
     pub value: I,
 }
+
+///
+/// Information on the properties of all the interval ticks for one dimension.
+/// 
 pub struct TickInfo<I> {
     /// List of the position of each tick to be displayed.
     pub ticks: Vec<Tick<I>>,
