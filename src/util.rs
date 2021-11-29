@@ -10,6 +10,11 @@ pub trait PlotNumber:PartialOrd+Copy+std::fmt::Debug{
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
 
+    fn tick_size(ideal_tick_size:f64,tick_info:&TickInfo<Self>,range:[Self;2],max:f64)->f64{
+        best_dash_size(tick_info.step.scale(range,max), tick_info.num_dash_between_ticks, ideal_tick_size)
+    }
+
+
     /// Create a hole value.
     fn hole()->Self;
 
@@ -32,6 +37,34 @@ pub trait PlotNumber:PartialOrd+Copy+std::fmt::Debug{
 
 }
 
+
+fn best_dash_size(
+    one_step: f64,
+    mut good_normalized_step: usize,
+    target_dash_size: f64,
+) -> f64 {
+    assert!(
+        good_normalized_step == 2
+            || good_normalized_step == 5
+            || good_normalized_step == 10
+    );
+
+    if good_normalized_step == 10 {
+        good_normalized_step = 5;
+    }
+
+    for x in 1..50 {
+        let dash_size = one_step / ((good_normalized_step * x) as f64);
+
+        if dash_size < target_dash_size {
+            return dash_size;
+        }
+    }
+    unreachable!(
+        "Could not find a good dash step size! {:?}",
+        (one_step, good_normalized_step, target_dash_size)
+    );
+}
 
 
 
