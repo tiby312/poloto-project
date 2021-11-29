@@ -38,7 +38,7 @@ pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
         max: f64,
     ) -> Option<f64> {
         let one_step = tick_info.step.scale(range, max);
-        let good_normalized_step = tick_info.normalized_tick_step;
+        let good_normalized_step = tick_info.dash_multiple;
 
         for x in 1..50 {
             let dash_size = one_step / ((good_normalized_step * x) as f64);
@@ -54,14 +54,22 @@ pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
 }
 
 pub struct Tick<I> {
+    pub position: I,
+    /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
     pub value: I,
-    pub label: I,
 }
 pub struct TickInfo<I> {
+    /// List of the position of each tick to be displayed.
     pub ticks: Vec<Tick<I>>,
+    /// The difference between two adjacent ticks
     pub step: I,
+    /// The starting tick position
     pub start_step: I,
-    pub normalized_tick_step: usize,
+    /// The number of dashes between two ticks must be a multiple of this number. 
+    pub dash_multiple: usize,
+
+    /// If we want to display the tick values relatively, this will
+    /// have the base start to start with.
     pub display_relative: Option<I>,
 }
 impl<I> TickInfo<I> {
@@ -71,13 +79,13 @@ impl<I> TickInfo<I> {
                 .ticks
                 .into_iter()
                 .map(|x| Tick {
+                    position: func(x.position),
                     value: func(x.value),
-                    label: func(x.label),
                 })
                 .collect(),
             step: func(self.step),
             start_step: func(self.start_step),
-            normalized_tick_step: self.normalized_tick_step,
+            dash_multiple: self.dash_multiple,
             display_relative: self.display_relative.map(|x| func(x)),
         }
     }
@@ -106,17 +114,17 @@ pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f6
         if counter >= step_num {
             None
         } else {
-            let value = start_step + step * (counter as f64);
-            let label = first_tick + step * (counter as f64);
+            let position = start_step + step * (counter as f64);
+            let value = first_tick + step * (counter as f64);
             counter += 1;
-            Some(Tick { value, label })
+            Some(Tick { position,value })
         }
     })
     .fuse();
 
     TickInfo {
         ticks: ii.collect(),
-        normalized_tick_step: good_normalized_step as usize,
+        dash_multiple: good_normalized_step as usize,
         step,
         start_step,
         display_relative: display_relative.then(|| start_step),
@@ -158,11 +166,11 @@ pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<
         if counter >= step_num {
             None
         } else {
-            let value = start_step + step * (counter as i128);
+            let position = start_step + step * (counter as i128);
             counter += 1;
             Some(Tick {
-                value,
-                label: value,
+                position,
+                value:position,
             })
         }
     })
@@ -172,7 +180,7 @@ pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<
         ticks: ii.collect(),
         step,
         start_step,
-        normalized_tick_step: good_normalized_step as usize,
+        dash_multiple: good_normalized_step as usize,
         display_relative: None,
     }
 }

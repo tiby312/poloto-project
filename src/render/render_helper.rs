@@ -186,8 +186,8 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
             };
 
             //Draw interva`l x text
-            for util::Tick { value, label } in xtick_info.ticks {
-                let xx = (value.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex))
+            for util::Tick { position, value } in xtick_info.ticks {
+                let xx = (position.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex))
                     + padding;
 
                 writer.single("line", |d| {
@@ -212,7 +212,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w,label,Some(s))/*label.fmt_tick(w, Some(s))*/)
+                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w,value,Some(s)))
                         ));
                     });
             }
@@ -242,9 +242,9 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
             };
 
             //Draw interval y text
-            for util::Tick { value, label } in ytick_info.ticks {
+            for util::Tick { position, value } in ytick_info.ticks {
                 let yy = height
-                    - (value.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
+                    - (position.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
                     - paddingy;
 
                 writer.single("line", |d| {
@@ -270,7 +270,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w|  plotter.ytick_fmt.write(w,label,Some(s))/*label.fmt_tick(w, Some(s))*/)
+                            DisplayableClosure::new(|w|  plotter.ytick_fmt.write(w,value,Some(s)))
                         ));
                     });
             }
