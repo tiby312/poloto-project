@@ -6,7 +6,7 @@ use fmt::Write;
 
 
 
-pub trait PlotNumber:PartialOrd+Copy{
+pub trait PlotNumber:PartialOrd+Copy+std::fmt::Debug{
 
     fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
 
@@ -30,7 +30,7 @@ pub trait PlotNumber:PartialOrd+Copy{
     fn zero()->Self;
 
     /// Used to display a tick
-    fn fmt(
+    fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
@@ -46,12 +46,16 @@ pub trait PlotNumber:PartialOrd+Copy{
 
 
 
+pub struct Tick<I>{
+    pub value:I,
+    pub label:I
+}
 pub struct TickInfo<I>{
-    pub ticks:Box<dyn Iterator<Item=I>>,
+    pub ticks:Box<dyn Iterator<Item=Tick<I>>>,
     pub step:I,
-    pub first_tick:I,
+    pub start_step:I,
     pub num_dash_between_ticks:usize,
-    pub display_relative:bool
+    pub display_relative:Option<I>
 }
 
 impl PlotNumber for f64{
@@ -61,18 +65,6 @@ impl PlotNumber for f64{
         let (step,good_normalized_step)=find_good_step_f64(Self::get_candidate_normalized_steps(),ideal_num_steps,range);
         let (start_step,step_num)=get_range_info_f64(step,range);
 
-        let mut counter=0;
-        let ii=std::iter::from_fn(move ||{
-            
-            if counter>=step_num{
-                None
-            }else{
-                let k=start_step+step*(counter as f64);
-                counter+=1;
-                Some(k)
-            }
-        }).fuse();
-
         let display_relative=determine_if_should_use_strat(
             start_step,
             start_step + ((step_num - 1) as f64) * step,
@@ -80,12 +72,27 @@ impl PlotNumber for f64{
         );
 
 
+        let first_tick=if display_relative {0.0} else{start_step};
+
+        let mut counter=0;
+        let ii=std::iter::from_fn(move ||{
+            
+            if counter>=step_num{
+                None
+            }else{
+                let value=start_step+step*(counter as f64);
+                let label=first_tick+step*(counter as f64);
+                counter+=1;
+                Some(Tick{value,label})
+            }
+        }).fuse();  
+
         TickInfo{
             ticks:Box::new(ii),
             num_dash_between_ticks:good_normalized_step as usize,
             step,
-            first_tick:if display_relative {0.0} else{start_step},
-            display_relative
+            start_step,
+            display_relative:Some(start_step)
         }
         
 
@@ -97,7 +104,7 @@ impl PlotNumber for f64{
     }
 
 
-    fn fmt(
+    fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
@@ -139,18 +146,18 @@ impl PlotNumber for i128{
             if counter>=step_num{
                 None
             }else{
-                let k=start_step+step*(counter as i128);
+                let value=start_step+step*(counter as i128);
                 counter+=1;
-                Some(k)
+                Some(Tick{value,label:value})
             }
         }).fuse();
 
         TickInfo{
             ticks:Box::new(ii),
             step,
-            first_tick:start_step,
+            start_step,
             num_dash_between_ticks:good_normalized_step as usize,
-            display_relative:false
+            display_relative:None
         }
         
 
@@ -160,7 +167,7 @@ impl PlotNumber for i128{
         0
     }
 
-    fn fmt(
+    fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
         _step: Option<Self>,

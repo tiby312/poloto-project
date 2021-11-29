@@ -209,7 +209,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
 
         {
             //step num is assured to be atleast 1.
-            let extra = if xtick_info.display_relative{
+            let extra = if let Some(base)=xtick_info.display_relative{
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -221,7 +221,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                     .build(|d| {
                         d.put_raw(format_args!(
                             "Where j = {}",
-                            DisplayableClosure::new(|w| xtick_info.first_tick.fmt(w,None))
+                            DisplayableClosure::new(|w| base.fmt_tick(w,None))
                         ));
                     });
 
@@ -231,9 +231,9 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
             };
 
             //Draw interva`l x text
-            for v in xtick_info.ticks{
+            for util::Tick{value,label} in xtick_info.ticks{
                 
-                let xx = (v.scale([minx,maxx],scalex) - minx.scale([minx,maxx],scalex)) + padding;
+                let xx = (value.scale([minx,maxx],scalex) - minx.scale([minx,maxx],scalex)) + padding;
 
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")
@@ -257,7 +257,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w|  v.fmt(
+                            DisplayableClosure::new(|w|  label.fmt_tick(
                                 w,
                                 Some(s)
                             ))
@@ -268,7 +268,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
 
         {
             //step num is assured to be atleast 1.
-            let extra = if ytick_info.display_relative{
+            let extra = if let Some(base) = ytick_info.display_relative{
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -280,7 +280,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                     .build(|w| {
                         w.put_raw(format_args!(
                             "Where k = {}",
-                            DisplayableClosure::new(|w| ytick_info.first_tick.fmt(w,None))
+                            DisplayableClosure::new(|w| base.fmt_tick(w,None))
                         ));
                     });
 
@@ -290,9 +290,9 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
             };
 
             //Draw interval y text
-            for v in ytick_info.ticks {
-                
-                let yy = height - (v.scale([miny,maxy],scaley) - miny.scale([miny,maxy],scaley) ) - paddingy;
+            for util::Tick{value,label} in ytick_info.ticks {
+                 
+                let yy = height - (value.scale([miny,maxy],scaley) - miny.scale([miny,maxy],scaley) ) - paddingy;
 
 
                 writer.single("line", |d| {
@@ -317,14 +317,14 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| v.fmt(w,Some(s)))
+                            DisplayableClosure::new(|w| label.fmt_tick(w,Some(s)))
                         ));
                     });
             }
         }
 
         let d1=minx.scale([minx,maxx],scalex);
-        let d2=xtick_info.first_tick.scale([minx,maxx],scalex);
+        let d2=xtick_info.start_step.scale([minx,maxx],scalex);
         let distance_to_firstx=d2-d1;
 
         writer.single("path", |d| {
@@ -354,7 +354,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         });
 
         let d1=miny.scale([miny,maxy],scaley);
-        let d2=ytick_info.first_tick.scale([miny,maxy],scaley);
+        let d2=ytick_info.start_step.scale([miny,maxy],scaley);
         let distance_to_firsty=d2-d1;
         
 
