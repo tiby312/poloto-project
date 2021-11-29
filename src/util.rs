@@ -6,7 +6,7 @@ pub trait DisconectableNumber: PlotNumber {
     fn hole() -> Self;
 }
 
-pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
+pub trait PlotNumber: PartialOrd + Copy+ std::fmt::Display {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -57,23 +57,17 @@ pub struct Tick<I> {
     pub label: I,
 }
 pub struct TickInfo<I> {
-    pub ticks: Box<dyn Iterator<Item = Tick<I>>>,
+    pub ticks: Vec<Tick<I>>,
     pub step: I,
     pub start_step: I,
     pub normalized_tick_step: usize,
     pub display_relative: Option<I>,
 }
 impl<I> TickInfo<I> {
-    pub fn map<J>(self, func: impl Fn(I) -> J + Clone + 'static) -> TickInfo<J>
-    where
-        I: 'static,
+    pub fn map<J>(self, func: impl Fn(I) -> J) -> TickInfo<J>
     {
-        let func2 = func.clone();
         TickInfo {
-            ticks: Box::new(self.ticks.map(move |x| Tick {
-                value: func2(x.value),
-                label: func2(x.label),
-            })),
+            ticks: self.ticks.into_iter().map(|x|Tick{value:func(x.value),label:func(x.label)}).collect(),
             step: func(self.step),
             start_step: func(self.start_step),
             normalized_tick_step: self.normalized_tick_step,
@@ -87,6 +81,10 @@ impl DisconectableNumber for f64 {
         f64::NAN
     }
 }
+
+
+
+
 
 pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f64> {
     let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
@@ -114,7 +112,7 @@ pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f6
     .fuse();
 
     TickInfo {
-        ticks: Box::new(ii),
+        ticks: ii.collect(),
         normalized_tick_step: good_normalized_step as usize,
         step,
         start_step,
@@ -168,7 +166,7 @@ pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<
     .fuse();
 
     TickInfo {
-        ticks: Box::new(ii),
+        ticks: ii.collect(),
         step,
         start_step,
         normalized_tick_step: good_normalized_step as usize,
