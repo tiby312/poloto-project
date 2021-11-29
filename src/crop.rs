@@ -80,28 +80,28 @@ pub trait Croppable<X:PlotNumber,Y:PlotNumber>: Sized {
     fn crop_above(self, val: Y) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Above,
-            val:(X::zero(),val),
+            val:(X::hole(),val),
             inner: self,
         }
     }
     fn crop_below(self, val: Y) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Below,
-            val:(X::zero(),val),
+            val:(X::hole(),val),
             inner: self,
         }
     }
     fn crop_left(self, val: X) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Left,
-            val:(val,Y::zero()),
+            val:(val,Y::hole()),
             inner: self,
         }
     }
     fn crop_right(self, val: X) -> Crop<X,Y,Self> {
         Crop {
             dir: Dir::Right,
-            val:(val,Y::zero()),
+            val:(val,Y::hole()),
             inner: self,
         }
     }

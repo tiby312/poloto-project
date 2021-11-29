@@ -6,15 +6,9 @@ use fmt::Write;
 
 
 
-
 pub trait PlotNumber:PartialOrd+Copy{
 
-    /// Find a good step using get_candidate_normalized_steps().
-    /// Returns the step value as well as the normalized step value.
-    fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8);
-
-    /// Return the location of the first tick as well as the number of ticks.
-    fn get_range_info(step:Self,range:[Self;2])->(Self,usize);
+    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>;
 
     /// Create a hole value.
     fn hole()->Self;
@@ -27,7 +21,7 @@ pub trait PlotNumber:PartialOrd+Copy{
     fn unit_range()->[Self;2];
 
     /// Get the locatin of the nth tick with the given step size.
-    fn get_tick(&self,index:usize,step:Self)->Self;
+    //fn get_tick(&self,index:usize,step:Self)->Self;
     
     /// Provided a min and max range, scale the current value against max.
     fn scale(&self,val:[Self;2],max:f64)->f64;
@@ -42,9 +36,6 @@ pub trait PlotNumber:PartialOrd+Copy{
         step: Option<Self>,
     ) -> std::fmt::Result;
 
-    /// Return true if you want to use i+j relative display.
-    fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool;
-
     /// Default canditation normalized steps. 
     /// They are: 1,2,5,10.
     fn get_candidate_normalized_steps()->&'static [u8]{
@@ -55,19 +46,54 @@ pub trait PlotNumber:PartialOrd+Copy{
 
 
 
+pub struct TickInfo<I>{
+    pub ticks:Box<dyn Iterator<Item=I>>,
+    pub step:I,
+    pub first_tick:I,
+    pub num_dash_between_ticks:usize,
+    pub display_relative:bool
+}
 
 impl PlotNumber for f64{
-    fn zero()->Self{
-        0.0
+
+    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
+        
+        let (step,good_normalized_step)=find_good_step_f64(Self::get_candidate_normalized_steps(),ideal_num_steps,range);
+        let (start_step,step_num)=get_range_info_f64(step,range);
+
+        let mut counter=0;
+        let ii=std::iter::from_fn(move ||{
+            
+            if counter>=step_num{
+                None
+            }else{
+                let k=start_step+step*(counter as f64);
+                counter+=1;
+                Some(k)
+            }
+        }).fuse();
+
+        let display_relative=determine_if_should_use_strat(
+            start_step,
+            start_step + ((step_num - 1) as f64) * step,
+            step,
+        );
+
+
+        TickInfo{
+            ticks:Box::new(ii),
+            num_dash_between_ticks:good_normalized_step as usize,
+            step,
+            first_tick:if display_relative {0.0} else{start_step},
+            display_relative
+        }
+        
+
     }
 
-    //Returns true if we should display all plots relativ to a base number
-    fn display_with_offset(xstart_step:Self,step_num:usize,xstep:Self)->bool{
-        determine_if_should_use_strat(
-            xstart_step,
-            xstart_step + ((step_num - 1) as f64) * xstep,
-            xstep,
-        )
+
+    fn zero()->Self{
+        0.0
     }
 
 
@@ -77,13 +103,6 @@ impl PlotNumber for f64{
         step: Option<Self>,
     ) -> std::fmt::Result{
         write!(formatter, "{}", crate::util::interval_float(*self, step))
-    }
-
-    fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
-        find_good_step_f64(Self::get_candidate_normalized_steps(),ideal_num_steps,range)
-    }
-    fn get_range_info(step:Self,range:[Self;2])->(Self,usize){
-        get_range_info_f64(step,range)
     }
     
     fn hole()->Self{
@@ -97,10 +116,6 @@ impl PlotNumber for f64{
         [-1.0,1.0]
     }
 
-    fn get_tick(&self,index:usize,step:Self)->Self{
-        self+step*(index as f64)
-    }
-
     fn scale(&self,val:[Self;2],max:f64)->f64{
         let diff=val[1]-val[0];
 
@@ -111,13 +126,38 @@ impl PlotNumber for f64{
 }
 
 impl PlotNumber for i128{
-    fn zero()->Self{
-        0
+
+
+    fn compute_ticks(ideal_num_steps:usize,range:[Self;2])->TickInfo<Self>{
+        
+        let (step,good_normalized_step)=find_good_step_int(Self::get_candidate_normalized_steps(),ideal_num_steps,range);
+        let (start_step,step_num)=get_range_info_int(step,range);
+
+        let mut counter=0;
+        let ii=std::iter::from_fn(move ||{
+            
+            if counter>=step_num{
+                None
+            }else{
+                let k=start_step+step*(counter as i128);
+                counter+=1;
+                Some(k)
+            }
+        }).fuse();
+
+        TickInfo{
+            ticks:Box::new(ii),
+            step,
+            first_tick:start_step,
+            num_dash_between_ticks:good_normalized_step as usize,
+            display_relative:false
+        }
+        
+
     }
 
-    //Returns true if we should display all plots relativ to a base number
-    fn display_with_offset(_xstart_step:Self,_step_num:usize,_xstep:Self)->bool{
-        false  
+    fn zero()->Self{
+        0
     }
 
     fn fmt(
@@ -126,13 +166,6 @@ impl PlotNumber for i128{
         _step: Option<Self>,
     ) -> std::fmt::Result{
         write!(formatter, "{}", self)
-    }
-
-    fn find_good_step(ideal_num_steps:usize,range:[Self;2])->(Self,u8){
-        find_good_step_int(Self::get_candidate_normalized_steps(),ideal_num_steps,range)
-    }
-    fn get_range_info(step:Self,range:[Self;2])->(Self,usize){
-        get_range_info_int(step,range)
     }
     
     fn hole()->Self{
@@ -146,9 +179,6 @@ impl PlotNumber for i128{
         [0,1]
     }
 
-    fn get_tick(&self,index:usize,step:Self)->Self{
-        self+step*(index as i128)
-    }
 
     fn scale(&self,val:[Self;2],max:f64)->f64{
         let diff=(val[1]-val[0]) as f64;

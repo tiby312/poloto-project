@@ -156,18 +156,22 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         let textx_padding = padding * 0.1;
 
 
+        let xtick_info=util::PlotNumber::compute_ticks(ideal_num_xsteps,[minx,maxx]);
+        let ytick_info=util::PlotNumber::compute_ticks(ideal_num_ysteps,[miny,maxy]);
+
+        /*
         let (xstep,good_normalized_stepx)=util::PlotNumber::find_good_step(ideal_num_xsteps,[minx,maxx]);
         let (xstart_step,xstep_num)=util::PlotNumber::get_range_info(xstep,[minx,maxx]);
 
         let (ystep,good_normalized_stepy)=util::PlotNumber::find_good_step(ideal_num_ysteps,[miny,maxy]);
         let (ystart_step,ystep_num)=util::PlotNumber::get_range_info(ystep,[miny,maxy]);
-        
+        */
 
         use tagger::PathCommand::*;
 
         fn best_dash_size(
             one_step: f64,
-            mut good_normalized_step: u8,
+            mut good_normalized_step: usize,
             target_dash_size: f64,
         ) -> f64 {
             assert!(
@@ -197,15 +201,15 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         //The target dash size will be halfed later.
         //This ensures that its always an even number of dash and empty spaces which is needed
         //to avoid alternating dashes every interval for odd values (5,15,25,35,etc).
-        let xdash_size = best_dash_size(xstep.scale([minx,maxx],scalex), good_normalized_stepx, 20.0);
-        let ydash_size = best_dash_size(ystep.scale([miny,maxy],scaley), good_normalized_stepy, 20.0);
+        let xdash_size = best_dash_size(xtick_info.step.scale([minx,maxx],scalex), xtick_info.num_dash_between_ticks, 20.0);
+        let ydash_size = best_dash_size(ytick_info.step.scale([miny,maxy],scaley), ytick_info.num_dash_between_ticks, 20.0);
         
         //let distance_to_firstx = xstart_step - minx;
         //let distance_to_firsty = ystart_step - miny;
 
         {
             //step num is assured to be atleast 1.
-            let (extra, xstart_step) = if X::display_with_offset(xstart_step,xstep_num,xstep){
+            let extra = if xtick_info.display_relative{
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -217,20 +221,18 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                     .build(|d| {
                         d.put_raw(format_args!(
                             "Where j = {}",
-                            DisplayableClosure::new(|w| xstart_step.fmt(w,None))
+                            DisplayableClosure::new(|w| xtick_info.first_tick.fmt(w,None))
                         ));
                     });
 
-                ("j+", X::zero())
+                "j+"
             } else {
-                ("", xstart_step)
+                ""
             };
 
             //Draw interva`l x text
-            for a in 0..xstep_num {
+            for v in xtick_info.ticks{
                 
-                let v=xstart_step.get_tick(a,xstep);
-
                 let xx = (v.scale([minx,maxx],scalex) - minx.scale([minx,maxx],scalex)) + padding;
 
                 writer.single("line", |d| {
@@ -242,6 +244,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                         .attr("y2", height - paddingy * 0.95);
                 });
 
+                let s=xtick_info.step;
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -256,7 +259,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                             extra,
                             DisplayableClosure::new(|w|  v.fmt(
                                 w,
-                                Some(xstep)
+                                Some(s)
                             ))
                         ));
                     });
@@ -265,7 +268,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
 
         {
             //step num is assured to be atleast 1.
-            let (extra, ystart_step) = if Y::display_with_offset(ystart_step,ystep_num,ystep){
+            let extra = if ytick_info.display_relative{
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -277,19 +280,18 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                     .build(|w| {
                         w.put_raw(format_args!(
                             "Where k = {}",
-                            DisplayableClosure::new(|w| ystart_step.fmt(w,None))
+                            DisplayableClosure::new(|w| ytick_info.first_tick.fmt(w,None))
                         ));
                     });
 
-                ("k+", Y::zero())
+                "k+"
             } else {
-                ("", ystart_step)
+                ""
             };
 
             //Draw interval y text
-            for a in 0..ystep_num {
-                let v=ystart_step.get_tick(a,ystep);
-
+            for v in ytick_info.ticks {
+                
                 let yy = height - (v.scale([miny,maxy],scaley) - miny.scale([miny,maxy],scaley) ) - paddingy;
 
 
@@ -302,6 +304,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                         .attr("y2", yy);
                 });
 
+                let s=ytick_info.step;
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_text")
@@ -314,14 +317,14 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| v.fmt(w,Some(ystep)))
+                            DisplayableClosure::new(|w| v.fmt(w,Some(s)))
                         ));
                     });
             }
         }
 
         let d1=minx.scale([minx,maxx],scalex);
-        let d2=xstart_step.scale([minx,maxx],scalex);
+        let d2=xtick_info.first_tick.scale([minx,maxx],scalex);
         let distance_to_firstx=d2-d1;
 
         writer.single("path", |d| {
@@ -351,7 +354,7 @@ pub(super) fn draw_base<X:PlotNumber,Y:PlotNumber,T: fmt::Write>(
         });
 
         let d1=miny.scale([miny,maxy],scaley);
-        let d2=ystart_step.scale([miny,maxy],scaley);
+        let d2=ytick_info.first_tick.scale([miny,maxy],scaley);
         let distance_to_firsty=d2-d1;
         
 
