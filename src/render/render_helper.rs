@@ -77,7 +77,7 @@ pub fn line<T: std::fmt::Write>(
 ///
 /// Draw the axis lines, and tick intervals
 ///
-pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
+pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
     plotter: &mut Plotter<X, Y>,
     writer: &mut tagger::ElemWriter<T>,
     dd: DrawData,
@@ -154,11 +154,11 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let xtick_info = PlotNumber::compute_ticks(ideal_num_xsteps, [minx, maxx]);
-        let ytick_info = PlotNumber::compute_ticks(ideal_num_ysteps, [miny, maxy]);
+        let xtick_info = PlotNum::compute_ticks(ideal_num_xsteps, [minx, maxx]);
+        let ytick_info = PlotNum::compute_ticks(ideal_num_ysteps, [miny, maxy]);
 
-        let xdash_size = PlotNumber::tick_size(20.0, &xtick_info, [minx, maxx], scalex);
-        let ydash_size = PlotNumber::tick_size(20.0, &ytick_info, [miny, maxy], scaley);
+        let xdash_size = PlotNum::tick_size(20.0, &xtick_info, [minx, maxx], scalex);
+        let ydash_size = PlotNum::tick_size(20.0, &ytick_info, [miny, maxy], scaley);
 
         use tagger::PathCommand::*;
 
@@ -212,7 +212,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w,value,Some(s)))
+                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w, value, Some(s)))
                         ));
                     });
             }
@@ -270,7 +270,7 @@ pub(super) fn draw_base<X: PlotNumber, Y: PlotNumber, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w|  plotter.ytick_fmt.write(w,value,Some(s)))
+                            DisplayableClosure::new(|w| plotter.ytick_fmt.write(w, value, Some(s)))
                         ));
                     });
             }

@@ -10,7 +10,7 @@ struct DrawData {
     padding: f64,
     paddingy: f64,
 }
-struct ScaleData<X: PlotNumber, Y: PlotNumber> {
+struct ScaleData<X: PlotNum, Y: PlotNum> {
     minx: X,
     maxx: X,
     miny: Y,
@@ -23,7 +23,7 @@ struct ScaleData<X: PlotNumber, Y: PlotNumber> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<X: PlotNumber, Y: PlotNumber, T: std::fmt::Write>(
+pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
     plotter: &mut Plotter<X, Y>,
     writer: T,
 ) -> T {

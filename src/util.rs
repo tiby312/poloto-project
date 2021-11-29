@@ -1,13 +1,12 @@
 use core::fmt;
 use fmt::Write;
 
-use crate::DisconectableNumber;
-use crate::PlotNumber;
-use crate::TickInfo;
+use crate::DisconectableNum;
+use crate::PlotNum;
 use crate::Tick;
+use crate::TickInfo;
 
-
-impl DisconectableNumber for f64 {
+impl DisconectableNum for f64 {
     fn hole() -> Self {
         f64::NAN
     }
@@ -33,7 +32,7 @@ pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f6
             let position = start_step + step * (counter as f64);
             let value = first_tick + step * (counter as f64);
             counter += 1;
-            Some(Tick { position,value })
+            Some(Tick { position, value })
         }
     })
     .fuse();
@@ -46,7 +45,7 @@ pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f6
         display_relative: display_relative.then(|| start_step),
     }
 }
-impl PlotNumber for f64 {
+impl PlotNum for f64 {
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
@@ -86,7 +85,7 @@ pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<
             counter += 1;
             Some(Tick {
                 position,
-                value:position,
+                value: position,
             })
         }
     })
@@ -102,7 +101,7 @@ pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<
 }
 
 /*
-impl PlotNumber for usize {
+impl PlotNum for usize {
     fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
         compute_ticks_i128(ideal_num_steps, [range[0] as i128,range[1] as i128]).map(|x|x as usize)
     }
@@ -121,10 +120,7 @@ impl PlotNumber for usize {
 }
 */
 
-
-
-
-impl PlotNumber for i128 {
+impl PlotNum for i128 {
     fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
         compute_ticks_i128(ideal_num_steps, range)
     }
@@ -305,7 +301,7 @@ pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
     })
 }
 
-pub(crate) fn find_bounds2<X: PlotNumber, Y: PlotNumber>(
+pub(crate) fn find_bounds2<X: PlotNum, Y: PlotNum>(
     it: impl IntoIterator<Item = (X, Y)>,
     xmarkers: impl IntoIterator<Item = X>,
     ymarkers: impl IntoIterator<Item = Y>,

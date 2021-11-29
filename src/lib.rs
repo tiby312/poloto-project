@@ -37,13 +37,12 @@ pub use util::interval_float as default_val_formatter;
 
 pub mod util;
 
-
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
-trait PlotTrait<X: PlotNumber, Y: PlotNumber> {
+trait PlotTrait<X: PlotNum, Y: PlotNum> {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
 
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
@@ -53,14 +52,14 @@ trait PlotTrait<X: PlotNumber, Y: PlotNumber> {
 use std::marker::PhantomData;
 
 use fmt::Display;
-struct PlotStruct<X: PlotNumber, Y: PlotNumber, I: Iterator<Item = (X, Y)> + Clone, F: Display> {
+struct PlotStruct<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)> + Clone, F: Display> {
     first: I,
     second: I,
     func: F,
     _p: PhantomData<(X, Y)>,
 }
 
-impl<X: PlotNumber, Y: PlotNumber, I: Iterator<Item = (X, Y)> + Clone, F: Display>
+impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)> + Clone, F: Display>
     PlotStruct<X, Y, I, F>
 {
     fn new(it: I, func: F) -> Self {
@@ -74,7 +73,7 @@ impl<X: PlotNumber, Y: PlotNumber, I: Iterator<Item = (X, Y)> + Clone, F: Displa
     }
 }
 
-impl<X: PlotNumber, Y: PlotNumber, D: Iterator<Item = (X, Y)> + Clone, F: Display> PlotTrait<X, Y>
+impl<X: PlotNum, Y: PlotNum, D: Iterator<Item = (X, Y)> + Clone, F: Display> PlotTrait<X, Y>
     for PlotStruct<X, Y, D, F>
 {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
@@ -96,7 +95,7 @@ enum PlotType {
     LineFill,
 }
 
-struct Plot<'a, X: PlotNumber, Y: PlotNumber> {
+struct Plot<'a, X: PlotNum, Y: PlotNum> {
     plot_type: PlotType,
     plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
@@ -187,32 +186,32 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
-pub trait Plottable<X: PlotNumber, Y: PlotNumber> {
+pub trait Plottable<X: PlotNum, Y: PlotNum> {
     /// Produce one plot
     fn make_plot(self) -> (X, Y);
 }
 
-impl<T: PlotNumber> Plottable<T, T> for [T; 2] {
+impl<T: PlotNum> Plottable<T, T> for [T; 2] {
     fn make_plot(self) -> (T, T) {
         let [x, y] = self;
         (x, y)
     }
 }
 
-impl<T: PlotNumber> Plottable<T, T> for &[T; 2] {
+impl<T: PlotNum> Plottable<T, T> for &[T; 2] {
     fn make_plot(self) -> (T, T) {
         let [x, y] = *self;
         (x, y)
     }
 }
 
-impl<A: PlotNumber, B: PlotNumber> Plottable<A, B> for (A, B) {
+impl<A: PlotNum, B: PlotNum> Plottable<A, B> for (A, B) {
     fn make_plot(self) -> (A, B) {
         self
     }
 }
 
-impl<A: PlotNumber, B: PlotNumber> Plottable<A, B> for &(A, B) {
+impl<A: PlotNum, B: PlotNum> Plottable<A, B> for &(A, B) {
     fn make_plot(self) -> (A, B) {
         *self
     }
@@ -221,7 +220,7 @@ impl<A: PlotNumber, B: PlotNumber> Plottable<A, B> for &(A, B) {
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: PlotNumber, Y: PlotNumber>(
+pub fn plot<'a, X: PlotNum, Y: PlotNum>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
@@ -229,7 +228,7 @@ pub fn plot<'a, X: PlotNumber, Y: PlotNumber>(
     Plotter::new(title, xname, yname)
 }
 
-trait MyFmt<X: PlotNumber> {
+trait MyFmt<X: PlotNum> {
     fn write(
         &self,
         formatter: &mut std::fmt::Formatter,
@@ -239,12 +238,12 @@ trait MyFmt<X: PlotNumber> {
 }
 
 struct Foo<A, X>(A, PhantomData<X>);
-impl<X: PlotNumber, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> Foo<A, X> {
+impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> Foo<A, X> {
     fn new(a: A) -> Foo<A, X> {
         Foo(a, PhantomData)
     }
 }
-impl<X: PlotNumber, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> MyFmt<X>
+impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> MyFmt<X>
     for Foo<A, X>
 {
     fn write(
@@ -266,7 +265,7 @@ impl<X: PlotNumber, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::R
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
 ///
-pub struct Plotter<'a, X: PlotNumber + 'a, Y: PlotNumber + 'a> {
+pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn fmt::Display + 'a>,
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
@@ -279,7 +278,7 @@ pub struct Plotter<'a, X: PlotNumber + 'a, Y: PlotNumber + 'a> {
     ytick_fmt: Box<dyn MyFmt<Y> + 'a>,
 }
 
-impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
+impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     ///
     /// Create a plotter with the specified element.
     ///
@@ -471,7 +470,7 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     }
 
     ///
-    /// Overrides the [`PlotNumber::fmt_tick`] function.
+    /// Overrides the [`PlotNum::fmt_tick`] function.
     /// The callback function provided will get called on each
     /// interval tick to be drawn. The callback function is passed
     /// the value of the interval, as well as the step-size.
@@ -488,7 +487,7 @@ impl<'a, X: PlotNumber, Y: PlotNumber> Plotter<'a, X, Y> {
     }
 
     ///
-    /// Overrides the [`PlotNumber::fmt_tick`] function.
+    /// Overrides the [`PlotNum::fmt_tick`] function.
     /// The callback function provided will get called on each
     /// interval tick to be drawn. The callback function is passed
     /// the value of the interval, as well as the step-size.
@@ -629,14 +628,12 @@ pub fn minify(a: &str) -> impl fmt::Display + '_ + Send + Sync {
 }
 */
 
-
-
-pub trait DisconectableNumber: PlotNumber {
+pub trait DisconectableNum: PlotNum {
     /// Create a hole value.
     fn hole() -> Self;
 }
 
-pub trait PlotNumber: PartialOrd + Copy + std::fmt::Display {
+pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -695,7 +692,7 @@ pub struct TickInfo<I> {
     pub step: I,
     /// The starting tick position
     pub start_step: I,
-    /// The number of dashes between two ticks must be a multiple of this number. 
+    /// The number of dashes between two ticks must be a multiple of this number.
     pub dash_multiple: usize,
 
     /// If we want to display the tick values relatively, this will
