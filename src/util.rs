@@ -197,13 +197,16 @@ impl PlotNumber for usize {
 }
 */
 
+
+
+
 impl PlotNumber for i128 {
     fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
         compute_ticks_i128(ideal_num_steps, range)
     }
 
     fn unit_range() -> [Self; 2] {
-        [0, 1]
+        [-1, 1]
     }
 
     fn scale(&self, val: [Self; 2], max: f64) -> f64 {
