@@ -115,11 +115,7 @@ impl PlotNumber for f64{
             start_step,
             display_relative:display_relative.then(||start_step)
         }
-        
-
     }
-
-
 
     fn fmt_tick(
         &self,
@@ -129,16 +125,13 @@ impl PlotNumber for f64{
         write!(formatter, "{}", crate::util::interval_float(*self, step))
     }
     
-
     fn unit_range()->[Self;2]{
         [-1.0,1.0]
     }
 
     fn scale(&self,val:[Self;2],max:f64)->f64{
         let diff=val[1]-val[0];
-
         let scale=max/diff;
-
         (*self)*scale
     }
 }
