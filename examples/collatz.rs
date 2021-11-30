@@ -1,5 +1,3 @@
-use std::convert::TryFrom;
-
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
@@ -18,12 +16,7 @@ fn main() {
     let mut p = poloto::plot("collatz", "x", "y");
 
     for i in 1000..1006 {
-        p.line(
-            poloto::formatm!("c({})", i),
-            collatz(i)
-                .enumerate()
-                .map(|(x, y)| (i128::try_from(x).unwrap(), y)),
-        );
+        p.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
     p.ymarker(0).simple_with_element(

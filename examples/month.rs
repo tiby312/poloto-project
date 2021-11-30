@@ -23,12 +23,7 @@ fn main() {
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
     //Map the strings to indexes
-    s.histogram(
-        "",
-        data.iter()
-            .enumerate()
-            .map(|(i, &(_, y))| (i128::try_from(i).unwrap(), y)),
-    );
+    s.histogram("", (0..).zip(data.iter().map(|x| x.1)));
 
     s.ymarker(0);
 

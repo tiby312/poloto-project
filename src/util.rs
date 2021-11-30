@@ -9,8 +9,6 @@ use crate::PlotNum;
 use crate::Tick;
 use crate::TickInfo;
 
-
-
 impl DiscNum for f64 {
     fn hole() -> Self {
         f64::NAN
@@ -59,15 +57,12 @@ pub fn compute_ticks_f64(ideal_num_steps: u32, range: [f64; 2]) -> TickInfo<f64>
 
     let first_tick = if display_relative { 0.0 } else { start_step };
 
-    let mut ticks=Vec::with_capacity(usize::try_from(step_num).unwrap());
-    for a in 0..step_num{
-        let position = start_step+step*(a as f64);
-        let value = first_tick+step*(a as f64);
-        
-        ticks.push(Tick{
-            position,
-            value
-        });
+    let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
+    for a in 0..step_num {
+        let position = start_step + step * (a as f64);
+        let value = first_tick + step * (a as f64);
+
+        ticks.push(Tick { position, value });
     }
 
     TickInfo {
@@ -79,18 +74,17 @@ pub fn compute_ticks_f64(ideal_num_steps: u32, range: [f64; 2]) -> TickInfo<f64>
     }
 }
 
-
 /// Generate out good tick interval defaults for `i128`.
 pub fn compute_ticks_i128(ideal_num_steps: u32, range: [i128; 2]) -> TickInfo<i128> {
     let (step, good_normalized_step) = find_good_step_int(&[1, 2, 5, 10], ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_int(step, range);
 
-    let mut ticks=Vec::with_capacity(usize::try_from(step_num).unwrap());
-    for a in 0..step_num{
-        let position = start_step+step*(a as i128);
-        ticks.push(Tick{
+    let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
+    for a in 0..step_num {
+        let position = start_step + step * (a as i128);
+        ticks.push(Tick {
             position,
-            value:position
+            value: position,
         });
     }
 
@@ -262,13 +256,13 @@ const SCIENCE: usize = 4;
 ///
 /// Format a f64 with the specified prevision. Formats using
 /// either decimal or scientific notation, whichever is shorter.
-/// 
+///
 /// The step amount dictates the precision we need to show at each interval
 /// in order to capture the changes from each step
 ///
 /// If the step size is not specified, the number will be formatted
 /// with no limit to the precision.
-/// 
+///
 pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
     //TODO handle zero???
     //want to display zero with a formatting that is cosistent with others

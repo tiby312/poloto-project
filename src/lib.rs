@@ -695,7 +695,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
 
 ///
 /// One interval tick
-/// 
+///
 pub struct Tick<I> {
     pub position: I,
     /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
@@ -704,7 +704,7 @@ pub struct Tick<I> {
 
 ///
 /// Information on the properties of all the interval ticks for one dimension.
-/// 
+///
 pub struct TickInfo<I> {
     /// List of the position of each tick to be displayed.
     pub ticks: Vec<Tick<I>>,
