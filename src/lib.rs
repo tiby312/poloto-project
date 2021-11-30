@@ -649,7 +649,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
     ///
-    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self>;
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
@@ -713,7 +713,7 @@ pub struct TickInfo<I> {
     /// The starting tick position
     pub start_step: I,
     /// The number of dashes between two ticks must be a multiple of this number.
-    pub dash_multiple: usize,
+    pub dash_multiple: u32,
 
     /// If we want to display the tick values relatively, this will
     /// have the base start to start with.

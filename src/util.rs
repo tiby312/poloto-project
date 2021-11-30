@@ -21,7 +21,7 @@ impl PlotNum for f64 {
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
-    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
         compute_ticks_f64(ideal_num_steps, range)
     }
 
@@ -44,9 +44,10 @@ impl PlotNum for f64 {
     }
 }
 
+use std::convert::TryFrom;
 
 /// Generate out good tick interval defaults for `f64`.
-pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f64> {
+pub fn compute_ticks_f64(ideal_num_steps: u32, range: [f64; 2]) -> TickInfo<f64> {
     let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_f64(step, range);
 
@@ -58,22 +59,20 @@ pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f6
 
     let first_tick = if display_relative { 0.0 } else { start_step };
 
-    let mut counter = 0;
-    let ii = std::iter::from_fn(move || {
-        if counter >= step_num {
-            None
-        } else {
-            let position = start_step + step * (counter as f64);
-            let value = first_tick + step * (counter as f64);
-            counter += 1;
-            Some(Tick { position, value })
-        }
-    })
-    .fuse();
+    let mut ticks=Vec::with_capacity(usize::try_from(step_num).unwrap());
+    for a in 0..step_num{
+        let position = start_step+step*(a as f64);
+        let value = first_tick+step*(a as f64);
+        
+        ticks.push(Tick{
+            position,
+            value
+        });
+    }
 
     TickInfo {
-        ticks: ii.collect(),
-        dash_multiple: good_normalized_step as usize,
+        ticks,
+        dash_multiple: good_normalized_step,
         step,
         start_step,
         display_relative: display_relative.then(|| start_step),
@@ -82,56 +81,30 @@ pub fn compute_ticks_f64(ideal_num_steps: usize, range: [f64; 2]) -> TickInfo<f6
 
 
 /// Generate out good tick interval defaults for `i128`.
-pub fn compute_ticks_i128(ideal_num_steps: usize, range: [i128; 2]) -> TickInfo<i128> {
+pub fn compute_ticks_i128(ideal_num_steps: u32, range: [i128; 2]) -> TickInfo<i128> {
     let (step, good_normalized_step) = find_good_step_int(&[1, 2, 5, 10], ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_int(step, range);
 
-    let mut counter = 0;
-    let ii = std::iter::from_fn(move || {
-        if counter >= step_num {
-            None
-        } else {
-            let position = start_step + step * (counter as i128);
-            counter += 1;
-            Some(Tick {
-                position,
-                value: position,
-            })
-        }
-    })
-    .fuse();
+    let mut ticks=Vec::with_capacity(usize::try_from(step_num).unwrap());
+    for a in 0..step_num{
+        let position = start_step+step*(a as i128);
+        ticks.push(Tick{
+            position,
+            value:position
+        });
+    }
 
     TickInfo {
-        ticks: ii.collect(),
+        ticks,
         step,
         start_step,
-        dash_multiple: good_normalized_step as usize,
+        dash_multiple: good_normalized_step,
         display_relative: None,
     }
 }
 
-/*
-impl PlotNum for usize {
-    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
-        compute_ticks_i128(ideal_num_steps, [range[0] as i128,range[1] as i128]).map(|x|x as usize)
-    }
-
-    fn unit_range() -> [Self; 2] {
-        [0, 1]
-    }
-
-    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
-        let diff = (val[1] - val[0]) as f64;
-
-        let scale = max / diff;
-
-        (*self) as f64 * scale
-    }
-}
-*/
-
 impl PlotNum for i128 {
-    fn compute_ticks(ideal_num_steps: usize, range: [Self; 2]) -> TickInfo<Self> {
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
         compute_ticks_i128(ideal_num_steps, range)
     }
 
@@ -158,7 +131,7 @@ fn round_up_to_nearest_multiple_f64(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple
 }
 
-fn get_range_info_int(step: i128, range_all: [i128; 2]) -> (i128, usize) {
+fn get_range_info_int(step: i128, range_all: [i128; 2]) -> (i128, u32) {
     let start_step = round_up_to_nearest_multiple_int(range_all[0], step);
 
     let step_num = {
@@ -180,7 +153,7 @@ fn get_range_info_int(step: i128, range_all: [i128; 2]) -> (i128, usize) {
 }
 
 //TODO handle case zero steps are found
-fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, usize) {
+fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, u32) {
     let start_step = round_up_to_nearest_multiple_f64(range_all[0], step);
 
     let step_num = {
@@ -201,7 +174,7 @@ fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, usize) {
     (start_step, step_num)
 }
 
-fn find_good_step_int(good_steps: &[u8], num_steps: usize, range_all: [i128; 2]) -> (i128, u8) {
+fn find_good_step_int(good_steps: &[u32], num_steps: u32, range_all: [i128; 2]) -> (i128, u32) {
     let range = range_all[1] - range_all[0];
 
     let rough_step = range / (num_steps - 1) as i128;
@@ -217,27 +190,27 @@ fn find_good_step_int(good_steps: &[u8], num_steps: usize, range_all: [i128; 2])
 
     (
         good_normalized_step * step_power,
-        good_normalized_step as u8,
+        good_normalized_step as u32,
     )
 }
 
-fn find_good_step_f64(good_steps: &[u8], num_steps: usize, range_all: [f64; 2]) -> (f64, u8) {
+fn find_good_step_f64(good_steps: &[u32], num_steps: u32, range_all: [f64; 2]) -> (f64, u32) {
     let range = range_all[1] - range_all[0];
 
     let rough_step = range / (num_steps - 1) as f64;
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor());
 
-    let normalized_step = (rough_step / step_power) as usize;
+    let normalized_step = (rough_step / step_power) as u32;
 
     let good_normalized_step = *good_steps
         .iter()
-        .find(|a| **a as usize > normalized_step)
+        .find(|a| **a as u32 > normalized_step)
         .unwrap();
 
     (
         good_normalized_step as f64 * step_power,
-        good_normalized_step as u8,
+        good_normalized_step,
     )
 }
 

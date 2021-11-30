@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 // PIPE me to a file!
 fn main() {
     let data = [
-        ("Jan", 3144000i128),
+        ("Jan", 3144000),
         ("Feb", 3518000),
         ("Mar", 3835000),
         ("Apr", 4133000),
