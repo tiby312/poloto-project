@@ -8,10 +8,7 @@ fn main() {
         }
     };
 
-    let range: Vec<_> = (0..200)
-        .map(|x| x as f64 / 200.0)
-        .map(|x| x * 10.0 - 5.0)
-        .collect();
+    let range: Vec<_> = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0).collect();
 
     poloto::plot("gaussian", "x", "y")
         .line("σ = 1.0", range.iter().map(|&x| [x, gaussian(1.0, 0.0)(x)]))
