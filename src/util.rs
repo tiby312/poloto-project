@@ -19,7 +19,7 @@ impl PlotNum for f64 {
         self.is_nan()
     }
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
-        compute_ticks_f64(ideal_num_steps, range)
+        compute_ticks_f64(ideal_num_steps, &[1, 2, 5, 10],range)
     }
 
     fn fmt_tick(
@@ -44,8 +44,8 @@ impl PlotNum for f64 {
 use std::convert::TryFrom;
 
 /// Generate out good tick interval defaults for `f64`.
-pub fn compute_ticks_f64(ideal_num_steps: u32, range: [f64; 2]) -> TickInfo<f64> {
-    let (step, good_normalized_step) = find_good_step_f64(&[1, 2, 5, 10], ideal_num_steps, range);
+pub fn compute_ticks_f64(ideal_num_steps: u32, good_ticks:&[u32],range: [f64; 2]) -> TickInfo<f64> {
+    let (step, good_normalized_step) = find_good_step_f64(good_ticks, ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_f64(step, range);
 
     let display_relative = determine_if_should_use_strat(
@@ -74,10 +74,10 @@ pub fn compute_ticks_f64(ideal_num_steps: u32, range: [f64; 2]) -> TickInfo<f64>
 }
 
 /// Generate out good tick interval defaults for `i128`.
-pub fn compute_ticks_i128(ideal_num_steps: u32, range: [i128; 2]) -> TickInfo<i128> {
+pub fn compute_ticks_i128(ideal_num_steps: u32, good_ticks:&[u32],range: [i128; 2]) -> TickInfo<i128> {
     //let ideal_num_steps=(ideal_num_steps as i128).min(  (range[1]-range[0]).abs() +1 ) as u32;
 
-    let (step, good_normalized_step) = find_good_step_int(&[1, 2, 5, 10], ideal_num_steps, range);
+    let (step, good_normalized_step) = find_good_step_int(good_ticks, ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_int(step, range);
 
     let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
@@ -100,7 +100,7 @@ pub fn compute_ticks_i128(ideal_num_steps: u32, range: [i128; 2]) -> TickInfo<i1
 
 impl PlotNum for i128 {
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
-        compute_ticks_i128(ideal_num_steps, range)
+        compute_ticks_i128(ideal_num_steps, &[1, 2, 5, 10],range)
     }
 
     fn unit_range() -> [Self; 2] {
