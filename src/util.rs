@@ -75,6 +75,8 @@ pub fn compute_ticks_f64(ideal_num_steps: u32, range: [f64; 2]) -> TickInfo<f64>
 
 /// Generate out good tick interval defaults for `i128`.
 pub fn compute_ticks_i128(ideal_num_steps: u32, range: [i128; 2]) -> TickInfo<i128> {
+    //let ideal_num_steps=(ideal_num_steps as i128).min(  (range[1]-range[0]).abs() +1 ) as u32;
+
     let (step, good_normalized_step) = find_good_step_int(&[1, 2, 5, 10], ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_int(step, range);
 
@@ -184,9 +186,11 @@ fn find_good_step_int(good_steps: &[u32], num_steps: u32, range_all: [i128; 2]) 
 
     let normalized_step = rough_step / step_power;
 
+    dbg!(range, rough_step, step_power, normalized_step);
+
     let good_normalized_step = *good_steps
         .iter()
-        .find(|a| **a as i128 > normalized_step)
+        .find(|a| **a as i128 >= normalized_step)
         .unwrap() as i128;
 
     (
@@ -206,7 +210,7 @@ fn find_good_step_f64(good_steps: &[u32], num_steps: u32, range_all: [f64; 2]) -
 
     let good_normalized_step = *good_steps
         .iter()
-        .find(|a| **a as u32 > normalized_step)
+        .find(|a| **a as u32 >= normalized_step)
         .unwrap();
 
     (
