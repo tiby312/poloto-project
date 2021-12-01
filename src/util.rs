@@ -2,7 +2,6 @@
 //! Utility functions to help build numbers that implement [`PlotNum`] and [`DiscNum`].
 //!
 use core::fmt;
-use fmt::Write;
 
 use crate::DiscNum;
 use crate::PlotNum;
@@ -28,7 +27,7 @@ impl PlotNum for f64 {
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
     ) -> std::fmt::Result {
-        write!(formatter, "{}", crate::util::interval_float(*self, step))
+        write_interval_float(formatter, *self, step)
     }
 
     fn unit_range() -> [Self; 2] {
@@ -106,6 +105,14 @@ impl PlotNum for i128 {
         [-1, 1]
     }
 
+    fn fmt_tick(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        step: Option<Self>,
+    ) -> std::fmt::Result {
+        write_interval_int(formatter, *self, step)
+    }
+
     fn scale(&self, val: [Self; 2], max: f64) -> f64 {
         let diff = (val[1] - val[0]) as f64;
 
@@ -171,7 +178,7 @@ fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, u32) {
 fn find_good_step_int(good_steps: &[u32], num_steps: u32, range_all: [i128; 2]) -> (i128, u32) {
     let range = range_all[1] - range_all[0];
 
-    let rough_step = range / (num_steps - 1) as i128;
+    let rough_step = (range / (num_steps - 1) as i128).max(1);
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor()) as i128;
 
@@ -208,45 +215,41 @@ fn find_good_step_f64(good_steps: &[u32], num_steps: u32, range_all: [f64; 2]) -
     )
 }
 
-fn make_normal(a: f64, step: Option<f64>) -> impl fmt::Display {
-    crate::DisplayableClosure::new(move |fm| {
-        if let Some(step) = step {
-            let k = (-step.log10()).ceil();
-            let k = k.max(0.0);
-            write!(fm, "{0:.1$}", a, k as usize)
-        } else {
-            write!(fm, "{0:e}", a)
-        }
-    })
+fn write_normal_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
+    if let Some(step) = step {
+        let k = (-step.log10()).ceil();
+        let k = k.max(0.0);
+        write!(fm, "{0:.1$}", a, k as usize)
+    } else {
+        write!(fm, "{0:e}", a)
+    }
 }
 
-fn make_science(a: f64, step: Option<f64>) -> impl fmt::Display {
-    crate::DisplayableClosure::new(move |fm| {
-        if let Some(step) = step {
-            let precision = if a == 0.0 {
-                0
-            } else {
-                let k1 = -step.log10().ceil();
-                let k2 = -a.abs().log10().ceil();
-                let k1 = k1 as isize;
-                let k2 = k2 as isize;
-
-                (k1 - k2).max(0) as usize
-            };
-
-            write!(fm, "{0:.1$e}", a, precision)
+fn write_science_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
+    if let Some(step) = step {
+        let precision = if a == 0.0 {
+            0
         } else {
-            write!(fm, "{}", a)
-        }
-    })
+            let k1 = -step.log10().ceil();
+            let k2 = -a.abs().log10().ceil();
+            let k1 = k1 as isize;
+            let k2 = k2 as isize;
+
+            (k1 - k2).max(0) as usize
+        };
+
+        write!(fm, "{0:.1$e}", a, precision)
+    } else {
+        write!(fm, "{}", a)
+    }
 }
 
 fn determine_if_should_use_strat(start: f64, end: f64, step: f64) -> bool {
     let mut start_s = String::new();
     let mut end_s = String::new();
 
-    write!(&mut start_s, "{}", interval_float(start, Some(step))).unwrap();
-    write!(&mut end_s, "{}", interval_float(end, Some(step))).unwrap();
+    write_interval_float(&mut start_s, start, Some(step)).unwrap();
+    write_interval_float(&mut end_s, end, Some(step)).unwrap();
 
     start_s.len() > 7 || end_s.len() > 7
 }
@@ -263,27 +266,55 @@ const SCIENCE: usize = 4;
 /// If the step size is not specified, the number will be formatted
 /// with no limit to the precision.
 ///
-pub fn interval_float(a: f64, step: Option<f64>) -> impl fmt::Display {
+pub fn write_interval_float<T: fmt::Write>(
+    mut fm: T,
+    a: f64,
+    step: Option<f64>,
+) -> std::fmt::Result {
     //TODO handle zero???
     //want to display zero with a formatting that is cosistent with others
-    crate::DisplayableClosure::new(move |fm| {
-        if a.abs().log10().floor().abs() > SCIENCE as f64 {
-            let mut k = String::new();
-            write!(&mut k, "{}", make_science(a, step))?;
+    if a.abs().log10().floor().abs() > SCIENCE as f64 {
+        let mut k = String::new();
+        write_science_float(&mut k, a, step)?;
 
-            let mut j = String::new();
-            write!(&mut j, "{}", make_normal(a, step))?;
+        let mut j = String::new();
+        write_normal_float(&mut j, a, step)?;
 
-            //Even if we use scientific notation,
-            //it could end up as more characters
-            //because of the needed precision.
-            let ans = if k.len() < j.len() { k } else { j };
-            write!(fm, "{}", ans)?;
-        } else {
-            write!(fm, "{}", make_normal(a, step))?;
-        }
-        Ok(())
-    })
+        //Even if we use scientific notation,
+        //it could end up as more characters
+        //because of the needed precision.
+        let ans = if k.len() < j.len() { k } else { j };
+        write!(fm, "{}", ans)?;
+    } else {
+        write_normal_float(fm, a, step)?;
+    }
+    Ok(())
+}
+
+pub fn write_interval_int<T: fmt::Write>(
+    mut fm: T,
+    a: i128,
+    step: Option<i128>,
+) -> std::fmt::Result {
+    //TODO handle zero???
+    //want to display zero with a formatting that is cosistent with others
+    if (a.abs() as f64).log10().floor().abs() > SCIENCE as f64 {
+        let mut k = String::new();
+        write_science_float(&mut k, a as f64, step.map(|x| x as f64))?;
+
+        use std::fmt::Write;
+        let mut j = String::new();
+        write!(&mut j, "{}", a)?;
+
+        //Even if we use scientific notation,
+        //it could end up as more characters
+        //because of the needed precision.
+        let ans = if k.len() < j.len() { k } else { j };
+        write!(fm, "{}", ans)?;
+    } else {
+        write!(fm, "{}", a)?;
+    }
+    Ok(())
 }
 
 pub(crate) fn find_bounds2<X: PlotNum, Y: PlotNum>(
