@@ -157,8 +157,8 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         let xtick_info = PlotNum::compute_ticks(ideal_num_xsteps, [minx, maxx]);
         let ytick_info = PlotNum::compute_ticks(ideal_num_ysteps, [miny, maxy]);
 
-        let xdash_size = PlotNum::tick_size(20.0, &xtick_info, [minx, maxx], scalex);
-        let ydash_size = PlotNum::tick_size(20.0, &ytick_info, [miny, maxy], scaley);
+        let xdash_size = PlotNum::dash_size(20.0, &xtick_info, [minx, maxx], scalex);
+        let ydash_size = PlotNum::dash_size(20.0, &ytick_info, [miny, maxy], scaley);
 
         use tagger::PathCommand::*;
 

@@ -635,39 +635,37 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
-
-
 ///
 /// Wrapper around a `PlotNum` that removes the dashes from both axis.
-/// 
-#[derive(PartialEq,PartialOrd,Debug,Copy,Clone)]
-pub struct NoDash<I:PlotNum>(pub I);
-impl<I:PlotNum> fmt::Display for NoDash<I>{
-    fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
+///
+#[derive(PartialEq, PartialOrd, Debug, Copy, Clone)]
+pub struct NoDash<I: PlotNum>(pub I);
+impl<I: PlotNum> fmt::Display for NoDash<I> {
+    fn fmt(&self, a: &mut fmt::Formatter) -> fmt::Result {
         self.0.fmt(a)
     }
 }
 
-impl<I:DiscNum> DiscNum for NoDash<I>{
-    fn hole()->Self{
+impl<I: DiscNum> DiscNum for NoDash<I> {
+    fn hole() -> Self {
         NoDash(I::hole())
     }
 }
-impl<I:PlotNum> PlotNum for NoDash<I>{
-    fn is_hole(&self)->bool{
+impl<I: PlotNum> PlotNum for NoDash<I> {
+    fn is_hole(&self) -> bool {
         self.0.is_hole()
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self>{
-        I::compute_ticks(ideal_num_steps,[range[0].0,range[1].0]).map(|x|NoDash(x))
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
+        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(|x| NoDash(x))
     }
 
-    fn unit_range()->[Self;2]{
-        let [a,b]=I::unit_range();
-        [NoDash(a),NoDash(b)]
+    fn unit_range() -> [Self; 2] {
+        let [a, b] = I::unit_range();
+        [NoDash(a), NoDash(b)]
     }
 
-    fn scale(&self, val: [Self; 2], max: f64) -> f64{
-        self.0.scale([val[0].0,val[1].0],max)
+    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
+        self.0.scale([val[0].0, val[1].0], max)
     }
 
     fn fmt_tick(
@@ -675,11 +673,11 @@ impl<I:PlotNum> PlotNum for NoDash<I>{
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
     ) -> std::fmt::Result {
-        self.0.fmt_tick(formatter,step.map(|x|x.0))
+        self.0.fmt_tick(formatter, step.map(|x| x.0))
     }
 
-    fn tick_size(
-        _ideal_tick_size: f64,
+    fn dash_size(
+        _ideal_dash_size: f64,
         _tick_info: &TickInfo<Self>,
         _range: [Self; 2],
         _max: f64,
@@ -688,13 +686,11 @@ impl<I:PlotNum> PlotNum for NoDash<I>{
     }
 }
 
-
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
-    
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -726,8 +722,8 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// Compute the exact size of the ticks.
     /// This can be overridden such that it always returns `None`.
     /// This way there will be no dashes, and it will just be a solid line.
-    fn tick_size(
-        ideal_tick_size: f64,
+    fn dash_size(
+        ideal_dash_size: f64,
         tick_info: &TickInfo<Self>,
         range: [Self; 2],
         max: f64,
@@ -737,13 +733,13 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
 
         for x in 1..50 {
             let dash_size = one_step / ((good_normalized_step * x) as f64);
-            if dash_size < ideal_tick_size {
+            if dash_size < ideal_dash_size {
                 return Some(dash_size);
             }
         }
         unreachable!(
             "Could not find a good dash step size! {:?}",
-            (one_step, good_normalized_step, ideal_tick_size)
+            (one_step, good_normalized_step, ideal_dash_size)
         );
     }
 }
