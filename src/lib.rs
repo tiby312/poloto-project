@@ -729,8 +729,13 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
         max: f64,
     ) -> Option<f64> {
         let one_step = tick_info.step.scale(range, max);
-        let good_normalized_step = tick_info.dash_multiple;
+        let mut good_normalized_step = tick_info.dash_multiple;
 
+        //TODO needed to aovid 10 dashes between ticks.
+        //see hover shader example.
+        if good_normalized_step==10{
+            good_normalized_step=5;
+        }
         for x in 1..50 {
             let dash_size = one_step / ((good_normalized_step * x) as f64);
             if dash_size < ideal_dash_size {
