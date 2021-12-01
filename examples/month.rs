@@ -19,7 +19,7 @@ fn main() {
         ("Feb", 3518000),
         ("Mar", 3518000),
     ];
-    /*
+
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
     //Map the strings to indexes
@@ -31,5 +31,4 @@ fn main() {
     s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val).unwrap()].0));
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
-    */
 }

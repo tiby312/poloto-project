@@ -186,7 +186,7 @@ fn find_good_step_int(good_steps: &[u32], num_steps: u32, range_all: [i128; 2]) 
 
     let normalized_step = rough_step / step_power;
 
-    dbg!(range, rough_step, step_power, normalized_step);
+    //dbg!(range, rough_step, step_power, normalized_step);
 
     let good_normalized_step = *good_steps
         .iter()

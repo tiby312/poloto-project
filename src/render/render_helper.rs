@@ -147,9 +147,11 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
-        let ideal_num_xsteps = if preserve_aspect { 5 } else { 9 };
+        //let ideal_num_xsteps = if preserve_aspect { 5 } else { 9 };
+        let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
 
-        let ideal_num_ysteps = 7;
+        //let ideal_num_ysteps = 7;
+        let ideal_num_ysteps = 6;
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
