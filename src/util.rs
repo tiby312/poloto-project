@@ -122,6 +122,73 @@ pub fn compute_ticks_i128(
     }
 }
 
+
+#[derive(Copy,Clone,PartialEq,PartialOrd)]
+pub struct MonthIndex(pub i128);
+
+impl fmt::Display for MonthIndex{
+    fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
+        write!(a,"{}",self.0)
+    }
+}
+impl PlotNum for MonthIndex{
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
+        let foo=[1,2,6,12];
+
+        let cc:Vec<_>=foo.iter().map(|&step|{
+            let (a,num_steps)=get_range_info_int(step,[range[0].0,range[1].0]);
+            (step,a,num_steps,(ideal_num_steps as i32 - num_steps as i32).abs())
+        }).collect();
+
+        let (step,start_step,num_steps,_)=cc.into_iter().min_by(|a,b|a.3.cmp(&b.3)).unwrap();
+
+        let mut ticks = Vec::with_capacity(usize::try_from(num_steps).unwrap());
+        for a in 0..num_steps {
+            let position = MonthIndex(start_step + step * (a as i128));
+            ticks.push(Tick {
+                position,
+                value: position,
+            });
+        }
+
+        let dash_multiple=step as u32;
+
+        let step=MonthIndex(step);
+        let start_step=MonthIndex(start_step);
+
+        TickInfo {
+            ticks,
+            step,
+            start_step,
+            dash_multiple,
+            display_relative: None,
+        }
+    }
+
+    fn unit_range() -> [Self; 2] {
+        [MonthIndex(-1), MonthIndex(1)]
+    }
+
+    fn fmt_tick(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        step: Option<Self>,
+    ) -> std::fmt::Result {
+        write_interval_int(formatter, self.0, step.map(|x|x.0))
+    }
+
+    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
+        let diff = (val[1].0 - val[0].0) as f64;
+
+        let scale = max / diff;
+
+        (self.0) as f64 * scale
+    }
+
+
+}
+
+
 impl PlotNum for i128 {
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
         compute_ticks_i128(ideal_num_steps, &[1, 2, 5, 10], range)
