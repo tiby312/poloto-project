@@ -122,25 +122,36 @@ pub fn compute_ticks_i128(
     }
 }
 
-
-#[derive(Copy,Clone,PartialEq,PartialOrd)]
+///
+/// A wrapper type that displays ticks at intervals that make sense for indexing to months.
+/// See the month example.
+///
+#[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct MonthIndex(pub i128);
 
-impl fmt::Display for MonthIndex{
-    fn fmt(&self,a:&mut fmt::Formatter)->fmt::Result{
-        write!(a,"{}",self.0)
+impl fmt::Display for MonthIndex {
+    fn fmt(&self, a: &mut fmt::Formatter) -> fmt::Result {
+        write!(a, "{}", self.0)
     }
 }
-impl PlotNum for MonthIndex{
+impl PlotNum for MonthIndex {
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
-        let foo=[1,2,6,12];
+        let foo = [1, 2, 6, 12];
 
-        let cc:Vec<_>=foo.iter().map(|&step|{
-            let (a,num_steps)=get_range_info_int(step,[range[0].0,range[1].0]);
-            (step,a,num_steps,(ideal_num_steps as i32 - num_steps as i32).abs())
-        }).collect();
+        let cc: Vec<_> = foo
+            .iter()
+            .map(|&step| {
+                let (a, num_steps) = get_range_info_int(step, [range[0].0, range[1].0]);
+                (
+                    step,
+                    a,
+                    num_steps,
+                    (ideal_num_steps as i32 - num_steps as i32).abs(),
+                )
+            })
+            .collect();
 
-        let (step,start_step,num_steps,_)=cc.into_iter().min_by(|a,b|a.3.cmp(&b.3)).unwrap();
+        let (step, start_step, num_steps, _) = cc.into_iter().min_by(|a, b| a.3.cmp(&b.3)).unwrap();
 
         let mut ticks = Vec::with_capacity(usize::try_from(num_steps).unwrap());
         for a in 0..num_steps {
@@ -151,10 +162,10 @@ impl PlotNum for MonthIndex{
             });
         }
 
-        let dash_multiple=step as u32;
+        let dash_multiple = step as u32;
 
-        let step=MonthIndex(step);
-        let start_step=MonthIndex(start_step);
+        let step = MonthIndex(step);
+        let start_step = MonthIndex(start_step);
 
         TickInfo {
             ticks,
@@ -174,7 +185,7 @@ impl PlotNum for MonthIndex{
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
     ) -> std::fmt::Result {
-        write_interval_int(formatter, self.0, step.map(|x|x.0))
+        write_interval_int(formatter, self.0, step.map(|x| x.0))
     }
 
     fn scale(&self, val: [Self; 2], max: f64) -> f64 {
@@ -184,10 +195,7 @@ impl PlotNum for MonthIndex{
 
         (self.0) as f64 * scale
     }
-
-
 }
-
 
 impl PlotNum for i128 {
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {

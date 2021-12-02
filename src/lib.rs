@@ -788,6 +788,3 @@ impl<I> TickInfo<I> {
         }
     }
 }
-
-
-

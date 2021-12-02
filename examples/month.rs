@@ -19,23 +19,15 @@ fn main() {
         ("Dec", 6219700),
         ("Jan", 3518000),
         ("Feb", 3518000),
-        ("Mar", 3518000),
-        
-        ("Mar", 3518000),
-        ("Mar", 3518000),
-        ("Mar", 3518000),
-        ("Mar", 3518000),
-        ("Mar", 3518000),
-        ("Mar", 3518000),
-        ("Mar", 3518000),
-        
     ];
-
 
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
     //Map the strings to indexes
-    s.histogram("", (0..).map(|x|MonthIndex(x)).zip(data.iter().map(|x| x.1)));
+    s.histogram(
+        "",
+        (0..).map(|x| MonthIndex(x)).zip(data.iter().map(|x| x.1)),
+    );
 
     s.ymarker(0);
 
