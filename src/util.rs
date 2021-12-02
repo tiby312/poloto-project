@@ -201,46 +201,48 @@ fn get_range_info_f64(step: f64, range_all: [f64; 2]) -> (f64, u32) {
     (start_step, step_num)
 }
 
-fn find_good_step_int(good_steps: &[u32], num_steps: u32, range_all: [i128; 2]) -> (i128, u32) {
+fn find_good_step_int(
+    good_steps: &[u32],
+    ideal_num_steps: u32,
+    range_all: [i128; 2],
+) -> (i128, u32) {
     let range = range_all[1] - range_all[0];
 
-    let rough_step = (range / (num_steps - 1) as i128).max(1);
+    let rough_step = (range / (ideal_num_steps - 1) as i128).max(1);
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor()) as i128;
 
-    let normalized_step = rough_step / step_power;
-
-    //dbg!(range, rough_step, step_power, normalized_step);
-
-    let good_normalized_step = *good_steps
+    let cc: Vec<_> = good_steps
         .iter()
-        .find(|a| **a as i128 >= normalized_step)
-        .unwrap() as i128;
+        .map(|&x| {
+            let num_steps = get_range_info_int(x as i128 * step_power, range_all).1;
+            (x, (num_steps as i32 - ideal_num_steps as i32).abs())
+        })
+        .collect();
 
-    (
-        good_normalized_step * step_power,
-        good_normalized_step as u32,
-    )
+    let best = cc.into_iter().min_by(|a, b| a.1.cmp(&b.1)).unwrap();
+
+    (best.0 as i128 * step_power, best.0)
 }
 
-fn find_good_step_f64(good_steps: &[u32], num_steps: u32, range_all: [f64; 2]) -> (f64, u32) {
+fn find_good_step_f64(good_steps: &[u32], ideal_num_steps: u32, range_all: [f64; 2]) -> (f64, u32) {
     let range = range_all[1] - range_all[0];
 
-    let rough_step = range / (num_steps - 1) as f64;
+    let rough_step = range / (ideal_num_steps - 1) as f64;
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor());
 
-    let normalized_step = (rough_step / step_power) as u32;
-
-    let good_normalized_step = *good_steps
+    let cc: Vec<_> = good_steps
         .iter()
-        .find(|a| **a as u32 >= normalized_step)
-        .unwrap();
+        .map(|&x| {
+            let num_steps = get_range_info_f64(x as f64 * step_power, range_all).1;
+            (x, (num_steps as i32 - ideal_num_steps as i32).abs())
+        })
+        .collect();
 
-    (
-        good_normalized_step as f64 * step_power,
-        good_normalized_step,
-    )
+    let best = cc.into_iter().min_by(|a, b| a.1.cmp(&b.1)).unwrap();
+
+    (best.0 as f64 * step_power, best.0)
 }
 
 fn write_normal_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
