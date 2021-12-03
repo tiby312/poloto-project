@@ -68,6 +68,7 @@ pub fn compute_ticks_f64(
         ticks.push(Tick { position, value });
     }
 
+    /*
     //TODO needed to aovid 10 dashes between ticks.
     //see hover shader example.
     let dash_multiple = if good_normalized_step == 10 {
@@ -75,6 +76,8 @@ pub fn compute_ticks_f64(
     } else {
         good_normalized_step
     };
+    */
+    let dash_multiple=good_normalized_step;
 
     TickInfo {
         ticks,
@@ -105,6 +108,7 @@ pub fn compute_ticks_i128(
         });
     }
 
+    /*
     //TODO needed to aovid 10 dashes between ticks.
     //see hover shader example.
     let dash_multiple = if good_normalized_step == 10 {
@@ -112,6 +116,8 @@ pub fn compute_ticks_i128(
     } else {
         good_normalized_step
     };
+    */
+    let dash_multiple=good_normalized_step;
 
     TickInfo {
         ticks,
