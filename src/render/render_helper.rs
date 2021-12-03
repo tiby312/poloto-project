@@ -151,7 +151,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
 
         //let ideal_num_ysteps = 7;
-        let ideal_num_ysteps = 6;
+        let ideal_num_ysteps = 5;
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;

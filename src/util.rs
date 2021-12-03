@@ -137,14 +137,13 @@ pub fn compute_ticks_i128(
     }
 }
 
-
-
-fn test_multiple<I:PlotNum>(ideal_dash_size: f64,
-    one_step:f64,
-    dash_multiple:u32,
+fn test_multiple<I: PlotNum>(
+    ideal_dash_size: f64,
+    one_step: f64,
+    dash_multiple: u32,
     range: [I; 2],
-    max: f64)->Option<f64>{
-
+    max: f64,
+) -> Option<f64> {
     assert!(dash_multiple > 0);
 
     for x in 1..50 {
@@ -175,15 +174,15 @@ pub fn compute_dash_size<I: PlotNum>(
     assert!(dash_multiple > 0);
 
     if dash_multiple == 1 || dash_multiple == 10 {
-        let a=test_multiple(ideal_dash_size,one_step,2,range,max).unwrap();
-        let b=test_multiple(ideal_dash_size,one_step,5,range,max).unwrap();
-        if (a-ideal_dash_size).abs()<(b-ideal_dash_size).abs(){
+        let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
+        let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
+        if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
             Some(a)
-        }else{
+        } else {
             Some(b)
         }
-    }else{
-        Some(test_multiple(ideal_dash_size,one_step,dash_multiple,range,max).unwrap())
+    } else {
+        Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
     }
 }
 
