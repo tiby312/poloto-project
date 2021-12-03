@@ -587,3 +587,54 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
         self.writer.write_str(s)
     }
 }
+
+///
+/// Wrapper around a `PlotNum` that removes the dashes for the relevant axis.
+///
+#[derive(PartialEq, PartialOrd, Debug, Copy, Clone)]
+pub struct NoDash<I: PlotNum>(pub I);
+impl<I: PlotNum> fmt::Display for NoDash<I> {
+    fn fmt(&self, a: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(a)
+    }
+}
+
+impl<I: DiscNum> DiscNum for NoDash<I> {
+    fn hole() -> Self {
+        NoDash(I::hole())
+    }
+}
+impl<I: PlotNum> PlotNum for NoDash<I> {
+    fn is_hole(&self) -> bool {
+        self.0.is_hole()
+    }
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
+        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(|x| NoDash(x))
+    }
+
+    fn unit_range() -> [Self; 2] {
+        let [a, b] = I::unit_range();
+        [NoDash(a), NoDash(b)]
+    }
+
+    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
+        self.0.scale([val[0].0, val[1].0], max)
+    }
+
+    fn fmt_tick(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+        step: Option<Self>,
+    ) -> std::fmt::Result {
+        self.0.fmt_tick(formatter, step.map(|x| x.0))
+    }
+
+    fn dash_size(
+        _ideal_dash_size: f64,
+        _tick_info: &TickInfo<Self>,
+        _range: [Self; 2],
+        _max: f64,
+    ) -> Option<f64> {
+        None
+    }
+}

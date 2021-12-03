@@ -1,4 +1,4 @@
-use poloto::NoDash;
+use poloto::util::NoDash;
 
 // PIPE me to a file!
 fn main() {
