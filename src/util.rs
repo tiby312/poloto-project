@@ -170,6 +170,7 @@ pub fn compute_dash_size<I: PlotNum>(
 
 ///
 /// A wrapper type that displays ticks at intervals that make sense for indexing to months.
+/// Ticks will apear at 1,2,6,12 instead of 1,2,5,10.
 /// See the month example.
 ///
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
