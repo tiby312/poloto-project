@@ -727,34 +727,13 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
         tick_info: &TickInfo<Self>,
         range: [Self; 2],
         max: f64,
-    ) -> Option<f64> {
-        let one_step = tick_info.step.scale(range, max);
-        let mut dash_multiple = tick_info.dash_multiple;
-
-        assert!(dash_multiple>0);
-
-        if dash_multiple==1 || dash_multiple==10{
-            dash_multiple=5;
-        }
-
-        for x in 1..50 {
-            let dash_size = one_step / ((dash_multiple.pow(x)) as f64);
-            if dash_size < ideal_dash_size {
-                return Some(dash_size);
-            }
-        }
-        unreachable!(
-            "Could not find a good dash step size! {:?}",
-            (one_step, dash_multiple, ideal_dash_size)
-        );
-    }
+    ) -> Option<f64>;
 }
-
-
 
 ///
 /// One interval tick
 ///
+#[derive(Clone)]
 pub struct Tick<I> {
     pub position: I,
     /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
@@ -764,6 +743,7 @@ pub struct Tick<I> {
 ///
 /// Information on the properties of all the interval ticks for one dimension.
 ///
+#[derive(Clone)]
 pub struct TickInfo<I> {
     /// List of the position of each tick to be displayed.
     pub ticks: Vec<Tick<I>>,

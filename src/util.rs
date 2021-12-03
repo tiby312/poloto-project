@@ -39,6 +39,15 @@ impl PlotNum for f64 {
         let scale = max / diff;
         (*self) * scale
     }
+
+    fn dash_size(
+        ideal_dash_size: f64,
+        tick_info: &TickInfo<Self>,
+        range: [Self; 2],
+        max: f64,
+    ) -> Option<f64> {
+        compute_dash_size(ideal_dash_size, tick_info, range, max)
+    }
 }
 
 use std::convert::TryFrom;
@@ -77,7 +86,7 @@ pub fn compute_ticks_f64(
         good_normalized_step
     };
     */
-    let dash_multiple=good_normalized_step;
+    let dash_multiple = good_normalized_step;
 
     TickInfo {
         ticks,
@@ -117,7 +126,7 @@ pub fn compute_ticks_i128(
         good_normalized_step
     };
     */
-    let dash_multiple=good_normalized_step;
+    let dash_multiple = good_normalized_step;
 
     TickInfo {
         ticks,
@@ -126,6 +135,37 @@ pub fn compute_ticks_i128(
         dash_multiple,
         display_relative: None,
     }
+}
+
+///
+/// Compute a good dash size that aligned with the ticks.
+/// This is only compatible for ticks using [1,2,5,10].
+///
+pub fn compute_dash_size<I: PlotNum>(
+    ideal_dash_size: f64,
+    tick_info: &TickInfo<I>,
+    range: [I; 2],
+    max: f64,
+) -> Option<f64> {
+    let one_step = tick_info.step.scale(range, max);
+    let mut dash_multiple = tick_info.dash_multiple;
+
+    assert!(dash_multiple > 0);
+
+    if dash_multiple == 1 || dash_multiple == 10 {
+        dash_multiple = 5;
+    }
+
+    for x in 1..50 {
+        let dash_size = one_step / ((dash_multiple.pow(x)) as f64);
+        if dash_size < ideal_dash_size {
+            return Some(dash_size);
+        }
+    }
+    unreachable!(
+        "Could not find a good dash step size! {:?}",
+        (one_step, dash_multiple, ideal_dash_size)
+    );
 }
 
 ///
@@ -201,6 +241,20 @@ impl PlotNum for MonthIndex {
 
         (self.0) as f64 * scale
     }
+
+    fn dash_size(
+        ideal_dash_size: f64,
+        tick_info: &TickInfo<Self>,
+        range: [Self; 2],
+        max: f64,
+    ) -> Option<f64> {
+        i128::dash_size(
+            ideal_dash_size,
+            &tick_info.clone().map(|x| x.0),
+            [range[0].0, range[1].0],
+            max,
+        )
+    }
 }
 
 impl PlotNum for i128 {
@@ -226,6 +280,15 @@ impl PlotNum for i128 {
         let scale = max / diff;
 
         (*self) as f64 * scale
+    }
+
+    fn dash_size(
+        ideal_dash_size: f64,
+        tick_info: &TickInfo<Self>,
+        range: [Self; 2],
+        max: f64,
+    ) -> Option<f64> {
+        compute_dash_size(ideal_dash_size, tick_info, range, max)
     }
 }
 
@@ -402,6 +465,14 @@ pub fn write_interval_float<T: fmt::Write>(
     Ok(())
 }
 
+///
+/// Format an int Formats using either decimal or scientific notation, whichever is shorter.
+///
+/// If its written in scientific notation, it will do so at the precision specified.
+///
+/// If the step size is not specified, the number will be formatted
+/// with no limit to the precision if scientific mode is picked.
+///
 pub fn write_interval_int<T: fmt::Write>(
     mut fm: T,
     a: i128,
