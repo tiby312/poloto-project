@@ -137,6 +137,28 @@ pub fn compute_ticks_i128(
     }
 }
 
+
+
+fn test_multiple<I:PlotNum>(ideal_dash_size: f64,
+    one_step:f64,
+    dash_multiple:u32,
+    range: [I; 2],
+    max: f64)->Option<f64>{
+
+    assert!(dash_multiple > 0);
+
+    for x in 1..50 {
+        let dash_size = one_step / ((dash_multiple.pow(x)) as f64);
+        if dash_size < ideal_dash_size {
+            return Some(dash_size);
+        }
+    }
+
+    unreachable!(
+        "Could not find a good dash step size! {:?}",
+        (one_step, dash_multiple, ideal_dash_size)
+    );
+}
 ///
 /// Compute a good dash size that aligned with the ticks.
 /// This is only compatible for ticks using `[1,2,5,10]`.
@@ -148,24 +170,21 @@ pub fn compute_dash_size<I: PlotNum>(
     max: f64,
 ) -> Option<f64> {
     let one_step = tick_info.step.scale(range, max);
-    let mut dash_multiple = tick_info.dash_multiple;
+    let dash_multiple = tick_info.dash_multiple;
 
     assert!(dash_multiple > 0);
 
     if dash_multiple == 1 || dash_multiple == 10 {
-        dash_multiple = 5;
-    }
-
-    for x in 1..50 {
-        let dash_size = one_step / ((dash_multiple.pow(x)) as f64);
-        if dash_size < ideal_dash_size {
-            return Some(dash_size);
+        let a=test_multiple(ideal_dash_size,one_step,2,range,max).unwrap();
+        let b=test_multiple(ideal_dash_size,one_step,5,range,max).unwrap();
+        if (a-ideal_dash_size).abs()<(b-ideal_dash_size).abs(){
+            Some(a)
+        }else{
+            Some(b)
         }
+    }else{
+        Some(test_multiple(ideal_dash_size,one_step,dash_multiple,range,max).unwrap())
     }
-    unreachable!(
-        "Could not find a good dash step size! {:?}",
-        (one_step, dash_multiple, ideal_dash_size)
-    );
 }
 
 ///
