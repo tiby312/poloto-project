@@ -141,8 +141,8 @@ fn test_multiple<I: PlotNum>(
     ideal_dash_size: f64,
     one_step: f64,
     dash_multiple: u32,
-    range: [I; 2],
-    max: f64,
+    _range: [I; 2],
+    _max: f64,
 ) -> Option<f64> {
     assert!(dash_multiple > 0);
 
