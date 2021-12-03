@@ -139,7 +139,7 @@ pub fn compute_ticks_i128(
 
 ///
 /// Compute a good dash size that aligned with the ticks.
-/// This is only compatible for ticks using [1,2,5,10].
+/// This is only compatible for ticks using `[1,2,5,10]`.
 ///
 pub fn compute_dash_size<I: PlotNum>(
     ideal_dash_size: f64,
@@ -248,12 +248,25 @@ impl PlotNum for MonthIndex {
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {
-        i128::dash_size(
-            ideal_dash_size,
-            &tick_info.clone().map(|x| x.0),
-            [range[0].0, range[1].0],
-            max,
-        )
+        let one_step = tick_info.step.scale(range, max);
+        let mut dash_multiple = tick_info.dash_multiple;
+
+        assert!(dash_multiple > 0);
+
+        if dash_multiple == 1 || dash_multiple == 12 {
+            dash_multiple = 6;
+        }
+
+        for x in 1..50 {
+            let dash_size = one_step / ((dash_multiple.pow(x)) as f64);
+            if dash_size < ideal_dash_size {
+                return Some(dash_size);
+            }
+        }
+        unreachable!(
+            "Could not find a good dash step size! {:?}",
+            (one_step, dash_multiple, ideal_dash_size)
+        );
     }
 }
 
