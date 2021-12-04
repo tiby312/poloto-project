@@ -99,29 +99,14 @@ struct Plot<'a, X: PlotNum, Y: PlotNum> {
 }
 
 ///
-/// The default svg tag
+/// Default SVG Header for a Poloto graph.
 ///
-/// They are as follows:
-/// `class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"`
+pub const SVG_HEADER: &str = r##"<svg class="poloto_background poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"##;
+
 ///
-pub fn default_svg<T: std::fmt::Write, K>(
-    e: &mut tagger::ElemWriter<T>,
-    extra: impl FnOnce(&mut tagger::AttrWriter<T>),
-    func: impl FnOnce(&mut tagger::ElemWriter<T>) -> K,
-) -> K {
-    e.elem("svg", |d| {
-        d.attr("width", DIMENSIONS[0])
-            .attr("class", "poloto_background poloto")
-            .attr("height", DIMENSIONS[1])
-            .attr(
-                "viewBox",
-                format_args!("0 0 {} {}", DIMENSIONS[0], DIMENSIONS[1]),
-            )
-            .attr("xmlns", "http://www.w3.org/2000/svg");
-        extra(d);
-    })
-    .build(|d| func(d))
-}
+/// Default SVG end tag.
+///
+pub const SVG_END: &str = "</svg>";
 
 /// Default light theme
 pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
@@ -179,8 +164,10 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     .poloto6fill{fill:orange;} \
     .poloto7fill{fill:chocolate;}";
 
+/*
 /// The demsions of the svg graph `[800,500]`.
 pub const DIMENSIONS: [usize; 2] = [800, 500];
+*/
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
@@ -533,16 +520,16 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut k=String::new();
     /// plotter.simple_theme(&mut k);
     /// ```
-    pub fn simple_theme<T: std::fmt::Write>(&mut self, a: T) -> T {
-        let mut w = tagger::new(a);
-        default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(format_args!(
-                "<style>{}</style>",
-                STYLE_CONFIG_LIGHT_DEFAULT
-            ));
-            self.render(d.writer());
-        });
-        w.into_writer()
+    pub fn simple_theme<T: std::fmt::Write>(&mut self, mut a: T) -> T {
+        write!(
+            &mut a,
+            "{}<style>{}</style>",
+            SVG_HEADER, STYLE_CONFIG_LIGHT_DEFAULT
+        )
+        .unwrap();
+        self.render(&mut a);
+        write!(&mut a, "{}", SVG_END).unwrap();
+        a
     }
 
     ///
@@ -555,22 +542,16 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut k=String::new();
     /// plotter.simple_theme_dark(&mut k);
     /// ```
-    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, a: T) -> T {
-        let mut w = tagger::new(a);
-        default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(format_args!("<style>{}</style>", STYLE_CONFIG_DARK_DEFAULT));
-            self.render(d.writer());
-        });
-        w.into_writer()
-    }
-
-    pub fn simple_with_element<T: std::fmt::Write, B: Display>(&mut self, a: T, b: B) -> T {
-        let mut w = tagger::new(a);
-        default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(b);
-            self.render(d.writer());
-        });
-        w.into_writer()
+    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, mut a: T) -> T {
+        write!(
+            &mut a,
+            "{}<style>{}</style>",
+            SVG_HEADER, STYLE_CONFIG_DARK_DEFAULT
+        )
+        .unwrap();
+        self.render(&mut a);
+        write!(&mut a, "{}", SVG_END).unwrap();
+        a
     }
 }
 /*

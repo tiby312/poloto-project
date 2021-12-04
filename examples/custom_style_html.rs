@@ -10,8 +10,6 @@ fn main() -> core::fmt::Result {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    //    let fs = poloto::theme_light().appendm(s.try_render()?);
-
     let mut buffer = String::new();
 
     s.simple_theme(&mut buffer);
@@ -23,9 +21,6 @@ fn main() -> core::fmt::Result {
 <button type="button" style="font-size: 24px;" onclick="monclick();">Remove Background Dynamically</button>
 <svg width="0" height="0" viewBox="0 0 0 0">
     <defs>
-        <pattern id="pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-            <circle cx="25" cy="25" r="25" fill="black" fill-opacity="0.2"/>
-        </pattern>
         <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
             <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
         </pattern> 
@@ -71,9 +66,7 @@ const HEADER: &'static str = r###"
     .poloto_background2{
         fill:green;
     }
-    .poloto_background.poloto_background{
-        fill: url(#pattern);
-    }
+    
     .poloto0stroke.poloto0stroke{
         stroke-dasharray:10 2 2;
     }

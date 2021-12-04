@@ -10,15 +10,14 @@ fn main() {
 
     plotter.line("floats", &data);
 
-    let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
-
-    default_svg(&mut e, tagger::no_attr(), |d| {
-        d.put_raw(MY_STYLE);
-        plotter.render(d.writer());
-    });
+    println!("{}", CUSTOM_SVG);
+    plotter.render(poloto::upgrade_write(std::io::stdout()));
+    println!("{}", poloto::SVG_END);
 }
 
-const MY_STYLE: &str = r###"<style>
+const CUSTOM_SVG: &str = r###"
+<svg class="poloto_background poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+<style>
     .poloto { 
     stroke-linecap:round;
     stroke-linejoin:round;

@@ -34,23 +34,47 @@ fn main() {
         })
         .build(|e| {
             for (i, &test) in generate_test().iter().enumerate() {
-                poloto::default_svg(
-                    e,
-                    |d| {
-                        d.attr("width", "500px").attr("height", "100%");
-                    },
-                    |e| {
-                        e.put_raw(format_args!(
-                            "<style>{}</style>",
-                            poloto::STYLE_CONFIG_LIGHT_DEFAULT
-                        ));
+                use std::fmt::Write;
+                write!(e.writer(), "{}", CUSTOM_SVG).unwrap();
 
-                        poloto::plot(formatm!("test {}", i), "x", "y")
-                            .scatter("", test)
-                            .render(e.writer());
-                    },
-                );
+                poloto::plot(formatm!("test {}", i), "x", "y")
+                    .scatter("", test)
+                    .render(e.writer());
+
+                write!(e.writer(), "{}", poloto::SVG_END).unwrap();
             }
         })
     });
 }
+
+pub const CUSTOM_SVG: &str = r####"
+<svg class="poloto_background poloto" width="500px" height="100%" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+<style>
+.poloto {
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    font-family: 'Tahoma', sans-serif;
+    stroke-width:2;
+    }
+    .scatter{stroke-width:7}
+    .poloto_text{fill: black;}
+    .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+    .poloto_background{background-color: AliceBlue;}
+    .poloto0stroke{stroke:  blue;}
+    .poloto1stroke{stroke:  red;}
+    .poloto2stroke{stroke:  green;}
+    .poloto3stroke{stroke:  gold;}
+    .poloto4stroke{stroke:  aqua;}
+    .poloto5stroke{stroke:  lime;}
+    .poloto6stroke{stroke:  orange;}
+    .poloto7stroke{stroke:  chocolate;}
+    .poloto0fill{fill:blue;}
+    .poloto1fill{fill:red;}
+    .poloto2fill{fill:green;}
+    .poloto3fill{fill:gold;}
+    .poloto4fill{fill:aqua;}
+    .poloto5fill{fill:lime;}
+    .poloto6fill{fill:orange;}
+    .poloto7fill{fill:chocolate;}
+</style>
+"####;

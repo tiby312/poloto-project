@@ -13,18 +13,23 @@ fn main() {
         .fuse()
     };
 
-    let mut p = poloto::plot("collatz", "x", "y");
+    let mut plotter = poloto::plot("collatz", "x", "y");
 
     for i in 1000..1006 {
-        p.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+        plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
-    p.ymarker(0).simple_with_element(
-        poloto::upgrade_write(std::io::stdout()),
-        format_args!(
-            "<style>{}{}</style>",
-            poloto::STYLE_CONFIG_DARK_DEFAULT,
-            ".poloto{stroke-dasharray:2;stroke-width:1;}"
-        ),
-    );
+    use std::fmt::Write;
+    let mut w = poloto::upgrade_write(std::io::stdout());
+
+    write!(
+        &mut w,
+        "{}<style>{}{}</style>",
+        poloto::SVG_HEADER,
+        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        ".poloto{stroke-dasharray:2;stroke-width:1;}"
+    )
+    .unwrap();
+    plotter.ymarker(0).render(&mut w);
+    write!(&mut w, "{}", poloto::SVG_END).unwrap();
 }

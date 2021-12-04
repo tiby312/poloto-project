@@ -8,11 +8,11 @@ fn main() -> core::fmt::Result {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     let mut buffer = String::new();
-    let mut e = tagger::new(&mut buffer);
 
-    default_svg(&mut e, tagger::no_attr(), |d| {
-        s.render(d.writer());
-    });
+    use std::fmt::Write;
+    write!(&mut buffer,"{}",r###"<svg class="poloto_background poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"###).unwrap();
+    s.render(&mut buffer);
+    write!(&mut buffer, "{}", poloto::SVG_END).unwrap();
 
     println!(
         r###"
