@@ -15,6 +15,8 @@ fn main() {
 
     let mut plotter = poloto::plot("collatz", "x", "y");
 
+    plotter.ymarker(0);
+
     for i in 1000..1006 {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
@@ -30,6 +32,6 @@ fn main() {
         ".poloto{stroke-dasharray:2;stroke-width:1;}"
     )
     .unwrap();
-    plotter.ymarker(0).render(&mut w);
+    plotter.render(&mut w);
     write!(&mut w, "{}", poloto::SVG_END).unwrap();
 }

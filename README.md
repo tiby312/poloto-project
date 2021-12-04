@@ -28,7 +28,7 @@ fn main() {
         .line("σ = 0.5", range.iter().map(|&x| [x, gaussian(0.5, 0.0)(x)]))
         .line("σ = 0.3", range.iter().map(|&x| [x, gaussian(0.3, 0.0)(x)]))
         .ymarker(0.0)
-        .simple_theme(poloto::upgrade_write(std::io::stdout()));
+        .simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }
 
 ```
@@ -95,20 +95,27 @@ fn main() {
         .fuse()
     };
 
-    let mut p = poloto::plot("collatz", "x", "y");
+    let mut plotter = poloto::plot("collatz", "x", "y");
+
+    plotter.ymarker(0);
 
     for i in 1000..1006 {
-        p.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+        plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
-    p.ymarker(0).simple_with_element(
-        poloto::upgrade_write(std::io::stdout()),
-        format_args!(
-            "<style>{}{}</style>",
-            poloto::STYLE_CONFIG_DARK_DEFAULT,
-            ".poloto{stroke-dasharray:2;stroke-width:1;}"
-        ),
-    );
+    use std::fmt::Write;
+    let mut w = poloto::upgrade_write(std::io::stdout());
+
+    write!(
+        &mut w,
+        "{}<style>{}{}</style>",
+        poloto::SVG_HEADER,
+        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        ".poloto{stroke-dasharray:2;stroke-width:1;}"
+    )
+    .unwrap();
+    plotter.render(&mut w);
+    write!(&mut w, "{}", poloto::SVG_END).unwrap();
 }
 
 ```
@@ -136,7 +143,7 @@ fn main() {
     poloto::plot("Heart Graph", "x", "y")
         .line_fill("heart", range.map(|x| heart(x)))
         .preserve_aspect()
-        .simple_theme(poloto::upgrade_write(std::io::stdout()));
+        .simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }
 
 ```
@@ -196,6 +203,8 @@ use std::convert::TryFrom;
 
 // PIPE me to a file!
 fn main() {
+    use poloto::util::MonthIndex;
+
     let data = [
         ("Jan", 3144000),
         ("Feb", 3518000),
@@ -211,18 +220,20 @@ fn main() {
         ("Dec", 6219700),
         ("Jan", 3518000),
         ("Feb", 3518000),
-        ("Mar", 3518000),
     ];
 
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
     //Map the strings to indexes
-    s.histogram("", (0..).zip(data.iter().map(|x| x.1)));
+    s.histogram(
+        "",
+        (0..).map(|x| MonthIndex(x)).zip(data.iter().map(|x| x.1)),
+    );
 
     s.ymarker(0);
 
     //Lookup the strings with the index
-    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val).unwrap()].0));
+    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
 
     s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
 }
