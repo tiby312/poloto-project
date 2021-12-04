@@ -336,7 +336,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
 
     /// Create a scatter plot from plots, using a SVG path with lines with zero length.
     /// Each point can be sized using the stroke width.
-    /// The path belongs to the CSS classes `scatter` and `.poloto[N]stroke` css class
+    /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
     /// with the latter class overriding the former.
     ///
     /// ```
