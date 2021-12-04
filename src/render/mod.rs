@@ -71,7 +71,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
 
         let name_exists = writer
             .elem("text", |d| {
-                d.attr("class", "poloto_text")
+                d.attr("class", "poloto_legend_text poloto_text")
                     .attr("alignment-baseline", "middle")
                     .attr("text-anchor", "start")
                     .attr("font-size", "large")
@@ -107,7 +107,10 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                     writer.single("line", |d| {
                         d.attr(
                             "class",
-                            format_args!("poloto{}stroke poloto{}legend", colori, colori),
+                            format_args!(
+                                "poloto_legend_icon poloto{}stroke poloto{}legend",
+                                colori, colori
+                            ),
                         )
                         .attr("stroke", "black")
                         .attr("x1", legendx1)
@@ -131,7 +134,10 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                     writer.single("line", |d| {
                         d.attr(
                             "class",
-                            format_args!("scatter poloto{}stroke poloto{}legend", colori, colori),
+                            format_args!(
+                                "poloto_scatter poloto_legend_icon poloto{}stroke poloto{}legend",
+                                colori, colori
+                            ),
                         )
                         .attr("stroke", "black")
                         .attr("x1", legendx1 + padding / 30.0)
@@ -142,14 +148,17 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                 }
 
                 writer.single("path", |d| {
-                    d.attr("class", format_args!("scatter poloto{}stroke", colori))
-                        .path(|p| {
-                            use tagger::PathCommand::*;
-                            for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                                p.put(M(x, y));
-                                p.put(H_(0));
-                            }
-                        });
+                    d.attr(
+                        "class",
+                        format_args!("poloto_scatter poloto{}stroke", colori),
+                    )
+                    .path(|p| {
+                        use tagger::PathCommand::*;
+                        for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
+                            p.put(M(x, y));
+                            p.put(H_(0));
+                        }
+                    });
                 });
             }
             PlotType::Histo => {
@@ -157,7 +166,10 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                     writer.single("rect", |d| {
                         d.attr(
                             "class",
-                            format_args!("poloto{}fill poloto{}legend", colori, colori),
+                            format_args!(
+                                "poloto_legend_icon poloto{}fill poloto{}legend",
+                                colori, colori
+                            ),
                         )
                         .attr("x", legendx1)
                         .attr("y", legendy1 - padding / 30.0)
@@ -196,7 +208,10 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                     writer.single("rect", |d| {
                         d.attr(
                             "class",
-                            format_args!("poloto{}fill poloto{}legend", colori, colori),
+                            format_args!(
+                                "poloto_legend_icon poloto{}fill poloto{}legend",
+                                colori, colori
+                            ),
                         )
                         .attr("x", legendx1)
                         .attr("y", legendy1 - padding / 30.0)

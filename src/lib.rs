@@ -7,9 +7,6 @@
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
 //!
-//! * Plots containing NaN or Infinity are ignored.
-//! * After 8 plots, the colors cycle back and are repeated.
-//!
 
 #[cfg(doctest)]
 mod test_readme {
@@ -115,7 +112,7 @@ pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
     font-family: 'Tahoma', sans-serif; \
     stroke-width:2; \
     } \
-    .scatter{stroke-width:7} \
+    .poloto_scatter{stroke-width:7} \
     .poloto_text{fill: black;} \
     .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none} \
     .poloto_background{background-color: AliceBlue;} \
@@ -143,7 +140,7 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     font-family: 'Tahoma', sans-serif; \
     stroke-width:2; \
     } \
-    .scatter{stroke-width:7} \
+    .poloto_scatter{stroke-width:7} \
     .poloto_text{fill: white;} \
     .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none} \
     .poloto_background{background-color: #262626;} \

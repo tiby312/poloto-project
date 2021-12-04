@@ -20,7 +20,7 @@ fn large_dot_print<W: std::fmt::Write, X: poloto::PlotNum, Y: poloto::PlotNum>(
         "{}<style>{}{}</style>",
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
-        ".scatter{stroke-width:33;}.poloto0legend{stroke-width:10}"
+        ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}"
     )
     .unwrap();
     a.render(&mut w);
