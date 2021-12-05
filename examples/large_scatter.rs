@@ -8,21 +8,12 @@ fn main() {
 
     plotter.line("b", x.iter().map(|&x| (x, x.sin())));
 
-    large_dot_print(poloto::upgrade_write(std::io::stdout()), plotter);
-}
-
-fn large_dot_print<W: std::fmt::Write, X: poloto::PlotNum, Y: poloto::PlotNum>(
-    mut w: W,
-    mut a: poloto::Plotter<X, Y>,
-) {
-    write!(
-        &mut w,
-        "{}<style>{}{}</style>",
+    println!(
+        "{}<style>{}{}</style>{}{}",
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}"
-    )
-    .unwrap();
-    a.render(&mut w);
-    write!(&mut w, "{}", poloto::SVG_END).unwrap();
+        ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
+        poloto::disp_mut(|f| plotter.render(f)),
+        poloto::SVG_END
+    );
 }

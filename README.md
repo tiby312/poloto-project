@@ -23,12 +23,14 @@ fn main() {
 
     let range: Vec<_> = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0).collect();
 
-    poloto::plot("gaussian", "x", "y")
+    let mut plotter = poloto::plot("gaussian", "x", "y")
         .line("σ = 1.0", range.iter().map(|&x| [x, gaussian(1.0, 0.0)(x)]))
         .line("σ = 0.5", range.iter().map(|&x| [x, gaussian(0.5, 0.0)(x)]))
         .line("σ = 0.3", range.iter().map(|&x| [x, gaussian(0.3, 0.0)(x)]))
         .ymarker(0.0)
-        .simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
+        .move_into();
+
+    println!("{}", poloto::disp_mut(|f| plotter.simple_theme(f)));
 }
 
 ```
@@ -103,23 +105,14 @@ fn main() {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
-    dashed_print(poloto::upgrade_write(std::io::stdout()), plotter);
-}
-
-fn dashed_print<W: std::fmt::Write, X: poloto::PlotNum, Y: poloto::PlotNum>(
-    mut w: W,
-    mut a: poloto::Plotter<X, Y>,
-) {
-    write!(
-        &mut w,
-        "{}<style>{}{}</style>",
+    println!(
+        "{}<style>{}{}</style>{}{}",
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto{stroke-dasharray:2;stroke-width:1;}"
+        ".poloto{stroke-dasharray:2;stroke-width:1;}",
+        poloto::disp_mut(|f| plotter.render(f)),
+        poloto::SVG_END
     )
-    .unwrap();
-    a.render(&mut w);
-    write!(&mut w, "{}", poloto::SVG_END).unwrap();
 }
 
 ```
@@ -144,10 +137,12 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    poloto::plot("Heart Graph", "x", "y")
+    let mut plotter = poloto::plot("Heart Graph", "x", "y")
         .line_fill("heart", range.map(|x| heart(x)))
         .preserve_aspect()
-        .simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
+        .move_into();
+
+    println!("{}", poloto::disp_mut(|f| plotter.simple_theme_dark(f)));
 }
 
 ```
@@ -190,7 +185,7 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    plotter.simple_theme(poloto::upgrade_write(std::io::stdout()));
+    println!("{}", poloto::disp_mut(|f| plotter.simple_theme(f)));
 }
 
 ```
@@ -239,7 +234,7 @@ fn main() {
     //Lookup the strings with the index
     s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
 
-    s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
+    println!("{}", poloto::disp_mut(|f| s.simple_theme_dark(f)));
 }
 
 ```

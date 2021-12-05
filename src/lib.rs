@@ -503,8 +503,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, a: T) -> T {
-        render::render(self, a)
+    pub fn render<T: std::fmt::Write>(&mut self, a: T) {
+        render::render(self, a);
     }
 
     ///
@@ -517,7 +517,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut k=String::new();
     /// plotter.simple_theme(&mut k);
     /// ```
-    pub fn simple_theme<T: std::fmt::Write>(&mut self, mut a: T) -> T {
+    pub fn simple_theme<T: std::fmt::Write>(&mut self, mut a: T) {
         write!(
             &mut a,
             "{}<style>{}</style>",
@@ -526,7 +526,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         .unwrap();
         self.render(&mut a);
         write!(&mut a, "{}", SVG_END).unwrap();
-        a
     }
 
     ///
@@ -539,7 +538,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut k=String::new();
     /// plotter.simple_theme_dark(&mut k);
     /// ```
-    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, mut a: T) -> T {
+    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, mut a: T) {
         write!(
             &mut a,
             "{}<style>{}</style>",
@@ -548,7 +547,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         .unwrap();
         self.render(&mut a);
         write!(&mut a, "{}", SVG_END).unwrap();
-        a
     }
 }
 /*
@@ -587,6 +585,32 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
 impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         (self.0)(formatter)
+    }
+}
+
+///
+/// Leverage rust's display format system using `RefCell` under the hood.
+///
+pub fn disp_mut<F: FnMut(&mut fmt::Formatter)>(a: F) -> DisplayableClosureMut<F> {
+    DisplayableClosureMut::new(a)
+}
+
+use std::cell::RefCell;
+
+///
+/// Wrap a mutable closure in a `RefCell` to allow it to be called inside of `fmt::Display::fmt`
+///
+pub struct DisplayableClosureMut<F>(pub RefCell<F>);
+
+impl<F: FnMut(&mut fmt::Formatter)> DisplayableClosureMut<F> {
+    pub fn new(a: F) -> Self {
+        DisplayableClosureMut(RefCell::new(a))
+    }
+}
+impl<F: FnMut(&mut fmt::Formatter)> fmt::Display for DisplayableClosureMut<F> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        (self.0.borrow_mut())(formatter);
+        Ok(())
     }
 }
 

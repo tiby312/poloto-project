@@ -21,21 +21,12 @@ fn main() {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
-    dashed_print(poloto::upgrade_write(std::io::stdout()), plotter);
-}
-
-fn dashed_print<W: std::fmt::Write, X: poloto::PlotNum, Y: poloto::PlotNum>(
-    mut w: W,
-    mut a: poloto::Plotter<X, Y>,
-) {
-    write!(
-        &mut w,
-        "{}<style>{}{}</style>",
+    println!(
+        "{}<style>{}{}</style>{}{}",
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto{stroke-dasharray:2;stroke-width:1;}"
+        ".poloto{stroke-dasharray:2;stroke-width:1;}",
+        poloto::disp_mut(|f| plotter.render(f)),
+        poloto::SVG_END
     )
-    .unwrap();
-    a.render(&mut w);
-    write!(&mut w, "{}", poloto::SVG_END).unwrap();
 }

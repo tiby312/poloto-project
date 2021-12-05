@@ -12,7 +12,7 @@ fn main() {
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     println!(
-        "{}<style>{}</style>{}",
+        "{}<style>{}</style>{}{}{}",
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
         r###"
@@ -28,8 +28,8 @@ fn main() {
     .poloto1fill.poloto1fill{
         fill: url(#pattern2);
     }
-    </style>"###
+    </style>"###,
+        poloto::disp_mut(|f| s.render(f)),
+        poloto::SVG_END
     );
-    s.render(tagger::upgrade_write(std::io::stdout()));
-    println!("{}", poloto::SVG_END);
 }

@@ -34,5 +34,5 @@ fn main() {
     //Lookup the strings with the index
     s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
 
-    s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
+    println!("{}", poloto::disp_mut(|f| s.simple_theme_dark(f)));
 }

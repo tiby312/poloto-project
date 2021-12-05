@@ -10,10 +10,6 @@ fn main() -> core::fmt::Result {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let mut buffer = String::new();
-
-    s.simple_theme(&mut buffer);
-
     println!(
         r###"
 <html>
@@ -31,7 +27,8 @@ fn main() -> core::fmt::Result {
 </div>
 </html>
         "###,
-        HEADER, buffer
+        HEADER,
+        poloto::disp_mut(|f| s.simple_theme(f))
     );
 
     Ok(())

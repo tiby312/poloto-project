@@ -10,8 +10,10 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    poloto::plot("Heart Graph", "x", "y")
+    let mut plotter = poloto::plot("Heart Graph", "x", "y")
         .line_fill("heart", range.map(|x| heart(x)))
         .preserve_aspect()
-        .simple_theme_dark(poloto::upgrade_write(std::io::stdout()));
+        .move_into();
+
+    println!("{}", poloto::disp_mut(|f| plotter.simple_theme_dark(f)));
 }

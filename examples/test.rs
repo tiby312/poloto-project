@@ -35,13 +35,18 @@ fn main() {
         .build(|e| {
             for (i, &test) in generate_test().iter().enumerate() {
                 use std::fmt::Write;
-                write!(e.writer(), "{}", CUSTOM_SVG).unwrap();
-
-                poloto::plot(formatm!("test {}", i), "x", "y")
-                    .scatter("", test)
-                    .render(e.writer());
-
-                write!(e.writer(), "{}", poloto::SVG_END).unwrap();
+                write!(
+                    e.writer(),
+                    "{}{}{}",
+                    CUSTOM_SVG,
+                    poloto::disp_mut(|f| {
+                        poloto::plot(formatm!("test {}", i), "x", "y")
+                            .scatter("", test)
+                            .render(f);
+                    }),
+                    poloto::SVG_END
+                )
+                .unwrap();
             }
         })
     });
