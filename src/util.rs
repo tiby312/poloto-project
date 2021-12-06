@@ -596,13 +596,14 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
     }
 }
 
-
 ///
 /// Shorthand to easily make a plot without dashed lines. See `nodash` example.
-/// 
-pub fn no_dash_tuple<A:crate::Plottable<X,Y>,X:PlotNum,Y:PlotNum>(a:A)->(NoDash<X>,NoDash<Y>){
-    let (a,b)=a.make_plot();
-    (NoDash(a),NoDash(b))
+///
+pub fn no_dash_tuple<A: crate::Plottable<X, Y>, X: PlotNum, Y: PlotNum>(
+    a: A,
+) -> (NoDash<X>, NoDash<Y>) {
+    let (a, b) = a.make_plot();
+    (NoDash(a), NoDash(b))
 }
 ///
 /// Wrapper around a `PlotNum` that removes the dashes for the relevant axis.
