@@ -26,7 +26,7 @@ fn main() {
     //Map the strings to indexes
     s.histogram(
         "",
-        (0..).map(|x| MonthIndex(x)).zip(data.iter().map(|x| x.1)),
+        (0..).map(MonthIndex).zip(data.iter().map(|x| x.1)),
     );
 
     s.ymarker(0);
