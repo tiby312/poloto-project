@@ -30,7 +30,7 @@ fn main() {
         .ymarker(0.0)
         .move_into();
 
-    println!("{}", poloto::disp(|f| poloto::simple_theme(f, plotter)));
+    println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }
 
 ```
@@ -109,7 +109,7 @@ fn main() {
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto{stroke-dasharray:2;stroke-width:1;}",
-        poloto::disp(|f| plotter.render(f)),
+        poloto::disp(|a| plotter.render(a)),
         poloto::SVG_END
     )
 }
@@ -137,13 +137,13 @@ fn main() {
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
     let plotter = poloto::plot("Heart Graph", "x", "y")
-        .line_fill("heart", range.map(|x| heart(x)))
+        .line_fill("heart", range.map(heart))
         .preserve_aspect()
         .move_into();
 
     println!(
         "{}",
-        poloto::disp(|f| poloto::simple_theme_dark(f, plotter))
+        poloto::disp(|a| poloto::simple_theme_dark(a, plotter))
     );
 }
 
@@ -187,7 +187,7 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", poloto::disp(|f| poloto::simple_theme(f, plotter)));
+    println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }
 
 ```
@@ -226,17 +226,14 @@ fn main() {
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
     //Map the strings to indexes
-    s.histogram(
-        "",
-        (0..).map(|x| MonthIndex(x)).zip(data.iter().map(|x| x.1)),
-    );
+    s.histogram("", (0..).map(MonthIndex).zip(data.iter().map(|x| x.1)));
 
     s.ymarker(0);
 
     //Lookup the strings with the index
     s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
 
-    println!("{}", poloto::disp(|f| poloto::simple_theme_dark(f, s)));
+    println!("{}", poloto::disp(|a| poloto::simple_theme_dark(a, s)));
 }
 
 ```
