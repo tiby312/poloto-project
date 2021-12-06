@@ -80,7 +80,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
             })?
             .build(|d| {
                 let mut wc = util::WriteCounter::new(d.writer());
-                p.plots.write_name(&mut wc).unwrap();
+                p.plots.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
 
