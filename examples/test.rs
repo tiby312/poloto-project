@@ -25,31 +25,29 @@ const fn generate_test() -> [&'static [[f64; 2]]; 9] {
 use poloto::formatm;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
-fn main() {
+fn main() -> std::fmt::Result {
     let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
 
-    e.elem("html", tagger::no_attr()).build(|e| {
-        e.elem("div", |d| {
-            d.attr("style", "display:flex;flex-wrap:wrap;");
-        })
-        .build(|e| {
-            for (i, &test) in generate_test().iter().enumerate() {
-                use std::fmt::Write;
-                write!(
-                    e.writer(),
-                    "{}{}{}",
-                    CUSTOM_SVG,
-                    poloto::disp_mut(|f| {
-                        poloto::plot(formatm!("test {}", i), "x", "y")
-                            .scatter("", test)
-                            .render(f);
-                    }),
-                    poloto::SVG_END
-                )
-                .unwrap();
-            }
-        })
-    });
+    e.elem("html", tagger::no_attr())?.build(|e| {
+        e.elem("div", |d| d.attr("style", "display:flex;flex-wrap:wrap;"))?
+            .build(|e| {
+                for (i, &test) in generate_test().iter().enumerate() {
+                    use std::fmt::Write;
+                    write!(
+                        e.writer(),
+                        "{}{}{}",
+                        CUSTOM_SVG,
+                        poloto::disp_mut(|f| {
+                            poloto::plot(formatm!("test {}", i), "x", "y")
+                                .scatter("", test)
+                                .render(f)
+                        }),
+                        poloto::SVG_END
+                    )?;
+                }
+                Ok(())
+            })
+    })
 }
 
 pub const CUSTOM_SVG: &str = r####"

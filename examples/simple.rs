@@ -1,5 +1,5 @@
 // PIPE me to a file!
-fn main() {
+fn main() -> std::fmt::Result {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
         [2010, 3144000],
@@ -25,5 +25,5 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0);
 
-    s.simple_theme(poloto::upgrade_write(std::io::stdout()));
+    s.simple_theme(poloto::upgrade_write(std::io::stdout()))
 }

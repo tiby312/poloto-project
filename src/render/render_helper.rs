@@ -4,7 +4,7 @@ pub fn line_fill<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
-) {
+) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 
@@ -18,35 +18,36 @@ pub fn line_fill<T: std::fmt::Write>(
             ) {
                 (true, true) => {
                     if first {
-                        path.put(M(last[0], base_line));
-                        path.put(L(last[0], last[1]));
+                        path.put(M(last[0], base_line))?;
+                        path.put(L(last[0], last[1]))?;
 
                         first = false;
                     }
                     last_finite = Some([newx, newy]);
-                    path.put(L(newx, newy));
+                    path.put(L(newx, newy))?;
                 }
                 (true, false) => {
-                    path.put(M(newx, newy));
+                    path.put(M(newx, newy))?;
                 }
                 (false, true) => {
-                    path.put(L(last[0], base_line));
+                    path.put(L(last[0], base_line))?;
                 }
                 _ => {}
             };
             last = [newx, newy];
         }
         if let Some([x, _]) = last_finite {
-            path.put(L(x, base_line));
-            path.put(Z(""));
+            path.put(L(x, base_line))?;
+            path.put(Z(""))?;
         }
     }
+    Ok(())
 }
 
 pub fn line<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
-) {
+) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 
@@ -59,19 +60,20 @@ pub fn line<T: std::fmt::Write>(
             ) {
                 (true, true) => {
                     if first {
-                        path.put(M(last[0], last[1]));
+                        path.put(M(last[0], last[1]))?;
                         first = false;
                     }
-                    path.put(L(newx, newy));
+                    path.put(L(newx, newy))?;
                 }
                 (true, false) => {
-                    path.put(M(newx, newy));
+                    path.put(M(newx, newy))?;
                 }
                 _ => {}
             };
             last = [newx, newy];
         }
     }
+    Ok(())
 }
 
 ///
@@ -82,7 +84,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
     writer: &mut tagger::ElemWriter<T>,
     dd: DrawData,
     sd: ScaleData<X, Y>,
-) {
+) -> fmt::Result {
     let DrawData {
         width,
         height,
@@ -102,46 +104,40 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_text")
-                .attr("alignment-baseline", "start")
-                .attr("text-anchor", "middle")
-                .attr("font-size", "x-large")
-                .attr("x", width / 2.0)
-                .attr("y", padding / 4.0);
-        })
-        .build(|w| {
-            write!(w.writer(), "{}", plotter.title).unwrap();
-        });
+            d.attr("class", "poloto_text")?;
+            d.attr("alignment-baseline", "start")?;
+            d.attr("text-anchor", "middle")?;
+            d.attr("font-size", "x-large")?;
+            d.attr("x", width / 2.0)?;
+            d.attr("y", padding / 4.0)
+        })?
+        .build(|w| write!(w.writer(), "{}", plotter.title))?;
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_text")
-                .attr("alignment-baseline", "start")
-                .attr("text-anchor", "middle")
-                .attr("font-size", "x-large")
-                .attr("x", width / 2.0)
-                .attr("y", height - padding / 8.);
-        })
-        .build(|w| {
-            write!(w.writer(), "{}", plotter.xname).unwrap();
-        });
+            d.attr("class", "poloto_text")?;
+            d.attr("alignment-baseline", "start")?;
+            d.attr("text-anchor", "middle")?;
+            d.attr("font-size", "x-large")?;
+            d.attr("x", width / 2.0)?;
+            d.attr("y", height - padding / 8.)
+        })?
+        .build(|w| write!(w.writer(), "{}", plotter.xname))?;
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_text")
-                .attr("alignment-baseline", "start")
-                .attr("text-anchor", "middle")
-                .attr("font-size", "x-large")
-                .attr(
-                    "transform",
-                    format_args!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
-                )
-                .attr("x", padding / 4.0)
-                .attr("y", height / 2.0);
-        })
-        .build(|w| {
-            write!(w.writer(), "{}", plotter.yname).unwrap();
-        });
+            d.attr("class", "poloto_text")?;
+            d.attr("alignment-baseline", "start")?;
+            d.attr("text-anchor", "middle")?;
+            d.attr("font-size", "x-large")?;
+            d.attr(
+                "transform",
+                format_args!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
+            )?;
+            d.attr("x", padding / 4.0)?;
+            d.attr("y", height / 2.0)
+        })?
+        .build(|w| write!(w.writer(), "{}", plotter.yname))?;
 
     {
         //Draw step lines
@@ -169,18 +165,18 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             let extra = if let Some(base) = xtick_info.display_relative {
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_text")
-                            .attr("alignment-baseline", "middle")
-                            .attr("text-anchor", "start")
-                            .attr("x", width * 0.55)
-                            .attr("y", paddingy * 0.7);
-                    })
+                        d.attr("class", "poloto_text")?;
+                        d.attr("alignment-baseline", "middle")?;
+                        d.attr("text-anchor", "start")?;
+                        d.attr("x", width * 0.55)?;
+                        d.attr("y", paddingy * 0.7)
+                    })?
                     .build(|d| {
                         d.put_raw(format_args!(
                             "Where j = {}",
                             DisplayableClosure::new(|w| base.fmt_tick(w, None))
-                        ));
-                    });
+                        ))
+                    })?;
 
                 "j+"
             } else {
@@ -193,30 +189,30 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     + padding;
 
                 writer.single("line", |d| {
-                    d.attr("class", "poloto_axis_lines")
-                        .attr("stroke", "black")
-                        .attr("x1", aspect_offset + xx)
-                        .attr("x2", aspect_offset + xx)
-                        .attr("y1", height - paddingy)
-                        .attr("y2", height - paddingy * 0.95);
-                });
+                    d.attr("class", "poloto_axis_lines")?;
+                    d.attr("stroke", "black")?;
+                    d.attr("x1", aspect_offset + xx)?;
+                    d.attr("x2", aspect_offset + xx)?;
+                    d.attr("y1", height - paddingy)?;
+                    d.attr("y2", height - paddingy * 0.95)
+                })?;
 
                 let s = xtick_info.step;
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_text")
-                            .attr("alignment-baseline", "start")
-                            .attr("text-anchor", "middle")
-                            .attr("x", aspect_offset + xx)
-                            .attr("y", height - paddingy + texty_padding);
-                    })
+                        d.attr("class", "poloto_text")?;
+                        d.attr("alignment-baseline", "start")?;
+                        d.attr("text-anchor", "middle")?;
+                        d.attr("x", aspect_offset + xx)?;
+                        d.attr("y", height - paddingy + texty_padding)
+                    })?
                     .build(|w| {
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
                             DisplayableClosure::new(|w| plotter.xtick_fmt.write(w, value, Some(s)))
-                        ));
-                    });
+                        ))
+                    })?;
             }
         }
 
@@ -225,18 +221,18 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             let extra = if let Some(base) = ytick_info.display_relative {
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_text")
-                            .attr("alignment-baseline", "middle")
-                            .attr("text-anchor", "start")
-                            .attr("x", padding)
-                            .attr("y", paddingy * 0.7);
-                    })
+                        d.attr("class", "poloto_text")?;
+                        d.attr("alignment-baseline", "middle")?;
+                        d.attr("text-anchor", "start")?;
+                        d.attr("x", padding)?;
+                        d.attr("y", paddingy * 0.7)
+                    })?
                     .build(|w| {
                         w.put_raw(format_args!(
                             "Where k = {}",
                             DisplayableClosure::new(|w| base.fmt_tick(w, None))
-                        ));
-                    });
+                        ))
+                    })?;
 
                 "k+"
             } else {
@@ -250,31 +246,31 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     - paddingy;
 
                 writer.single("line", |d| {
-                    d.attr("class", "poloto_axis_lines")
-                        .attr("stroke", "black")
-                        .attr("x1", aspect_offset + padding)
-                        .attr("x2", aspect_offset + padding * 0.96)
-                        .attr("y1", yy)
-                        .attr("y2", yy);
-                });
+                    d.attr("class", "poloto_axis_lines")?;
+                    d.attr("stroke", "black")?;
+                    d.attr("x1", aspect_offset + padding)?;
+                    d.attr("x2", aspect_offset + padding * 0.96)?;
+                    d.attr("y1", yy)?;
+                    d.attr("y2", yy)
+                })?;
 
                 let s = ytick_info.step;
 
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_text")
-                            .attr("alignment-baseline", "middle")
-                            .attr("text-anchor", "end")
-                            .attr("x", aspect_offset + padding - textx_padding)
-                            .attr("y", yy);
-                    })
+                        d.attr("class", "poloto_text")?;
+                        d.attr("alignment-baseline", "middle")?;
+                        d.attr("text-anchor", "end")?;
+                        d.attr("x", aspect_offset + padding - textx_padding)?;
+                        d.attr("y", yy)
+                    })?
                     .build(|w| {
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
                             DisplayableClosure::new(|w| plotter.ytick_fmt.write(w, value, Some(s)))
-                        ));
-                    });
+                        ))
+                    })?;
             }
         }
 
@@ -283,9 +279,9 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
-            d.attr("stroke", "black")
-                .attr("fill", "none")
-                .attr("class", "poloto_axis_lines");
+            d.attr("stroke", "black")?;
+            d.attr("fill", "none")?;
+            d.attr("class", "poloto_axis_lines")?;
             if let Some(xdash_size) = xdash_size {
                 d.attr(
                     "style",
@@ -295,29 +291,29 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         //-(distance_to_firstx).scale2([minx,maxx],scalex)
                         -distance_to_firstx
                     ),
-                );
+                )?;
             }
             d.path(|p| {
-                p.put(M(padding + aspect_offset, height - paddingy));
+                p.put(M(padding + aspect_offset, height - paddingy))?;
                 if preserve_aspect {
                     p.put(L(
                         height - paddingy / 2.0 + aspect_offset,
                         height - paddingy,
-                    ));
+                    ))
                 } else {
-                    p.put(L(width - padding + aspect_offset, height - paddingy));
+                    p.put(L(width - padding + aspect_offset, height - paddingy))
                 }
-            });
-        });
+            })
+        })?;
 
         let d1 = miny.scale([miny, maxy], scaley);
         let d2 = ytick_info.start_step.scale([miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
 
         writer.single("path", |d| {
-            d.attr("stroke", "black")
-                .attr("fill", "none")
-                .attr("class", "poloto_axis_lines");
+            d.attr("stroke", "black")?;
+            d.attr("fill", "none")?;
+            d.attr("class", "poloto_axis_lines")?;
             if let Some(ydash_size) = ydash_size {
                 d.attr(
                     "style",
@@ -327,12 +323,13 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         //-(distance_to_firsty).scale2([miny,maxy],scaley)
                         -distance_to_firsty
                     ),
-                );
+                )?;
             }
             d.path(|p| {
-                p.put(M(aspect_offset + padding, height - paddingy));
-                p.put(L(aspect_offset + padding, paddingy));
-            });
-        });
+                p.put(M(aspect_offset + padding, height - paddingy))?;
+                p.put(L(aspect_offset + padding, paddingy))
+            })
+        })?;
     }
+    Ok(())
 }

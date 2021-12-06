@@ -26,7 +26,7 @@ struct ScaleData<X: PlotNum, Y: PlotNum> {
 pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
     plotter: &mut Plotter<X, Y>,
     writer: T,
-) -> T {
+) -> fmt::Result {
     let mut writer = tagger::new(writer);
 
     let mut plotter = {
@@ -71,18 +71,18 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
 
         let name_exists = writer
             .elem("text", |d| {
-                d.attr("class", "poloto_legend_text poloto_text")
-                    .attr("alignment-baseline", "middle")
-                    .attr("text-anchor", "start")
-                    .attr("font-size", "large")
-                    .attr("x", width - padding / 1.2)
-                    .attr("y", paddingy + (i as f64) * spacing);
-            })
+                d.attr("class", "poloto_legend_text poloto_text")?;
+                d.attr("alignment-baseline", "middle")?;
+                d.attr("text-anchor", "start")?;
+                d.attr("font-size", "large")?;
+                d.attr("x", width - padding / 1.2)?;
+                d.attr("y", paddingy + (i as f64) * spacing)
+            })?
             .build(|d| {
                 let mut wc = util::WriteCounter::new(d.writer());
                 p.plots.write_name(&mut wc).unwrap();
-                wc.get_counter() != 0
-            });
+                Ok(wc.get_counter() != 0)
+            })?;
 
         let aa = minx.scale([minx, maxx], scalex2);
         let bb = miny.scale([miny, maxy], scaley2);
@@ -111,23 +111,21 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                                 "poloto_legend_icon poloto{}stroke poloto{}legend",
                                 colori, colori
                             ),
-                        )
-                        .attr("stroke", "black")
-                        .attr("x1", legendx1)
-                        .attr("x2", legendx1 + padding / 3.0)
-                        .attr("y1", legendy1)
-                        .attr("y2", legendy1);
-                    });
+                        )?;
+                        d.attr("stroke", "black")?;
+                        d.attr("x1", legendx1)?;
+                        d.attr("x2", legendx1 + padding / 3.0)?;
+                        d.attr("y1", legendy1)?;
+                        d.attr("y2", legendy1)
+                    })?;
                 }
 
                 writer.single("path", |d| {
-                    d.attr("class", format_args!("poloto{}stroke", colori))
-                        .attr("fill", "none")
-                        .attr("stroke", "black")
-                        .path(|p| {
-                            line(p, it);
-                        });
-                });
+                    d.attr("class", format_args!("poloto{}stroke", colori))?;
+                    d.attr("fill", "none")?;
+                    d.attr("stroke", "black")?;
+                    d.path(|p| line(p, it))
+                })?;
             }
             PlotType::Scatter => {
                 if name_exists {
@@ -138,28 +136,29 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                                 "poloto_scatter poloto_legend_icon poloto{}stroke poloto{}legend",
                                 colori, colori
                             ),
-                        )
-                        .attr("stroke", "black")
-                        .attr("x1", legendx1 + padding / 30.0)
-                        .attr("x2", legendx1 + padding / 30.0)
-                        .attr("y1", legendy1)
-                        .attr("y2", legendy1);
-                    });
+                        )?;
+                        d.attr("stroke", "black")?;
+                        d.attr("x1", legendx1 + padding / 30.0)?;
+                        d.attr("x2", legendx1 + padding / 30.0)?;
+                        d.attr("y1", legendy1)?;
+                        d.attr("y2", legendy1)
+                    })?;
                 }
 
                 writer.single("path", |d| {
                     d.attr(
                         "class",
                         format_args!("poloto_scatter poloto{}stroke", colori),
-                    )
-                    .path(|p| {
+                    )?;
+                    d.path(|p| {
                         use tagger::PathCommand::*;
                         for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                            p.put(M(x, y));
-                            p.put(H_(0));
+                            p.put(M(x, y))?;
+                            p.put(H_(0))?;
                         }
-                    });
-                });
+                        Ok(())
+                    })
+                })?;
             }
             PlotType::Histo => {
                 if name_exists {
@@ -170,38 +169,39 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                                 "poloto_legend_icon poloto{}fill poloto{}legend",
                                 colori, colori
                             ),
-                        )
-                        .attr("x", legendx1)
-                        .attr("y", legendy1 - padding / 30.0)
-                        .attr("width", padding / 3.0)
-                        .attr("height", padding / 20.0)
-                        .attr("rx", padding / 30.0)
-                        .attr("ry", padding / 30.0);
-                    });
+                        )?;
+                        d.attr("x", legendx1)?;
+                        d.attr("y", legendy1 - padding / 30.0)?;
+                        d.attr("width", padding / 3.0)?;
+                        d.attr("height", padding / 20.0)?;
+                        d.attr("rx", padding / 30.0)?;
+                        d.attr("ry", padding / 30.0)
+                    })?;
                 }
 
                 writer
                     .elem("g", |d| {
-                        d.attr("class", format_args!("poloto{}fill", colori));
-                    })
+                        d.attr("class", format_args!("poloto{}fill", colori))
+                    })?
                     .build(|writer| {
                         let mut last = None;
                         //TODO dont necesarily filter?
                         for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                             if let Some((lx, ly)) = last {
                                 writer.single("rect", |d| {
-                                    d.attr("x", lx)
-                                        .attr("y", ly)
-                                        .attr(
-                                            "width",
-                                            (padding * 0.02).max((x - lx) - (padding * 0.02)),
-                                        )
-                                        .attr("height", height - paddingy - ly);
-                                });
+                                    d.attr("x", lx)?;
+                                    d.attr("y", ly)?;
+                                    d.attr(
+                                        "width",
+                                        (padding * 0.02).max((x - lx) - (padding * 0.02)),
+                                    )?;
+                                    d.attr("height", height - paddingy - ly)
+                                })?;
                             }
                             last = Some((x, y))
                         }
-                    });
+                        Ok(())
+                    })?;
             }
             PlotType::LineFill => {
                 if name_exists {
@@ -212,20 +212,20 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                                 "poloto_legend_icon poloto{}fill poloto{}legend",
                                 colori, colori
                             ),
-                        )
-                        .attr("x", legendx1)
-                        .attr("y", legendy1 - padding / 30.0)
-                        .attr("width", padding / 3.0)
-                        .attr("height", padding / 20.0)
-                        .attr("rx", padding / 30.0)
-                        .attr("ry", padding / 30.0);
-                    });
+                        )?;
+                        d.attr("x", legendx1)?;
+                        d.attr("y", legendy1 - padding / 30.0)?;
+                        d.attr("width", padding / 3.0)?;
+                        d.attr("height", padding / 20.0)?;
+                        d.attr("rx", padding / 30.0)?;
+                        d.attr("ry", padding / 30.0)
+                    })?;
                 }
 
                 writer.single("path", |d| {
-                    d.attr("class", format_args!("poloto{}fill", colori))
-                        .path(|path| line_fill(path, it, height - paddingy));
-                });
+                    d.attr("class", format_args!("poloto{}fill", colori))?;
+                    d.path(|path| line_fill(path, it, height - paddingy))
+                })?;
             }
         }
     }
@@ -249,7 +249,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
             preserve_aspect,
             aspect_offset,
         },
-    );
+    )?;
 
-    writer.into_writer()
+    Ok(())
 }
