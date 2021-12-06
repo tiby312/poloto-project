@@ -506,47 +506,54 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
         render::render(self, a)
     }
-
-    ///
-    /// Make a graph with a svg tag and a simple css theme.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// let mut k=String::new();
-    /// plotter.simple_theme(&mut k);
-    /// ```
-    pub fn simple_theme<T: std::fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
-        write!(
-            &mut a,
-            "{}<style>{}</style>",
-            SVG_HEADER, STYLE_CONFIG_LIGHT_DEFAULT
-        )?;
-        self.render(&mut a)?;
-        write!(&mut a, "{}", SVG_END)
-    }
-
-    ///
-    /// Make a graph with a svg tag and a simple dark css theme.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    /// let mut k=String::new();
-    /// plotter.simple_theme_dark(&mut k);
-    /// ```
-    pub fn simple_theme_dark<T: std::fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
-        write!(
-            &mut a,
-            "{}<style>{}</style>",
-            SVG_HEADER, STYLE_CONFIG_DARK_DEFAULT
-        )?;
-        self.render(&mut a)?;
-        write!(&mut a, "{}", SVG_END)
-    }
 }
+
+///
+/// Make a graph with a svg tag and a simple css theme.
+///
+/// ```
+/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+/// let mut plotter = poloto::plot("title", "x", "y");
+/// plotter.line("", &data);
+/// let mut k=String::new();
+/// poloto::simple_theme(plotter,&mut k);
+/// ```
+pub fn simple_theme<T: std::fmt::Write, X: PlotNum, Y: PlotNum>(
+    mut p: Plotter<X, Y>,
+    mut a: T,
+) -> std::fmt::Result {
+    write!(
+        &mut a,
+        "{}<style>{}</style>",
+        SVG_HEADER, STYLE_CONFIG_LIGHT_DEFAULT
+    )?;
+    p.render(&mut a)?;
+    write!(&mut a, "{}", SVG_END)
+}
+
+///
+/// Make a graph with a svg tag and a simple dark css theme.
+///
+/// ```
+/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+/// let mut plotter = poloto::plot("title", "x", "y");
+/// plotter.line("", &data);
+/// let mut k=String::new();
+/// poloto::simple_theme_dark(plotter,&mut k);
+/// ```
+pub fn simple_theme_dark<T: std::fmt::Write, X: PlotNum, Y: PlotNum>(
+    mut p: Plotter<X, Y>,
+    mut a: T,
+) -> std::fmt::Result {
+    write!(
+        &mut a,
+        "{}<style>{}</style>",
+        SVG_HEADER, STYLE_CONFIG_DARK_DEFAULT
+    )?;
+    p.render(&mut a)?;
+    write!(&mut a, "{}", SVG_END)
+}
+
 /*
 pub struct Renderer {}
 impl Renderer {
@@ -589,8 +596,8 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
 ///
 /// Leverage rust's display format system using `RefCell` under the hood.
 ///
-pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(a: F) -> DisplayableClosureMut<F> {
-    DisplayableClosureMut::new(a)
+pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(a: F) -> DisplayableClosureOnce<F> {
+    DisplayableClosureOnce::new(a)
 }
 
 use std::cell::RefCell;
@@ -598,16 +605,20 @@ use std::cell::RefCell;
 ///
 /// Wrap a mutable closure in a `RefCell` to allow it to be called inside of `fmt::Display::fmt`
 ///
-pub struct DisplayableClosureMut<F>(pub RefCell<F>);
+pub struct DisplayableClosureOnce<F>(pub RefCell<Option<F>>);
 
-impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureMut<F> {
+impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureOnce<F> {
     pub fn new(a: F) -> Self {
-        DisplayableClosureMut(RefCell::new(a))
+        DisplayableClosureOnce(RefCell::new(Some(a)))
     }
 }
-impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureMut<F> {
+impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureOnce<F> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        (self.0.borrow_mut())(formatter)
+        if let Some(f) = (self.0.borrow_mut()).take() {
+            (f)(formatter)
+        } else {
+            Ok(())
+        }
     }
 }
 

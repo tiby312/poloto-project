@@ -3,10 +3,13 @@ fn main() {
 
     println!(
         "{}",
-        poloto::disp_mut(|f| {
-            poloto::plot("cows per year", "year", "cow")
-                .scatter("", &data)
-                .simple_theme(f)
+        poloto::disp(|f| {
+            poloto::simple_theme(
+                poloto::plot("cows per year", "year", "cow")
+                    .scatter("", &data)
+                    .move_into(),
+                f,
+            )
         })
     );
 }

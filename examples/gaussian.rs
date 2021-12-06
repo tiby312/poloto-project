@@ -10,12 +10,12 @@ fn main() {
 
     let range: Vec<_> = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0).collect();
 
-    let mut plotter = poloto::plot("gaussian", "x", "y")
+    let plotter = poloto::plot("gaussian", "x", "y")
         .line("σ = 1.0", range.iter().map(|&x| [x, gaussian(1.0, 0.0)(x)]))
         .line("σ = 0.5", range.iter().map(|&x| [x, gaussian(0.5, 0.0)(x)]))
         .line("σ = 0.3", range.iter().map(|&x| [x, gaussian(0.3, 0.0)(x)]))
         .ymarker(0.0)
         .move_into();
 
-    println!("{}", poloto::disp_mut(|f| plotter.simple_theme(f)));
+    println!("{}", poloto::disp(|f| poloto::simple_theme(plotter, f)));
 }

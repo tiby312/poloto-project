@@ -29,7 +29,7 @@ fn main() {
         fill: url(#pattern2);
     }
     </style>"###,
-        poloto::disp_mut(|f| s.render(f)),
+        poloto::disp(|f| s.render(f)),
         poloto::SVG_END
     );
 }

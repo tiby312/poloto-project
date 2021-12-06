@@ -26,7 +26,7 @@ fn main() {
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto{stroke-dasharray:2;stroke-width:1;}",
-        poloto::disp_mut(|f| plotter.render(f)),
+        poloto::disp(|f| plotter.render(f)),
         poloto::SVG_END
     )
 }

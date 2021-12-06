@@ -12,5 +12,5 @@ fn main() -> std::fmt::Result {
 
     s.line("", &data);
 
-    s.simple_theme_dark(poloto::upgrade_write(std::io::stdout()))
+    poloto::simple_theme_dark(s, poloto::upgrade_write(std::io::stdout()))
 }

@@ -17,7 +17,7 @@ fn main() {
 </html>
         "###,
         HEADER,
-        poloto::disp_mut(|f| s.simple_theme(f))
+        poloto::disp(|f| poloto::simple_theme(s, f))
     );
 }
 

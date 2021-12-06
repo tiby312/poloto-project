@@ -25,5 +25,5 @@ fn main() -> std::fmt::Result {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0);
 
-    s.simple_theme(poloto::upgrade_write(std::io::stdout()))
+    poloto::simple_theme(s, poloto::upgrade_write(std::io::stdout()))
 }

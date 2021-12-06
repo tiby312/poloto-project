@@ -37,7 +37,7 @@ fn main() -> std::fmt::Result {
                         e.writer(),
                         "{}{}{}",
                         CUSTOM_SVG,
-                        poloto::disp_mut(|f| {
+                        poloto::disp(|f| {
                             poloto::plot(formatm!("test {}", i), "x", "y")
                                 .scatter("", test)
                                 .render(f)
