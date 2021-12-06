@@ -2,7 +2,7 @@
 ///with the exception that the styles are not in the svg itself.
 ///The svg is embeded in the html, and we can modify its style by
 ///using styles that override the svg's style.
-fn main() -> core::fmt::Result {
+fn main() {
     let mut s = poloto::plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
@@ -30,8 +30,6 @@ fn main() -> core::fmt::Result {
         HEADER,
         poloto::disp_mut(|f| s.simple_theme(f))
     );
-
-    Ok(())
 }
 
 const HEADER: &'static str = r###"

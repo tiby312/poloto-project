@@ -1,4 +1,4 @@
-fn main() -> core::fmt::Result {
+fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     let mut s = poloto::plot("Demo: Hovering and shadows", "x", "y");
@@ -19,7 +19,6 @@ fn main() -> core::fmt::Result {
         HEADER,
         poloto::disp_mut(|f| s.simple_theme(f))
     );
-    Ok(())
 }
 
 const HEADER: &'static str = r###"
