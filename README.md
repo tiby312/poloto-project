@@ -11,22 +11,26 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 ## Gaussian Example
 
 ```rust
+
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
     let gaussian = |sigma: f64, mu: f64| {
-        move |x: f64| {
-            (-0.5 * (x - mu).powi(2) / sigma.powi(2)).exp()
-                * (sigma * std::f64::consts::TAU).sqrt().recip()
-        }
+        let s = sigma.powi(2);
+        let k = (sigma * std::f64::consts::TAU).sqrt().recip();
+        move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
     let range: Vec<_> = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0).collect();
 
+    let g1 = gaussian(1.0, 0.0);
+    let g2 = gaussian(0.5, 0.0);
+    let g3 = gaussian(0.3, 0.0);
+
     let plotter = poloto::plot("gaussian", "x", "y")
-        .line("σ = 1.0", range.iter().map(|&x| [x, gaussian(1.0, 0.0)(x)]))
-        .line("σ = 0.5", range.iter().map(|&x| [x, gaussian(0.5, 0.0)(x)]))
-        .line("σ = 0.3", range.iter().map(|&x| [x, gaussian(0.3, 0.0)(x)]))
+        .line("σ = 1.0", range.iter().map(|&x| [x, g1(x)]))
+        .line("σ = 0.5", range.iter().map(|&x| [x, g2(x)]))
+        .line("σ = 0.3", range.iter().map(|&x| [x, g3(x)]))
         .ymarker(0.0)
         .move_into();
 
