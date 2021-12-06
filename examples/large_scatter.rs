@@ -13,7 +13,7 @@ fn main() {
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
-        poloto::disp(|f| plotter.render(f)),
+        poloto::disp(|a| plotter.render(a)),
         poloto::SVG_END
     );
 }

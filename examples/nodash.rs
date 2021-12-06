@@ -1,7 +1,7 @@
 use poloto::util::NoDash;
 
 // PIPE me to a file!
-fn main() -> std::fmt::Result {
+fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
         (NoDash(2010), NoDash(-3144000)),
@@ -12,5 +12,5 @@ fn main() -> std::fmt::Result {
 
     s.line("", &data);
 
-    poloto::simple_theme_dark(poloto::upgrade_write(std::io::stdout()), s)
+    println!("{}", poloto::disp(|a| poloto::simple_theme_dark(a, s)));
 }

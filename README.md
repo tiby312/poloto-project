@@ -43,7 +43,7 @@ fn main() {
 
 ```rust
 // PIPE me to a file!
-fn main() -> std::fmt::Result {
+fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
         [2010, 3144000],
@@ -69,9 +69,8 @@ fn main() -> std::fmt::Result {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0);
 
-    poloto::simple_theme(poloto::upgrade_write(std::io::stdout()), s)
+    println!("{}", poloto::disp(|a| poloto::simple_theme(a, s)));
 }
-
 ```
 
 ## Output

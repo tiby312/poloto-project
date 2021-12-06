@@ -43,7 +43,7 @@ fn main() {
         format_args!(
             "{}{}{}",
             poloto::SVG_HEADER,
-            poloto::disp(|f| s.render(f)),
+            poloto::disp(|a| s.render(a)),
             poloto::SVG_END
         )
     );

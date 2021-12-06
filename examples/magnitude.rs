@@ -3,9 +3,9 @@ fn main() {
 
     println!(
         "{}",
-        poloto::disp(|f| {
+        poloto::disp(|a| {
             poloto::simple_theme(
-                f,
+                a,
                 poloto::plot("cows per year", "year", "cow")
                     .scatter("", &data)
                     .move_into(),

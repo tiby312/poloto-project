@@ -524,11 +524,12 @@ pub fn simple_theme<T: std::fmt::Write, X: PlotNum, Y: PlotNum>(
 ) -> std::fmt::Result {
     write!(
         &mut a,
-        "{}<style>{}</style>",
-        SVG_HEADER, STYLE_CONFIG_LIGHT_DEFAULT
-    )?;
-    p.render(&mut a)?;
-    write!(&mut a, "{}", SVG_END)
+        "{}<style>{}</style>{}{}",
+        SVG_HEADER,
+        STYLE_CONFIG_LIGHT_DEFAULT,
+        disp(|a| p.render(a)),
+        SVG_END
+    )
 }
 
 ///
@@ -547,26 +548,13 @@ pub fn simple_theme_dark<T: std::fmt::Write, X: PlotNum, Y: PlotNum>(
 ) -> std::fmt::Result {
     write!(
         &mut a,
-        "{}<style>{}</style>",
-        SVG_HEADER, STYLE_CONFIG_DARK_DEFAULT
-    )?;
-    p.render(&mut a)?;
-    write!(&mut a, "{}", SVG_END)
+        "{}<style>{}</style>{}{}",
+        SVG_HEADER,
+        STYLE_CONFIG_DARK_DEFAULT,
+        disp(|a| p.render(a)),
+        SVG_END
+    )
 }
-
-/*
-pub struct Renderer {}
-impl Renderer {
-    pub fn render<T: fmt::Write>(&mut self, a: T) -> T {
-        let mut w = tagger::new(a);
-        default_svg(&mut w, tagger::no_attr(), |d| {
-            d.put_raw(format_args!("<style>{}</style>", STYLE_CONFIG_DARK_DEFAULT));
-            self.render(d.writer());
-        });
-        w.into_writer()
-    }
-}
-*/
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
@@ -621,20 +609,6 @@ impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Displayable
         }
     }
 }
-
-/*
-///
-/// Remove all whitespace/newlines from a tring.
-///
-pub fn minify(a: &str) -> impl fmt::Display + '_ + Send + Sync {
-    DisplayableClosure::new(move |w| {
-        for a in a.split_whitespace() {
-            write!(w, "{}", a)?;
-        }
-        Ok(())
-    })
-}
-*/
 
 ///
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.

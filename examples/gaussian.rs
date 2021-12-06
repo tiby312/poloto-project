@@ -17,5 +17,5 @@ fn main() {
         .ymarker(0.0)
         .move_into();
 
-    println!("{}", poloto::disp(|f| poloto::simple_theme(f, plotter)));
+    println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }
