@@ -42,8 +42,8 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
 
     let ([minx, maxx], [miny, maxy]) = util::find_bounds2(
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-        plotter.xmarkers.iter().map(|x| *x),
-        plotter.ymarkers.iter().map(|x| *x),
+        plotter.xmarkers.iter().copied(),
+        plotter.ymarkers.iter().copied(),
     );
 
     let preserve_aspect = plotter.preserve_aspect;

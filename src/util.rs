@@ -201,22 +201,17 @@ impl fmt::Display for MonthIndex {
 }
 impl PlotNum for MonthIndex {
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
-        let foo = [1, 2, 6, 12];
+        let cc = [1, 2, 6, 12].iter().map(|&step| {
+            let (a, num_steps) = get_range_info_int(step, [range[0].0, range[1].0]);
+            (
+                step,
+                a,
+                num_steps,
+                (ideal_num_steps as i32 - num_steps as i32).abs(),
+            )
+        });
 
-        let cc: Vec<_> = foo
-            .iter()
-            .map(|&step| {
-                let (a, num_steps) = get_range_info_int(step, [range[0].0, range[1].0]);
-                (
-                    step,
-                    a,
-                    num_steps,
-                    (ideal_num_steps as i32 - num_steps as i32).abs(),
-                )
-            })
-            .collect();
-
-        let (step, start_step, num_steps, _) = cc.into_iter().min_by(|a, b| a.3.cmp(&b.3)).unwrap();
+        let (step, start_step, num_steps, _) = cc.min_by(|a, b| a.3.cmp(&b.3)).unwrap();
 
         let mut ticks = Vec::with_capacity(usize::try_from(num_steps).unwrap());
         for a in 0..num_steps {
@@ -388,15 +383,12 @@ fn find_good_step_int(
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor()) as i128;
 
-    let cc: Vec<_> = good_steps
-        .iter()
-        .map(|&x| {
-            let num_steps = get_range_info_int(x as i128 * step_power, range_all).1;
-            (x, (num_steps as i32 - ideal_num_steps as i32).abs())
-        })
-        .collect();
+    let cc = good_steps.iter().map(|&x| {
+        let num_steps = get_range_info_int(x as i128 * step_power, range_all).1;
+        (x, (num_steps as i32 - ideal_num_steps as i32).abs())
+    });
 
-    let best = cc.into_iter().min_by(|a, b| a.1.cmp(&b.1)).unwrap();
+    let best = cc.min_by(|a, b| a.1.cmp(&b.1)).unwrap();
 
     (best.0 as i128 * step_power, best.0)
 }
@@ -408,15 +400,12 @@ fn find_good_step_f64(good_steps: &[u32], ideal_num_steps: u32, range_all: [f64;
 
     let step_power = 10.0f64.powf((rough_step as f64).log10().floor());
 
-    let cc: Vec<_> = good_steps
-        .iter()
-        .map(|&x| {
-            let num_steps = get_range_info_f64(x as f64 * step_power, range_all).1;
-            (x, (num_steps as i32 - ideal_num_steps as i32).abs())
-        })
-        .collect();
+    let cc = good_steps.iter().map(|&x| {
+        let num_steps = get_range_info_f64(x as f64 * step_power, range_all).1;
+        (x, (num_steps as i32 - ideal_num_steps as i32).abs())
+    });
 
-    let best = cc.into_iter().min_by(|a, b| a.1.cmp(&b.1)).unwrap();
+    let best = cc.min_by(|a, b| a.1.cmp(&b.1)).unwrap();
 
     (best.0 as f64 * step_power, best.0)
 }
@@ -628,7 +617,7 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
         self.0.is_hole()
     }
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
-        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(|x| NoDash(x))
+        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(NoDash)
     }
 
     fn unit_range() -> [Self; 2] {
