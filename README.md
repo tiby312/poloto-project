@@ -30,7 +30,7 @@ fn main() {
         .ymarker(0.0)
         .move_into();
 
-    println!("{}", poloto::disp(|f| poloto::simple_theme(plotter, f)));
+    println!("{}", poloto::disp(|f| poloto::simple_theme(f, plotter)));
 }
 
 ```
@@ -69,7 +69,7 @@ fn main() -> std::fmt::Result {
     //Also scale to include a value of 0 articles.
     s.xmarker(2025).ymarker(0);
 
-    poloto::simple_theme(s, poloto::upgrade_write(std::io::stdout()))
+    poloto::simple_theme(poloto::upgrade_write(std::io::stdout()), s)
 }
 
 ```
@@ -144,7 +144,7 @@ fn main() {
 
     println!(
         "{}",
-        poloto::disp(|f| poloto::simple_theme_dark(plotter, f))
+        poloto::disp(|f| poloto::simple_theme_dark(f, plotter))
     );
 }
 
@@ -188,7 +188,7 @@ fn main() {
         x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", poloto::disp(|f| poloto::simple_theme(plotter, f)));
+    println!("{}", poloto::disp(|f| poloto::simple_theme(f, plotter)));
 }
 
 ```
@@ -237,7 +237,7 @@ fn main() {
     //Lookup the strings with the index
     s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
 
-    println!("{}", poloto::disp(|f| poloto::simple_theme_dark(s, f)));
+    println!("{}", poloto::disp(|f| poloto::simple_theme_dark(f, s)));
 }
 
 ```

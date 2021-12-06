@@ -5,10 +5,10 @@ fn main() {
         "{}",
         poloto::disp(|f| {
             poloto::simple_theme(
+                f,
                 poloto::plot("cows per year", "year", "cow")
                     .scatter("", &data)
                     .move_into(),
-                f,
             )
         })
     );

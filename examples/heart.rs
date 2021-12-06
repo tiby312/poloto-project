@@ -17,6 +17,6 @@ fn main() {
 
     println!(
         "{}",
-        poloto::disp(|f| poloto::simple_theme_dark(plotter, f))
+        poloto::disp(|f| poloto::simple_theme_dark(f, plotter))
     );
 }

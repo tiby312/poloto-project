@@ -516,11 +516,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
 /// let mut plotter = poloto::plot("title", "x", "y");
 /// plotter.line("", &data);
 /// let mut k=String::new();
-/// poloto::simple_theme(plotter,&mut k);
+/// poloto::simple_theme(&mut k,plotter);
 /// ```
 pub fn simple_theme<T: std::fmt::Write, X: PlotNum, Y: PlotNum>(
-    mut p: Plotter<X, Y>,
     mut a: T,
+    mut p: Plotter<X, Y>,
 ) -> std::fmt::Result {
     write!(
         &mut a,
@@ -539,11 +539,11 @@ pub fn simple_theme<T: std::fmt::Write, X: PlotNum, Y: PlotNum>(
 /// let mut plotter = poloto::plot("title", "x", "y");
 /// plotter.line("", &data);
 /// let mut k=String::new();
-/// poloto::simple_theme_dark(plotter,&mut k);
+/// poloto::simple_theme_dark(&mut k,plotter);
 /// ```
 pub fn simple_theme_dark<T: std::fmt::Write, X: PlotNum, Y: PlotNum>(
-    mut p: Plotter<X, Y>,
     mut a: T,
+    mut p: Plotter<X, Y>,
 ) -> std::fmt::Result {
     write!(
         &mut a,

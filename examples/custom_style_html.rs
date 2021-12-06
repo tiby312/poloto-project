@@ -28,7 +28,7 @@ fn main() {
 </html>
         "###,
         HEADER,
-        poloto::disp(move |f| poloto::simple_theme(s, f))
+        poloto::disp(move |f| poloto::simple_theme(f, s))
     );
 }
 
