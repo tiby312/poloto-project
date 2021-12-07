@@ -11,13 +11,13 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 ## Gaussian Example
 
 ```rust
-
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
     let gaussian = |sigma: f64, mu: f64| {
+        use std::f64::consts::TAU;
         let s = sigma.powi(2);
-        let k = (sigma * std::f64::consts::TAU).sqrt().recip();
+        let k = (sigma * TAU).sqrt().recip();
         move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
@@ -36,6 +36,7 @@ fn main() {
 
     println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }
+
 
 ```
 ## Output
