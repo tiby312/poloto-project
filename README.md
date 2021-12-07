@@ -21,23 +21,21 @@ fn main() {
         move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let range: Vec<_> = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0).collect();
+    let range = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0);
 
     let g1 = gaussian(1.0, 0.0);
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
     let plotter = poloto::plot("gaussian", "x", "y")
-        .line("σ = 1.0", range.iter().map(|&x| [x, g1(x)]))
-        .line("σ = 0.5", range.iter().map(|&x| [x, g2(x)]))
-        .line("σ = 0.3", range.iter().map(|&x| [x, g3(x)]))
+        .line("σ = 1.0", range.clone().map(|x| [x, g1(x)]))
+        .line("σ = 0.5", range.clone().map(|x| [x, g2(x)]))
+        .line("σ = 0.3", range.clone().map(|x| [x, g3(x)]))
         .ymarker(0.0)
         .move_into();
 
     println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }
-
-
 ```
 ## Output
 
@@ -166,7 +164,7 @@ use poloto::formatm;
 
 // PIPE me to a file!
 fn main() {
-    let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
+    let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
     let mut plotter = poloto::plot(
         "Some Trigonometry Plots 🥳",
@@ -178,23 +176,22 @@ fn main() {
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
     plotter.line(
         "tan(x)",
-        x.iter()
-            .map(|&x| [x, x.tan()])
+        x.clone()
+            .map(|x| [x, x.tan()])
             .crop_above(10.0)
             .crop_below(-10.0)
             .crop_left(2.0),
     );
 
-    plotter.line("sin(2x)", x.iter().map(|&x| [x, (2.0 * x).sin()]));
+    plotter.line("sin(2x)", x.clone().map(|x| [x, (2.0 * x).sin()]));
 
     plotter.line(
         "2*cos(x)",
-        x.iter().map(|&x| [x, 2.0 * x.cos()]).crop_above(1.4),
+        x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
     println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }
-
 ```
 
 ## Output
