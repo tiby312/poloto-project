@@ -623,7 +623,7 @@ pub trait DiscNum: PlotNum {
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
 ///
-pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
+pub trait PlotNum: std::fmt::Debug + PartialOrd + Copy + std::fmt::Display {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -637,7 +637,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
-    fn unit_range() -> [Self; 2];
+    fn unit_range(offset: Option<Self>) -> [Self; 2];
 
     /// Provided a min and max range, scale the current value against max.
     fn scale(&self, val: [Self; 2], max: f64) -> f64;
@@ -666,7 +666,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
 ///
 /// One interval tick
 ///
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Tick<I> {
     pub position: I,
     /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
@@ -676,7 +676,7 @@ pub struct Tick<I> {
 ///
 /// Information on the properties of all the interval ticks for one dimension.
 ///
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct TickInfo<I> {
     /// List of the position of each tick to be displayed.
     pub ticks: Vec<Tick<I>>,

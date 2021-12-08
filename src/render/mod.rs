@@ -46,6 +46,8 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
         plotter.ymarkers.iter().copied(),
     );
 
+    dbg!(minx, maxx, miny, maxy);
+
     let preserve_aspect = plotter.preserve_aspect;
 
     let aspect_offset = if preserve_aspect {

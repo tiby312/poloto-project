@@ -30,8 +30,12 @@ impl PlotNum for f64 {
         write_interval_float(formatter, *self, step)
     }
 
-    fn unit_range() -> [Self; 2] {
-        [-1.0, 1.0]
+    fn unit_range(offset: Option<Self>) -> [Self; 2] {
+        if let Some(o) = offset {
+            [o - 1.0, o + 1.0]
+        } else {
+            [-1.0, 1.0]
+        }
     }
 
     fn scale(&self, val: [Self; 2], max: f64) -> f64 {
@@ -117,6 +121,8 @@ pub fn compute_ticks_i128(
         });
     }
 
+    dbg!(step, good_normalized_step, &ticks);
+
     /*
     //TODO needed to aovid 10 dashes between ticks.
     //see hover shader example.
@@ -191,7 +197,7 @@ pub fn compute_dash_size<I: PlotNum>(
 /// Ticks will apear at 1,2,6,12 instead of 1,2,5,10.
 /// See the month example.
 ///
-#[derive(Copy, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct MonthIndex(pub i128);
 
 impl fmt::Display for MonthIndex {
@@ -236,8 +242,12 @@ impl PlotNum for MonthIndex {
         }
     }
 
-    fn unit_range() -> [Self; 2] {
-        [MonthIndex(-1), MonthIndex(1)]
+    fn unit_range(offset: Option<Self>) -> [Self; 2] {
+        if let Some(o) = offset {
+            [MonthIndex(o.0 - 1), MonthIndex(o.0 + 1)]
+        } else {
+            [MonthIndex(-1), MonthIndex(1)]
+        }
     }
 
     fn fmt_tick(
@@ -289,8 +299,12 @@ impl PlotNum for i128 {
         compute_ticks_i128(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
-    fn unit_range() -> [Self; 2] {
-        [-1, 1]
+    fn unit_range(offset: Option<Self>) -> [Self; 2] {
+        if let Some(o) = offset {
+            [o - 1, o + 1]
+        } else {
+            [-1, 1]
+        }
     }
 
     fn fmt_tick(
@@ -528,6 +542,7 @@ pub(crate) fn find_bounds2<X: PlotNum, Y: PlotNum>(
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
     if let Some((x, y)) = ii.next() {
+        dbg!(x, y, "YOO");
         let mut val = ([x, x], [y, y]);
         let mut xmoved = false;
         let mut ymoved = false;
@@ -564,16 +579,16 @@ pub(crate) fn find_bounds2<X: PlotNum, Y: PlotNum>(
         });
 
         if !xmoved {
-            val.0 = X::unit_range();
+            val.0 = X::unit_range(Some(x));
         }
 
         if !ymoved {
-            val.1 = Y::unit_range();
+            val.1 = Y::unit_range(Some(y));
         }
 
         val
     } else {
-        (X::unit_range(), Y::unit_range())
+        (X::unit_range(None), Y::unit_range(None))
     }
 }
 
@@ -612,7 +627,7 @@ pub fn no_dash_tuple<A: crate::Plottable<X, Y>, X: PlotNum, Y: PlotNum>(
 pub struct NoDash<I: PlotNum>(pub I);
 impl<I: PlotNum> fmt::Display for NoDash<I> {
     fn fmt(&self, a: &mut fmt::Formatter) -> fmt::Result {
-        self.0.fmt(a)
+        std::fmt::Display::fmt(&self.0, a)
     }
 }
 
@@ -629,8 +644,8 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
         I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(NoDash)
     }
 
-    fn unit_range() -> [Self; 2] {
-        let [a, b] = I::unit_range();
+    fn unit_range(o: Option<Self>) -> [Self; 2] {
+        let [a, b] = I::unit_range(o.map(|x| x.0));
         [NoDash(a), NoDash(b)]
     }
 
