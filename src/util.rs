@@ -560,17 +560,25 @@ pub(crate) fn find_bounds2<X: PlotNum, Y: PlotNum>(
         ii.fold(&mut val, |val, (x, y)| {
             if x < val.0[0] {
                 val.0[0] = x;
-                xmoved = true;
+                if !xmoved {
+                    xmoved = true
+                };
             } else if x > val.0[1] {
                 val.0[1] = x;
-                xmoved = true;
+                if !xmoved {
+                    xmoved = true
+                };
             }
             if y < val.1[0] {
                 val.1[0] = y;
-                ymoved = true;
+                if !ymoved {
+                    ymoved = true
+                };
             } else if y > val.1[1] {
                 val.1[1] = y;
-                ymoved = true;
+                if !ymoved {
+                    ymoved = true
+                };
             }
             val
         });
