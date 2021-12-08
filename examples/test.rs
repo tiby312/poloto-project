@@ -64,9 +64,10 @@ fn main() -> std::fmt::Result {
                         use std::fmt::Write;
                         write!(
                             e.writer(),
-                            "{}<style>{}</style>{}{}",
+                            "{}<style>{}{}</style>{}{}",
                             CUSTOM_SVG,
                             poloto::STYLE_CONFIG_DARK_DEFAULT,
+                            ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 poloto::plot(formatm!("test {}", i), "x", "y")
                                     .scatter("", test)
@@ -80,9 +81,10 @@ fn main() -> std::fmt::Result {
                         use std::fmt::Write;
                         write!(
                             e.writer(),
-                            "{}<style>{}</style>{}{}",
+                            "{}<style>{}{}</style>{}{}",
                             CUSTOM_SVG,
                             poloto::STYLE_CONFIG_DARK_DEFAULT,
+                            ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 poloto::plot(formatm!("test {}", i), "x", "y")
                                     .scatter("", test)

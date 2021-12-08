@@ -81,15 +81,6 @@ pub fn compute_ticks_f64(
         ticks.push(Tick { position, value });
     }
 
-    /*
-    //TODO needed to aovid 10 dashes between ticks.
-    //see hover shader example.
-    let dash_multiple = if good_normalized_step == 10 {
-        5
-    } else {
-        good_normalized_step
-    };
-    */
     let dash_multiple = good_normalized_step;
 
     TickInfo {
@@ -107,29 +98,25 @@ pub fn compute_ticks_i128(
     good_ticks: &[u32],
     range: [i128; 2],
 ) -> TickInfo<i128> {
-    //let ideal_num_steps=(ideal_num_steps as i128).min(  (range[1]-range[0]).abs() +1 ) as u32;
-
     let (step, good_normalized_step) = find_good_step_int(good_ticks, ideal_num_steps, range);
     let (start_step, step_num) = get_range_info_int(step, range);
+
+    let display_relative = determine_if_should_use_strat(
+        start_step as f64,
+        (start_step + ((step_num - 1) as i128) * step) as f64,
+        step as f64,
+    );
+
+    let first_tick = if display_relative { 0 } else { start_step };
 
     let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
     for a in 0..step_num {
         let position = start_step + step * (a as i128);
-        ticks.push(Tick {
-            position,
-            value: position,
-        });
+        let value = first_tick + step * (a as i128);
+
+        ticks.push(Tick { position, value });
     }
 
-    /*
-    //TODO needed to aovid 10 dashes between ticks.
-    //see hover shader example.
-    let dash_multiple = if good_normalized_step == 10 {
-        5
-    } else {
-        good_normalized_step
-    };
-    */
     let dash_multiple = good_normalized_step;
 
     TickInfo {
@@ -137,7 +124,7 @@ pub fn compute_ticks_i128(
         step,
         start_step,
         dash_multiple,
-        display_relative: None,
+        display_relative: display_relative.then(|| start_step),
     }
 }
 
