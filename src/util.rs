@@ -121,8 +121,6 @@ pub fn compute_ticks_i128(
         });
     }
 
-    dbg!(step, good_normalized_step, &ticks);
-
     /*
     //TODO needed to aovid 10 dashes between ticks.
     //see hover shader example.
@@ -542,7 +540,6 @@ pub(crate) fn find_bounds2<X: PlotNum, Y: PlotNum>(
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
     if let Some((x, y)) = ii.next() {
-        dbg!(x, y, "YOO");
         let mut val = ([x, x], [y, y]);
         let mut xmoved = false;
         let mut ymoved = false;
