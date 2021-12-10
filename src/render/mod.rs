@@ -40,7 +40,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let ([minx, maxx], [miny, maxy]) = util::find_bounds2(
+    let ([minx, maxx], [miny, maxy]) = util::find_bounds(
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
         plotter.xmarkers.iter().copied(),
         plotter.ymarkers.iter().copied(),
