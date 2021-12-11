@@ -11,8 +11,11 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 ## CSS classes
 
-* `poloto` - default svg element
-* `poloto_background` - default svg element
+Below are the css classes that can be stylized. There are default styles settings
+for these css classes in the static strings `STYLE_CONFIG_LIGHT_DEFAULT` and `STYLE_CONFIG_DARK_DEFAULT`.
+
+These are the css classes added through `Plotter::render`
+
 * `poloto_text` - all poloto text
 * `poloto_axis_lines` - axis lines and ticks 
 * `poloto_tick_labels` - x and y labels as well as `where` labels
@@ -23,6 +26,11 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 * `poloto_line` - line plots and legend icon
 * `poloto_histo` - histogram and legend icon 
 * `poloto_linefill` - line fill and legend icon
+
+These are the css classes added through `poloto::SVG_HEADER` which is used by `simple_theme` and `simple_theme_dark`.
+
+* `poloto` - default svg element
+
 
 
 ## Gaussian Example

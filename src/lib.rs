@@ -99,7 +99,7 @@ struct Plot<'a, X: PlotNum, Y: PlotNum> {
 ///
 /// Default SVG Header for a Poloto graph.
 ///
-pub const SVG_HEADER: &str = r##"<svg class="poloto_background poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"##;
+pub const SVG_HEADER: &str = r##"<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"##;
 
 ///
 /// Default SVG end tag.
@@ -112,11 +112,11 @@ pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
     stroke-linejoin:round; \
     font-family: 'Tahoma', sans-serif; \
     stroke-width:2; \
+    background-color: AliceBlue;\
     } \
     .poloto_scatter{stroke-width:7} \
     .poloto_text{fill: black;} \
     .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none} \
-    .poloto_background{background-color: AliceBlue;} \
     .poloto0stroke{stroke:  blue;} \
     .poloto1stroke{stroke:  red;} \
     .poloto2stroke{stroke:  green;} \
@@ -140,11 +140,11 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     stroke-linejoin:round; \
     font-family: 'Tahoma', sans-serif; \
     stroke-width:2; \
+    background-color: #262626;\
     } \
     .poloto_scatter{stroke-width:7} \
     .poloto_text{fill: white;} \
     .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none} \
-    .poloto_background{background-color: #262626;} \
     .poloto0stroke{stroke:  blue;} \
     .poloto1stroke{stroke:  red;} \
     .poloto2stroke{stroke:  green;} \

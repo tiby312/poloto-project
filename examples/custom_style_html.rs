@@ -38,15 +38,15 @@ const HEADER: &'static str = r###"
     var flip=true;
     function monclick(){
         if(flip){
-            var foo=document.getElementsByClassName('poloto_background')[0];
+            var foo=document.getElementsByClassName('poloto')[0];
         
-            foo.classList.remove('poloto_background');
-            foo.classList.add('poloto_background2');
+            foo.classList.remove('poloto');
+            foo.classList.add('poloto2');
         }else{
-            var foo=document.getElementsByClassName('poloto_background2')[0];
+            var foo=document.getElementsByClassName('poloto2')[0];
         
-            foo.classList.remove('poloto_background2');
-            foo.classList.add('poloto_background');
+            foo.classList.remove('poloto2');
+            foo.classList.add('poloto');
         }
         flip=!flip;   
     }
@@ -58,7 +58,11 @@ const HEADER: &'static str = r###"
     .poloto_text2{
         fill:white;
     }
-    .poloto_background2{
+    .poloto2{
+        stroke-linecap:round;
+        stroke-linejoin:round;
+        font-family: 'Tahoma', sans-serif;
+        stroke-width:2;
         fill:green;
     }
     
