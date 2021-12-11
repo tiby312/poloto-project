@@ -104,7 +104,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_base poloto_text")?;
+            d.attr("class", "poloto_labels poloto_text")?;
             d.attr("alignment-baseline", "start")?;
             d.attr("text-anchor", "middle")?;
             d.attr("font-size", "x-large")?;
@@ -115,7 +115,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_base poloto_text")?;
+            d.attr("class", "poloto_labels poloto_text")?;
             d.attr("alignment-baseline", "start")?;
             d.attr("text-anchor", "middle")?;
             d.attr("font-size", "x-large")?;
@@ -126,7 +126,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_base poloto_text")?;
+            d.attr("class", "poloto_labels poloto_text")?;
             d.attr("alignment-baseline", "start")?;
             d.attr("text-anchor", "middle")?;
             d.attr("font-size", "x-large")?;
@@ -165,7 +165,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             let extra = if let Some(base) = xtick_info.display_relative {
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_base poloto_text")?;
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
                         d.attr("alignment-baseline", "middle")?;
                         d.attr("text-anchor", "start")?;
                         d.attr("x", width * 0.55)?;
@@ -189,7 +189,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     + padding;
 
                 writer.single("line", |d| {
-                    d.attr("class", "poloto_base poloto_axis_lines")?;
+                    d.attr("class", "poloto_axis_lines")?;
                     d.attr("stroke", "black")?;
                     d.attr("x1", aspect_offset + xx)?;
                     d.attr("x2", aspect_offset + xx)?;
@@ -200,7 +200,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                 let s = xtick_info.step;
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_base poloto_text")?;
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
                         d.attr("alignment-baseline", "start")?;
                         d.attr("text-anchor", "middle")?;
                         d.attr("x", aspect_offset + xx)?;
@@ -221,7 +221,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             let extra = if let Some(base) = ytick_info.display_relative {
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_base poloto_text")?;
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
                         d.attr("alignment-baseline", "middle")?;
                         d.attr("text-anchor", "start")?;
                         d.attr("x", padding)?;
@@ -246,7 +246,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     - paddingy;
 
                 writer.single("line", |d| {
-                    d.attr("class", "poloto_base poloto_axis_lines")?;
+                    d.attr("class", "poloto_axis_lines")?;
                     d.attr("stroke", "black")?;
                     d.attr("x1", aspect_offset + padding)?;
                     d.attr("x2", aspect_offset + padding * 0.96)?;
@@ -258,7 +258,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
                 writer
                     .elem("text", |d| {
-                        d.attr("class", "poloto_base poloto_text")?;
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
                         d.attr("alignment-baseline", "middle")?;
                         d.attr("text-anchor", "end")?;
                         d.attr("x", aspect_offset + padding - textx_padding)?;
@@ -281,7 +281,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         writer.single("path", |d| {
             d.attr("stroke", "black")?;
             d.attr("fill", "none")?;
-            d.attr("class", "poloto_base poloto_axis_lines")?;
+            d.attr("class", "poloto_axis_lines")?;
             if let Some(xdash_size) = xdash_size {
                 d.attr(
                     "style",
@@ -312,7 +312,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         writer.single("path", |d| {
             d.attr("stroke", "black")?;
             d.attr("fill", "none")?;
-            d.attr("class", "poloto_base poloto_axis_lines")?;
+            d.attr("class", "poloto_axis_lines")?;
             if let Some(ydash_size) = ydash_size {
                 d.attr(
                     "style",

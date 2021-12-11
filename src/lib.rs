@@ -7,6 +7,7 @@
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
 //!
+//!
 
 #[cfg(doctest)]
 mod test_readme {

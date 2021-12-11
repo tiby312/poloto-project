@@ -223,7 +223,10 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                 }
 
                 writer.single("path", |d| {
-                    d.attr("class", format_args!("poloto_linefill poloto{}fill", colori))?;
+                    d.attr(
+                        "class",
+                        format_args!("poloto_linefill poloto{}fill", colori),
+                    )?;
                     d.path(|path| line_fill(path, it, height - paddingy))
                 })?;
             }
