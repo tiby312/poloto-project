@@ -11,19 +11,18 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 ## CSS classes
 
-`poloto` - default svg element
-`poloto_background` - default svg element
-`poloto_text` - all poloto text
-`poloto_axis_lines` - axis lines and ticks 
-`poloto_tick_labels` - x and y labels as well as `where` labels
-`poloto_labels` - title, x label, ylabel
-`poloto_legend_text` - legend text
-`poloto_legend_icon` - legend icon
-
-`poloto_scatter` - scatter plots and legend icon
-`poloto_line` - line plots and legend icon
-`poloto_histo` - histogram and legend icon 
-`poloto_linefill` - line fill and legend icon
+* `poloto` - default svg element
+* `poloto_background` - default svg element
+* `poloto_text` - all poloto text
+* `poloto_axis_lines` - axis lines and ticks 
+* `poloto_tick_labels` - x and y labels as well as `where` labels
+* `poloto_labels` - title, x label, ylabel
+* `poloto_legend_text` - legend text
+* `poloto_legend_icon` - legend icon
+* `poloto_scatter` - scatter plots and legend icon
+* `poloto_line` - line plots and legend icon
+* `poloto_histo` - histogram and legend icon 
+* `poloto_linefill` - line fill and legend icon
 
 
 ## Gaussian Example
