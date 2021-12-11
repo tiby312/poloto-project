@@ -111,10 +111,10 @@ pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
     stroke-linecap:round; \
     stroke-linejoin:round; \
     font-family: 'Tahoma', sans-serif; \
-    stroke-width:2; \
     background-color: AliceBlue;\
     } \
     .poloto_scatter{stroke-width:7} \
+    .poloto_line{stroke-width:2} \
     .poloto_text{fill: black;} \
     .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none} \
     .poloto0stroke{stroke:  blue;} \
@@ -139,10 +139,10 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     stroke-linecap:round; \
     stroke-linejoin:round; \
     font-family: 'Tahoma', sans-serif; \
-    stroke-width:2; \
     background-color: #262626;\
     } \
     .poloto_scatter{stroke-width:7} \
+    .poloto_line{stroke-width:2} \
     .poloto_text{fill: white;} \
     .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none} \
     .poloto0stroke{stroke:  blue;} \
