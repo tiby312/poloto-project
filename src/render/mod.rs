@@ -71,7 +71,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
 
         let name_exists = writer
             .elem("text", |d| {
-                d.attr("class", "poloto_legend_text poloto_text")?;
+                d.attr("class", "poloto_text poloto_legend_text")?;
                 d.attr("alignment-baseline", "middle")?;
                 d.attr("text-anchor", "start")?;
                 d.attr("font-size", "large")?;
@@ -108,7 +108,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         d.attr(
                             "class",
                             format_args!(
-                                "poloto_legend_icon poloto{}stroke poloto{}legend",
+                                "poloto_line poloto_legend_icon poloto{}stroke poloto{}legend",
                                 colori, colori
                             ),
                         )?;
@@ -121,7 +121,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                 }
 
                 writer.single("path", |d| {
-                    d.attr("class", format_args!("poloto{}stroke", colori))?;
+                    d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                     d.attr("fill", "none")?;
                     d.attr("stroke", "black")?;
                     d.path(|p| line(p, it))
@@ -166,7 +166,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         d.attr(
                             "class",
                             format_args!(
-                                "poloto_legend_icon poloto{}fill poloto{}legend",
+                                "poloto_histo poloto_legend_icon poloto{}fill poloto{}legend",
                                 colori, colori
                             ),
                         )?;
@@ -181,7 +181,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
 
                 writer
                     .elem("g", |d| {
-                        d.attr("class", format_args!("poloto{}fill", colori))
+                        d.attr("class", format_args!("poloto_histo poloto{}fill", colori))
                     })?
                     .build(|writer| {
                         let mut last = None;
@@ -209,7 +209,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         d.attr(
                             "class",
                             format_args!(
-                                "poloto_legend_icon poloto{}fill poloto{}legend",
+                                "poloto_linefill poloto_legend_icon poloto{}fill poloto{}legend",
                                 colori, colori
                             ),
                         )?;
@@ -223,7 +223,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                 }
 
                 writer.single("path", |d| {
-                    d.attr("class", format_args!("poloto{}fill", colori))?;
+                    d.attr("class", format_args!("poloto_linefill poloto{}fill", colori))?;
                     d.path(|path| line_fill(path, it, height - paddingy))
                 })?;
             }

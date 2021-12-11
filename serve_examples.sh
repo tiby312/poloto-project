@@ -2,6 +2,7 @@ set -ex
 
 mkdir assets -p
 
+cargo run --example base_color > assets/base_color.svg
 cargo run --example large_scatter > assets/large_scatter.svg
 cargo run --example custom_colors_html > assets/custom_colors.html
 cargo run --example custom_style > assets/custom_style.svg
