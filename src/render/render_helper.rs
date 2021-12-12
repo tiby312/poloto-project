@@ -104,7 +104,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_labels poloto_text")?;
+            d.attr("class", "poloto_labels poloto_text poloto_title")?;
             d.attr("alignment-baseline", "start")?;
             d.attr("text-anchor", "middle")?;
             d.attr("font-size", "x-large")?;
@@ -115,7 +115,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_labels poloto_text")?;
+            d.attr("class", "poloto_labels poloto_text poloto_xname")?;
             d.attr("alignment-baseline", "start")?;
             d.attr("text-anchor", "middle")?;
             d.attr("font-size", "x-large")?;
@@ -126,7 +126,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
     writer
         .elem("text", |d| {
-            d.attr("class", "poloto_labels poloto_text")?;
+            d.attr("class", "poloto_labels poloto_text poloto_yname")?;
             d.attr("alignment-baseline", "start")?;
             d.attr("text-anchor", "middle")?;
             d.attr("font-size", "x-large")?;
