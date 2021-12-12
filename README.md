@@ -29,10 +29,16 @@ These are the css classes added through `Plotter::render`
 * `poloto_line` - line plots and legend icon
 * `poloto_histo` - histogram and legend icon 
 * `poloto_linefill` - line fill and legend icon
+* `poloto_linefillraw` - line fill raw and legend icon
 
 These are the css classes added through `poloto::SVG_HEADER` which is used by `simple_theme` and `simple_theme_dark`.
 
 * `poloto` - default svg element
+
+For plots:
+
+* `poloto[n]fill` - If the n'th plot requires fill. (e.g. linefill or histogram)
+* `poloto[n]stroke` - If the n'th plot requires stroke. (e.g. line or scatter)
 
 
 

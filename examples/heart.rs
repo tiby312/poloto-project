@@ -10,10 +10,14 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let plotter = poloto::plot("Heart Graph", "x", "y")
-        .line_fill("heart", range.map(heart))
+    let mut plotter = poloto::plot("Heart Graph", "x", "y")
+        .line_fill_raw("heart", range.map(heart))
         .preserve_aspect()
         .move_into();
+
+
+    plotter.xmarker(-20.).xmarker(20.).ymarker(-20.).ymarker(20.);
+
 
     println!(
         "{}",

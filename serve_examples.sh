@@ -19,6 +19,7 @@ cargo run --example dark > assets/dark.svg
 cargo run --example gaussian > assets/gaussian.svg
 cargo run --example collatz > assets/collatz.svg
 cargo run --example heart > assets/heart.svg
+cargo run --example line_fill > assets/line_fill.svg
 
 cd assets
 python3 -m http.server

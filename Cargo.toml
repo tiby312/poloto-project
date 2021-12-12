@@ -2,7 +2,7 @@
 name = "poloto"
 version = "3.10.0"
 authors = ["Ken <kenakioreed@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 repository = "https://github.com/tiby312/poloto"
 description = "Simple 2D plotting library that outputs SVG and can be styled using CSS"

@@ -227,7 +227,34 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         "class",
                         format_args!("poloto_linefill poloto{}fill", colori),
                     )?;
-                    d.path(|path| line_fill(path, it, height - paddingy))
+                    d.path(|path| line_fill(path, it, height - paddingy,true))
+                })?;
+            }
+            PlotType::LineFillRaw => {
+                if name_exists {
+                    writer.single("rect", |d| {
+                        d.attr(
+                            "class",
+                            format_args!(
+                                "poloto_linefillraw poloto_legend_icon poloto{}fill poloto{}legend",
+                                colori, colori
+                            ),
+                        )?;
+                        d.attr("x", legendx1)?;
+                        d.attr("y", legendy1 - padding / 30.0)?;
+                        d.attr("width", padding / 3.0)?;
+                        d.attr("height", padding / 20.0)?;
+                        d.attr("rx", padding / 30.0)?;
+                        d.attr("ry", padding / 30.0)
+                    })?;
+                }
+
+                writer.single("path", |d| {
+                    d.attr(
+                        "class",
+                        format_args!("poloto_linefillraw poloto{}fill", colori),
+                    )?;
+                    d.path(|path| line_fill(path, it, height - paddingy,false))
                 })?;
             }
         }

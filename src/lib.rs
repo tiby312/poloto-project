@@ -89,6 +89,7 @@ enum PlotType {
     Line,
     Histo,
     LineFill,
+    LineFillRaw
 }
 
 struct Plot<'a, X: PlotNum, Y: PlotNum> {
@@ -327,6 +328,32 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
+            plots: Box::new(PlotStruct::new(
+                plots.into_iter().map(|x| x.make_plot()),
+                name,
+            )),
+        });
+        self
+    }
+
+
+    /// Create a line from plots that will be filled using a SVG path element.
+    /// The first and last points will be connected and then filled in.
+    /// The path element belongs to the `.poloto[N]fill` css class.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// plotter.line_fill_raw("", &data);
+    /// ```
+    pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    where
+        I: IntoIterator,
+        I::IntoIter: Clone + 'a,
+        I::Item: Plottable<X, Y>,
+    {
+        self.plots.push(Plot {
+            plot_type: PlotType::LineFillRaw,
             plots: Box::new(PlotStruct::new(
                 plots.into_iter().map(|x| x.make_plot()),
                 name,

@@ -4,6 +4,7 @@ pub fn line_fill<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
+    add_start_end_base:bool
 ) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
@@ -18,9 +19,12 @@ pub fn line_fill<T: std::fmt::Write>(
             ) {
                 (true, true) => {
                     if first {
-                        path.put(M(last[0], base_line))?;
-                        path.put(L(last[0], last[1]))?;
-
+                        if add_start_end_base{
+                            path.put(M(last[0], base_line))?;
+                            path.put(L(last[0], last[1]))?;
+                        }else{
+                            path.put(M(last[0], last[1]))?;
+                        }
                         first = false;
                     }
                     last_finite = Some([newx, newy]);
@@ -37,7 +41,9 @@ pub fn line_fill<T: std::fmt::Write>(
             last = [newx, newy];
         }
         if let Some([x, _]) = last_finite {
-            path.put(L(x, base_line))?;
+            if add_start_end_base{
+                path.put(L(x, base_line))?;   
+            }
             path.put(Z(""))?;
         }
     }
