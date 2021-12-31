@@ -66,14 +66,14 @@ where
 ///
 ///
 /// Using `Iterator::filter` to filter out plots can have
-/// undesireable effects when used with `Plotter::line`,
+/// undesirable effects when used with `Plotter::line`,
 /// since the line will assume continuity between each plot
 /// after the filtering has taken place.
 ///
 /// As an alternative, you can replace undesired plots with
 /// NaN values to indicate discontinuity.
 ///
-/// As a conveniance, you can use this Trait that will
+/// As a convenience, you can use this Trait that will
 /// automatically replace plots past certain bounds with NaN.
 ///
 ///

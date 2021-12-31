@@ -4,41 +4,9 @@ Documentation at [docs.rs](https://docs.rs/poloto)
 
 A simple 2D plotting library that outputs graphs to SVG that can be styled using CSS.
 
-Poloto graphs can be stylized using css either directly in the SVG, or from inside of html with an embeded svg. The latter allows the user to dynamically match the svg to their website's theme. The user can take full advantage of CSS, adding highlight on hover, animation, shadows, strokes, etc. Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples) to see this. The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
+Poloto graphs can be stylized using css either directly in the SVG, or from inside of html with an embedded svg. The latter allows the user to dynamically match the svg to their website's theme. The user can take full advantage of CSS, adding highlight on hover, animation, shadows, strokes, etc. Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples) to see this. The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
 
 You can see it in action in this rust book [broccoli-book](https://tiby312.github.io/broccoli_report/)
-
-
-## CSS classes
-
-Below are the css classes that can be stylized. There are default styles settings
-for these css classes in the static strings `STYLE_CONFIG_LIGHT_DEFAULT` and `STYLE_CONFIG_DARK_DEFAULT`.
-
-These are the css classes added through `Plotter::render`
-
-* `poloto_text` - all poloto text
-* `poloto_axis_lines` - axis lines and ticks 
-* `poloto_tick_labels` - x and y labels as well as `where` labels
-* `poloto_labels` - title, x label, ylabel
-* `poloto_title` - title
-* `poloto_xname` - xlabel
-* `poloto_yname` - ylabel
-* `poloto_legend_text` - legend text
-* `poloto_legend_icon` - legend icon
-* `poloto_scatter` - scatter plots and legend icon
-* `poloto_line` - line plots and legend icon
-* `poloto_histo` - histogram and legend icon 
-* `poloto_linefill` - line fill and legend icon
-* `poloto_linefillraw` - line fill raw and legend icon
-
-These are the css classes added through `poloto::SVG_HEADER` which is used by `simple_theme` and `simple_theme_dark`.
-
-* `poloto` - default svg element
-
-For plots:
-
-* `poloto[n]fill` - If the n'th plot requires fill. (e.g. linefill or histogram)
-* `poloto[n]stroke` - If the n'th plot requires stroke. (e.g. line or scatter)
 
 
 
@@ -279,6 +247,37 @@ fn main() {
 ## CSS Usage Example
 
 See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
+
+## CSS classes
+
+Below are the css classes that can be stylized. There are default styles settings
+for these css classes in the static strings `STYLE_CONFIG_LIGHT_DEFAULT` and `STYLE_CONFIG_DARK_DEFAULT`.
+
+These are the css classes added through `Plotter::render`
+
+* `poloto_text` - all poloto text
+* `poloto_axis_lines` - axis lines and ticks 
+* `poloto_tick_labels` - x and y labels as well as `where` labels
+* `poloto_labels` - title, x label, ylabel
+* `poloto_title` - title
+* `poloto_xname` - xlabel
+* `poloto_yname` - ylabel
+* `poloto_legend_text` - legend text
+* `poloto_legend_icon` - legend icon
+* `poloto_scatter` - scatter plots and legend icon
+* `poloto_line` - line plots and legend icon
+* `poloto_histo` - histogram and legend icon 
+* `poloto_linefill` - line fill and legend icon
+* `poloto_linefillraw` - line fill raw and legend icon
+
+These are the css classes added through `poloto::SVG_HEADER` which is used by `simple_theme` and `simple_theme_dark`.
+
+* `poloto` - default svg element
+
+For plots:
+
+* `poloto[n]fill` - If the n'th plot requires fill. (e.g. linefill or histogram)
+* `poloto[n]stroke` - If the n'th plot requires stroke. (e.g. line or scatter)
 
 
 ## Iterating plots twice

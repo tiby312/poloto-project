@@ -54,7 +54,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
         0.0
     };
 
-    //The range over which the data will be scalled to fit
+    //The range over which the data will be scaled to fit
     let scalex2 = if preserve_aspect {
         height - paddingy * 2.0
     } else {
