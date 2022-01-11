@@ -79,7 +79,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                 d.attr("y", paddingy + (i as f64) * spacing)
             })?
             .build(|d| {
-                let mut wc = util::WriteCounter::new(tagger::escape_guard(d.writer_escapable()));
+                let mut wc = util::WriteCounter::new(d.writer_safe());
                 p.plots.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
