@@ -21,6 +21,5 @@ fn main() {
             .crop_left(2.0),
     );
 
-
     println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }

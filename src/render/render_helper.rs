@@ -4,7 +4,7 @@ pub fn line_fill<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
-    add_start_end_base:bool
+    add_start_end_base: bool,
 ) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
@@ -19,10 +19,10 @@ pub fn line_fill<T: std::fmt::Write>(
             ) {
                 (true, true) => {
                     if first {
-                        if add_start_end_base{
+                        if add_start_end_base {
                             path.put(M(last[0], base_line))?;
                             path.put(L(last[0], last[1]))?;
-                        }else{
+                        } else {
                             path.put(M(last[0], last[1]))?;
                         }
                         first = false;
@@ -41,8 +41,8 @@ pub fn line_fill<T: std::fmt::Write>(
             last = [newx, newy];
         }
         if let Some([x, _]) = last_finite {
-            if add_start_end_base{
-                path.put(L(x, base_line))?;   
+            if add_start_end_base {
+                path.put(L(x, base_line))?;
             }
             path.put(Z(""))?;
         }
@@ -117,7 +117,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", width / 2.0)?;
             d.attr("y", padding / 4.0)
         })?
-        .build(|w| write!(w.writer(), "{}", plotter.title))?;
+        .build(|w| w.put_raw(&plotter.title))?;
 
     writer
         .elem("text", |d| {
@@ -128,7 +128,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", width / 2.0)?;
             d.attr("y", height - padding / 8.)
         })?
-        .build(|w| write!(w.writer(), "{}", plotter.xname))?;
+        .build(|w| w.put_raw(&plotter.xname))?;
 
     writer
         .elem("text", |d| {
@@ -143,7 +143,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", padding / 4.0)?;
             d.attr("y", height / 2.0)
         })?
-        .build(|w| write!(w.writer(), "{}", plotter.yname))?;
+        .build(|w| write!(w.writer_escapable(), "{}", plotter.yname))?;
 
     {
         //Draw step lines

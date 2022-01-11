@@ -89,7 +89,7 @@ enum PlotType {
     Line,
     Histo,
     LineFill,
-    LineFillRaw
+    LineFillRaw,
 }
 
 struct Plot<'a, X: PlotNum, Y: PlotNum> {
@@ -335,7 +335,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         });
         self
     }
-
 
     /// Create a line from plots that will be filled using a SVG path element.
     /// The first and last points will be connected and then filled in.

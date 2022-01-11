@@ -79,7 +79,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                 d.attr("y", paddingy + (i as f64) * spacing)
             })?
             .build(|d| {
-                let mut wc = util::WriteCounter::new(d.writer());
+                let mut wc = util::WriteCounter::new(tagger::escape_guard(d.writer_escapable()));
                 p.plots.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
@@ -227,7 +227,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         "class",
                         format_args!("poloto_linefill poloto{}fill", colori),
                     )?;
-                    d.path(|path| line_fill(path, it, height - paddingy,true))
+                    d.path(|path| line_fill(path, it, height - paddingy, true))
                 })?;
             }
             PlotType::LineFillRaw => {
@@ -254,7 +254,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         "class",
                         format_args!("poloto_linefillraw poloto{}fill", colori),
                     )?;
-                    d.path(|path| line_fill(path, it, height - paddingy,false))
+                    d.path(|path| line_fill(path, it, height - paddingy, false))
                 })?;
             }
         }

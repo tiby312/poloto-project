@@ -15,9 +15,11 @@ fn main() {
         .preserve_aspect()
         .move_into();
 
-
-    plotter.xmarker(-20.).xmarker(20.).ymarker(-20.).ymarker(20.);
-
+    plotter
+        .xmarker(-20.)
+        .xmarker(20.)
+        .ymarker(-20.)
+        .ymarker(20.);
 
     println!(
         "{}",

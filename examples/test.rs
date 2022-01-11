@@ -63,7 +63,7 @@ fn main() -> std::fmt::Result {
                     for (i, &test) in generate_test().iter().enumerate() {
                         use std::fmt::Write;
                         write!(
-                            e.writer(),
+                            e.writer_escapable(),
                             "{}<style>{}{}</style>{}{}",
                             CUSTOM_SVG,
                             poloto::STYLE_CONFIG_DARK_DEFAULT,
@@ -80,7 +80,7 @@ fn main() -> std::fmt::Result {
                     for (i, &test) in generate_test_int().iter().enumerate() {
                         use std::fmt::Write;
                         write!(
-                            e.writer(),
+                            e.writer_escapable(),
                             "{}<style>{}{}</style>{}{}",
                             CUSTOM_SVG,
                             poloto::STYLE_CONFIG_DARK_DEFAULT,
