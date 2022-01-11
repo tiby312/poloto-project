@@ -732,7 +732,7 @@ impl<I> TickInfo<I> {
             step: func(self.step),
             start_step: func(self.start_step),
             dash_multiple: self.dash_multiple,
-            display_relative: self.display_relative.map(|x| func(x)),
+            display_relative: self.display_relative.map(func),
         }
     }
 }

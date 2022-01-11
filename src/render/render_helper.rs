@@ -143,7 +143,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", padding / 4.0)?;
             d.attr("y", height / 2.0)
         })?
-        .build(|w| write!(w.writer_escapable(), "{}", plotter.yname))?;
+        .build(|w| w.put_raw(&plotter.yname))?;
 
     {
         //Draw step lines
