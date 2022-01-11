@@ -204,6 +204,8 @@ fn main() {
 ## String Interval Example
 
 ```rust
+use std::convert::TryFrom;
+
 // PIPE me to a file!
 fn main() {
     use poloto::util::MonthIndex;
