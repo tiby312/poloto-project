@@ -39,6 +39,25 @@ fn months(a:Duration)->i64{
 */
 
 
+
+fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]) -> (i128, u32) {
+    let range = range_all[1] - range_all[0];
+
+    let rough_step = (range / (ideal_num_steps - 1) as i128).max(1);
+
+    let step_power = 10.0f64.powf((rough_step as f64).log10().floor()) as i128;
+
+    let cc = good_steps.iter().map(|&x| {
+        let num_steps = get_range_info(x as i128 * step_power, range_all).1;
+        (x, (num_steps as i32 - ideal_num_steps as i32).abs())
+    });
+
+    let best = cc.min_by(|a, b| a.1.cmp(&b.1)).unwrap();
+
+    (best.0 as i128 * step_power, best.0)
+}
+
+
 impl PlotNum for UnixTime{
     fn is_hole(&self) -> bool {
         false
@@ -50,10 +69,6 @@ impl PlotNum for UnixTime{
 
         let mind = NaiveDateTime::from_timestamp(min.0, 0);
         let maxd = NaiveDateTime::from_timestamp(max.0, 0);
-
-        //let duration=min.signed_duration_singe(max);
-
-
         
         let year_diff:i64={
             let min_year=mind.year();
@@ -76,9 +91,23 @@ impl PlotNum for UnixTime{
             (max.0-min.0)/60/60
         };
 
+        let min_difference={
+            (max.0-min.0)/60
+        };
+        
         let second_difference={
             max.0-min.0
         };
+
+        let differences=[
+            (year_diff,&[1, 2, 5, 10]),
+            (month_difference,&[1, 2, 6, 12]),
+            (day_difference,&[1, 2, 5,10]),
+            (hour_difference,&[1, 2, 5,10]),
+            (minute_difference,&[1, 2, 5,10]),
+            (second_difference,&[1, 2, 5,10])
+        ];
+
 
 
         //INPUT:
@@ -91,6 +120,16 @@ impl PlotNum for UnixTime{
         //allowed steps
         //OUTPUT:
         //Best tick distribution
+
+        
+        let diffs=differences.into_iter().map(|range,good_ticks|{
+            let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
+            (step,good_normalized_step)   
+        }).collect();
+
+        diffs.min_by(step_diff)
+   
+        
 
         unimplemented!();
     }
