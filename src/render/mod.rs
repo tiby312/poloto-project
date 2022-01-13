@@ -66,6 +66,16 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
     let spacing = padding / 3.0;
     let legendx1 = width - padding / 1.2 + padding / 30.0;
 
+    let mut color_iter = {
+        let max = if let Some(nn) = plotter.num_css_classes {
+            nn
+        } else {
+            usize::MAX
+        };
+
+        (0..max).cycle()
+    };
+
     for (i, mut p) in plotter.plots.drain(..).enumerate() {
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
 
@@ -95,11 +105,7 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
             ]
         });
 
-        let colori = if let Some(nn) = plotter.num_css_classes {
-            i % nn
-        } else {
-            i
-        };
+        let colori = color_iter.next().unwrap();
 
         match p.plot_type {
             PlotType::Line => {
