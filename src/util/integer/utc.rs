@@ -32,7 +32,7 @@ impl UnixTime {
     }
 
     //0 to 59
-    fn second(&self)->u32{
+    fn second(&self) -> u32 {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).second()
     }
 }
@@ -51,48 +51,74 @@ impl std::fmt::Display for UnixTime {
     }
 }
 
-
-
 pub trait DateLike {
-    fn years(&self) -> Box<dyn Iterator<Item = Self>>;
-    fn months(&self) -> Box<dyn Iterator<Item = Self>>;
+    type Years: IntoIterator<Item = Self> + Clone;
+    type Months: IntoIterator<Item = Self> + Clone;
+    fn years(&self) -> Self::Years;
+    fn months(&self) -> Self::Months;
+
     fn days(&self) -> Box<dyn Iterator<Item = Self>>;
     fn hours(&self) -> Box<dyn Iterator<Item = Self>>;
-    fn minutes(&self)->Box<dyn Iterator<Item=Self>>;
-    fn seconds(&self)->Box<dyn Iterator<Item=Self>>;
+    fn minutes(&self) -> Box<dyn Iterator<Item = Self>>;
+    fn seconds(&self) -> Box<dyn Iterator<Item = Self>>;
+}
 
+#[derive(Clone)]
+pub struct UnixYears {
+    counter: i32,
+}
+
+impl Iterator for UnixYears {
+    type Item = UnixTime;
+    fn next(&mut self) -> Option<Self::Item> {
+        let y = chrono::NaiveDateTime::new(
+            chrono::NaiveDate::from_yo(self.counter, 1),
+            chrono::NaiveTime::from_hms(0, 0, 0),
+        );
+        self.counter += 1;
+        Some(UnixTime(y.timestamp()))
+    }
+}
+
+#[derive(Clone)]
+pub struct UnixMonths {
+    year_counter: i32,
+    month_counter: u32,
+}
+
+impl Iterator for UnixMonths {
+    type Item = UnixTime;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.month_counter += 1;
+        if self.month_counter > 12 {
+            self.year_counter += 1;
+            self.month_counter = 1;
+        }
+        let y = chrono::NaiveDateTime::new(
+            chrono::NaiveDate::from_ymd(self.year_counter, self.month_counter, 1),
+            chrono::NaiveTime::from_hms(0, 0, 0),
+        );
+        Some(UnixTime(y.timestamp()))
+    }
 }
 
 impl DateLike for UnixTime {
-    fn years(&self) -> Box<dyn Iterator<Item = Self>> {
+    type Years = UnixYears;
+    type Months = UnixMonths;
+    fn years(&self) -> UnixYears {
         let mut counter = chrono::NaiveDateTime::from_timestamp(self.0, 0).year() + 1;
-        Box::new(std::iter::repeat_with(move || {
-            let y = chrono::NaiveDateTime::new(
-                chrono::NaiveDate::from_yo(counter, 1),
-                chrono::NaiveTime::from_hms(0, 0, 0),
-            );
-            counter += 1;
-            UnixTime(y.timestamp())
-        }))
+        UnixYears { counter }
     }
 
-    fn months(&self) -> Box<dyn Iterator<Item = Self>> {
+    fn months(&self) -> UnixMonths {
         let t = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let mut month_counter = t.month();
         let mut year_counter = t.year();
 
-        Box::new(std::iter::repeat_with(move || {
-            month_counter += 1;
-            if month_counter > 12 {
-                year_counter += 1;
-                month_counter = 1;
-            }
-            let y = chrono::NaiveDateTime::new(
-                chrono::NaiveDate::from_ymd(year_counter, month_counter, 1),
-                chrono::NaiveTime::from_hms(0, 0, 0),
-            );
-            UnixTime(y.timestamp())
-        }))
+        UnixMonths {
+            month_counter,
+            year_counter,
+        }
     }
 
     fn days(&self) -> Box<dyn Iterator<Item = Self>> {
@@ -110,37 +136,34 @@ impl DateLike for UnixTime {
     }
 
     fn hours(&self) -> Box<dyn Iterator<Item = Self>> {
+        let hours = 60 * 60;
 
-        let hours=60*60;
-
-        let mut counter=((self.0+hours)/hours)*hours;
-        Box::new(std::iter::repeat_with(move ||{
-            let r=counter;
-            counter+=hours;
+        let mut counter = ((self.0 + hours) / hours) * hours;
+        Box::new(std::iter::repeat_with(move || {
+            let r = counter;
+            counter += hours;
             UnixTime(r)
         }))
     }
 
     fn minutes(&self) -> Box<dyn Iterator<Item = Self>> {
+        let min = 60;
 
-        let min=60;
-
-        let mut counter=((self.0+min)/min)*min;
-        Box::new(std::iter::repeat_with(move ||{
-            let r=counter;
-            counter+=min;
+        let mut counter = ((self.0 + min) / min) * min;
+        Box::new(std::iter::repeat_with(move || {
+            let r = counter;
+            counter += min;
             UnixTime(r)
         }))
     }
 
     fn seconds(&self) -> Box<dyn Iterator<Item = Self>> {
-        let mut counter=self.0;
-        Box::new(std::iter::repeat_with(move ||{
-            counter+=1;
+        let mut counter = self.0;
+        Box::new(std::iter::repeat_with(move || {
+            counter += 1;
             UnixTime(counter)
         }))
     }
-
 }
 
 #[test]
@@ -205,9 +228,7 @@ fn test_minutes() {
     assert_eq!(28, it.next().unwrap().minute());
     assert_eq!(29, it.next().unwrap().minute());
     assert_eq!(30, it.next().unwrap().minute());
-
 }
-
 
 #[test]
 fn test_seconds() {
@@ -222,7 +243,6 @@ fn test_seconds() {
     assert_eq!(26, it.next().unwrap().second());
     assert_eq!(27, it.next().unwrap().second());
     assert_eq!(28, it.next().unwrap().second());
-
 }
 
 #[test]
@@ -263,6 +283,51 @@ fn test_days() {
     assert_eq!(16, it.next().unwrap().day());
 }
 
+fn collect_ticks_all(
+    mut a: impl Iterator<Item = UnixTime> + Clone,
+    max: UnixTime,
+    amount: &[usize],
+    ideal_ticks: u32,
+) -> Option<Vec<UnixTime>> {
+    let origin = a.clone();
+    let ideal_ticks: isize = ideal_ticks as isize;
+    let res: Vec<_> = amount
+        .iter()
+        .map(|a| collect_ticks(origin.clone(), max, *a))
+        .filter(|x| x.is_some())
+        .map(|x| x.unwrap())
+        .collect();
+    res.into_iter().min_by(|a, b| {
+        (ideal_ticks - a.len() as isize)
+            .abs()
+            .cmp(&(ideal_ticks - b.len() as isize).abs())
+    })
+}
+
+fn collect_ticks(
+    mut a: impl Iterator<Item = UnixTime>,
+    max: UnixTime,
+    amount: usize,
+) -> Option<Vec<UnixTime>> {
+    assert!(amount > 0);
+    let mut v = Vec::new();
+    for aa in (0..amount - 1).cycle() {
+        if v.len() > 100 {
+            //TODO better way?
+            return None;
+        }
+        let a = a.next().unwrap();
+        if a >= max {
+            break;
+        }
+
+        if aa == 0 {
+            v.push(a);
+        }
+    }
+    Some(v)
+}
+
 impl PlotNum for UnixTime {
     fn is_hole(&self) -> bool {
         false
@@ -270,6 +335,15 @@ impl PlotNum for UnixTime {
     fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
         let [min, max] = range;
         assert!(min <= max);
+
+        let years = collect_ticks_all(min.years(), max, &[1, 2, 5, 10], ideal_num_steps);
+
+        /*
+        let years=collect_ticks(min.years(),max,10000);
+        if let Some(years){
+            let months=collect_ticks(min.months(),)
+        }
+        */
 
         let mind = NaiveDateTime::from_timestamp(min.0, 0);
         let maxd = NaiveDateTime::from_timestamp(max.0, 0);
