@@ -208,7 +208,7 @@ use std::convert::TryFrom;
 
 // PIPE me to a file!
 fn main() {
-    use poloto::util::MonthIndex;
+    use poloto::util::integer::i128::MonthIndex;
 
     let data = [
         ("Jan", 3144000),

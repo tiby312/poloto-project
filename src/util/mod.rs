@@ -1,21 +1,17 @@
 //!
 //! Utility functions to help build numbers that implement [`PlotNum`] and [`DiscNum`].
 //!
+use super::*;
 use crate::tick_fmt;
 use crate::DiscNum;
 use crate::PlotNum;
 use crate::Tick;
 use crate::TickInfo;
 use core::fmt;
-
-pub use self::f64::compute_ticks as compute_ticks_f64;
-pub use self::i128::compute_ticks as compute_ticks_i128;
-mod f64;
-mod i128;
-mod utc;
-
-
-pub use self::i128::month::MonthIndex;
+//pub use self::f64::compute_ticks as compute_ticks_f64;
+//pub use self::i128::compute_ticks as compute_ticks_i128;
+pub mod f64;
+pub mod integer;
 
 use std::convert::TryFrom;
 
