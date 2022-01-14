@@ -66,15 +66,13 @@ pub trait DateLike {
     fn minutes(&self) -> Self::Minutes;
     fn seconds(&self) -> Self::Seconds;
 
+    fn num_months(&self, other: UnixTime) -> i64;
+    fn num_years(&self, other: UnixTime) -> i64;
+    fn num_days(&self, other: UnixTime) -> i64;
 
-    fn num_months(&self,other:UnixTime)->i64;  
-    fn num_years(&self,other:UnixTime)->i64;
-    fn num_days(&self,other:UnixTime)->i64;
-    
-    fn num_hours(&self,other:UnixTime)->i64;
-    fn num_minutes(&self,other:UnixTime)->i64;
-    fn num_seconds(&self,other:UnixTime)->i64;
-    
+    fn num_hours(&self, other: UnixTime) -> i64;
+    fn num_minutes(&self, other: UnixTime) -> i64;
+    fn num_seconds(&self, other: UnixTime) -> i64;
 }
 
 #[derive(Clone)]
@@ -119,7 +117,7 @@ impl Iterator for UnixMonths {
 #[derive(Clone)]
 pub struct UnixDays {
     //counter: chrono::naive::NaiveDate,
-    counter:i64
+    counter: i64,
 }
 
 impl Iterator for UnixDays {
@@ -189,15 +187,14 @@ impl DateLike for UnixTime {
         UnixYears { counter }
     }
 
-    fn num_years(&self,other:UnixTime)->i64{
-        assert!(self.0<=other.0);
-    
+    fn num_years(&self, other: UnixTime) -> i64 {
+        assert!(self.0 <= other.0);
+
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let other = chrono::NaiveDateTime::from_timestamp(other.0, 0);
-        
-        other.year() as i64-this.year() as i64
-    }
 
+        other.year() as i64 - this.year() as i64
+    }
 
     fn months(&self) -> UnixMonths {
         let t = chrono::NaiveDateTime::from_timestamp(self.0, 0);
@@ -210,15 +207,15 @@ impl DateLike for UnixTime {
         }
     }
 
-    fn num_months(&self,other:UnixTime)->i64{
-        assert!(self.0<=other.0);
-        
+    fn num_months(&self, other: UnixTime) -> i64 {
+        assert!(self.0 <= other.0);
+
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let other = chrono::NaiveDateTime::from_timestamp(other.0, 0);
-        let years=other.year()-this.year();
-        let remainder=other.month0() as i64+(12-this.month0() as i64);
+        let years = other.year() - this.year();
+        let remainder = other.month0() as i64 + (12 - this.month0() as i64);
 
-        years as i64*12+remainder
+        years as i64 * 12 + remainder
     }
 
     fn days(&self) -> UnixDays {
@@ -228,10 +225,10 @@ impl DateLike for UnixTime {
         UnixDays { counter }
     }
 
-    fn num_days(&self,other:UnixTime)->i64{
-        assert!(self.0<=other.0);
-    
-        (other.0-self.0)/24/60/60
+    fn num_days(&self, other: UnixTime) -> i64 {
+        assert!(self.0 <= other.0);
+
+        (other.0 - self.0) / 24 / 60 / 60
     }
 
     fn hours(&self) -> UnixHours {
@@ -241,12 +238,11 @@ impl DateLike for UnixTime {
         UnixHours { counter }
     }
 
-    fn num_hours(&self,other:UnixTime)->i64{
-        assert!(self.0<=other.0);
-    
-        (other.0-self.0)/60/60
-    }
+    fn num_hours(&self, other: UnixTime) -> i64 {
+        assert!(self.0 <= other.0);
 
+        (other.0 - self.0) / 60 / 60
+    }
 
     fn minutes(&self) -> UnixMinutes {
         let min = 60;
@@ -255,25 +251,25 @@ impl DateLike for UnixTime {
         UnixMinutes { counter }
     }
 
-    fn num_minutes(&self,other:UnixTime)->i64{
-        assert!(self.0<=other.0);
-    
-        (other.0-self.0)/60
-    }
+    fn num_minutes(&self, other: UnixTime) -> i64 {
+        assert!(self.0 <= other.0);
 
+        (other.0 - self.0) / 60
+    }
 
     fn seconds(&self) -> UnixSeconds {
         let mut counter = self.0;
         UnixSeconds { counter }
     }
 
-    fn num_seconds(&self,other:UnixTime)->i64{
-        assert!(self.0<=other.0);
-    
-        (other.0-self.0)
-    }
+    fn num_seconds(&self, other: UnixTime) -> i64 {
+        assert!(self.0 <= other.0);
 
+        (other.0 - self.0)
+    }
 }
+
+//TODO add tests comparing two timestamps and comparing iterator with num_* functions.
 
 #[test]
 fn test_years() {
@@ -472,18 +468,19 @@ impl PlotNum for UnixTime {
             ),
         ];
 
-        let valid:Vec<_>=arr.into_iter().filter(|(_,x)|x.is_some()).map(|(a,x)|(a,x.unwrap())).collect();
-        
-        
-        let best=valid.into_iter().min_by(|a, b| {
+        let valid: Vec<_> = arr
+            .into_iter()
+            .filter(|(_, x)| x.is_some())
+            .map(|(a, x)| (a, x.unwrap()))
+            .collect();
+
+        let best = valid.into_iter().min_by(|a, b| {
             (ideal_num_steps as isize - a.1.len() as isize)
                 .abs()
-                .cmp(&(ideal_num_steps as isize - b.1.len() as isize).abs())});
+                .cmp(&(ideal_num_steps as isize - b.1.len() as isize).abs())
+        });
 
-
-
-        let best=best.expect("Couldnt find a good tick size");
-
+        let best = best.expect("Couldnt find a good tick size");
 
         enum Unit {
             Year,
@@ -495,8 +492,6 @@ impl PlotNum for UnixTime {
         }
 
         unimplemented!();
-
-
     }
 
     fn fmt_tick(
