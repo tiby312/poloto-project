@@ -54,13 +54,27 @@ impl std::fmt::Display for UnixTime {
 pub trait DateLike {
     type Years: IntoIterator<Item = Self> + Clone;
     type Months: IntoIterator<Item = Self> + Clone;
+    type Days: IntoIterator<Item = Self> + Clone;
+    type Hours: IntoIterator<Item = Self> + Clone;
+    type Minutes: IntoIterator<Item = Self> + Clone;
+    type Seconds: IntoIterator<Item = Self> + Clone;
+
     fn years(&self) -> Self::Years;
     fn months(&self) -> Self::Months;
+    fn days(&self) -> Self::Days;
+    fn hours(&self) -> Self::Hours;
+    fn minutes(&self) -> Self::Minutes;
+    fn seconds(&self) -> Self::Seconds;
 
-    fn days(&self) -> Box<dyn Iterator<Item = Self>>;
-    fn hours(&self) -> Box<dyn Iterator<Item = Self>>;
-    fn minutes(&self) -> Box<dyn Iterator<Item = Self>>;
-    fn seconds(&self) -> Box<dyn Iterator<Item = Self>>;
+
+    fn num_months(&self,other:UnixTime)->i64;  
+    fn num_years(&self,other:UnixTime)->i64;
+    fn num_days(&self,other:UnixTime)->i64;
+    
+    fn num_hours(&self,other:UnixTime)->i64;
+    fn num_minutes(&self,other:UnixTime)->i64;
+    fn num_seconds(&self,other:UnixTime)->i64;
+    
 }
 
 #[derive(Clone)]
@@ -102,13 +116,88 @@ impl Iterator for UnixMonths {
     }
 }
 
+#[derive(Clone)]
+pub struct UnixDays {
+    //counter: chrono::naive::NaiveDate,
+    counter:i64
+}
+
+impl Iterator for UnixDays {
+    type Item = UnixTime;
+    fn next(&mut self) -> Option<Self::Item> {
+        let r = self.counter;
+        self.counter += 60 * 60 * 24;
+        Some(UnixTime(r))
+        /*
+        let d = self.counter.succ();
+        let d = chrono::NaiveDateTime::new(d, chrono::NaiveTime::from_hms(0, 0, 0));
+
+        Some(UnixTime(d.timestamp()))
+        */
+    }
+}
+
+#[derive(Clone)]
+pub struct UnixHours {
+    counter: i64,
+}
+
+impl Iterator for UnixHours {
+    type Item = UnixTime;
+    fn next(&mut self) -> Option<Self::Item> {
+        let r = self.counter;
+        self.counter += 60 * 60;
+        Some(UnixTime(r))
+    }
+}
+
+#[derive(Clone)]
+pub struct UnixMinutes {
+    counter: i64,
+}
+impl Iterator for UnixMinutes {
+    type Item = UnixTime;
+    fn next(&mut self) -> Option<Self::Item> {
+        let r = self.counter;
+        self.counter += 60;
+        Some(UnixTime(r))
+    }
+}
+
+#[derive(Clone)]
+pub struct UnixSeconds {
+    counter: i64,
+}
+impl Iterator for UnixSeconds {
+    type Item = UnixTime;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.counter += 1;
+        Some(UnixTime(self.counter))
+    }
+}
+
 impl DateLike for UnixTime {
     type Years = UnixYears;
     type Months = UnixMonths;
+    type Days = UnixDays;
+    type Hours = UnixHours;
+    type Minutes = UnixMinutes;
+    type Seconds = UnixSeconds;
+
     fn years(&self) -> UnixYears {
         let mut counter = chrono::NaiveDateTime::from_timestamp(self.0, 0).year() + 1;
         UnixYears { counter }
     }
+
+    fn num_years(&self,other:UnixTime)->i64{
+        assert!(self.0<=other.0);
+    
+        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+        let other = chrono::NaiveDateTime::from_timestamp(other.0, 0);
+        
+        other.year() as i64-this.year() as i64
+    }
+
 
     fn months(&self) -> UnixMonths {
         let t = chrono::NaiveDateTime::from_timestamp(self.0, 0);
@@ -121,49 +210,69 @@ impl DateLike for UnixTime {
         }
     }
 
-    fn days(&self) -> Box<dyn Iterator<Item = Self>> {
-        let mut t = chrono::NaiveDateTime::from_timestamp(self.0, 0)
-            .date()
-            .iter_days();
-        let _ = t.next().unwrap();
+    fn num_months(&self,other:UnixTime)->i64{
+        assert!(self.0<=other.0);
+        
+        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+        let other = chrono::NaiveDateTime::from_timestamp(other.0, 0);
+        let years=other.year()-this.year();
+        let remainder=other.month0() as i64+(12-this.month0() as i64);
 
-        Box::new(std::iter::repeat_with(move || {
-            let d = t.next().unwrap();
-            let d = chrono::NaiveDateTime::new(d, chrono::NaiveTime::from_hms(0, 0, 0));
-
-            UnixTime(d.timestamp())
-        }))
+        years as i64*12+remainder
     }
 
-    fn hours(&self) -> Box<dyn Iterator<Item = Self>> {
+    fn days(&self) -> UnixDays {
+        let days = 60 * 60 * 24;
+
+        let mut counter = ((self.0 + days) / days) * days;
+        UnixDays { counter }
+    }
+
+    fn num_days(&self,other:UnixTime)->i64{
+        assert!(self.0<=other.0);
+    
+        (other.0-self.0)/24/60/60
+    }
+
+    fn hours(&self) -> UnixHours {
         let hours = 60 * 60;
 
         let mut counter = ((self.0 + hours) / hours) * hours;
-        Box::new(std::iter::repeat_with(move || {
-            let r = counter;
-            counter += hours;
-            UnixTime(r)
-        }))
+        UnixHours { counter }
     }
 
-    fn minutes(&self) -> Box<dyn Iterator<Item = Self>> {
+    fn num_hours(&self,other:UnixTime)->i64{
+        assert!(self.0<=other.0);
+    
+        (other.0-self.0)/60/60
+    }
+
+
+    fn minutes(&self) -> UnixMinutes {
         let min = 60;
 
         let mut counter = ((self.0 + min) / min) * min;
-        Box::new(std::iter::repeat_with(move || {
-            let r = counter;
-            counter += min;
-            UnixTime(r)
-        }))
+        UnixMinutes { counter }
     }
 
-    fn seconds(&self) -> Box<dyn Iterator<Item = Self>> {
-        let mut counter = self.0;
-        Box::new(std::iter::repeat_with(move || {
-            counter += 1;
-            UnixTime(counter)
-        }))
+    fn num_minutes(&self,other:UnixTime)->i64{
+        assert!(self.0<=other.0);
+    
+        (other.0-self.0)/60
     }
+
+
+    fn seconds(&self) -> UnixSeconds {
+        let mut counter = self.0;
+        UnixSeconds { counter }
+    }
+
+    fn num_seconds(&self,other:UnixTime)->i64{
+        assert!(self.0<=other.0);
+    
+        (other.0-self.0)
+    }
+
 }
 
 #[test]
@@ -336,37 +445,45 @@ impl PlotNum for UnixTime {
         let [min, max] = range;
         assert!(min <= max);
 
-        let years = collect_ticks_all(min.years(), max, &[1, 2, 5, 10], ideal_num_steps);
+        let arr = vec![
+            (
+                Unit::Year,
+                collect_ticks_all(min.years(), max, &[1, 2, 5, 10], ideal_num_steps),
+            ),
+            (
+                Unit::Month,
+                collect_ticks_all(min.months(), max, &[1, 2, 6, 12], ideal_num_steps),
+            ),
+            (
+                Unit::Day,
+                collect_ticks_all(min.days(), max, &[1, 2, 5, 10], ideal_num_steps),
+            ),
+            (
+                Unit::Hour,
+                collect_ticks_all(min.hours(), max, &[1, 2, 5, 10], ideal_num_steps),
+            ),
+            (
+                Unit::Minute,
+                collect_ticks_all(min.minutes(), max, &[1, 2, 5, 10], ideal_num_steps),
+            ),
+            (
+                Unit::Second,
+                collect_ticks_all(min.seconds(), max, &[1, 2, 5, 10], ideal_num_steps),
+            ),
+        ];
 
-        /*
-        let years=collect_ticks(min.years(),max,10000);
-        if let Some(years){
-            let months=collect_ticks(min.months(),)
-        }
-        */
+        let valid:Vec<_>=arr.into_iter().filter(|(_,x)|x.is_some()).map(|(a,x)|(a,x.unwrap())).collect();
+        
+        
+        let best=valid.into_iter().min_by(|a, b| {
+            (ideal_num_steps as isize - a.1.len() as isize)
+                .abs()
+                .cmp(&(ideal_num_steps as isize - b.1.len() as isize).abs())});
 
-        let mind = NaiveDateTime::from_timestamp(min.0, 0);
-        let maxd = NaiveDateTime::from_timestamp(max.0, 0);
 
-        let year_diff: i64 = {
-            let min_year = mind.year();
-            let max_year = maxd.year();
-            (max_year - min_year) as i64
-        };
 
-        let month_difference = {
-            let min_month = mind.month0() as i64;
-            let max_month = maxd.month0() as i64;
-            (12 - min_month) + year_diff + max_month
-        };
+        let best=best.expect("Couldnt find a good tick size");
 
-        let day_difference = { (maxd.num_days_from_ce() - mind.num_days_from_ce()) as i64 };
-
-        let hour_difference = { (max.0 - min.0) / 60 / 60 };
-
-        let minute_difference = { (max.0 - min.0) / 60 };
-
-        let second_difference = { max.0 - min.0 };
 
         enum Unit {
             Year,
@@ -377,67 +494,9 @@ impl PlotNum for UnixTime {
             Second,
         }
 
-        struct Unit2<'a> {
-            diff: i64,
-            stepa: &'a [u32],
-            unit: Unit,
-        }
-
-        let differences = [
-            Unit2 {
-                diff: year_diff,
-                stepa: &[1, 2, 5, 10],
-                unit: Unit::Year,
-            },
-            Unit2 {
-                diff: month_difference,
-                stepa: &[1, 2, 6, 12],
-                unit: Unit::Month,
-            },
-            Unit2 {
-                diff: day_difference,
-                stepa: &[1, 2, 5, 10],
-                unit: Unit::Day,
-            },
-            Unit2 {
-                diff: hour_difference,
-                stepa: &[1, 2, 5, 10],
-                unit: Unit::Hour,
-            },
-            Unit2 {
-                diff: minute_difference,
-                stepa: &[1, 2, 5, 10],
-                unit: Unit::Minute,
-            },
-            Unit2 {
-                diff: second_difference,
-                stepa: &[1, 2, 5, 10],
-                unit: Unit::Second,
-            },
-        ];
-
-        //INPUT:
-        //num year
-        //num month
-        //num day
-        //num hour
-        //num second
-        //ideal number of ticks
-        //allowed steps
-        //OUTPUT:
-        //Best tick distribution
-
-        /*
-        let diffs=differences.into_iter().map(|unit|{
-            let g=find_good_step(unit.stepa, ideal_num_steps, unit.diff);
-            let diff=g.num_steps-ideal_num_steps;
-            ( diff.abs(),g,unit.unit)
-        }).collect();
-
-        let best = diffs.min_by(|a, b| a.0.cmp(&b.0)).unwrap();
-        */
-
         unimplemented!();
+
+
     }
 
     fn fmt_tick(
