@@ -53,20 +53,6 @@ impl UnixTime {
 
         let counter=base.timestamp()+dd*24*60*60;
 
-        /*
-        let d1 = dd / 30;
-        let d2 = dd % 30;
-
-        let month = this.month() + d1 as u32;
-        let month1 = month / 12;
-        let month2 = month % 12;
-
-        let snapped = chrono::NaiveDateTime::new(
-            NaiveDate::from_ymd(this.year() + month1 as i32, month2, (d2 + 1) as u32),
-            NaiveTime::from_hms(0, 0, 0),
-        );
-        let counter = snapped.timestamp();
-        */
         UnixDays {
             counter,
             step_value,
@@ -90,26 +76,6 @@ impl UnixTime {
 
         let counter = base.timestamp() + hh * 60 * 60;
 
-        /*
-        let hour1 = hh / 24;
-        let hour2 = hh % 24;
-
-        let day = this.day() + hour1 as u32;
-        let day1 = day / 30;
-        let day2 = day % 30;
-
-        let month = this.month() + day1;
-        let month1 = month / 12;
-        let month2 = month % 12;
-
-        let year = this.year() + month1 as i32;
-
-        let snapped = chrono::NaiveDateTime::new(
-            NaiveDate::from_ymd(year, month2, day2),
-            NaiveTime::from_hms(hour2 as u32, 0, 0),
-        );
-        let counter = snapped.timestamp();
-        */
         UnixHours {
             counter,
             step_value,
@@ -133,13 +99,6 @@ impl UnixTime {
 
         let counter = base.timestamp() + mm * 60 ;
 
-
-        /*
-        let snapped =
-            chrono::NaiveDateTime::new(this.date(), NaiveTime::from_hms(this.hour(), mm as u32, 0));
-        let counter = snapped.timestamp();
-        */
-
         UnixMinutes {
             counter,
             step_value,
@@ -161,13 +120,6 @@ impl UnixTime {
 
         let counter = base.timestamp() +ss ;
 
-        /*
-        let snapped = chrono::NaiveDateTime::new(
-            this.date(),
-            NaiveTime::from_hms(this.hour(), this.minute(), ss as u32),
-        );
-        let counter = snapped.timestamp();
-        */
         UnixSeconds {
             counter,
             step_value,
