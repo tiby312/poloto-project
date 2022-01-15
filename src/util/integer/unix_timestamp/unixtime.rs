@@ -3,7 +3,12 @@ use super::*;
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Copy, Clone)]
 pub struct UnixTime(pub i64);
 
+pub use chrono::ParseResult;
+
 impl UnixTime {
+    pub fn parse_from_str(s:&str,fmt:&str)->ParseResult<UnixTime>{
+        NaiveDateTime::parse_from_str(s,fmt).map(|x|UnixTime(x.timestamp()))    
+    }
     pub fn year(&self) -> i32 {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).year()
     }
@@ -167,7 +172,7 @@ impl Iterator for UnixYears {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug,Clone)]
 pub struct UnixMonths {
     year_counter: i32,
     month_counter: u32,
@@ -182,12 +187,13 @@ impl Iterator for UnixMonths {
             chrono::NaiveTime::from_hms(0, 0, 0),
         );
 
-        self.month_counter += self.step_value;
-        if self.month_counter >= 12 {
-            let extra = self.month_counter - 11;
-            self.year_counter += 1;
-            self.month_counter = extra;
-        }
+        let new = self.month_counter+self.step_value;
+
+        let new1=new/12;
+        let new2=new%12;
+
+        self.year_counter+=new1 as i32;
+        self.month_counter=new2;
 
         Some(UnixTime(y.timestamp()))
     }

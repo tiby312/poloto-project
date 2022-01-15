@@ -1,3 +1,4 @@
+use poloto::util::integer::UnixTime;
 // PIPE me to a file!
 fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
@@ -19,11 +20,16 @@ fn main() {
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
-    s.histogram("", &data);
+    let data=data.into_iter().map(|&[a,b]|{
+        let a=UnixTime::parse_from_str(&format!("{}/1/1 00:00:00",a),"%Y/%m/%d %H:%M:%S").unwrap();
+        (a,b)
+    });
+
+    s.histogram("", data);
 
     //Scale grpah to include up to the year 2025.
     //Also scale to include a value of 0 articles.
-    s.xmarker(2025).ymarker(0);
+    //s.xmarker(2025).ymarker(0);
 
     println!("{}", poloto::disp(|a| poloto::simple_theme(a, s)));
 }

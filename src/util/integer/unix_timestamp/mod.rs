@@ -5,7 +5,7 @@ use super::*;
 use chrono::prelude::*;
 use chrono::DateTime;
 use chrono::Duration;
-use unixtime::UnixTime;
+pub use unixtime::UnixTime;
 
 impl PlotNum for UnixTime {
     fn is_hole(&self) -> bool {
@@ -33,13 +33,15 @@ impl PlotNum for UnixTime {
         }
     }
 
+    
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
         step: Option<Self>,
     ) -> std::fmt::Result {
-        unimplemented!();
+        
     }
+    
 
     fn unit_range(offset: Option<Self>) -> [Self; 2] {
         if let Some(o) = offset {

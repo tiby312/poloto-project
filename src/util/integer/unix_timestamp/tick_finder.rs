@@ -52,10 +52,12 @@ impl BestTickFinder {
 
     fn consider_set(&mut self, range: Vec<UnixTime>) {
         let new_closeness = (self.ideal_num_steps as i64 - range.len() as i64).abs();
-        let old_closeness = (self.ideal_num_steps as i64 - range.len() as i64).abs();
+        let old_closeness = (self.ideal_num_steps as i64 - self.best.len() as i64).abs();
+        dbg!(old_closeness,new_closeness);
         if new_closeness < old_closeness {
             self.best = range;
 
+            dbg!(&self.best);
             //Keep improving upper bound
             if self.best.len() > self.ideal_num_steps as usize {
                 self.max_tick_num = self.best.len() as u32;
