@@ -490,6 +490,40 @@ fn collect_ticks_all(
 }
 */
 
+pub struct BestTickFinder{
+    ideal_num_steps:usize,
+    start:UnixTime,
+    end:UnixTime,
+    best:Vec<UnixTime>
+}
+impl BestTickFinder{
+    fn consider_years(&self,step_sizes:&[i64]){
+        for &a in step_sizes{
+            let mut set=Vec::new();
+            let mut failed=false;
+            for (i,b) in self.start.years(a).enumerate(){
+                if i>200{
+                    failed=true;
+                    break;
+                }
+
+                if b>self.end{
+                    break;
+                }
+
+                set.push(b);
+            }
+
+            if !failed{
+                //if the length is closer to the ideal than the current best,
+                //switch to this.
+            }
+
+        }
+        
+    }
+}
+
 impl PlotNum for UnixTime {
     fn is_hole(&self) -> bool {
         false
