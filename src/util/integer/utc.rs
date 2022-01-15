@@ -49,7 +49,7 @@ impl UnixTime {
 
         let dd = ((dd + step_value) / step_value) * step_value;
 
-        let base = chrono::NaiveDateTime::new(NaiveDate::from_ymd(this.year(),this.month(),0), chrono::NaiveTime::from_hms(0, 0, 0));
+        let base = chrono::NaiveDateTime::new(NaiveDate::from_ymd(this.year(),this.month(),1), chrono::NaiveTime::from_hms(0, 0, 0));
 
         let counter=base.timestamp()+dd*24*60*60;
 
@@ -274,7 +274,7 @@ fn test_hours() {
 
     let a = UnixTime(1642232500);
     println!("start:{}", a);
-    let mut it = a.hours(1);
+    let mut it = a.hours(5);
 
     for a in it.take(4) {
         println!("{}", a);
