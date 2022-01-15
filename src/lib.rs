@@ -217,26 +217,30 @@ trait MyFmt<X: PlotNum> {
         &self,
         formatter: &mut std::fmt::Formatter,
         value: X,
-        step: Option<X>,
+        step: X::UnitData,
+        fmt: FmtFull,
     ) -> std::fmt::Result;
 }
 
 struct Foo<A, X>(A, PhantomData<X>);
-impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> Foo<A, X> {
+impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, X::UnitData, FmtFull) -> std::fmt::Result>
+    Foo<A, X>
+{
     fn new(a: A) -> Foo<A, X> {
         Foo(a, PhantomData)
     }
 }
-impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result> MyFmt<X>
-    for Foo<A, X>
+impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, X::UnitData, FmtFull) -> std::fmt::Result>
+    MyFmt<X> for Foo<A, X>
 {
     fn write(
         &self,
         formatter: &mut std::fmt::Formatter,
         value: X,
-        step: Option<X>,
+        step: X::UnitData,
+        fmt: FmtFull,
     ) -> std::fmt::Result {
-        (self.0)(formatter, value, step)
+        (self.0)(formatter, value, step, fmt)
     }
 }
 
@@ -284,8 +288,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xtick_fmt: Box::new(Foo::<_, X>::new(move |a, b, c| b.fmt_tick(a, c))),
-            ytick_fmt: Box::new(Foo::<_, Y>::new(move |a, b, c| b.fmt_tick(a, c))),
+            xtick_fmt: Box::new(Foo::<_, X>::new(move |a, b, c, d| b.fmt_tick(a, c, d))),
+            ytick_fmt: Box::new(Foo::<_, Y>::new(move |a, b, c, d| b.fmt_tick(a, c, d))),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -489,7 +493,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     ///
     pub fn xinterval_fmt(
         &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, X, Option<X>) -> std::fmt::Result + 'a,
+        a: impl Fn(&mut std::fmt::Formatter, X, X::UnitData, FmtFull) -> std::fmt::Result + 'a,
     ) -> &mut Self {
         self.xtick_fmt = Box::new(Foo::new(a));
         self
@@ -506,7 +510,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     ///
     pub fn yinterval_fmt(
         &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, Y, Option<Y>) -> std::fmt::Result + 'a,
+        a: impl Fn(&mut std::fmt::Formatter, Y, Y::UnitData, FmtFull) -> std::fmt::Result + 'a,
     ) -> &mut Self {
         self.ytick_fmt = Box::new(Foo::new(a));
         self
@@ -651,6 +655,8 @@ pub trait DiscNum: PlotNum {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
+    type UnitData: Copy;
+
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -660,7 +666,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
     ///
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self>;
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, Self::UnitData>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
@@ -674,7 +680,8 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
-        _step: Option<Self>,
+        _step: Self::UnitData,
+        _draw_full: FmtFull,
     ) -> std::fmt::Result {
         write!(formatter, "{}", self)
     }
@@ -684,10 +691,15 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// This way there will be no dashes, and it will just be a solid line.
     fn dash_size(
         ideal_dash_size: f64,
-        tick_info: &TickInfo<Self>,
+        tick_info: &TickInfo<Self, Self::UnitData>,
         range: [Self; 2],
         max: f64,
     ) -> Option<f64>;
+}
+
+pub enum FmtFull {
+    Full,
+    Tick,
 }
 
 ///
@@ -704,11 +716,13 @@ pub struct Tick<I> {
 /// Information on the properties of all the interval ticks for one dimension.
 ///
 #[derive(Debug, Clone)]
-pub struct TickInfo<I> {
+pub struct TickInfo<I, D> {
+    pub unit_data: D,
+
     /// List of the position of each tick to be displayed.
-    /// This must have a length of as least 2. 
+    /// This must have a length of as least 2.
     pub ticks: Vec<Tick<I>>,
-    
+
     /// The number of dashes between two ticks must be a multiple of this number.
     //pub dash_multiple: u32,
 
@@ -716,8 +730,9 @@ pub struct TickInfo<I> {
     /// have the base start to start with.
     pub display_relative: Option<I>,
 }
-impl<I> TickInfo<I> {
-    pub fn map<J>(self, func: impl Fn(I) -> J) -> TickInfo<J> {
+
+impl<I, A> TickInfo<I, A> {
+    pub fn map<J, B>(self, func: impl Fn(I) -> J, func2: impl Fn(A) -> B) -> TickInfo<J, B> {
         TickInfo {
             ticks: self
                 .ticks
@@ -729,6 +744,7 @@ impl<I> TickInfo<I> {
                 .collect(),
             //dash_multiple: self.dash_multiple,
             display_relative: self.display_relative.map(func),
+            unit_data: func2(self.unit_data),
         }
     }
 }

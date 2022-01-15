@@ -7,19 +7,22 @@ impl DiscNum for f64 {
 }
 
 impl PlotNum for f64 {
+    type UnitData = ();
+
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, ()> {
         compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
-        step: Option<Self>,
+        step: (),
+        fmt: FmtFull,
     ) -> std::fmt::Result {
-        tick_fmt::write_interval_float(formatter, *self, step)
+        tick_fmt::write_interval_float(formatter, *self, None)
     }
 
     fn unit_range(offset: Option<Self>) -> [Self; 2] {
@@ -38,7 +41,7 @@ impl PlotNum for f64 {
 
     fn dash_size(
         ideal_dash_size: f64,
-        tick_info: &TickInfo<Self>,
+        tick_info: &TickInfo<Self, ()>,
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {
@@ -48,7 +51,11 @@ impl PlotNum for f64 {
 }
 
 /// Generate out good tick interval defaults for `f64`.
-pub fn compute_ticks(ideal_num_steps: u32, good_ticks: &[u32], range: [f64; 2]) -> TickInfo<f64> {
+pub fn compute_ticks(
+    ideal_num_steps: u32,
+    good_ticks: &[u32],
+    range: [f64; 2],
+) -> TickInfo<f64, ()> {
     let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
     let (start_step, step_num) = get_range_info(step, range);
 
@@ -70,10 +77,10 @@ pub fn compute_ticks(ideal_num_steps: u32, good_ticks: &[u32], range: [f64; 2]) 
 
     let dash_multiple = good_normalized_step;
 
+    assert!(ticks.len() >= 2);
 
-    assert!(ticks.len()>=2);
-    
     TickInfo {
+        unit_data: (),
         ticks,
         //dash_multiple,
         display_relative: display_relative.then(|| start_step),

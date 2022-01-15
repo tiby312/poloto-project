@@ -7,11 +7,22 @@ use chrono::DateTime;
 use chrono::Duration;
 pub use unixtime::UnixTime;
 
+#[derive(Copy, Clone, Debug)]
+pub enum TimestampType {
+    YR,
+    MO,
+    DY,
+    HR,
+    MI,
+    SE,
+}
+
 impl PlotNum for UnixTime {
+    type UnitData = TimestampType;
     fn is_hole(&self) -> bool {
         false
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, TimestampType> {
         assert!(range[0] <= range[1]);
 
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
@@ -23,25 +34,33 @@ impl PlotNum for UnixTime {
         t.consider_mi(&[1, 2, 5, 10]);
         t.consider_se(&[1, 2, 5, 10]);
 
-        let ticks:Vec<_>=t.into_best().into_iter().map(|x|Tick{position:x,value:x}).collect();
+        let (best, unit_data) = t.into_best().unwrap(); //TODO dont unwrap? Maybe make PlotNum::compute_ticks() return a result?
 
-        assert!(ticks.len()>=2);
-        
-        TickInfo{
+        let ticks: Vec<_> = best
+            .into_iter()
+            .map(|x| Tick {
+                position: x,
+                value: x,
+            })
+            .collect();
+
+        assert!(ticks.len() >= 2);
+
+        TickInfo {
+            unit_data,
             ticks,
-            display_relative:None
+            display_relative: None,
         }
     }
 
-    
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
-        step: Option<Self>,
+        step: TimestampType,
+        fmt: FmtFull,
     ) -> std::fmt::Result {
-        
+        unimplemented!();
     }
-    
 
     fn unit_range(offset: Option<Self>) -> [Self; 2] {
         if let Some(o) = offset {
@@ -62,7 +81,7 @@ impl PlotNum for UnixTime {
 
     fn dash_size(
         ideal_dash_size: f64,
-        tick_info: &TickInfo<Self>,
+        tick_info: &TickInfo<Self, TimestampType>,
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {

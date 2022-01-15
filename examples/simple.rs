@@ -20,9 +20,10 @@ fn main() {
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
-    let data=data.into_iter().map(|&[a,b]|{
-        let a=UnixTime::parse_from_str(&format!("{}/1/1 00:00:00",a),"%Y/%m/%d %H:%M:%S").unwrap();
-        (a,b)
+    let data = data.into_iter().map(|&[a, b]| {
+        let a =
+            UnixTime::parse_from_str(&format!("{}/1/1 00:00:00", a), "%Y/%m/%d %H:%M:%S").unwrap();
+        (a, b)
     });
 
     s.histogram("", data);

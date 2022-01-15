@@ -42,7 +42,7 @@ fn test_multiple<I: PlotNum>(
 ///
 pub fn compute_dash_size<I: PlotNum>(
     ideal_dash_size: f64,
-    tick_info: &TickInfo<I>,
+    tick_info: &TickInfo<I, I::UnitData>,
     range: [I; 2],
     max: f64,
 ) -> Option<f64> {
@@ -177,11 +177,12 @@ impl<I: DiscNum> DiscNum for NoDash<I> {
     }
 }
 impl<I: PlotNum> PlotNum for NoDash<I> {
+    type UnitData = I::UnitData;
     fn is_hole(&self) -> bool {
         self.0.is_hole()
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
-        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(NoDash)
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, Self::UnitData> {
+        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(NoDash, |x| x)
     }
 
     fn unit_range(o: Option<Self>) -> [Self; 2] {
@@ -196,14 +197,15 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
-        step: Option<Self>,
+        step: Self::UnitData,
+        fmt: FmtFull,
     ) -> std::fmt::Result {
-        self.0.fmt_tick(formatter, step.map(|x| x.0))
+        self.0.fmt_tick(formatter, step, fmt)
     }
 
     fn dash_size(
         _ideal_dash_size: f64,
-        _tick_info: &TickInfo<Self>,
+        _tick_info: &TickInfo<Self, Self::UnitData>,
         _range: [Self; 2],
         _max: f64,
     ) -> Option<f64> {

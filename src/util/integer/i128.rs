@@ -1,7 +1,11 @@
 use super::*;
 
 /// Generate out good tick interval defaults for `i128`.
-pub fn compute_ticks(ideal_num_steps: u32, good_ticks: &[u32], range: [i128; 2]) -> TickInfo<i128> {
+pub fn compute_ticks(
+    ideal_num_steps: u32,
+    good_ticks: &[u32],
+    range: [i128; 2],
+) -> TickInfo<i128, ()> {
     let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
     let (start_step, step_num) = get_range_info(step, range);
 
@@ -24,6 +28,7 @@ pub fn compute_ticks(ideal_num_steps: u32, good_ticks: &[u32], range: [i128; 2])
     let dash_multiple = good_normalized_step;
 
     TickInfo {
+        unit_data: (),
         ticks,
         //dash_multiple,
         display_relative: display_relative.then(|| start_step),
@@ -31,7 +36,8 @@ pub fn compute_ticks(ideal_num_steps: u32, good_ticks: &[u32], range: [i128; 2])
 }
 
 impl PlotNum for i128 {
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
+    type UnitData = ();
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, ()> {
         compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
@@ -46,9 +52,10 @@ impl PlotNum for i128 {
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
-        step: Option<Self>,
+        step: (),
+        fmt: FmtFull,
     ) -> std::fmt::Result {
-        tick_fmt::write_interval_i128(formatter, *self, step)
+        tick_fmt::write_interval_i128(formatter, *self, None)
     }
 
     fn scale(&self, val: [Self; 2], max: f64) -> f64 {
@@ -61,7 +68,7 @@ impl PlotNum for i128 {
 
     fn dash_size(
         ideal_dash_size: f64,
-        tick_info: &TickInfo<Self>,
+        tick_info: &TickInfo<Self, ()>,
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {
@@ -88,7 +95,8 @@ mod month {
         }
     }
     impl PlotNum for MonthIndex {
-        fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
+        type UnitData = <i128 as PlotNum>::UnitData;
+        fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, Self::UnitData> {
             let cc = [1, 2, 6, 12].iter().map(|&step| {
                 let (a, num_steps) = get_range_info(step, [range[0].0, range[1].0]);
                 (
@@ -115,10 +123,10 @@ mod month {
             let step = MonthIndex(step);
             let start_step = MonthIndex(start_step);
 
-
-            assert!(ticks.len()>=2);
+            assert!(ticks.len() >= 2);
 
             TickInfo {
+                unit_data: (),
                 ticks,
                 //dash_multiple,
                 display_relative: None,
@@ -136,9 +144,10 @@ mod month {
         fn fmt_tick(
             &self,
             formatter: &mut std::fmt::Formatter,
-            step: Option<Self>,
+            step: Self::UnitData,
+            fmt: FmtFull,
         ) -> std::fmt::Result {
-            tick_fmt::write_interval_i128(formatter, self.0, step.map(|x| x.0))
+            tick_fmt::write_interval_i128(formatter, self.0, None)
         }
 
         fn scale(&self, val: [Self; 2], max: f64) -> f64 {
@@ -151,7 +160,7 @@ mod month {
 
         fn dash_size(
             ideal_dash_size: f64,
-            tick_info: &TickInfo<Self>,
+            tick_info: &TickInfo<Self, Self::UnitData>,
             range: [Self; 2],
             max: f64,
         ) -> Option<f64> {

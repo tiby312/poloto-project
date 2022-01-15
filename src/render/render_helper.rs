@@ -180,7 +180,11 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     .build(|d| {
                         d.put_raw(format_args!(
                             "Where j = {}",
-                            DisplayableClosure::new(|w| base.fmt_tick(w, None))
+                            DisplayableClosure::new(|w| base.fmt_tick(
+                                w,
+                                xtick_info.unit_data,
+                                FmtFull::Full
+                            ))
                         ))
                     })?;
 
@@ -215,7 +219,12 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w, value, None))
+                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(
+                                w,
+                                value,
+                                xtick_info.unit_data,
+                                FmtFull::Tick
+                            ))
                         ))
                     })?;
             }
@@ -235,7 +244,11 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     .build(|w| {
                         w.put_raw(format_args!(
                             "Where k = {}",
-                            DisplayableClosure::new(|w| base.fmt_tick(w, None))
+                            DisplayableClosure::new(|w| base.fmt_tick(
+                                w,
+                                ytick_info.unit_data,
+                                FmtFull::Full
+                            ))
                         ))
                     })?;
 
@@ -259,7 +272,6 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     d.attr("y2", yy)
                 })?;
 
-
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -272,7 +284,12 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.ytick_fmt.write(w, value, None))
+                            DisplayableClosure::new(|w| plotter.ytick_fmt.write(
+                                w,
+                                value,
+                                ytick_info.unit_data,
+                                FmtFull::Tick
+                            )) //TODO need a way to communicate writing base
                         ))
                     })?;
             }
