@@ -29,7 +29,7 @@ fn main() {
     s.ymarker(0);
 
     //Lookup the strings with the index
-    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
+    s.xinterval_fmt(|fmt, val, _,_| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
 
     println!("{}", poloto::disp(|a| poloto::simple_theme_dark(a, s)));
 }

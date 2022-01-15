@@ -59,7 +59,32 @@ impl PlotNum for UnixTime {
         step: TimestampType,
         fmt: FmtFull,
     ) -> std::fmt::Result {
-        unimplemented!();
+        use TimestampType::*;
+        match fmt {
+            FmtFull::Full => {
+                write!(formatter, "{}", self)
+            }
+            FmtFull::Tick => match step {
+                YR => {
+                    write!(formatter, "{}", self.year())
+                }
+                MO => {
+                    write!(formatter, "{}", self.month())
+                }
+                DY => {
+                    write!(formatter, "{}", self.day())
+                }
+                HR => {
+                    write!(formatter, "{}", self.hour())
+                }
+                MI => {
+                    write!(formatter, "{}", self.minute())
+                }
+                SE => {
+                    write!(formatter, "{}", self.second())
+                }
+            },
+        }
     }
 
     fn unit_range(offset: Option<Self>) -> [Self; 2] {
