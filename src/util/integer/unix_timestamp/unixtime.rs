@@ -9,6 +9,14 @@ impl UnixTime {
     pub fn parse_from_str(s: &str, fmt: &str) -> ParseResult<UnixTime> {
         NaiveDateTime::parse_from_str(s, fmt).map(|x| UnixTime(x.timestamp()))
     }
+    pub fn from_year(year:i32)->UnixTime{
+        UnixTime(NaiveDateTime::new(NaiveDate::from_ymd(year,1,1),NaiveTime::from_hms(0,0,0)).timestamp())
+    }
+
+    pub fn from_ymd(year:i32,month:u32,day:u32)->UnixTime{
+        UnixTime(NaiveDateTime::new(NaiveDate::from_ymd(year,month,day),NaiveTime::from_hms(0,0,0)).timestamp())
+    }
+
     pub fn year(&self) -> i32 {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).year()
     }
