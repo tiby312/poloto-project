@@ -46,6 +46,8 @@ pub fn compute_dash_size<I: PlotNum>(
     range: [I; 2],
     max: f64,
 ) -> Option<f64> {
+    unimplemented!();
+    /*
     let one_step = tick_info.step.scale(range, max);
     let dash_multiple = tick_info.dash_multiple;
 
@@ -62,6 +64,7 @@ pub fn compute_dash_size<I: PlotNum>(
     } else {
         Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
     }
+    */
 }
 
 pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(

@@ -42,7 +42,8 @@ impl PlotNum for f64 {
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {
-        compute_dash_size(ideal_dash_size, tick_info, range, max)
+        None
+        //compute_dash_size(ideal_dash_size, tick_info, range, max)
     }
 }
 
@@ -69,11 +70,12 @@ pub fn compute_ticks(ideal_num_steps: u32, good_ticks: &[u32], range: [f64; 2]) 
 
     let dash_multiple = good_normalized_step;
 
+
+    assert!(ticks.len()>=2);
+    
     TickInfo {
         ticks,
-        dash_multiple,
-        step,
-        start_step,
+        //dash_multiple,
         display_relative: display_relative.then(|| start_step),
     }
 }

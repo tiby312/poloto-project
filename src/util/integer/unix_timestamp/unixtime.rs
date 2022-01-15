@@ -1,13 +1,37 @@
 use super::*;
-use chrono::prelude::*;
-use chrono::DateTime;
-use chrono::Duration;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Copy, Clone)]
-pub struct UnixTime(i64);
+pub struct UnixTime(pub i64);
 
 impl UnixTime {
-    fn years(&self, step_value: i64) -> UnixYears {
+    pub fn year(&self) -> i32 {
+        chrono::NaiveDateTime::from_timestamp(self.0, 0).year()
+    }
+    //1 to 12
+    pub fn month(&self) -> u32 {
+        chrono::NaiveDateTime::from_timestamp(self.0, 0).month()
+    }
+
+    //1 to 30
+    pub fn day(&self) -> u32 {
+        chrono::NaiveDateTime::from_timestamp(self.0, 0).day()
+    }
+
+    //0 to 23
+    pub fn hour(&self) -> u32 {
+        chrono::NaiveDateTime::from_timestamp(self.0, 0).hour()
+    }
+    //0 to 59
+    pub fn minute(&self) -> u32 {
+        chrono::NaiveDateTime::from_timestamp(self.0, 0).minute()
+    }
+
+    //0 to 59
+    pub fn second(&self) -> u32 {
+        chrono::NaiveDateTime::from_timestamp(self.0, 0).second()
+    }
+
+    pub fn years(&self, step_value: i64) -> UnixYears {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let yy = this.year() as i64;
 
@@ -19,11 +43,7 @@ impl UnixTime {
         }
     }
 
-    fn year(&self) -> i32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).year()
-    }
-
-    fn months(&self, step_value: i64) -> UnixMonths {
+    pub fn months(&self, step_value: i64) -> UnixMonths {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let mm = this.month0() as i64;
 
@@ -38,20 +58,19 @@ impl UnixTime {
             step_value: step_value as u32,
         }
     }
-    //1 to 12
-    fn month(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).month()
-    }
 
-    fn days(&self, step_value: i64) -> UnixDays {
+    pub fn days(&self, step_value: i64) -> UnixDays {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let dd = this.day0() as i64;
 
         let dd = ((dd + step_value) / step_value) * step_value;
 
-        let base = chrono::NaiveDateTime::new(NaiveDate::from_ymd(this.year(),this.month(),1), chrono::NaiveTime::from_hms(0, 0, 0));
+        let base = chrono::NaiveDateTime::new(
+            NaiveDate::from_ymd(this.year(), this.month(), 1),
+            chrono::NaiveTime::from_hms(0, 0, 0),
+        );
 
-        let counter=base.timestamp()+dd*24*60*60;
+        let counter = base.timestamp() + dd * 24 * 60 * 60;
 
         UnixDays {
             counter,
@@ -59,12 +78,7 @@ impl UnixTime {
         }
     }
 
-    //1 to 30
-    fn day(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).day()
-    }
-
-    fn hours(&self, step_value: i64) -> UnixHours {
+    pub fn hours(&self, step_value: i64) -> UnixHours {
         let hours = 60 * 60;
 
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
@@ -82,12 +96,7 @@ impl UnixTime {
         }
     }
 
-    //0 to 23
-    fn hour(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).hour()
-    }
-
-    fn minutes(&self, step_value: i64) -> UnixMinutes {
+    pub fn minutes(&self, step_value: i64) -> UnixMinutes {
         let minutes = 60;
 
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
@@ -95,40 +104,34 @@ impl UnixTime {
 
         let mm = ((mm + step_value) / step_value) * step_value;
 
-        let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(this.hour(), 0, 0));
+        let base =
+            chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(this.hour(), 0, 0));
 
-        let counter = base.timestamp() + mm * 60 ;
+        let counter = base.timestamp() + mm * 60;
 
         UnixMinutes {
             counter,
             step_value,
         }
     }
-    //0 to 59
-    fn minute(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).minute()
-    }
 
-    fn seconds(&self, step_value: i64) -> UnixSeconds {
+    pub fn seconds(&self, step_value: i64) -> UnixSeconds {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let ss = this.second() as i64;
 
         let ss = ((ss + step_value) / step_value) * step_value;
 
+        let base = chrono::NaiveDateTime::new(
+            this.date(),
+            chrono::NaiveTime::from_hms(this.hour(), this.minute(), 0),
+        );
 
-        let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(this.hour(), this.minute(), 0));
-
-        let counter = base.timestamp() +ss ;
+        let counter = base.timestamp() + ss;
 
         UnixSeconds {
             counter,
             step_value,
         }
-    }
-
-    //0 to 59
-    fn second(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).second()
     }
 }
 impl std::fmt::Display for UnixTime {
@@ -247,25 +250,6 @@ impl Iterator for UnixSeconds {
         Some(UnixTime(r))
     }
 }
-
-pub struct Diff {
-    //total number of months
-    pub num: i64,
-    //if year, zero
-    //if month, the offset of the first month in the context of a year (feburary would be 1).
-    //if day, the offset of the first day in the context of a month (the 2nd would be 1).
-    //if hour, the offset of the first hour in the context of a day (2pm would be 14).
-    //if minute, the offset of the first minute in the context of an hour ()
-    pub offset: i64,
-}
-
-fn round_up_to_nearest_multiple(val: i64, multiple: i64) -> i64 {
-    let ss = if val >= 0 { multiple - 1 } else { 0 };
-
-    ((val + ss) / multiple) * multiple
-}
-
-//TODO add tests comparing two timestamps and comparing iterator with num_* functions.
 
 #[test]
 fn test_hours() {
@@ -435,190 +419,4 @@ fn test_days() {
 
     //assert_eq!(15, it.next().unwrap().day());
     //assert_eq!(16, it.next().unwrap().day());
-}
-
-fn collect_ticks(
-    mut a: impl Iterator<Item = UnixTime>,
-    max: UnixTime,
-    amount: usize,
-    offset: usize,
-) -> Option<Vec<UnixTime>> {
-    assert!(amount > 0);
-    let mut v = Vec::new();
-    for aa in (offset..amount - 1).cycle() {
-        if v.len() > 100 {
-            //TODO better way?
-            return None;
-        }
-        let a = a.next().unwrap();
-        if a >= max {
-            break;
-        }
-
-        if aa == 0 {
-            v.push(a);
-        }
-    }
-    Some(v)
-}
-
-/*
-fn collect_ticks_all(
-    mut a: impl Iterator<Item = UnixTime> + Clone,
-    max: UnixTime,
-    offset:usize,  //Offset is where it is in relation to the parent unit
-    amount: &[usize],
-    ideal_ticks: u32,
-) -> Option<Vec<UnixTime>> {
-    let origin = a.clone();
-    let ideal_ticks: isize = ideal_ticks as isize;
-
-    let mut res=Vec::new();
-
-    for &a in amount{
-        if let Some(r)=a.collect_ticks(origin.clone(),max,a,offset){
-            res.push(r);
-        }
-
-    }
-
-    res.into_iter().min_by(|a, b| {
-        (ideal_ticks - a.len() as isize)
-            .abs()
-            .cmp(&(ideal_ticks - b.len() as isize).abs())
-    })
-}
-*/
-
-pub struct BestTickFinder{
-    ideal_num_steps:usize,
-    start:UnixTime,
-    end:UnixTime,
-    best:Vec<UnixTime>
-}
-impl BestTickFinder{
-    fn consider_years(&self,step_sizes:&[i64]){
-        for &a in step_sizes{
-            let mut set=Vec::new();
-            let mut failed=false;
-            for (i,b) in self.start.years(a).enumerate(){
-                if i>200{
-                    failed=true;
-                    break;
-                }
-
-                if b>self.end{
-                    break;
-                }
-
-                set.push(b);
-            }
-
-            if !failed{
-                //if the length is closer to the ideal than the current best,
-                //switch to this.
-            }
-
-        }
-        
-    }
-}
-
-impl PlotNum for UnixTime {
-    fn is_hole(&self) -> bool {
-        false
-    }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self> {
-        let [min, max] = range;
-        assert!(min <= max);
-
-        /*
-        let arr = vec![
-            (
-                Unit::Year,
-                collect_ticks_all(min.years(), max, &[1, 2, 5, 10,100,200,500,1000,2000,5000], ideal_num_steps),
-            ),
-            (
-                Unit::Month,
-                collect_ticks_all(min.months(), max, &[1, 2, 6, 12,24,48], ideal_num_steps),
-            ),
-            (
-                Unit::Day,
-                collect_ticks_all(min.days(), max, &[1, 2, 5,7, 10,30,60,100,365], ideal_num_steps),
-            ),
-            (
-                Unit::Hour,
-                collect_ticks_all(min.hours(), max, &[1, 2, 5, 10], ideal_num_steps),
-            ),
-            (
-                Unit::Minute,
-                collect_ticks_all(min.minutes(), max, &[1, 2, 5, 10], ideal_num_steps),
-            ),
-            (
-                Unit::Second,
-                collect_ticks_all(min.seconds(), max, &[1, 2, 5, 10], ideal_num_steps),
-            ),
-        ];
-
-        let valid: Vec<_> = arr
-            .into_iter()
-            .filter(|(_, x)| x.is_some())
-            .map(|(a, x)| (a, x.unwrap()))
-            .collect();
-
-        let best = valid.into_iter().min_by(|a, b| {
-            (ideal_num_steps as isize - a.1.len() as isize)
-                .abs()
-                .cmp(&(ideal_num_steps as isize - b.1.len() as isize).abs())
-        });
-
-        let best = best.expect("Couldnt find a good tick size");
-
-        enum Unit {
-            Year,
-            Month,
-            Day,
-            Hour,
-            Minute,
-            Second,
-        }
-        */
-
-        unimplemented!();
-    }
-
-    fn fmt_tick(
-        &self,
-        formatter: &mut std::fmt::Formatter,
-        step: Option<Self>,
-    ) -> std::fmt::Result {
-        unimplemented!();
-    }
-
-    fn unit_range(offset: Option<Self>) -> [Self; 2] {
-        if let Some(o) = offset {
-            [o, UnixTime(o.0 + 1)]
-        } else {
-            [UnixTime(0), UnixTime(1)]
-        }
-    }
-
-    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
-        let [val1, val2] = val;
-        let [val1, val2] = [val1.0, val2.0];
-        assert!(val1 <= val2);
-        let diff = (val2 - val1) as f64;
-        let scale = max / diff;
-        self.0 as f64 * scale
-    }
-
-    fn dash_size(
-        ideal_dash_size: f64,
-        tick_info: &TickInfo<Self>,
-        range: [Self; 2],
-        max: f64,
-    ) -> Option<f64> {
-        unimplemented!();
-        //compute_dash_size(ideal_dash_size, tick_info, range, max)
-    }
 }

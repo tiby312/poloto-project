@@ -706,13 +706,11 @@ pub struct Tick<I> {
 #[derive(Debug, Clone)]
 pub struct TickInfo<I> {
     /// List of the position of each tick to be displayed.
+    /// This must have a length of as least 2. 
     pub ticks: Vec<Tick<I>>,
-    /// The difference between two adjacent ticks
-    pub step: I,
-    /// The starting tick position
-    pub start_step: I,
+    
     /// The number of dashes between two ticks must be a multiple of this number.
-    pub dash_multiple: u32,
+    //pub dash_multiple: u32,
 
     /// If we want to display the tick values relatively, this will
     /// have the base start to start with.
@@ -729,9 +727,7 @@ impl<I> TickInfo<I> {
                     value: func(x.value),
                 })
                 .collect(),
-            step: func(self.step),
-            start_step: func(self.start_step),
-            dash_multiple: self.dash_multiple,
+            //dash_multiple: self.dash_multiple,
             display_relative: self.display_relative.map(func),
         }
     }

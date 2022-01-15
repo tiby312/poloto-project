@@ -25,9 +25,7 @@ pub fn compute_ticks(ideal_num_steps: u32, good_ticks: &[u32], range: [i128; 2])
 
     TickInfo {
         ticks,
-        step,
-        start_step,
-        dash_multiple,
+        //dash_multiple,
         display_relative: display_relative.then(|| start_step),
     }
 }
@@ -67,7 +65,8 @@ impl PlotNum for i128 {
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {
-        compute_dash_size(ideal_dash_size, tick_info, range, max)
+        None
+        //compute_dash_size(ideal_dash_size, tick_info, range, max)
     }
 }
 
@@ -116,11 +115,12 @@ mod month {
             let step = MonthIndex(step);
             let start_step = MonthIndex(start_step);
 
+
+            assert!(ticks.len()>=2);
+
             TickInfo {
                 ticks,
-                step,
-                start_step,
-                dash_multiple,
+                //dash_multiple,
                 display_relative: None,
             }
         }
@@ -155,6 +155,8 @@ mod month {
             range: [Self; 2],
             max: f64,
         ) -> Option<f64> {
+            None
+            /*
             let one_step = tick_info.step.scale(range, max);
             let mut dash_multiple = tick_info.dash_multiple;
 
@@ -174,6 +176,7 @@ mod month {
                 "Could not find a good dash step size! {:?}",
                 (one_step, dash_multiple, ideal_dash_size)
             );
+            */
         }
     }
 }

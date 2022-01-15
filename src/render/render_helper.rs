@@ -190,7 +190,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             };
 
             //Draw interva`l x text
-            for Tick { position, value } in xtick_info.ticks {
+            for &Tick { position, value } in xtick_info.ticks.iter() {
                 let xx = (position.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex))
                     + padding;
 
@@ -203,7 +203,6 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     d.attr("y2", height - paddingy * 0.95)
                 })?;
 
-                let s = xtick_info.step;
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -216,7 +215,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w, value, Some(s)))
+                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(w, value, None))
                         ))
                     })?;
             }
@@ -246,7 +245,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             };
 
             //Draw interval y text
-            for Tick { position, value } in ytick_info.ticks {
+            for &Tick { position, value } in ytick_info.ticks.iter() {
                 let yy = height
                     - (position.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
                     - paddingy;
@@ -260,7 +259,6 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                     d.attr("y2", yy)
                 })?;
 
-                let s = ytick_info.step;
 
                 writer
                     .elem("text", |d| {
@@ -274,14 +272,14 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.ytick_fmt.write(w, value, Some(s)))
+                            DisplayableClosure::new(|w| plotter.ytick_fmt.write(w, value, None))
                         ))
                     })?;
             }
         }
 
         let d1 = minx.scale([minx, maxx], scalex);
-        let d2 = xtick_info.start_step.scale([minx, maxx], scalex);
+        let d2 = xtick_info.ticks[0].position.scale([minx, maxx], scalex);
         let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
@@ -312,7 +310,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         })?;
 
         let d1 = miny.scale([miny, maxy], scaley);
-        let d2 = ytick_info.start_step.scale([miny, maxy], scaley);
+        let d2 = ytick_info.ticks[0].position.scale([miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
 
         writer.single("path", |d| {
