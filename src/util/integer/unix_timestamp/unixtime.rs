@@ -5,16 +5,34 @@ pub struct UnixTime(pub i64);
 
 pub use chrono::ParseResult;
 
+fn round_up_to_nearest_multiple(val: i64, multiple: i64) -> i64 {
+    let ss = if val >= 0 { multiple - 1 } else { 0 };
+
+    ((val + ss) / multiple) * multiple
+}
+
 impl UnixTime {
     pub fn parse_from_str(s: &str, fmt: &str) -> ParseResult<UnixTime> {
         NaiveDateTime::parse_from_str(s, fmt).map(|x| UnixTime(x.timestamp()))
     }
-    pub fn from_year(year:i32)->UnixTime{
-        UnixTime(NaiveDateTime::new(NaiveDate::from_ymd(year,1,1),NaiveTime::from_hms(0,0,0)).timestamp())
+    pub fn from_year(year: i32) -> UnixTime {
+        UnixTime(
+            NaiveDateTime::new(
+                NaiveDate::from_ymd(year, 1, 1),
+                NaiveTime::from_hms(0, 0, 0),
+            )
+            .timestamp(),
+        )
     }
 
-    pub fn from_ymd(year:i32,month:u32,day:u32)->UnixTime{
-        UnixTime(NaiveDateTime::new(NaiveDate::from_ymd(year,month,day),NaiveTime::from_hms(0,0,0)).timestamp())
+    pub fn from_ymd(year: i32, month: u32, day: u32) -> UnixTime {
+        UnixTime(
+            NaiveDateTime::new(
+                NaiveDate::from_ymd(year, month, day),
+                NaiveTime::from_hms(0, 0, 0),
+            )
+            .timestamp(),
+        )
     }
 
     pub fn year(&self) -> i32 {
@@ -48,7 +66,7 @@ impl UnixTime {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let yy = this.year() as i64;
 
-        let counter = (((yy + step_value) / step_value) * step_value) as i32;
+        let counter = round_up_to_nearest_multiple(yy, step_value) as i32;
 
         UnixYears {
             counter,
@@ -60,7 +78,7 @@ impl UnixTime {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let mm = this.month0() as i64;
 
-        let month_counter = (((mm + step_value) / step_value) * step_value) as u32;
+        let month_counter = round_up_to_nearest_multiple(mm, step_value) as u32;
 
         let month1 = month_counter / 12;
         let month2 = month_counter % 12;
@@ -76,7 +94,7 @@ impl UnixTime {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let dd = this.day0() as i64;
 
-        let dd = ((dd + step_value) / step_value) * step_value;
+        let dd = round_up_to_nearest_multiple(dd, step_value);
 
         let base = chrono::NaiveDateTime::new(
             NaiveDate::from_ymd(this.year(), this.month(), 1),
@@ -97,7 +115,7 @@ impl UnixTime {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let hh = this.hour() as i64;
 
-        let hh = ((hh + step_value) / step_value) * step_value;
+        let hh = round_up_to_nearest_multiple(hh, step_value);
 
         let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(0, 0, 0));
 
@@ -115,7 +133,7 @@ impl UnixTime {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let mm = this.minute() as i64;
 
-        let mm = ((mm + step_value) / step_value) * step_value;
+        let mm = round_up_to_nearest_multiple(mm, step_value);
 
         let base =
             chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(this.hour(), 0, 0));
@@ -132,8 +150,7 @@ impl UnixTime {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let ss = this.second() as i64;
 
-        let ss = ((ss + step_value) / step_value) * step_value;
-
+        let ss = round_up_to_nearest_multiple(ss, step_value);
         let base = chrono::NaiveDateTime::new(
             this.date(),
             chrono::NaiveTime::from_hms(this.hour(), this.minute(), 0),
@@ -313,7 +330,8 @@ fn test_years() {
     //1642121137
     //(2022-01-14T00:45:37+00:00)
 
-    let a = UnixTime(1642123584);
+    //let a = UnixTime(1642123584);
+    let a = UnixTime::from_year(2010);
 
     println!("start:{}", a);
     let mut it = a.years(2);

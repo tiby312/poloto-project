@@ -3,15 +3,22 @@ use super::*;
 macro_rules! make_consider {
     ($fn_name1:ident,$fn_name2:ident,$ee:expr) => {
         pub fn $fn_name1(&mut self, step_sizes: &[i64]) {
-            for &a in step_sizes {
+            for &a in step_sizes.iter().rev() {
                 if let Some(range) = self.gen_tick(self.start.$fn_name2(a)) {
                     self.consider_set(range, $ee);
+                } else {
+                    // Since we are hansling smaller and smaller step sizes,
+                    // If gen_tick fails, thats means it has too many ticks,
+                    // so we can safely exist the loop because the intervals
+                    // are just going to get smaller and smaller.
+                    break;
                 }
             }
         }
     };
 }
 
+#[derive(Debug)]
 pub struct BestTickFinder {
     ideal_num_steps: u32,
     start: UnixTime,
@@ -28,7 +35,7 @@ impl BestTickFinder {
             ideal_num_steps,
             start,
             end,
-            max_tick_num: ideal_num_steps * 3,
+            max_tick_num: ideal_num_steps * 2,
             best: Vec::new(),
             typ: TimestampType::YR,
         }
@@ -40,6 +47,7 @@ impl BestTickFinder {
             None
         }
     }
+
     fn gen_tick<I: Iterator<Item = UnixTime>>(&self, it: I) -> Option<Vec<UnixTime>> {
         let mut set = Vec::new();
         for b in it {
@@ -56,19 +64,28 @@ impl BestTickFinder {
         Some(set)
     }
 
-    fn consider_set(&mut self, range: Vec<UnixTime>, ee: TimestampType) {
+    fn consider_set(&mut self, range: Vec<UnixTime>, ee: TimestampType) -> bool {
         let new_closeness = (self.ideal_num_steps as i64 - range.len() as i64).abs();
         let old_closeness = (self.ideal_num_steps as i64 - self.best.len() as i64).abs();
-        dbg!(old_closeness, new_closeness);
-        if new_closeness < old_closeness {
+
+        let is_better = if new_closeness < old_closeness {
+            true
+        } else if new_closeness == old_closeness {
+            if range.len() > self.best.len() {
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        };
+
+        if is_better {
             self.best = range;
             self.typ = ee;
-
-            dbg!(&self.best);
-            //Keep improving upper bound
-            if self.best.len() > self.ideal_num_steps as usize {
-                self.max_tick_num = self.best.len() as u32;
-            }
+            true
+        } else {
+            false
         }
     }
 

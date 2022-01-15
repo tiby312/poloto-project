@@ -27,14 +27,23 @@ impl PlotNum for UnixTime {
 
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
 
-        t.consider_yr(&[1, 2, 5, 100, 200, 500, 1000, 2000, 5000]);
-        t.consider_mo(&[1, 2, 6, 12, 24, 48]);
-        t.consider_dy(&[1, 2, 5, 7, 10, 30, 60, 100, 365]);
-        t.consider_hr(&[1, 2, 5, 10]);
-        t.consider_mi(&[1, 2, 5, 10]);
-        t.consider_se(&[1, 2, 5, 10]);
+        let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
+        let steps_mo = &[1, 2, 6, 12, 24, 48];
+        let steps_dy = &[1, 2, 5, 7, 10, 30, 60, 100, 365];
+        let steps_hr = &[1, 2, 5, 10];
+        let steps_mi = &[1, 2, 5, 10];
+        let steps_se = &[1, 2, 5, 10];
 
-        let (best, unit_data) = t.into_best().unwrap(); //TODO dont unwrap? Maybe make PlotNum::compute_ticks() return a result?
+        t.consider_yr(steps_yr);
+        t.consider_mo(steps_mo);
+        t.consider_dy(steps_dy);
+        t.consider_hr(steps_hr);
+        t.consider_mi(steps_mi);
+        t.consider_se(steps_se);
+
+        //TODO handle dashes???
+
+        let (best, unit_data) = t.into_best().unwrap();
 
         let ticks: Vec<_> = best
             .into_iter()
@@ -69,19 +78,34 @@ impl PlotNum for UnixTime {
                     write!(formatter, "{}", self.year())
                 }
                 MO => {
-                    write!(formatter, "{}", self.month())
+                    let m = match self.month() {
+                        1 => "Jan",
+                        2 => "Feb",
+                        3 => "Mar",
+                        4 => "Apr",
+                        5 => "May",
+                        6 => "Jun",
+                        7 => "Jul",
+                        8 => "Aug",
+                        9 => "Sep",
+                        10 => "Oct",
+                        11 => "Nov",
+                        12 => "Dec",
+                    };
+
+                    write!(formatter, "{}:{}", self.year(), m)
                 }
                 DY => {
-                    write!(formatter, "{}", self.day())
+                    write!(formatter, "{}:{}", self.month(), self.day())
                 }
                 HR => {
-                    write!(formatter, "{}", self.hour())
+                    write!(formatter, "{}:{}", self.day(), self.hour())
                 }
                 MI => {
-                    write!(formatter, "{}", self.minute())
+                    write!(formatter, "{}:{}", self.hour(), self.minute())
                 }
                 SE => {
-                    write!(formatter, "{}", self.second())
+                    write!(formatter, "{}:{}", self.minute(), self.second())
                 }
             },
         }

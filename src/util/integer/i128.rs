@@ -1,11 +1,14 @@
 use super::*;
 
+#[derive(Copy, Clone, Debug)]
+pub struct StepAmount(pub i128);
+
 /// Generate out good tick interval defaults for `i128`.
 pub fn compute_ticks(
     ideal_num_steps: u32,
     good_ticks: &[u32],
     range: [i128; 2],
-) -> TickInfo<i128, ()> {
+) -> TickInfo<i128, StepAmount> {
     let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
     let (start_step, step_num) = get_range_info(step, range);
 
@@ -28,7 +31,7 @@ pub fn compute_ticks(
     let dash_multiple = good_normalized_step;
 
     TickInfo {
-        unit_data: (),
+        unit_data: StepAmount(step),
         ticks,
         //dash_multiple,
         display_relative: display_relative.then(|| start_step),
@@ -36,8 +39,8 @@ pub fn compute_ticks(
 }
 
 impl PlotNum for i128 {
-    type UnitData = ();
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, ()> {
+    type UnitData = StepAmount;
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, StepAmount> {
         compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
@@ -52,10 +55,14 @@ impl PlotNum for i128 {
     fn fmt_tick(
         &self,
         formatter: &mut std::fmt::Formatter,
-        step: (),
+        step: StepAmount,
         fmt: FmtFull,
     ) -> std::fmt::Result {
-        tick_fmt::write_interval_i128(formatter, *self, None)
+        let step = match fmt {
+            FmtFull::Full => Some(step.0),
+            FmtFull::Tick => None,
+        };
+        tick_fmt::write_interval_i128(formatter, *self, step)
     }
 
     fn scale(&self, val: [Self; 2], max: f64) -> f64 {
@@ -68,7 +75,7 @@ impl PlotNum for i128 {
 
     fn dash_size(
         ideal_dash_size: f64,
-        tick_info: &TickInfo<Self, ()>,
+        tick_info: &TickInfo<Self, StepAmount>,
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {
@@ -126,7 +133,7 @@ mod month {
             assert!(ticks.len() >= 2);
 
             TickInfo {
-                unit_data: (),
+                unit_data: StepAmount(step.0),
                 ticks,
                 //dash_multiple,
                 display_relative: None,

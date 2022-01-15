@@ -21,7 +21,7 @@ fn main() {
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
     let data = data.into_iter().map(|&(a, b)| {
-        let a =UnixTime::from_year(a);
+        let a = UnixTime::from_year(a);
         (a, b)
     });
 
@@ -33,5 +33,8 @@ fn main() {
     //Also scale to include a value of 0 articles.
     s.xmarker(UnixTime::from_year(2025)).ymarker(0);
 
-    println!("{}", poloto::disp(|a| poloto::simple_theme(a, s)));
+    let mut st = String::new();
+    use std::fmt::Write;
+    write!(&mut st, "{}", poloto::disp(|a| poloto::simple_theme(a, s)));
+    println!("{}", st);
 }

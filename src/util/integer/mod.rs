@@ -65,25 +65,3 @@ fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]
 
     (best.0 as i128 * step_power, best.0)
 }
-
-fn find_good_step2(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]) -> StepRes {
-    let range = range_all[1] - range_all[0];
-
-    let rough_step = (range / (ideal_num_steps - 1) as i128).max(1);
-
-    let step_power = 10.0f64.powf((rough_step as f64).log10().floor()) as i128;
-
-    let cc = good_steps.iter().map(|&x| {
-        let num_steps = get_range_info(x as i128 * step_power, range_all).1;
-        let s = StepRes {
-            step_size: (x as i128 * step_power),
-            step_amount: x,
-            num_steps: num_steps as i128,
-        };
-        (s, (num_steps as i32 - ideal_num_steps as i32).abs())
-    });
-
-    let best = cc.min_by(|a, b| a.1.cmp(&b.1)).unwrap();
-
-    best.0
-}
