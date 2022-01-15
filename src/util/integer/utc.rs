@@ -49,6 +49,11 @@ impl UnixTime {
 
         let dd = ((dd + step_value) / step_value) * step_value;
 
+        let base = chrono::NaiveDateTime::new(NaiveDate::from_ymd(this.year(),this.month(),0), chrono::NaiveTime::from_hms(0, 0, 0));
+
+        let counter=base.timestamp()+dd*24*60*60;
+
+        /*
         let d1 = dd / 30;
         let d2 = dd % 30;
 
@@ -61,7 +66,7 @@ impl UnixTime {
             NaiveTime::from_hms(0, 0, 0),
         );
         let counter = snapped.timestamp();
-
+        */
         UnixDays {
             counter,
             step_value,
@@ -81,6 +86,11 @@ impl UnixTime {
 
         let hh = ((hh + step_value) / step_value) * step_value;
 
+        let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(0, 0, 0));
+
+        let counter = base.timestamp() + hh * 60 * 60;
+
+        /*
         let hour1 = hh / 24;
         let hour2 = hh % 24;
 
@@ -99,7 +109,7 @@ impl UnixTime {
             NaiveTime::from_hms(hour2 as u32, 0, 0),
         );
         let counter = snapped.timestamp();
-
+        */
         UnixHours {
             counter,
             step_value,
@@ -119,9 +129,16 @@ impl UnixTime {
 
         let mm = ((mm + step_value) / step_value) * step_value;
 
+        let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(this.hour(), 0, 0));
+
+        let counter = base.timestamp() + mm * 60 ;
+
+
+        /*
         let snapped =
             chrono::NaiveDateTime::new(this.date(), NaiveTime::from_hms(this.hour(), mm as u32, 0));
         let counter = snapped.timestamp();
+        */
 
         UnixMinutes {
             counter,
@@ -139,12 +156,18 @@ impl UnixTime {
 
         let ss = ((ss + step_value) / step_value) * step_value;
 
+
+        let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(this.hour(), this.minute(), 0));
+
+        let counter = base.timestamp() +ss ;
+
+        /*
         let snapped = chrono::NaiveDateTime::new(
             this.date(),
             NaiveTime::from_hms(this.hour(), this.minute(), ss as u32),
         );
         let counter = snapped.timestamp();
-
+        */
         UnixSeconds {
             counter,
             step_value,
