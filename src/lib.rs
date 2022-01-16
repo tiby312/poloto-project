@@ -666,7 +666,11 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
     ///
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, Self::UnitData>;
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [Self; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self, Self::UnitData>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
@@ -685,7 +689,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     ) -> std::fmt::Result {
         write!(formatter, "{}", self)
     }
-
+    /*
     /// Compute the exact size of the ticks.
     /// This can be overridden such that it always returns `None`.
     /// This way there will be no dashes, and it will just be a solid line.
@@ -695,6 +699,15 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
         range: [Self; 2],
         max: f64,
     ) -> Option<f64>;
+    */
+}
+
+pub struct DashInfo {
+    //The ideal dash size in the drawing area
+    pub ideal_dash_size: f64,
+
+    //The total drawing area
+    pub max: f64,
 }
 
 pub enum FmtFull {
@@ -725,6 +738,7 @@ pub struct TickInfo<I, D> {
 
     /// The number of dashes between two ticks must be a multiple of this number.
     //pub dash_multiple: u32,
+    pub dash_size: Option<f64>,
 
     /// If we want to display the tick values relatively, this will
     /// have the base start to start with.
@@ -742,7 +756,7 @@ impl<I, A> TickInfo<I, A> {
                     value: func(x.value),
                 })
                 .collect(),
-            //dash_multiple: self.dash_multiple,
+            dash_size: self.dash_size,
             display_relative: self.display_relative.map(func),
             unit_data: func2(self.unit_data),
         }

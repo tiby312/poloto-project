@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 // PIPE me to a file!
 fn main() {
-    use poloto::util::integer::i128::MonthIndex;
+    //    use poloto::util::integer::i128::MonthIndex;
 
     let data = [
         ("Jan", 3144000),
@@ -20,7 +20,7 @@ fn main() {
         ("Jan", 3518000),
         ("Feb", 3518000),
     ];
-
+    /*
     let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
 
     //Map the strings to indexes
@@ -32,4 +32,5 @@ fn main() {
     s.xinterval_fmt(|fmt, val, _, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
 
     println!("{}", poloto::disp(|a| poloto::simple_theme_dark(a, s)));
+    */
 }

@@ -22,7 +22,11 @@ impl PlotNum for UnixTime {
     fn is_hole(&self) -> bool {
         false
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, TimestampType> {
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [Self; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self, TimestampType> {
         assert!(range[0] <= range[1]);
 
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
@@ -34,18 +38,19 @@ impl PlotNum for UnixTime {
         let steps_mi = &[1, 2, 5, 10];
         let steps_se = &[1, 2, 5, 10];
 
-        t.consider_yr(steps_yr);
-        t.consider_mo(steps_mo);
-        t.consider_dy(steps_dy);
-        t.consider_hr(steps_hr);
-        t.consider_mi(steps_mi);
-        t.consider_se(steps_se);
+        t.consider_yr(steps_yr, steps_mo);
+        t.consider_mo(steps_mo, steps_dy);
+        t.consider_dy(steps_dy, steps_hr);
+        t.consider_hr(steps_hr, steps_mi);
+        t.consider_mi(steps_mi, steps_se);
+        t.consider_se(steps_se, &[1, 2, 5, 10]);
 
         //TODO handle dashes???
 
-        let (best, unit_data) = t.into_best().unwrap();
+        let ret = t.into_best().unwrap();
 
-        let ticks: Vec<_> = best
+        let ticks: Vec<_> = ret
+            .ticks
             .into_iter()
             .map(|x| Tick {
                 position: x,
@@ -55,10 +60,38 @@ impl PlotNum for UnixTime {
 
         assert!(ticks.len() >= 2);
 
+        let dash_size = None;
+
+        /*
+        let dash_size = {
+            /*
+            let dash_multiple = good_normalized_step;
+            let max = dash.max;
+            let ideal_dash_size = dash.ideal_dash_size;
+            let one_step = step.scale(range, max);
+
+            assert!(dash_multiple > 0);
+
+            if dash_multiple == 1 || dash_multiple == 10 {
+                let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
+                let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
+                if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
+                    Some(a)
+                } else {
+                    Some(b)
+                }
+            } else {
+                Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
+            }
+            */
+        };
+        */
+
         TickInfo {
-            unit_data,
+            unit_data: ret.unit_data,
             ticks,
-            display_relative: None,
+            dash_size,
+            display_relative: None, //Never want to do this for unix time.
         }
     }
 
@@ -91,6 +124,7 @@ impl PlotNum for UnixTime {
                         10 => "Oct",
                         11 => "Nov",
                         12 => "Dec",
+                        _ => unreachable!(),
                     };
 
                     write!(formatter, "{}:{}", self.year(), m)
@@ -127,14 +161,18 @@ impl PlotNum for UnixTime {
         let scale = max / diff;
         self.0 as f64 * scale
     }
-
+    /*
     fn dash_size(
         ideal_dash_size: f64,
         tick_info: &TickInfo<Self, TimestampType>,
         range: [Self; 2],
         max: f64,
     ) -> Option<f64> {
+
+
+
         None
         //compute_dash_size(ideal_dash_size, tick_info, range, max)
     }
+    */
 }

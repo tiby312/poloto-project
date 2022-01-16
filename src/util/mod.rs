@@ -181,8 +181,12 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
     fn is_hole(&self) -> bool {
         self.0.is_hole()
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, Self::UnitData> {
-        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0]).map(NoDash, |x| x)
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [Self; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self, Self::UnitData> {
+        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0], dash).map(NoDash, |x| x)
     }
 
     fn unit_range(o: Option<Self>) -> [Self; 2] {
@@ -203,6 +207,7 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
         self.0.fmt_tick(formatter, step, fmt)
     }
 
+    /*
     fn dash_size(
         _ideal_dash_size: f64,
         _tick_info: &TickInfo<Self, Self::UnitData>,
@@ -210,5 +215,5 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
         _max: f64,
     ) -> Option<f64> {
         None
-    }
+    }*/
 }

@@ -14,8 +14,62 @@ impl PlotNum for f64 {
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, StepAmount> {
-        compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [Self; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self, StepAmount> {
+        let good_ticks = &[1, 2, 5, 10];
+
+        let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
+        let (start_step, step_num) = get_range_info(step, range);
+
+        let display_relative = tick_fmt::should_fmt_offset(
+            start_step,
+            start_step + ((step_num - 1) as f64) * step,
+            step,
+        );
+
+        let first_tick = if display_relative { 0.0 } else { start_step };
+
+        let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
+        for a in 0..step_num {
+            let position = start_step + step * (a as f64);
+            let value = first_tick + step * (a as f64);
+
+            ticks.push(Tick { position, value });
+        }
+
+        assert!(ticks.len() >= 2);
+
+        let dash_size = {
+            let dash_multiple = good_normalized_step;
+            let max = dash.max;
+            let ideal_dash_size = dash.ideal_dash_size;
+            let one_step = step.scale(range, max);
+
+            assert!(dash_multiple > 0);
+
+            if dash_multiple == 1 || dash_multiple == 10 {
+                let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
+                let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
+                if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
+                    Some(a)
+                } else {
+                    Some(b)
+                }
+            } else {
+                Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
+            }
+        };
+
+        TickInfo {
+            unit_data: StepAmount(step),
+            ticks,
+            dash_size,
+            display_relative: display_relative.then(|| start_step),
+        }
+        //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
     fn fmt_tick(
@@ -25,8 +79,8 @@ impl PlotNum for f64 {
         fmt: FmtFull,
     ) -> std::fmt::Result {
         let step = match fmt {
-            FmtFull::Full => Some(step.0),
-            FmtFull::Tick => None,
+            FmtFull::Tick => Some(step.0),
+            FmtFull::Full => None,
         };
         tick_fmt::write_interval_float(formatter, *self, step)
     }
@@ -45,6 +99,7 @@ impl PlotNum for f64 {
         (*self) * scale
     }
 
+    /*
     fn dash_size(
         ideal_dash_size: f64,
         tick_info: &TickInfo<Self, StepAmount>,
@@ -53,45 +108,19 @@ impl PlotNum for f64 {
     ) -> Option<f64> {
         None
         //compute_dash_size(ideal_dash_size, tick_info, range, max)
-    }
+    }*/
 }
 
+/*
 /// Generate out good tick interval defaults for `f64`.
 pub fn compute_ticks(
     ideal_num_steps: u32,
     good_ticks: &[u32],
     range: [f64; 2],
 ) -> TickInfo<f64, StepAmount> {
-    let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
-    let (start_step, step_num) = get_range_info(step, range);
 
-    let display_relative = tick_fmt::should_fmt_offset(
-        start_step,
-        start_step + ((step_num - 1) as f64) * step,
-        step,
-    );
-
-    let first_tick = if display_relative { 0.0 } else { start_step };
-
-    let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
-    for a in 0..step_num {
-        let position = start_step + step * (a as f64);
-        let value = first_tick + step * (a as f64);
-
-        ticks.push(Tick { position, value });
-    }
-
-    let dash_multiple = good_normalized_step;
-
-    assert!(ticks.len() >= 2);
-
-    TickInfo {
-        unit_data: StepAmount(step),
-        ticks,
-        //dash_multiple,
-        display_relative: display_relative.then(|| start_step),
-    }
 }
+*/
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple

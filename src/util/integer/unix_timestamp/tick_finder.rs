@@ -2,10 +2,14 @@ use super::*;
 
 macro_rules! make_consider {
     ($fn_name1:ident,$fn_name2:ident,$ee:expr) => {
-        pub fn $fn_name1(&mut self, step_sizes: &[i64]) {
+        pub fn $fn_name1(&mut self, step_sizes: &[i64], dash_nums: &'a [i64]) {
             for &a in step_sizes.iter().rev() {
-                if let Some(range) = self.gen_tick(self.start.$fn_name2(a)) {
-                    self.consider_set(range, $ee);
+                if let Some(ticks) = self.gen_tick(self.start.$fn_name2(a)) {
+                    self.consider_set(Candidate {
+                        ticks,
+                        unit_data: $ee,
+                        dash_nums,
+                    });
                 } else {
                     // Since we are hansling smaller and smaller step sizes,
                     // If gen_tick fails, thats means it has too many ticks,
@@ -19,16 +23,22 @@ macro_rules! make_consider {
 }
 
 #[derive(Debug)]
-pub struct BestTickFinder {
+pub struct Candidate<'a> {
+    pub ticks: Vec<UnixTime>,
+    pub unit_data: TimestampType,
+    pub dash_nums: &'a [i64],
+}
+
+#[derive(Debug)]
+pub struct BestTickFinder<'a> {
     ideal_num_steps: u32,
     start: UnixTime,
     end: UnixTime,
     //The number of ticks at which to give up on this candidate.
     max_tick_num: u32,
-    best: Vec<UnixTime>,
-    typ: TimestampType,
+    best: Candidate<'a>,
 }
-impl BestTickFinder {
+impl<'a> BestTickFinder<'a> {
     pub fn new(range: [UnixTime; 2], ideal_num_steps: u32) -> Self {
         let [start, end] = range;
         BestTickFinder {
@@ -36,13 +46,16 @@ impl BestTickFinder {
             start,
             end,
             max_tick_num: ideal_num_steps * 2,
-            best: Vec::new(),
-            typ: TimestampType::YR,
+            best: Candidate {
+                ticks: Vec::new(),
+                unit_data: TimestampType::YR,
+                dash_nums: &[],
+            },
         }
     }
-    pub fn into_best(self) -> Option<(Vec<UnixTime>, TimestampType)> {
-        if self.best.len() >= 2 {
-            Some((self.best, self.typ))
+    pub fn into_best(self) -> Option<Candidate<'a>> {
+        if self.best.ticks.len() >= 2 {
+            Some(self.best)
         } else {
             None
         }
@@ -64,14 +77,14 @@ impl BestTickFinder {
         Some(set)
     }
 
-    fn consider_set(&mut self, range: Vec<UnixTime>, ee: TimestampType) -> bool {
-        let new_closeness = (self.ideal_num_steps as i64 - range.len() as i64).abs();
-        let old_closeness = (self.ideal_num_steps as i64 - self.best.len() as i64).abs();
+    fn consider_set(&mut self, candidate: Candidate<'a>) -> bool {
+        let new_closeness = (self.ideal_num_steps as i64 - candidate.ticks.len() as i64).abs();
+        let old_closeness = (self.ideal_num_steps as i64 - self.best.ticks.len() as i64).abs();
 
         let is_better = if new_closeness < old_closeness {
             true
         } else if new_closeness == old_closeness {
-            if range.len() > self.best.len() {
+            if candidate.ticks.len() > self.best.ticks.len() {
                 true
             } else {
                 false
@@ -81,8 +94,7 @@ impl BestTickFinder {
         };
 
         if is_better {
-            self.best = range;
-            self.typ = ee;
+            self.best = candidate;
             true
         } else {
             false

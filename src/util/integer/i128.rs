@@ -3,45 +3,72 @@ use super::*;
 #[derive(Copy, Clone, Debug)]
 pub struct StepAmount(pub i128);
 
+/*
 /// Generate out good tick interval defaults for `i128`.
 pub fn compute_ticks(
     ideal_num_steps: u32,
     good_ticks: &[u32],
     range: [i128; 2],
 ) -> TickInfo<i128, StepAmount> {
-    let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
-    let (start_step, step_num) = get_range_info(step, range);
 
-    let display_relative = tick_fmt::should_fmt_offset(
-        start_step as f64,
-        (start_step + ((step_num - 1) as i128) * step) as f64,
-        step as f64,
-    );
-
-    let first_tick = if display_relative { 0 } else { start_step };
-
-    let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
-    for a in 0..step_num {
-        let position = start_step + step * (a as i128);
-        let value = first_tick + step * (a as i128);
-
-        ticks.push(Tick { position, value });
-    }
-
-    let dash_multiple = good_normalized_step;
-
-    TickInfo {
-        unit_data: StepAmount(step),
-        ticks,
-        //dash_multiple,
-        display_relative: display_relative.then(|| start_step),
-    }
 }
+*/
 
 impl PlotNum for i128 {
     type UnitData = StepAmount;
-    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, StepAmount> {
-        compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [Self; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self, StepAmount> {
+        let good_ticks = &[1, 2, 5, 10];
+
+        let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
+        let (start_step, step_num) = get_range_info(step, range);
+
+        let display_relative = tick_fmt::should_fmt_offset(
+            start_step as f64,
+            (start_step + ((step_num - 1) as i128) * step) as f64,
+            step as f64,
+        );
+
+        let first_tick = if display_relative { 0 } else { start_step };
+
+        let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
+        for a in 0..step_num {
+            let position = start_step + step * (a as i128);
+            let value = first_tick + step * (a as i128);
+
+            ticks.push(Tick { position, value });
+        }
+
+        let dash_size = {
+            let dash_multiple = good_normalized_step;
+            let max = dash.max;
+            let ideal_dash_size = dash.ideal_dash_size;
+            let one_step = step.scale(range, max);
+
+            assert!(dash_multiple > 0);
+
+            if dash_multiple == 1 || dash_multiple == 10 {
+                let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
+                let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
+                if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
+                    Some(a)
+                } else {
+                    Some(b)
+                }
+            } else {
+                Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
+            }
+        };
+
+        TickInfo {
+            unit_data: StepAmount(step),
+            ticks,
+            dash_size,
+            display_relative: display_relative.then(|| start_step),
+        }
     }
 
     fn unit_range(offset: Option<Self>) -> [Self; 2] {
@@ -59,8 +86,8 @@ impl PlotNum for i128 {
         fmt: FmtFull,
     ) -> std::fmt::Result {
         let step = match fmt {
-            FmtFull::Full => Some(step.0),
-            FmtFull::Tick => None,
+            FmtFull::Tick => Some(step.0),
+            FmtFull::Full => None,
         };
         tick_fmt::write_interval_i128(formatter, *self, step)
     }
@@ -72,7 +99,7 @@ impl PlotNum for i128 {
 
         (*self) as f64 * scale
     }
-
+    /*
     fn dash_size(
         ideal_dash_size: f64,
         tick_info: &TickInfo<Self, StepAmount>,
@@ -82,8 +109,10 @@ impl PlotNum for i128 {
         None
         //compute_dash_size(ideal_dash_size, tick_info, range, max)
     }
+    */
 }
 
+/*
 pub use month::MonthIndex;
 mod month {
     use super::*;
@@ -103,7 +132,7 @@ mod month {
     }
     impl PlotNum for MonthIndex {
         type UnitData = <i128 as PlotNum>::UnitData;
-        fn compute_ticks(ideal_num_steps: u32, range: [Self; 2]) -> TickInfo<Self, Self::UnitData> {
+        fn compute_ticks(ideal_num_steps: u32, range: [Self; 2],dash:DashInfo) -> TickInfo<Self, Self::UnitData> {
             let cc = [1, 2, 6, 12].iter().map(|&step| {
                 let (a, num_steps) = get_range_info(step, [range[0].0, range[1].0]);
                 (
@@ -196,3 +225,4 @@ mod month {
         }
     }
 }
+*/
