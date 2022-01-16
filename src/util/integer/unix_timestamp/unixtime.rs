@@ -4,6 +4,7 @@ use super::*;
 pub struct UnixTime(pub i64);
 
 pub use chrono::ParseResult;
+pub use chrono::Weekday;
 
 fn round_up_to_nearest_multiple(val: i64, multiple: i64) -> i64 {
     let ss = if val >= 0 { multiple - 1 } else { 0 };
@@ -41,6 +42,10 @@ impl UnixTime {
     //1 to 12
     pub fn month(&self) -> u32 {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).month()
+    }
+
+    pub fn weekday(&self)->chrono::Weekday{
+        chrono::NaiveDateTime::from_timestamp(self.0, 0).weekday()
     }
 
     //1 to 30

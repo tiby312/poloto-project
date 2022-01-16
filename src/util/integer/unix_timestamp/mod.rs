@@ -28,7 +28,7 @@ impl PlotNum for UnixTime {
         dash: DashInfo,
     ) -> TickInfo<Self, TimestampType> {
         assert!(range[0] <= range[1]);
-
+        
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
 
         let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
@@ -47,8 +47,10 @@ impl PlotNum for UnixTime {
 
         //TODO handle dashes???
 
+
         let ret = t.into_best().unwrap();
 
+        
         let ticks: Vec<_> = ret
             .ticks
             .into_iter()
@@ -111,6 +113,7 @@ impl PlotNum for UnixTime {
                     write!(formatter, "{}", self.year())
                 }
                 MO => {
+                    /*
                     let m = match self.month() {
                         1 => "Jan",
                         2 => "Feb",
@@ -126,14 +129,15 @@ impl PlotNum for UnixTime {
                         12 => "Dec",
                         _ => unreachable!(),
                     };
+                    */
 
-                    write!(formatter, "{}:{}", self.year(), m)
+                    write!(formatter, "{}/{}", self.year(), self.month())
                 }
                 DY => {
-                    write!(formatter, "{}:{}", self.month(), self.day())
+                    write!(formatter, "{}/{}", self.month(), self.day())
                 }
                 HR => {
-                    write!(formatter, "{}:{}", self.day(), self.hour())
+                    write!(formatter, "{}:{}", self.weekday(), self.hour())
                 }
                 MI => {
                     write!(formatter, "{}:{}", self.hour(), self.minute())
@@ -146,6 +150,7 @@ impl PlotNum for UnixTime {
     }
 
     fn unit_range(offset: Option<Self>) -> [Self; 2] {
+        dbg!("UNIT RANGE");
         if let Some(o) = offset {
             [o, UnixTime(o.0 + 1)]
         } else {

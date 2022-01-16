@@ -77,6 +77,7 @@ impl<'a> BestTickFinder<'a> {
         Some(set)
     }
 
+    ///Returns true if the candidate was chosen
     fn consider_set(&mut self, candidate: Candidate<'a>) -> bool {
         let new_closeness = (self.ideal_num_steps as i64 - candidate.ticks.len() as i64).abs();
         let old_closeness = (self.ideal_num_steps as i64 - self.best.ticks.len() as i64).abs();
@@ -84,6 +85,7 @@ impl<'a> BestTickFinder<'a> {
         let is_better = if new_closeness < old_closeness {
             true
         } else if new_closeness == old_closeness {
+            //If there is a tie, choose the one with more ticks.
             if candidate.ticks.len() > self.best.ticks.len() {
                 true
             } else {
