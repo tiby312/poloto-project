@@ -9,6 +9,7 @@ macro_rules! make_consider {
                         ticks,
                         unit_data: $ee,
                         dash_nums,
+                        chosen_tick:a
                     });
                 } else {
                     // Since we are hansling smaller and smaller step sizes,
@@ -27,7 +28,10 @@ pub struct Candidate<'a> {
     pub ticks: Vec<UnixTime>,
     pub unit_data: TimestampType,
     pub dash_nums: &'a [i64],
+    pub chosen_tick:i64
 }
+
+
 
 #[derive(Debug)]
 pub struct BestTickFinder<'a> {
@@ -50,7 +54,8 @@ impl<'a> BestTickFinder<'a> {
                 ticks: Vec::new(),
                 unit_data: TimestampType::YR,
                 dash_nums: &[],
-            },
+                chosen_tick:0
+            }
         }
     }
     pub fn into_best(self) -> Option<Candidate<'a>> {

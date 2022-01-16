@@ -26,6 +26,7 @@ impl UnixTime {
         )
     }
 
+
     pub fn from_ymd(year: i32, month: u32, day: u32) -> UnixTime {
         UnixTime(
             NaiveDateTime::new(
@@ -35,6 +36,18 @@ impl UnixTime {
             .timestamp(),
         )
     }
+
+
+    pub fn from_ymd_hms(year: i32, month: u32, day: u32,hours:u32,min:u32,seconds:u32) -> UnixTime {
+        UnixTime(
+            NaiveDateTime::new(
+                NaiveDate::from_ymd(year, month, day),
+                NaiveTime::from_hms(hours, min, seconds),
+            )
+            .timestamp(),
+        )
+    }
+
 
     pub fn year(&self) -> i32 {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).year()

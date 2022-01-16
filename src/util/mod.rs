@@ -186,7 +186,9 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
         range: [Self; 2],
         dash: DashInfo,
     ) -> TickInfo<Self, Self::UnitData> {
-        I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0], dash).map(NoDash, |x| x)
+        let mut k=I::compute_ticks(ideal_num_steps, [range[0].0, range[1].0], dash).map(NoDash, |x| x);
+        k.dash_size=None;
+        k
     }
 
     fn unit_range(o: Option<Self>) -> [Self; 2] {

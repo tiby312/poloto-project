@@ -32,8 +32,8 @@ impl PlotNum for UnixTime {
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
 
         let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
-        let steps_mo = &[1, 2, 6, 12, 24, 48];
-        let steps_dy = &[1, 2, 5, 7, 10, 30, 60, 100, 365];
+        let steps_mo = &[1, 2, 3, 6, 12];
+        let steps_dy = &[1, 2, 5, 10];
         let steps_hr = &[1, 2, 5, 10];
         let steps_mi = &[1, 2, 5, 10];
         let steps_se = &[1, 2, 5, 10];
@@ -50,7 +50,7 @@ impl PlotNum for UnixTime {
 
         let ret = t.into_best().unwrap();
 
-        
+
         let ticks: Vec<_> = ret
             .ticks
             .into_iter()
@@ -104,6 +104,26 @@ impl PlotNum for UnixTime {
         fmt: FmtFull,
     ) -> std::fmt::Result {
         use TimestampType::*;
+
+
+        let m = match self.month() {
+            1 => "Jan",
+            2 => "Feb",
+            3 => "Mar",
+            4 => "Apr",
+            5 => "May",
+            6 => "Jun",
+            7 => "Jul",
+            8 => "Aug",
+            9 => "Sep",
+            10 => "Oct",
+            11 => "Nov",
+            12 => "Dec",
+            _ => unreachable!(),
+        };
+        
+
+
         match fmt {
             FmtFull::Full => {
                 write!(formatter, "{}", self)
@@ -113,28 +133,11 @@ impl PlotNum for UnixTime {
                     write!(formatter, "{}", self.year())
                 }
                 MO => {
-                    /*
-                    let m = match self.month() {
-                        1 => "Jan",
-                        2 => "Feb",
-                        3 => "Mar",
-                        4 => "Apr",
-                        5 => "May",
-                        6 => "Jun",
-                        7 => "Jul",
-                        8 => "Aug",
-                        9 => "Sep",
-                        10 => "Oct",
-                        11 => "Nov",
-                        12 => "Dec",
-                        _ => unreachable!(),
-                    };
-                    */
-
-                    write!(formatter, "{}/{}", self.year(), self.month())
+                    
+                    write!(formatter, "{} {}", self.year(), m)
                 }
                 DY => {
-                    write!(formatter, "{}/{}", self.month(), self.day())
+                    write!(formatter, "{} {}", m, self.day())
                 }
                 HR => {
                     write!(formatter, "{}:{}", self.weekday(), self.hour())
