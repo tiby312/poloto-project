@@ -29,18 +29,14 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
 ) -> fmt::Result {
     let mut writer = tagger::new(writer);
 
-    let mut plotter = {
-        let mut empty = crate::Plotter::new("", "", "");
-        core::mem::swap(&mut empty, plotter);
-        empty
-    };
-
     let width = crate::WIDTH as f64;
     let height = crate::HEIGHT as f64;
     let padding = 150.0;
     let paddingy = 100.0;
 
     let ([minx, maxx], [miny, maxy]) = util::find_bounds(
+        &mut plotter.xcontext,
+        &mut plotter.ycontext,
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
         plotter.xmarkers.iter().copied(),
         plotter.ymarkers.iter().copied(),
@@ -94,16 +90,64 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                 Ok(wc.get_counter() != 0)
             })?;
 
-        let aa = minx.scale([minx, maxx], scalex2);
-        let bb = miny.scale([miny, maxy], scaley2);
+        let aa = plotter.xcontext.scale(minx, [minx, maxx], scalex2);
+        let bb = plotter.ycontext.scale(miny, [miny, maxy], scaley2);
 
+        struct Foo<X, Y> {
+            basex_ii: f64,
+            basey_ii: f64,
+            rangex_ii: [X; 2],
+            rangey_ii: [Y; 2],
+            maxx_ii: f64,
+            maxy_ii: f64,
+        }
+        impl<X: PlotNum, Y: PlotNum> Foo<X, Y> {
+            fn iter<'a>(
+                &'a self,
+                p: &'a mut Plot<X, Y>,
+                xcontext: &'a mut X::Context,
+                ycontext: &'a mut Y::Context,
+            ) -> impl Iterator<Item = [f64; 2]> + 'a {
+                p.plots.iter_second().map(move |(x, y)| {
+                    /*
+                    [
+                        aspect_offset + padding + (plotter.xcontext.scale(x,[minx, maxx], scalex2) - aa),
+                        height - paddingy - (plotter.ycontext.scale(y,[miny, maxy], scaley2) - bb),
+                    ]
+                    */
+                    [
+                        self.basex_ii + xcontext.scale(x, self.rangex_ii, self.maxx_ii),
+                        self.basey_ii - ycontext.scale(y, self.rangey_ii, self.maxy_ii),
+                    ]
+                })
+            }
+        }
+
+        let foo = Foo {
+            basex_ii: aspect_offset + padding - aa,
+            basey_ii: height - paddingy + bb,
+            rangex_ii: [minx, maxx],
+            rangey_ii: [miny, maxy],
+            maxx_ii: scalex2,
+            maxy_ii: scaley2,
+        };
+
+        /*
         // Scale all the plots here.
         let it = p.plots.iter_second().map(|(x, y)| {
+            /*
             [
-                aspect_offset + padding + (x.scale([minx, maxx], scalex2) - aa),
-                height - paddingy - (y.scale([miny, maxy], scaley2) - bb),
+                aspect_offset + padding + (plotter.xcontext.scale(x,[minx, maxx], scalex2) - aa),
+                height - paddingy - (plotter.ycontext.scale(y,[miny, maxy], scaley2) - bb),
+            ]
+            */
+            [
+                basex_ii+plotter.xcontext.scale(x,rangex_ii,max_ii)
+                basey_ii+plotter.ycontext.scale(y,rangey_ii,may_ii)
+
             ]
         });
+        */
 
         let colori = color_iter.next().unwrap();
 
@@ -130,7 +174,12 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                     d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                     d.attr("fill", "none")?;
                     d.attr("stroke", "black")?;
-                    d.path(|p| line(p, it))
+                    d.path(|a| {
+                        line(
+                            a,
+                            foo.iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext),
+                        )
+                    })
                 })?;
             }
             PlotType::Scatter => {
@@ -156,11 +205,14 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         "class",
                         format_args!("poloto_scatter poloto{}stroke", colori),
                     )?;
-                    d.path(|p| {
+                    d.path(|a| {
                         use tagger::PathCommand::*;
-                        for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                            p.put(M(x, y))?;
-                            p.put(H_(0))?;
+                        for [x, y] in foo
+                            .iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
+                            .filter(|&[x, y]| x.is_finite() && y.is_finite())
+                        {
+                            a.put(M(x, y))?;
+                            a.put(H_(0))?;
                         }
                         Ok(())
                     })
@@ -192,7 +244,10 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                     .build(|writer| {
                         let mut last = None;
                         //TODO dont necesarily filter?
-                        for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
+                        for [x, y] in foo
+                            .iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
+                            .filter(|&[x, y]| x.is_finite() && y.is_finite())
+                        {
                             if let Some((lx, ly)) = last {
                                 writer.single("rect", |d| {
                                     d.attr("x", lx)?;
@@ -233,7 +288,14 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         "class",
                         format_args!("poloto_linefill poloto{}fill", colori),
                     )?;
-                    d.path(|path| line_fill(path, it, height - paddingy, true))
+                    d.path(|path| {
+                        line_fill(
+                            path,
+                            foo.iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext),
+                            height - paddingy,
+                            true,
+                        )
+                    })
                 })?;
             }
             PlotType::LineFillRaw => {
@@ -260,14 +322,21 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
                         "class",
                         format_args!("poloto_linefillraw poloto{}fill", colori),
                     )?;
-                    d.path(|path| line_fill(path, it, height - paddingy, false))
+                    d.path(|path| {
+                        line_fill(
+                            path,
+                            foo.iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext),
+                            height - paddingy,
+                            false,
+                        )
+                    })
                 })?;
             }
         }
     }
 
     draw_base(
-        &mut plotter,
+        plotter,
         &mut writer,
         DrawData {
             width: crate::WIDTH as f64,

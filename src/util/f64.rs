@@ -8,17 +8,19 @@ impl DiscNum for f64 {
 #[derive(Copy, Clone, Debug)]
 pub struct StepAmount(pub f64);
 
-impl PlotNum for f64 {
+#[derive(Default)]
+pub struct Defaultf64Context;
+
+impl PlotNumContext for Defaultf64Context {
+    type Num = f64;
     type UnitData = StepAmount;
 
-    fn is_hole(&self) -> bool {
-        self.is_nan()
-    }
     fn compute_ticks(
+        &mut self,
         ideal_num_steps: u32,
-        range: [Self; 2],
+        range: [f64; 2],
         dash: DashInfo,
-    ) -> TickInfo<Self, StepAmount> {
+    ) -> TickInfo<f64, StepAmount> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -46,7 +48,7 @@ impl PlotNum for f64 {
             let dash_multiple = good_normalized_step;
             let max = dash.max;
             let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = step.scale(range, max);
+            let one_step = self.scale(step, range, max);
 
             assert!(dash_multiple > 0);
 
@@ -72,9 +74,10 @@ impl PlotNum for f64 {
         //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
-    fn fmt_tick(
-        &self,
-        formatter: &mut std::fmt::Formatter,
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        formatter: T,
+        val: f64,
         step: StepAmount,
         fmt: FmtFull,
     ) -> std::fmt::Result {
@@ -82,10 +85,10 @@ impl PlotNum for f64 {
             FmtFull::Tick => Some(step.0),
             FmtFull::Full => None,
         };
-        tick_fmt::write_interval_float(formatter, *self, step)
+        tick_fmt::write_interval_float(formatter, val, step)
     }
 
-    fn unit_range(offset: Option<Self>) -> [Self; 2] {
+    fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
         if let Some(o) = offset {
             [o - 1.0, o + 1.0]
         } else {
@@ -93,34 +96,20 @@ impl PlotNum for f64 {
         }
     }
 
-    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
-        let diff = val[1] - val[0];
+    fn scale(&mut self, val: f64, range: [f64; 2], max: f64) -> f64 {
+        let diff = range[1] - range[0];
         let scale = max / diff;
-        (*self) * scale
+        val * scale
     }
-
-    /*
-    fn dash_size(
-        ideal_dash_size: f64,
-        tick_info: &TickInfo<Self, StepAmount>,
-        range: [Self; 2],
-        max: f64,
-    ) -> Option<f64> {
-        None
-        //compute_dash_size(ideal_dash_size, tick_info, range, max)
-    }*/
 }
 
-/*
-/// Generate out good tick interval defaults for `f64`.
-pub fn compute_ticks(
-    ideal_num_steps: u32,
-    good_ticks: &[u32],
-    range: [f64; 2],
-) -> TickInfo<f64, StepAmount> {
+impl PlotNum for f64 {
+    type Context = Defaultf64Context;
 
+    fn is_hole(&self) -> bool {
+        self.is_nan()
+    }
 }
-*/
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple

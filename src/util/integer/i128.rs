@@ -14,13 +14,18 @@ pub fn compute_ticks(
 }
 */
 
-impl PlotNum for i128 {
+#[derive(Default)]
+pub struct Defaulti128Context;
+
+impl PlotNumContext for Defaulti128Context {
+    type Num = i128;
     type UnitData = StepAmount;
     fn compute_ticks(
+        &mut self,
         ideal_num_steps: u32,
-        range: [Self; 2],
+        range: [i128; 2],
         dash: DashInfo,
-    ) -> TickInfo<Self, StepAmount> {
+    ) -> TickInfo<i128, StepAmount> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -46,7 +51,7 @@ impl PlotNum for i128 {
             let dash_multiple = good_normalized_step;
             let max = dash.max;
             let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = step.scale(range, max);
+            let one_step = self.scale(step, range, max);
 
             assert!(dash_multiple > 0);
 
@@ -71,7 +76,7 @@ impl PlotNum for i128 {
         }
     }
 
-    fn unit_range(offset: Option<Self>) -> [Self; 2] {
+    fn unit_range(&mut self, offset: Option<i128>) -> [i128; 2] {
         if let Some(o) = offset {
             [o - 1, o + 1]
         } else {
@@ -79,9 +84,10 @@ impl PlotNum for i128 {
         }
     }
 
-    fn fmt_tick(
-        &self,
-        formatter: &mut std::fmt::Formatter,
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        formatter: T,
+        val: i128,
         step: StepAmount,
         fmt: FmtFull,
     ) -> std::fmt::Result {
@@ -89,27 +95,20 @@ impl PlotNum for i128 {
             FmtFull::Tick => Some(step.0),
             FmtFull::Full => None,
         };
-        tick_fmt::write_interval_i128(formatter, *self, step)
+        tick_fmt::write_interval_i128(formatter, val, step)
     }
 
-    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
-        let diff = (val[1] - val[0]) as f64;
+    fn scale(&mut self, val: i128, range: [i128; 2], max: f64) -> f64 {
+        let diff = (range[1] - range[0]) as f64;
 
         let scale = max / diff;
 
-        (*self) as f64 * scale
+        val as f64 * scale
     }
-    /*
-    fn dash_size(
-        ideal_dash_size: f64,
-        tick_info: &TickInfo<Self, StepAmount>,
-        range: [Self; 2],
-        max: f64,
-    ) -> Option<f64> {
-        None
-        //compute_dash_size(ideal_dash_size, tick_info, range, max)
-    }
-    */
+}
+
+impl PlotNum for i128 {
+    type Context = Defaulti128Context;
 }
 
 /*

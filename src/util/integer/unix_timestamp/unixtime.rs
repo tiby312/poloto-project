@@ -26,7 +26,6 @@ impl UnixTime {
         )
     }
 
-
     pub fn from_ymd(year: i32, month: u32, day: u32) -> UnixTime {
         UnixTime(
             NaiveDateTime::new(
@@ -37,8 +36,14 @@ impl UnixTime {
         )
     }
 
-
-    pub fn from_ymd_hms(year: i32, month: u32, day: u32,hours:u32,min:u32,seconds:u32) -> UnixTime {
+    pub fn from_ymd_hms(
+        year: i32,
+        month: u32,
+        day: u32,
+        hours: u32,
+        min: u32,
+        seconds: u32,
+    ) -> UnixTime {
         UnixTime(
             NaiveDateTime::new(
                 NaiveDate::from_ymd(year, month, day),
@@ -48,7 +53,6 @@ impl UnixTime {
         )
     }
 
-
     pub fn year(&self) -> i32 {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).year()
     }
@@ -57,7 +61,7 @@ impl UnixTime {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).month()
     }
 
-    pub fn weekday(&self)->chrono::Weekday{
+    pub fn weekday(&self) -> chrono::Weekday {
         chrono::NaiveDateTime::from_timestamp(self.0, 0).weekday()
     }
 
@@ -128,8 +132,6 @@ impl UnixTime {
     }
 
     pub fn hours(&self, step_value: i64) -> UnixHours {
-        let hours = 60 * 60;
-
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let hh = this.hour() as i64;
 
@@ -146,8 +148,6 @@ impl UnixTime {
     }
 
     pub fn minutes(&self, step_value: i64) -> UnixMinutes {
-        let minutes = 60;
-
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let mm = this.minute() as i64;
 

@@ -20,7 +20,7 @@ fn main() {
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
-    let data = data.into_iter().map(|&(a, b)| {
+    let data = data.into_iter().map(|(a, b)| {
         let a = UnixTime::from_year(a);
         (a, b)
     });

@@ -1,3 +1,4 @@
+/*
 use poloto::util::no_dash_tuple;
 
 // PIPE me to a file!
@@ -11,3 +12,6 @@ fn main() {
 
     println!("{}", poloto::disp(|a| poloto::simple_theme_dark(a, s)));
 }
+*/
+
+fn main() {}

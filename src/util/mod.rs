@@ -36,38 +36,10 @@ fn test_multiple<I: PlotNum>(
         (one_step, dash_multiple, ideal_dash_size)
     );
 }
-///
-/// Compute a good dash size that aligned with the ticks.
-/// This is only compatible for ticks using `[1,2,5,10]`.
-///
-pub fn compute_dash_size<I: PlotNum>(
-    ideal_dash_size: f64,
-    tick_info: &TickInfo<I, I::UnitData>,
-    range: [I; 2],
-    max: f64,
-) -> Option<f64> {
-    unimplemented!();
-    /*
-    let one_step = tick_info.step.scale(range, max);
-    let dash_multiple = tick_info.dash_multiple;
-
-    assert!(dash_multiple > 0);
-
-    if dash_multiple == 1 || dash_multiple == 10 {
-        let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
-        let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
-        if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
-            Some(a)
-        } else {
-            Some(b)
-        }
-    } else {
-        Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
-    }
-    */
-}
 
 pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
+    xcontext: &mut X::Context,
+    ycontext: &mut Y::Context,
     it: impl IntoIterator<Item = (X, Y)>,
     xmarkers: impl IntoIterator<Item = X>,
     ymarkers: impl IntoIterator<Item = Y>,
@@ -119,16 +91,16 @@ pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
         });
 
         if !xmoved {
-            val.0 = X::unit_range(Some(x));
+            val.0 = xcontext.unit_range(Some(x));
         }
 
         if !ymoved {
-            val.1 = Y::unit_range(Some(y));
+            val.1 = ycontext.unit_range(Some(y));
         }
 
         val
     } else {
-        (X::unit_range(None), Y::unit_range(None))
+        (xcontext.unit_range(None), ycontext.unit_range(None))
     }
 }
 
@@ -151,6 +123,7 @@ impl<T: fmt::Write> fmt::Write for WriteCounter<T> {
     }
 }
 
+/*
 ///
 /// Shorthand to easily make a plot without dashed lines. See `nodash` example.
 ///
@@ -177,7 +150,8 @@ impl<I: DiscNum> DiscNum for NoDash<I> {
     }
 }
 impl<I: PlotNum> PlotNum for NoDash<I> {
-    type UnitData = I::UnitData;
+    type Context = I::Context;
+
     fn is_hole(&self) -> bool {
         self.0.is_hole()
     }
@@ -219,3 +193,5 @@ impl<I: PlotNum> PlotNum for NoDash<I> {
         None
     }*/
 }
+
+*/

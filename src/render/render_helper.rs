@@ -158,7 +158,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let xtick_info = PlotNum::compute_ticks(
+        let xtick_info = plotter.xcontext.compute_ticks(
             ideal_num_xsteps,
             [minx, maxx],
             DashInfo {
@@ -166,7 +166,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                 max: scalex,
             },
         );
-        let ytick_info = PlotNum::compute_ticks(
+        let ytick_info = plotter.ycontext.compute_ticks(
             ideal_num_ysteps,
             [miny, maxy],
             DashInfo {
@@ -192,14 +192,12 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         d.attr("y", paddingy * 0.7)
                     })?
                     .build(|d| {
-                        d.put_raw(format_args!(
-                            "Where j = {}",
-                            DisplayableClosure::new(|w| base.fmt_tick(
-                                w,
-                                xtick_info.unit_data,
-                                FmtFull::Full
-                            ))
-                        ))
+                        let mut w = d.writer_safe();
+                        use std::fmt::Write;
+                        write!(w, "{}", "Where j = ")?;
+                        plotter
+                            .xcontext
+                            .fmt_tick(w, base, xtick_info.unit_data, FmtFull::Full)
                     })?;
 
                 "j+"
@@ -209,7 +207,8 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
 
             //Draw interva`l x text
             for &Tick { position, value } in xtick_info.ticks.iter() {
-                let xx = (position.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex))
+                let xx = (plotter.xcontext.scale(position, [minx, maxx], scalex)
+                    - plotter.xcontext.scale(minx, [minx, maxx], scalex))
                     + padding;
 
                 writer.single("line", |d| {
@@ -230,16 +229,24 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         d.attr("y", height - paddingy + texty_padding)
                     })?
                     .build(|w| {
+                        let mut w = w.writer_safe();
+                        use std::fmt::Write;
+                        write!(w, "{}", extra)?;
+                        plotter
+                            .xcontext
+                            .fmt_tick(w, value, xtick_info.unit_data, FmtFull::Tick)
+                        /*
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.xtick_fmt.write(
+                            DisplayableClosure::new(|w| plotter.xcontext.fmt_tick(
                                 w,
                                 value,
                                 xtick_info.unit_data,
                                 FmtFull::Tick
                             ))
                         ))
+                        */
                     })?;
             }
         }
@@ -256,14 +263,12 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         d.attr("y", paddingy * 0.7)
                     })?
                     .build(|w| {
-                        w.put_raw(format_args!(
-                            "Where k = {}",
-                            DisplayableClosure::new(|w| base.fmt_tick(
-                                w,
-                                ytick_info.unit_data,
-                                FmtFull::Full
-                            ))
-                        ))
+                        use std::fmt::Write;
+                        let mut w = w.writer_safe();
+                        write!(w, "{}", "Where k = ")?;
+                        plotter
+                            .ycontext
+                            .fmt_tick(w, base, ytick_info.unit_data, FmtFull::Full)
                     })?;
 
                 "k+"
@@ -274,7 +279,8 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             //Draw interval y text
             for &Tick { position, value } in ytick_info.ticks.iter() {
                 let yy = height
-                    - (position.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
+                    - (plotter.ycontext.scale(position, [miny, maxy], scaley)
+                        - plotter.ycontext.scale(miny, [miny, maxy], scaley))
                     - paddingy;
 
                 writer.single("line", |d| {
@@ -295,22 +301,32 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         d.attr("y", yy)
                     })?
                     .build(|w| {
+                        let mut w = w.writer_safe();
+                        use std::fmt::Write;
+                        write!(w, "{}", extra)?;
+                        plotter
+                            .ycontext
+                            .fmt_tick(w, value, ytick_info.unit_data, FmtFull::Tick)
+                        /*
                         w.put_raw(format_args!(
                             "{}{}",
                             extra,
-                            DisplayableClosure::new(|w| plotter.ytick_fmt.write(
+                            DisplayableClosure::new(|w| plotter.ycontext.fmt_tick(
                                 w,
                                 value,
                                 ytick_info.unit_data,
                                 FmtFull::Tick
                             )) //TODO need a way to communicate writing base
                         ))
+                        */
                     })?;
             }
         }
 
-        let d1 = minx.scale([minx, maxx], scalex);
-        let d2 = xtick_info.ticks[0].position.scale([minx, maxx], scalex);
+        let d1 = plotter.xcontext.scale(minx, [minx, maxx], scalex);
+        let d2 = plotter
+            .xcontext
+            .scale(xtick_info.ticks[0].position, [minx, maxx], scalex);
         let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
@@ -340,8 +356,10 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             })
         })?;
 
-        let d1 = miny.scale([miny, maxy], scaley);
-        let d2 = ytick_info.ticks[0].position.scale([miny, maxy], scaley);
+        let d1 = plotter.ycontext.scale(miny, [miny, maxy], scaley);
+        let d2 = plotter
+            .ycontext
+            .scale(ytick_info.ticks[0].position, [miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
 
         writer.single("path", |d| {

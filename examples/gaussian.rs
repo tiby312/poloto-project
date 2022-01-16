@@ -14,12 +14,12 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let plotter = poloto::plot("gaussian", "x", "y")
-        .line("σ = 1.0", range.clone().map(|x| [x, g1(x)]))
-        .line("σ = 0.5", range.clone().map(|x| [x, g2(x)]))
-        .line("σ = 0.3", range.clone().map(|x| [x, g3(x)]))
-        .ymarker(0.0)
-        .move_into();
+    let mut plotter = poloto::plot("gaussian", "x", "y");
+
+    plotter.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
+    plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
+    plotter.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+    plotter.ymarker(0.0);
 
     println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }

@@ -208,10 +208,21 @@ pub fn plot<'a, X: PlotNum, Y: PlotNum>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a, X, Y> {
-    Plotter::new(title, xname, yname)
+) -> Plotter<'a, X, Y>
+where
+    X::Context: PlotNumContext + Default,
+    Y::Context: PlotNumContext + Default,
+{
+    Plotter::new(
+        title,
+        xname,
+        yname,
+        X::Context::default(),
+        Y::Context::default(),
+    )
 }
 
+/*
 trait MyFmt<X: PlotNum> {
     fn write(
         &self,
@@ -243,6 +254,7 @@ impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, X::UnitData, FmtFull) -> std
         (self.0)(formatter, value, step, fmt)
     }
 }
+*/
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -262,8 +274,8 @@ pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xtick_fmt: Box<dyn MyFmt<X> + 'a>,
-    ytick_fmt: Box<dyn MyFmt<Y> + 'a>,
+    xcontext: X::Context,
+    ycontext: Y::Context,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
@@ -278,6 +290,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
+        xcontext: X::Context,
+        ycontext: Y::Context,
     ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
@@ -288,8 +302,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
             ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xtick_fmt: Box::new(Foo::<_, X>::new(move |a, b, c, d| b.fmt_tick(a, c, d))),
-            ytick_fmt: Box::new(Foo::<_, Y>::new(move |a, b, c, d| b.fmt_tick(a, c, d))),
+            xcontext,
+            ycontext,
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -472,6 +486,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self
     }
 
+    /*
     ///
     /// Move a plotter out from behind a mutable reference leaving
     /// an empty plotter.
@@ -481,40 +496,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         core::mem::swap(&mut empty, self);
         empty
     }
-
-    ///
-    /// Overrides the [`PlotNum::fmt_tick`] function.
-    /// The callback function provided will get called on each
-    /// interval tick to be drawn. The callback function is passed
-    /// the value of the interval, as well as the step-size.
-    /// This function is also called to display `k` and `j` values
-    /// for when the magnitudes of of the plots are extreme.
-    /// In those cases, the step-size is not provided and `None` is passed.
-    ///
-    pub fn xinterval_fmt(
-        &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, X, X::UnitData, FmtFull) -> std::fmt::Result + 'a,
-    ) -> &mut Self {
-        self.xtick_fmt = Box::new(Foo::new(a));
-        self
-    }
-
-    ///
-    /// Overrides the [`PlotNum::fmt_tick`] function.
-    /// The callback function provided will get called on each
-    /// interval tick to be drawn. The callback function is passed
-    /// the value of the interval, as well as the step-size.
-    /// This function is also called to display `k` and `j` values
-    /// for when the magnitudes of of the plots are extreme.
-    /// In those cases, the step-size is not provided and `None` is passed.
-    ///
-    pub fn yinterval_fmt(
-        &mut self,
-        a: impl Fn(&mut std::fmt::Formatter, Y, Y::UnitData, FmtFull) -> std::fmt::Result + 'a,
-    ) -> &mut Self {
-        self.ytick_fmt = Box::new(Foo::new(a));
-        self
-    }
+    */
 
     ///
     /// Use the plot iterators to write out the graph elements.
@@ -650,56 +632,52 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
-///
-/// A plottable number. In order to be able to plot a number, we need information on how
-/// to display it as well as the interval ticks.
-///
-pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
+pub trait PlotNumContext {
     type UnitData: Copy;
-
-    /// Is this a hole value to inject discontinuty?
-    fn is_hole(&self) -> bool {
-        false
-    }
+    type Num: PlotNum;
 
     ///
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
     ///
     fn compute_ticks(
+        &mut self,
         ideal_num_steps: u32,
-        range: [Self; 2],
+        range: [Self::Num; 2],
         dash: DashInfo,
-    ) -> TickInfo<Self, Self::UnitData>;
+    ) -> TickInfo<Self::Num, Self::UnitData>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
-    fn unit_range(offset: Option<Self>) -> [Self; 2];
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2];
 
     /// Provided a min and max range, scale the current value against max.
-    fn scale(&self, val: [Self; 2], max: f64) -> f64;
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64;
 
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &self,
-        formatter: &mut std::fmt::Formatter,
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        mut formatter: T,
+        val: Self::Num,
         _step: Self::UnitData,
         _draw_full: FmtFull,
     ) -> std::fmt::Result {
-        write!(formatter, "{}", self)
+        write!(formatter, "{}", val)
     }
-    /*
-    /// Compute the exact size of the ticks.
-    /// This can be overridden such that it always returns `None`.
-    /// This way there will be no dashes, and it will just be a solid line.
-    fn dash_size(
-        ideal_dash_size: f64,
-        tick_info: &TickInfo<Self, Self::UnitData>,
-        range: [Self; 2],
-        max: f64,
-    ) -> Option<f64>;
-    */
+}
+
+///
+/// A plottable number. In order to be able to plot a number, we need information on how
+/// to display it as well as the interval ticks.
+///
+pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
+    type Context: PlotNumContext<Num = Self>;
+
+    /// Is this a hole value to inject discontinuty?
+    fn is_hole(&self) -> bool {
+        false
+    }
 }
 
 pub struct DashInfo {

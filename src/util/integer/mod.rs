@@ -35,11 +35,6 @@ fn get_range_info(step: i128, range_all: [i128; 2]) -> (i128, u32) {
     (start_step, step_num)
 }
 
-struct StepRes {
-    step_size: i128,
-    num_steps: i128,
-    step_amount: u32, // e.g. 1,2,5, or 10
-}
 ///
 /// INPUT:
 /// Ideal number of ticks

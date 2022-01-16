@@ -4,7 +4,6 @@ mod unixtime;
 use super::*;
 use chrono::prelude::*;
 use chrono::DateTime;
-use chrono::Duration;
 pub use unixtime::UnixTime;
 
 #[derive(Copy, Clone, Debug)]
@@ -17,18 +16,20 @@ pub enum TimestampType {
     SE,
 }
 
-impl PlotNum for UnixTime {
+#[derive(Default)]
+pub struct DefaultUnixTimeContext;
+
+impl PlotNumContext for DefaultUnixTimeContext {
+    type Num = UnixTime;
     type UnitData = TimestampType;
-    fn is_hole(&self) -> bool {
-        false
-    }
     fn compute_ticks(
+        &mut self,
         ideal_num_steps: u32,
-        range: [Self; 2],
-        dash: DashInfo,
-    ) -> TickInfo<Self, TimestampType> {
+        range: [UnixTime; 2],
+        _dash: DashInfo,
+    ) -> TickInfo<UnixTime, TimestampType> {
         assert!(range[0] <= range[1]);
-        
+
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
 
         let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
@@ -47,9 +48,7 @@ impl PlotNum for UnixTime {
 
         //TODO handle dashes???
 
-
         let ret = t.into_best().unwrap();
-
 
         let ticks: Vec<_> = ret
             .ticks
@@ -97,16 +96,16 @@ impl PlotNum for UnixTime {
         }
     }
 
-    fn fmt_tick(
-        &self,
-        formatter: &mut std::fmt::Formatter,
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        mut formatter: T,
+        val: UnixTime,
         step: TimestampType,
         fmt: FmtFull,
     ) -> std::fmt::Result {
         use TimestampType::*;
 
-
-        let m = match self.month() {
+        let m = match val.month() {
             1 => "Jan",
             2 => "Feb",
             3 => "Mar",
@@ -121,39 +120,35 @@ impl PlotNum for UnixTime {
             12 => "Dec",
             _ => unreachable!(),
         };
-        
-
 
         match fmt {
             FmtFull::Full => {
-                write!(formatter, "{}", self)
+                write!(formatter, "{}", val)
             }
             FmtFull::Tick => match step {
                 YR => {
-                    write!(formatter, "{}", self.year())
+                    write!(formatter, "{}", val.year())
                 }
                 MO => {
-                    
-                    write!(formatter, "{} {}", self.year(), m)
+                    write!(formatter, "{} {}", val.year(), m)
                 }
                 DY => {
-                    write!(formatter, "{} {}", m, self.day())
+                    write!(formatter, "{} {}", m, val.day())
                 }
                 HR => {
-                    write!(formatter, "{}:{}", self.weekday(), self.hour())
+                    write!(formatter, "{}:{}", val.weekday(), val.hour())
                 }
                 MI => {
-                    write!(formatter, "{}:{}", self.hour(), self.minute())
+                    write!(formatter, "{}:{}", val.hour(), val.minute())
                 }
                 SE => {
-                    write!(formatter, "{}:{}", self.minute(), self.second())
+                    write!(formatter, "{}:{}", val.minute(), val.second())
                 }
             },
         }
     }
 
-    fn unit_range(offset: Option<Self>) -> [Self; 2] {
-        dbg!("UNIT RANGE");
+    fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
         if let Some(o) = offset {
             [o, UnixTime(o.0 + 1)]
         } else {
@@ -161,26 +156,16 @@ impl PlotNum for UnixTime {
         }
     }
 
-    fn scale(&self, val: [Self; 2], max: f64) -> f64 {
-        let [val1, val2] = val;
+    fn scale(&mut self, val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
+        let [val1, val2] = range;
         let [val1, val2] = [val1.0, val2.0];
         assert!(val1 <= val2);
         let diff = (val2 - val1) as f64;
         let scale = max / diff;
-        self.0 as f64 * scale
+        val.0 as f64 * scale
     }
-    /*
-    fn dash_size(
-        ideal_dash_size: f64,
-        tick_info: &TickInfo<Self, TimestampType>,
-        range: [Self; 2],
-        max: f64,
-    ) -> Option<f64> {
+}
 
-
-
-        None
-        //compute_dash_size(ideal_dash_size, tick_info, range, max)
-    }
-    */
+impl PlotNum for UnixTime {
+    type Context = DefaultUnixTimeContext;
 }
