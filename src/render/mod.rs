@@ -23,7 +23,7 @@ struct ScaleData<X: PlotNum, Y: PlotNum> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
+pub fn render<X: PlotNumContext, Y: PlotNumContext, T: std::fmt::Write>(
     plotter: &mut Plotter<X, Y>,
     writer: T,
 ) -> fmt::Result {
@@ -102,11 +102,11 @@ pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
             maxy_ii: f64,
         }
         impl<X: PlotNum, Y: PlotNum> Foo<X, Y> {
-            fn iter<'a>(
+            fn iter<'a, XX: PlotNumContext<Num = X>, YY: PlotNumContext<Num = Y>>(
                 &'a self,
                 p: &'a mut Plot<X, Y>,
-                xcontext: &'a mut X::Context,
-                ycontext: &'a mut Y::Context,
+                xcontext: &'a mut XX,
+                ycontext: &'a mut YY,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
                 p.plots.iter_second().map(move |(x, y)| {
                     /*

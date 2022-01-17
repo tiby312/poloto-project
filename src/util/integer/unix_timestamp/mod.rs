@@ -166,6 +166,4 @@ impl PlotNumContext for DefaultUnixTimeContext {
     }
 }
 
-impl PlotNum for UnixTime {
-    type Context = DefaultUnixTimeContext;
-}
+impl PlotNum for UnixTime {}

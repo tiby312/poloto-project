@@ -8,9 +8,10 @@ use crate::PlotNum;
 use crate::Tick;
 use crate::TickInfo;
 use core::fmt;
-//pub use self::f64::compute_ticks as compute_ticks_f64;
-//pub use self::i128::compute_ticks as compute_ticks_i128;
-pub mod f64;
+
+
+
+pub mod f64_;
 pub mod integer;
 
 use std::convert::TryFrom;
@@ -37,13 +38,13 @@ fn test_multiple<I: PlotNum>(
     );
 }
 
-pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
-    xcontext: &mut X::Context,
-    ycontext: &mut Y::Context,
-    it: impl IntoIterator<Item = (X, Y)>,
-    xmarkers: impl IntoIterator<Item = X>,
-    ymarkers: impl IntoIterator<Item = Y>,
-) -> ([X; 2], [Y; 2]) {
+pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
+    xcontext: &mut X,
+    ycontext: &mut Y,
+    it: impl IntoIterator<Item = (X::Num, Y::Num)>,
+    xmarkers: impl IntoIterator<Item = X::Num>,
+    ymarkers: impl IntoIterator<Item = Y::Num>,
+) -> ([X::Num; 2], [Y::Num; 2]) {
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
     if let Some((x, y)) = ii.next() {

@@ -107,9 +107,7 @@ impl PlotNumContext for Defaulti128Context {
     }
 }
 
-impl PlotNum for i128 {
-    type Context = Defaulti128Context;
-}
+impl PlotNum for i128 {}
 
 /*
 pub use month::MonthIndex;
