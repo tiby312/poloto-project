@@ -69,15 +69,9 @@ fn main() -> std::fmt::Result {
                             poloto::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                poloto::plot(
-                                    poloto::ctx::f64,
-                                    poloto::ctx::f64,
-                                    formatm!("test {}", i),
-                                    "x",
-                                    "y",
-                                )
-                                .scatter("", test)
-                                .render(a)
+                                poloto::plot(formatm!("test {}", i), "x", "y")
+                                    .scatter("", test)
+                                    .render(a)
                             }),
                             poloto::SVG_END
                         )?;
@@ -92,15 +86,9 @@ fn main() -> std::fmt::Result {
                             poloto::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                poloto::plot(
-                                    poloto::ctx::i128,
-                                    poloto::ctx::i128,
-                                    formatm!("test {}", i),
-                                    "x",
-                                    "y",
-                                )
-                                .scatter("", test)
-                                .render(a)
+                                poloto::plot(formatm!("test {}", i), "x", "y")
+                                    .scatter("", test)
+                                    .render(a)
                             }),
                             poloto::SVG_END
                         )?;

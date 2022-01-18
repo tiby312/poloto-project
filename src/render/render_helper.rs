@@ -85,11 +85,17 @@ pub fn line<T: std::fmt::Write>(
 ///
 /// Draw the axis lines, and tick intervals
 ///
-pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
-    plotter: &mut Plotter<X, Y>,
+pub(super) fn draw_base<
+    X: PlotNum,
+    Y: PlotNum,
+    XC: PlotNumContext<Num = X>,
+    YC: PlotNumContext<Num = Y>,
+    T: fmt::Write,
+>(
+    plotter: &mut Plotter<X, Y, XC, YC>,
     writer: &mut tagger::ElemWriter<T>,
     dd: DrawData,
-    sd: ScaleData<X::Num, Y::Num>,
+    sd: ScaleData<X, Y>,
 ) -> fmt::Result {
     let DrawData {
         width,

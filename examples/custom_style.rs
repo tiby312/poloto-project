@@ -3,8 +3,6 @@ fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     let mut s = poloto::plot(
-        poloto::ctx::f64,
-        poloto::ctx::f64,
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",

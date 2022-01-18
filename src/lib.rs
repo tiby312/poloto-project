@@ -214,14 +214,18 @@ impl<A: PlotNum, B: PlotNum> Plottable<A, B> for &(A, B) {
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: PlotNumContext, Y: PlotNumContext>(
-    xcontext: X,
-    ycontext: Y,
+pub fn plot<'a, X: PlotNum, Y: PlotNum>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a, X, Y> {
-    Plotter::new(xcontext, ycontext, title, xname, yname)
+) -> Plotter<'a, X, Y, X::DefaultContext, Y::DefaultContext> {
+    Plotter::new(
+        X::DefaultContext::default(),
+        Y::DefaultContext::default(),
+        title,
+        xname,
+        yname,
+    )
 }
 
 /*
@@ -267,18 +271,52 @@ impl<X: PlotNum, A: Fn(&mut std::fmt::Formatter, X, X::UnitData, FmtFull) -> std
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
 ///
-pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
+pub struct Plotter<
+    'a,
+    X: PlotNum + 'a,
+    Y: PlotNum + 'a,
+    XC: PlotNumContext<Num = X>,
+    YC: PlotNumContext<Num = Y>,
+> {
     title: Box<dyn fmt::Display + 'a>,
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
-    plots: Vec<Plot<'a, X::Num, Y::Num>>,
+    plots: Vec<Plot<'a, X, Y>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xcontext: X,
-    ycontext: Y,
+    xcontext: XC,
+    ycontext: YC,
 }
 
-impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
+impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>
+    Plotter<'a, X, Y, XC, YC>
+{
+    pub fn with_xcontext<XC2: PlotNumContext<Num = X>>(self, a: XC2) -> Plotter<'a, X, Y, XC2, YC> {
+        Plotter {
+            title: self.title,
+            xname: self.xname,
+            yname: self.yname,
+            plots: self.plots,
+            num_css_classes: self.num_css_classes,
+            preserve_aspect: self.preserve_aspect,
+            xcontext: a,
+            ycontext: self.ycontext,
+        }
+    }
+
+    pub fn with_ycontext<YC2: PlotNumContext<Num = Y>>(self, a: YC2) -> Plotter<'a, X, Y, XC, YC2> {
+        Plotter {
+            title: self.title,
+            xname: self.xname,
+            yname: self.yname,
+            plots: self.plots,
+            num_css_classes: self.num_css_classes,
+            preserve_aspect: self.preserve_aspect,
+            xcontext: self.xcontext,
+            ycontext: a,
+        }
+    }
+
     ///
     /// Create a plotter with the specified element.
     ///
@@ -287,12 +325,12 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
-        xcontext: X,
-        ycontext: Y,
+        xcontext: XC,
+        ycontext: YC,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a, X, Y> {
+    ) -> Plotter<'a, X, Y, XC, YC> {
         Plotter {
             title: Box::new(title),
             xname: Box::new(xname),
@@ -316,7 +354,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -340,7 +378,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -365,7 +403,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFillRaw,
@@ -391,7 +429,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -416,7 +454,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
@@ -499,9 +537,15 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
 /// let mut k=String::new();
 /// poloto::simple_theme(&mut k,plotter);
 /// ```
-pub fn simple_theme<T: std::fmt::Write, X: PlotNumContext, Y: PlotNumContext>(
+pub fn simple_theme<
+    T: std::fmt::Write,
+    X: PlotNum,
+    Y: PlotNum,
+    XC: PlotNumContext<Num = X>,
+    YC: PlotNumContext<Num = Y>,
+>(
     mut a: T,
-    mut p: Plotter<X, Y>,
+    mut p: Plotter<X, Y, XC, YC>,
 ) -> std::fmt::Result {
     write!(
         &mut a,
@@ -523,9 +567,15 @@ pub fn simple_theme<T: std::fmt::Write, X: PlotNumContext, Y: PlotNumContext>(
 /// let mut k=String::new();
 /// poloto::simple_theme_dark(&mut k,plotter);
 /// ```
-pub fn simple_theme_dark<T: std::fmt::Write, X: PlotNumContext, Y: PlotNumContext>(
+pub fn simple_theme_dark<
+    T: std::fmt::Write,
+    X: PlotNum,
+    Y: PlotNum,
+    XC: PlotNumContext<Num = X>,
+    YC: PlotNumContext<Num = Y>,
+>(
     mut a: T,
-    mut p: Plotter<X, Y>,
+    mut p: Plotter<X, Y, XC, YC>,
 ) -> std::fmt::Result {
     write!(
         &mut a,
@@ -880,6 +930,8 @@ pub trait PlotNumContext {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
+    type DefaultContext: PlotNumContext<Num = Self> + Default;
+
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false

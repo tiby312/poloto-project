@@ -13,13 +13,8 @@ fn main() {
         (UnixTime::from_ymd(2020, 2, 4), 4682000),
     ];
 
-    let mut s = poloto::plot(
-        poloto::ctx::UnixTime,
-        poloto::ctx::i128.no_dash().marker(0),
-        "Number of Wikipedia Articles",
-        "Year",
-        "Number of Articles",
-    );
+    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles")
+        .with_ycontext(poloto::ctx::i128.no_dash().marker(0));
 
     s.line("", data);
 

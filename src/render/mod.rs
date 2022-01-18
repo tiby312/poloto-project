@@ -23,8 +23,14 @@ struct ScaleData<X: PlotNum, Y: PlotNum> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<X: PlotNumContext, Y: PlotNumContext, T: std::fmt::Write>(
-    plotter: &mut Plotter<X, Y>,
+pub fn render<
+    X: PlotNum,
+    Y: PlotNum,
+    XC: PlotNumContext<Num = X>,
+    YC: PlotNumContext<Num = Y>,
+    T: std::fmt::Write,
+>(
+    plotter: &mut Plotter<X, Y, XC, YC>,
     writer: T,
 ) -> fmt::Result {
     let mut writer = tagger::new(writer);

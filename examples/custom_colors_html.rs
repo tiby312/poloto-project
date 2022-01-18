@@ -1,12 +1,6 @@
 use poloto::*;
 fn main() {
-    let mut s = plot(
-        poloto::ctx::f64,
-        poloto::ctx::f64,
-        "Demo: you can use CSS patterns if you embed SVG!",
-        "x",
-        "y",
-    );
+    let mut s = plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
