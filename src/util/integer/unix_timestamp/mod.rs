@@ -22,12 +22,14 @@ pub struct DefaultUnixTimeContext;
 impl PlotNumContext for DefaultUnixTimeContext {
     type Num = UnixTime;
     type UnitData = TimestampType;
+    type TickIter = std::vec::IntoIter<Tick<UnixTime>>;
+
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
         range: [UnixTime; 2],
         _dash: DashInfo,
-    ) -> TickInfo<UnixTime, TimestampType> {
+    ) -> TickInfo<UnixTime, TimestampType, Self::TickIter> {
         assert!(range[0] <= range[1]);
 
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
@@ -90,7 +92,7 @@ impl PlotNumContext for DefaultUnixTimeContext {
 
         TickInfo {
             unit_data: ret.unit_data,
-            ticks,
+            ticks: ticks.into_iter(),
             dash_size,
             display_relative: None, //Never want to do this for unix time.
         }

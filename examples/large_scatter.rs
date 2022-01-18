@@ -2,7 +2,13 @@ use poloto::*;
 fn main() {
     let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
 
-    let mut plotter = plot("cows per year", "year", "cows");
+    let mut plotter = plot(
+        poloto::ctx::f64,
+        poloto::ctx::f64,
+        "cows per year",
+        "year",
+        "cows",
+    );
 
     plotter.scatter("a", x.clone().map(|x| (x, x.cos())));
 

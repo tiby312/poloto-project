@@ -13,8 +13,8 @@ fn main() {
         .fuse()
     };
 
-    use poloto::types as tt;
-    let mut plotter = poloto::plot(tt::i128,tt::i128,"collatz", "x", "y");
+    use poloto::ctx::i128 as di128;
+    let mut plotter = poloto::plot(di128, di128, "collatz", "x", "y");
 
     plotter.ymarker(0);
 

@@ -33,15 +33,15 @@ pub mod tick_fmt;
 
 pub mod util;
 
-
-pub mod types{
+pub mod prelude {
+    pub use super::PlotNumContextExt;
+}
+pub mod ctx {
     use super::*;
     pub use util::f64_::Defaultf64Context as f64;
     pub use util::integer::i128::Defaulti128Context as i128;
     pub use util::integer::unix_timestamp::DefaultUnixTimeContext as UnixTime;
 }
-
-
 
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
@@ -215,13 +215,12 @@ impl<A: PlotNum, B: PlotNum> Plottable<A, B> for &(A, B) {
 /// Create a Plotter
 ///
 pub fn plot<'a, X: PlotNumContext, Y: PlotNumContext>(
-    xcontext:X,
-    ycontext:Y,
+    xcontext: X,
+    ycontext: Y,
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a, X, Y>
-{
+) -> Plotter<'a, X, Y> {
     Plotter::new(xcontext, ycontext, title, xname, yname)
 }
 
@@ -635,9 +634,14 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
-pub trait PlotNumContext {
-    type UnitData: Copy;
-    type Num: PlotNum;
+pub struct WithNumTicks<T: PlotNumContext> {
+    t: T,
+    num: u32,
+}
+impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
+    type UnitData = P::UnitData;
+    type Num = P::Num;
+    type TickIter = P::TickIter;
 
     ///
     /// Given an ideal number of intervals across the min and max values,
@@ -648,7 +652,175 @@ pub trait PlotNumContext {
         ideal_num_steps: u32,
         range: [Self::Num; 2],
         dash: DashInfo,
-    ) -> TickInfo<Self::Num, Self::UnitData>;
+    ) -> TickInfo<Self::Num, Self::UnitData, Self::TickIter> {
+        self.t.compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.t.unit_range(offset)
+    }
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.t.scale(val, range, max)
+    }
+
+    /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        formatter: T,
+        val: Self::Num,
+        step: Self::UnitData,
+        draw_full: FmtFull,
+    ) -> std::fmt::Result {
+        self.t.fmt_tick(formatter, val, step, draw_full)
+    }
+
+    fn ideal_num_ticks(&mut self) -> Option<u32> {
+        Some(self.num)
+    }
+}
+
+pub struct WithFmt<T, F> {
+    pub t: T,
+    pub func: F,
+}
+impl<
+        P: PlotNumContext,
+        F: FnMut(&mut dyn std::fmt::Write, P::Num, P::UnitData, FmtFull) -> std::fmt::Result,
+    > PlotNumContext for WithFmt<P, F>
+{
+    type UnitData = P::UnitData;
+    type Num = P::Num;
+    type TickIter = P::TickIter;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::UnitData, Self::TickIter> {
+        self.t.compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.t.unit_range(offset)
+    }
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.t.scale(val, range, max)
+    }
+
+    /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        mut formatter: T,
+        val: Self::Num,
+        step: Self::UnitData,
+        draw_full: FmtFull,
+    ) -> std::fmt::Result {
+        (self.func)(&mut formatter, val, step, draw_full)
+    }
+
+    fn ideal_num_ticks(&mut self) -> Option<u32> {
+        self.t.ideal_num_ticks()
+    }
+}
+
+pub struct NoDash<T>(pub T);
+
+impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
+    type UnitData = P::UnitData;
+    type Num = P::Num;
+    type TickIter = P::TickIter;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::UnitData, Self::TickIter> {
+        let mut t = self.0.compute_ticks(ideal_num_steps, range, dash);
+        t.dash_size = None;
+        t
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.0.unit_range(offset)
+    }
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.0.scale(val, range, max)
+    }
+
+    /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        formatter: T,
+        val: Self::Num,
+        step: Self::UnitData,
+        draw_full: FmtFull,
+    ) -> std::fmt::Result {
+        self.0.fmt_tick(formatter, val, step, draw_full)
+    }
+
+    fn ideal_num_ticks(&mut self) -> Option<u32> {
+        self.0.ideal_num_ticks()
+    }
+}
+
+pub trait PlotNumContextExt: PlotNumContext + Sized {
+    fn no_dash(self) -> NoDash<Self> {
+        NoDash(self)
+    }
+
+    fn with_fmt<F>(self, func: F) -> WithFmt<Self, F>
+    where
+        F: FnMut(&mut dyn std::fmt::Write, Self::Num, Self::UnitData, FmtFull) -> std::fmt::Result,
+    {
+        WithFmt { t: self, func }
+    }
+
+    fn with_ideal_num_ticks(self, num: u32) -> WithNumTicks<Self> {
+        WithNumTicks { t: self, num }
+    }
+}
+impl<T: PlotNumContext> PlotNumContextExt for T {}
+
+pub trait PlotNumContext {
+    type UnitData: Copy;
+    type Num: PlotNum;
+    type TickIter: Iterator<Item = Tick<Self::Num>>;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::UnitData, Self::TickIter>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
@@ -667,6 +839,10 @@ pub trait PlotNumContext {
         _draw_full: FmtFull,
     ) -> std::fmt::Result {
         write!(formatter, "{}", val)
+    }
+
+    fn ideal_num_ticks(&mut self) -> Option<u32> {
+        None
     }
 }
 
@@ -697,7 +873,7 @@ pub enum FmtFull {
 ///
 /// One interval tick
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Tick<I> {
     pub position: I,
     /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
@@ -708,12 +884,13 @@ pub struct Tick<I> {
 /// Information on the properties of all the interval ticks for one dimension.
 ///
 #[derive(Debug, Clone)]
-pub struct TickInfo<I, D> {
+pub struct TickInfo<I, D, IT: Iterator<Item = Tick<I>>> {
     pub unit_data: D,
 
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
-    pub ticks: Vec<Tick<I>>,
+    //pub ticks: Vec<Tick<I>>,
+    pub ticks: IT,
 
     /// The number of dashes between two ticks must be a multiple of this number.
     //pub dash_multiple: u32,
@@ -722,22 +899,4 @@ pub struct TickInfo<I, D> {
     /// If we want to display the tick values relatively, this will
     /// have the base start to start with.
     pub display_relative: Option<I>,
-}
-
-impl<I, A> TickInfo<I, A> {
-    pub fn map<J, B>(self, func: impl Fn(I) -> J, func2: impl Fn(A) -> B) -> TickInfo<J, B> {
-        TickInfo {
-            ticks: self
-                .ticks
-                .into_iter()
-                .map(|x| Tick {
-                    position: func(x.position),
-                    value: func(x.value),
-                })
-                .collect(),
-            dash_size: self.dash_size,
-            display_relative: self.display_relative.map(func),
-            unit_data: func2(self.unit_data),
-        }
-    }
 }

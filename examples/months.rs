@@ -1,4 +1,6 @@
+use poloto::prelude::*;
 use poloto::util::integer::UnixTime;
+
 // PIPE me to a file!
 fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
@@ -18,7 +20,13 @@ fn main() {
         println!("{}",a);
     } */
 
-    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
+    let mut s = poloto::plot(
+        poloto::ctx::UnixTime,
+        poloto::ctx::i128.no_dash(),
+        "Number of Wikipedia Articles",
+        "Year",
+        "Number of Articles",
+    );
 
     s.line("", data);
 

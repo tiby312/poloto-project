@@ -20,12 +20,14 @@ pub struct Defaulti128Context;
 impl PlotNumContext for Defaulti128Context {
     type Num = i128;
     type UnitData = StepAmount;
+    type TickIter = std::vec::IntoIter<Tick<i128>>;
+
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
         range: [i128; 2],
         dash: DashInfo,
-    ) -> TickInfo<i128, StepAmount> {
+    ) -> TickInfo<i128, StepAmount, Self::TickIter> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -70,7 +72,7 @@ impl PlotNumContext for Defaulti128Context {
 
         TickInfo {
             unit_data: StepAmount(step),
-            ticks,
+            ticks: ticks.into_iter(),
             dash_size,
             display_relative: display_relative.then(|| start_step),
         }

@@ -1,4 +1,6 @@
+use poloto::prelude::*;
 use poloto::util::integer::UnixTime;
+
 // PIPE me to a file!
 fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
@@ -18,7 +20,13 @@ fn main() {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
+    let mut s = poloto::plot(
+        poloto::ctx::UnixTime,
+        poloto::ctx::i128.no_dash(),
+        "Number of Wikipedia Articles",
+        "Year",
+        "Number of Articles",
+    );
 
     let data = data.into_iter().map(|(a, b)| {
         let a = UnixTime::from_year(a);
@@ -35,6 +43,6 @@ fn main() {
 
     let mut st = String::new();
     use std::fmt::Write;
-    write!(&mut st, "{}", poloto::disp(|a| poloto::simple_theme(a, s)));
+    write!(&mut st, "{}", poloto::disp(|a| poloto::simple_theme(a, s))).unwrap();
     println!("{}", st);
 }

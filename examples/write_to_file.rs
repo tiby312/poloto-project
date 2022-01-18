@@ -1,7 +1,7 @@
 fn main() -> std::io::Result<()> {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let mut s = poloto::plot("test", "x", "y");
+    let mut s = poloto::plot(poloto::ctx::f64, poloto::ctx::f64, "test", "x", "y");
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
 

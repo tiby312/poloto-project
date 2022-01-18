@@ -1,7 +1,13 @@
 fn main() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let mut plotter = poloto::plot("cows per year", "year", "cow");
+    let mut plotter = poloto::plot(
+        poloto::ctx::f64,
+        poloto::ctx::f64,
+        "cows per year",
+        "year",
+        "cow",
+    );
     plotter.scatter("", &data);
 
     println!(

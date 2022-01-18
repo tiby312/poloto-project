@@ -9,8 +9,6 @@ use crate::Tick;
 use crate::TickInfo;
 use core::fmt;
 
-
-
 pub mod f64_;
 pub mod integer;
 

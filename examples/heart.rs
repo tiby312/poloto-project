@@ -10,7 +10,7 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let mut plotter = poloto::plot("Heart Graph", "x", "y");
+    let mut plotter = poloto::plot(poloto::ctx::f64, poloto::ctx::f64, "Heart Graph", "x", "y");
 
     plotter.line_fill_raw("heart", range.map(heart));
     plotter.preserve_aspect();

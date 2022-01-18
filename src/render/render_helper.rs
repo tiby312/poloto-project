@@ -149,16 +149,26 @@ pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
-        //let ideal_num_xsteps = if preserve_aspect { 5 } else { 9 };
-        let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
+        let ideal_num_xsteps = if let Some(t) = plotter.xcontext.ideal_num_ticks() {
+            t
+        } else {
+            if preserve_aspect {
+                4
+            } else {
+                6
+            }
+        };
 
-        //let ideal_num_ysteps = 7;
-        let ideal_num_ysteps = 5;
+        let ideal_num_ysteps = if let Some(t) = plotter.xcontext.ideal_num_ticks() {
+            t
+        } else {
+            5
+        };
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let xtick_info = plotter.xcontext.compute_ticks(
+        let mut xtick_info = plotter.xcontext.compute_ticks(
             ideal_num_xsteps,
             [minx, maxx],
             DashInfo {
@@ -166,7 +176,7 @@ pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
                 max: scalex,
             },
         );
-        let ytick_info = plotter.ycontext.compute_ticks(
+        let mut ytick_info = plotter.ycontext.compute_ticks(
             ideal_num_ysteps,
             [miny, maxy],
             DashInfo {
@@ -175,10 +185,16 @@ pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
             },
         );
 
-        let xdash_size = xtick_info.dash_size; //PlotNum::dash_size(30.0, &xtick_info, [minx, maxx], scalex);
-        let ydash_size = ytick_info.dash_size; //PlotNum::dash_size(30.0, &ytick_info, [miny, maxy], scaley);
+        let xdash_size = xtick_info.dash_size;
+        let ydash_size = ytick_info.dash_size;
 
         use tagger::PathCommand::*;
+
+        let first_tickx = xtick_info.ticks.next().unwrap();
+        let xticks = std::iter::once(first_tickx).chain(xtick_info.ticks);
+
+        let first_ticky = ytick_info.ticks.next().unwrap();
+        let yticks = std::iter::once(first_ticky).chain(ytick_info.ticks);
 
         {
             //step num is assured to be atleast 1.
@@ -206,7 +222,7 @@ pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
             };
 
             //Draw interva`l x text
-            for &Tick { position, value } in xtick_info.ticks.iter() {
+            for Tick { position, value } in xticks {
                 let xx = (plotter.xcontext.scale(position, [minx, maxx], scalex)
                     - plotter.xcontext.scale(minx, [minx, maxx], scalex))
                     + padding;
@@ -277,7 +293,7 @@ pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
             };
 
             //Draw interval y text
-            for &Tick { position, value } in ytick_info.ticks.iter() {
+            for Tick { position, value } in yticks {
                 let yy = height
                     - (plotter.ycontext.scale(position, [miny, maxy], scaley)
                         - plotter.ycontext.scale(miny, [miny, maxy], scaley))
@@ -326,7 +342,7 @@ pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
         let d1 = plotter.xcontext.scale(minx, [minx, maxx], scalex);
         let d2 = plotter
             .xcontext
-            .scale(xtick_info.ticks[0].position, [minx, maxx], scalex);
+            .scale(first_tickx.position, [minx, maxx], scalex);
         let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
@@ -359,7 +375,7 @@ pub(super) fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
         let d1 = plotter.ycontext.scale(miny, [miny, maxy], scaley);
         let d2 = plotter
             .ycontext
-            .scale(ytick_info.ticks[0].position, [miny, maxy], scaley);
+            .scale(first_ticky.position, [miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
 
         writer.single("path", |d| {

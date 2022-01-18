@@ -14,13 +14,14 @@ pub struct Defaultf64Context;
 impl PlotNumContext for Defaultf64Context {
     type Num = f64;
     type UnitData = StepAmount;
+    type TickIter = std::vec::IntoIter<Tick<f64>>;
 
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
         range: [f64; 2],
         dash: DashInfo,
-    ) -> TickInfo<f64, StepAmount> {
+    ) -> TickInfo<f64, StepAmount, Self::TickIter> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -67,7 +68,7 @@ impl PlotNumContext for Defaultf64Context {
 
         TickInfo {
             unit_data: StepAmount(step),
-            ticks,
+            ticks: ticks.into_iter(),
             dash_size,
             display_relative: display_relative.then(|| start_step),
         }
