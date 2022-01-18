@@ -1,5 +1,3 @@
-use poloto::prelude::*;
-
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
@@ -16,18 +14,7 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let d = poloto::ctx::f64
-        .no_dash()
-        .with_fmt(|w, v, _, _| write!(w, "hay:{}", v))
-        .with_ideal_num_ticks(6);
-
-    let mut plotter = poloto::plot(
-        d,
-        poloto::ctx::f64.no_dash().marker(0.0),
-        "gaussian",
-        "x",
-        "y",
-    );
+    let mut plotter = poloto::plot(poloto::ctx::f64, poloto::ctx::f64, "gaussian", "x", "y");
 
     plotter.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
