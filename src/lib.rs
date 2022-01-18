@@ -295,6 +295,8 @@ pub struct Plotter<
 impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>
     Plotter<'a, X, Y, XC, YC>
 {
+    //TODO add move_into() back?
+
     pub fn with_xcontext<XC2: PlotNumContext<Num = X>>(self, a: XC2) -> Plotter<'a, X, Y, XC2, YC> {
         Plotter {
             title: self.title,

@@ -36,14 +36,8 @@ impl UnixTime {
         )
     }
 
-    pub fn from_ymd_hms(
-        year: i32,
-        month: u32,
-        day: u32,
-        hours: u32,
-        min: u32,
-        seconds: u32,
-    ) -> UnixTime {
+    pub fn from_ymd_hms(day: (i32, u32, u32), hours: u32, min: u32, seconds: u32) -> UnixTime {
+        let (year, month, day) = day;
         UnixTime(
             NaiveDateTime::new(
                 NaiveDate::from_ymd(year, month, day),
@@ -98,23 +92,32 @@ impl UnixTime {
 
     pub fn months(&self, step_value: i64) -> UnixMonths {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+
         let mm = this.month0() as i64;
 
-        let month_counter = round_up_to_nearest_multiple(mm, step_value) as u32;
+        let mut m = helper::MonthCounter::new(this.year(), mm as u32);
 
-        let month1 = month_counter / 12;
-        let month2 = month_counter % 12;
+        //round up to nearest month
+        if this.day0() != 0 || this.hour() != 0 || this.minute() != 0 || this.second() != 0 {
+            m.step(1);
+        }
+
+        m.round_up_to_nearest_multiple_month(step_value as u32);
 
         UnixMonths {
-            month_counter: month2,
-            year_counter: this.year() + month1 as i32,
+            counter: m,
             step_value: step_value as u32,
         }
     }
 
     pub fn days(&self, step_value: i64) -> UnixDays {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
-        let dd = this.day0() as i64;
+        let mut dd = this.day0() as i64;
+
+        //round up to nearest day.
+        if this.hour() != 0 || this.minute() != 0 || this.second() != 0 {
+            dd += 1;
+        }
 
         let dd = round_up_to_nearest_multiple(dd, step_value);
 
@@ -133,8 +136,12 @@ impl UnixTime {
 
     pub fn hours(&self, step_value: i64) -> UnixHours {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
-        let hh = this.hour() as i64;
+        let mut hh = this.hour() as i64;
 
+        //round up to nearest hour.
+        if this.minute() != 0 || this.second() != 0 {
+            hh += 1;
+        }
         let hh = round_up_to_nearest_multiple(hh, step_value);
 
         let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(0, 0, 0));
@@ -149,7 +156,12 @@ impl UnixTime {
 
     pub fn minutes(&self, step_value: i64) -> UnixMinutes {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
-        let mm = this.minute() as i64;
+        let mut mm = this.minute() as i64;
+
+        //round up to nearest minute
+        if this.second() != 0 {
+            mm += 1;
+        }
 
         let mm = round_up_to_nearest_multiple(mm, step_value);
 
@@ -215,10 +227,47 @@ impl Iterator for UnixYears {
     }
 }
 
+mod helper {
+    use super::*;
+    ///Month is zero indexed.
+    #[derive(Debug, Copy, Clone)]
+    pub struct MonthCounter {
+        year: i32,
+        month: u32,
+    }
+    impl MonthCounter {
+        pub fn year(&self) -> i32 {
+            self.year
+        }
+        pub fn month(&self) -> u32 {
+            self.month
+        }
+        pub fn new(year: i32, month: u32) -> Self {
+            assert!(month < 12);
+            MonthCounter { year, month }
+        }
+        pub fn round_up_to_nearest_multiple_month(&mut self, step_value: u32) {
+            let month_counter =
+                round_up_to_nearest_multiple(self.month as i64, step_value as i64) as u32;
+            let month1 = month_counter / 12;
+            let month2 = month_counter % 12;
+            self.year += month1 as i32;
+            self.month = month2;
+        }
+        pub fn step(&mut self, step_value: u32) {
+            let new = self.month + step_value;
+
+            let new1 = new / 12;
+            let new2 = new % 12;
+
+            self.year += new1 as i32;
+            self.month = new2;
+        }
+    }
+}
 #[derive(Debug, Clone)]
 pub struct UnixMonths {
-    year_counter: i32,
-    month_counter: u32,
+    counter: helper::MonthCounter,
     step_value: u32,
 }
 
@@ -226,17 +275,11 @@ impl Iterator for UnixMonths {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
         let y = chrono::NaiveDateTime::new(
-            chrono::NaiveDate::from_ymd(self.year_counter, self.month_counter + 1, 1),
+            chrono::NaiveDate::from_ymd(self.counter.year(), self.counter.month() + 1, 1),
             chrono::NaiveTime::from_hms(0, 0, 0),
         );
 
-        let new = self.month_counter + self.step_value;
-
-        let new1 = new / 12;
-        let new2 = new % 12;
-
-        self.year_counter += new1 as i32;
-        self.month_counter = new2;
+        self.counter.step(self.step_value);
 
         Some(UnixTime(y.timestamp()))
     }
@@ -420,9 +463,11 @@ fn test_months() {
     //1642121137
     //(2022-01-14T00:45:37+00:00)
 
-    let a = UnixTime(1642232500);
+    //let a = UnixTime(1642232500);
+    let a = UnixTime::from_ymd(2020, 8, 5);
+
     println!("start:{}", a);
-    let mut it = a.months(2);
+    let mut it = a.months(1);
 
     for a in it.take(4) {
         println!("{}", a);

@@ -37,8 +37,8 @@ impl PlotNumContext for DefaultUnixTimeContext {
         let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
         let steps_mo = &[1, 2, 3, 6, 12];
         let steps_dy = &[1, 2, 5, 10];
-        let steps_hr = &[1, 2, 5, 10];
-        let steps_mi = &[1, 2, 5, 10];
+        let steps_hr = &[1, 2, 6, 12];
+        let steps_mi = &[1, 2, 10, 15];
         let steps_se = &[1, 2, 5, 10];
 
         t.consider_yr(steps_yr, steps_mo);

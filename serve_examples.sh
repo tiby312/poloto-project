@@ -21,6 +21,8 @@ cargo run --example collatz > assets/collatz.svg
 cargo run --example heart > assets/heart.svg
 cargo run --example line_fill > assets/line_fill.svg
 cargo run --example days > assets/days.svg
-
+cargo run --example hours > assets/hours.svg
+cargo run --example minutes > assets/minutes.svg
+cargo run --example seconds > assets/seconds.svg
 cd assets
 python3 -m http.server
