@@ -1,5 +1,5 @@
 use poloto::formatm;
-
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
@@ -10,7 +10,6 @@ fn main() {
         "This is the y label",
     );
 
-    use poloto::Croppable;
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
     plotter.line(
         "tan(x)",

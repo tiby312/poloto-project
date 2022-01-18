@@ -97,7 +97,7 @@ pub fn render<
         let aa = plotter.xcontext.scale(minx, [minx, maxx], scalex2);
         let bb = plotter.ycontext.scale(miny, [miny, maxy], scaley2);
 
-        struct Foo<X, Y> {
+        struct PlotIter<X, Y> {
             basex_ii: f64,
             basey_ii: f64,
             rangex_ii: [X; 2],
@@ -105,20 +105,14 @@ pub fn render<
             maxx_ii: f64,
             maxy_ii: f64,
         }
-        impl<X: PlotNum, Y: PlotNum> Foo<X, Y> {
-            fn iter<'a, XX: PlotNumContext<Num = X>, YY: PlotNumContext<Num = Y>>(
+        impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
+            fn gen_iter<'a, XX: PlotNumContext<Num = X>, YY: PlotNumContext<Num = Y>>(
                 &'a self,
                 p: &'a mut Plot<X, Y>,
                 xcontext: &'a mut XX,
                 ycontext: &'a mut YY,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
                 p.plots.iter_second().map(move |(x, y)| {
-                    /*
-                    [
-                        aspect_offset + padding + (plotter.xcontext.scale(x,[minx, maxx], scalex2) - aa),
-                        height - paddingy - (plotter.ycontext.scale(y,[miny, maxy], scaley2) - bb),
-                    ]
-                    */
                     [
                         self.basex_ii + xcontext.scale(x, self.rangex_ii, self.maxx_ii),
                         self.basey_ii - ycontext.scale(y, self.rangey_ii, self.maxy_ii),
@@ -127,7 +121,7 @@ pub fn render<
             }
         }
 
-        let foo = Foo {
+        let plot_iter = PlotIter {
             basex_ii: aspect_offset + padding - aa,
             basey_ii: height - paddingy + bb,
             rangex_ii: [minx, maxx],
@@ -135,23 +129,6 @@ pub fn render<
             maxx_ii: scalex2,
             maxy_ii: scaley2,
         };
-
-        /*
-        // Scale all the plots here.
-        let it = p.plots.iter_second().map(|(x, y)| {
-            /*
-            [
-                aspect_offset + padding + (plotter.xcontext.scale(x,[minx, maxx], scalex2) - aa),
-                height - paddingy - (plotter.ycontext.scale(y,[miny, maxy], scaley2) - bb),
-            ]
-            */
-            [
-                basex_ii+plotter.xcontext.scale(x,rangex_ii,max_ii)
-                basey_ii+plotter.ycontext.scale(y,rangey_ii,may_ii)
-
-            ]
-        });
-        */
 
         let colori = color_iter.next().unwrap();
 
@@ -181,7 +158,11 @@ pub fn render<
                     d.path(|a| {
                         line(
                             a,
-                            foo.iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext),
+                            plot_iter.gen_iter(
+                                &mut p,
+                                &mut plotter.xcontext,
+                                &mut plotter.ycontext,
+                            ),
                         )
                     })
                 })?;
@@ -211,8 +192,8 @@ pub fn render<
                     )?;
                     d.path(|a| {
                         use tagger::PathCommand::*;
-                        for [x, y] in foo
-                            .iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
+                        for [x, y] in plot_iter
+                            .gen_iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             a.put(M(x, y))?;
@@ -248,8 +229,8 @@ pub fn render<
                     .build(|writer| {
                         let mut last = None;
                         //TODO dont necesarily filter?
-                        for [x, y] in foo
-                            .iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
+                        for [x, y] in plot_iter
+                            .gen_iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             if let Some((lx, ly)) = last {
@@ -295,7 +276,11 @@ pub fn render<
                     d.path(|path| {
                         line_fill(
                             path,
-                            foo.iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext),
+                            plot_iter.gen_iter(
+                                &mut p,
+                                &mut plotter.xcontext,
+                                &mut plotter.ycontext,
+                            ),
                             height - paddingy,
                             true,
                         )
@@ -329,7 +314,11 @@ pub fn render<
                     d.path(|path| {
                         line_fill(
                             path,
-                            foo.iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext),
+                            plot_iter.gen_iter(
+                                &mut p,
+                                &mut plotter.xcontext,
+                                &mut plotter.ycontext,
+                            ),
                             height - paddingy,
                             false,
                         )

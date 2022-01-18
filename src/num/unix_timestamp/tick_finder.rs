@@ -85,17 +85,12 @@ impl<'a> BestTickFinder<'a> {
         let new_closeness = (self.ideal_num_steps as i64 - candidate.ticks.len() as i64).abs();
         let old_closeness = (self.ideal_num_steps as i64 - self.best.ticks.len() as i64).abs();
 
-        let is_better = if new_closeness < old_closeness {
-            true
-        } else if new_closeness == old_closeness {
+        use std::cmp::Ordering;
+        let is_better = match new_closeness.cmp(&old_closeness) {
+            Ordering::Less => true,
             //If there is a tie, choose the one with more ticks.
-            if candidate.ticks.len() > self.best.ticks.len() {
-                true
-            } else {
-                false
-            }
-        } else {
-            false
+            Ordering::Greater => candidate.ticks.len() > self.best.ticks.len(),
+            Ordering::Equal => false,
         };
 
         if is_better {

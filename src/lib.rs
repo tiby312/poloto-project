@@ -25,9 +25,9 @@ use std::fmt;
 
 pub use tagger::upgrade_write;
 
-pub use crop::Crop;
-pub use crop::Croppable;
-mod crop;
+pub mod plottable;
+use plottable::Plottable;
+
 mod render;
 pub mod util;
 
@@ -42,6 +42,7 @@ pub mod context_ext;
 ///
 pub mod prelude {
     pub use super::context_ext::PlotNumContextExt;
+    pub use super::plottable::Croppable;
 }
 
 ///The width of the svg tag.
@@ -178,39 +179,6 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
 /// The demsions of the svg graph `[800,500]`.
 pub const DIMENSIONS: [usize; 2] = [800, 500];
 */
-
-/// Iterators that are passed to the [`Plotter`] plot functions must produce
-/// items that implement this trait.
-pub trait Plottable<X: PlotNum, Y: PlotNum> {
-    /// Produce one plot
-    fn make_plot(self) -> (X, Y);
-}
-
-impl<T: PlotNum> Plottable<T, T> for [T; 2] {
-    fn make_plot(self) -> (T, T) {
-        let [x, y] = self;
-        (x, y)
-    }
-}
-
-impl<T: PlotNum> Plottable<T, T> for &[T; 2] {
-    fn make_plot(self) -> (T, T) {
-        let [x, y] = *self;
-        (x, y)
-    }
-}
-
-impl<A: PlotNum, B: PlotNum> Plottable<A, B> for (A, B) {
-    fn make_plot(self) -> (A, B) {
-        self
-    }
-}
-
-impl<A: PlotNum, B: PlotNum> Plottable<A, B> for &(A, B) {
-    fn make_plot(self) -> (A, B) {
-        *self
-    }
-}
 
 ///
 /// Create a Plotter

@@ -157,12 +157,10 @@ pub(super) fn draw_base<
 
         let ideal_num_xsteps = if let Some(t) = plotter.xcontext.ideal_num_ticks() {
             t
+        } else if preserve_aspect {
+            4
         } else {
-            if preserve_aspect {
-                4
-            } else {
-                6
-            }
+            6
         };
 
         let ideal_num_ysteps = if let Some(t) = plotter.xcontext.ideal_num_ticks() {
@@ -216,7 +214,7 @@ pub(super) fn draw_base<
                     .build(|d| {
                         let mut w = d.writer_safe();
                         use std::fmt::Write;
-                        write!(w, "{}", "Where j = ")?;
+                        write!(w, "Where j = ")?;
                         plotter
                             .xcontext
                             .fmt_tick(w, base, xtick_info.unit_data, FmtFull::Full)
@@ -287,7 +285,7 @@ pub(super) fn draw_base<
                     .build(|w| {
                         use std::fmt::Write;
                         let mut w = w.writer_safe();
-                        write!(w, "{}", "Where k = ")?;
+                        write!(w, "Where k = ")?;
                         plotter
                             .ycontext
                             .fmt_tick(w, base, ytick_info.unit_data, FmtFull::Full)
