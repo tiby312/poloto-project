@@ -40,7 +40,7 @@ pub fn render<
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let ([minx, maxx], [miny, maxy]) = util::find_bounds(
+    let ([minx, maxx], [miny, maxy]) = num::find_bounds(
         &mut plotter.xcontext,
         &mut plotter.ycontext,
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
@@ -89,7 +89,7 @@ pub fn render<
                 d.attr("y", paddingy + (i as f64) * spacing)
             })?
             .build(|d| {
-                let mut wc = util::WriteCounter::new(d.writer_safe());
+                let mut wc = num::WriteCounter::new(d.writer_safe());
                 p.plots.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;

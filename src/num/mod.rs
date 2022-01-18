@@ -2,15 +2,16 @@
 //! Utility functions to help build numbers that implement [`PlotNum`] and [`DiscNum`].
 //!
 use super::*;
-use crate::tick_fmt;
+use crate::util;
 use crate::DiscNum;
 use crate::PlotNum;
 use crate::Tick;
 use crate::TickInfo;
 use core::fmt;
 
-pub mod f64_;
+pub mod float;
 pub mod integer;
+pub mod unix_timestamp;
 
 use std::convert::TryFrom;
 

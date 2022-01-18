@@ -9,10 +9,7 @@ cargo run --example custom_style > assets/custom_style.svg
 cargo run --example custom_style_html > assets/custom_style.html
 cargo run --example hover_shadow_html > assets/hover_shadow.html
 cargo run --example magnitude > assets/magnitude.svg
-cargo run --example months > assets/months.svg
-cargo run --example nodash > assets/nodash.svg
 cargo run --example trig > assets/trig.svg
-cargo run --example simple > assets/simple.svg
 cargo run --example test > assets/test.html
 cargo run --example write_to_file
 cargo run --example dark > assets/dark.svg
@@ -20,6 +17,8 @@ cargo run --example gaussian > assets/gaussian.svg
 cargo run --example collatz > assets/collatz.svg
 cargo run --example heart > assets/heart.svg
 cargo run --example line_fill > assets/line_fill.svg
+cargo run --example years > assets/years.svg
+cargo run --example months > assets/months.svg
 cargo run --example days > assets/days.svg
 cargo run --example hours > assets/hours.svg
 cargo run --example minutes > assets/minutes.svg

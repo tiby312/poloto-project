@@ -29,18 +29,12 @@ pub use crop::Crop;
 pub use crop::Croppable;
 mod crop;
 mod render;
-pub mod tick_fmt;
-
 pub mod util;
+
+pub mod num;
 
 pub mod prelude {
     pub use super::PlotNumContextExt;
-}
-pub mod ctx {
-    use super::*;
-    pub use util::f64_::Defaultf64Context as f64;
-    pub use util::integer::i128::Defaulti128Context as i128;
-    pub use util::integer::unix_timestamp::DefaultUnixTimeContext as UnixTime;
 }
 
 ///The width of the svg tag.

@@ -106,8 +106,8 @@ pub(crate) fn should_fmt_offset(start: f64, end: f64, step: f64) -> bool {
     let mut start_s = String::new();
     let mut end_s = String::new();
 
-    tick_fmt::write_interval_float(&mut start_s, start, Some(step)).unwrap();
-    tick_fmt::write_interval_float(&mut end_s, end, Some(step)).unwrap();
+    util::write_interval_float(&mut start_s, start, Some(step)).unwrap();
+    util::write_interval_float(&mut end_s, end, Some(step)).unwrap();
 
     start_s.len() > 7 || end_s.len() > 7
 }

@@ -27,7 +27,7 @@ impl PlotNumContext for Defaultf64Context {
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
         let (start_step, step_num) = get_range_info(step, range);
 
-        let display_relative = tick_fmt::should_fmt_offset(
+        let display_relative = util::should_fmt_offset(
             start_step,
             start_step + ((step_num - 1) as f64) * step,
             step,
@@ -86,7 +86,7 @@ impl PlotNumContext for Defaultf64Context {
             FmtFull::Tick => Some(step.0),
             FmtFull::Full => None,
         };
-        tick_fmt::write_interval_float(formatter, val, step)
+        util::write_interval_float(formatter, val, step)
     }
 
     fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
