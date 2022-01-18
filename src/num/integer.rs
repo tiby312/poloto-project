@@ -1,3 +1,6 @@
+//!
+//! Plot integers
+//!
 use super::*;
 
 fn round_up_to_nearest_multiple(val: i128, multiple: i128) -> i128 {

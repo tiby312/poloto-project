@@ -1,3 +1,7 @@
+//!
+//! Adapters to manipulate a [`PlotNumContext`]
+//!
+//!
 use super::*;
 pub struct WithNumTicks<T: PlotNumContext> {
     t: T,

@@ -1,3 +1,6 @@
+//!
+//! Plot floats
+//!
 use super::*;
 
 impl DiscNum for f64 {

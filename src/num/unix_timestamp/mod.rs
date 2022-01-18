@@ -1,3 +1,11 @@
+//! Plot unix timestamps.
+//!
+//! Does not implement dashes/grid lines because due to leap days, the distance
+//! between the dashes can't be constant.
+//!
+//!
+//!
+//!  
 mod tick_finder;
 mod unixtime;
 

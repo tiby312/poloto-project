@@ -1,4 +1,6 @@
 //!
+//! Misc functions.
+//!
 //! Functions to write numbers formatted in a way that takes up the least amount of space.
 //!
 use super::*;
