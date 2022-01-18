@@ -20,9 +20,13 @@ fn main() {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles")
-        .with_xcontext(DefaultUnixTimeContext.marker(UnixTime::from_year(2025)))
-        .with_ycontext(Defaulti128Context.no_dash().marker(0));
+    let mut s = poloto::Plotter::new(
+        DefaultUnixTimeContext.marker(UnixTime::from_year(2025)),
+        Defaulti128Context.no_dash().marker(0),
+        "Number of Wikipedia Articles",
+        "Year",
+        "Number of Articles",
+    );
 
     let data = data.into_iter().map(|(a, b)| {
         let a = UnixTime::from_year(a);

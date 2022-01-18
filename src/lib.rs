@@ -255,8 +255,8 @@ pub struct Plotter<
     plots: Vec<Plot<'a, X, Y>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xcontext: XC,
-    ycontext: YC,
+    pub xcontext: XC,
+    pub ycontext: YC,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>
