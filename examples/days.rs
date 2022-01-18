@@ -15,15 +15,13 @@ fn main() {
 
     let mut s = poloto::plot(
         poloto::ctx::UnixTime,
-        poloto::ctx::i128.no_dash(),
+        poloto::ctx::i128.no_dash().marker(0),
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
     );
 
     s.line("", data);
-
-    s.ymarker(0);
 
     let mut st = String::new();
     use std::fmt::Write;

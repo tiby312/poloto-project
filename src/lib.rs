@@ -272,8 +272,6 @@ pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
     plots: Vec<Plot<'a, X::Num, Y::Num>>,
-    xmarkers: Vec<X::Num>,
-    ymarkers: Vec<Y::Num>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
     xcontext: X,
@@ -300,8 +298,6 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             xname: Box::new(xname),
             yname: Box::new(yname),
             plots: Vec::new(),
-            xmarkers: Vec::new(),
-            ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
             xcontext,
@@ -429,36 +425,6 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
                 name,
             )),
         });
-        self
-    }
-
-    /// Add x values that the scaled graph must fit.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    ///
-    /// // Include origin in the graph.
-    /// plotter.xmarker(0.0).ymarker(0.0);
-    /// ```
-    pub fn xmarker(&mut self, marker: X::Num) -> &mut Self {
-        self.xmarkers.push(marker);
-        self
-    }
-
-    /// Add y values that the scaled graph must fit.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
-    /// plotter.line("", &data);
-    ///
-    /// // Include origin in the graph.
-    /// plotter.xmarker(0.0).ymarker(0.0);
-    /// ```
-    pub fn ymarker(&mut self, marker: Y::Num) -> &mut Self {
-        self.ymarkers.push(marker);
         self
     }
 
@@ -788,7 +754,65 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
     }
 }
 
+pub struct Marker<T: PlotNumContext>(pub T, T::Num);
+
+impl<P: PlotNumContext> PlotNumContext for Marker<P> {
+    type UnitData = P::UnitData;
+    type Num = P::Num;
+    type TickIter = P::TickIter;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::UnitData, Self::TickIter> {
+        self.0.compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.0.unit_range(offset)
+    }
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.0.scale(val, range, max)
+    }
+
+    /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
+    fn fmt_tick<T: std::fmt::Write>(
+        &mut self,
+        formatter: T,
+        val: Self::Num,
+        step: Self::UnitData,
+        draw_full: FmtFull,
+    ) -> std::fmt::Result {
+        self.0.fmt_tick(formatter, val, step, draw_full)
+    }
+
+    fn ideal_num_ticks(&mut self) -> Option<u32> {
+        self.0.ideal_num_ticks()
+    }
+
+    fn get_markers(&mut self) -> Vec<Self::Num> {
+        //TODO replace when existential types come?
+        let mut a = self.0.get_markers();
+        a.push(self.1);
+        a
+    }
+}
+
 pub trait PlotNumContextExt: PlotNumContext + Sized {
+    fn marker(self, a: Self::Num) -> Marker<Self> {
+        Marker(self, a)
+    }
     fn no_dash(self) -> NoDash<Self> {
         NoDash(self)
     }
@@ -801,6 +825,7 @@ pub trait PlotNumContextExt: PlotNumContext + Sized {
     }
 
     fn with_ideal_num_ticks(self, num: u32) -> WithNumTicks<Self> {
+        assert!(num >= 2);
         WithNumTicks { t: self, num }
     }
 }
@@ -843,6 +868,10 @@ pub trait PlotNumContext {
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
         None
+    }
+
+    fn get_markers(&mut self) -> Vec<Self::Num> {
+        vec![]
     }
 }
 

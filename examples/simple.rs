@@ -21,8 +21,8 @@ fn main() {
     ];
 
     let mut s = poloto::plot(
-        poloto::ctx::UnixTime,
-        poloto::ctx::i128.no_dash(),
+        poloto::ctx::UnixTime.marker(UnixTime::from_year(2025)),
+        poloto::ctx::i128.no_dash().marker(0),
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
@@ -36,10 +36,6 @@ fn main() {
     //UnixTime::parse_from_str(&format!("{}/1/1 00:00:00", a), "%Y/%m/%d %H:%M:%S").unwrap();
 
     s.histogram("", data);
-
-    //Scale grpah to include up to the year 2025.
-    //Also scale to include a value of 0 articles.
-    s.xmarker(UnixTime::from_year(2025)).ymarker(0);
 
     let mut st = String::new();
     use std::fmt::Write;

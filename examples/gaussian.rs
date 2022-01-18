@@ -18,14 +18,20 @@ fn main() {
 
     let d = poloto::ctx::f64
         .no_dash()
-        .with_fmt(|w, v, _, _| write!(w, "hay:{}", v));
+        .with_fmt(|w, v, _, _| write!(w, "hay:{}", v))
+        .with_ideal_num_ticks(6);
 
-    let mut plotter = poloto::plot(d, poloto::ctx::f64.no_dash(), "gaussian", "x", "y");
+    let mut plotter = poloto::plot(
+        d,
+        poloto::ctx::f64.no_dash().marker(0.0),
+        "gaussian",
+        "x",
+        "y",
+    );
 
     plotter.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     plotter.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
-    plotter.ymarker(0.0);
 
     println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
 }

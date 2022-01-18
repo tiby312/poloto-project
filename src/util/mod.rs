@@ -40,9 +40,10 @@ pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
     xcontext: &mut X,
     ycontext: &mut Y,
     it: impl IntoIterator<Item = (X::Num, Y::Num)>,
-    xmarkers: impl IntoIterator<Item = X::Num>,
-    ymarkers: impl IntoIterator<Item = Y::Num>,
 ) -> ([X::Num; 2], [Y::Num; 2]) {
+    let xmarkers = xcontext.get_markers();
+    let ymarkers = ycontext.get_markers();
+
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
     if let Some((x, y)) = ii.next() {

@@ -38,8 +38,6 @@ pub fn render<X: PlotNumContext, Y: PlotNumContext, T: std::fmt::Write>(
         &mut plotter.xcontext,
         &mut plotter.ycontext,
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-        plotter.xmarkers.iter().copied(),
-        plotter.ymarkers.iter().copied(),
     );
 
     let preserve_aspect = plotter.preserve_aspect;
