@@ -218,7 +218,11 @@ pub fn plot<'a, X: PlotNum, Y: PlotNum>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a, X, Y, X::DefaultContext, Y::DefaultContext> {
+) -> Plotter<'a, X, Y, X::DefaultContext, Y::DefaultContext>
+where
+    X::DefaultContext: PlotNumContext<Num = X> + Default,
+    Y::DefaultContext: PlotNumContext<Num = Y> + Default,
+{
     Plotter::new(
         X::DefaultContext::default(),
         Y::DefaultContext::default(),
@@ -930,7 +934,7 @@ pub trait PlotNumContext {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
-    type DefaultContext: PlotNumContext<Num = Self> + Default;
+    type DefaultContext;
 
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
