@@ -44,7 +44,6 @@ pub trait PlotNumContext {
         write!(formatter, "{}", val)
     }
 
-    //TODO pass in UnitData to this so that context can dynamically determine some things.
     fn ideal_num_ticks(&mut self) -> Option<u32> {
         None
     }
