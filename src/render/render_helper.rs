@@ -151,11 +151,14 @@ pub(super) fn draw_base<
         })?
         .build(|w| w.put_raw(&plotter.yname))?;
 
+
+    let xcontext=&mut plotter.xcontext;
+    let ycontext=&mut plotter.ycontext;
     {
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
 
-        let ideal_num_xsteps = if let Some(t) = plotter.xcontext.ideal_num_ticks() {
+        let ideal_num_xsteps = if let Some(t) = xcontext.ideal_num_ticks() {
             t
         } else if preserve_aspect {
             4
@@ -163,7 +166,7 @@ pub(super) fn draw_base<
             6
         };
 
-        let ideal_num_ysteps = if let Some(t) = plotter.xcontext.ideal_num_ticks() {
+        let ideal_num_ysteps = if let Some(t) = xcontext.ideal_num_ticks() {
             t
         } else {
             5
@@ -172,7 +175,7 @@ pub(super) fn draw_base<
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let mut xtick_info = plotter.xcontext.compute_ticks(
+        let mut xtick_info = xcontext.compute_ticks(
             ideal_num_xsteps,
             [minx, maxx],
             DashInfo {
@@ -180,7 +183,7 @@ pub(super) fn draw_base<
                 max: scalex,
             },
         );
-        let mut ytick_info = plotter.ycontext.compute_ticks(
+        let mut ytick_info = ycontext.compute_ticks(
             ideal_num_ysteps,
             [miny, maxy],
             DashInfo {
@@ -215,8 +218,7 @@ pub(super) fn draw_base<
                         let mut w = d.writer_safe();
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
-                        plotter
-                            .xcontext
+                                                    xcontext
                             .fmt_tick(w, base, FmtFull::Full(xtick_info.unit_data))
                     })?;
 
@@ -227,8 +229,8 @@ pub(super) fn draw_base<
 
             //Draw interva`l x text
             for Tick { position, value } in xticks {
-                let xx = (plotter.xcontext.scale(position, [minx, maxx], scalex)
-                    - plotter.xcontext.scale(minx, [minx, maxx], scalex))
+                let xx = (xcontext.scale(position, [minx, maxx], scalex)
+                    - xcontext.scale(minx, [minx, maxx], scalex))
                     + padding;
 
                 writer.single("line", |d| {
@@ -252,8 +254,8 @@ pub(super) fn draw_base<
                         let mut w = w.writer_safe();
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
-                        plotter
-                            .xcontext
+                        
+                            xcontext
                             .fmt_tick(w, value, FmtFull::Tick(xtick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
@@ -286,8 +288,8 @@ pub(super) fn draw_base<
                         use std::fmt::Write;
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
-                        plotter
-                            .ycontext
+                        
+                            ycontext
                             .fmt_tick(w, base, FmtFull::Full(ytick_info.unit_data))
                     })?;
 
@@ -299,8 +301,8 @@ pub(super) fn draw_base<
             //Draw interval y text
             for Tick { position, value } in yticks {
                 let yy = height
-                    - (plotter.ycontext.scale(position, [miny, maxy], scaley)
-                        - plotter.ycontext.scale(miny, [miny, maxy], scaley))
+                    - (ycontext.scale(position, [miny, maxy], scaley)
+                        - ycontext.scale(miny, [miny, maxy], scaley))
                     - paddingy;
 
                 writer.single("line", |d| {
@@ -324,8 +326,8 @@ pub(super) fn draw_base<
                         let mut w = w.writer_safe();
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
-                        plotter
-                            .ycontext
+                        
+                            ycontext
                             .fmt_tick(w, value, FmtFull::Tick(ytick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
@@ -343,9 +345,9 @@ pub(super) fn draw_base<
             }
         }
 
-        let d1 = plotter.xcontext.scale(minx, [minx, maxx], scalex);
-        let d2 = plotter
-            .xcontext
+        let d1 = xcontext.scale(minx, [minx, maxx], scalex);
+        let d2 = 
+            xcontext
             .scale(first_tickx.position, [minx, maxx], scalex);
         let distance_to_firstx = d2 - d1;
 
@@ -376,9 +378,9 @@ pub(super) fn draw_base<
             })
         })?;
 
-        let d1 = plotter.ycontext.scale(miny, [miny, maxy], scaley);
-        let d2 = plotter
-            .ycontext
+        let d1 = ycontext.scale(miny, [miny, maxy], scaley);
+        let d2 = 
+            ycontext
             .scale(first_ticky.position, [miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
 

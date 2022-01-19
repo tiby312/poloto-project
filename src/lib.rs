@@ -466,6 +466,10 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
     }
 }
 
+
+
+
+
 ///
 /// Make a graph with a svg tag and a simple css theme.
 ///

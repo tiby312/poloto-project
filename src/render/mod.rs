@@ -40,9 +40,13 @@ pub fn render<
     let padding = 150.0;
     let paddingy = 100.0;
 
+    let xcontext=&mut plotter.xcontext;
+    let ycontext=&mut plotter.ycontext;
+    
+
     let ([minx, maxx], [miny, maxy]) = num::find_bounds(
-        &mut plotter.xcontext,
-        &mut plotter.ycontext,
+        xcontext,
+        ycontext,
         plotter.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
     );
 
@@ -94,8 +98,8 @@ pub fn render<
                 Ok(wc.get_counter() != 0)
             })?;
 
-        let aa = plotter.xcontext.scale(minx, [minx, maxx], scalex2);
-        let bb = plotter.ycontext.scale(miny, [miny, maxy], scaley2);
+        let aa = xcontext.scale(minx, [minx, maxx], scalex2);
+        let bb = ycontext.scale(miny, [miny, maxy], scaley2);
 
         struct PlotIter<X, Y> {
             basex_ii: f64,
@@ -160,8 +164,8 @@ pub fn render<
                             a,
                             plot_iter.gen_iter(
                                 &mut p,
-                                &mut plotter.xcontext,
-                                &mut plotter.ycontext,
+                                xcontext,
+                                ycontext,
                             ),
                         )
                     })
@@ -193,7 +197,7 @@ pub fn render<
                     d.path(|a| {
                         use tagger::PathCommand::*;
                         for [x, y] in plot_iter
-                            .gen_iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
+                            .gen_iter(&mut p, xcontext, ycontext)
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             a.put(M(x, y))?;
@@ -230,7 +234,7 @@ pub fn render<
                         let mut last = None;
                         //TODO dont necesarily filter?
                         for [x, y] in plot_iter
-                            .gen_iter(&mut p, &mut plotter.xcontext, &mut plotter.ycontext)
+                            .gen_iter(&mut p, xcontext, ycontext)
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             if let Some((lx, ly)) = last {
@@ -278,8 +282,8 @@ pub fn render<
                             path,
                             plot_iter.gen_iter(
                                 &mut p,
-                                &mut plotter.xcontext,
-                                &mut plotter.ycontext,
+                                xcontext,
+                                ycontext,
                             ),
                             height - paddingy,
                             true,
@@ -316,8 +320,8 @@ pub fn render<
                             path,
                             plot_iter.gen_iter(
                                 &mut p,
-                                &mut plotter.xcontext,
-                                &mut plotter.ycontext,
+                                xcontext,
+                                ycontext,
                             ),
                             height - paddingy,
                             false,
