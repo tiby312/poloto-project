@@ -217,7 +217,7 @@ pub(super) fn draw_base<
                         write!(w, "Where j = ")?;
                         plotter
                             .xcontext
-                            .fmt_tick(w, base, xtick_info.unit_data, FmtFull::Full)
+                            .fmt_tick(w, base, FmtFull::Full(xtick_info.unit_data))
                     })?;
 
                 "j+"
@@ -254,7 +254,7 @@ pub(super) fn draw_base<
                         write!(w, "{}", extra)?;
                         plotter
                             .xcontext
-                            .fmt_tick(w, value, xtick_info.unit_data, FmtFull::Tick)
+                            .fmt_tick(w, value, FmtFull::Tick(xtick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -288,7 +288,7 @@ pub(super) fn draw_base<
                         write!(w, "Where k = ")?;
                         plotter
                             .ycontext
-                            .fmt_tick(w, base, ytick_info.unit_data, FmtFull::Full)
+                            .fmt_tick(w, base, FmtFull::Full(ytick_info.unit_data))
                     })?;
 
                 "k+"
@@ -326,7 +326,7 @@ pub(super) fn draw_base<
                         write!(w, "{}", extra)?;
                         plotter
                             .ycontext
-                            .fmt_tick(w, value, ytick_info.unit_data, FmtFull::Tick)
+                            .fmt_tick(w, value, FmtFull::Tick(ytick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",

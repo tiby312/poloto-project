@@ -149,12 +149,11 @@ impl PlotNumContext for Defaulti128Context {
         &mut self,
         formatter: T,
         val: i128,
-        step: StepAmount,
-        fmt: FmtFull,
+        step: FmtFull<StepAmount>,
     ) -> std::fmt::Result {
-        let step = match fmt {
-            FmtFull::Tick => Some(step.0),
-            FmtFull::Full => None,
+        let step = match step {
+            FmtFull::Tick(step) => Some(step.0),
+            FmtFull::Full(_) => None,
         };
         util::write_interval_i128(formatter, val, step)
     }

@@ -42,10 +42,9 @@ impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
         &mut self,
         formatter: T,
         val: Self::Num,
-        step: Self::UnitData,
-        draw_full: FmtFull,
+        step: FmtFull<Self::UnitData>,
     ) -> std::fmt::Result {
-        self.t.fmt_tick(formatter, val, step, draw_full)
+        self.t.fmt_tick(formatter, val, step)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -59,7 +58,7 @@ pub struct WithFmt<T, F> {
 }
 impl<
         P: PlotNumContext,
-        F: FnMut(&mut dyn std::fmt::Write, P::Num, P::UnitData, FmtFull) -> std::fmt::Result,
+        F: FnMut(&mut dyn std::fmt::Write, P::Num, FmtFull<P::UnitData>) -> std::fmt::Result,
     > PlotNumContext for WithFmt<P, F>
 {
     type UnitData = P::UnitData;
@@ -96,10 +95,9 @@ impl<
         &mut self,
         mut formatter: T,
         val: Self::Num,
-        step: Self::UnitData,
-        draw_full: FmtFull,
+        step: FmtFull<Self::UnitData>,
     ) -> std::fmt::Result {
-        (self.func)(&mut formatter, val, step, draw_full)
+        (self.func)(&mut formatter, val, step)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -146,10 +144,9 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
         &mut self,
         formatter: T,
         val: Self::Num,
-        step: Self::UnitData,
-        draw_full: FmtFull,
+        step: FmtFull<Self::UnitData>,
     ) -> std::fmt::Result {
-        self.0.fmt_tick(formatter, val, step, draw_full)
+        self.0.fmt_tick(formatter, val, step)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -194,10 +191,9 @@ impl<P: PlotNumContext> PlotNumContext for Marker<P> {
         &mut self,
         formatter: T,
         val: Self::Num,
-        step: Self::UnitData,
-        draw_full: FmtFull,
+        step: FmtFull<Self::UnitData>,
     ) -> std::fmt::Result {
-        self.0.fmt_tick(formatter, val, step, draw_full)
+        self.0.fmt_tick(formatter, val, step)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -222,7 +218,7 @@ pub trait PlotNumContextExt: PlotNumContext + Sized {
 
     fn with_fmt<F>(self, func: F) -> WithFmt<Self, F>
     where
-        F: FnMut(&mut dyn std::fmt::Write, Self::Num, Self::UnitData, FmtFull) -> std::fmt::Result,
+        F: FnMut(&mut dyn std::fmt::Write, Self::Num, FmtFull<Self::UnitData>) -> std::fmt::Result,
     {
         WithFmt { t: self, func }
     }

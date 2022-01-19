@@ -27,8 +27,7 @@ pub enum TimestampType {
 pub fn write_fmt<T: fmt::Write>(
     mut formatter: T,
     val: UnixTime,
-    step: TimestampType,
-    fmt: FmtFull,
+    step: FmtFull<TimestampType>,
 ) -> fmt::Result {
     use TimestampType::*;
 
@@ -48,11 +47,11 @@ pub fn write_fmt<T: fmt::Write>(
         _ => unreachable!(),
     };
 
-    match fmt {
-        FmtFull::Full => {
+    match step {
+        FmtFull::Full(_) => {
             write!(formatter, "{}", val)
         }
-        FmtFull::Tick => match step {
+        FmtFull::Tick(step) => match step {
             YR => {
                 write!(formatter, "{}", val.year())
             }
@@ -160,10 +159,9 @@ impl PlotNumContext for DefaultUnixTimeContext {
         &mut self,
         formatter: T,
         val: UnixTime,
-        step: TimestampType,
-        fmt: FmtFull,
+        step: FmtFull<TimestampType>,
     ) -> std::fmt::Result {
-        self::write_fmt(formatter, val, step, fmt)
+        self::write_fmt(formatter, val, step)
     }
 
     fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {

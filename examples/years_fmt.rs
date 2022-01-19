@@ -25,8 +25,8 @@ fn main() {
         "Number of Articles",
         UnixTime::ctx()
             .marker(UnixTime::from_year(2025))
-            .with_fmt(|mut w, v, tt, fm| {
-                poloto::num::timestamp::write_fmt(&mut w, v, tt, fm)?;
+            .with_fmt(|mut w, v, tt| {
+                poloto::num::timestamp::write_fmt(&mut w, v, tt)?;
                 write!(w, " yr")
             }),
         i128::ctx().no_dash().marker(0),

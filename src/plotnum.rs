@@ -39,8 +39,7 @@ pub trait PlotNumContext {
         &mut self,
         mut formatter: T,
         val: Self::Num,
-        _step: Self::UnitData,
-        _draw_full: FmtFull,
+        _draw_full: FmtFull<Self::UnitData>,
     ) -> std::fmt::Result {
         write!(formatter, "{}", val)
     }
@@ -80,9 +79,9 @@ pub struct DashInfo {
     pub max: f64,
 }
 
-pub enum FmtFull {
-    Full,
-    Tick,
+pub enum FmtFull<T> {
+    Full(T),
+    Tick(T),
 }
 
 ///
