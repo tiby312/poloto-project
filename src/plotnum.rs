@@ -53,6 +53,10 @@ pub trait PlotNumContext {
     }
 }
 
+
+///
+/// A plottable number that has a default context that can be created by calling `ctx()`
+/// 
 pub trait HasDefaultCtx: PlotNum {
     type DefaultContext: PlotNumContext<Num = Self> + Default;
     fn ctx() -> Self::DefaultContext {
