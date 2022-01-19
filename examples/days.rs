@@ -15,7 +15,7 @@ fn main() {
     ];
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles")
-        .with_ycontext(poloto::ctx::<i128>().no_dash().marker(0));
+        .with_ycontext(i128::ctx().no_dash().marker(0));
 
     s.line("", data);
 

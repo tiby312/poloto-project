@@ -43,9 +43,9 @@ pub mod context_ext;
 pub mod prelude {
     pub use super::context_ext::PlotNumContextExt;
     pub use super::formatm;
+    pub use super::plotnum::HasDefaultCtx;
     pub use super::plottable::crop::Croppable;
 }
-
 
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
@@ -185,15 +185,11 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: PlotNum, Y: PlotNum>(
+pub fn plot<'a, X: HasDefaultCtx, Y: HasDefaultCtx>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a, X, Y, X::DefaultContext, Y::DefaultContext>
-where
-    X::DefaultContext: PlotNumContext<Num = X> + Default,
-    Y::DefaultContext: PlotNumContext<Num = Y> + Default,
-{
+) -> Plotter<'a, X, Y, X::DefaultContext, Y::DefaultContext> {
     Plotter::new(
         title,
         xname,
@@ -227,16 +223,6 @@ pub struct Plotter<
     preserve_aspect: bool,
     pub xcontext: XC,
     pub ycontext: YC,
-}
-
-///
-/// Generate a default context if it exists for the specified `PlotNum`.
-///
-pub fn ctx<X: PlotNum>() -> X::DefaultContext
-where
-    X::DefaultContext: PlotNumContext + Default,
-{
-    X::DefaultContext::default()
 }
 
 impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>

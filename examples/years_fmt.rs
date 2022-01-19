@@ -23,13 +23,13 @@ fn main() {
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        poloto::ctx::<UnixTime>()
+        UnixTime::ctx()
             .marker(UnixTime::from_year(2025))
             .with_fmt(|mut w, v, tt, fm| {
                 poloto::num::timestamp::write_fmt(&mut w, v, tt, fm)?;
                 write!(w, " yr")
             }),
-        poloto::ctx::<i128>().no_dash().marker(0),
+        i128::ctx().no_dash().marker(0),
     );
 
     let data = data.into_iter().map(|(a, b)| {

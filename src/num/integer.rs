@@ -168,7 +168,9 @@ impl PlotNumContext for Defaulti128Context {
     }
 }
 
-impl PlotNum for i128 {
+impl PlotNum for i128 {}
+
+impl HasDefaultCtx for i128 {
     type DefaultContext = Defaulti128Context;
 }
 

@@ -54,13 +54,18 @@ pub trait PlotNumContext {
     }
 }
 
+pub trait HasDefaultCtx: PlotNum {
+    type DefaultContext: PlotNumContext<Num = Self> + Default;
+    fn ctx() -> Self::DefaultContext {
+        Self::DefaultContext::default()
+    }
+}
+
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
-    type DefaultContext;
-
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false

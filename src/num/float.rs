@@ -107,9 +107,11 @@ impl PlotNumContext for Defaultf64Context {
     }
 }
 
-impl PlotNum for f64 {
+impl HasDefaultCtx for f64 {
     type DefaultContext = Defaultf64Context;
+}
 
+impl PlotNum for f64 {
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
