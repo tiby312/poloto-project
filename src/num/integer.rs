@@ -59,9 +59,6 @@ fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]
     (best.0 as i128 * step_power, best.0)
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct StepAmount(pub i128);
-
 /*
 /// Generate out good tick interval defaults for `i128`.
 pub fn compute_ticks(
@@ -74,19 +71,19 @@ pub fn compute_ticks(
 */
 
 #[derive(Default, Copy, Clone)]
-pub struct Defaulti128Context;
+pub struct Defaulti128Context {
+    step_amount: i128,
+}
 
 impl PlotNumContext for Defaulti128Context {
     type Num = i128;
-    type UnitData = StepAmount;
-    type TickIter = std::vec::IntoIter<Tick<i128>>;
 
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
         range: [i128; 2],
         dash: DashInfo,
-    ) -> TickInfo<i128, StepAmount, Self::TickIter> {
+    ) -> TickInfo<i128> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -129,9 +126,9 @@ impl PlotNumContext for Defaulti128Context {
             }
         };
 
+        self.step_amount = step;
         TickInfo {
-            unit_data: StepAmount(step),
-            ticks: ticks.into_iter(),
+            ticks,
             dash_size,
             display_relative: display_relative.then(|| start_step),
         }
@@ -145,14 +142,14 @@ impl PlotNumContext for Defaulti128Context {
         }
     }
 
-    fn fmt_tick<T: std::fmt::Write>(
+    fn fmt_tick(
         &mut self,
-        formatter: T,
+        formatter: &mut dyn std::fmt::Write,
         val: i128,
-        step: FmtFull<StepAmount>,
+        step: FmtFull<()>,
     ) -> std::fmt::Result {
         let step = match step {
-            FmtFull::Tick(step) => Some(step.0),
+            FmtFull::Tick(_) => Some(self.step_amount),
             FmtFull::Full(_) => None,
         };
         util::write_interval_i128(formatter, val, step)

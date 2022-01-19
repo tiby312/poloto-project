@@ -15,7 +15,8 @@ fn main() {
         .fuse()
     };
 
-    let mut plotter = poloto::plot("collatz", "x", "y").with_ycontext(i128::ctx().marker(0));
+    let mut plotter = poloto::plot("collatz", "x", "y");
+    plotter.with_ycontext(i128::ctx().marker(0));
 
     for i in 1000..1006 {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));

@@ -11,20 +11,19 @@ pub trait DiscNum: PlotNum {
 }
 
 pub trait PlotNumContext {
-    type UnitData: Copy;
     type Num: PlotNum;
-    type TickIter: Iterator<Item = Tick<Self::Num>>;
 
     ///
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
+    /// Guarenteed to be called before fmt_tick.
     ///
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
         range: [Self::Num; 2],
         dash: DashInfo,
-    ) -> TickInfo<Self::Num, Self::UnitData, Self::TickIter>;
+    ) -> TickInfo<Self::Num>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
@@ -35,11 +34,11 @@ pub trait PlotNumContext {
 
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick<T: std::fmt::Write>(
+    fn fmt_tick(
         &mut self,
-        mut formatter: T,
+        formatter: &mut dyn std::fmt::Write,
         val: Self::Num,
-        _draw_full: FmtFull<Self::UnitData>,
+        _draw_full: FmtFull<()>,
     ) -> std::fmt::Result {
         write!(formatter, "{}", val)
     }
@@ -101,13 +100,10 @@ pub struct Tick<I> {
 /// Information on the properties of all the interval ticks for one dimension.
 ///
 #[derive(Debug, Clone)]
-pub struct TickInfo<I, D, IT: Iterator<Item = Tick<I>>> {
-    pub unit_data: D,
-
+pub struct TickInfo<I> {
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
-    //pub ticks: Vec<Tick<I>>,
-    pub ticks: IT,
+    pub ticks: Vec<Tick<I>>,
 
     /// The number of dashes between two ticks must be a multiple of this number.
     //pub dash_multiple: u32,

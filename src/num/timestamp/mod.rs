@@ -27,7 +27,8 @@ pub enum TimestampType {
 pub fn write_fmt<T: fmt::Write>(
     mut formatter: T,
     val: UnixTime,
-    step: FmtFull<TimestampType>,
+    step: FmtFull<()>,
+    typestamp_type: TimestampType,
 ) -> fmt::Result {
     use TimestampType::*;
 
@@ -51,7 +52,7 @@ pub fn write_fmt<T: fmt::Write>(
         FmtFull::Full(_) => {
             write!(formatter, "{}", val)
         }
-        FmtFull::Tick(step) => match step {
+        FmtFull::Tick(_) => match typestamp_type {
             YR => {
                 write!(formatter, "{}", val.year())
             }
@@ -73,20 +74,28 @@ pub fn write_fmt<T: fmt::Write>(
         },
     }
 }
-#[derive(Default, Clone, Copy)]
-pub struct DefaultUnixTimeContext;
+
+#[derive(Clone, Copy)]
+pub struct DefaultUnixTimeContext {
+    timestamp_type: TimestampType,
+}
+impl std::default::Default for DefaultUnixTimeContext {
+    fn default() -> Self {
+        DefaultUnixTimeContext {
+            timestamp_type: TimestampType::YR,
+        }
+    }
+}
 
 impl PlotNumContext for DefaultUnixTimeContext {
     type Num = UnixTime;
-    type UnitData = TimestampType;
-    type TickIter = std::vec::IntoIter<Tick<UnixTime>>;
 
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
         range: [UnixTime; 2],
         _dash: DashInfo,
-    ) -> TickInfo<UnixTime, TimestampType, Self::TickIter> {
+    ) -> TickInfo<UnixTime> {
         assert!(range[0] <= range[1]);
 
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
@@ -147,21 +156,21 @@ impl PlotNumContext for DefaultUnixTimeContext {
         };
         */
 
+        self.timestamp_type = ret.unit_data;
         TickInfo {
-            unit_data: ret.unit_data,
-            ticks: ticks.into_iter(),
+            ticks,
             dash_size,
             display_relative: None, //Never want to do this for unix time.
         }
     }
 
-    fn fmt_tick<T: std::fmt::Write>(
+    fn fmt_tick(
         &mut self,
-        formatter: T,
+        formatter: &mut dyn std::fmt::Write,
         val: UnixTime,
-        step: FmtFull<TimestampType>,
+        step: FmtFull<()>,
     ) -> std::fmt::Result {
-        self::write_fmt(formatter, val, step)
+        self::write_fmt(formatter, val, step, self.timestamp_type)
     }
 
     fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {

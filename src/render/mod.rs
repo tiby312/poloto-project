@@ -23,14 +23,8 @@ struct ScaleData<X: PlotNum, Y: PlotNum> {
 
 //Returns error if the user supplied format functions don't work.
 //Panics if the element tag writing writes fail
-pub fn render<
-    X: PlotNum,
-    Y: PlotNum,
-    XC: PlotNumContext<Num = X>,
-    YC: PlotNumContext<Num = Y>,
-    T: std::fmt::Write,
->(
-    plotter: &mut Plotter<X, Y, XC, YC>,
+pub fn render<X: PlotNum, Y: PlotNum, T: std::fmt::Write>(
+    plotter: &mut Plotter<X, Y>,
     writer: T,
 ) -> fmt::Result {
     let mut writer = tagger::new(writer);
@@ -40,8 +34,8 @@ pub fn render<
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let xcontext = plotter.xcontext.as_mut().unwrap();
-    let ycontext = plotter.ycontext.as_mut().unwrap();
+    let xcontext: &mut dyn PlotNumContext<Num = X> = plotter.xcontext.as_mut().unwrap().as_mut();
+    let ycontext: &mut dyn PlotNumContext<Num = Y> = plotter.ycontext.as_mut().unwrap().as_mut();
 
     let ([minx, maxx], [miny, maxy]) = num::find_bounds(
         xcontext,
@@ -109,11 +103,11 @@ pub fn render<
             maxy_ii: f64,
         }
         impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
-            fn gen_iter<'a, XX: PlotNumContext<Num = X>, YY: PlotNumContext<Num = Y>>(
+            fn gen_iter<'a>(
                 &'a self,
                 p: &'a mut Plot<X, Y>,
-                xcontext: &'a mut XX,
-                ycontext: &'a mut YY,
+                xcontext: &'a mut dyn PlotNumContext<Num = X>,
+                ycontext: &'a mut dyn PlotNumContext<Num = Y>,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
                 p.plots.iter_second().map(move |(x, y)| {
                     [

@@ -85,14 +85,8 @@ pub fn line<T: std::fmt::Write>(
 ///
 /// Draw the axis lines, and tick intervals
 ///
-pub(super) fn draw_base<
-    X: PlotNum,
-    Y: PlotNum,
-    XC: PlotNumContext<Num = X>,
-    YC: PlotNumContext<Num = Y>,
-    T: fmt::Write,
->(
-    plotter: &mut Plotter<X, Y, XC, YC>,
+pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
+    plotter: &mut Plotter<X, Y>,
     writer: &mut tagger::ElemWriter<T>,
     dd: DrawData,
     sd: ScaleData<X, Y>,
@@ -174,7 +168,7 @@ pub(super) fn draw_base<
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
-        let mut xtick_info = xcontext.compute_ticks(
+        let xtick_info = xcontext.compute_ticks(
             ideal_num_xsteps,
             [minx, maxx],
             DashInfo {
@@ -182,7 +176,7 @@ pub(super) fn draw_base<
                 max: scalex,
             },
         );
-        let mut ytick_info = ycontext.compute_ticks(
+        let ytick_info = ycontext.compute_ticks(
             ideal_num_ysteps,
             [miny, maxy],
             DashInfo {
@@ -196,11 +190,9 @@ pub(super) fn draw_base<
 
         use tagger::PathCommand::*;
 
-        let first_tickx = xtick_info.ticks.next().unwrap();
-        let xticks = std::iter::once(first_tickx).chain(xtick_info.ticks);
+        let first_tickx = xtick_info.ticks[0];
 
-        let first_ticky = ytick_info.ticks.next().unwrap();
-        let yticks = std::iter::once(first_ticky).chain(ytick_info.ticks);
+        let first_ticky = ytick_info.ticks[0];
 
         {
             //step num is assured to be atleast 1.
@@ -217,7 +209,7 @@ pub(super) fn draw_base<
                         let mut w = d.writer_safe();
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
-                        xcontext.fmt_tick(w, base, FmtFull::Full(xtick_info.unit_data))
+                        xcontext.fmt_tick(&mut w, base, FmtFull::Full(()))
                     })?;
 
                 "j+"
@@ -226,7 +218,7 @@ pub(super) fn draw_base<
             };
 
             //Draw interva`l x text
-            for Tick { position, value } in xticks {
+            for &Tick { position, value } in xtick_info.ticks.iter() {
                 let xx = (xcontext.scale(position, [minx, maxx], scalex)
                     - xcontext.scale(minx, [minx, maxx], scalex))
                     + padding;
@@ -253,7 +245,7 @@ pub(super) fn draw_base<
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        xcontext.fmt_tick(w, value, FmtFull::Tick(xtick_info.unit_data))
+                        xcontext.fmt_tick(&mut w, value, FmtFull::Tick(()))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -286,7 +278,7 @@ pub(super) fn draw_base<
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
 
-                        ycontext.fmt_tick(w, base, FmtFull::Full(ytick_info.unit_data))
+                        ycontext.fmt_tick(&mut w, base, FmtFull::Full(()))
                     })?;
 
                 "k+"
@@ -295,7 +287,7 @@ pub(super) fn draw_base<
             };
 
             //Draw interval y text
-            for Tick { position, value } in yticks {
+            for &Tick { position, value } in ytick_info.ticks.iter() {
                 let yy = height
                     - (ycontext.scale(position, [miny, maxy], scaley)
                         - ycontext.scale(miny, [miny, maxy], scaley))
@@ -323,7 +315,7 @@ pub(super) fn draw_base<
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        ycontext.fmt_tick(w, value, FmtFull::Tick(ytick_info.unit_data))
+                        ycontext.fmt_tick(&mut w, value, FmtFull::Tick(()))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",

@@ -190,7 +190,7 @@ pub fn plot<'a, X: HasDefaultCtx, Y: HasDefaultCtx>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display + 'a,
-) -> Plotter<'a, X, Y, X::DefaultContext, Y::DefaultContext> {
+) -> Plotter<'a, X, Y> {
     Plotter::new(
         title,
         xname,
@@ -209,13 +209,7 @@ pub fn plot<'a, X: HasDefaultCtx, Y: HasDefaultCtx>(
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
 ///
-pub struct Plotter<
-    'a,
-    X: PlotNum + 'a,
-    Y: PlotNum + 'a,
-    XC: PlotNumContext<Num = X>,
-    YC: PlotNumContext<Num = Y>,
-> {
+pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn fmt::Display + 'a>,
     xname: Box<dyn fmt::Display + 'a>,
     yname: Box<dyn fmt::Display + 'a>,
@@ -225,13 +219,11 @@ pub struct Plotter<
 
     //Only none after move_into() is called on this object.
     //if render() is called after move_into() is called, it will panic.
-    pub xcontext: Option<XC>,
-    pub ycontext: Option<YC>,
+    pub xcontext: Option<Box<dyn PlotNumContext<Num = X> + 'a>>,
+    pub ycontext: Option<Box<dyn PlotNumContext<Num = Y> + 'a>>,
 }
 
-impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>
-    Plotter<'a, X, Y, XC, YC>
-{
+impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     pub fn move_into(&mut self) -> Self {
         let mut dummy = Plotter {
             title: Box::new(""),
@@ -249,30 +241,14 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
         dummy
     }
 
-    pub fn with_xcontext<XC2: PlotNumContext<Num = X>>(self, a: XC2) -> Plotter<'a, X, Y, XC2, YC> {
-        Plotter {
-            title: self.title,
-            xname: self.xname,
-            yname: self.yname,
-            plots: self.plots,
-            num_css_classes: self.num_css_classes,
-            preserve_aspect: self.preserve_aspect,
-            xcontext: Some(a),
-            ycontext: self.ycontext,
-        }
+    pub fn with_xcontext<XC2: PlotNumContext<Num = X> + 'a>(&mut self, a: XC2) -> &mut Self {
+        self.xcontext = Some(Box::new(a));
+        self
     }
 
-    pub fn with_ycontext<YC2: PlotNumContext<Num = Y>>(self, a: YC2) -> Plotter<'a, X, Y, XC, YC2> {
-        Plotter {
-            title: self.title,
-            xname: self.xname,
-            yname: self.yname,
-            plots: self.plots,
-            num_css_classes: self.num_css_classes,
-            preserve_aspect: self.preserve_aspect,
-            xcontext: self.xcontext,
-            ycontext: Some(a),
-        }
+    pub fn with_ycontext<YC2: PlotNumContext<Num = Y> + 'a>(&mut self, a: YC2) -> &mut Self {
+        self.ycontext = Some(Box::new(a));
+        self
     }
 
     ///
@@ -286,9 +262,9 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-        xcontext: XC,
-        ycontext: YC,
-    ) -> Plotter<'a, X, Y, XC, YC> {
+        xcontext: impl PlotNumContext<Num = X> + 'a,
+        ycontext: impl PlotNumContext<Num = Y> + 'a,
+    ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
             xname: Box::new(xname),
@@ -296,8 +272,8 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
             plots: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xcontext: Some(xcontext),
-            ycontext: Some(ycontext),
+            xcontext: Some(Box::new(xcontext)),
+            ycontext: Some(Box::new(ycontext)),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -493,9 +469,7 @@ pub trait SimpleTheme {
     fn simple_theme_dark<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
 }
 
-impl<X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>> SimpleTheme
-    for Plotter<'_, X, Y, XC, YC>
-{
+impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
     fn simple_theme<T: std::fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
         write!(
             &mut a,

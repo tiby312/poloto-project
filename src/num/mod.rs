@@ -37,11 +37,11 @@ fn test_multiple<I: PlotNum>(
     );
 }
 
-pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
-    xcontext: &mut X,
-    ycontext: &mut Y,
-    it: impl IntoIterator<Item = (X::Num, Y::Num)>,
-) -> ([X::Num; 2], [Y::Num; 2]) {
+pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
+    xcontext: &mut dyn PlotNumContext<Num = X>,
+    ycontext: &mut dyn PlotNumContext<Num = Y>,
+    it: impl IntoIterator<Item = (X, Y)>,
+) -> ([X; 2], [Y; 2]) {
     let xmarkers = xcontext.get_markers();
     let ymarkers = ycontext.get_markers();
 

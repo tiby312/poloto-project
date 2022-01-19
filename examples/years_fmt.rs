@@ -23,12 +23,7 @@ fn main() {
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        UnixTime::ctx()
-            .marker(UnixTime::from_year(2025))
-            .with_fmt(|mut w, v, tt| {
-                poloto::num::timestamp::write_fmt(&mut w, v, tt)?;
-                write!(w, " yr")
-            }),
+        UnixTime::ctx().marker(UnixTime::from_year(2025)),
         i128::ctx().no_dash().marker(0),
     )
     .histogram("", &data)

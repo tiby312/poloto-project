@@ -8,23 +8,21 @@ impl DiscNum for f64 {
         f64::NAN
     }
 }
-#[derive(Copy, Clone, Debug)]
-pub struct StepAmount(pub f64);
 
 #[derive(Default, Clone, Copy)]
-pub struct Defaultf64Context;
+pub struct Defaultf64Context {
+    step_amount: f64,
+}
 
 impl PlotNumContext for Defaultf64Context {
     type Num = f64;
-    type UnitData = StepAmount;
-    type TickIter = std::vec::IntoIter<Tick<f64>>;
 
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
         range: [f64; 2],
         dash: DashInfo,
-    ) -> TickInfo<f64, StepAmount, Self::TickIter> {
+    ) -> TickInfo<f64> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -69,23 +67,23 @@ impl PlotNumContext for Defaultf64Context {
             }
         };
 
+        self.step_amount = step;
         TickInfo {
-            unit_data: StepAmount(step),
-            ticks: ticks.into_iter(),
+            ticks,
             dash_size,
             display_relative: display_relative.then(|| start_step),
         }
         //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
-    fn fmt_tick<T: std::fmt::Write>(
+    fn fmt_tick(
         &mut self,
-        formatter: T,
+        formatter: &mut dyn std::fmt::Write,
         val: f64,
-        step: FmtFull<StepAmount>,
+        step: FmtFull<()>,
     ) -> std::fmt::Result {
         let step = match step {
-            FmtFull::Tick(step) => Some(step.0),
+            FmtFull::Tick(_) => Some(self.step_amount),
             FmtFull::Full(_) => None,
         };
         util::write_interval_float(formatter, val, step)
