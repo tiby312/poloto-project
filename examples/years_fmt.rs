@@ -30,12 +30,9 @@ fn main() {
                 write!(w, " yr")
             }),
         i128::ctx().no_dash().marker(0),
-    );
+    )
+    .histogram("", &data)
+    .move_into();
 
-    s.histogram("", &data);
-
-    let mut st = String::new();
-    use std::fmt::Write;
-    write!(&mut st, "{}", poloto::disp(|a| s.simple_theme(a))).unwrap();
-    println!("{}", st);
+    println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

@@ -73,7 +73,7 @@ pub fn write_fmt<T: fmt::Write>(
         },
     }
 }
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct DefaultUnixTimeContext;
 
 impl PlotNumContext for DefaultUnixTimeContext {

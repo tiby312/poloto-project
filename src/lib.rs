@@ -222,14 +222,32 @@ pub struct Plotter<
     plots: Vec<Plot<'a, X, Y>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    pub xcontext: XC,
-    pub ycontext: YC,
+
+    //Only none after move_into() is called on this object.
+    //if render() is called after move_into() is called, it will panic.
+    pub xcontext: Option<XC>,
+    pub ycontext: Option<YC>,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>
     Plotter<'a, X, Y, XC, YC>
 {
-    //TODO add move_into() back?
+    pub fn move_into(&mut self) -> Self {
+        let mut dummy = Plotter {
+            title: Box::new(""),
+            xname: Box::new(""),
+            yname: Box::new(""),
+            plots: Vec::new(),
+            num_css_classes: self.num_css_classes,
+            preserve_aspect: self.preserve_aspect,
+            xcontext: None,
+            ycontext: None,
+        };
+
+        std::mem::swap(&mut dummy, self);
+
+        dummy
+    }
 
     pub fn with_xcontext<XC2: PlotNumContext<Num = X>>(self, a: XC2) -> Plotter<'a, X, Y, XC2, YC> {
         Plotter {
@@ -239,7 +257,7 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
             plots: self.plots,
             num_css_classes: self.num_css_classes,
             preserve_aspect: self.preserve_aspect,
-            xcontext: a,
+            xcontext: Some(a),
             ycontext: self.ycontext,
         }
     }
@@ -253,7 +271,7 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
             num_css_classes: self.num_css_classes,
             preserve_aspect: self.preserve_aspect,
             xcontext: self.xcontext,
-            ycontext: a,
+            ycontext: Some(a),
         }
     }
 
@@ -278,8 +296,8 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
             plots: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xcontext,
-            ycontext,
+            xcontext: Some(xcontext),
+            ycontext: Some(ycontext),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -463,6 +481,9 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
+        assert!(self.xcontext.is_some());
+        assert!(self.ycontext.is_some());
+
         render::render(self, a)
     }
 }

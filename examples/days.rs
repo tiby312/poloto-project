@@ -15,12 +15,9 @@ fn main() {
     ];
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles")
-        .with_ycontext(i128::ctx().no_dash().marker(0));
+        .with_ycontext(i128::ctx().no_dash().marker(0))
+        .line("", &data)
+        .move_into();
 
-    s.line("", &data);
-
-    let mut st = String::new();
-    use std::fmt::Write;
-    write!(&mut st, "{}", poloto::disp(|a| s.simple_theme(a))).unwrap();
-    println!("{}", st);
+    println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

@@ -151,8 +151,8 @@ pub(super) fn draw_base<
         })?
         .build(|w| w.put_raw(&plotter.yname))?;
 
-    let xcontext = &mut plotter.xcontext;
-    let ycontext = &mut plotter.ycontext;
+    let xcontext = plotter.xcontext.as_mut().unwrap();
+    let ycontext = plotter.ycontext.as_mut().unwrap();
     {
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr

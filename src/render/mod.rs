@@ -40,8 +40,8 @@ pub fn render<
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let xcontext = &mut plotter.xcontext;
-    let ycontext = &mut plotter.ycontext;
+    let xcontext = plotter.xcontext.as_mut().unwrap();
+    let ycontext = plotter.ycontext.as_mut().unwrap();
 
     let ([minx, maxx], [miny, maxy]) = num::find_bounds(
         xcontext,

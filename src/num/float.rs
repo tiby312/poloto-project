@@ -11,7 +11,7 @@ impl DiscNum for f64 {
 #[derive(Copy, Clone, Debug)]
 pub struct StepAmount(pub f64);
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Defaultf64Context;
 
 impl PlotNumContext for Defaultf64Context {
