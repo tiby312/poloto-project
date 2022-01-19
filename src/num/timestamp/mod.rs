@@ -27,8 +27,7 @@ pub enum TimestampType {
 pub fn write_fmt<T: fmt::Write>(
     mut formatter: T,
     val: UnixTime,
-    step: FmtFull<()>,
-    typestamp_type: TimestampType,
+    step: FmtFull<TimestampType>,
 ) -> fmt::Result {
     use TimestampType::*;
 
@@ -52,7 +51,7 @@ pub fn write_fmt<T: fmt::Write>(
         FmtFull::Full(_) => {
             write!(formatter, "{}", val)
         }
-        FmtFull::Tick(_) => match typestamp_type {
+        FmtFull::Tick(step) => match step {
             YR => {
                 write!(formatter, "{}", val.year())
             }
@@ -84,6 +83,11 @@ impl std::default::Default for DefaultUnixTimeContext {
         DefaultUnixTimeContext {
             timestamp_type: TimestampType::YR,
         }
+    }
+}
+impl DefaultUnixTimeContext {
+    pub fn get_timestamp_type(&self) -> TimestampType {
+        self.timestamp_type
     }
 }
 
@@ -156,8 +160,8 @@ impl PlotNumContext for DefaultUnixTimeContext {
         };
         */
 
-        self.timestamp_type = ret.unit_data;
         TickInfo {
+            unit_data: ret.unit_data,
             ticks,
             dash_size,
             display_relative: None, //Never want to do this for unix time.
@@ -168,9 +172,9 @@ impl PlotNumContext for DefaultUnixTimeContext {
         &mut self,
         formatter: &mut dyn std::fmt::Write,
         val: UnixTime,
-        step: FmtFull<()>,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
-        self::write_fmt(formatter, val, step, self.timestamp_type)
+        self::write_fmt(formatter, val, step)
     }
 
     fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
@@ -191,7 +195,9 @@ impl PlotNumContext for DefaultUnixTimeContext {
     }
 }
 
-impl PlotNum for UnixTime {}
+impl PlotNum for UnixTime {
+    type StepInfo = TimestampType;
+}
 
 impl HasDefaultCtx for UnixTime {
     type DefaultContext = DefaultUnixTimeContext;

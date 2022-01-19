@@ -209,7 +209,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         let mut w = d.writer_safe();
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
-                        xcontext.fmt_tick(&mut w, base, FmtFull::Full(()))
+                        xcontext.fmt_tick(&mut w, base, FmtFull::Full(xtick_info.unit_data))
                     })?;
 
                 "j+"
@@ -245,7 +245,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        xcontext.fmt_tick(&mut w, value, FmtFull::Tick(()))
+                        xcontext.fmt_tick(&mut w, value, FmtFull::Tick(xtick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -278,7 +278,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
 
-                        ycontext.fmt_tick(&mut w, base, FmtFull::Full(()))
+                        ycontext.fmt_tick(&mut w, base, FmtFull::Full(ytick_info.unit_data))
                     })?;
 
                 "k+"
@@ -315,7 +315,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        ycontext.fmt_tick(&mut w, value, FmtFull::Tick(()))
+                        ycontext.fmt_tick(&mut w, value, FmtFull::Tick(ytick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",

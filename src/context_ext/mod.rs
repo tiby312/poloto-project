@@ -40,7 +40,7 @@ impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
         &mut self,
         formatter: &mut dyn std::fmt::Write,
         val: Self::Num,
-        step: FmtFull<()>,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
         self.t.fmt_tick(formatter, val, step)
     }
@@ -56,7 +56,11 @@ pub struct WithFmt<T, F> {
 }
 impl<
         P: PlotNumContext,
-        F: FnMut(&mut dyn std::fmt::Write, P::Num, FmtFull<()>) -> std::fmt::Result,
+        F: FnMut(
+            &mut dyn std::fmt::Write,
+            P::Num,
+            FmtFull<<P::Num as PlotNum>::StepInfo>,
+        ) -> std::fmt::Result,
     > PlotNumContext for WithFmt<P, F>
 {
     type Num = P::Num;
@@ -91,7 +95,7 @@ impl<
         &mut self,
         mut formatter: &mut dyn std::fmt::Write,
         val: Self::Num,
-        step: FmtFull<()>,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
         (self.func)(&mut formatter, val, step)
     }
@@ -138,7 +142,7 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
         &mut self,
         formatter: &mut dyn std::fmt::Write,
         val: Self::Num,
-        step: FmtFull<()>,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
         self.0.fmt_tick(formatter, val, step)
     }
@@ -183,7 +187,7 @@ impl<P: PlotNumContext> PlotNumContext for Marker<P> {
         &mut self,
         formatter: &mut dyn std::fmt::Write,
         val: Self::Num,
-        step: FmtFull<()>,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
         self.0.fmt_tick(formatter, val, step)
     }
@@ -210,7 +214,11 @@ pub trait PlotNumContextExt: PlotNumContext + Sized {
 
     fn with_fmt<F>(self, func: F) -> WithFmt<Self, F>
     where
-        F: FnMut(&mut dyn std::fmt::Write, Self::Num, FmtFull<()>) -> std::fmt::Result,
+        F: FnMut(
+            &mut dyn std::fmt::Write,
+            Self::Num,
+            FmtFull<<Self::Num as PlotNum>::StepInfo>,
+        ) -> std::fmt::Result,
     {
         WithFmt { t: self, func }
     }

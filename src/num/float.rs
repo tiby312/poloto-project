@@ -67,8 +67,8 @@ impl PlotNumContext for Defaultf64Context {
             }
         };
 
-        self.step_amount = step;
         TickInfo {
+            unit_data: step,
             ticks,
             dash_size,
             display_relative: display_relative.then(|| start_step),
@@ -80,10 +80,10 @@ impl PlotNumContext for Defaultf64Context {
         &mut self,
         formatter: &mut dyn std::fmt::Write,
         val: f64,
-        step: FmtFull<()>,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
         let step = match step {
-            FmtFull::Tick(_) => Some(self.step_amount),
+            FmtFull::Tick(step) => Some(step),
             FmtFull::Full(_) => None,
         };
         util::write_interval_float(formatter, val, step)
@@ -109,6 +109,8 @@ impl HasDefaultCtx for f64 {
 }
 
 impl PlotNum for f64 {
+    type StepInfo = f64;
+
     fn is_hole(&self) -> bool {
         self.is_nan()
     }

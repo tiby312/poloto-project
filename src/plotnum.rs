@@ -38,7 +38,7 @@ pub trait PlotNumContext {
         &mut self,
         formatter: &mut dyn std::fmt::Write,
         val: Self::Num,
-        _draw_full: FmtFull<()>,
+        _draw_full: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
         write!(formatter, "{}", val)
     }
@@ -67,6 +67,8 @@ pub trait HasDefaultCtx: PlotNum {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
+    type StepInfo: Copy;
+
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -100,7 +102,8 @@ pub struct Tick<I> {
 /// Information on the properties of all the interval ticks for one dimension.
 ///
 #[derive(Debug, Clone)]
-pub struct TickInfo<I> {
+pub struct TickInfo<I: PlotNum> {
+    pub unit_data: I::StepInfo,
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
     pub ticks: Vec<Tick<I>>,

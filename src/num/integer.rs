@@ -126,8 +126,8 @@ impl PlotNumContext for Defaulti128Context {
             }
         };
 
-        self.step_amount = step;
         TickInfo {
+            unit_data: step,
             ticks,
             dash_size,
             display_relative: display_relative.then(|| start_step),
@@ -146,10 +146,10 @@ impl PlotNumContext for Defaulti128Context {
         &mut self,
         formatter: &mut dyn std::fmt::Write,
         val: i128,
-        step: FmtFull<()>,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
         let step = match step {
-            FmtFull::Tick(_) => Some(self.step_amount),
+            FmtFull::Tick(step) => Some(step),
             FmtFull::Full(_) => None,
         };
         util::write_interval_i128(formatter, val, step)
@@ -164,7 +164,9 @@ impl PlotNumContext for Defaulti128Context {
     }
 }
 
-impl PlotNum for i128 {}
+impl PlotNum for i128 {
+    type StepInfo = i128;
+}
 
 impl HasDefaultCtx for i128 {
     type DefaultContext = Defaulti128Context;
