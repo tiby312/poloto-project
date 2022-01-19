@@ -26,7 +26,7 @@ fn main() {
         UnixTime::ctx()
             .marker(UnixTime::from_year(2025))
             .with_fmt(|mut w, v, t| {
-                poloto::num::timestamp::write_fmt(&mut w, v, t)?;
+                v.default_tick_fmt(&mut w, t)?;
                 write!(w, " yr")
             }),
         i128::ctx().no_dash().marker(0),

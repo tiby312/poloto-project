@@ -219,8 +219,8 @@ pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 
     //Only none after move_into() is called on this object.
     //if render() is called after move_into() is called, it will panic.
-    pub xcontext: Option<Box<dyn PlotNumContext<Num = X> + 'a>>,
-    pub ycontext: Option<Box<dyn PlotNumContext<Num = Y> + 'a>>,
+    xcontext: Option<Box<dyn PlotNumContext<Num = X> + 'a>>,
+    ycontext: Option<Box<dyn PlotNumContext<Num = Y> + 'a>>,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {

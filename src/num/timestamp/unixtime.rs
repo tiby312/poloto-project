@@ -193,6 +193,57 @@ impl UnixTime {
             step_value,
         }
     }
+
+    pub fn default_tick_fmt<T: fmt::Write>(
+        &self,
+        mut formatter: T,
+        step: FmtFull<TimestampType>,
+    ) -> fmt::Result {
+        let val = self;
+        use TimestampType::*;
+
+        let m = match val.month() {
+            1 => "Jan",
+            2 => "Feb",
+            3 => "Mar",
+            4 => "Apr",
+            5 => "May",
+            6 => "Jun",
+            7 => "Jul",
+            8 => "Aug",
+            9 => "Sep",
+            10 => "Oct",
+            11 => "Nov",
+            12 => "Dec",
+            _ => unreachable!(),
+        };
+
+        match step {
+            FmtFull::Full(_) => {
+                write!(formatter, "{}", val)
+            }
+            FmtFull::Tick(step) => match step {
+                YR => {
+                    write!(formatter, "{}", val.year())
+                }
+                MO => {
+                    write!(formatter, "{} {}", val.year(), m)
+                }
+                DY => {
+                    write!(formatter, "{} {}", m, val.day())
+                }
+                HR => {
+                    write!(formatter, "{}:{}", val.weekday(), val.hour())
+                }
+                MI => {
+                    write!(formatter, "{}:{}", val.hour(), val.minute())
+                }
+                SE => {
+                    write!(formatter, "{}:{}", val.minute(), val.second())
+                }
+            },
+        }
+    }
 }
 impl std::fmt::Display for UnixTime {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {

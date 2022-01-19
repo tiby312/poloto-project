@@ -24,56 +24,6 @@ pub enum TimestampType {
     SE,
 }
 
-pub fn write_fmt<T: fmt::Write>(
-    mut formatter: T,
-    val: UnixTime,
-    step: FmtFull<TimestampType>,
-) -> fmt::Result {
-    use TimestampType::*;
-
-    let m = match val.month() {
-        1 => "Jan",
-        2 => "Feb",
-        3 => "Mar",
-        4 => "Apr",
-        5 => "May",
-        6 => "Jun",
-        7 => "Jul",
-        8 => "Aug",
-        9 => "Sep",
-        10 => "Oct",
-        11 => "Nov",
-        12 => "Dec",
-        _ => unreachable!(),
-    };
-
-    match step {
-        FmtFull::Full(_) => {
-            write!(formatter, "{}", val)
-        }
-        FmtFull::Tick(step) => match step {
-            YR => {
-                write!(formatter, "{}", val.year())
-            }
-            MO => {
-                write!(formatter, "{} {}", val.year(), m)
-            }
-            DY => {
-                write!(formatter, "{} {}", m, val.day())
-            }
-            HR => {
-                write!(formatter, "{}:{}", val.weekday(), val.hour())
-            }
-            MI => {
-                write!(formatter, "{}:{}", val.hour(), val.minute())
-            }
-            SE => {
-                write!(formatter, "{}:{}", val.minute(), val.second())
-            }
-        },
-    }
-}
-
 #[derive(Clone, Copy)]
 pub struct DefaultUnixTimeContext {
     timestamp_type: TimestampType,
@@ -174,7 +124,7 @@ impl PlotNumContext for DefaultUnixTimeContext {
         val: UnixTime,
         step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
     ) -> std::fmt::Result {
-        self::write_fmt(formatter, val, step)
+        val.default_tick_fmt(formatter, step)
     }
 
     fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
