@@ -46,6 +46,7 @@ pub mod prelude {
     pub use super::plottable::crop::Croppable;
 }
 
+
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
 ///The height of the svg tag.

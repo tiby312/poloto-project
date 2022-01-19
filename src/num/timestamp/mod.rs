@@ -12,7 +12,7 @@ mod unixtime;
 use super::*;
 use chrono::prelude::*;
 use chrono::DateTime;
-pub use unixtime::UnixTime;
+pub use unixtime::*;
 
 #[derive(Copy, Clone, Debug)]
 pub enum TimestampType {

@@ -1,4 +1,4 @@
-use poloto::num::unix_timestamp::UnixTime;
+use poloto::num::timestamp::UnixTime;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {

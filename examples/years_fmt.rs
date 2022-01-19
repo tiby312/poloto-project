@@ -1,4 +1,4 @@
-use poloto::num::unix_timestamp::UnixTime;
+use poloto::num::timestamp::UnixTime;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -26,7 +26,7 @@ fn main() {
         poloto::ctx::<UnixTime>()
             .marker(UnixTime::from_year(2025))
             .with_fmt(|mut w, v, tt, fm| {
-                poloto::num::unix_timestamp::write_fmt(&mut w, v, tt, fm)?;
+                poloto::num::timestamp::write_fmt(&mut w, v, tt, fm)?;
                 write!(w, " yr")
             }),
         poloto::ctx::<i128>().no_dash().marker(0),

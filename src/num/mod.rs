@@ -11,7 +11,7 @@ use core::fmt;
 
 pub mod float;
 pub mod integer;
-pub mod unix_timestamp;
+pub mod timestamp;
 
 use std::convert::TryFrom;
 
