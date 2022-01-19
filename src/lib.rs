@@ -42,7 +42,7 @@ pub mod context_ext;
 ///
 pub mod prelude {
     pub use super::context_ext::PlotNumContextExt;
-    pub use super::plottable::Croppable;
+    pub use super::plottable::crop::Croppable;
 }
 
 ///The width of the svg tag.

@@ -37,9 +37,9 @@ impl<A: PlotNum, B: PlotNum> Plottable<A, B> for &(A, B) {
     }
 }
 
-pub use crop::Crop;
-pub use crop::Croppable;
-mod crop {
+//pub use crop::Crop;
+//pub use crop::Croppable;
+pub mod crop {
     use crate::Plottable;
 
     use crate::DiscNum;
