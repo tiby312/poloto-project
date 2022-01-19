@@ -1,4 +1,4 @@
-use poloto::formatm;
+use poloto::prelude::*;
 fn main() {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 

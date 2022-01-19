@@ -1,4 +1,3 @@
-use poloto::formatm;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {

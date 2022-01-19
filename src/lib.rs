@@ -42,6 +42,7 @@ pub mod context_ext;
 ///
 pub mod prelude {
     pub use super::context_ext::PlotNumContextExt;
+    pub use super::formatm;
     pub use super::plottable::crop::Croppable;
 }
 
