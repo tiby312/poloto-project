@@ -1,3 +1,4 @@
+use poloto::prelude::*;
 ///This displays the same exact image as in the `custom_style.rs`,
 ///with the exception that the styles are not in the svg itself.
 ///The svg is embedded in the html, and we can modify its style by
@@ -28,7 +29,7 @@ fn main() {
 </html>
         "###,
         HEADER,
-        poloto::disp(move |a| poloto::simple_theme(a, s))
+        poloto::disp(move |a| s.simple_theme(a))
     );
 }
 

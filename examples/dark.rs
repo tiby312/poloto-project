@@ -8,8 +8,5 @@ fn main() {
 
     plotter.line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
 
-    println!(
-        "{}",
-        poloto::disp(|a| poloto::simple_theme_dark(a, plotter))
-    );
+    println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
 }

@@ -45,6 +45,7 @@ pub mod prelude {
     pub use super::formatm;
     pub use super::plotnum::HasDefaultCtx;
     pub use super::plottable::crop::Croppable;
+    pub use super::SimpleTheme;
 }
 
 ///The width of the svg tag.
@@ -466,68 +467,35 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
     }
 }
 
-
-
-
-
-///
-/// Make a graph with a svg tag and a simple css theme.
-///
-/// ```
-/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-/// let mut plotter = poloto::plot("title", "x", "y");
-/// plotter.line("", &data);
-/// let mut k=String::new();
-/// poloto::simple_theme(&mut k,plotter);
-/// ```
-pub fn simple_theme<
-    T: std::fmt::Write,
-    X: PlotNum,
-    Y: PlotNum,
-    XC: PlotNumContext<Num = X>,
-    YC: PlotNumContext<Num = Y>,
->(
-    mut a: T,
-    mut p: Plotter<X, Y, XC, YC>,
-) -> std::fmt::Result {
-    write!(
-        &mut a,
-        "{}<style>{}</style>{}{}",
-        SVG_HEADER,
-        STYLE_CONFIG_LIGHT_DEFAULT,
-        disp(|a| p.render(a)),
-        SVG_END
-    )
+pub trait SimpleTheme {
+    fn simple_theme<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
+    fn simple_theme_dark<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
 }
 
-///
-/// Make a graph with a svg tag and a simple dark css theme.
-///
-/// ```
-/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-/// let mut plotter = poloto::plot("title", "x", "y");
-/// plotter.line("", &data);
-/// let mut k=String::new();
-/// poloto::simple_theme_dark(&mut k,plotter);
-/// ```
-pub fn simple_theme_dark<
-    T: std::fmt::Write,
-    X: PlotNum,
-    Y: PlotNum,
-    XC: PlotNumContext<Num = X>,
-    YC: PlotNumContext<Num = Y>,
->(
-    mut a: T,
-    mut p: Plotter<X, Y, XC, YC>,
-) -> std::fmt::Result {
-    write!(
-        &mut a,
-        "{}<style>{}</style>{}{}",
-        SVG_HEADER,
-        STYLE_CONFIG_DARK_DEFAULT,
-        disp(|a| p.render(a)),
-        SVG_END
-    )
+impl<X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>> SimpleTheme
+    for Plotter<'_, X, Y, XC, YC>
+{
+    fn simple_theme<T: std::fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
+        write!(
+            &mut a,
+            "{}<style>{}</style>{}{}",
+            SVG_HEADER,
+            STYLE_CONFIG_LIGHT_DEFAULT,
+            disp(|a| self.render(a)),
+            SVG_END
+        )
+    }
+
+    fn simple_theme_dark<T: std::fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
+        write!(
+            &mut a,
+            "{}<style>{}</style>{}{}",
+            SVG_HEADER,
+            STYLE_CONFIG_DARK_DEFAULT,
+            disp(|a| self.render(a)),
+            SVG_END
+        )
+    }
 }
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`

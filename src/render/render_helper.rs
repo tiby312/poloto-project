@@ -151,9 +151,8 @@ pub(super) fn draw_base<
         })?
         .build(|w| w.put_raw(&plotter.yname))?;
 
-
-    let xcontext=&mut plotter.xcontext;
-    let ycontext=&mut plotter.ycontext;
+    let xcontext = &mut plotter.xcontext;
+    let ycontext = &mut plotter.ycontext;
     {
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
@@ -218,8 +217,7 @@ pub(super) fn draw_base<
                         let mut w = d.writer_safe();
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
-                                                    xcontext
-                            .fmt_tick(w, base, FmtFull::Full(xtick_info.unit_data))
+                        xcontext.fmt_tick(w, base, FmtFull::Full(xtick_info.unit_data))
                     })?;
 
                 "j+"
@@ -254,9 +252,8 @@ pub(super) fn draw_base<
                         let mut w = w.writer_safe();
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
-                        
-                            xcontext
-                            .fmt_tick(w, value, FmtFull::Tick(xtick_info.unit_data))
+
+                        xcontext.fmt_tick(w, value, FmtFull::Tick(xtick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -288,9 +285,8 @@ pub(super) fn draw_base<
                         use std::fmt::Write;
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
-                        
-                            ycontext
-                            .fmt_tick(w, base, FmtFull::Full(ytick_info.unit_data))
+
+                        ycontext.fmt_tick(w, base, FmtFull::Full(ytick_info.unit_data))
                     })?;
 
                 "k+"
@@ -326,9 +322,8 @@ pub(super) fn draw_base<
                         let mut w = w.writer_safe();
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
-                        
-                            ycontext
-                            .fmt_tick(w, value, FmtFull::Tick(ytick_info.unit_data))
+
+                        ycontext.fmt_tick(w, value, FmtFull::Tick(ytick_info.unit_data))
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -346,9 +341,7 @@ pub(super) fn draw_base<
         }
 
         let d1 = xcontext.scale(minx, [minx, maxx], scalex);
-        let d2 = 
-            xcontext
-            .scale(first_tickx.position, [minx, maxx], scalex);
+        let d2 = xcontext.scale(first_tickx.position, [minx, maxx], scalex);
         let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
@@ -379,9 +372,7 @@ pub(super) fn draw_base<
         })?;
 
         let d1 = ycontext.scale(miny, [miny, maxy], scaley);
-        let d2 = 
-            ycontext
-            .scale(first_ticky.position, [miny, maxy], scaley);
+        let d2 = ycontext.scale(first_ticky.position, [miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
 
         writer.single("path", |d| {

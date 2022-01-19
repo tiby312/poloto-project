@@ -40,9 +40,8 @@ pub fn render<
     let padding = 150.0;
     let paddingy = 100.0;
 
-    let xcontext=&mut plotter.xcontext;
-    let ycontext=&mut plotter.ycontext;
-    
+    let xcontext = &mut plotter.xcontext;
+    let ycontext = &mut plotter.ycontext;
 
     let ([minx, maxx], [miny, maxy]) = num::find_bounds(
         xcontext,
@@ -159,16 +158,7 @@ pub fn render<
                     d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                     d.attr("fill", "none")?;
                     d.attr("stroke", "black")?;
-                    d.path(|a| {
-                        line(
-                            a,
-                            plot_iter.gen_iter(
-                                &mut p,
-                                xcontext,
-                                ycontext,
-                            ),
-                        )
-                    })
+                    d.path(|a| line(a, plot_iter.gen_iter(&mut p, xcontext, ycontext)))
                 })?;
             }
             PlotType::Scatter => {
@@ -280,11 +270,7 @@ pub fn render<
                     d.path(|path| {
                         line_fill(
                             path,
-                            plot_iter.gen_iter(
-                                &mut p,
-                                xcontext,
-                                ycontext,
-                            ),
+                            plot_iter.gen_iter(&mut p, xcontext, ycontext),
                             height - paddingy,
                             true,
                         )
@@ -318,11 +304,7 @@ pub fn render<
                     d.path(|path| {
                         line_fill(
                             path,
-                            plot_iter.gen_iter(
-                                &mut p,
-                                xcontext,
-                                ycontext,
-                            ),
+                            plot_iter.gen_iter(&mut p, xcontext, ycontext),
                             height - paddingy,
                             false,
                         )

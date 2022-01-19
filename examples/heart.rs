@@ -18,8 +18,5 @@ fn main() {
     plotter.line_fill_raw("heart", range.map(heart));
     plotter.preserve_aspect();
 
-    println!(
-        "{}",
-        poloto::disp(|a| poloto::simple_theme_dark(a, plotter))
-    );
+    println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
 }

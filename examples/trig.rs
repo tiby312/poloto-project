@@ -26,5 +26,5 @@ fn main() {
         x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
+    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }

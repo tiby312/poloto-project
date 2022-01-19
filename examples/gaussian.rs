@@ -22,5 +22,5 @@ fn main() {
     plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     plotter.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
+    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }

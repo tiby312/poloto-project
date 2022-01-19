@@ -1,3 +1,4 @@
+use poloto::prelude::*;
 fn main() -> std::io::Result<()> {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -12,5 +13,5 @@ fn main() -> std::io::Result<()> {
     //Write the graph to a file
     let mut file = std::fs::File::create("assets/write_to_file.svg")?;
     use std::io::Write;
-    write!(file, "{}", poloto::disp(|a| poloto::simple_theme(a, s)))
+    write!(file, "{}", poloto::disp(|a| s.simple_theme(a)))
 }

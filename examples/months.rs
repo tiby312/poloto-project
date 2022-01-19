@@ -22,6 +22,6 @@ fn main() {
 
     let mut st = String::new();
     use std::fmt::Write;
-    write!(&mut st, "{}", poloto::disp(|a| poloto::simple_theme(a, s))).unwrap();
+    write!(&mut st, "{}", poloto::disp(|a| s.simple_theme(a))).unwrap();
     println!("{}", st);
 }

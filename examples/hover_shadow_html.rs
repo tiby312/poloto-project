@@ -1,3 +1,4 @@
+use poloto::prelude::*;
 fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -17,7 +18,7 @@ fn main() {
 </html>
         "###,
         HEADER,
-        poloto::disp(|a| poloto::simple_theme(a, s))
+        poloto::disp(|a| s.simple_theme(a))
     );
 }
 
