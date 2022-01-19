@@ -17,7 +17,7 @@ cargo run --example gaussian > assets/gaussian.svg
 cargo run --example collatz > assets/collatz.svg
 cargo run --example heart > assets/heart.svg
 cargo run --example line_fill > assets/line_fill.svg
-cargo run --example years > assets/years.svg
+cargo run --example years_fmt > assets/years.svg
 cargo run --example months > assets/months.svg
 cargo run --example days > assets/days.svg
 cargo run --example hours > assets/hours.svg

@@ -1,5 +1,4 @@
-use poloto::num::integer::Defaulti128Context;
-use poloto::num::unix_timestamp::{DefaultUnixTimeContext, UnixTime};
+use poloto::num::unix_timestamp::UnixTime;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -21,19 +20,22 @@ fn main() {
     ];
 
     let mut s = poloto::Plotter::new(
-        DefaultUnixTimeContext.marker(UnixTime::from_year(2025)),
-        Defaulti128Context.no_dash().marker(0),
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
+        poloto::ctx::<UnixTime>()
+            .marker(UnixTime::from_year(2025))
+            .with_fmt(|mut w, v, tt, fm| {
+                poloto::num::unix_timestamp::write_fmt(&mut w, v, tt, fm)?;
+                write!(w, " yr")
+            }),
+        poloto::ctx::<i128>().no_dash().marker(0),
     );
 
     let data = data.into_iter().map(|(a, b)| {
         let a = UnixTime::from_year(a);
         (a, b)
     });
-
-    //UnixTime::parse_from_str(&format!("{}/1/1 00:00:00", a), "%Y/%m/%d %H:%M:%S").unwrap();
 
     s.histogram("", data);
 

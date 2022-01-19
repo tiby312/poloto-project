@@ -193,11 +193,11 @@ where
     Y::DefaultContext: PlotNumContext<Num = Y> + Default,
 {
     Plotter::new(
-        X::DefaultContext::default(),
-        Y::DefaultContext::default(),
         title,
         xname,
         yname,
+        X::DefaultContext::default(),
+        Y::DefaultContext::default(),
     )
 }
 
@@ -225,6 +225,16 @@ pub struct Plotter<
     preserve_aspect: bool,
     pub xcontext: XC,
     pub ycontext: YC,
+}
+
+///
+/// Generate a default context if it exists for the specified `PlotNum`.
+///
+pub fn ctx<X: PlotNum>() -> X::DefaultContext
+where
+    X::DefaultContext: PlotNumContext + Default,
+{
+    X::DefaultContext::default()
 }
 
 impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>
@@ -266,11 +276,11 @@ impl<'a, X: PlotNum, Y: PlotNum, XC: PlotNumContext<Num = X>, YC: PlotNumContext
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
-        xcontext: XC,
-        ycontext: YC,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
+        xcontext: XC,
+        ycontext: YC,
     ) -> Plotter<'a, X, Y, XC, YC> {
         Plotter {
             title: Box::new(title),
