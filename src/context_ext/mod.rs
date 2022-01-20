@@ -33,12 +33,8 @@ impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
     fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
         self.t.scale(val, range, max)
     }
-    fn fmt_name(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        name: NameInfo<Self::Num>,
-    ) -> std::fmt::Result {
-        self.t.fmt_name(formatter, name)
+    fn fmt_name(&mut self, name: NameInfo<Self::Num>) -> std::fmt::Result {
+        self.t.fmt_name(name)
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
@@ -99,12 +95,8 @@ impl<
         self.t.scale(val, range, max)
     }
 
-    fn fmt_name(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        name: NameInfo<Self::Num>,
-    ) -> std::fmt::Result {
-        self.t.fmt_name(formatter, name)
+    fn fmt_name(&mut self, name: NameInfo<Self::Num>) -> std::fmt::Result {
+        self.t.fmt_name(name)
     }
 
     /// Used to display a tick
@@ -158,12 +150,8 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
         self.0.scale(val, range, max)
     }
 
-    fn fmt_name(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        name: NameInfo<Self::Num>,
-    ) -> std::fmt::Result {
-        self.0.fmt_name(formatter, name)
+    fn fmt_name(&mut self, name: NameInfo<Self::Num>) -> std::fmt::Result {
+        self.0.fmt_name(name)
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
@@ -214,12 +202,8 @@ impl<P: PlotNumContext> PlotNumContext for Marker<P> {
         self.0.scale(val, range, max)
     }
 
-    fn fmt_name(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        name: NameInfo<Self::Num>,
-    ) -> std::fmt::Result {
-        self.0.fmt_name(formatter, name)
+    fn fmt_name(&mut self, name: NameInfo<Self::Num>) -> std::fmt::Result {
+        self.0.fmt_name(name)
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].

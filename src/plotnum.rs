@@ -43,11 +43,7 @@ pub trait PlotNumContext {
         write!(formatter, "{}", val)
     }
 
-    fn fmt_name(
-        &mut self,
-        _formatter: &mut dyn std::fmt::Write,
-        _info: NameInfo<Self::Num>,
-    ) -> std::fmt::Result {
+    fn fmt_name(&mut self, _info: NameInfo<Self::Num>) -> std::fmt::Result {
         Ok(())
     }
 
@@ -60,7 +56,8 @@ pub trait PlotNumContext {
     }
 }
 
-pub struct NameInfo<T: PlotNum> {
+pub struct NameInfo<'a, T: PlotNum> {
+    pub writer: &'a mut dyn std::fmt::Write,
     pub min: T,
     pub max: T,
     pub step: T::StepInfo,
@@ -81,7 +78,7 @@ pub trait HasDefaultCtx: PlotNum {
 
     fn ctx_bounds<K>(name: K) -> WithNameFunc<K, Self::DefaultContext>
     where
-        K: FnMut(&mut dyn std::fmt::Write, NameInfo<Self>) -> std::fmt::Result,
+        K: FnMut(NameInfo<Self>) -> std::fmt::Result,
     {
         WithNameFunc {
             name: Some(name),
@@ -133,12 +130,8 @@ impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> 
         self.it.fmt_tick(formatter, val, step)
     }
 
-    fn fmt_name(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        _info: NameInfo<Self::Num>,
-    ) -> std::fmt::Result {
-        write!(formatter, "{}", self.name)
+    fn fmt_name(&mut self, info: NameInfo<Self::Num>) -> std::fmt::Result {
+        write!(info.writer, "{}", self.name)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -150,18 +143,13 @@ impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> 
     }
 }
 
-pub struct WithNameFunc<
-    K: FnOnce(&mut dyn std::fmt::Write, NameInfo<J::Num>) -> std::fmt::Result,
-    J: PlotNumContext,
-> {
+pub struct WithNameFunc<K: FnOnce(NameInfo<J::Num>) -> std::fmt::Result, J: PlotNumContext> {
     name: Option<K>,
     it: J,
 }
 
-impl<
-        K: FnOnce(&mut dyn std::fmt::Write, NameInfo<J::Num>) -> std::fmt::Result,
-        J: PlotNumContext,
-    > PlotNumContext for WithNameFunc<K, J>
+impl<K: FnOnce(NameInfo<J::Num>) -> std::fmt::Result, J: PlotNumContext> PlotNumContext
+    for WithNameFunc<K, J>
 {
     type Num = J::Num;
 
@@ -200,12 +188,8 @@ impl<
         self.it.fmt_tick(formatter, val, step)
     }
 
-    fn fmt_name(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        info: NameInfo<Self::Num>,
-    ) -> std::fmt::Result {
-        (self.name.take().unwrap())(formatter, info)
+    fn fmt_name(&mut self, info: NameInfo<Self::Num>) -> std::fmt::Result {
+        (self.name.take().unwrap())(info)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {

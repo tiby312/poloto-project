@@ -19,8 +19,12 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let xc = UnixTime::ctx_bounds(|w, d| {
-        write!(w, "Time between {} and {} in {}", d.min, d.max, d.step)
+    let xc = UnixTime::ctx_bounds(|d| {
+        write!(
+            d.writer,
+            "Time between {} and {} in {}",
+            d.min, d.max, d.step
+        )
     })
     .marker(UnixTime::from_year(2025))
     .with_fmt(|mut w, v, t| {

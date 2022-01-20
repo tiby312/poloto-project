@@ -169,14 +169,12 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("y", height - padding / 8.)
         })?
         .build(|w| {
-            xcontext.fmt_name(
-                &mut w.writer_safe(),
-                NameInfo {
-                    min: minx,
-                    max: maxx,
-                    step: xtick_info.unit_data,
-                },
-            )
+            xcontext.fmt_name(NameInfo {
+                writer: &mut w.writer_safe(),
+                min: minx,
+                max: maxx,
+                step: xtick_info.unit_data,
+            })
         })?;
 
     writer
@@ -193,14 +191,12 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("y", height / 2.0)
         })?
         .build(|w| {
-            ycontext.fmt_name(
-                &mut w.writer_safe(),
-                NameInfo {
-                    min: miny,
-                    max: maxy,
-                    step: ytick_info.unit_data,
-                },
-            )
+            ycontext.fmt_name(NameInfo {
+                writer: &mut w.writer_safe(),
+                min: miny,
+                max: maxy,
+                step: ytick_info.unit_data,
+            })
         })?;
 
     let xdash_size = xtick_info.dash_size;
