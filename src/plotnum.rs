@@ -34,13 +34,8 @@ pub trait PlotNumContext {
 
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        _draw_full: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        write!(formatter, "{}", val)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        write!(tick.writer, "{}", tick.val)
     }
 
     fn fmt_name(&mut self, _info: NameInfo<Self::Num>) -> std::fmt::Result {
@@ -76,7 +71,7 @@ pub trait HasDefaultCtx: PlotNum {
         }
     }
 
-    fn ctx_bounds<K>(name: K) -> WithNameFunc<K, Self::DefaultContext>
+    fn ctx_fmt<K>(name: K) -> WithNameFunc<K, Self::DefaultContext>
     where
         K: FnMut(NameInfo<Self>) -> std::fmt::Result,
     {
@@ -84,6 +79,10 @@ pub trait HasDefaultCtx: PlotNum {
             name: Some(name),
             it: Self::DefaultContext::default(),
         }
+    }
+
+    fn ctx_none() -> Self::DefaultContext {
+        Self::DefaultContext::default()
     }
 }
 
@@ -121,13 +120,8 @@ impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> 
 
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        self.it.fmt_tick(formatter, val, step)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        self.it.fmt_tick(tick)
     }
 
     fn fmt_name(&mut self, info: NameInfo<Self::Num>) -> std::fmt::Result {
@@ -141,6 +135,13 @@ impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> 
     fn get_markers(&mut self) -> Vec<Self::Num> {
         self.it.get_markers()
     }
+}
+
+pub struct TickFmt<'a, T: PlotNum> {
+    pub writer: &'a mut dyn std::fmt::Write,
+    pub val: T,
+    pub step: FmtFull,
+    pub info: T::StepInfo,
 }
 
 pub struct WithNameFunc<K: FnOnce(NameInfo<J::Num>) -> std::fmt::Result, J: PlotNumContext> {
@@ -179,13 +180,8 @@ impl<K: FnOnce(NameInfo<J::Num>) -> std::fmt::Result, J: PlotNumContext> PlotNum
 
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        self.it.fmt_tick(formatter, val, step)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        self.it.fmt_tick(tick)
     }
 
     fn fmt_name(&mut self, info: NameInfo<Self::Num>) -> std::fmt::Result {
@@ -222,9 +218,9 @@ pub struct DashInfo {
     pub max: f64,
 }
 
-pub enum FmtFull<T> {
-    Full(T),
-    Tick(T),
+pub enum FmtFull {
+    Full,
+    Tick,
 }
 
 ///

@@ -197,7 +197,8 @@ impl UnixTime {
     pub fn default_tick_fmt<T: fmt::Write>(
         &self,
         mut formatter: T,
-        step: FmtFull<TimestampType>,
+        step: FmtFull,
+        info: TimestampType,
     ) -> fmt::Result {
         let val = self;
         use TimestampType::*;
@@ -219,10 +220,10 @@ impl UnixTime {
         };
 
         match step {
-            FmtFull::Full(_) => {
+            FmtFull::Full => {
                 write!(formatter, "{}", val)
             }
-            FmtFull::Tick(step) => match step {
+            FmtFull::Tick => match info {
                 YR => {
                     write!(formatter, "{}", val.year())
                 }

@@ -74,17 +74,12 @@ impl PlotNumContext for Defaultf64Context {
         //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
 
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: f64,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        let step = match step {
-            FmtFull::Tick(step) => Some(step),
-            FmtFull::Full(_) => None,
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        let step = match tick.step {
+            FmtFull::Tick => Some(tick.info),
+            FmtFull::Full => None,
         };
-        util::write_interval_float(formatter, val, step)
+        util::write_interval_float(tick.writer, tick.val, step)
     }
 
     fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {

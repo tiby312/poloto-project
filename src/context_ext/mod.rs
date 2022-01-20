@@ -38,13 +38,8 @@ impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        self.t.fmt_tick(formatter, val, step)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        self.t.fmt_tick(tick)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -60,14 +55,8 @@ pub struct WithFmt<T, F> {
     pub t: T,
     pub func: F,
 }
-impl<
-        P: PlotNumContext,
-        F: FnMut(
-            &mut dyn std::fmt::Write,
-            P::Num,
-            FmtFull<<P::Num as PlotNum>::StepInfo>,
-        ) -> std::fmt::Result,
-    > PlotNumContext for WithFmt<P, F>
+impl<P: PlotNumContext, F: FnMut(TickFmt<P::Num>) -> std::fmt::Result> PlotNumContext
+    for WithFmt<P, F>
 {
     type Num = P::Num;
 
@@ -101,13 +90,8 @@ impl<
 
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &mut self,
-        mut formatter: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        (self.func)(&mut formatter, val, step)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        (self.func)(tick)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -155,13 +139,8 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        self.0.fmt_tick(formatter, val, step)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        self.0.fmt_tick(tick)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -207,13 +186,8 @@ impl<P: PlotNumContext> PlotNumContext for Marker<P> {
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        self.0.fmt_tick(formatter, val, step)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        self.0.fmt_tick(tick)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
@@ -238,11 +212,7 @@ pub trait PlotNumContextExt: PlotNumContext + Sized {
 
     fn with_fmt<F>(self, func: F) -> WithFmt<Self, F>
     where
-        F: FnMut(
-            &mut dyn std::fmt::Write,
-            Self::Num,
-            FmtFull<<Self::Num as PlotNum>::StepInfo>,
-        ) -> std::fmt::Result,
+        F: FnMut(TickFmt<Self::Num>) -> std::fmt::Result,
     {
         WithFmt { t: self, func }
     }

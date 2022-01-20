@@ -140,17 +140,12 @@ impl PlotNumContext for Defaulti128Context {
         }
     }
 
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: i128,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        let step = match step {
-            FmtFull::Tick(step) => Some(step),
-            FmtFull::Full(_) => None,
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        let step = match tick.step {
+            FmtFull::Tick => Some(tick.info),
+            FmtFull::Full => None,
         };
-        util::write_interval_i128(formatter, val, step)
+        util::write_interval_i128(tick.writer, tick.val, step)
     }
 
     fn scale(&mut self, val: i128, range: [i128; 2], max: f64) -> f64 {

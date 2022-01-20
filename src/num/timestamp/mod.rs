@@ -124,13 +124,8 @@ impl PlotNumContext for DefaultUnixTimeContext {
         }
     }
 
-    fn fmt_tick(
-        &mut self,
-        formatter: &mut dyn std::fmt::Write,
-        val: UnixTime,
-        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
-    ) -> std::fmt::Result {
-        val.default_tick_fmt(formatter, step)
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        tick.val.default_tick_fmt(tick.writer, tick.step, tick.info)
     }
 
     fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {

@@ -19,7 +19,7 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let xc = UnixTime::ctx_bounds(|d| {
+    let xc = UnixTime::ctx_fmt(|d| {
         write!(
             d.writer,
             "Time between {} and {} in {}",
@@ -27,9 +27,9 @@ fn main() {
         )
     })
     .marker(UnixTime::from_year(2025))
-    .with_fmt(|mut w, v, t| {
-        v.default_tick_fmt(&mut w, t)?;
-        write!(w, " yr")
+    .with_fmt(|mut t| {
+        t.val.default_tick_fmt(&mut t.writer, t.step, t.info)?;
+        write!(t.writer, " yr")
     });
 
     let mut s = poloto::Plotter::new(
