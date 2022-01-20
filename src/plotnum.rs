@@ -46,8 +46,7 @@ pub trait PlotNumContext {
     fn fmt_name(
         &mut self,
         _formatter: &mut dyn std::fmt::Write,
-        _bounds: [Self::Num; 2],
-        _step: <Self::Num as PlotNum>::StepInfo,
+        _info: NameInfo<Self::Num>,
     ) -> std::fmt::Result {
         Ok(())
     }
@@ -59,7 +58,12 @@ pub trait PlotNumContext {
     fn get_markers(&mut self) -> Vec<Self::Num> {
         vec![]
     }
+}
 
+pub struct NameInfo<T: PlotNum> {
+    pub min: T,
+    pub max: T,
+    pub step: T::StepInfo,
 }
 
 ///
@@ -77,7 +81,7 @@ pub trait HasDefaultCtx: PlotNum {
 
     fn ctx_bounds<K>(name: K) -> WithNameFunc<K, Self::DefaultContext>
     where
-        K: FnMut(&mut dyn std::fmt::Write, [Self; 2], Self::StepInfo) -> std::fmt::Result,
+        K: FnMut(&mut dyn std::fmt::Write, NameInfo<Self>) -> std::fmt::Result,
     {
         WithNameFunc {
             name: Some(name),
@@ -132,8 +136,7 @@ impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> 
     fn fmt_name(
         &mut self,
         formatter: &mut dyn std::fmt::Write,
-        _bounds: [Self::Num; 2],
-        _step: <Self::Num as PlotNum>::StepInfo,
+        _info: NameInfo<Self::Num>,
     ) -> std::fmt::Result {
         write!(formatter, "{}", self.name)
     }
@@ -148,11 +151,7 @@ impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> 
 }
 
 pub struct WithNameFunc<
-    K: FnOnce(
-        &mut dyn std::fmt::Write,
-        [J::Num; 2],
-        <J::Num as PlotNum>::StepInfo,
-    ) -> std::fmt::Result,
+    K: FnOnce(&mut dyn std::fmt::Write, NameInfo<J::Num>) -> std::fmt::Result,
     J: PlotNumContext,
 > {
     name: Option<K>,
@@ -160,11 +159,7 @@ pub struct WithNameFunc<
 }
 
 impl<
-        K: FnOnce(
-            &mut dyn std::fmt::Write,
-            [J::Num; 2],
-            <J::Num as PlotNum>::StepInfo,
-        ) -> std::fmt::Result,
+        K: FnOnce(&mut dyn std::fmt::Write, NameInfo<J::Num>) -> std::fmt::Result,
         J: PlotNumContext,
     > PlotNumContext for WithNameFunc<K, J>
 {
@@ -208,10 +203,9 @@ impl<
     fn fmt_name(
         &mut self,
         formatter: &mut dyn std::fmt::Write,
-        bounds: [Self::Num; 2],
-        step: <Self::Num as PlotNum>::StepInfo,
+        info: NameInfo<Self::Num>,
     ) -> std::fmt::Result {
-        (self.name.take().unwrap())(formatter, bounds, step)
+        (self.name.take().unwrap())(formatter, info)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {

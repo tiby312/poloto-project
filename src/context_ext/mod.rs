@@ -36,10 +36,9 @@ impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
     fn fmt_name(
         &mut self,
         formatter: &mut dyn std::fmt::Write,
-        bounds: [Self::Num; 2],
-        step: <Self::Num as PlotNum>::StepInfo,
+        name: NameInfo<Self::Num>,
     ) -> std::fmt::Result {
-        self.t.fmt_name(formatter, bounds, step)
+        self.t.fmt_name(formatter, name)
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
@@ -103,10 +102,9 @@ impl<
     fn fmt_name(
         &mut self,
         formatter: &mut dyn std::fmt::Write,
-        bounds: [Self::Num; 2],
-        step: <Self::Num as PlotNum>::StepInfo,
+        name: NameInfo<Self::Num>,
     ) -> std::fmt::Result {
-        self.t.fmt_name(formatter, bounds, step)
+        self.t.fmt_name(formatter, name)
     }
 
     /// Used to display a tick
@@ -163,10 +161,9 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
     fn fmt_name(
         &mut self,
         formatter: &mut dyn std::fmt::Write,
-        bounds: [Self::Num; 2],
-        step: <Self::Num as PlotNum>::StepInfo,
+        name: NameInfo<Self::Num>,
     ) -> std::fmt::Result {
-        self.0.fmt_name(formatter, bounds, step)
+        self.0.fmt_name(formatter, name)
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
@@ -220,10 +217,9 @@ impl<P: PlotNumContext> PlotNumContext for Marker<P> {
     fn fmt_name(
         &mut self,
         formatter: &mut dyn std::fmt::Write,
-        bounds: [Self::Num; 2],
-        step: <Self::Num as PlotNum>::StepInfo,
+        name: NameInfo<Self::Num>,
     ) -> std::fmt::Result {
-        self.0.fmt_name(formatter, bounds, step)
+        self.0.fmt_name(formatter, name)
     }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
