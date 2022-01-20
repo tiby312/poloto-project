@@ -88,8 +88,8 @@ impl<'a> BestTickFinder<'a> {
         use std::cmp::Ordering;
         let is_better = match new_closeness.cmp(&old_closeness) {
             Ordering::Less => true,
-            //If there is a tie, choose the one with more ticks.
-            Ordering::Greater => candidate.ticks.len() > self.best.ticks.len(),
+            //If there is a tie, choose the one with less ticks.
+            Ordering::Greater => candidate.ticks.len() < self.best.ticks.len(),
             Ordering::Equal => false,
         };
 
