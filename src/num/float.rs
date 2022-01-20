@@ -10,8 +10,7 @@ impl DiscNum for f64 {
 }
 
 #[derive(Default, Clone, Copy)]
-pub struct Defaultf64Context {
-}
+pub struct Defaultf64Context {}
 
 impl PlotNumContext for Defaultf64Context {
     type Num = f64;

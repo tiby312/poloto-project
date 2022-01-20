@@ -111,6 +111,43 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
     let xcontext = plotter.xcontext.as_mut().unwrap();
     let ycontext = plotter.ycontext.as_mut().unwrap();
 
+    //Draw step lines
+    //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
+
+    let ideal_num_xsteps = if let Some(t) = xcontext.ideal_num_ticks() {
+        t
+    } else if preserve_aspect {
+        4
+    } else {
+        6
+    };
+
+    let ideal_num_ysteps = if let Some(t) = xcontext.ideal_num_ticks() {
+        t
+    } else {
+        5
+    };
+
+    let texty_padding = paddingy * 0.3;
+    let textx_padding = padding * 0.1;
+
+    let xtick_info = xcontext.compute_ticks(
+        ideal_num_xsteps,
+        [minx, maxx],
+        DashInfo {
+            ideal_dash_size: 30.0,
+            max: scalex,
+        },
+    );
+    let ytick_info = ycontext.compute_ticks(
+        ideal_num_ysteps,
+        [miny, maxy],
+        DashInfo {
+            ideal_dash_size: 30.0,
+            max: scaley,
+        },
+    );
+
     writer
         .elem("text", |d| {
             d.attr("class", "poloto_labels poloto_text poloto_title")?;
@@ -131,7 +168,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", width / 2.0)?;
             d.attr("y", height - padding / 8.)
         })?
-        .build(|w| xcontext.fmt_name(&mut w.writer_safe()))?;
+        .build(|w| xcontext.fmt_name(&mut w.writer_safe(), [minx, maxx], xtick_info.unit_data))?;
 
     writer
         .elem("text", |d| {
@@ -146,247 +183,209 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", padding / 4.0)?;
             d.attr("y", height / 2.0)
         })?
-        .build(|w| ycontext.fmt_name(&mut w.writer_safe()))?;
+        .build(|w| ycontext.fmt_name(&mut w.writer_safe(), [miny, maxy], ytick_info.unit_data))?;
+
+    let xdash_size = xtick_info.dash_size;
+    let ydash_size = ytick_info.dash_size;
+
+    use tagger::PathCommand::*;
+
+    let first_tickx = xtick_info.ticks[0];
+
+    let first_ticky = ytick_info.ticks[0];
 
     {
-        //Draw step lines
-        //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
-
-        let ideal_num_xsteps = if let Some(t) = xcontext.ideal_num_ticks() {
-            t
-        } else if preserve_aspect {
-            4
-        } else {
-            6
-        };
-
-        let ideal_num_ysteps = if let Some(t) = xcontext.ideal_num_ticks() {
-            t
-        } else {
-            5
-        };
-
-        let texty_padding = paddingy * 0.3;
-        let textx_padding = padding * 0.1;
-
-        let xtick_info = xcontext.compute_ticks(
-            ideal_num_xsteps,
-            [minx, maxx],
-            DashInfo {
-                ideal_dash_size: 30.0,
-                max: scalex,
-            },
-        );
-        let ytick_info = ycontext.compute_ticks(
-            ideal_num_ysteps,
-            [miny, maxy],
-            DashInfo {
-                ideal_dash_size: 30.0,
-                max: scaley,
-            },
-        );
-
-        let xdash_size = xtick_info.dash_size;
-        let ydash_size = ytick_info.dash_size;
-
-        use tagger::PathCommand::*;
-
-        let first_tickx = xtick_info.ticks[0];
-
-        let first_ticky = ytick_info.ticks[0];
-
-        {
-            //step num is assured to be atleast 1.
-            let extra = if let Some(base) = xtick_info.display_relative {
-                writer
-                    .elem("text", |d| {
-                        d.attr("class", "poloto_tick_labels poloto_text")?;
-                        d.attr("alignment-baseline", "middle")?;
-                        d.attr("text-anchor", "start")?;
-                        d.attr("x", width * 0.55)?;
-                        d.attr("y", paddingy * 0.7)
-                    })?
-                    .build(|d| {
-                        let mut w = d.writer_safe();
-                        use std::fmt::Write;
-                        write!(w, "Where j = ")?;
-                        xcontext.fmt_tick(&mut w, base, FmtFull::Full(xtick_info.unit_data))
-                    })?;
-
-                "j+"
-            } else {
-                ""
-            };
-
-            //Draw interva`l x text
-            for &Tick { position, value } in xtick_info.ticks.iter() {
-                let xx = (xcontext.scale(position, [minx, maxx], scalex)
-                    - xcontext.scale(minx, [minx, maxx], scalex))
-                    + padding;
-
-                writer.single("line", |d| {
-                    d.attr("class", "poloto_axis_lines")?;
-                    d.attr("stroke", "black")?;
-                    d.attr("x1", aspect_offset + xx)?;
-                    d.attr("x2", aspect_offset + xx)?;
-                    d.attr("y1", height - paddingy)?;
-                    d.attr("y2", height - paddingy * 0.95)
+        //step num is assured to be atleast 1.
+        let extra = if let Some(base) = xtick_info.display_relative {
+            writer
+                .elem("text", |d| {
+                    d.attr("class", "poloto_tick_labels poloto_text")?;
+                    d.attr("alignment-baseline", "middle")?;
+                    d.attr("text-anchor", "start")?;
+                    d.attr("x", width * 0.55)?;
+                    d.attr("y", paddingy * 0.7)
+                })?
+                .build(|d| {
+                    let mut w = d.writer_safe();
+                    use std::fmt::Write;
+                    write!(w, "Where j = ")?;
+                    xcontext.fmt_tick(&mut w, base, FmtFull::Full(xtick_info.unit_data))
                 })?;
 
-                writer
-                    .elem("text", |d| {
-                        d.attr("class", "poloto_tick_labels poloto_text")?;
-                        d.attr("alignment-baseline", "start")?;
-                        d.attr("text-anchor", "middle")?;
-                        d.attr("x", aspect_offset + xx)?;
-                        d.attr("y", height - paddingy + texty_padding)
-                    })?
-                    .build(|w| {
-                        let mut w = w.writer_safe();
-                        use std::fmt::Write;
-                        write!(w, "{}", extra)?;
+            "j+"
+        } else {
+            ""
+        };
 
-                        xcontext.fmt_tick(&mut w, value, FmtFull::Tick(xtick_info.unit_data))
-                        /*
-                        w.put_raw(format_args!(
-                            "{}{}",
-                            extra,
-                            DisplayableClosure::new(|w| plotter.xcontext.fmt_tick(
-                                w,
-                                value,
-                                xtick_info.unit_data,
-                                FmtFull::Tick
-                            ))
+        //Draw interva`l x text
+        for &Tick { position, value } in xtick_info.ticks.iter() {
+            let xx = (xcontext.scale(position, [minx, maxx], scalex)
+                - xcontext.scale(minx, [minx, maxx], scalex))
+                + padding;
+
+            writer.single("line", |d| {
+                d.attr("class", "poloto_axis_lines")?;
+                d.attr("stroke", "black")?;
+                d.attr("x1", aspect_offset + xx)?;
+                d.attr("x2", aspect_offset + xx)?;
+                d.attr("y1", height - paddingy)?;
+                d.attr("y2", height - paddingy * 0.95)
+            })?;
+
+            writer
+                .elem("text", |d| {
+                    d.attr("class", "poloto_tick_labels poloto_text")?;
+                    d.attr("alignment-baseline", "start")?;
+                    d.attr("text-anchor", "middle")?;
+                    d.attr("x", aspect_offset + xx)?;
+                    d.attr("y", height - paddingy + texty_padding)
+                })?
+                .build(|w| {
+                    let mut w = w.writer_safe();
+                    use std::fmt::Write;
+                    write!(w, "{}", extra)?;
+
+                    xcontext.fmt_tick(&mut w, value, FmtFull::Tick(xtick_info.unit_data))
+                    /*
+                    w.put_raw(format_args!(
+                        "{}{}",
+                        extra,
+                        DisplayableClosure::new(|w| plotter.xcontext.fmt_tick(
+                            w,
+                            value,
+                            xtick_info.unit_data,
+                            FmtFull::Tick
                         ))
-                        */
-                    })?;
-            }
-        }
-
-        {
-            //step num is assured to be atleast 1.
-            let extra = if let Some(base) = ytick_info.display_relative {
-                writer
-                    .elem("text", |d| {
-                        d.attr("class", "poloto_tick_labels poloto_text")?;
-                        d.attr("alignment-baseline", "middle")?;
-                        d.attr("text-anchor", "start")?;
-                        d.attr("x", padding)?;
-                        d.attr("y", paddingy * 0.7)
-                    })?
-                    .build(|w| {
-                        use std::fmt::Write;
-                        let mut w = w.writer_safe();
-                        write!(w, "Where k = ")?;
-
-                        ycontext.fmt_tick(&mut w, base, FmtFull::Full(ytick_info.unit_data))
-                    })?;
-
-                "k+"
-            } else {
-                ""
-            };
-
-            //Draw interval y text
-            for &Tick { position, value } in ytick_info.ticks.iter() {
-                let yy = height
-                    - (ycontext.scale(position, [miny, maxy], scaley)
-                        - ycontext.scale(miny, [miny, maxy], scaley))
-                    - paddingy;
-
-                writer.single("line", |d| {
-                    d.attr("class", "poloto_axis_lines")?;
-                    d.attr("stroke", "black")?;
-                    d.attr("x1", aspect_offset + padding)?;
-                    d.attr("x2", aspect_offset + padding * 0.96)?;
-                    d.attr("y1", yy)?;
-                    d.attr("y2", yy)
-                })?;
-
-                writer
-                    .elem("text", |d| {
-                        d.attr("class", "poloto_tick_labels poloto_text")?;
-                        d.attr("alignment-baseline", "middle")?;
-                        d.attr("text-anchor", "end")?;
-                        d.attr("x", aspect_offset + padding - textx_padding)?;
-                        d.attr("y", yy)
-                    })?
-                    .build(|w| {
-                        let mut w = w.writer_safe();
-                        use std::fmt::Write;
-                        write!(w, "{}", extra)?;
-
-                        ycontext.fmt_tick(&mut w, value, FmtFull::Tick(ytick_info.unit_data))
-                        /*
-                        w.put_raw(format_args!(
-                            "{}{}",
-                            extra,
-                            DisplayableClosure::new(|w| plotter.ycontext.fmt_tick(
-                                w,
-                                value,
-                                ytick_info.unit_data,
-                                FmtFull::Tick
-                            )) //TODO need a way to communicate writing base
-                        ))
-                        */
-                    })?;
-            }
-        }
-
-        let d1 = xcontext.scale(minx, [minx, maxx], scalex);
-        let d2 = xcontext.scale(first_tickx.position, [minx, maxx], scalex);
-        let distance_to_firstx = d2 - d1;
-
-        writer.single("path", |d| {
-            d.attr("stroke", "black")?;
-            d.attr("fill", "none")?;
-            d.attr("class", "poloto_axis_lines")?;
-            if let Some(xdash_size) = xdash_size {
-                d.attr(
-                    "style",
-                    format_args!(
-                        "stroke-dasharray:{};stroke-dashoffset:{};",
-                        xdash_size / 2.0,
-                        -distance_to_firstx
-                    ),
-                )?;
-            }
-            d.path(|p| {
-                p.put(M(padding + aspect_offset, height - paddingy))?;
-                if preserve_aspect {
-                    p.put(L(
-                        height - paddingy / 2.0 + aspect_offset,
-                        height - paddingy,
                     ))
-                } else {
-                    p.put(L(width - padding + aspect_offset, height - paddingy))
-                }
-            })
-        })?;
-
-        let d1 = ycontext.scale(miny, [miny, maxy], scaley);
-        let d2 = ycontext.scale(first_ticky.position, [miny, maxy], scaley);
-        let distance_to_firsty = d2 - d1;
-
-        writer.single("path", |d| {
-            d.attr("stroke", "black")?;
-            d.attr("fill", "none")?;
-            d.attr("class", "poloto_axis_lines")?;
-            if let Some(ydash_size) = ydash_size {
-                d.attr(
-                    "style",
-                    format_args!(
-                        "stroke-dasharray:{};stroke-dashoffset:{};",
-                        ydash_size / 2.0,
-                        -distance_to_firsty
-                    ),
-                )?;
-            }
-            d.path(|p| {
-                p.put(M(aspect_offset + padding, height - paddingy))?;
-                p.put(L(aspect_offset + padding, paddingy))
-            })
-        })?;
+                    */
+                })?;
+        }
     }
+
+    {
+        //step num is assured to be atleast 1.
+        let extra = if let Some(base) = ytick_info.display_relative {
+            writer
+                .elem("text", |d| {
+                    d.attr("class", "poloto_tick_labels poloto_text")?;
+                    d.attr("alignment-baseline", "middle")?;
+                    d.attr("text-anchor", "start")?;
+                    d.attr("x", padding)?;
+                    d.attr("y", paddingy * 0.7)
+                })?
+                .build(|w| {
+                    use std::fmt::Write;
+                    let mut w = w.writer_safe();
+                    write!(w, "Where k = ")?;
+
+                    ycontext.fmt_tick(&mut w, base, FmtFull::Full(ytick_info.unit_data))
+                })?;
+
+            "k+"
+        } else {
+            ""
+        };
+
+        //Draw interval y text
+        for &Tick { position, value } in ytick_info.ticks.iter() {
+            let yy = height
+                - (ycontext.scale(position, [miny, maxy], scaley)
+                    - ycontext.scale(miny, [miny, maxy], scaley))
+                - paddingy;
+
+            writer.single("line", |d| {
+                d.attr("class", "poloto_axis_lines")?;
+                d.attr("stroke", "black")?;
+                d.attr("x1", aspect_offset + padding)?;
+                d.attr("x2", aspect_offset + padding * 0.96)?;
+                d.attr("y1", yy)?;
+                d.attr("y2", yy)
+            })?;
+
+            writer
+                .elem("text", |d| {
+                    d.attr("class", "poloto_tick_labels poloto_text")?;
+                    d.attr("alignment-baseline", "middle")?;
+                    d.attr("text-anchor", "end")?;
+                    d.attr("x", aspect_offset + padding - textx_padding)?;
+                    d.attr("y", yy)
+                })?
+                .build(|w| {
+                    let mut w = w.writer_safe();
+                    use std::fmt::Write;
+                    write!(w, "{}", extra)?;
+
+                    ycontext.fmt_tick(&mut w, value, FmtFull::Tick(ytick_info.unit_data))
+                    /*
+                    w.put_raw(format_args!(
+                        "{}{}",
+                        extra,
+                        DisplayableClosure::new(|w| plotter.ycontext.fmt_tick(
+                            w,
+                            value,
+                            ytick_info.unit_data,
+                            FmtFull::Tick
+                        )) //TODO need a way to communicate writing base
+                    ))
+                    */
+                })?;
+        }
+    }
+
+    let d1 = xcontext.scale(minx, [minx, maxx], scalex);
+    let d2 = xcontext.scale(first_tickx.position, [minx, maxx], scalex);
+    let distance_to_firstx = d2 - d1;
+
+    writer.single("path", |d| {
+        d.attr("stroke", "black")?;
+        d.attr("fill", "none")?;
+        d.attr("class", "poloto_axis_lines")?;
+        if let Some(xdash_size) = xdash_size {
+            d.attr(
+                "style",
+                format_args!(
+                    "stroke-dasharray:{};stroke-dashoffset:{};",
+                    xdash_size / 2.0,
+                    -distance_to_firstx
+                ),
+            )?;
+        }
+        d.path(|p| {
+            p.put(M(padding + aspect_offset, height - paddingy))?;
+            if preserve_aspect {
+                p.put(L(
+                    height - paddingy / 2.0 + aspect_offset,
+                    height - paddingy,
+                ))
+            } else {
+                p.put(L(width - padding + aspect_offset, height - paddingy))
+            }
+        })
+    })?;
+
+    let d1 = ycontext.scale(miny, [miny, maxy], scaley);
+    let d2 = ycontext.scale(first_ticky.position, [miny, maxy], scaley);
+    let distance_to_firsty = d2 - d1;
+
+    writer.single("path", |d| {
+        d.attr("stroke", "black")?;
+        d.attr("fill", "none")?;
+        d.attr("class", "poloto_axis_lines")?;
+        if let Some(ydash_size) = ydash_size {
+            d.attr(
+                "style",
+                format_args!(
+                    "stroke-dasharray:{};stroke-dashoffset:{};",
+                    ydash_size / 2.0,
+                    -distance_to_firsty
+                ),
+            )?;
+        }
+        d.path(|p| {
+            p.put(M(aspect_offset + padding, height - paddingy))?;
+            p.put(L(aspect_offset + padding, paddingy))
+        })
+    })?;
+
     Ok(())
 }

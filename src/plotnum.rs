@@ -43,8 +43,12 @@ pub trait PlotNumContext {
         write!(formatter, "{}", val)
     }
 
-    
-    fn fmt_name(&mut self, _formatter: &mut dyn std::fmt::Write) -> std::fmt::Result {
+    fn fmt_name(
+        &mut self,
+        _formatter: &mut dyn std::fmt::Write,
+        _bounds: [Self::Num; 2],
+        _step: <Self::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result {
         Ok(())
     }
 
@@ -66,6 +70,16 @@ pub trait HasDefaultCtx: PlotNum {
     fn ctx<K: std::fmt::Display>(name: K) -> WithName<K, Self::DefaultContext> {
         WithName {
             name,
+            it: Self::DefaultContext::default(),
+        }
+    }
+
+    fn ctx_bounds<K>(name: K) -> WithNameFunc<K, Self::DefaultContext>
+    where
+        K: FnMut(&mut dyn std::fmt::Write, [Self; 2], Self::StepInfo) -> std::fmt::Result,
+    {
+        WithNameFunc {
+            name: Some(name),
             it: Self::DefaultContext::default(),
         }
     }
@@ -114,8 +128,89 @@ impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> 
         self.it.fmt_tick(formatter, val, step)
     }
 
-    fn fmt_name(&mut self, formatter: &mut dyn std::fmt::Write) -> std::fmt::Result {
+    fn fmt_name(
+        &mut self,
+        formatter: &mut dyn std::fmt::Write,
+        _bounds: [Self::Num; 2],
+        _step: <Self::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result {
         write!(formatter, "{}", self.name)
+    }
+
+    fn ideal_num_ticks(&mut self) -> Option<u32> {
+        self.it.ideal_num_ticks()
+    }
+
+    fn get_markers(&mut self) -> Vec<Self::Num> {
+        self.it.get_markers()
+    }
+}
+
+pub struct WithNameFunc<
+    K: FnOnce(
+        &mut dyn std::fmt::Write,
+        [J::Num; 2],
+        <J::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result,
+    J: PlotNumContext,
+> {
+    name: Option<K>,
+    it: J,
+}
+
+impl<
+        K: FnOnce(
+            &mut dyn std::fmt::Write,
+            [J::Num; 2],
+            <J::Num as PlotNum>::StepInfo,
+        ) -> std::fmt::Result,
+        J: PlotNumContext,
+    > PlotNumContext for WithNameFunc<K, J>
+{
+    type Num = J::Num;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num> {
+        self.it.compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.it.unit_range(offset)
+    }
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.it.scale(val, range, max)
+    }
+
+    /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
+    fn fmt_tick(
+        &mut self,
+        formatter: &mut dyn std::fmt::Write,
+        val: Self::Num,
+        step: FmtFull<<Self::Num as PlotNum>::StepInfo>,
+    ) -> std::fmt::Result {
+        self.it.fmt_tick(formatter, val, step)
+    }
+
+    fn fmt_name(
+        &mut self,
+        formatter: &mut dyn std::fmt::Write,
+        bounds: [Self::Num; 2],
+        step: <Self::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result {
+        (self.name.take().unwrap())(formatter, bounds, step)
     }
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {

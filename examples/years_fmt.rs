@@ -19,14 +19,17 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let mut s = poloto::Plotter::new(
-        "Number of Wikipedia Articles",
-        UnixTime::ctx("year")
+    let xc =
+        UnixTime::ctx_bounds(|w, [a, b], c| write!(w, "Time between {} and {} in {}", a, b, c))
             .marker(UnixTime::from_year(2025))
             .with_fmt(|mut w, v, t| {
                 v.default_tick_fmt(&mut w, t)?;
                 write!(w, " yr")
-            }),
+            });
+
+    let mut s = poloto::Plotter::new(
+        "Number of Wikipedia Articles",
+        xc,
         i128::ctx("Number of articles").no_dash().marker(0),
     )
     .histogram("", &data)

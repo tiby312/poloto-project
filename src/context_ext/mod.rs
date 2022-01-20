@@ -33,7 +33,14 @@ impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
     fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
         self.t.scale(val, range, max)
     }
-
+    fn fmt_name(
+        &mut self,
+        formatter: &mut dyn std::fmt::Write,
+        bounds: [Self::Num; 2],
+        step: <Self::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result {
+        self.t.fmt_name(formatter, bounds, step)
+    }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
     fn fmt_tick(
@@ -47,6 +54,10 @@ impl<P: PlotNumContext> PlotNumContext for WithNumTicks<P> {
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
         Some(self.num)
+    }
+
+    fn get_markers(&mut self) -> Vec<Self::Num> {
+        self.t.get_markers()
     }
 }
 
@@ -89,6 +100,15 @@ impl<
         self.t.scale(val, range, max)
     }
 
+    fn fmt_name(
+        &mut self,
+        formatter: &mut dyn std::fmt::Write,
+        bounds: [Self::Num; 2],
+        step: <Self::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result {
+        self.t.fmt_name(formatter, bounds, step)
+    }
+
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
     fn fmt_tick(
@@ -102,6 +122,10 @@ impl<
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
         self.t.ideal_num_ticks()
+    }
+
+    fn get_markers(&mut self) -> Vec<Self::Num> {
+        self.t.get_markers()
     }
 }
 
@@ -136,6 +160,14 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
         self.0.scale(val, range, max)
     }
 
+    fn fmt_name(
+        &mut self,
+        formatter: &mut dyn std::fmt::Write,
+        bounds: [Self::Num; 2],
+        step: <Self::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result {
+        self.0.fmt_name(formatter, bounds, step)
+    }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
     fn fmt_tick(
@@ -149,6 +181,10 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
 
     fn ideal_num_ticks(&mut self) -> Option<u32> {
         self.0.ideal_num_ticks()
+    }
+
+    fn get_markers(&mut self) -> Vec<Self::Num> {
+        self.0.get_markers()
     }
 }
 
@@ -181,6 +217,14 @@ impl<P: PlotNumContext> PlotNumContext for Marker<P> {
         self.0.scale(val, range, max)
     }
 
+    fn fmt_name(
+        &mut self,
+        formatter: &mut dyn std::fmt::Write,
+        bounds: [Self::Num; 2],
+        step: <Self::Num as PlotNum>::StepInfo,
+    ) -> std::fmt::Result {
+        self.0.fmt_name(formatter, bounds, step)
+    }
     /// Used to display a tick
     /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
     fn fmt_tick(

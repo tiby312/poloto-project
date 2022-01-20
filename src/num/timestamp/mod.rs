@@ -24,6 +24,12 @@ pub enum TimestampType {
     SE,
 }
 
+impl std::fmt::Display for TimestampType {
+    fn fmt(&self, a: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(a, "{:?}", self)
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct DefaultUnixTimeContext {
     timestamp_type: TimestampType,
