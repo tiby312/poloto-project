@@ -59,6 +59,8 @@ pub trait PlotNumContext {
     fn get_markers(&mut self) -> Vec<Self::Num> {
         vec![]
     }
+
+    //TODO add a zoom option for text size???
 }
 
 ///
