@@ -60,7 +60,6 @@ pub trait PlotNumContext {
         vec![]
     }
 
-    //TODO add a zoom option for text size???
 }
 
 ///
