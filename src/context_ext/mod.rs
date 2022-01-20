@@ -3,6 +3,51 @@
 //!
 //!
 use super::*;
+
+impl<T: PlotNum> PlotNumContext for Box<dyn PlotNumContext<Num = T>> {
+    type Num = T;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num> {
+        self.as_mut().compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.as_mut().unit_range(offset)
+    }
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.as_mut().scale(val, range, max)
+    }
+    fn fmt_name(&mut self, name: NameInfo<Self::Num>) -> std::fmt::Result {
+        self.as_mut().fmt_name(name)
+    }
+    /// Used to display a tick
+    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        self.as_mut().fmt_tick(tick)
+    }
+
+    fn ideal_num_ticks(&mut self) -> Option<u32> {
+        self.as_mut().ideal_num_ticks()
+    }
+
+    fn get_markers(&mut self) -> Vec<Self::Num> {
+        self.as_mut().get_markers()
+    }
+}
+
 pub struct WithNumTicks<T: PlotNumContext> {
     t: T,
     num: u32,

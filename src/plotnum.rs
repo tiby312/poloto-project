@@ -142,6 +142,7 @@ pub struct TickFmt<'a, T: PlotNum> {
     pub val: T,
     pub step: FmtFull,
     pub info: T::StepInfo,
+    pub bounds: [T; 2],
 }
 
 pub struct WithNameFunc<K: FnOnce(NameInfo<J::Num>) -> std::fmt::Result, J: PlotNumContext> {

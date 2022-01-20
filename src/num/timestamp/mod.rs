@@ -61,11 +61,11 @@ impl PlotNumContext for DefaultUnixTimeContext {
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
 
         let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
-        let steps_mo = &[1, 2, 3, 6, 12];
-        let steps_dy = &[1, 2, 5, 10];
-        let steps_hr = &[1, 2, 6, 12];
-        let steps_mi = &[1, 2, 10, 15];
-        let steps_se = &[1, 2, 5, 10];
+        let steps_mo = &[1, 2, 3, 6];
+        let steps_dy = &[1, 2, 4, 5, 7];
+        let steps_hr = &[1, 2, 4, 6];
+        let steps_mi = &[1, 2, 10, 15, 30];
+        let steps_se = &[1, 2, 5, 10, 15, 30];
 
         t.consider_yr(steps_yr, steps_mo);
         t.consider_mo(steps_mo, steps_dy);

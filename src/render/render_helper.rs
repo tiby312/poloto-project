@@ -85,8 +85,8 @@ pub fn line<T: std::fmt::Write>(
 ///
 /// Draw the axis lines, and tick intervals
 ///
-pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
-    plotter: &mut Plotter<X, Y>,
+pub(super) fn draw_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a, T: fmt::Write>(
+    plotter: &'a mut Plotter<X, Y>,
     writer: &mut tagger::ElemWriter<T>,
     dd: DrawData,
     sd: ScaleData<X, Y>,
@@ -108,8 +108,8 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         aspect_offset,
     } = sd;
 
-    let xcontext = plotter.xcontext.as_mut().unwrap();
-    let ycontext = plotter.ycontext.as_mut().unwrap();
+    let xcontext: &mut dyn PlotNumContext<Num = X> = plotter.xcontext.as_mut().unwrap().as_mut();
+    let ycontext: &mut dyn PlotNumContext<Num = Y> = plotter.ycontext.as_mut().unwrap().as_mut();
 
     //Draw step lines
     //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr
@@ -122,7 +122,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         6
     };
 
-    let ideal_num_ysteps = if let Some(t) = xcontext.ideal_num_ticks() {
+    let ideal_num_ysteps = if let Some(t) = ycontext.ideal_num_ticks() {
         t
     } else {
         5
@@ -228,6 +228,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         val: base,
                         step: FmtFull::Full,
                         info: xtick_info.unit_data,
+                        bounds: [minx, maxx],
                     })
                 })?;
 
@@ -269,6 +270,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         val: value,
                         step: FmtFull::Tick,
                         info: xtick_info.unit_data,
+                        bounds: [minx, maxx],
                     })
                     /*
                     w.put_raw(format_args!(
@@ -307,6 +309,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         val: base,
                         step: FmtFull::Full,
                         info: ytick_info.unit_data,
+                        bounds: [miny, maxy],
                     })
                 })?;
 
@@ -349,6 +352,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
                         val: value,
                         step: FmtFull::Tick,
                         info: ytick_info.unit_data,
+                        bounds: [miny, maxy],
                     })
                     /*
                     w.put_raw(format_args!(
