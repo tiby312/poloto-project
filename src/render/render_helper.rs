@@ -108,6 +108,9 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
         aspect_offset,
     } = sd;
 
+    let xcontext = plotter.xcontext.as_mut().unwrap();
+    let ycontext = plotter.ycontext.as_mut().unwrap();
+
     writer
         .elem("text", |d| {
             d.attr("class", "poloto_labels poloto_text poloto_title")?;
@@ -128,7 +131,7 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", width / 2.0)?;
             d.attr("y", height - padding / 8.)
         })?
-        .build(|w| w.put_raw(&plotter.xname))?;
+        .build(|w| xcontext.fmt_name(&mut w.writer_safe()))?;
 
     writer
         .elem("text", |d| {
@@ -143,10 +146,8 @@ pub(super) fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
             d.attr("x", padding / 4.0)?;
             d.attr("y", height / 2.0)
         })?
-        .build(|w| w.put_raw(&plotter.yname))?;
+        .build(|w| ycontext.fmt_name(&mut w.writer_safe()))?;
 
-    let xcontext = plotter.xcontext.as_mut().unwrap();
-    let ycontext = plotter.ycontext.as_mut().unwrap();
     {
         //Draw step lines
         //https://stackoverflow.com/questions/60497397/how-do-you-format-a-float-to-the-first-significant-decimal-and-with-specified-pr

@@ -21,15 +21,13 @@ fn main() {
 
     let mut s = poloto::Plotter::new(
         "Number of Wikipedia Articles",
-        "Year",
-        "Number of Articles",
-        UnixTime::ctx()
+        UnixTime::ctx("year")
             .marker(UnixTime::from_year(2025))
             .with_fmt(|mut w, v, t| {
                 v.default_tick_fmt(&mut w, t)?;
                 write!(w, " yr")
             }),
-        i128::ctx().no_dash().marker(0),
+        i128::ctx("Number of articles").no_dash().marker(0),
     )
     .histogram("", &data)
     .move_into();

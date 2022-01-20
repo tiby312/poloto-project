@@ -15,10 +15,13 @@ fn main() {
         (UnixTime::from_ymd(2021, 3, 4), 4682000),
     ];
 
-    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles")
-        .with_ycontext(i128::ctx().no_dash().marker(0))
-        .line("", &data)
-        .move_into();
+    let mut s = poloto::Plotter::new(
+        "Number of Wikipedia Articles",
+        UnixTime::ctx("Year"),
+        i128::ctx("Number of Articles").no_dash().marker(0),
+    )
+    .line("", &data)
+    .move_into();
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

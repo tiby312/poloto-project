@@ -13,10 +13,8 @@ fn main() {
 
     let mut plotter = poloto::Plotter::new(
         "Heart Graph",
-        "x",
-        "y",
-        f64::ctx().marker(-20.).marker(20.),
-        f64::ctx().marker(20.).marker(-20.),
+        f64::ctx("x").marker(-20.).marker(20.),
+        f64::ctx("y").marker(20.).marker(-20.),
     );
 
     plotter.line_fill_raw("heart", range.map(heart));

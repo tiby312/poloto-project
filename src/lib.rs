@@ -191,13 +191,7 @@ pub fn plot<'a, X: HasDefaultCtx, Y: HasDefaultCtx>(
     xname: impl Display + 'a,
     yname: impl Display + 'a,
 ) -> Plotter<'a, X, Y> {
-    Plotter::new(
-        title,
-        xname,
-        yname,
-        X::DefaultContext::default(),
-        Y::DefaultContext::default(),
-    )
+    Plotter::new(title, X::ctx(xname), Y::ctx(yname))
 }
 
 /// Keeps track of plots.
@@ -211,8 +205,6 @@ pub fn plot<'a, X: HasDefaultCtx, Y: HasDefaultCtx>(
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn fmt::Display + 'a>,
-    xname: Box<dyn fmt::Display + 'a>,
-    yname: Box<dyn fmt::Display + 'a>,
     plots: Vec<Plot<'a, X, Y>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
@@ -227,8 +219,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     pub fn move_into(&mut self) -> Self {
         let mut dummy = Plotter {
             title: Box::new(""),
-            xname: Box::new(""),
-            yname: Box::new(""),
             plots: Vec::new(),
             num_css_classes: self.num_css_classes,
             preserve_aspect: self.preserve_aspect,
@@ -241,16 +231,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         dummy
     }
 
-    pub fn with_xcontext<XC2: PlotNumContext<Num = X> + 'a>(&mut self, a: XC2) -> &mut Self {
-        self.xcontext = Some(Box::new(a));
-        self
-    }
-
-    pub fn with_ycontext<YC2: PlotNumContext<Num = Y> + 'a>(&mut self, a: YC2) -> &mut Self {
-        self.ycontext = Some(Box::new(a));
-        self
-    }
-
     ///
     /// Create a plotter with the specified element.
     ///
@@ -260,15 +240,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// ```
     pub fn new(
         title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
         xcontext: impl PlotNumContext<Num = X> + 'a,
         ycontext: impl PlotNumContext<Num = Y> + 'a,
     ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
-            xname: Box::new(xname),
-            yname: Box::new(yname),
             plots: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
