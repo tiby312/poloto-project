@@ -43,7 +43,8 @@ pub trait PlotNumContext {
         write!(formatter, "{}", val)
     }
 
-    fn fmt_name(&mut self, formatter: &mut dyn std::fmt::Write) -> std::fmt::Result {
+    
+    fn fmt_name(&mut self, _formatter: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
     }
 

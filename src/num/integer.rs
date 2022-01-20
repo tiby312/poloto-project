@@ -72,7 +72,6 @@ pub fn compute_ticks(
 
 #[derive(Default, Copy, Clone)]
 pub struct Defaulti128Context {
-    step_amount: i128,
 }
 
 impl PlotNumContext for Defaulti128Context {
