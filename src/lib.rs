@@ -878,28 +878,23 @@ impl Canvas{
 
 
 
-impl<X:PlotNum,F> PlotterTickTrait<X> for F where F:FnMut(X,DataSingle<X>)->std::fmt::Result{
-    fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result{
-        (self)(val,data)
-    }
-
-}
 
 pub trait PlotterTickTrait<X:PlotNum>{
     fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result;
 }
-
-
-
-
-
-pub struct NoDisp<F>(pub F);
-
-impl<X:PlotNum,Y:PlotNum,F> PlotterXnameTrait<X,Y> for NoDisp<F> where F:FnMut(Data<X,Y>)->std::fmt::Result{
-    fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result{
-        (self.0)(data)
+pub fn tick_ext<X:PlotNum>(func:impl FnMut(X,DataSingle<X>)->std::fmt::Result )->impl PlotterTickTrait<X>{
+ 
+    impl<X:PlotNum,F> PlotterTickTrait<X> for F where F:FnMut(X,DataSingle<X>)->std::fmt::Result{
+        fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result{
+            (self)(val,data)
+        }   
     }
+    func
 }
+
+
+
+
 
 
 pub trait PlotterXnameTrait<X:PlotNum,Y:PlotNum>{
@@ -911,6 +906,22 @@ impl<T:std::fmt::Display,X:PlotNum,Y:PlotNum> PlotterXnameTrait<X,Y> for T{
         write!(data.writer,"{}",self)
     }
 }
+pub fn name_ext<X:PlotNum,Y:PlotNum>(func:impl FnMut(Data<X,Y>)->std::fmt::Result )->impl PlotterXnameTrait<X,Y>{
+    struct NoDisp<F>(pub F);
+
+    impl<X:PlotNum,Y:PlotNum,F> PlotterXnameTrait<X,Y> for NoDisp<F> where F:FnMut(Data<X,Y>)->std::fmt::Result{
+        fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result{
+            (self.0)(data)
+        }
+    }
+    
+    NoDisp(func)
+}
+
+
+
+
+
 
 
 

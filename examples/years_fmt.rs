@@ -21,11 +21,14 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let title=poloto::NoDisp(|p:poloto::Data<UnixTime,i128>|write!(p.writer,"title {:?}",p.boundx));
+
     //compute min and max
-    let mut plotter=poloto::Plotter::new(title,"xname","yname");
+    let mut plotter=poloto::Plotter::new(poloto::name_ext(|p|write!(p.writer,"title {:?}",p.boundx)),"xname","yname");
     plotter.line("foo",&data);
 
+    plotter.with_xtickfmt(poloto::tick_ext(|v,d|{
+        write!(d.writer,"{}",v)
+    }));
 
     /*
     //compute min and max
