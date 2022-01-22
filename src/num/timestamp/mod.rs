@@ -88,6 +88,11 @@ impl PlotNum for UnixTime {
         let scale = max / diff;
         val.0 as f64 * scale
     }
+
+    fn val_fmt(&mut self, writer:&mut dyn fmt::Write,tick: FmtFull,info:&mut TimestampType) -> std::fmt::Result {
+        self.default_tick_fmt(writer, tick, *info)
+    }
+
     fn compute_ticks(
         ideal_num_steps: u32,
         range: [UnixTime; 2],

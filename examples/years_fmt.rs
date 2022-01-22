@@ -1,5 +1,7 @@
 use poloto::num::timestamp::UnixTime;
 use poloto::prelude::*;
+
+
 // PIPE me to a file!
 fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
@@ -19,25 +21,36 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
+    let title=poloto::NoDisp(|p:poloto::Data<UnixTime,i128>|write!(p.writer,"title {:?}",p.boundx));
+    //compute min and max
+    let mut plotter=poloto::Plotter::new(title,"xname","yname");
+    plotter.line("foo",&data);
+
+
+    /*
+    //compute min and max
+    let mut data=poloto::plot().line("foo",&data).find_bounds();
+
 
     //knowldge of canvas dim
     let canvas=poloto::Canvas::new();
 
-    //compute min and max
-    let mut data=poloto::plot().line("foo",&data).find_bounds();
-
     //compute step info
     let ticks=canvas.gen_ticks(&data);
 
+
+    let names = poloto::names("title","xname","yname");
+    
+
+    */
 
     println!(
         "{}<style>{}{}</style>{}{}",
         poloto::SVG_HEADER,
         poloto::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
-        poloto::disp(|w| canvas.render(w,data,ticks,())),
+        poloto::disp(|w| plotter.render(w)),
         poloto::SVG_END
     )
-
 }
 

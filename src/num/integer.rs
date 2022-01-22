@@ -109,6 +109,15 @@ impl PlotNumContext for Defaulti128Context {
 impl PlotNum for i128 {
     type StepInfo = i128;
 
+
+    fn val_fmt(&mut self, writer:&mut dyn fmt::Write,tick: FmtFull,info:&mut Self::StepInfo) -> std::fmt::Result {
+        let step = match tick {
+            FmtFull::Tick => Some(*info),
+            FmtFull::Full => None,
+        };
+        util::write_interval_i128(writer, *self, step)
+    }
+
     fn scale(val: i128, range: [i128; 2], max: f64) -> f64 {
         let diff = (range[1] - range[0]) as f64;
 

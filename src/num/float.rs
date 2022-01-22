@@ -55,6 +55,14 @@ impl PlotNum for f64 {
         self.is_nan()
     }
 
+    fn val_fmt(&mut self, writer:&mut dyn fmt::Write,tick: FmtFull,info:&mut Self::StepInfo) -> std::fmt::Result {
+        let step = match tick {
+            FmtFull::Tick => Some(*info),
+            FmtFull::Full => None,
+        };
+        util::write_interval_float(writer, *self, step)
+    }
+
     fn scale(val: f64, range: [f64; 2], max: f64) -> f64 {
         let diff = range[1] - range[0];
         let scale = max / diff;

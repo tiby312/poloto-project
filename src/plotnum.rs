@@ -234,6 +234,11 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// the range to display in the graph.
     fn unit_range(offset: Option<Self>) -> [Self; 2];
 
+
+    /// Default way to display the number
+    fn val_fmt(&mut self,writer:&mut dyn std::fmt::Write,_tick: FmtFull,_extra:&mut Self::StepInfo) -> std::fmt::Result {
+        write!(writer,"{}",self)
+    } 
 }
 
 pub struct DashInfo {

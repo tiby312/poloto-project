@@ -186,16 +186,8 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: PlotNum, Y: PlotNum>() -> Plotter<'a, X, Y> {
-    Plotter::new()
-}
-
-
-
-pub struct PlotterRes<'a,X:PlotNum,Y:PlotNum>{
-    plots:Vec<Plot<'a,X,Y>>,
-    pub boundx:[X;2],
-    pub boundy:[Y;2],
+pub fn plot<'a, X: PlotNum, Y: PlotNum>(title:impl PlotterXnameTrait<X,Y>+'a,xname:impl PlotterXnameTrait<X,Y>+'a,yname:impl PlotterXnameTrait<X,Y>+'a) -> Plotter<'a, X, Y> {
+    Plotter::new(title,xname,yname)
 }
 
 
@@ -296,7 +288,7 @@ impl Canvas{
         TickResult { tickx, ticky }
     }
 
-    pub fn render<X:PlotNum,Y:PlotNum>(&self,writer:impl std::fmt::Write,mut plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>,text:impl PolotoText<X,Y>)->std::fmt::Result{
+    pub fn render<X:PlotNum,Y:PlotNum>(&self,writer:impl std::fmt::Write,mut plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>)->std::fmt::Result{
         let Canvas{
             ideal_num_xsteps,
             ideal_num_ysteps,
@@ -566,14 +558,13 @@ impl Canvas{
         self.draw_base(
             &mut writer,
             plotter,
-            ticks,
-            text
+            ticks
         )?;
     
         Ok(())    
     }
 
-    pub fn draw_base<X:PlotNum,Y:PlotNum,T: fmt::Write>(&self,writer: &mut tagger::ElemWriter<T>,plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>,mut text:impl PolotoText<X,Y>)->std::fmt::Result{
+    pub fn draw_base<X:PlotNum,Y:PlotNum,T: fmt::Write>(&self,writer: &mut tagger::ElemWriter<T>,mut plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>)->std::fmt::Result{
         let Canvas{
             ideal_num_xsteps,
             ideal_num_ysteps,
@@ -590,8 +581,10 @@ impl Canvas{
             preserve_aspect
         }=*self;
     
-        let [minx,maxx]=plotter.boundx;
-        let [miny,maxy]=plotter.boundy;
+        let boundx=plotter.boundx;
+        let boundy=plotter.boundy;
+        let [minx,maxx]=boundx;
+        let [miny,maxy]=boundy;
 
         /*
     pub fn draw_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a, T: fmt::Write>(
@@ -617,8 +610,8 @@ impl Canvas{
             aspect_offset,
         } = sd;
         */
-        let xtick_info=ticks.tickx;
-        let ytick_info=ticks.ticky;
+        let mut xtick_info=ticks.tickx;
+        let mut ytick_info=ticks.ticky;
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
@@ -633,7 +626,7 @@ impl Canvas{
                 d.attr("x", width / 2.0)?;
                 d.attr("y", padding / 4.0)
             })?
-            .build(|w| text.fmt_title(&mut w.writer_safe()))?;
+            .build(|w| plotter.title.fmt_self(Data{writer:&mut w.writer_safe(),boundx,boundy,stepx:xtick_info.unit_data,stepy:ytick_info.unit_data}) )?;
     
         writer
             .elem("text", |d| {
@@ -645,7 +638,7 @@ impl Canvas{
                 d.attr("y", height - padding / 8.)
             })?
             .build(|w| {
-                text.fmt_xname(&mut w.writer_safe())
+                plotter.xname.fmt_self(Data{writer:&mut w.writer_safe(),boundx,boundy,stepx:xtick_info.unit_data,stepy:ytick_info.unit_data})
             })?;
     
         writer
@@ -662,7 +655,7 @@ impl Canvas{
                 d.attr("y", height / 2.0)
             })?
             .build(|w| {
-                text.fmt_yname(&mut w.writer_safe())
+                plotter.yname.fmt_self(Data{writer:&mut w.writer_safe(),boundx,boundy,stepx:xtick_info.unit_data,stepy:ytick_info.unit_data})
             })?;
     
         let xdash_size:Option<f64> = None;//xtick_info.dash_size;
@@ -689,7 +682,8 @@ impl Canvas{
                         let mut w = d.writer_safe();
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
-                        text.fmt_tickx(&mut w, base,FmtFull::Full)
+                        
+                        plotter.xtick_fmt.fmt_self(base,DataSingle{writer:&mut w,bound:boundx,ff:FmtFull::Full,step:xtick_info.unit_data})
                     })?;
     
                 "j+"
@@ -725,7 +719,8 @@ impl Canvas{
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
                         
-                        text.fmt_tickx(&mut w, value,FmtFull::Tick)
+
+                        plotter.xtick_fmt.fmt_self(value,DataSingle{writer:&mut w,bound:boundx,ff:FmtFull::Tick,step:xtick_info.unit_data})
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -758,7 +753,7 @@ impl Canvas{
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
     
-                        text.fmt_ticky(&mut w, base,FmtFull::Full)
+                        plotter.ytick_fmt.fmt_self(base,DataSingle{writer:&mut w,bound:boundy,ff:FmtFull::Full,step:ytick_info.unit_data})
                     })?;
     
                 "k+"
@@ -795,7 +790,9 @@ impl Canvas{
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
     
-                        text.fmt_ticky(&mut w, value,FmtFull::Tick)
+
+                        plotter.ytick_fmt.fmt_self(value,DataSingle{writer:&mut w,bound:boundy,ff:FmtFull::Tick,step:ytick_info.unit_data})
+
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -874,28 +871,62 @@ impl Canvas{
 
 
 
-impl<X:PlotNum,Y:PlotNum> PolotoText<X,Y> for (){
-    fn fmt_title(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result{
-        write!(w,"title")
+
+
+
+
+
+
+
+impl<X:PlotNum,F> PlotterTickTrait<X> for F where F:FnMut(X,DataSingle<X>)->std::fmt::Result{
+    fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result{
+        (self)(val,data)
     }
-    fn fmt_xname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result{
-        write!(w,"xname")
-    }
-    fn fmt_yname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result{
-        write!(w,"yname")
+
+}
+
+pub trait PlotterTickTrait<X:PlotNum>{
+    fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result;
+}
+
+
+
+
+
+pub struct NoDisp<F>(pub F);
+
+impl<X:PlotNum,Y:PlotNum,F> PlotterXnameTrait<X,Y> for NoDisp<F> where F:FnMut(Data<X,Y>)->std::fmt::Result{
+    fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result{
+        (self.0)(data)
     }
 }
 
-pub trait PolotoText<X:PlotNum,Y:PlotNum>{
-    fn fmt_title(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result;
-    fn fmt_xname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result;
-    fn fmt_yname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result;
-    fn fmt_tickx(&mut self,w:&mut dyn std::fmt::Write,val:X,_f:FmtFull)->std::fmt::Result{
-        write!(w,"{}",val)
+
+pub trait PlotterXnameTrait<X:PlotNum,Y:PlotNum>{
+    fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result;
+}
+
+impl<T:std::fmt::Display,X:PlotNum,Y:PlotNum> PlotterXnameTrait<X,Y> for T{
+    fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result{
+        write!(data.writer,"{}",self)
     }
-    fn fmt_ticky(&mut self,w:&mut dyn std::fmt::Write,val:Y,_f:FmtFull)->std::fmt::Result{
-        write!(w,"{}",val)
-    }
+}
+
+
+
+
+pub struct DataSingle<'a,X:PlotNum>{
+    pub writer:&'a mut dyn std::fmt::Write,
+    pub bound:[X;2],
+    pub step:X::StepInfo,
+    pub ff:FmtFull
+}
+pub struct Data<'a,X:PlotNum,Y:PlotNum>{
+    pub writer:&'a mut dyn std::fmt::Write,
+    pub boundx:[X;2],
+    pub boundy:[Y;2],
+    pub stepx:X::StepInfo,
+    pub stepy:Y::StepInfo,
 }
 
 
@@ -903,6 +934,22 @@ pub struct TickResult<X:PlotNum,Y:PlotNum>{
     pub tickx:TickInfo<X>,
     pub ticky:TickInfo<Y>
 }
+
+
+
+pub struct PlotterRes<'a,X:PlotNum,Y:PlotNum>{
+    plots:Vec<Plot<'a,X,Y>>,
+    boundx:[X;2],
+    boundy:[Y;2],
+    title: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
+    xname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
+    yname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
+    xtick_fmt:Box<dyn PlotterTickTrait<X> + 'a>,
+    ytick_fmt:Box<dyn PlotterTickTrait<Y> + 'a>,
+    num_css_classes:Option<usize>,
+    preserve_aspect:bool
+}
+
 
 
 /// Keeps track of plots.
@@ -915,35 +962,30 @@ pub struct TickResult<X:PlotNum,Y:PlotNum>{
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    //title: Box<dyn fmt::Display + 'a>,
+    title: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
+    xname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
+    yname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
+    xtick_fmt:Box<dyn PlotterTickTrait<X> + 'a>,
+    ytick_fmt:Box<dyn PlotterTickTrait<Y> + 'a>,
     plots: Vec<Plot<'a, X, Y>>,
     xmarkers:Vec<X>,
     ymarkers:Vec<Y>,
-    //num_css_classes: Option<usize>,
-    //preserve_aspect: bool,
+    num_css_classes: Option<usize>,
+    preserve_aspect: bool,
 
-    //Only none after move_into() is called on this object.
-    //if render() is called after move_into() is called, it will panic.
-    //xcontext: Option<Box<dyn PlotNumContext<Num = X> + 'a>>,
-    //ycontext: Option<Box<dyn PlotNumContext<Num = Y> + 'a>>,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
-    pub fn move_into(&mut self) -> Self {
-        let mut dummy = Plotter {
-            //title: Box::new(""),
-            plots: Vec::new(),
-            xmarkers:Vec::new(),
-            ymarkers:Vec::new()
-            //num_css_classes: self.num_css_classes,
-            //preserve_aspect: self.preserve_aspect,
-            //xcontext: None,
-            //ycontext: None,
-        };
+    
 
-        std::mem::swap(&mut dummy, self);
+    pub fn with_xtickfmt(&mut self,a:impl PlotterTickTrait<X>+'a)->&mut Self{
+        self.xtick_fmt=Box::new(a);
+        self
+    }
 
-        dummy
+    pub fn with_ytickfmt(&mut self,a:impl PlotterTickTrait<Y>+'a)->&mut Self{
+        self.ytick_fmt=Box::new(a);
+        self
     }
 
     ///
@@ -953,17 +995,18 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut p = poloto::Plotter::new("title", "x", "y");
     /// p.line("",[[1,1]]);
     /// ```
-    pub fn new() -> Plotter<'a, X, Y> {
+    pub fn new(title:impl PlotterXnameTrait<X,Y>+'a,xname:impl PlotterXnameTrait<X,Y>+'a,yname:impl PlotterXnameTrait<X,Y>+'a) -> Plotter<'a, X, Y> {
         Plotter {
-            //title: Box::new(title),
+            title: Box::new(title),
+            xname:Box::new(xname),
+            yname:Box::new(yname),
             plots: Vec::new(),
             xmarkers:Vec::new(),
-            ymarkers:Vec::new()
-            
-            //num_css_classes: Some(8),
-            //preserve_aspect: false,
-            //xcontext: Some(Box::new(xcontext)),
-            //ycontext: Some(Box::new(ycontext)),
+            ymarkers:Vec::new(),
+            num_css_classes: Some(8),
+            preserve_aspect: false,
+            xtick_fmt:Box::new(|mut v:X,mut d:DataSingle<X>|v.val_fmt(d.writer, d.ff, &mut d.step)),
+            ytick_fmt:Box::new(|mut v:Y,mut d:DataSingle<Y>|v.val_fmt(d.writer, d.ff, &mut d.step)),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -1099,13 +1142,20 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         );
 
         PlotterRes{
-            plots:pp.plots,
+            title: pp.title,
+            xname:pp.xname,
+            yname:pp.yname,
+            plots: Vec::new(),
+            num_css_classes:pp.num_css_classes,
+            preserve_aspect: pp.preserve_aspect,
+            xtick_fmt:pp.xtick_fmt,
+            ytick_fmt:pp.ytick_fmt,
             boundx,
             boundy
         }
     }
 
-    /*
+    
     ///
     /// Preserve the aspect ratio by drawing a smaller graph in the same area.
     ///
@@ -1131,9 +1181,9 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self.num_css_classes = a;
         self
     }
-    */
+    
 
-    /*
+    
     ///
     /// Move a plotter out from behind a mutable reference leaving
     /// an empty plotter.
@@ -1143,8 +1193,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         core::mem::swap(&mut empty, self);
         empty
     }
-    */
-/*
+    
+
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
@@ -1164,12 +1214,21 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
-        assert!(self.xcontext.is_some());
-        assert!(self.ycontext.is_some());
+        
+    
+        let data=self.find_bounds();
 
-        render::render(self, a)
+
+        //knowldge of canvas dim
+        let canvas=crate::Canvas::new();
+
+        //compute step info
+        let ticks=canvas.gen_ticks(&data);
+
+        canvas.render(a,data,ticks)
+    
     }
-    */
+    
 }
 
 /*
