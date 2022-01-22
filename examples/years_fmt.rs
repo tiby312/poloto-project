@@ -23,28 +23,13 @@ fn main() {
 
 
     //compute min and max
-    let mut plotter=poloto::Plotter::new(poloto::name_ext(|p|write!(p.writer,"title {:?}",p.boundx)),"xname","yname");
+    let mut plotter=poloto::Plotter::new(poloto::name_ext(|p|write!(p.writer,"title {:?} in {}",p.boundx,p.stepx)),"xname","yname");
     plotter.line("foo",&data);
 
+    /*
     plotter.with_xtickfmt(poloto::tick_ext(|v,d|{
         write!(d.writer,"{}",v)
     }));
-
-    /*
-    //compute min and max
-    let mut data=poloto::plot().line("foo",&data).find_bounds();
-
-
-    //knowldge of canvas dim
-    let canvas=poloto::Canvas::new();
-
-    //compute step info
-    let ticks=canvas.gen_ticks(&data);
-
-
-    let names = poloto::names("title","xname","yname");
-    
-
     */
 
     println!(

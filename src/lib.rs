@@ -882,6 +882,10 @@ impl Canvas{
 pub trait PlotterTickTrait<X:PlotNum>{
     fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result;
 }
+
+pub fn default_tick<X:PlotNum>()->impl PlotterTickTrait<X>{
+    tick_ext(|mut v:X,mut d|v.val_fmt(d.writer, d.ff, &mut d.step))
+}
 pub fn tick_ext<X:PlotNum>(func:impl FnMut(X,DataSingle<X>)->std::fmt::Result )->impl PlotterTickTrait<X>{
  
     impl<X:PlotNum,F> PlotterTickTrait<X> for F where F:FnMut(X,DataSingle<X>)->std::fmt::Result{
@@ -1016,8 +1020,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
             ymarkers:Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xtick_fmt:Box::new(|mut v:X,mut d:DataSingle<X>|v.val_fmt(d.writer, d.ff, &mut d.step)),
-            ytick_fmt:Box::new(|mut v:Y,mut d:DataSingle<Y>|v.val_fmt(d.writer, d.ff, &mut d.step)),
+            xtick_fmt:Box::new(default_tick()),
+            ytick_fmt:Box::new(default_tick()),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -1156,7 +1160,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
             title: pp.title,
             xname:pp.xname,
             yname:pp.yname,
-            plots: Vec::new(),
+            plots: pp.plots,
             num_css_classes:pp.num_css_classes,
             preserve_aspect: pp.preserve_aspect,
             xtick_fmt:pp.xtick_fmt,
