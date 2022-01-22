@@ -38,12 +38,12 @@ fn test_multiple<I: PlotNum>(
 }
 
 pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
-    xcontext: &mut dyn PlotNumContext<Num = X>,
-    ycontext: &mut dyn PlotNumContext<Num = Y>,
     it: impl IntoIterator<Item = (X, Y)>,
+    xmarkers:Vec<X>,
+    ymarkers:Vec<Y>
 ) -> ([X; 2], [Y; 2]) {
-    let xmarkers = xcontext.get_markers();
-    let ymarkers = ycontext.get_markers();
+    //let xmarkers = xcontext.get_markers();
+    //let ymarkers = ycontext.get_markers();
 
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
@@ -51,6 +51,8 @@ pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
         let mut val = ([x, x], [y, y]);
         let mut xmoved = false;
         let mut ymoved = false;
+
+        /*
         let ii = ii
             .chain(
                 xmarkers
@@ -64,7 +66,7 @@ pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
                     .filter(|a| !a.is_hole())
                     .map(|yy| (x, yy)),
             );
-
+        */
         ii.fold(&mut val, |val, (x, y)| {
             if x < val.0[0] {
                 val.0[0] = x;
@@ -92,16 +94,16 @@ pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
         });
 
         if !xmoved {
-            val.0 = xcontext.unit_range(Some(x));
+            val.0 = X::unit_range(Some(x));
         }
 
         if !ymoved {
-            val.1 = ycontext.unit_range(Some(y));
+            val.1 = Y::unit_range(Some(y));
         }
 
         val
     } else {
-        (xcontext.unit_range(None), ycontext.unit_range(None))
+        (X::unit_range(None), Y::unit_range(None))
     }
 }
 

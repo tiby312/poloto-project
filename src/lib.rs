@@ -45,7 +45,7 @@ pub mod prelude {
     pub use super::formatm;
     pub use super::plotnum::HasDefaultCtx;
     pub use super::plottable::crop::Croppable;
-    pub use super::SimpleTheme;
+    //pub use super::SimpleTheme;
 }
 
 ///The width of the svg tag.
@@ -186,13 +186,724 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: HasDefaultCtx, Y: HasDefaultCtx>(
-    title: impl Display + 'a,
-    xname: impl Display + 'a,
-    yname: impl Display + 'a,
-) -> Plotter<'a, X, Y> {
-    Plotter::new(title, X::ctx(xname), Y::ctx(yname))
+pub fn plot<'a, X: PlotNum, Y: PlotNum>() -> Plotter<'a, X, Y> {
+    Plotter::new()
 }
+
+
+
+pub struct PlotterRes<'a,X:PlotNum,Y:PlotNum>{
+    plots:Vec<Plot<'a,X,Y>>,
+    pub boundx:[X;2],
+    pub boundy:[Y;2],
+}
+
+
+
+#[derive(Copy,Clone)]
+pub struct Canvas{
+    ideal_num_xsteps:u32,
+    ideal_num_ysteps:u32,
+    width:f64,
+    height:f64,
+    padding:f64,
+    paddingy:f64,
+    aspect_offset:f64,
+    scalex2:f64,
+    scaley2:f64,
+    spacing:f64,
+    legendx1:f64,
+    num_css_classes: Option<usize>,
+    preserve_aspect: bool,
+
+}
+impl Canvas{
+    pub fn new()->Self{
+        Self::with_options(false, None)
+    }
+    pub fn with_options(preserve_aspect:bool,num_css_classes:Option<usize>)->Self{
+        let ideal_num_xsteps = if preserve_aspect {
+            4
+        } else {
+            6
+        };
+    
+        let ideal_num_ysteps = 5;
+        
+
+        let width=crate::WIDTH as f64;
+        let height=crate::HEIGHT as f64;
+        let padding=150.0;
+        let paddingy=100.0;
+
+        let aspect_offset = if preserve_aspect {
+            width / 2.0 - height + paddingy * 2.0
+        } else {
+            0.0
+        };
+
+        //The range over which the data will be scaled to fit
+        let scalex2 = if preserve_aspect {
+            height - paddingy * 2.0
+        } else {
+            width - padding * 2.0
+        };
+
+        let scaley2 = height - paddingy * 2.0;
+
+        let spacing = padding / 3.0;
+        let legendx1 = width - padding / 1.2 + padding / 30.0;
+
+
+        
+        Canvas{
+            ideal_num_xsteps,
+            ideal_num_ysteps,
+            width,
+            height,
+            padding,
+            paddingy,
+            aspect_offset,
+            scalex2,
+            scaley2,
+            spacing,
+            legendx1,
+            num_css_classes,
+            preserve_aspect
+        }
+    }
+
+    pub fn gen_ticks<X:PlotNum,Y:PlotNum>(&self,plotter:&PlotterRes<X,Y>)->TickResult<X,Y>{
+
+        let tickx = X::compute_ticks(
+            self.ideal_num_xsteps,
+            plotter.boundx,
+            DashInfo {
+                ideal_dash_size: 30.0,
+                max: self.scalex2,
+            },
+        );
+
+        let ticky = Y::compute_ticks(
+            self.ideal_num_ysteps,
+            plotter.boundy,
+            DashInfo {
+                ideal_dash_size: 30.0,
+                max: self.scaley2,
+            },
+        );
+
+        TickResult { tickx, ticky }
+    }
+
+    pub fn render<X:PlotNum,Y:PlotNum>(&self,writer:impl std::fmt::Write,mut plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>,text:impl PolotoText<X,Y>)->std::fmt::Result{
+        let Canvas{
+            ideal_num_xsteps,
+            ideal_num_ysteps,
+            width,
+            height,
+            padding,
+            paddingy,
+            aspect_offset,
+            scalex2,
+            scaley2,
+            spacing,
+            legendx1,
+            num_css_classes,
+            preserve_aspect
+        }=*self;
+
+
+        let [minx,maxx]=plotter.boundx;
+        let [miny,maxy]=plotter.boundy;
+
+        let mut writer = tagger::new(writer);
+
+
+        let mut color_iter = {
+            let max = if let Some(nn) = num_css_classes {
+                nn
+            } else {
+                usize::MAX
+            };
+    
+            (0..max).cycle()
+        };
+    
+        for (i, mut p) in plotter.plots.drain(..).enumerate() {
+            let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
+    
+            let name_exists = writer
+                .elem("text", |d| {
+                    d.attr("class", "poloto_text poloto_legend_text")?;
+                    d.attr("alignment-baseline", "middle")?;
+                    d.attr("text-anchor", "start")?;
+                    d.attr("font-size", "large")?;
+                    d.attr("x", width - padding / 1.2)?;
+                    d.attr("y", paddingy + (i as f64) * spacing)
+                })?
+                .build(|d| {
+                    let mut wc = num::WriteCounter::new(d.writer_safe());
+                    p.plots.write_name(&mut wc)?;
+                    Ok(wc.get_counter() != 0)
+                })?;
+    
+            let aa = X::scale(minx, [minx, maxx], scalex2);
+            let bb = Y::scale(miny, [miny, maxy], scaley2);
+    
+            struct PlotIter<X, Y> {
+                basex_ii: f64,
+                basey_ii: f64,
+                rangex_ii: [X; 2],
+                rangey_ii: [Y; 2],
+                maxx_ii: f64,
+                maxy_ii: f64,
+            }
+            impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
+                fn gen_iter<'a>(
+                    &'a self,
+                    p: &'a mut Plot<X, Y>,
+                ) -> impl Iterator<Item = [f64; 2]> + 'a {
+                    p.plots.iter_second().map(move |(x, y)| {
+                        [
+                            self.basex_ii + X::scale(x, self.rangex_ii, self.maxx_ii),
+                            self.basey_ii - Y::scale(y, self.rangey_ii, self.maxy_ii),
+                        ]
+                    })
+                }
+            }
+    
+            let plot_iter = PlotIter {
+                basex_ii: aspect_offset + padding - aa,
+                basey_ii: height - paddingy + bb,
+                rangex_ii: [minx, maxx],
+                rangey_ii: [miny, maxy],
+                maxx_ii: scalex2,
+                maxy_ii: scaley2,
+            };
+    
+            let colori = color_iter.next().unwrap();
+    
+            match p.plot_type {
+                PlotType::Line => {
+                    if name_exists {
+                        writer.single("line", |d| {
+                            d.attr(
+                                "class",
+                                format_args!(
+                                    "poloto_line poloto_legend_icon poloto{}stroke poloto{}legend",
+                                    colori, colori
+                                ),
+                            )?;
+                            d.attr("stroke", "black")?;
+                            d.attr("x1", legendx1)?;
+                            d.attr("x2", legendx1 + padding / 3.0)?;
+                            d.attr("y1", legendy1)?;
+                            d.attr("y2", legendy1)
+                        })?;
+                    }
+    
+                    writer.single("path", |d| {
+                        d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
+                        d.attr("fill", "none")?;
+                        d.attr("stroke", "black")?;
+                        d.path(|a| render::line(a, plot_iter.gen_iter(&mut p)))
+                    })?;
+                }
+                PlotType::Scatter => {
+                    if name_exists {
+                        writer.single("line", |d| {
+                            d.attr(
+                                "class",
+                                format_args!(
+                                    "poloto_scatter poloto_legend_icon poloto{}stroke poloto{}legend",
+                                    colori, colori
+                                ),
+                            )?;
+                            d.attr("stroke", "black")?;
+                            d.attr("x1", legendx1 + padding / 30.0)?;
+                            d.attr("x2", legendx1 + padding / 30.0)?;
+                            d.attr("y1", legendy1)?;
+                            d.attr("y2", legendy1)
+                        })?;
+                    }
+    
+                    writer.single("path", |d| {
+                        d.attr(
+                            "class",
+                            format_args!("poloto_scatter poloto{}stroke", colori),
+                        )?;
+                        d.path(|a| {
+                            use tagger::PathCommand::*;
+                            for [x, y] in plot_iter
+                                .gen_iter(&mut p)
+                                .filter(|&[x, y]| x.is_finite() && y.is_finite())
+                            {
+                                a.put(M(x, y))?;
+                                a.put(H_(0))?;
+                            }
+                            Ok(())
+                        })
+                    })?;
+                }
+                PlotType::Histo => {
+                    if name_exists {
+                        writer.single("rect", |d| {
+                            d.attr(
+                                "class",
+                                format_args!(
+                                    "poloto_histo poloto_legend_icon poloto{}fill poloto{}legend",
+                                    colori, colori
+                                ),
+                            )?;
+                            d.attr("x", legendx1)?;
+                            d.attr("y", legendy1 - padding / 30.0)?;
+                            d.attr("width", padding / 3.0)?;
+                            d.attr("height", padding / 20.0)?;
+                            d.attr("rx", padding / 30.0)?;
+                            d.attr("ry", padding / 30.0)
+                        })?;
+                    }
+    
+                    writer
+                        .elem("g", |d| {
+                            d.attr("class", format_args!("poloto_histo poloto{}fill", colori))
+                        })?
+                        .build(|writer| {
+                            let mut last = None;
+                            //TODO dont necesarily filter?
+                            for [x, y] in plot_iter
+                                .gen_iter(&mut p)
+                                .filter(|&[x, y]| x.is_finite() && y.is_finite())
+                            {
+                                if let Some((lx, ly)) = last {
+                                    writer.single("rect", |d| {
+                                        d.attr("x", lx)?;
+                                        d.attr("y", ly)?;
+                                        d.attr(
+                                            "width",
+                                            (padding * 0.02).max((x - lx) - (padding * 0.02)),
+                                        )?;
+                                        d.attr("height", height - paddingy - ly)
+                                    })?;
+                                }
+                                last = Some((x, y))
+                            }
+                            Ok(())
+                        })?;
+                }
+                PlotType::LineFill => {
+                    if name_exists {
+                        writer.single("rect", |d| {
+                            d.attr(
+                                "class",
+                                format_args!(
+                                    "poloto_linefill poloto_legend_icon poloto{}fill poloto{}legend",
+                                    colori, colori
+                                ),
+                            )?;
+                            d.attr("x", legendx1)?;
+                            d.attr("y", legendy1 - padding / 30.0)?;
+                            d.attr("width", padding / 3.0)?;
+                            d.attr("height", padding / 20.0)?;
+                            d.attr("rx", padding / 30.0)?;
+                            d.attr("ry", padding / 30.0)
+                        })?;
+                    }
+    
+                    writer.single("path", |d| {
+                        d.attr(
+                            "class",
+                            format_args!("poloto_linefill poloto{}fill", colori),
+                        )?;
+                        d.path(|path| {
+                            render::line_fill(
+                                path,
+                                plot_iter.gen_iter(&mut p),
+                                height - paddingy,
+                                true,
+                            )
+                        })
+                    })?;
+                }
+                PlotType::LineFillRaw => {
+                    if name_exists {
+                        writer.single("rect", |d| {
+                            d.attr(
+                                "class",
+                                format_args!(
+                                    "poloto_linefillraw poloto_legend_icon poloto{}fill poloto{}legend",
+                                    colori, colori
+                                ),
+                            )?;
+                            d.attr("x", legendx1)?;
+                            d.attr("y", legendy1 - padding / 30.0)?;
+                            d.attr("width", padding / 3.0)?;
+                            d.attr("height", padding / 20.0)?;
+                            d.attr("rx", padding / 30.0)?;
+                            d.attr("ry", padding / 30.0)
+                        })?;
+                    }
+    
+                    writer.single("path", |d| {
+                        d.attr(
+                            "class",
+                            format_args!("poloto_linefillraw poloto{}fill", colori),
+                        )?;
+                        d.path(|path| {
+                            render::line_fill(
+                                path,
+                                plot_iter.gen_iter(&mut p),
+                                height - paddingy,
+                                false,
+                            )
+                        })
+                    })?;
+                }
+            }
+        }
+    
+        self.draw_base(
+            &mut writer,
+            plotter,
+            ticks,
+            text
+        )?;
+    
+        Ok(())    
+    }
+
+    pub fn draw_base<X:PlotNum,Y:PlotNum,T: fmt::Write>(&self,writer: &mut tagger::ElemWriter<T>,plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>,mut text:impl PolotoText<X,Y>)->std::fmt::Result{
+        let Canvas{
+            ideal_num_xsteps,
+            ideal_num_ysteps,
+            width,
+            height,
+            padding,
+            paddingy,
+            aspect_offset,
+            scalex2,
+            scaley2,
+            spacing,
+            legendx1,
+            num_css_classes,
+            preserve_aspect
+        }=*self;
+    
+        let [minx,maxx]=plotter.boundx;
+        let [miny,maxy]=plotter.boundy;
+
+        /*
+    pub fn draw_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a, T: fmt::Write>(
+        plotter: &'a mut Plotter<X, Y>,
+        writer: &mut tagger::ElemWriter<T>,
+        dd: DrawData,
+        sd: ScaleData<X, Y>,
+    ) -> fmt::Result {
+        let DrawData {
+            width,
+            height,
+            padding,
+            paddingy,
+        } = dd;
+        let ScaleData {
+            minx,
+            maxx,
+            miny,
+            maxy,
+            scalex,
+            scaley,
+            preserve_aspect,
+            aspect_offset,
+        } = sd;
+        */
+        let xtick_info=ticks.tickx;
+        let ytick_info=ticks.ticky;
+
+        let texty_padding = paddingy * 0.3;
+        let textx_padding = padding * 0.1;
+    
+    
+        writer
+            .elem("text", |d| {
+                d.attr("class", "poloto_labels poloto_text poloto_title")?;
+                d.attr("alignment-baseline", "start")?;
+                d.attr("text-anchor", "middle")?;
+                d.attr("font-size", "x-large")?;
+                d.attr("x", width / 2.0)?;
+                d.attr("y", padding / 4.0)
+            })?
+            .build(|w| text.fmt_title(&mut w.writer_safe()))?;
+    
+        writer
+            .elem("text", |d| {
+                d.attr("class", "poloto_labels poloto_text poloto_xname")?;
+                d.attr("alignment-baseline", "start")?;
+                d.attr("text-anchor", "middle")?;
+                d.attr("font-size", "x-large")?;
+                d.attr("x", width / 2.0)?;
+                d.attr("y", height - padding / 8.)
+            })?
+            .build(|w| {
+                text.fmt_xname(&mut w.writer_safe())
+            })?;
+    
+        writer
+            .elem("text", |d| {
+                d.attr("class", "poloto_labels poloto_text poloto_yname")?;
+                d.attr("alignment-baseline", "start")?;
+                d.attr("text-anchor", "middle")?;
+                d.attr("font-size", "x-large")?;
+                d.attr(
+                    "transform",
+                    format_args!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
+                )?;
+                d.attr("x", padding / 4.0)?;
+                d.attr("y", height / 2.0)
+            })?
+            .build(|w| {
+                text.fmt_yname(&mut w.writer_safe())
+            })?;
+    
+        let xdash_size:Option<f64> = None;//xtick_info.dash_size;
+        let ydash_size:Option<f64> = None;//ytick_info.dash_size;
+    
+        use tagger::PathCommand::*;
+    
+        let first_tickx = xtick_info.ticks[0];
+    
+        let first_ticky = ytick_info.ticks[0];
+    
+        {
+            //step num is assured to be atleast 1.
+            let extra = if let Some(base) = xtick_info.display_relative {
+                writer
+                    .elem("text", |d| {
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
+                        d.attr("alignment-baseline", "middle")?;
+                        d.attr("text-anchor", "start")?;
+                        d.attr("x", width * 0.55)?;
+                        d.attr("y", paddingy * 0.7)
+                    })?
+                    .build(|d| {
+                        let mut w = d.writer_safe();
+                        use std::fmt::Write;
+                        write!(w, "Where j = ")?;
+                        text.fmt_tickx(&mut w, base,FmtFull::Full)
+                    })?;
+    
+                "j+"
+            } else {
+                ""
+            };
+    
+            //Draw interva`l x text
+            for &Tick { position, value } in xtick_info.ticks.iter() {
+                let xx = (X::scale(position, [minx, maxx], scalex2)
+                    - X::scale(minx, [minx, maxx], scalex2))
+                    + padding;
+    
+                writer.single("line", |d| {
+                    d.attr("class", "poloto_axis_lines")?;
+                    d.attr("stroke", "black")?;
+                    d.attr("x1", aspect_offset + xx)?;
+                    d.attr("x2", aspect_offset + xx)?;
+                    d.attr("y1", height - paddingy)?;
+                    d.attr("y2", height - paddingy * 0.95)
+                })?;
+    
+                writer
+                    .elem("text", |d| {
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
+                        d.attr("alignment-baseline", "start")?;
+                        d.attr("text-anchor", "middle")?;
+                        d.attr("x", aspect_offset + xx)?;
+                        d.attr("y", height - paddingy + texty_padding)
+                    })?
+                    .build(|w| {
+                        let mut w = w.writer_safe();
+                        use std::fmt::Write;
+                        write!(w, "{}", extra)?;
+                        
+                        text.fmt_tickx(&mut w, value,FmtFull::Tick)
+                        /*
+                        w.put_raw(format_args!(
+                            "{}{}",
+                            extra,
+                            DisplayableClosure::new(|w| plotter.xcontext.fmt_tick(
+                                w,
+                                value,
+                                xtick_info.unit_data,
+                                FmtFull::Tick
+                            ))
+                        ))
+                        */
+                    })?;
+            }
+        }
+    
+        {
+            //step num is assured to be atleast 1.
+            let extra = if let Some(base) = ytick_info.display_relative {
+                writer
+                    .elem("text", |d| {
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
+                        d.attr("alignment-baseline", "middle")?;
+                        d.attr("text-anchor", "start")?;
+                        d.attr("x", padding)?;
+                        d.attr("y", paddingy * 0.7)
+                    })?
+                    .build(|w| {
+                        use std::fmt::Write;
+                        let mut w = w.writer_safe();
+                        write!(w, "Where k = ")?;
+    
+                        text.fmt_ticky(&mut w, base,FmtFull::Full)
+                    })?;
+    
+                "k+"
+            } else {
+                ""
+            };
+    
+            //Draw interval y text
+            for &Tick { position, value } in ytick_info.ticks.iter() {
+                let yy = height
+                    - (Y::scale(position, [miny, maxy], scaley2)
+                        - Y::scale(miny, [miny, maxy], scaley2))
+                    - paddingy;
+    
+                writer.single("line", |d| {
+                    d.attr("class", "poloto_axis_lines")?;
+                    d.attr("stroke", "black")?;
+                    d.attr("x1", aspect_offset + padding)?;
+                    d.attr("x2", aspect_offset + padding * 0.96)?;
+                    d.attr("y1", yy)?;
+                    d.attr("y2", yy)
+                })?;
+    
+                writer
+                    .elem("text", |d| {
+                        d.attr("class", "poloto_tick_labels poloto_text")?;
+                        d.attr("alignment-baseline", "middle")?;
+                        d.attr("text-anchor", "end")?;
+                        d.attr("x", aspect_offset + padding - textx_padding)?;
+                        d.attr("y", yy)
+                    })?
+                    .build(|w| {
+                        let mut w = w.writer_safe();
+                        use std::fmt::Write;
+                        write!(w, "{}", extra)?;
+    
+                        text.fmt_ticky(&mut w, value,FmtFull::Tick)
+                        /*
+                        w.put_raw(format_args!(
+                            "{}{}",
+                            extra,
+                            DisplayableClosure::new(|w| plotter.ycontext.fmt_tick(
+                                w,
+                                value,
+                                ytick_info.unit_data,
+                                FmtFull::Tick
+                            )) //TODO need a way to communicate writing base
+                        ))
+                        */
+                    })?;
+            }
+        }
+    
+        let d1 = X::scale(minx, [minx, maxx], scalex2);
+        let d2 = X::scale(first_tickx.position, [minx, maxx], scalex2);
+        let distance_to_firstx = d2 - d1;
+    
+        writer.single("path", |d| {
+            d.attr("stroke", "black")?;
+            d.attr("fill", "none")?;
+            d.attr("class", "poloto_axis_lines")?;
+            if let Some(xdash_size) = xdash_size {
+                d.attr(
+                    "style",
+                    format_args!(
+                        "stroke-dasharray:{};stroke-dashoffset:{};",
+                        xdash_size / 2.0,
+                        -distance_to_firstx
+                    ),
+                )?;
+            }
+            d.path(|p| {
+                p.put(M(padding + aspect_offset, height - paddingy))?;
+                if preserve_aspect {
+                    p.put(L(
+                        height - paddingy / 2.0 + aspect_offset,
+                        height - paddingy,
+                    ))
+                } else {
+                    p.put(L(width - padding + aspect_offset, height - paddingy))
+                }
+            })
+        })?;
+    
+        let d1 = Y::scale(miny, [miny, maxy], scaley2);
+        let d2 = Y::scale(first_ticky.position, [miny, maxy], scaley2);
+        let distance_to_firsty = d2 - d1;
+    
+        writer.single("path", |d| {
+            d.attr("stroke", "black")?;
+            d.attr("fill", "none")?;
+            d.attr("class", "poloto_axis_lines")?;
+            if let Some(ydash_size) = ydash_size {
+                d.attr(
+                    "style",
+                    format_args!(
+                        "stroke-dasharray:{};stroke-dashoffset:{};",
+                        ydash_size / 2.0,
+                        -distance_to_firsty
+                    ),
+                )?;
+            }
+            d.path(|p| {
+                p.put(M(aspect_offset + padding, height - paddingy))?;
+                p.put(L(aspect_offset + padding, paddingy))
+            })
+        })?;
+    
+        Ok(())
+    }
+    
+}
+
+
+
+impl<X:PlotNum,Y:PlotNum> PolotoText<X,Y> for (){
+    fn fmt_title(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result{
+        write!(w,"title")
+    }
+    fn fmt_xname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result{
+        write!(w,"xname")
+    }
+    fn fmt_yname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result{
+        write!(w,"yname")
+    }
+}
+
+pub trait PolotoText<X:PlotNum,Y:PlotNum>{
+    fn fmt_title(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result;
+    fn fmt_xname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result;
+    fn fmt_yname(&mut self,w:&mut dyn std::fmt::Write)->std::fmt::Result;
+    fn fmt_tickx(&mut self,w:&mut dyn std::fmt::Write,val:X,_f:FmtFull)->std::fmt::Result{
+        write!(w,"{}",val)
+    }
+    fn fmt_ticky(&mut self,w:&mut dyn std::fmt::Write,val:Y,_f:FmtFull)->std::fmt::Result{
+        write!(w,"{}",val)
+    }
+}
+
+
+pub struct TickResult<X:PlotNum,Y:PlotNum>{
+    pub tickx:TickInfo<X>,
+    pub ticky:TickInfo<Y>
+}
+
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -204,26 +915,30 @@ pub fn plot<'a, X: HasDefaultCtx, Y: HasDefaultCtx>(
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    title: Box<dyn fmt::Display + 'a>,
+    //title: Box<dyn fmt::Display + 'a>,
     plots: Vec<Plot<'a, X, Y>>,
-    num_css_classes: Option<usize>,
-    preserve_aspect: bool,
+    xmarkers:Vec<X>,
+    ymarkers:Vec<Y>,
+    //num_css_classes: Option<usize>,
+    //preserve_aspect: bool,
 
     //Only none after move_into() is called on this object.
     //if render() is called after move_into() is called, it will panic.
-    xcontext: Option<Box<dyn PlotNumContext<Num = X> + 'a>>,
-    ycontext: Option<Box<dyn PlotNumContext<Num = Y> + 'a>>,
+    //xcontext: Option<Box<dyn PlotNumContext<Num = X> + 'a>>,
+    //ycontext: Option<Box<dyn PlotNumContext<Num = Y> + 'a>>,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     pub fn move_into(&mut self) -> Self {
         let mut dummy = Plotter {
-            title: Box::new(""),
+            //title: Box::new(""),
             plots: Vec::new(),
-            num_css_classes: self.num_css_classes,
-            preserve_aspect: self.preserve_aspect,
-            xcontext: None,
-            ycontext: None,
+            xmarkers:Vec::new(),
+            ymarkers:Vec::new()
+            //num_css_classes: self.num_css_classes,
+            //preserve_aspect: self.preserve_aspect,
+            //xcontext: None,
+            //ycontext: None,
         };
 
         std::mem::swap(&mut dummy, self);
@@ -238,18 +953,17 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut p = poloto::Plotter::new("title", "x", "y");
     /// p.line("",[[1,1]]);
     /// ```
-    pub fn new(
-        title: impl Display + 'a,
-        xcontext: impl PlotNumContext<Num = X> + 'a,
-        ycontext: impl PlotNumContext<Num = Y> + 'a,
-    ) -> Plotter<'a, X, Y> {
+    pub fn new() -> Plotter<'a, X, Y> {
         Plotter {
-            title: Box::new(title),
+            //title: Box::new(title),
             plots: Vec::new(),
-            num_css_classes: Some(8),
-            preserve_aspect: false,
-            xcontext: Some(Box::new(xcontext)),
-            ycontext: Some(Box::new(ycontext)),
+            xmarkers:Vec::new(),
+            ymarkers:Vec::new()
+            
+            //num_css_classes: Some(8),
+            //preserve_aspect: false,
+            //xcontext: Some(Box::new(xcontext)),
+            //ycontext: Some(Box::new(ycontext)),
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -376,6 +1090,22 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self
     }
 
+    pub fn find_bounds(&mut self)->PlotterRes<'a,X,Y>{
+        let mut pp=self.move_into();
+
+        let (boundx, boundy) = num::find_bounds(
+            pp.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
+            pp.xmarkers,pp.ymarkers
+        );
+
+        PlotterRes{
+            plots:pp.plots,
+            boundx,
+            boundy
+        }
+    }
+
+    /*
     ///
     /// Preserve the aspect ratio by drawing a smaller graph in the same area.
     ///
@@ -401,6 +1131,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self.num_css_classes = a;
         self
     }
+    */
 
     /*
     ///
@@ -413,7 +1144,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         empty
     }
     */
-
+/*
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
@@ -438,8 +1169,10 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
 
         render::render(self, a)
     }
+    */
 }
 
+/*
 pub trait SimpleTheme {
     fn simple_theme<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
     fn simple_theme_dark<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
@@ -468,6 +1201,7 @@ impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
         )
     }
 }
+*/
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.

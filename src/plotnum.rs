@@ -10,6 +10,11 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
+
+
+
+
+
 pub trait PlotNumContext {
     type Num: PlotNum;
 
@@ -209,6 +214,26 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     fn is_hole(&self) -> bool {
         false
     }
+
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(val: Self, range: [Self; 2], max: f64) -> f64;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    /// Guarenteed to be called before fmt_tick.
+    ///
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [Self; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self>;
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(offset: Option<Self>) -> [Self; 2];
+
 }
 
 pub struct DashInfo {

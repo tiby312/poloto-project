@@ -82,62 +82,11 @@ impl PlotNumContext for Defaulti128Context {
         range: [i128; 2],
         dash: DashInfo,
     ) -> TickInfo<i128> {
-        let good_ticks = &[1, 2, 5, 10];
-
-        let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
-        let (start_step, step_num) = get_range_info(step, range);
-
-        let display_relative = util::should_fmt_offset(
-            start_step as f64,
-            (start_step + ((step_num - 1) as i128) * step) as f64,
-            step as f64,
-        );
-
-        let first_tick = if display_relative { 0 } else { start_step };
-
-        let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
-        for a in 0..step_num {
-            let position = start_step + step * (a as i128);
-            let value = first_tick + step * (a as i128);
-
-            ticks.push(Tick { position, value });
-        }
-
-        let dash_size = {
-            let dash_multiple = good_normalized_step;
-            let max = dash.max;
-            let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = self.scale(step, range, max);
-
-            assert!(dash_multiple > 0);
-
-            if dash_multiple == 1 || dash_multiple == 10 {
-                let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
-                let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
-                if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
-                    Some(a)
-                } else {
-                    Some(b)
-                }
-            } else {
-                Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
-            }
-        };
-
-        TickInfo {
-            unit_data: step,
-            ticks,
-            dash_size,
-            display_relative: display_relative.then(|| start_step),
-        }
+        unimplemented!();
     }
 
     fn unit_range(&mut self, offset: Option<i128>) -> [i128; 2] {
-        if let Some(o) = offset {
-            [o - 1, o + 1]
-        } else {
-            [-1, 1]
-        }
+        unimplemented!()
     }
 
     fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
@@ -159,6 +108,81 @@ impl PlotNumContext for Defaulti128Context {
 
 impl PlotNum for i128 {
     type StepInfo = i128;
+
+    fn scale(val: i128, range: [i128; 2], max: f64) -> f64 {
+        let diff = (range[1] - range[0]) as f64;
+
+        let scale = max / diff;
+
+        val as f64 * scale
+    }
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [i128; 2],
+        _info:DashInfo
+    ) -> TickInfo<i128> {
+        let good_ticks = &[1, 2, 5, 10];
+
+        let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
+        let (start_step, step_num) = get_range_info(step, range);
+
+        let display_relative = util::should_fmt_offset(
+            start_step as f64,
+            (start_step + ((step_num - 1) as i128) * step) as f64,
+            step as f64,
+        );
+
+        let first_tick = if display_relative { 0 } else { start_step };
+
+        let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
+        for a in 0..step_num {
+            let position = start_step + step * (a as i128);
+            let value = first_tick + step * (a as i128);
+
+            ticks.push(Tick { position, value });
+        }
+
+        /*
+        let dash_size = {
+            let dash_multiple = good_normalized_step;
+            let max = dash.max;
+            let ideal_dash_size = dash.ideal_dash_size;
+            let one_step = self.scale(step, range, max);
+
+            assert!(dash_multiple > 0);
+
+            if dash_multiple == 1 || dash_multiple == 10 {
+                let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
+                let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
+                if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
+                    Some(a)
+                } else {
+                    Some(b)
+                }
+            } else {
+                Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
+            }
+        };
+        */
+        let dash_size=None;
+
+        TickInfo {
+            unit_data: step,
+            ticks,
+            dash_size,
+            //dash_size,
+            display_relative: display_relative.then(|| start_step),
+        }
+    }
+
+    fn unit_range(offset: Option<i128>) -> [i128; 2] {
+        if let Some(o) = offset {
+            [o - 1, o + 1]
+        } else {
+            [-1, 1]
+        }
+    }
+
 }
 
 impl HasDefaultCtx for i128 {

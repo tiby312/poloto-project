@@ -21,6 +21,51 @@ impl PlotNumContext for Defaultf64Context {
         range: [f64; 2],
         dash: DashInfo,
     ) -> TickInfo<f64> {
+        unimplemented!()
+        //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
+    }
+    fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
+        unimplemented!()
+    }
+
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        let step = match tick.step {
+            FmtFull::Tick => Some(tick.info),
+            FmtFull::Full => None,
+        };
+        util::write_interval_float(tick.writer, tick.val, step)
+    }
+
+
+    fn scale(&mut self, val: f64, range: [f64; 2], max: f64) -> f64 {
+        let diff = range[1] - range[0];
+        let scale = max / diff;
+        val * scale
+    }
+}
+
+impl HasDefaultCtx for f64 {
+    type DefaultContext = Defaultf64Context;
+}
+
+impl PlotNum for f64 {
+    type StepInfo = f64;
+
+    fn is_hole(&self) -> bool {
+        self.is_nan()
+    }
+
+    fn scale(val: f64, range: [f64; 2], max: f64) -> f64 {
+        let diff = range[1] - range[0];
+        let scale = max / diff;
+        val * scale
+    }
+
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [f64; 2],
+        dash:DashInfo
+    ) -> TickInfo<f64> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -44,6 +89,8 @@ impl PlotNumContext for Defaultf64Context {
 
         assert!(ticks.len() >= 2);
 
+        
+        /*
         let dash_size = {
             let dash_multiple = good_normalized_step;
             let max = dash.max;
@@ -64,25 +111,19 @@ impl PlotNumContext for Defaultf64Context {
                 Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
             }
         };
+        */
+        let dash_size=None;
+        
 
         TickInfo {
             unit_data: step,
             ticks,
-            dash_size,
             display_relative: display_relative.then(|| start_step),
+            dash_size
         }
         //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
-
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        let step = match tick.step {
-            FmtFull::Tick => Some(tick.info),
-            FmtFull::Full => None,
-        };
-        util::write_interval_float(tick.writer, tick.val, step)
-    }
-
-    fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
+    fn unit_range(offset: Option<f64>) -> [f64; 2] {
         if let Some(o) = offset {
             [o - 1.0, o + 1.0]
         } else {
@@ -90,23 +131,6 @@ impl PlotNumContext for Defaultf64Context {
         }
     }
 
-    fn scale(&mut self, val: f64, range: [f64; 2], max: f64) -> f64 {
-        let diff = range[1] - range[0];
-        let scale = max / diff;
-        val * scale
-    }
-}
-
-impl HasDefaultCtx for f64 {
-    type DefaultContext = Defaultf64Context;
-}
-
-impl PlotNum for f64 {
-    type StepInfo = f64;
-
-    fn is_hole(&self) -> bool {
-        self.is_nan()
-    }
 }
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {

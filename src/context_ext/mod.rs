@@ -164,7 +164,7 @@ impl<P: PlotNumContext> PlotNumContext for NoDash<P> {
         dash: DashInfo,
     ) -> TickInfo<Self::Num> {
         let mut t = self.0.compute_ticks(ideal_num_steps, range, dash);
-        t.dash_size = None;
+        //t.dash_size = None;
         t
     }
 

@@ -56,6 +56,43 @@ impl PlotNumContext for DefaultUnixTimeContext {
         range: [UnixTime; 2],
         _dash: DashInfo,
     ) -> TickInfo<UnixTime> {
+        unimplemented!()
+    }
+
+    fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
+        unimplemented!()
+    }
+
+    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
+        tick.val.default_tick_fmt(tick.writer, tick.step, tick.info)
+    }
+
+    fn scale(&mut self, val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
+        let [val1, val2] = range;
+        let [val1, val2] = [val1.0, val2.0];
+        assert!(val1 <= val2);
+        let diff = (val2 - val1) as f64;
+        let scale = max / diff;
+        val.0 as f64 * scale
+    }
+}
+
+impl PlotNum for UnixTime {
+    type StepInfo = TimestampType;
+
+    fn scale(val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
+        let [val1, val2] = range;
+        let [val1, val2] = [val1.0, val2.0];
+        assert!(val1 <= val2);
+        let diff = (val2 - val1) as f64;
+        let scale = max / diff;
+        val.0 as f64 * scale
+    }
+    fn compute_ticks(
+        ideal_num_steps: u32,
+        range: [UnixTime; 2],
+        _info:DashInfo
+    ) -> TickInfo<UnixTime> {
         assert!(range[0] <= range[1]);
 
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
@@ -115,6 +152,7 @@ impl PlotNumContext for DefaultUnixTimeContext {
             */
         };
         */
+        
 
         TickInfo {
             unit_data: ret.unit_data,
@@ -124,11 +162,7 @@ impl PlotNumContext for DefaultUnixTimeContext {
         }
     }
 
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        tick.val.default_tick_fmt(tick.writer, tick.step, tick.info)
-    }
-
-    fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
+    fn unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
         if let Some(o) = offset {
             [o, UnixTime(o.0 + 1)]
         } else {
@@ -136,18 +170,6 @@ impl PlotNumContext for DefaultUnixTimeContext {
         }
     }
 
-    fn scale(&mut self, val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
-        let [val1, val2] = range;
-        let [val1, val2] = [val1.0, val2.0];
-        assert!(val1 <= val2);
-        let diff = (val2 - val1) as f64;
-        let scale = max / diff;
-        val.0 as f64 * scale
-    }
-}
-
-impl PlotNum for UnixTime {
-    type StepInfo = TimestampType;
 }
 
 impl HasDefaultCtx for UnixTime {
