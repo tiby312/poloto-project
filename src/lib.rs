@@ -129,10 +129,9 @@ struct TickResult<X: PlotNum, Y: PlotNum> {
     pub ticky: TickInfo<Y>,
 }
 
-
 ///
 /// Specify option for the x and y axis.
-/// 
+///
 pub struct AxisBuilder<'a, X: PlotNum> {
     dash: bool,
     ideal_num: Option<u32>,
@@ -483,7 +482,7 @@ pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
 
 ///
 /// Convert a closure to a object that implements Display
-/// 
+///
 pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
     util::DisplayableClosure::new(a)
 }

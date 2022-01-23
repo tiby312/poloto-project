@@ -1,7 +1,7 @@
 //!
-//! Funcionality to format the title/xaxis/yaxis and ticks with more information as 
+//! Funcionality to format the title/xaxis/yaxis and ticks with more information as
 //! input.
-//! 
+//!
 use super::*;
 
 ///

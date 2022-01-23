@@ -1,7 +1,7 @@
 //!
 //! A simple dark and light css theme.
-//! 
-//! 
+//!
+//!
 use super::*;
 
 ///
