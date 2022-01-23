@@ -21,10 +21,10 @@ fn main() {
 
     println!(
         "{}<style>{}{}</style>{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
         poloto::disp(|a| plotter.render(a)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     )
 }

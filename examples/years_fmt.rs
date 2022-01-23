@@ -26,7 +26,6 @@ fn main() {
         write!(p.writer, "Entries from {} to {} in {}", srt, end, p.stepx)
     });
 
-    //compute min and max
     let mut plotter = poloto::plot(title, "years", "entries");
 
     plotter.line("foo", &data);
@@ -35,10 +34,10 @@ fn main() {
 
     println!(
         "{}<style>{}{}</style>{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
         poloto::disp(|w| plotter.render(w)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     )
 }

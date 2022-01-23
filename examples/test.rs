@@ -66,14 +66,14 @@ fn main() -> std::fmt::Result {
                             e.writer_escapable(),
                             "{}<style>{}{}</style>{}{}",
                             CUSTOM_SVG,
-                            poloto::STYLE_CONFIG_DARK_DEFAULT,
+                            poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 poloto::plot(formatm!("test {}", i), "x", "y")
                                     .scatter("", test)
                                     .render(a)
                             }),
-                            poloto::SVG_END
+                            poloto::simple_theme::SVG_END
                         )?;
                     }
 
@@ -83,14 +83,14 @@ fn main() -> std::fmt::Result {
                             e.writer_escapable(),
                             "{}<style>{}{}</style>{}{}",
                             CUSTOM_SVG,
-                            poloto::STYLE_CONFIG_DARK_DEFAULT,
+                            poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 poloto::plot(formatm!("test {}", i), "x", "y")
                                     .scatter("", test)
                                     .render(a)
                             }),
-                            poloto::SVG_END
+                            poloto::simple_theme::SVG_END
                         )?;
                     }
 

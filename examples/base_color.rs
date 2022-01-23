@@ -6,10 +6,10 @@ fn main() {
 
     println!(
         "{}<style>{}{}</style>{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}",
         poloto::disp(|a| plotter.render(a)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     )
 }

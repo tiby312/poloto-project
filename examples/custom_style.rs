@@ -13,8 +13,8 @@ fn main() {
 
     println!(
         "{}<style>{}</style>{}{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         r###"
     <defs>
         <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
@@ -30,6 +30,6 @@ fn main() {
     }
     </style>"###,
         poloto::disp(|a| s.render(a)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     );
 }

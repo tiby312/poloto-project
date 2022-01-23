@@ -37,13 +37,13 @@ fn main() {
     </div>
     </htmls>
     "###,
-        poloto::STYLE_CONFIG_LIGHT_DEFAULT,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::STYLE_CONFIG_LIGHT_DEFAULT,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         format_args!(
             "{}{}{}",
-            poloto::SVG_HEADER,
+            poloto::simple_theme::SVG_HEADER,
             poloto::disp(|a| s.render(a)),
-            poloto::SVG_END
+            poloto::simple_theme::SVG_END
         )
     );
 }

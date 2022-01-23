@@ -113,3 +113,41 @@ pub(crate) fn should_fmt_offset(start: f64, end: f64, step: f64) -> bool {
 
     start_s.len() > 7 || end_s.len() > 7
 }
+
+use std::cell::RefCell;
+
+/// Convert a moved closure into a impl fmt::Display.
+/// This is useful because std's `format_args!()` macro
+/// has a shorter lifetime.
+pub struct DisplayableClosure<F>(pub F);
+
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
+    pub fn new(a: F) -> Self {
+        DisplayableClosure(a)
+    }
+}
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        (self.0)(formatter)
+    }
+}
+
+///
+/// Wrap a mutable closure in a `RefCell` to allow it to be called inside of `fmt::Display::fmt`
+///
+pub struct DisplayableClosureOnce<F>(pub RefCell<Option<F>>);
+
+impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureOnce<F> {
+    pub fn new(a: F) -> Self {
+        DisplayableClosureOnce(RefCell::new(Some(a)))
+    }
+}
+impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureOnce<F> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        if let Some(f) = (self.0.borrow_mut()).take() {
+            (f)(formatter)
+        } else {
+            Ok(())
+        }
+    }
+}
