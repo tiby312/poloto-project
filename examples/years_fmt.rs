@@ -22,23 +22,23 @@ fn main() {
     let (title, xname) = {
         use poloto::plotnum::FmtFull;
         use poloto::polotofmt;
-        let title = polotofmt::name_ext(|p: polotofmt::Data<UnixTime, i128>| {
-            let srt = poloto::disp_const(|w| p.boundx[0].default_fmt(w, FmtFull::Short, p.stepx));
-            let end = poloto::disp_const(|w| p.boundx[1].default_fmt(w, FmtFull::Short, p.stepx));
-            write!(p.writer, "Entries from {} to {} in {}", srt, end, p.stepx)
+        let title = polotofmt::name_ext(|w, x: polotofmt::DataSingle<UnixTime>, _| {
+            let srt = poloto::disp_const(|w| x.bound[0].default_fmt(w, FmtFull::Short, x.step));
+            let end = poloto::disp_const(|w| x.bound[1].default_fmt(w, FmtFull::Short, x.step));
+            write!(w, "Entries from {} to {} in {}", srt, end, x.step)
         });
 
         let mut xname = poloto::AxisBuilder::new(polotofmt::name_single_ext(
-            |p: polotofmt::DataSingle<UnixTime>| {
+            |w, p: polotofmt::DataSingle<UnixTime>| {
                 let srt = poloto::disp_const(|w| p.bound[0].default_fmt(w, FmtFull::Short, p.step));
                 let end = poloto::disp_const(|w| p.bound[1].default_fmt(w, FmtFull::Short, p.step));
-                write!(p.writer, "Entries from {} to {} in {}", srt, end, p.step)
+                write!(w, "Entries from {} to {} in {}", srt, end, p.step)
             },
         ));
 
-        xname.with_tick_fmt(polotofmt::tick_fmt_ext(|v: UnixTime, mut d, ff| {
-            v.default_fmt(&mut d.writer, ff, d.step)?;
-            write!(d.writer, " yr")
+        xname.with_tick_fmt(polotofmt::tick_fmt_ext(|mut w, v: UnixTime, d, ff| {
+            v.default_fmt(&mut w, ff, d.step)?;
+            write!(w, " yr")
         }));
 
         xname.with_ideal_num(2);
