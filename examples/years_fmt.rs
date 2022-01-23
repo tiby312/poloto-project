@@ -30,7 +30,8 @@ fn main() {
     let mut plotter = poloto::plot(title, "years", "entries");
 
     plotter.line("foo", &data);
-    plotter.ymarker(0).no_dash_y();
+    plotter.ymarker(0);
+    plotter.no_dash_y();
 
     println!(
         "{}<style>{}{}</style>{}{}",
