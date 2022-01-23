@@ -9,45 +9,6 @@ impl DiscNum for f64 {
     }
 }
 
-#[derive(Default, Clone, Copy)]
-pub struct Defaultf64Context {}
-
-impl PlotNumContext for Defaultf64Context {
-    type Num = f64;
-
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [f64; 2],
-        dash: DashInfo,
-    ) -> TickInfo<f64> {
-        unimplemented!()
-        //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
-    }
-    fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
-        unimplemented!()
-    }
-
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        let step = match tick.step {
-            FmtFull::Tick => Some(tick.info),
-            FmtFull::Full => None,
-        };
-        util::write_interval_float(tick.writer, tick.val, step)
-    }
-
-
-    fn scale(&mut self, val: f64, range: [f64; 2], max: f64) -> f64 {
-        let diff = range[1] - range[0];
-        let scale = max / diff;
-        val * scale
-    }
-}
-
-impl HasDefaultCtx for f64 {
-    type DefaultContext = Defaultf64Context;
-}
-
 impl PlotNum for f64 {
     type StepInfo = f64;
 
@@ -55,25 +16,27 @@ impl PlotNum for f64 {
         self.is_nan()
     }
 
-    fn val_fmt(&mut self, writer:&mut dyn fmt::Write,tick: FmtFull,info:&mut Self::StepInfo) -> std::fmt::Result {
+    fn val_fmt(
+        &mut self,
+        writer: &mut dyn fmt::Write,
+        tick: FmtFull,
+        info: &mut Self::StepInfo,
+    ) -> std::fmt::Result {
         let step = match tick {
-            FmtFull::Tick => Some(*info),
+            FmtFull::Short => Some(*info),
             FmtFull::Full => None,
         };
         util::write_interval_float(writer, *self, step)
     }
 
-    fn scale(val: f64, range: [f64; 2], max: f64) -> f64 {
+    fn scale(&self, range: [f64; 2], max: f64) -> f64 {
+        let val = *self;
         let diff = range[1] - range[0];
         let scale = max / diff;
         val * scale
     }
 
-    fn compute_ticks(
-        ideal_num_steps: u32,
-        range: [f64; 2],
-        dash:DashInfo
-    ) -> TickInfo<f64> {
+    fn compute_ticks(ideal_num_steps: u32, range: [f64; 2], dash: DashInfo) -> TickInfo<f64> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -97,13 +60,11 @@ impl PlotNum for f64 {
 
         assert!(ticks.len() >= 2);
 
-        
-        /*
         let dash_size = {
             let dash_multiple = good_normalized_step;
             let max = dash.max;
             let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = self.scale(step, range, max);
+            let one_step = step.scale(range, max);
 
             assert!(dash_multiple > 0);
 
@@ -119,15 +80,14 @@ impl PlotNum for f64 {
                 Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
             }
         };
-        */
-        let dash_size=None;
-        
+
+        //let dash_size = None;
 
         TickInfo {
             unit_data: step,
             ticks,
             display_relative: display_relative.then(|| start_step),
-            dash_size
+            dash_size,
         }
         //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
@@ -138,7 +98,6 @@ impl PlotNum for f64 {
             [-1.0, 1.0]
         }
     }
-
 }
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {

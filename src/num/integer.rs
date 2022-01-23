@@ -70,66 +70,31 @@ pub fn compute_ticks(
 }
 */
 
-#[derive(Default, Copy, Clone)]
-pub struct Defaulti128Context {}
-
-impl PlotNumContext for Defaulti128Context {
-    type Num = i128;
-
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [i128; 2],
-        dash: DashInfo,
-    ) -> TickInfo<i128> {
-        unimplemented!();
-    }
-
-    fn unit_range(&mut self, offset: Option<i128>) -> [i128; 2] {
-        unimplemented!()
-    }
-
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        let step = match tick.step {
-            FmtFull::Tick => Some(tick.info),
-            FmtFull::Full => None,
-        };
-        util::write_interval_i128(tick.writer, tick.val, step)
-    }
-
-    fn scale(&mut self, val: i128, range: [i128; 2], max: f64) -> f64 {
-        let diff = (range[1] - range[0]) as f64;
-
-        let scale = max / diff;
-
-        val as f64 * scale
-    }
-}
-
 impl PlotNum for i128 {
     type StepInfo = i128;
 
-
-    fn val_fmt(&mut self, writer:&mut dyn fmt::Write,tick: FmtFull,info:&mut Self::StepInfo) -> std::fmt::Result {
+    fn val_fmt(
+        &mut self,
+        writer: &mut dyn fmt::Write,
+        tick: FmtFull,
+        info: &mut Self::StepInfo,
+    ) -> std::fmt::Result {
         let step = match tick {
-            FmtFull::Tick => Some(*info),
+            FmtFull::Short => Some(*info),
             FmtFull::Full => None,
         };
         util::write_interval_i128(writer, *self, step)
     }
 
-    fn scale(val: i128, range: [i128; 2], max: f64) -> f64 {
+    fn scale(&self, range: [i128; 2], max: f64) -> f64 {
+        let val = *self;
         let diff = (range[1] - range[0]) as f64;
 
         let scale = max / diff;
 
         val as f64 * scale
     }
-    fn compute_ticks(
-        ideal_num_steps: u32,
-        range: [i128; 2],
-        _info:DashInfo
-    ) -> TickInfo<i128> {
+    fn compute_ticks(ideal_num_steps: u32, range: [i128; 2], dash: DashInfo) -> TickInfo<i128> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -151,12 +116,11 @@ impl PlotNum for i128 {
             ticks.push(Tick { position, value });
         }
 
-        /*
         let dash_size = {
             let dash_multiple = good_normalized_step;
             let max = dash.max;
             let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = self.scale(step, range, max);
+            let one_step = step.scale(range, max);
 
             assert!(dash_multiple > 0);
 
@@ -172,8 +136,8 @@ impl PlotNum for i128 {
                 Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
             }
         };
-        */
-        let dash_size=None;
+
+        //let dash_size = None;
 
         TickInfo {
             unit_data: step,
@@ -191,11 +155,6 @@ impl PlotNum for i128 {
             [-1, 1]
         }
     }
-
-}
-
-impl HasDefaultCtx for i128 {
-    type DefaultContext = Defaulti128Context;
 }
 
 /*

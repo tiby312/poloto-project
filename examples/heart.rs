@@ -11,11 +11,12 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let mut plotter = poloto::Plotter::new(
-        "Heart Graph",
-        f64::ctx("x").marker(-20.).marker(20.),
-        f64::ctx("y").marker(20.).marker(-20.),
-    );
+    let mut plotter = poloto::plot("Heart Graph", "x", "y")
+        .xmarker(-20.)
+        .xmarker(20.)
+        .ymarker(20.)
+        .ymarker(-20.)
+        .move_into();
 
     plotter.line_fill_raw("heart", range.map(heart));
     plotter.preserve_aspect();

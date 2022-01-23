@@ -1,6 +1,4 @@
 use poloto::num::timestamp::UnixTime;
-use poloto::prelude::*;
-
 
 // PIPE me to a file!
 fn main() {
@@ -21,16 +19,18 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
+    let title = poloto::name_ext(|p: poloto::Data<UnixTime, i128>| {
+        use poloto::plotnum::FmtFull;
+        let srt = poloto::disp_const(|w| p.boundx[0].default_fmt(w, FmtFull::Short, p.stepx));
+        let end = poloto::disp_const(|w| p.boundx[1].default_fmt(w, FmtFull::Short, p.stepx));
+        write!(p.writer, "Entries from {} to {} in {}", srt, end, p.stepx)
+    });
 
     //compute min and max
-    let mut plotter=poloto::Plotter::new(poloto::name_ext(|p|write!(p.writer,"title {:?} in {}",p.boundx,p.stepx)),"xname","yname");
-    plotter.line("foo",&data);
+    let mut plotter = poloto::plot(title, "years", "entries");
 
-    /*
-    plotter.with_xtickfmt(poloto::tick_ext(|v,d|{
-        write!(d.writer,"{}",v)
-    }));
-    */
+    plotter.line("foo", &data);
+    plotter.ymarker(0).no_dash_y();
 
     println!(
         "{}<style>{}{}</style>{}{}",
@@ -41,4 +41,3 @@ fn main() {
         poloto::SVG_END
     )
 }
-

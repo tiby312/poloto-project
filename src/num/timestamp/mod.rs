@@ -30,57 +30,11 @@ impl std::fmt::Display for TimestampType {
     }
 }
 
-#[derive(Clone, Copy)]
-pub struct DefaultUnixTimeContext {
-    timestamp_type: TimestampType,
-}
-impl std::default::Default for DefaultUnixTimeContext {
-    fn default() -> Self {
-        DefaultUnixTimeContext {
-            timestamp_type: TimestampType::YR,
-        }
-    }
-}
-impl DefaultUnixTimeContext {
-    pub fn get_timestamp_type(&self) -> TimestampType {
-        self.timestamp_type
-    }
-}
-
-impl PlotNumContext for DefaultUnixTimeContext {
-    type Num = UnixTime;
-
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [UnixTime; 2],
-        _dash: DashInfo,
-    ) -> TickInfo<UnixTime> {
-        unimplemented!()
-    }
-
-    fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
-        unimplemented!()
-    }
-
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        tick.val.default_tick_fmt(tick.writer, tick.step, tick.info)
-    }
-
-    fn scale(&mut self, val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
-        let [val1, val2] = range;
-        let [val1, val2] = [val1.0, val2.0];
-        assert!(val1 <= val2);
-        let diff = (val2 - val1) as f64;
-        let scale = max / diff;
-        val.0 as f64 * scale
-    }
-}
-
 impl PlotNum for UnixTime {
     type StepInfo = TimestampType;
 
-    fn scale(val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
+    fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
+        let val = *self;
         let [val1, val2] = range;
         let [val1, val2] = [val1.0, val2.0];
         assert!(val1 <= val2);
@@ -89,14 +43,19 @@ impl PlotNum for UnixTime {
         val.0 as f64 * scale
     }
 
-    fn val_fmt(&mut self, writer:&mut dyn fmt::Write,tick: FmtFull,info:&mut TimestampType) -> std::fmt::Result {
-        self.default_tick_fmt(writer, tick, *info)
+    fn val_fmt(
+        &mut self,
+        writer: &mut dyn fmt::Write,
+        tick: FmtFull,
+        info: &mut TimestampType,
+    ) -> std::fmt::Result {
+        self.default_fmt(writer, tick, *info)
     }
 
     fn compute_ticks(
         ideal_num_steps: u32,
         range: [UnixTime; 2],
-        _info:DashInfo
+        _info: DashInfo,
     ) -> TickInfo<UnixTime> {
         assert!(range[0] <= range[1]);
 
@@ -157,7 +116,6 @@ impl PlotNum for UnixTime {
             */
         };
         */
-        
 
         TickInfo {
             unit_data: ret.unit_data,
@@ -174,9 +132,4 @@ impl PlotNum for UnixTime {
             [UnixTime(0), UnixTime(1)]
         }
     }
-
-}
-
-impl HasDefaultCtx for UnixTime {
-    type DefaultContext = DefaultUnixTimeContext;
 }

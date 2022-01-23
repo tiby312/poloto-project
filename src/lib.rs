@@ -35,17 +35,13 @@ pub mod plotnum;
 use plotnum::*;
 pub mod num;
 
-pub mod context_ext;
-
 ///
 /// The poloto prelude.
 ///
 pub mod prelude {
-    pub use super::context_ext::PlotNumContextExt;
     pub use super::formatm;
-    pub use super::plotnum::HasDefaultCtx;
     pub use super::plottable::crop::Croppable;
-    //pub use super::SimpleTheme;
+    pub use super::SimpleTheme;
 }
 
 ///The width of the svg tag.
@@ -186,47 +182,43 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: PlotNum, Y: PlotNum>(title:impl PlotterXnameTrait<X,Y>+'a,xname:impl PlotterXnameTrait<X,Y>+'a,yname:impl PlotterXnameTrait<X,Y>+'a) -> Plotter<'a, X, Y> {
-    Plotter::new(title,xname,yname)
+pub fn plot<'a, X: PlotNum, Y: PlotNum>(
+    title: impl PlotterXnameTrait<X, Y> + 'a,
+    xname: impl PlotterXnameTrait<X, Y> + 'a,
+    yname: impl PlotterXnameTrait<X, Y> + 'a,
+) -> Plotter<'a, X, Y> {
+    Plotter::new(title, xname, yname, default_tick(), default_tick())
 }
 
-
-
-#[derive(Copy,Clone)]
-pub struct Canvas{
-    ideal_num_xsteps:u32,
-    ideal_num_ysteps:u32,
-    width:f64,
-    height:f64,
-    padding:f64,
-    paddingy:f64,
-    aspect_offset:f64,
-    scalex2:f64,
-    scaley2:f64,
-    spacing:f64,
-    legendx1:f64,
+#[derive(Copy, Clone)]
+pub struct Canvas {
+    ideal_num_xsteps: u32,
+    ideal_num_ysteps: u32,
+    width: f64,
+    height: f64,
+    padding: f64,
+    paddingy: f64,
+    aspect_offset: f64,
+    scalex2: f64,
+    scaley2: f64,
+    spacing: f64,
+    legendx1: f64,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-
 }
-impl Canvas{
-    pub fn new()->Self{
+impl Canvas {
+    pub fn new() -> Self {
         Self::with_options(false, None)
     }
-    pub fn with_options(preserve_aspect:bool,num_css_classes:Option<usize>)->Self{
-        let ideal_num_xsteps = if preserve_aspect {
-            4
-        } else {
-            6
-        };
-    
-        let ideal_num_ysteps = 5;
-        
+    pub fn with_options(preserve_aspect: bool, num_css_classes: Option<usize>) -> Self {
+        let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
 
-        let width=crate::WIDTH as f64;
-        let height=crate::HEIGHT as f64;
-        let padding=150.0;
-        let paddingy=100.0;
+        let ideal_num_ysteps = 5;
+
+        let width = crate::WIDTH as f64;
+        let height = crate::HEIGHT as f64;
+        let padding = 150.0;
+        let paddingy = 100.0;
 
         let aspect_offset = if preserve_aspect {
             width / 2.0 - height + paddingy * 2.0
@@ -246,9 +238,7 @@ impl Canvas{
         let spacing = padding / 3.0;
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
-
-        
-        Canvas{
+        Canvas {
             ideal_num_xsteps,
             ideal_num_ysteps,
             width,
@@ -261,12 +251,14 @@ impl Canvas{
             spacing,
             legendx1,
             num_css_classes,
-            preserve_aspect
+            preserve_aspect,
         }
     }
 
-    pub fn gen_ticks<X:PlotNum,Y:PlotNum>(&self,plotter:&PlotterRes<X,Y>)->TickResult<X,Y>{
-
+    pub fn gen_ticks<X: PlotNum, Y: PlotNum>(
+        &self,
+        plotter: &PlotterRes<X, Y>,
+    ) -> TickResult<X, Y> {
         let tickx = X::compute_ticks(
             self.ideal_num_xsteps,
             plotter.boundx,
@@ -288,10 +280,13 @@ impl Canvas{
         TickResult { tickx, ticky }
     }
 
-    pub fn render<X:PlotNum,Y:PlotNum>(&self,writer:impl std::fmt::Write,mut plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>)->std::fmt::Result{
-        let Canvas{
-            ideal_num_xsteps,
-            ideal_num_ysteps,
+    pub fn render<X: PlotNum, Y: PlotNum>(
+        &self,
+        writer: impl std::fmt::Write,
+        mut plotter: PlotterRes<X, Y>,
+        ticks: TickResult<X, Y>,
+    ) -> std::fmt::Result {
+        let Canvas {
             width,
             height,
             padding,
@@ -302,15 +297,13 @@ impl Canvas{
             spacing,
             legendx1,
             num_css_classes,
-            preserve_aspect
-        }=*self;
+            ..
+        } = *self;
 
-
-        let [minx,maxx]=plotter.boundx;
-        let [miny,maxy]=plotter.boundy;
+        let [minx, maxx] = plotter.boundx;
+        let [miny, maxy] = plotter.boundy;
 
         let mut writer = tagger::new(writer);
-
 
         let mut color_iter = {
             let max = if let Some(nn) = num_css_classes {
@@ -318,13 +311,13 @@ impl Canvas{
             } else {
                 usize::MAX
             };
-    
+
             (0..max).cycle()
         };
-    
+
         for (i, mut p) in plotter.plots.drain(..).enumerate() {
             let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
-    
+
             let name_exists = writer
                 .elem("text", |d| {
                     d.attr("class", "poloto_text poloto_legend_text")?;
@@ -339,10 +332,10 @@ impl Canvas{
                     p.plots.write_name(&mut wc)?;
                     Ok(wc.get_counter() != 0)
                 })?;
-    
-            let aa = X::scale(minx, [minx, maxx], scalex2);
-            let bb = Y::scale(miny, [miny, maxy], scaley2);
-    
+
+            let aa = minx.scale([minx, maxx], scalex2);
+            let bb = miny.scale([miny, maxy], scaley2);
+
             struct PlotIter<X, Y> {
                 basex_ii: f64,
                 basey_ii: f64,
@@ -358,13 +351,13 @@ impl Canvas{
                 ) -> impl Iterator<Item = [f64; 2]> + 'a {
                     p.plots.iter_second().map(move |(x, y)| {
                         [
-                            self.basex_ii + X::scale(x, self.rangex_ii, self.maxx_ii),
-                            self.basey_ii - Y::scale(y, self.rangey_ii, self.maxy_ii),
+                            self.basex_ii + x.scale(self.rangex_ii, self.maxx_ii),
+                            self.basey_ii - y.scale(self.rangey_ii, self.maxy_ii),
                         ]
                     })
                 }
             }
-    
+
             let plot_iter = PlotIter {
                 basex_ii: aspect_offset + padding - aa,
                 basey_ii: height - paddingy + bb,
@@ -373,9 +366,9 @@ impl Canvas{
                 maxx_ii: scalex2,
                 maxy_ii: scaley2,
             };
-    
+
             let colori = color_iter.next().unwrap();
-    
+
             match p.plot_type {
                 PlotType::Line => {
                     if name_exists {
@@ -394,7 +387,7 @@ impl Canvas{
                             d.attr("y2", legendy1)
                         })?;
                     }
-    
+
                     writer.single("path", |d| {
                         d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                         d.attr("fill", "none")?;
@@ -419,7 +412,7 @@ impl Canvas{
                             d.attr("y2", legendy1)
                         })?;
                     }
-    
+
                     writer.single("path", |d| {
                         d.attr(
                             "class",
@@ -456,7 +449,7 @@ impl Canvas{
                             d.attr("ry", padding / 30.0)
                         })?;
                     }
-    
+
                     writer
                         .elem("g", |d| {
                             d.attr("class", format_args!("poloto_histo poloto{}fill", colori))
@@ -502,7 +495,7 @@ impl Canvas{
                             d.attr("ry", padding / 30.0)
                         })?;
                     }
-    
+
                     writer.single("path", |d| {
                         d.attr(
                             "class",
@@ -536,7 +529,7 @@ impl Canvas{
                             d.attr("ry", padding / 30.0)
                         })?;
                     }
-    
+
                     writer.single("path", |d| {
                         d.attr(
                             "class",
@@ -554,20 +547,19 @@ impl Canvas{
                 }
             }
         }
-    
-        self.draw_base(
-            &mut writer,
-            plotter,
-            ticks
-        )?;
-    
-        Ok(())    
+
+        self.draw_base(&mut writer, plotter, ticks)?;
+
+        Ok(())
     }
 
-    pub fn draw_base<X:PlotNum,Y:PlotNum,T: fmt::Write>(&self,writer: &mut tagger::ElemWriter<T>,mut plotter:PlotterRes<X,Y>,ticks:TickResult<X,Y>)->std::fmt::Result{
-        let Canvas{
-            ideal_num_xsteps,
-            ideal_num_ysteps,
+    pub fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
+        &self,
+        writer: &mut tagger::ElemWriter<T>,
+        mut plotter: PlotterRes<X, Y>,
+        ticks: TickResult<X, Y>,
+    ) -> std::fmt::Result {
+        let Canvas {
             width,
             height,
             padding,
@@ -575,48 +567,21 @@ impl Canvas{
             aspect_offset,
             scalex2,
             scaley2,
-            spacing,
-            legendx1,
-            num_css_classes,
-            preserve_aspect
-        }=*self;
-    
-        let boundx=plotter.boundx;
-        let boundy=plotter.boundy;
-        let [minx,maxx]=boundx;
-        let [miny,maxy]=boundy;
-
-        /*
-    pub fn draw_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a, T: fmt::Write>(
-        plotter: &'a mut Plotter<X, Y>,
-        writer: &mut tagger::ElemWriter<T>,
-        dd: DrawData,
-        sd: ScaleData<X, Y>,
-    ) -> fmt::Result {
-        let DrawData {
-            width,
-            height,
-            padding,
-            paddingy,
-        } = dd;
-        let ScaleData {
-            minx,
-            maxx,
-            miny,
-            maxy,
-            scalex,
-            scaley,
             preserve_aspect,
-            aspect_offset,
-        } = sd;
-        */
-        let mut xtick_info=ticks.tickx;
-        let mut ytick_info=ticks.ticky;
+            ..
+        } = *self;
+
+        let boundx = plotter.boundx;
+        let boundy = plotter.boundy;
+        let [minx, maxx] = boundx;
+        let [miny, maxy] = boundy;
+
+        let xtick_info = ticks.tickx;
+        let ytick_info = ticks.ticky;
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
-    
-    
+
         writer
             .elem("text", |d| {
                 d.attr("class", "poloto_labels poloto_text poloto_title")?;
@@ -626,8 +591,16 @@ impl Canvas{
                 d.attr("x", width / 2.0)?;
                 d.attr("y", padding / 4.0)
             })?
-            .build(|w| plotter.title.fmt_self(Data{writer:&mut w.writer_safe(),boundx,boundy,stepx:xtick_info.unit_data,stepy:ytick_info.unit_data}) )?;
-    
+            .build(|w| {
+                plotter.title.fmt_self(Data {
+                    writer: &mut w.writer_safe(),
+                    boundx,
+                    boundy,
+                    stepx: xtick_info.unit_data,
+                    stepy: ytick_info.unit_data,
+                })
+            })?;
+
         writer
             .elem("text", |d| {
                 d.attr("class", "poloto_labels poloto_text poloto_xname")?;
@@ -638,9 +611,15 @@ impl Canvas{
                 d.attr("y", height - padding / 8.)
             })?
             .build(|w| {
-                plotter.xname.fmt_self(Data{writer:&mut w.writer_safe(),boundx,boundy,stepx:xtick_info.unit_data,stepy:ytick_info.unit_data})
+                plotter.xname.fmt_self(Data {
+                    writer: &mut w.writer_safe(),
+                    boundx,
+                    boundy,
+                    stepx: xtick_info.unit_data,
+                    stepy: ytick_info.unit_data,
+                })
             })?;
-    
+
         writer
             .elem("text", |d| {
                 d.attr("class", "poloto_labels poloto_text poloto_yname")?;
@@ -655,18 +634,32 @@ impl Canvas{
                 d.attr("y", height / 2.0)
             })?
             .build(|w| {
-                plotter.yname.fmt_self(Data{writer:&mut w.writer_safe(),boundx,boundy,stepx:xtick_info.unit_data,stepy:ytick_info.unit_data})
+                plotter.yname.fmt_self(Data {
+                    writer: &mut w.writer_safe(),
+                    boundx,
+                    boundy,
+                    stepx: xtick_info.unit_data,
+                    stepy: ytick_info.unit_data,
+                })
             })?;
-    
-        let xdash_size:Option<f64> = None;//xtick_info.dash_size;
-        let ydash_size:Option<f64> = None;//ytick_info.dash_size;
-    
+
+        let xdash_size: Option<f64> = if plotter.dash_x {
+            xtick_info.dash_size
+        } else {
+            None
+        };
+        let ydash_size: Option<f64> = if plotter.dash_y {
+            ytick_info.dash_size
+        } else {
+            None
+        };
+
         use tagger::PathCommand::*;
-    
+
         let first_tickx = xtick_info.ticks[0];
-    
+
         let first_ticky = ytick_info.ticks[0];
-    
+
         {
             //step num is assured to be atleast 1.
             let extra = if let Some(base) = xtick_info.display_relative {
@@ -682,21 +675,29 @@ impl Canvas{
                         let mut w = d.writer_safe();
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
-                        
-                        plotter.xtick_fmt.fmt_self(base,DataSingle{writer:&mut w,bound:boundx,ff:FmtFull::Full,step:xtick_info.unit_data})
+
+                        plotter.xtick_fmt.fmt_self(
+                            base,
+                            DataSingle {
+                                writer: &mut w,
+                                bound: boundx,
+                                ff: FmtFull::Full,
+                                step: xtick_info.unit_data,
+                            },
+                        )
                     })?;
-    
+
                 "j+"
             } else {
                 ""
             };
-    
+
             //Draw interva`l x text
             for &Tick { position, value } in xtick_info.ticks.iter() {
-                let xx = (X::scale(position, [minx, maxx], scalex2)
-                    - X::scale(minx, [minx, maxx], scalex2))
+                let xx = (position.scale([minx, maxx], scalex2)
+                    - minx.scale([minx, maxx], scalex2))
                     + padding;
-    
+
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")?;
                     d.attr("stroke", "black")?;
@@ -705,7 +706,7 @@ impl Canvas{
                     d.attr("y1", height - paddingy)?;
                     d.attr("y2", height - paddingy * 0.95)
                 })?;
-    
+
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -718,9 +719,16 @@ impl Canvas{
                         let mut w = w.writer_safe();
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
-                        
 
-                        plotter.xtick_fmt.fmt_self(value,DataSingle{writer:&mut w,bound:boundx,ff:FmtFull::Tick,step:xtick_info.unit_data})
+                        plotter.xtick_fmt.fmt_self(
+                            value,
+                            DataSingle {
+                                writer: &mut w,
+                                bound: boundx,
+                                ff: FmtFull::Short,
+                                step: xtick_info.unit_data,
+                            },
+                        )
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -736,7 +744,7 @@ impl Canvas{
                     })?;
             }
         }
-    
+
         {
             //step num is assured to be atleast 1.
             let extra = if let Some(base) = ytick_info.display_relative {
@@ -752,22 +760,29 @@ impl Canvas{
                         use std::fmt::Write;
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
-    
-                        plotter.ytick_fmt.fmt_self(base,DataSingle{writer:&mut w,bound:boundy,ff:FmtFull::Full,step:ytick_info.unit_data})
+
+                        plotter.ytick_fmt.fmt_self(
+                            base,
+                            DataSingle {
+                                writer: &mut w,
+                                bound: boundy,
+                                ff: FmtFull::Full,
+                                step: ytick_info.unit_data,
+                            },
+                        )
                     })?;
-    
+
                 "k+"
             } else {
                 ""
             };
-    
+
             //Draw interval y text
             for &Tick { position, value } in ytick_info.ticks.iter() {
                 let yy = height
-                    - (Y::scale(position, [miny, maxy], scaley2)
-                        - Y::scale(miny, [miny, maxy], scaley2))
+                    - (position.scale([miny, maxy], scaley2) - miny.scale([miny, maxy], scaley2))
                     - paddingy;
-    
+
                 writer.single("line", |d| {
                     d.attr("class", "poloto_axis_lines")?;
                     d.attr("stroke", "black")?;
@@ -776,7 +791,7 @@ impl Canvas{
                     d.attr("y1", yy)?;
                     d.attr("y2", yy)
                 })?;
-    
+
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -789,9 +804,16 @@ impl Canvas{
                         let mut w = w.writer_safe();
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
-    
 
-                        plotter.ytick_fmt.fmt_self(value,DataSingle{writer:&mut w,bound:boundy,ff:FmtFull::Tick,step:ytick_info.unit_data})
+                        plotter.ytick_fmt.fmt_self(
+                            value,
+                            DataSingle {
+                                writer: &mut w,
+                                bound: boundy,
+                                ff: FmtFull::Short,
+                                step: ytick_info.unit_data,
+                            },
+                        )
 
                         /*
                         w.put_raw(format_args!(
@@ -808,11 +830,11 @@ impl Canvas{
                     })?;
             }
         }
-    
-        let d1 = X::scale(minx, [minx, maxx], scalex2);
-        let d2 = X::scale(first_tickx.position, [minx, maxx], scalex2);
+
+        let d1 = minx.scale([minx, maxx], scalex2);
+        let d2 = first_tickx.position.scale([minx, maxx], scalex2);
         let distance_to_firstx = d2 - d1;
-    
+
         writer.single("path", |d| {
             d.attr("stroke", "black")?;
             d.attr("fill", "none")?;
@@ -839,11 +861,11 @@ impl Canvas{
                 }
             })
         })?;
-    
-        let d1 = Y::scale(miny, [miny, maxy], scaley2);
-        let d2 = Y::scale(first_ticky.position, [miny, maxy], scaley2);
+
+        let d1 = miny.scale([miny, maxy], scaley2);
+        let d2 = first_ticky.position.scale([miny, maxy], scaley2);
         let distance_to_firsty = d2 - d1;
-    
+
         writer.single("path", |d| {
             d.attr("stroke", "black")?;
             d.attr("fill", "none")?;
@@ -863,109 +885,91 @@ impl Canvas{
                 p.put(L(aspect_offset + padding, paddingy))
             })
         })?;
-    
+
         Ok(())
     }
-    
 }
 
-
-
-
-
-
-
-
-
-
-
-pub trait PlotterTickTrait<X:PlotNum>{
-    fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result;
+pub trait PlotterTickTrait<X: PlotNum> {
+    fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result;
 }
 
-pub fn default_tick<X:PlotNum>()->impl PlotterTickTrait<X>{
-    tick_ext(|mut v:X,mut d|v.val_fmt(d.writer, d.ff, &mut d.step))
+pub fn default_tick<X: PlotNum>() -> impl PlotterTickTrait<X> {
+    tick_ext(|mut v: X, mut d| v.val_fmt(d.writer, d.ff, &mut d.step))
 }
-pub fn tick_ext<X:PlotNum>(func:impl FnMut(X,DataSingle<X>)->std::fmt::Result )->impl PlotterTickTrait<X>{
- 
-    impl<X:PlotNum,F> PlotterTickTrait<X> for F where F:FnMut(X,DataSingle<X>)->std::fmt::Result{
-        fn fmt_self(&mut self,val:X,data:DataSingle<X>)->std::fmt::Result{
-            (self)(val,data)
-        }   
+pub fn tick_ext<X: PlotNum>(
+    func: impl FnMut(X, DataSingle<X>) -> std::fmt::Result,
+) -> impl PlotterTickTrait<X> {
+    impl<X: PlotNum, F> PlotterTickTrait<X> for F
+    where
+        F: FnMut(X, DataSingle<X>) -> std::fmt::Result,
+    {
+        fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result {
+            (self)(val, data)
+        }
     }
+
     func
 }
 
-
-
-
-
-
-pub trait PlotterXnameTrait<X:PlotNum,Y:PlotNum>{
-    fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result;
+pub trait PlotterXnameTrait<X: PlotNum, Y: PlotNum> {
+    fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result;
 }
 
-impl<T:std::fmt::Display,X:PlotNum,Y:PlotNum> PlotterXnameTrait<X,Y> for T{
-    fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result{
-        write!(data.writer,"{}",self)
+impl<T: std::fmt::Display, X: PlotNum, Y: PlotNum> PlotterXnameTrait<X, Y> for T {
+    fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result {
+        write!(data.writer, "{}", self)
     }
 }
-pub fn name_ext<X:PlotNum,Y:PlotNum>(func:impl FnMut(Data<X,Y>)->std::fmt::Result )->impl PlotterXnameTrait<X,Y>{
-    struct NoDisp<F>(pub F);
 
-    impl<X:PlotNum,Y:PlotNum,F> PlotterXnameTrait<X,Y> for NoDisp<F> where F:FnMut(Data<X,Y>)->std::fmt::Result{
-        fn fmt_self(&mut self,data:Data<X,Y>)->std::fmt::Result{
+pub fn name_ext<X: PlotNum, Y: PlotNum, F: FnMut(Data<X, Y>) -> std::fmt::Result>(
+    func: F,
+) -> impl PlotterXnameTrait<X, Y> {
+    pub struct NoDisp<F>(pub F);
+
+    impl<X: PlotNum, Y: PlotNum, F> PlotterXnameTrait<X, Y> for NoDisp<F>
+    where
+        F: FnMut(Data<X, Y>) -> std::fmt::Result,
+    {
+        fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result {
             (self.0)(data)
         }
     }
-    
+
     NoDisp(func)
 }
 
-
-
-
-
-
-
-
-
-pub struct DataSingle<'a,X:PlotNum>{
-    pub writer:&'a mut dyn std::fmt::Write,
-    pub bound:[X;2],
-    pub step:X::StepInfo,
-    pub ff:FmtFull
+pub struct DataSingle<'a, X: PlotNum> {
+    pub writer: &'a mut dyn std::fmt::Write,
+    pub bound: [X; 2],
+    pub step: X::StepInfo,
+    pub ff: FmtFull,
 }
-pub struct Data<'a,X:PlotNum,Y:PlotNum>{
-    pub writer:&'a mut dyn std::fmt::Write,
-    pub boundx:[X;2],
-    pub boundy:[Y;2],
-    pub stepx:X::StepInfo,
-    pub stepy:Y::StepInfo,
+pub struct Data<'a, X: PlotNum, Y: PlotNum> {
+    pub writer: &'a mut dyn std::fmt::Write,
+    pub boundx: [X; 2],
+    pub boundy: [Y; 2],
+    pub stepx: X::StepInfo,
+    pub stepy: Y::StepInfo,
 }
 
-
-pub struct TickResult<X:PlotNum,Y:PlotNum>{
-    pub tickx:TickInfo<X>,
-    pub ticky:TickInfo<Y>
+pub struct TickResult<X: PlotNum, Y: PlotNum> {
+    pub tickx: TickInfo<X>,
+    pub ticky: TickInfo<Y>,
 }
 
-
-
-pub struct PlotterRes<'a,X:PlotNum,Y:PlotNum>{
-    plots:Vec<Plot<'a,X,Y>>,
-    boundx:[X;2],
-    boundy:[Y;2],
-    title: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
-    xname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
-    yname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
-    xtick_fmt:Box<dyn PlotterTickTrait<X> + 'a>,
-    ytick_fmt:Box<dyn PlotterTickTrait<Y> + 'a>,
-    num_css_classes:Option<usize>,
-    preserve_aspect:bool
+pub struct PlotterRes<'a, X: PlotNum, Y: PlotNum> {
+    plots: Vec<Plot<'a, X, Y>>,
+    boundx: [X; 2],
+    boundy: [Y; 2],
+    title: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
+    xname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
+    yname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
+    xtick_fmt: Box<dyn PlotterTickTrait<X> + 'a>,
+    ytick_fmt: Box<dyn PlotterTickTrait<Y> + 'a>,
+    dash_x: bool,
+    dash_y: bool,
 }
-
-
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -977,32 +981,21 @@ pub struct PlotterRes<'a,X:PlotNum,Y:PlotNum>{
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    title: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
-    xname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
-    yname: Box<dyn PlotterXnameTrait<X,Y> + 'a>,
-    xtick_fmt:Box<dyn PlotterTickTrait<X> + 'a>,
-    ytick_fmt:Box<dyn PlotterTickTrait<Y> + 'a>,
+    title: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
+    xname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
+    yname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
+    xtick_fmt: Box<dyn PlotterTickTrait<X> + 'a>,
+    ytick_fmt: Box<dyn PlotterTickTrait<Y> + 'a>,
     plots: Vec<Plot<'a, X, Y>>,
-    xmarkers:Vec<X>,
-    ymarkers:Vec<Y>,
+    xmarkers: Vec<X>,
+    ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-
+    dash_x: bool,
+    dash_y: bool,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
-    
-
-    pub fn with_xtickfmt(&mut self,a:impl PlotterTickTrait<X>+'a)->&mut Self{
-        self.xtick_fmt=Box::new(a);
-        self
-    }
-
-    pub fn with_ytickfmt(&mut self,a:impl PlotterTickTrait<Y>+'a)->&mut Self{
-        self.ytick_fmt=Box::new(a);
-        self
-    }
-
     ///
     /// Create a plotter with the specified element.
     ///
@@ -1010,18 +1003,26 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// let mut p = poloto::Plotter::new("title", "x", "y");
     /// p.line("",[[1,1]]);
     /// ```
-    pub fn new(title:impl PlotterXnameTrait<X,Y>+'a,xname:impl PlotterXnameTrait<X,Y>+'a,yname:impl PlotterXnameTrait<X,Y>+'a) -> Plotter<'a, X, Y> {
+    pub fn new(
+        title: impl PlotterXnameTrait<X, Y> + 'a,
+        xname: impl PlotterXnameTrait<X, Y> + 'a,
+        yname: impl PlotterXnameTrait<X, Y> + 'a,
+        xtick_fmt: impl PlotterTickTrait<X> + 'a,
+        ytick_fmt: impl PlotterTickTrait<Y> + 'a,
+    ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
-            xname:Box::new(xname),
-            yname:Box::new(yname),
+            xname: Box::new(xname),
+            yname: Box::new(yname),
             plots: Vec::new(),
-            xmarkers:Vec::new(),
-            ymarkers:Vec::new(),
+            xmarkers: Vec::new(),
+            ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xtick_fmt:Box::new(default_tick()),
-            ytick_fmt:Box::new(default_tick()),
+            xtick_fmt: Box::new(xtick_fmt),
+            ytick_fmt: Box::new(ytick_fmt),
+            dash_x: true,
+            dash_y: true,
         }
     }
     /// Create a line from plots using a SVG polyline element.
@@ -1148,29 +1149,29 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self
     }
 
-    pub fn find_bounds(&mut self)->PlotterRes<'a,X,Y>{
-        let mut pp=self.move_into();
+    pub fn find_bounds(&mut self) -> PlotterRes<'a, X, Y> {
+        let mut pp = self.move_into();
 
         let (boundx, boundy) = num::find_bounds(
             pp.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            pp.xmarkers,pp.ymarkers
+            pp.xmarkers,
+            pp.ymarkers,
         );
 
-        PlotterRes{
+        PlotterRes {
             title: pp.title,
-            xname:pp.xname,
-            yname:pp.yname,
+            xname: pp.xname,
+            yname: pp.yname,
             plots: pp.plots,
-            num_css_classes:pp.num_css_classes,
-            preserve_aspect: pp.preserve_aspect,
-            xtick_fmt:pp.xtick_fmt,
-            ytick_fmt:pp.ytick_fmt,
+            xtick_fmt: pp.xtick_fmt,
+            ytick_fmt: pp.ytick_fmt,
             boundx,
-            boundy
+            boundy,
+            dash_x: pp.dash_x,
+            dash_y: pp.dash_y,
         }
     }
 
-    
     ///
     /// Preserve the aspect ratio by drawing a smaller graph in the same area.
     ///
@@ -1196,19 +1197,35 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self.num_css_classes = a;
         self
     }
-    
 
-    
+    pub fn xmarker(&mut self, a: X) -> &mut Self {
+        self.xmarkers.push(a);
+        self
+    }
+
+    pub fn ymarker(&mut self, a: Y) -> &mut Self {
+        self.ymarkers.push(a);
+        self
+    }
+
+    pub fn no_dash_x(&mut self) -> &mut Self {
+        self.dash_x = false;
+        self
+    }
+    pub fn no_dash_y(&mut self) -> &mut Self {
+        self.dash_y = false;
+        self
+    }
+
     ///
     /// Move a plotter out from behind a mutable reference leaving
     /// an empty plotter.
     ///
     pub fn move_into(&mut self) -> Plotter<'a, X, Y> {
-        let mut empty = crate::Plotter::new("", "", "");
+        let mut empty = crate::plot("", "", "");
         core::mem::swap(&mut empty, self);
         empty
     }
-    
 
     ///
     /// Use the plot iterators to write out the graph elements.
@@ -1229,24 +1246,18 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
-        
-    
-        let data=self.find_bounds();
-
+        let data = self.find_bounds();
 
         //knowldge of canvas dim
-        let canvas=crate::Canvas::new();
+        let canvas = crate::Canvas::new();
 
         //compute step info
-        let ticks=canvas.gen_ticks(&data);
+        let ticks = canvas.gen_ticks(&data);
 
-        canvas.render(a,data,ticks)
-    
+        canvas.render(a, data, ticks)
     }
-    
 }
 
-/*
 pub trait SimpleTheme {
     fn simple_theme<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
     fn simple_theme_dark<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
@@ -1275,7 +1286,6 @@ impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
         )
     }
 }
-*/
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
 /// Similar to `format_args!()` except has a more flexible lifetime.
@@ -1307,6 +1317,10 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
 ///
 pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(a: F) -> DisplayableClosureOnce<F> {
     DisplayableClosureOnce::new(a)
+}
+
+pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> DisplayableClosure<F> {
+    DisplayableClosure::new(a)
 }
 
 use std::cell::RefCell;

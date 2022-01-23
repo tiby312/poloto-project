@@ -10,197 +10,12 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
-
-
-
-
-
-pub trait PlotNumContext {
-    type Num: PlotNum;
-
-    ///
-    /// Given an ideal number of intervals across the min and max values,
-    /// Calculate information related to where the interval ticks should go.
-    /// Guarenteed to be called before fmt_tick.
-    ///
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [Self::Num; 2],
-        dash: DashInfo,
-    ) -> TickInfo<Self::Num>;
-
-    /// If there is only one point in a graph, or no point at all,
-    /// the range to display in the graph.
-    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2];
-
-    /// Provided a min and max range, scale the current value against max.
-    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64;
-
-    /// Used to display a tick
-    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        write!(tick.writer, "{}", tick.val)
-    }
-
-    fn fmt_name(&mut self, _info: NameInfo<Self::Num>) -> std::fmt::Result {
-        Ok(())
-    }
-
-    fn ideal_num_ticks(&mut self) -> Option<u32> {
-        None
-    }
-
-    fn get_markers(&mut self) -> Vec<Self::Num> {
-        vec![]
-    }
-}
-
-pub struct NameInfo<'a, T: PlotNum> {
-    pub writer: &'a mut dyn std::fmt::Write,
-    pub min: T,
-    pub max: T,
-    pub step: T::StepInfo,
-}
-
-///
-/// A plottable number that has a default context that can be created by calling `ctx()`
-///
-pub trait HasDefaultCtx: PlotNum {
-    type DefaultContext: PlotNumContext<Num = Self> + Default;
-
-    fn ctx<K: std::fmt::Display>(name: K) -> WithName<K, Self::DefaultContext> {
-        WithName {
-            name,
-            it: Self::DefaultContext::default(),
-        }
-    }
-
-    fn ctx_fmt<K>(name: K) -> WithNameFunc<K, Self::DefaultContext>
-    where
-        K: FnMut(NameInfo<Self>) -> std::fmt::Result,
-    {
-        WithNameFunc {
-            name: Some(name),
-            it: Self::DefaultContext::default(),
-        }
-    }
-
-    fn ctx_none() -> Self::DefaultContext {
-        Self::DefaultContext::default()
-    }
-}
-
-pub struct WithName<K: std::fmt::Display, J: PlotNumContext> {
-    name: K,
-    it: J,
-}
-
-impl<K: std::fmt::Display, J: PlotNumContext> PlotNumContext for WithName<K, J> {
-    type Num = J::Num;
-
-    ///
-    /// Given an ideal number of intervals across the min and max values,
-    /// Calculate information related to where the interval ticks should go.
-    ///
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [Self::Num; 2],
-        dash: DashInfo,
-    ) -> TickInfo<Self::Num> {
-        self.it.compute_ticks(ideal_num_steps, range, dash)
-    }
-
-    /// If there is only one point in a graph, or no point at all,
-    /// the range to display in the graph.
-    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
-        self.it.unit_range(offset)
-    }
-
-    /// Provided a min and max range, scale the current value against max.
-    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
-        self.it.scale(val, range, max)
-    }
-
-    /// Used to display a tick
-    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        self.it.fmt_tick(tick)
-    }
-
-    fn fmt_name(&mut self, info: NameInfo<Self::Num>) -> std::fmt::Result {
-        write!(info.writer, "{}", self.name)
-    }
-
-    fn ideal_num_ticks(&mut self) -> Option<u32> {
-        self.it.ideal_num_ticks()
-    }
-
-    fn get_markers(&mut self) -> Vec<Self::Num> {
-        self.it.get_markers()
-    }
-}
-
 pub struct TickFmt<'a, T: PlotNum> {
     pub writer: &'a mut dyn std::fmt::Write,
     pub val: T,
     pub step: FmtFull,
     pub info: T::StepInfo,
     pub bounds: [T; 2],
-}
-
-pub struct WithNameFunc<K: FnOnce(NameInfo<J::Num>) -> std::fmt::Result, J: PlotNumContext> {
-    name: Option<K>,
-    it: J,
-}
-
-impl<K: FnOnce(NameInfo<J::Num>) -> std::fmt::Result, J: PlotNumContext> PlotNumContext
-    for WithNameFunc<K, J>
-{
-    type Num = J::Num;
-
-    ///
-    /// Given an ideal number of intervals across the min and max values,
-    /// Calculate information related to where the interval ticks should go.
-    ///
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [Self::Num; 2],
-        dash: DashInfo,
-    ) -> TickInfo<Self::Num> {
-        self.it.compute_ticks(ideal_num_steps, range, dash)
-    }
-
-    /// If there is only one point in a graph, or no point at all,
-    /// the range to display in the graph.
-    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
-        self.it.unit_range(offset)
-    }
-
-    /// Provided a min and max range, scale the current value against max.
-    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
-        self.it.scale(val, range, max)
-    }
-
-    /// Used to display a tick
-    /// Before overriding this, consider using [`crate::Plotter::xinterval_fmt`] and [`crate::Plotter::yinterval_fmt`].
-    fn fmt_tick(&mut self, tick: TickFmt<Self::Num>) -> std::fmt::Result {
-        self.it.fmt_tick(tick)
-    }
-
-    fn fmt_name(&mut self, info: NameInfo<Self::Num>) -> std::fmt::Result {
-        (self.name.take().unwrap())(info)
-    }
-
-    fn ideal_num_ticks(&mut self) -> Option<u32> {
-        self.it.ideal_num_ticks()
-    }
-
-    fn get_markers(&mut self) -> Vec<Self::Num> {
-        self.it.get_markers()
-    }
 }
 
 ///
@@ -215,30 +30,29 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
         false
     }
 
-
     /// Provided a min and max range, scale the current value against max.
-    fn scale(val: Self, range: [Self; 2], max: f64) -> f64;
+    fn scale(&self, range: [Self; 2], max: f64) -> f64;
 
     ///
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
     /// Guarenteed to be called before fmt_tick.
     ///
-    fn compute_ticks(
-        ideal_num_steps: u32,
-        range: [Self; 2],
-        dash: DashInfo,
-    ) -> TickInfo<Self>;
+    fn compute_ticks(ideal_num_steps: u32, range: [Self; 2], dash: DashInfo) -> TickInfo<Self>;
 
     /// If there is only one point in a graph, or no point at all,
     /// the range to display in the graph.
     fn unit_range(offset: Option<Self>) -> [Self; 2];
 
-
     /// Default way to display the number
-    fn val_fmt(&mut self,writer:&mut dyn std::fmt::Write,_tick: FmtFull,_extra:&mut Self::StepInfo) -> std::fmt::Result {
-        write!(writer,"{}",self)
-    } 
+    fn val_fmt(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        _tick: FmtFull,
+        _extra: &mut Self::StepInfo,
+    ) -> std::fmt::Result {
+        write!(writer, "{}", self)
+    }
 }
 
 pub struct DashInfo {
@@ -251,7 +65,7 @@ pub struct DashInfo {
 
 pub enum FmtFull {
     Full,
-    Tick,
+    Short,
 }
 
 ///
