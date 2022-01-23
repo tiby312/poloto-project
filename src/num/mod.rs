@@ -39,8 +39,8 @@ fn test_multiple<I: PlotNum>(
 
 pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
     it: impl IntoIterator<Item = (X, Y)>,
-    xmarkers: Vec<X>,
-    ymarkers: Vec<Y>,
+    xmarkers: &[X],
+    ymarkers: &[Y],
 ) -> ([X; 2], [Y; 2]) {
     //let xmarkers = xcontext.get_markers();
     //let ymarkers = ycontext.get_markers();
@@ -57,13 +57,13 @@ pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
                 xmarkers
                     .into_iter()
                     .filter(|a| !a.is_hole())
-                    .map(|xx| (xx, y)),
+                    .map(|&xx| (xx, y)),
             )
             .chain(
                 ymarkers
                     .into_iter()
                     .filter(|a| !a.is_hole())
-                    .map(|yy| (x, yy)),
+                    .map(|&yy| (x, yy)),
             );
 
         ii.fold(&mut val, |val, (x, y)| {

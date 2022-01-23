@@ -19,18 +19,37 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let title = poloto::polotofmt::name_ext(|p: poloto::polotofmt::Data<UnixTime, i128>| {
+    let (title, xname) = {
         use poloto::plotnum::FmtFull;
-        let srt = poloto::disp_const(|w| p.boundx[0].default_fmt(w, FmtFull::Short, p.stepx));
-        let end = poloto::disp_const(|w| p.boundx[1].default_fmt(w, FmtFull::Short, p.stepx));
-        write!(p.writer, "Entries from {} to {} in {}", srt, end, p.stepx)
-    });
+        use poloto::polotofmt;
+        let title = polotofmt::name_ext(|p: polotofmt::Data<UnixTime, i128>| {
+            let srt = poloto::disp_const(|w| p.boundx[0].default_fmt(w, FmtFull::Short, p.stepx));
+            let end = poloto::disp_const(|w| p.boundx[1].default_fmt(w, FmtFull::Short, p.stepx));
+            write!(p.writer, "Entries from {} to {} in {}", srt, end, p.stepx)
+        });
 
-    let mut plotter = poloto::plot(title, "years", "entries");
+        let mut xname = poloto::AxisBuilder::new(polotofmt::name_single_ext(
+            |p: polotofmt::DataSingle<UnixTime>| {
+                let srt = poloto::disp_const(|w| p.bound[0].default_fmt(w, FmtFull::Short, p.step));
+                let end = poloto::disp_const(|w| p.bound[1].default_fmt(w, FmtFull::Short, p.step));
+                write!(p.writer, "Entries from {} to {} in {}", srt, end, p.step)
+            },
+        ));
+
+        xname.with_tick_fmt(polotofmt::tick_fmt_ext(|v: UnixTime, mut d, ff| {
+            v.default_fmt(&mut d.writer, ff, d.step)?;
+            write!(d.writer, " yr")
+        }));
+
+        xname.with_ideal_num(2);
+
+        (title, xname)
+    };
+
+    let mut plotter = poloto::Plotter::new(title, xname, poloto::AxisBuilder::new("entires"));
 
     plotter.line("foo", &data);
-    plotter.ymarker(0);
-    plotter.no_dash_y();
+    plotter.yaxis().marker(0).no_dash();
 
     println!(
         "{}<style>{}{}</style>{}{}",

@@ -107,7 +107,7 @@ enum PlotType {
     LineFillRaw,
 }
 
-struct Plot<'a, X: PlotNum, Y: PlotNum> {
+struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plot_type: PlotType,
     plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
@@ -115,14 +115,13 @@ struct Plot<'a, X: PlotNum, Y: PlotNum> {
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: PlotNum, Y: PlotNum>(
+pub fn plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
     title: impl PlotterNameFmt<X, Y> + 'a,
-    xname: impl PlotterNameFmt<X, Y> + 'a,
-    yname: impl PlotterNameFmt<X, Y> + 'a,
+    xname: impl PlotterNameSingleFmt<X> + 'a,
+    yname: impl PlotterNameSingleFmt<Y> + 'a,
 ) -> Plotter<'a, X, Y> {
-    Plotter::new(title, xname, yname, default_tick_fmt(), default_tick_fmt())
+    Plotter::new(title, AxisBuilder::new(xname), AxisBuilder::new(yname))
 }
-
 
 //TODO remove this?
 struct TickResult<X: PlotNum, Y: PlotNum> {
@@ -130,28 +129,68 @@ struct TickResult<X: PlotNum, Y: PlotNum> {
     pub ticky: TickInfo<Y>,
 }
 
-
 //TODo use this!
-pub struct AxisBuilder<'a,T>{
-    dash:bool,
-    ideal_num:Option<u32>,
-    markers:Vec<T>,
-    name:Box<dyn PlotterNameFmt<X>+'a>,
-    tick_fmt:Box<dyn PlotterTickFmt<X>+'a>
+pub struct AxisBuilder<'a, X: PlotNum> {
+    dash: bool,
+    ideal_num: Option<u32>,
+    markers: Vec<X>,
+    name: Box<dyn PlotterNameSingleFmt<X> + 'a>,
+    tick_fmt: Box<dyn PlotterTickFmt<X> + 'a>,
+}
+
+impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
+    pub fn new(name: impl PlotterNameSingleFmt<X> + 'a) -> Self {
+        AxisBuilder {
+            dash: true,
+            ideal_num: None,
+            markers: vec![],
+            name: Box::new(name),
+            tick_fmt: Box::new(default_tick_fmt()),
+        }
+    }
+    pub fn new_ext(
+        name: impl PlotterNameSingleFmt<X> + 'a,
+        tick_fmt: impl PlotterTickFmt<X> + 'a,
+    ) -> Self {
+        AxisBuilder {
+            dash: true,
+            ideal_num: None,
+            markers: vec![],
+            name: Box::new(name),
+            tick_fmt: Box::new(tick_fmt),
+        }
+    }
+    pub fn marker(&mut self, a: X) -> &mut Self {
+        self.markers.push(a);
+        self
+    }
+    pub fn with_ideal_num(&mut self, a: u32) -> &mut Self {
+        self.ideal_num = Some(a);
+        self
+    }
+    pub fn with_name(&mut self, a: impl PlotterNameSingleFmt<X> + 'a) -> &mut Self {
+        self.name = Box::new(a);
+        self
+    }
+
+    pub fn with_tick_fmt(&mut self, a: impl PlotterTickFmt<X> + 'a) -> &mut Self {
+        self.tick_fmt = Box::new(a);
+        self
+    }
+    pub fn no_dash(&mut self) -> &mut Self {
+        self.dash = false;
+        self
+    }
 }
 
 //TODO remove this?
-struct PlotterRes<'a, X: PlotNum, Y: PlotNum> {
+struct PlotterRes<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Vec<Plot<'a, X, Y>>,
     boundx: [X; 2],
     boundy: [Y; 2],
     title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    xname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    yname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    xtick_fmt: Box<dyn PlotterTickFmt<X> + 'a>,
-    ytick_fmt: Box<dyn PlotterTickFmt<Y> + 'a>,
-    dash_x: bool,
-    dash_y: bool,
+    xaxis: AxisBuilder<'a, X>,
+    yaxis: AxisBuilder<'a, Y>,
 }
 
 /// Keeps track of plots.
@@ -165,17 +204,11 @@ struct PlotterRes<'a, X: PlotNum, Y: PlotNum> {
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    xname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    yname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    xtick_fmt: Box<dyn PlotterTickFmt<X> + 'a>,
-    ytick_fmt: Box<dyn PlotterTickFmt<Y> + 'a>,
     plots: Vec<Plot<'a, X, Y>>,
-    xmarkers: Vec<X>,
-    ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    dash_x: bool,
-    dash_y: bool,
+    xaxis: AxisBuilder<'a, X>,
+    yaxis: AxisBuilder<'a, Y>,
 }
 
 impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
@@ -188,26 +221,31 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// ```
     pub fn new(
         title: impl PlotterNameFmt<X, Y> + 'a,
-        xname: impl PlotterNameFmt<X, Y> + 'a,
-        yname: impl PlotterNameFmt<X, Y> + 'a,
-        xtick_fmt: impl PlotterTickFmt<X> + 'a,
-        ytick_fmt: impl PlotterTickFmt<Y> + 'a,
+        xaxis: AxisBuilder<'a, X>,
+        yaxis: AxisBuilder<'a, Y>,
     ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
-            xname: Box::new(xname),
-            yname: Box::new(yname),
             plots: Vec::new(),
-            xmarkers: Vec::new(),
-            ymarkers: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xtick_fmt: Box::new(xtick_fmt),
-            ytick_fmt: Box::new(ytick_fmt),
-            dash_x: true,
-            dash_y: true,
+            xaxis,
+            yaxis,
         }
     }
+
+    pub fn with_name(&mut self, a: impl PlotterNameFmt<X, Y> + 'a) -> &mut Self {
+        self.title = Box::new(a);
+        self
+    }
+    pub fn xaxis(&mut self) -> &mut AxisBuilder<'a, X> {
+        &mut self.xaxis
+    }
+
+    pub fn yaxis(&mut self) -> &mut AxisBuilder<'a, Y> {
+        &mut self.yaxis
+    }
+
     /// Create a line from plots using a SVG polyline element.
     /// The element belongs to the `.poloto[N]stroke` css class.
     ///
@@ -337,21 +375,17 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
 
         let (boundx, boundy) = num::find_bounds(
             pp.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            pp.xmarkers,
-            pp.ymarkers,
+            &pp.xaxis.markers,
+            &pp.yaxis.markers,
         );
 
         PlotterRes {
             title: pp.title,
-            xname: pp.xname,
-            yname: pp.yname,
             plots: pp.plots,
-            xtick_fmt: pp.xtick_fmt,
-            ytick_fmt: pp.ytick_fmt,
             boundx,
             boundy,
-            dash_x: pp.dash_x,
-            dash_y: pp.dash_y,
+            xaxis: pp.xaxis,
+            yaxis: pp.yaxis,
         }
     }
 
@@ -378,25 +412,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     ///
     pub fn num_css_class(&mut self, a: Option<usize>) -> &mut Self {
         self.num_css_classes = a;
-        self
-    }
-
-    pub fn xmarker(&mut self, a: X) -> &mut Self {
-        self.xmarkers.push(a);
-        self
-    }
-
-    pub fn ymarker(&mut self, a: Y) -> &mut Self {
-        self.ymarkers.push(a);
-        self
-    }
-
-    pub fn no_dash_x(&mut self) -> &mut Self {
-        self.dash_x = false;
-        self
-    }
-    pub fn no_dash_y(&mut self) -> &mut Self {
-        self.dash_y = false;
         self
     }
 
@@ -432,7 +447,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         let data = self.find_bounds();
 
         //knowldge of canvas dim
-        let canvas = render::Canvas::new();
+        let mut canvas = render::Canvas::new();
 
         //compute step info
         let ticks = canvas.gen_ticks(&data);

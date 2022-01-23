@@ -13,10 +13,9 @@ fn main() {
         (UnixTime::from_ymd_hms(day1, 1, 3, 0), 4133000),
     ];
 
-    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles")
-        .line("", &data)
-        .ymarker(0)
-        .move_into();
+    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
+    s.line("", &data);
+    s.yaxis().marker(0);
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

@@ -14,7 +14,7 @@ fn main() {
     };
 
     let mut plotter = poloto::plot("collatz", "x", "y");
-    plotter.ymarker(0);
+    plotter.yaxis().marker(0);
     for i in 1000..1006 {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }

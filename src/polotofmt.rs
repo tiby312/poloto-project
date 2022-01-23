@@ -5,25 +5,53 @@ use super::*;
 /// such as min and max bounds and step information.
 ///
 pub trait PlotterTickFmt<X: PlotNum> {
-    fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result;
+    fn fmt_self(&mut self, val: X, data: DataSingle<X>, ff: FmtFull) -> std::fmt::Result;
 }
 
-pub fn default_tick_fmt<X: PlotNum>() -> impl PlotterTickFmt<X> {
-    tick_fmt_ext(|mut v: X, mut d| v.val_fmt(d.writer, d.ff, &mut d.step))
+pub fn default_tick_fmt<'a, X: PlotNum + 'a>() -> impl PlotterTickFmt<X> + 'a {
+    tick_fmt_ext(|mut v: X, mut d, ff| v.val_fmt(d.writer, ff, &mut d.step))
 }
+
 pub fn tick_fmt_ext<X: PlotNum>(
-    func: impl FnMut(X, DataSingle<X>) -> std::fmt::Result,
+    func: impl FnMut(X, DataSingle<X>, FmtFull) -> std::fmt::Result,
 ) -> impl PlotterTickFmt<X> {
     impl<X: PlotNum, F> PlotterTickFmt<X> for F
     where
-        F: FnMut(X, DataSingle<X>) -> std::fmt::Result,
+        F: FnMut(X, DataSingle<X>, FmtFull) -> std::fmt::Result,
     {
-        fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result {
-            (self)(val, data)
+        fn fmt_self(&mut self, val: X, data: DataSingle<X>, ff: FmtFull) -> std::fmt::Result {
+            (self)(val, data, ff)
         }
     }
 
     func
+}
+
+pub trait PlotterNameSingleFmt<X: PlotNum> {
+    fn fmt_self(&mut self, data: DataSingle<X>) -> std::fmt::Result;
+}
+
+impl<T: std::fmt::Display, X: PlotNum> PlotterNameSingleFmt<X> for T {
+    fn fmt_self(&mut self, data: DataSingle<X>) -> std::fmt::Result {
+        write!(data.writer, "{}", self)
+    }
+}
+
+pub fn name_single_ext<X: PlotNum, F: FnMut(DataSingle<X>) -> std::fmt::Result>(
+    func: F,
+) -> impl PlotterNameSingleFmt<X> {
+    pub struct NoDisp<F>(pub F);
+
+    impl<X: PlotNum, F> PlotterNameSingleFmt<X> for NoDisp<F>
+    where
+        F: FnMut(DataSingle<X>) -> std::fmt::Result,
+    {
+        fn fmt_self(&mut self, data: DataSingle<X>) -> std::fmt::Result {
+            (self.0)(data)
+        }
+    }
+
+    NoDisp(func)
 }
 
 ///
@@ -60,13 +88,12 @@ pub fn name_ext<X: PlotNum, Y: PlotNum, F: FnMut(Data<X, Y>) -> std::fmt::Result
 pub struct DataSingle<'a, X: PlotNum> {
     pub writer: &'a mut dyn std::fmt::Write,
     pub bound: [X; 2],
-    pub step: X::StepInfo,
-    pub ff: FmtFull,
+    pub step: &'a mut X::StepInfo,
 }
 pub struct Data<'a, X: PlotNum, Y: PlotNum> {
     pub writer: &'a mut dyn std::fmt::Write,
     pub boundx: [X; 2],
     pub boundy: [Y; 2],
-    pub stepx: X::StepInfo,
-    pub stepy: Y::StepInfo,
+    pub stepx: &'a mut X::StepInfo,
+    pub stepy: &'a mut Y::StepInfo,
 }

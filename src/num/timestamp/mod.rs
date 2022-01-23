@@ -49,7 +49,7 @@ impl PlotNum for UnixTime {
         tick: FmtFull,
         info: &mut TimestampType,
     ) -> std::fmt::Result {
-        self.default_fmt(writer, tick, *info)
+        self.default_fmt(writer, tick, info)
     }
 
     fn compute_ticks(

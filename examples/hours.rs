@@ -15,8 +15,9 @@ fn main() {
 
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles")
         .line("", &data)
-        .ymarker(0)
         .move_into();
+
+    s.yaxis().marker(0);
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

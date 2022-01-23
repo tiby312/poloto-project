@@ -198,7 +198,7 @@ impl UnixTime {
         &self,
         mut formatter: T,
         step: FmtFull,
-        info: TimestampType,
+        info: &TimestampType,
     ) -> fmt::Result {
         let val = self;
         use TimestampType::*;

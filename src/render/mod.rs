@@ -22,7 +22,6 @@ impl Canvas {
     }
     pub fn with_options(preserve_aspect: bool, num_css_classes: Option<usize>) -> Self {
         let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
-
         let ideal_num_ysteps = 5;
 
         let width = crate::WIDTH as f64;
@@ -66,9 +65,16 @@ impl Canvas {
     }
 
     pub fn gen_ticks<X: PlotNum, Y: PlotNum>(
-        &self,
+        &mut self,
         plotter: &PlotterRes<X, Y>,
     ) -> TickResult<X, Y> {
+        if let Some(a) = plotter.xaxis.ideal_num {
+            self.ideal_num_xsteps = a;
+        }
+        if let Some(a) = plotter.yaxis.ideal_num {
+            self.ideal_num_ysteps = a;
+        }
+
         let tickx = X::compute_ticks(
             self.ideal_num_xsteps,
             plotter.boundx,
@@ -386,8 +392,8 @@ impl Canvas {
         let [minx, maxx] = boundx;
         let [miny, maxy] = boundy;
 
-        let xtick_info = ticks.tickx;
-        let ytick_info = ticks.ticky;
+        let mut xtick_info = ticks.tickx;
+        let mut ytick_info = ticks.ticky;
 
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
@@ -406,8 +412,8 @@ impl Canvas {
                     writer: &mut w.writer_safe(),
                     boundx,
                     boundy,
-                    stepx: xtick_info.unit_data,
-                    stepy: ytick_info.unit_data,
+                    stepx: &mut xtick_info.unit_data,
+                    stepy: &mut ytick_info.unit_data,
                 })
             })?;
 
@@ -421,12 +427,10 @@ impl Canvas {
                 d.attr("y", height - padding / 8.)
             })?
             .build(|w| {
-                plotter.xname.fmt_self(Data {
+                plotter.xaxis.name.fmt_self(DataSingle {
                     writer: &mut w.writer_safe(),
-                    boundx,
-                    boundy,
-                    stepx: xtick_info.unit_data,
-                    stepy: ytick_info.unit_data,
+                    bound: boundx,
+                    step: &mut xtick_info.unit_data,
                 })
             })?;
 
@@ -444,21 +448,19 @@ impl Canvas {
                 d.attr("y", height / 2.0)
             })?
             .build(|w| {
-                plotter.yname.fmt_self(Data {
+                plotter.yaxis.name.fmt_self(DataSingle {
                     writer: &mut w.writer_safe(),
-                    boundx,
-                    boundy,
-                    stepx: xtick_info.unit_data,
-                    stepy: ytick_info.unit_data,
+                    bound: boundy,
+                    step: &mut ytick_info.unit_data,
                 })
             })?;
 
-        let xdash_size: Option<f64> = if plotter.dash_x {
+        let xdash_size: Option<f64> = if plotter.xaxis.dash {
             xtick_info.dash_size
         } else {
             None
         };
-        let ydash_size: Option<f64> = if plotter.dash_y {
+        let ydash_size: Option<f64> = if plotter.yaxis.dash {
             ytick_info.dash_size
         } else {
             None
@@ -486,14 +488,14 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
 
-                        plotter.xtick_fmt.fmt_self(
+                        plotter.xaxis.tick_fmt.fmt_self(
                             base,
                             DataSingle {
                                 writer: &mut w,
                                 bound: boundx,
-                                ff: FmtFull::Full,
-                                step: xtick_info.unit_data,
+                                step: &mut xtick_info.unit_data,
                             },
+                            FmtFull::Full,
                         )
                     })?;
 
@@ -530,14 +532,14 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        plotter.xtick_fmt.fmt_self(
+                        plotter.xaxis.tick_fmt.fmt_self(
                             value,
                             DataSingle {
                                 writer: &mut w,
                                 bound: boundx,
-                                ff: FmtFull::Short,
-                                step: xtick_info.unit_data,
+                                step: &mut xtick_info.unit_data,
                             },
+                            FmtFull::Short,
                         )
                         /*
                         w.put_raw(format_args!(
@@ -571,14 +573,14 @@ impl Canvas {
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
 
-                        plotter.ytick_fmt.fmt_self(
+                        plotter.yaxis.tick_fmt.fmt_self(
                             base,
                             DataSingle {
                                 writer: &mut w,
                                 bound: boundy,
-                                ff: FmtFull::Full,
-                                step: ytick_info.unit_data,
+                                step: &mut ytick_info.unit_data,
                             },
+                            FmtFull::Full,
                         )
                     })?;
 
@@ -615,14 +617,14 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        plotter.ytick_fmt.fmt_self(
+                        plotter.yaxis.tick_fmt.fmt_self(
                             value,
                             DataSingle {
                                 writer: &mut w,
                                 bound: boundy,
-                                ff: FmtFull::Short,
-                                step: ytick_info.unit_data,
+                                step: &mut ytick_info.unit_data,
                             },
+                            FmtFull::Short,
                         )
 
                         /*

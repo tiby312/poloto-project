@@ -23,7 +23,7 @@ pub struct TickFmt<'a, T: PlotNum> {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
-    type StepInfo: Copy;
+    type StepInfo;
 
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
