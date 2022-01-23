@@ -191,6 +191,8 @@ struct PlotterRes<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
     xaxis: AxisBuilder<'a, X>,
     yaxis: AxisBuilder<'a, Y>,
+    preserve_aspect: bool,
+    num_css_classes: Option<usize>,
 }
 
 /// Keeps track of plots.
@@ -386,6 +388,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
             boundy,
             xaxis: pp.xaxis,
             yaxis: pp.yaxis,
+            num_css_classes: pp.num_css_classes,
+            preserve_aspect: pp.preserve_aspect,
         }
     }
 
@@ -447,7 +451,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         let data = self.find_bounds();
 
         //knowldge of canvas dim
-        let mut canvas = render::Canvas::new();
+        let mut canvas = render::Canvas::with_options(data.preserve_aspect, data.num_css_classes);
 
         //compute step info
         let ticks = canvas.gen_ticks(&data);

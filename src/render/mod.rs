@@ -17,9 +17,6 @@ pub(super) struct Canvas {
     preserve_aspect: bool,
 }
 impl Canvas {
-    pub fn new() -> Self {
-        Self::with_options(false, None)
-    }
     pub fn with_options(preserve_aspect: bool, num_css_classes: Option<usize>) -> Self {
         let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
         let ideal_num_ysteps = 5;
