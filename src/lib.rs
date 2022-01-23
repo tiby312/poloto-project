@@ -183,15 +183,15 @@ pub const DIMENSIONS: [usize; 2] = [800, 500];
 /// Create a Plotter
 ///
 pub fn plot<'a, X: PlotNum, Y: PlotNum>(
-    title: impl PlotterXnameTrait<X, Y> + 'a,
-    xname: impl PlotterXnameTrait<X, Y> + 'a,
-    yname: impl PlotterXnameTrait<X, Y> + 'a,
+    title: impl PlotterNameFmt<X, Y> + 'a,
+    xname: impl PlotterNameFmt<X, Y> + 'a,
+    yname: impl PlotterNameFmt<X, Y> + 'a,
 ) -> Plotter<'a, X, Y> {
-    Plotter::new(title, xname, yname, default_tick(), default_tick())
+    Plotter::new(title, xname, yname, default_tick_fmt(), default_tick_fmt())
 }
 
 #[derive(Copy, Clone)]
-pub struct Canvas {
+struct Canvas {
     ideal_num_xsteps: u32,
     ideal_num_ysteps: u32,
     width: f64,
@@ -890,83 +890,96 @@ impl Canvas {
     }
 }
 
-pub trait PlotterTickTrait<X: PlotNum> {
-    fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result;
-}
+use polotofmt::*;
+pub mod polotofmt {
+    use super::*;
 
-pub fn default_tick<X: PlotNum>() -> impl PlotterTickTrait<X> {
-    tick_ext(|mut v: X, mut d| v.val_fmt(d.writer, d.ff, &mut d.step))
-}
-pub fn tick_ext<X: PlotNum>(
-    func: impl FnMut(X, DataSingle<X>) -> std::fmt::Result,
-) -> impl PlotterTickTrait<X> {
-    impl<X: PlotNum, F> PlotterTickTrait<X> for F
-    where
-        F: FnMut(X, DataSingle<X>) -> std::fmt::Result,
-    {
-        fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result {
-            (self)(val, data)
+    ///
+    /// Allows to override the default tick formatting using information
+    /// such as min and max bounds and step information.
+    ///
+    pub trait PlotterTickFmt<X: PlotNum> {
+        fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result;
+    }
+
+    pub fn default_tick_fmt<X: PlotNum>() -> impl PlotterTickFmt<X> {
+        tick_fmt_ext(|mut v: X, mut d| v.val_fmt(d.writer, d.ff, &mut d.step))
+    }
+    pub fn tick_fmt_ext<X: PlotNum>(
+        func: impl FnMut(X, DataSingle<X>) -> std::fmt::Result,
+    ) -> impl PlotterTickFmt<X> {
+        impl<X: PlotNum, F> PlotterTickFmt<X> for F
+        where
+            F: FnMut(X, DataSingle<X>) -> std::fmt::Result,
+        {
+            fn fmt_self(&mut self, val: X, data: DataSingle<X>) -> std::fmt::Result {
+                (self)(val, data)
+            }
         }
+
+        func
     }
 
-    func
-}
-
-pub trait PlotterXnameTrait<X: PlotNum, Y: PlotNum> {
-    fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result;
-}
-
-impl<T: std::fmt::Display, X: PlotNum, Y: PlotNum> PlotterXnameTrait<X, Y> for T {
-    fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result {
-        write!(data.writer, "{}", self)
+    ///
+    /// Allows to format either the title,xaxis label, or yaxis label
+    /// using information such as the min and max bounds or step information.
+    ///
+    pub trait PlotterNameFmt<X: PlotNum, Y: PlotNum> {
+        fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result;
     }
-}
 
-pub fn name_ext<X: PlotNum, Y: PlotNum, F: FnMut(Data<X, Y>) -> std::fmt::Result>(
-    func: F,
-) -> impl PlotterXnameTrait<X, Y> {
-    pub struct NoDisp<F>(pub F);
-
-    impl<X: PlotNum, Y: PlotNum, F> PlotterXnameTrait<X, Y> for NoDisp<F>
-    where
-        F: FnMut(Data<X, Y>) -> std::fmt::Result,
-    {
+    impl<T: std::fmt::Display, X: PlotNum, Y: PlotNum> PlotterNameFmt<X, Y> for T {
         fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result {
-            (self.0)(data)
+            write!(data.writer, "{}", self)
         }
     }
 
-    NoDisp(func)
+    pub fn name_ext<X: PlotNum, Y: PlotNum, F: FnMut(Data<X, Y>) -> std::fmt::Result>(
+        func: F,
+    ) -> impl PlotterNameFmt<X, Y> {
+        pub struct NoDisp<F>(pub F);
+
+        impl<X: PlotNum, Y: PlotNum, F> PlotterNameFmt<X, Y> for NoDisp<F>
+        where
+            F: FnMut(Data<X, Y>) -> std::fmt::Result,
+        {
+            fn fmt_self(&mut self, data: Data<X, Y>) -> std::fmt::Result {
+                (self.0)(data)
+            }
+        }
+
+        NoDisp(func)
+    }
+
+    pub struct DataSingle<'a, X: PlotNum> {
+        pub writer: &'a mut dyn std::fmt::Write,
+        pub bound: [X; 2],
+        pub step: X::StepInfo,
+        pub ff: FmtFull,
+    }
+    pub struct Data<'a, X: PlotNum, Y: PlotNum> {
+        pub writer: &'a mut dyn std::fmt::Write,
+        pub boundx: [X; 2],
+        pub boundy: [Y; 2],
+        pub stepx: X::StepInfo,
+        pub stepy: Y::StepInfo,
+    }
 }
 
-pub struct DataSingle<'a, X: PlotNum> {
-    pub writer: &'a mut dyn std::fmt::Write,
-    pub bound: [X; 2],
-    pub step: X::StepInfo,
-    pub ff: FmtFull,
-}
-pub struct Data<'a, X: PlotNum, Y: PlotNum> {
-    pub writer: &'a mut dyn std::fmt::Write,
-    pub boundx: [X; 2],
-    pub boundy: [Y; 2],
-    pub stepx: X::StepInfo,
-    pub stepy: Y::StepInfo,
-}
-
-pub struct TickResult<X: PlotNum, Y: PlotNum> {
+struct TickResult<X: PlotNum, Y: PlotNum> {
     pub tickx: TickInfo<X>,
     pub ticky: TickInfo<Y>,
 }
 
-pub struct PlotterRes<'a, X: PlotNum, Y: PlotNum> {
+struct PlotterRes<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     boundx: [X; 2],
     boundy: [Y; 2],
-    title: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
-    xname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
-    yname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
-    xtick_fmt: Box<dyn PlotterTickTrait<X> + 'a>,
-    ytick_fmt: Box<dyn PlotterTickTrait<Y> + 'a>,
+    title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    xname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    yname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    xtick_fmt: Box<dyn PlotterTickFmt<X> + 'a>,
+    ytick_fmt: Box<dyn PlotterTickFmt<Y> + 'a>,
     dash_x: bool,
     dash_y: bool,
 }
@@ -981,11 +994,11 @@ pub struct PlotterRes<'a, X: PlotNum, Y: PlotNum> {
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    title: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
-    xname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
-    yname: Box<dyn PlotterXnameTrait<X, Y> + 'a>,
-    xtick_fmt: Box<dyn PlotterTickTrait<X> + 'a>,
-    ytick_fmt: Box<dyn PlotterTickTrait<Y> + 'a>,
+    title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    xname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    yname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    xtick_fmt: Box<dyn PlotterTickFmt<X> + 'a>,
+    ytick_fmt: Box<dyn PlotterTickFmt<Y> + 'a>,
     plots: Vec<Plot<'a, X, Y>>,
     xmarkers: Vec<X>,
     ymarkers: Vec<Y>,
@@ -1004,11 +1017,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
-        title: impl PlotterXnameTrait<X, Y> + 'a,
-        xname: impl PlotterXnameTrait<X, Y> + 'a,
-        yname: impl PlotterXnameTrait<X, Y> + 'a,
-        xtick_fmt: impl PlotterTickTrait<X> + 'a,
-        ytick_fmt: impl PlotterTickTrait<Y> + 'a,
+        title: impl PlotterNameFmt<X, Y> + 'a,
+        xname: impl PlotterNameFmt<X, Y> + 'a,
+        yname: impl PlotterNameFmt<X, Y> + 'a,
+        xtick_fmt: impl PlotterTickFmt<X> + 'a,
+        ytick_fmt: impl PlotterTickFmt<Y> + 'a,
     ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
@@ -1149,7 +1162,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self
     }
 
-    pub fn find_bounds(&mut self) -> PlotterRes<'a, X, Y> {
+    fn find_bounds(&mut self) -> PlotterRes<'a, X, Y> {
         let mut pp = self.move_into();
 
         let (boundx, boundy) = num::find_bounds(

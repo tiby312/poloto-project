@@ -19,7 +19,7 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let title = poloto::name_ext(|p: poloto::Data<UnixTime, i128>| {
+    let title = poloto::polotofmt::name_ext(|p: poloto::polotofmt::Data<UnixTime, i128>| {
         use poloto::plotnum::FmtFull;
         let srt = poloto::disp_const(|w| p.boundx[0].default_fmt(w, FmtFull::Short, p.stepx));
         let end = poloto::disp_const(|w| p.boundx[1].default_fmt(w, FmtFull::Short, p.stepx));
