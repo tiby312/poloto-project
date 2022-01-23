@@ -123,11 +123,24 @@ pub fn plot<'a, X: PlotNum, Y: PlotNum>(
     Plotter::new(title, xname, yname, default_tick_fmt(), default_tick_fmt())
 }
 
+
+//TODO remove this?
 struct TickResult<X: PlotNum, Y: PlotNum> {
     pub tickx: TickInfo<X>,
     pub ticky: TickInfo<Y>,
 }
 
+
+//TODo use this!
+pub struct AxisBuilder<'a,T>{
+    dash:bool,
+    ideal_num:Option<u32>,
+    markers:Vec<T>,
+    name:Box<dyn PlotterNameFmt<X>+'a>,
+    tick_fmt:Box<dyn PlotterTickFmt<X>+'a>
+}
+
+//TODO remove this?
 struct PlotterRes<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     boundx: [X; 2],
