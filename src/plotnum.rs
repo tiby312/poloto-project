@@ -1,9 +1,9 @@
 //!
-//! Contains the [`PlotNum`] and [`PlotNumContext`] traits and their supporting structs.
+//! Contains the [`PlotNum`] trait and their supporting structs.
 //!
 ///
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
-/// See [`Croppable`]
+/// See [`crate::plottable::crop::Croppable`]
 ///
 pub trait DiscNum: PlotNum {
     /// Create a hole value.
