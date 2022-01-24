@@ -30,13 +30,8 @@ fn main() {
         title,
         "xname",
         "yname",
-        poloto::ctx::<UnixTime>().with_tick_fmt(|v,w,_b,_s|{
-            write!(w,"{}",v.format("%D"))
-        }),
-        poloto::ctx::<i128>()
-            .with_no_dash()
-            .with_marker(0)
-            .with_no_dash(),
+        UnixTime::ctx().with_tick_fmt(|v, w, _b, _s| write!(w, "{}", v.format("%D"))),
+        i128::ctx().with_no_dash().with_marker(0).with_no_dash(),
     );
 
     plotter.line("foo", &data);

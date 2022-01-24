@@ -8,8 +8,8 @@ fn main() {
         "Demo: you can use CSS patterns if you embed SVG!",
         "x",
         "y",
-        poloto::ctx::<f64>(),
-        poloto::ctx::<f64>(),
+        f64::ctx(),
+        f64::ctx(),
     );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);

@@ -1,13 +1,8 @@
+use poloto::prelude::*;
 fn main() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let mut plotter = poloto::plot(
-        "cows per year",
-        "year",
-        "cow",
-        poloto::ctx::<f64>(),
-        poloto::ctx::<f64>(),
-    );
+    let mut plotter = poloto::plot("cows per year", "year", "cow", f64::ctx(), f64::ctx());
     plotter.scatter("", &data);
 
     println!(

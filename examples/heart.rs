@@ -15,8 +15,8 @@ fn main() {
         "Heart Graph",
         "x",
         "y",
-        poloto::ctx::<f64>().with_marker(-20.0).with_marker(20.0),
-        poloto::ctx::<f64>().with_marker(-20.0).with_marker(20.0),
+        f64::ctx().with_marker(-20.0).with_marker(20.0),
+        f64::ctx().with_marker(-20.0).with_marker(20.0),
     );
 
     plotter.line_fill_raw("heart", range.map(heart));

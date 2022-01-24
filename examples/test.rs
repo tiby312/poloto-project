@@ -1,3 +1,4 @@
+use poloto::prelude::*;
 const fn generate_test() -> [&'static [[f64; 2]]; 9] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
@@ -73,8 +74,8 @@ fn main() -> std::fmt::Result {
                                     formatm!("test {}", i),
                                     "x",
                                     "y",
-                                    poloto::ctx::<f64>(),
-                                    poloto::ctx::<f64>(),
+                                    f64::ctx(),
+                                    f64::ctx(),
                                 )
                                 .scatter("", test)
                                 .render(a)
@@ -96,8 +97,8 @@ fn main() -> std::fmt::Result {
                                     formatm!("test {}", i),
                                     "x",
                                     "y",
-                                    poloto::ctx::<i128>(),
-                                    poloto::ctx::<i128>(),
+                                    i128::ctx(),
+                                    i128::ctx(),
                                 )
                                 .scatter("", test)
                                 .render(a)

@@ -44,6 +44,7 @@ pub mod polotofmt;
 ///
 pub mod prelude {
     pub use super::formatm;
+    pub use super::plotnum::HasDefaultContext;
     pub use super::plotnum::PlotNumContextExt;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
@@ -124,10 +125,6 @@ pub fn plot<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a>(
     ycontext: Y,
 ) -> Plotter<'a, X, Y> {
     Plotter::new(title, xname, yname, xcontext, ycontext)
-}
-
-pub fn ctx<X: HasDefaultContext>() -> X::DefaultContext {
-    X::DefaultContext::default()
 }
 
 /// Keeps track of plots.

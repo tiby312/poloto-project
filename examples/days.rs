@@ -18,8 +18,8 @@ fn main() {
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        poloto::ctx::<UnixTime>(),
-        poloto::ctx::<i128>().with_marker(0),
+        UnixTime::ctx(),
+        i128::ctx().with_marker(0),
     );
     s.line("", &data);
 

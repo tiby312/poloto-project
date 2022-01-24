@@ -1,3 +1,5 @@
+use poloto::prelude::*;
+
 //PIPE me to a file!
 fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
@@ -6,8 +8,8 @@ fn main() {
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
-        poloto::ctx::<f64>(),
-        poloto::ctx::<f64>(),
+        f64::ctx(),
+        f64::ctx(),
     );
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));

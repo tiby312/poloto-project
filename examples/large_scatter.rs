@@ -1,13 +1,8 @@
+use poloto::prelude::*;
 fn main() {
     let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
 
-    let mut plotter = poloto::plot(
-        "cows per year",
-        "year",
-        "cows",
-        poloto::ctx::<f64>(),
-        poloto::ctx::<f64>(),
-    );
+    let mut plotter = poloto::plot("cows per year", "year", "cows", f64::ctx(), f64::ctx());
 
     plotter.scatter("a", x.clone().map(|x| (x, x.cos())));
 
