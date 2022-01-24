@@ -21,6 +21,55 @@ pub trait HasDefaultContext{
 
 
 
+pub struct WhereFmt<X,F>{
+    ctx:X,
+    func:F    
+}
+
+impl<X:PlotNumContext,F:FnMut(X::Num,&mut dyn fmt::Write,[X::Num;2])->fmt::Result> PlotNumContext for WhereFmt<X,F>{
+    type StepInfo = X::StepInfo;
+    type Num=X::Num;
+    
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self,val:Self::Num, range: [Self::Num; 2], max: f64) -> f64{
+        self.ctx.scale(val,range,max)
+    }
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    /// Guarenteed to be called before fmt_tick.
+    ///
+    fn compute_ticks(&mut self,ideal_num_steps: u32, range: [Self::Num; 2], dash: DashInfo) -> TickInfo<Self::Num,Self::StepInfo>{
+        self.ctx.compute_ticks(ideal_num_steps,range,dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self,offset: Option<Self::Num>) -> [Self::Num; 2]{
+        self.ctx.unit_range(offset)
+    }
+
+    fn tick_fmt(
+        &mut self,
+        val:Self::Num,
+        writer: &mut dyn std::fmt::Write,
+        bound:[Self::Num;2],
+        extra: &mut Self::StepInfo,
+    ) -> std::fmt::Result{
+        self.ctx.tick_fmt(val,writer,bound,extra)
+    }
+
+    fn where_fmt(
+        &mut self,
+        val:Self::Num,
+        writer:&mut dyn std::fmt::Write,
+        bound:[Self::Num;2]
+    )->std::fmt::Result{
+        (self.func)(val,writer,bound)
+    }
+
+}
 pub struct TickFmt<X,F>{
     ctx:X,
     func:F    
@@ -78,6 +127,10 @@ use std::fmt;
 pub trait PlotNumContextExt:PlotNumContext+Sized{
     fn with_tick_fmt<F:FnMut(Self::Num,&mut dyn fmt::Write,[Self::Num;2],&mut Self::StepInfo)->fmt::Result>(self,func:F)->TickFmt<Self,F>{
         TickFmt { ctx: self, func}
+    }
+
+    fn with_where_fmt<F:FnMut(Self::Num,&mut dyn fmt::Write,[Self::Num;2])->fmt::Result>(self,func:F)->WhereFmt<Self,F>{
+        WhereFmt { ctx: self, func}
     }
 }
 
