@@ -130,39 +130,6 @@ pub fn ctx<X: HasDefaultContext>() -> X::DefaultContext {
     X::DefaultContext::default()
 }
 
-///
-/// Specify option for the x and y axis.
-///
-pub struct AxisBuilder<X: PlotNum> {
-    dash: bool,
-    ideal_num: Option<u32>,
-    markers: Vec<X>,
-}
-
-impl<X: PlotNum> AxisBuilder<X> {
-    pub fn new() -> Self {
-        AxisBuilder {
-            dash: true,
-            ideal_num: None,
-            markers: vec![],
-        }
-    }
-
-    pub fn marker(&mut self, a: X) -> &mut Self {
-        self.markers.push(a);
-        self
-    }
-    pub fn with_ideal_num(&mut self, a: u32) -> &mut Self {
-        self.ideal_num = Some(a);
-        self
-    }
-
-    pub fn no_dash(&mut self) -> &mut Self {
-        self.dash = false;
-        self
-    }
-}
-
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
 /// render is called.
@@ -179,8 +146,6 @@ pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
     plots: Vec<Plot<'a, X::Num, Y::Num>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xaxis: AxisBuilder<X::Num>,
-    yaxis: AxisBuilder<Y::Num>,
     xcontext: X,
     ycontext: Y,
 }
@@ -207,8 +172,6 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             plots: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xaxis: AxisBuilder::new(),
-            yaxis: AxisBuilder::new(),
             xcontext,
             ycontext,
         }
@@ -397,8 +360,6 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
         let (boundx, boundy) = num::find_bounds(
             self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            &self.xaxis.markers,
-            &self.yaxis.markers,
             &mut self.xcontext,
             &mut self.ycontext,
         );
@@ -406,10 +367,10 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
         //knowldge of canvas dim
         let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
 
-        if let Some(a) = self.xaxis.ideal_num {
+        if let Some(a) = self.xcontext.ideal_num_ticks() {
             canvas.ideal_num_xsteps = a;
         }
-        if let Some(a) = self.yaxis.ideal_num {
+        if let Some(a) = self.ycontext.ideal_num_ticks() {
             canvas.ideal_num_ysteps = a;
         }
 

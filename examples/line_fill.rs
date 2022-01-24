@@ -6,7 +6,6 @@ fn main() {
     let title =
         poloto::polotofmt::title(|w, (x, xs), _| write!(w, "from {} to {} in {}", x[0], x[1], xs));
 
-        
     let mut plotter = poloto::plot(
         title,
         formatm!("This is the {} label", 'x'),

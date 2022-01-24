@@ -68,6 +68,14 @@ impl<X: PlotNumContext, F: FnMut(X::Num, &mut dyn fmt::Write, [X::Num; 2]) -> fm
     ) -> std::fmt::Result {
         (self.func)(val, writer, bound)
     }
+
+    fn markers(&self) -> Vec<Self::Num> {
+        self.ctx.markers()
+    }
+
+    fn ideal_num_ticks(&self) -> Option<u32> {
+        self.ctx.ideal_num_ticks()
+    }
 }
 pub struct TickFmt<X, F> {
     ctx: X,
@@ -125,6 +133,203 @@ impl<
     ) -> std::fmt::Result {
         self.ctx.where_fmt(val, writer, bound)
     }
+
+    fn markers(&self) -> Vec<Self::Num> {
+        self.ctx.markers()
+    }
+
+    fn ideal_num_ticks(&self) -> Option<u32> {
+        self.ctx.ideal_num_ticks()
+    }
+}
+
+pub struct NoDash<X> {
+    ctx: X,
+}
+
+impl<X: PlotNumContext> PlotNumContext for NoDash<X> {
+    type StepInfo = X::StepInfo;
+    type Num = X::Num;
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.ctx.scale(val, range, max)
+    }
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    /// Guarenteed to be called before fmt_tick.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::StepInfo> {
+        let mut d = self.ctx.compute_ticks(ideal_num_steps, range, dash);
+        d.dash_size = None;
+        d
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.ctx.unit_range(offset)
+    }
+
+    fn tick_fmt(
+        &mut self,
+        val: Self::Num,
+        writer: &mut dyn std::fmt::Write,
+        bound: [Self::Num; 2],
+        extra: &mut Self::StepInfo,
+    ) -> std::fmt::Result {
+        self.ctx.tick_fmt(val, writer, bound, extra)
+    }
+
+    fn where_fmt(
+        &mut self,
+        val: Self::Num,
+        writer: &mut dyn std::fmt::Write,
+        bound: [Self::Num; 2],
+    ) -> std::fmt::Result {
+        self.ctx.where_fmt(val, writer, bound)
+    }
+
+    fn markers(&self) -> Vec<Self::Num> {
+        self.ctx.markers()
+    }
+
+    fn ideal_num_ticks(&self) -> Option<u32> {
+        self.ctx.ideal_num_ticks()
+    }
+}
+
+pub struct WithMarker<X: PlotNumContext> {
+    ctx: X,
+    marker: X::Num,
+}
+
+impl<X: PlotNumContext> PlotNumContext for WithMarker<X> {
+    type StepInfo = X::StepInfo;
+    type Num = X::Num;
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.ctx.scale(val, range, max)
+    }
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    /// Guarenteed to be called before fmt_tick.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::StepInfo> {
+        self.ctx.compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.ctx.unit_range(offset)
+    }
+
+    fn tick_fmt(
+        &mut self,
+        val: Self::Num,
+        writer: &mut dyn std::fmt::Write,
+        bound: [Self::Num; 2],
+        extra: &mut Self::StepInfo,
+    ) -> std::fmt::Result {
+        self.ctx.tick_fmt(val, writer, bound, extra)
+    }
+
+    fn where_fmt(
+        &mut self,
+        val: Self::Num,
+        writer: &mut dyn std::fmt::Write,
+        bound: [Self::Num; 2],
+    ) -> std::fmt::Result {
+        self.ctx.where_fmt(val, writer, bound)
+    }
+
+    fn markers(&self) -> Vec<Self::Num> {
+        let mut a = self.ctx.markers();
+        a.push(self.marker);
+        a
+    }
+
+    fn ideal_num_ticks(&self) -> Option<u32> {
+        self.ctx.ideal_num_ticks()
+    }
+}
+
+pub struct WithNumTick<X: PlotNumContext> {
+    ctx: X,
+    num_ticks: u32,
+}
+
+impl<X: PlotNumContext> PlotNumContext for WithNumTick<X> {
+    type StepInfo = X::StepInfo;
+    type Num = X::Num;
+
+    /// Provided a min and max range, scale the current value against max.
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.ctx.scale(val, range, max)
+    }
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    /// Guarenteed to be called before fmt_tick.
+    ///
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::StepInfo> {
+        self.ctx.compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    /// If there is only one point in a graph, or no point at all,
+    /// the range to display in the graph.
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.ctx.unit_range(offset)
+    }
+
+    fn tick_fmt(
+        &mut self,
+        val: Self::Num,
+        writer: &mut dyn std::fmt::Write,
+        bound: [Self::Num; 2],
+        extra: &mut Self::StepInfo,
+    ) -> std::fmt::Result {
+        self.ctx.tick_fmt(val, writer, bound, extra)
+    }
+
+    fn where_fmt(
+        &mut self,
+        val: Self::Num,
+        writer: &mut dyn std::fmt::Write,
+        bound: [Self::Num; 2],
+    ) -> std::fmt::Result {
+        self.ctx.where_fmt(val, writer, bound)
+    }
+
+    fn markers(&self) -> Vec<Self::Num> {
+        self.ctx.markers()
+    }
+
+    fn ideal_num_ticks(&self) -> Option<u32> {
+        Some(self.num_ticks)
+    }
 }
 
 use std::fmt;
@@ -144,6 +349,21 @@ pub trait PlotNumContextExt: PlotNumContext + Sized {
         func: F,
     ) -> WhereFmt<Self, F> {
         WhereFmt { ctx: self, func }
+    }
+
+    fn with_no_dash(self) -> NoDash<Self> {
+        NoDash { ctx: self }
+    }
+
+    fn with_marker(self, marker: Self::Num) -> WithMarker<Self> {
+        WithMarker { ctx: self, marker }
+    }
+
+    fn with_ideal_num_ticks(self, num_ticks: u32) -> WithNumTick<Self> {
+        WithNumTick {
+            ctx: self,
+            num_ticks,
+        }
     }
 }
 
@@ -190,6 +410,14 @@ pub trait PlotNumContext {
         writer: &mut dyn std::fmt::Write,
         _bound: [Self::Num; 2],
     ) -> std::fmt::Result;
+
+    fn markers(&self) -> Vec<Self::Num> {
+        vec![]
+    }
+
+    fn ideal_num_ticks(&self) -> Option<u32> {
+        None
+    }
 }
 
 ///

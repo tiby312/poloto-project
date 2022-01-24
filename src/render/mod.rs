@@ -455,16 +455,8 @@ impl Canvas {
                 */
             })?;
 
-        let xdash_size: Option<f64> = if plotter.xaxis.dash {
-            xtick_info.dash_size
-        } else {
-            None
-        };
-        let ydash_size: Option<f64> = if plotter.yaxis.dash {
-            ytick_info.dash_size
-        } else {
-            None
-        };
+        let xdash_size = xtick_info.dash_size;
+        let ydash_size = ytick_info.dash_size;
 
         use tagger::PathCommand::*;
 

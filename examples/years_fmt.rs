@@ -1,5 +1,5 @@
 use poloto::num::timestamp::UnixTime;
-
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
@@ -20,17 +20,25 @@ fn main() {
     ];
 
     use poloto::polotofmt;
-    let title = polotofmt::title(|w, ([min,max],xs),_| {
-        let srt = UnixTime::dynamic_format(&min,xs);
-        let end = UnixTime::dynamic_format(&max,xs);
+    let title = polotofmt::title(|w, ([min, max], xs), _| {
+        let srt = UnixTime::dynamic_format(&min, xs);
+        let end = UnixTime::dynamic_format(&max, xs);
         write!(w, "Entries from {} to {} in {}", srt, end, xs)
     });
 
-    let mut plotter = poloto::Plotter::new(title, "xname","yname",poloto::ctx::<UnixTime>(),poloto::ctx::<i128>());
+    let mut plotter = poloto::Plotter::new(
+        title,
+        "xname",
+        "yname",
+        poloto::ctx::<UnixTime>(),
+        poloto::ctx::<i128>()
+            .with_no_dash()
+            .with_marker(0)
+            .with_no_dash(),
+    );
 
     plotter.line("foo", &data);
 
-    
     println!(
         "{}<style>{}{}</style>{}{}",
         poloto::simple_theme::SVG_HEADER,
