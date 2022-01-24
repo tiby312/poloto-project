@@ -20,26 +20,20 @@ fn main() {
     ];
 
     let (title, xname) = {
-        use poloto::plotnum::FmtFull;
         use poloto::polotofmt;
         let title = polotofmt::name_ext(|w, x: polotofmt::DataSingle<UnixTime>, _| {
-            let srt = poloto::disp_const(|w| x.bound[0].default_fmt(w, FmtFull::Short, x.step));
-            let end = poloto::disp_const(|w| x.bound[1].default_fmt(w, FmtFull::Short, x.step));
+            let srt=x.bound[0].format("%Y");
+            let end = x.bound[1].dynamic_format(x.step);
             write!(w, "Entries from {} to {} in {}", srt, end, x.step)
         });
 
         let mut xname = poloto::AxisBuilder::new(polotofmt::name_single_ext(
             |w, p: polotofmt::DataSingle<UnixTime>| {
-                let srt = poloto::disp_const(|w| p.bound[0].default_fmt(w, FmtFull::Short, p.step));
-                let end = poloto::disp_const(|w| p.bound[1].default_fmt(w, FmtFull::Short, p.step));
+                let srt = p.bound[0].dynamic_format(p.step);
+                let end = p.bound[1].dynamic_format(p.step);
                 write!(w, "Entries from {} to {} in {}", srt, end, p.step)
             },
         ));
-
-        xname.with_tick_fmt(polotofmt::tick_fmt_ext(|mut w, v: UnixTime, d, ff| {
-            v.default_fmt(&mut w, ff, d.step)?;
-            write!(w, " yr")
-        }));
 
         xname.with_ideal_num(2);
 

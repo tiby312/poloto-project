@@ -136,8 +136,7 @@ pub struct AxisBuilder<'a, X: PlotNum> {
     dash: bool,
     ideal_num: Option<u32>,
     markers: Vec<X>,
-    name: Box<dyn PlotterNameSingleFmt<X> + 'a>,
-    tick_fmt: Box<dyn PlotterTickFmt<X> + 'a>,
+    name: Box<dyn PlotterNameSingleFmt<X> + 'a>
 }
 
 impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
@@ -147,21 +146,9 @@ impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
             ideal_num: None,
             markers: vec![],
             name: Box::new(name),
-            tick_fmt: Box::new(default_tick_fmt()),
         }
     }
-    pub fn new_ext(
-        name: impl PlotterNameSingleFmt<X> + 'a,
-        tick_fmt: impl PlotterTickFmt<X> + 'a,
-    ) -> Self {
-        AxisBuilder {
-            dash: true,
-            ideal_num: None,
-            markers: vec![],
-            name: Box::new(name),
-            tick_fmt: Box::new(tick_fmt),
-        }
-    }
+
     pub fn marker(&mut self, a: X) -> &mut Self {
         self.markers.push(a);
         self
@@ -175,10 +162,6 @@ impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
         self
     }
 
-    pub fn with_tick_fmt(&mut self, a: impl PlotterTickFmt<X> + 'a) -> &mut Self {
-        self.tick_fmt = Box::new(a);
-        self
-    }
     pub fn no_dash(&mut self) -> &mut Self {
         self.dash = false;
         self

@@ -194,36 +194,36 @@ impl UnixTime {
         }
     }
 
-    pub fn default_fmt<T: fmt::Write>(
-        &self,
-        mut formatter: T,
-        step: FmtFull,
-        info: &TimestampType,
-    ) -> fmt::Result {
-        let val = self;
-        use TimestampType::*;
+    pub fn format<'a>(&self,a:&'a str)->chrono::format::DelayedFormat<chrono::format::StrftimeItems<'a>>{
+        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+        this.format(a)
+    }
 
-        let m = match val.month() {
-            1 => "Jan",
-            2 => "Feb",
-            3 => "Mar",
-            4 => "Apr",
-            5 => "May",
-            6 => "Jun",
-            7 => "Jul",
-            8 => "Aug",
-            9 => "Sep",
-            10 => "Oct",
-            11 => "Nov",
-            12 => "Dec",
-            _ => unreachable!(),
-        };
+    pub fn dynamic_format<'a>(
+        &'a self,
+        info: &'a TimestampType,
+    ) -> impl Display+'a {
+        crate::disp_const(move |formatter|{
+            let val = self;
+            use TimestampType::*;
 
-        match step {
-            FmtFull::Full => {
-                write!(formatter, "{}", val)
-            }
-            FmtFull::Short => match info {
+            let m = match val.month() {
+                1 => "Jan",
+                2 => "Feb",
+                3 => "Mar",
+                4 => "Apr",
+                5 => "May",
+                6 => "Jun",
+                7 => "Jul",
+                8 => "Aug",
+                9 => "Sep",
+                10 => "Oct",
+                11 => "Nov",
+                12 => "Dec",
+                _ => unreachable!(),
+            };
+
+            match info {
                 YR => {
                     write!(formatter, "{}", val.year())
                 }
@@ -242,8 +242,9 @@ impl UnixTime {
                 SE => {
                     write!(formatter, "{}:{}", val.minute(), val.second())
                 }
-            },
-        }
+            }
+        
+        })
     }
 }
 impl std::fmt::Display for UnixTime {

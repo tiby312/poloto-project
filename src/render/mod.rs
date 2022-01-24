@@ -479,7 +479,7 @@ impl Canvas {
 
         {
             //step num is assured to be atleast 1.
-            let extra = if let Some(base) = xtick_info.display_relative {
+            let extra = if let Some(mut base) = xtick_info.display_relative {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -493,15 +493,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
 
-                        plotter.xaxis.tick_fmt.fmt_self(
-                            &mut w,
-                            base,
-                            DataSingle {
-                                bound: boundx,
-                                step: &mut xtick_info.unit_data,
-                            },
-                            FmtFull::Full,
-                        )
+                        base.where_fmt(&mut w,boundx)
                     })?;
 
                 "j+"
@@ -510,7 +502,7 @@ impl Canvas {
             };
 
             //Draw interva`l x text
-            for &Tick { position, value } in xtick_info.ticks.iter() {
+            for &Tick { position,mut  value } in xtick_info.ticks.iter() {
                 let xx = (position.scale([minx, maxx], scalex2)
                     - minx.scale([minx, maxx], scalex2))
                     + padding;
@@ -537,15 +529,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        plotter.xaxis.tick_fmt.fmt_self(
-                            &mut w,
-                            value,
-                            DataSingle {
-                                bound: boundx,
-                                step: &mut xtick_info.unit_data,
-                            },
-                            FmtFull::Short,
-                        )
+                        value.tick_fmt(&mut w, boundx, &mut xtick_info.unit_data)
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -564,7 +548,7 @@ impl Canvas {
 
         {
             //step num is assured to be atleast 1.
-            let extra = if let Some(base) = ytick_info.display_relative {
+            let extra = if let Some(mut base) = ytick_info.display_relative {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -578,15 +562,7 @@ impl Canvas {
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
 
-                        plotter.yaxis.tick_fmt.fmt_self(
-                            &mut w,
-                            base,
-                            DataSingle {
-                                bound: boundy,
-                                step: &mut ytick_info.unit_data,
-                            },
-                            FmtFull::Full,
-                        )
+                        base.where_fmt(&mut w,boundy)
                     })?;
 
                 "k+"
@@ -595,7 +571,7 @@ impl Canvas {
             };
 
             //Draw interval y text
-            for &Tick { position, value } in ytick_info.ticks.iter() {
+            for &Tick { position, mut value } in ytick_info.ticks.iter() {
                 let yy = height
                     - (position.scale([miny, maxy], scaley2) - miny.scale([miny, maxy], scaley2))
                     - paddingy;
@@ -622,15 +598,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        plotter.yaxis.tick_fmt.fmt_self(
-                            &mut w,
-                            value,
-                            DataSingle {
-                                bound: boundy,
-                                step: &mut ytick_info.unit_data,
-                            },
-                            FmtFull::Short,
-                        )
+                        value.tick_fmt(&mut w, boundy, &mut ytick_info.unit_data)
 
                         /*
                         w.put_raw(format_args!(

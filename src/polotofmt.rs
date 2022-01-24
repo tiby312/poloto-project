@@ -5,6 +5,7 @@
 use super::*;
 use std::fmt;
 
+/* 
 ///
 /// Allows to override the default tick formatting using information
 /// such as min and max bounds and step information.
@@ -15,7 +16,6 @@ pub trait PlotterTickFmt<X: PlotNum> {
         w: &mut dyn fmt::Write,
         val: X,
         data: DataSingle<X>,
-        ff: FmtFull,
     ) -> std::fmt::Result;
 }
 
@@ -43,6 +43,7 @@ pub fn tick_fmt_ext<X: PlotNum>(
 
     func
 }
+*/
 
 pub trait PlotterNameSingleFmt<X: PlotNum> {
     fn fmt_self(&mut self, w: &mut dyn fmt::Write, data: DataSingle<X>) -> std::fmt::Result;

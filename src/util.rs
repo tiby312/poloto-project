@@ -6,6 +6,8 @@
 use super::*;
 const SCIENCE: usize = 4;
 
+
+
 fn write_normal_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
     if let Some(step) = step {
         let k = (-step.log10()).ceil();

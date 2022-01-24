@@ -43,13 +43,13 @@ impl PlotNum for UnixTime {
         val.0 as f64 * scale
     }
 
-    fn val_fmt(
+    fn tick_fmt(
         &mut self,
         writer: &mut dyn fmt::Write,
-        tick: FmtFull,
+        _bound:[Self;2],
         info: &mut TimestampType,
     ) -> std::fmt::Result {
-        self.default_fmt(writer, tick, info)
+        write!(writer,"{}",self.dynamic_format(info))
     }
 
     fn compute_ticks(

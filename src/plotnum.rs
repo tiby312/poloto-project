@@ -13,10 +13,11 @@ pub trait DiscNum: PlotNum {
 pub struct TickFmt<'a, T: PlotNum> {
     pub writer: &'a mut dyn std::fmt::Write,
     pub val: T,
-    pub step: FmtFull,
     pub info: T::StepInfo,
     pub bounds: [T; 2],
 }
+
+
 
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
@@ -44,14 +45,21 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
     /// the range to display in the graph.
     fn unit_range(offset: Option<Self>) -> [Self; 2];
 
-    /// Default way to display the number
-    fn val_fmt(
+    fn tick_fmt(
         &mut self,
         writer: &mut dyn std::fmt::Write,
-        _tick: FmtFull,
+        _bound:[Self;2],
         _extra: &mut Self::StepInfo,
     ) -> std::fmt::Result {
         write!(writer, "{}", self)
+    }
+
+    fn where_fmt(
+        &mut self,
+        writer:&mut dyn std::fmt::Write,
+        _bound:[Self;2]
+    )->std::fmt::Result{
+        write!(writer,"{}",self)
     }
 }
 
@@ -63,10 +71,6 @@ pub struct DashInfo {
     pub max: f64,
 }
 
-pub enum FmtFull {
-    Full,
-    Short,
-}
 
 ///
 /// One interval tick

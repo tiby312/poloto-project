@@ -16,17 +16,17 @@ impl PlotNum for f64 {
         self.is_nan()
     }
 
-    fn val_fmt(
+    fn tick_fmt(
         &mut self,
         writer: &mut dyn fmt::Write,
-        tick: FmtFull,
+        _bound:[Self;2],
         info: &mut Self::StepInfo,
     ) -> std::fmt::Result {
-        let step = match tick {
-            FmtFull::Short => Some(*info),
-            FmtFull::Full => None,
-        };
-        util::write_interval_float(writer, *self, step)
+        util::write_interval_float(writer, *self, Some(*info))
+    }
+
+    fn where_fmt(&mut self, writer:&mut dyn std::fmt::Write,_bound:[Self;2],) ->std::fmt::Result {
+        util::write_interval_float(writer, *self, None)
     }
 
     fn scale(&self, range: [f64; 2], max: f64) -> f64 {
