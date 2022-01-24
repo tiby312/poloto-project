@@ -58,6 +58,25 @@ fn main() {
         (DayTimestamp(UnixTime::from_ymd_hms(day2, 1, 50, 1)), 4133000),
     ];
 
+    
+    let x=poloto::ctx::<UnixTime>().with_tick(|w,d|{
+        write!(w,"{}",d.format("%D"))
+    }).with_where(|w,d|{
+        write!(w,"{}",d.format("%m"))
+    }).with_marker(0);
+
+    let y=poloto::ctx::<i128>();
+
+    let mut s=poloto::plot(x,y,"title","xname","yname");
+    s.line("",&data);
+    s.line("",&data);
+    s.line("",&data);
+    s.line("",&data);
+    
+
+
+
+
     let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
     s.line("", &data);
     s.yaxis().marker(0);
