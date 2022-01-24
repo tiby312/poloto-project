@@ -123,11 +123,6 @@ pub fn plot<'a, X: HasDefaultContext + 'a, Y: HasDefaultContext + 'a>(
     Plotter::new(title,xname,yname, X::DefaultContext::default(), Y::DefaultContext::default())
 }
 
-//TODO remove this?
-struct TickResult<X: PlotNum, Y: PlotNum> {
-    pub tickx: TickInfo<X>,
-    pub ticky: TickInfo<Y>,
-}
 
 ///
 /// Specify option for the x and y axis.
@@ -400,6 +395,8 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
             &self.xaxis.markers,
             &self.yaxis.markers,
+            &mut self.xcontext,
+            &mut self.ycontext
         );
 
          //knowldge of canvas dim

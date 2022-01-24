@@ -2,11 +2,11 @@ use crate::*;
 
 
 
-pub struct Data<X:PlotNum,Y:PlotNum>{
+pub struct Data<X,Y,J,K>{
     pub boundx:[X;2],
     pub boundy:[Y;2],
-    pub tickx:TickInfo<X>,
-    pub ticky:TickInfo<Y>
+    pub tickx:TickInfo<X,J>,
+    pub ticky:TickInfo<Y,K>
 }
 
 
@@ -76,7 +76,7 @@ impl Canvas {
         &self,
         writer: impl std::fmt::Write,
         plotter: &mut Plotter<X, Y>,
-        data:Data<X::Num,Y::Num>
+        data:Data<X::Num,Y::Num,X::StepInfo,Y::StepInfo>
     ) -> std::fmt::Result {
         let Canvas {
             width,
@@ -354,7 +354,7 @@ impl Canvas {
         &self,
         writer: &mut tagger::ElemWriter<T>,
         plotter: &mut Plotter<X, Y>,
-        data: Data<X::Num, Y::Num>,
+        data: Data<X::Num, Y::Num,X::StepInfo,Y::StepInfo>,
     ) -> std::fmt::Result {
         let Canvas {
             width,
@@ -568,7 +568,7 @@ impl Canvas {
             //Draw interval y text
             for &Tick { position, mut value } in ytick_info.ticks.iter() {
                 let yy = height
-                    - (position.scale([miny, maxy], scaley2) - miny.scale([miny, maxy], scaley2))
+                    - (ycontext.scale(position,[miny, maxy], scaley2) - ycontext.scale(miny,[miny, maxy], scaley2))
                     - paddingy;
 
                 writer.single("line", |d| {

@@ -45,6 +45,9 @@ pub fn tick_fmt_ext<X: PlotNum>(
 }
 */
 
+
+/* 
+
 pub trait PlotterNameSingleFmt<X: PlotNum> {
     fn fmt_self(&mut self, w: &mut dyn fmt::Write, data: DataSingle<X>) -> std::fmt::Result;
 }
@@ -125,7 +128,9 @@ pub fn name_ext<
     NoDisp(func)
 }
 
-pub struct DataSingle<'a, X: PlotNum> {
+pub struct DataSingle<'a, X: PlotNum,I> {
     pub bound: [X; 2],
-    pub step: &'a mut X::StepInfo,
+    pub step: &'a mut I,
 }
+
+*/
