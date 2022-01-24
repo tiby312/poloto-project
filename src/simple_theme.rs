@@ -78,7 +78,7 @@ pub trait SimpleTheme {
     fn simple_theme_dark(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result;
 }
 
-impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
+impl<X: PlotNumContext, Y: PlotNumContext> SimpleTheme for Plotter<'_, X, Y> {
     fn simple_theme(&mut self, mut a: &mut dyn fmt::Write) -> std::fmt::Result {
         write!(
             &mut a,

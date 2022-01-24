@@ -9,34 +9,33 @@ impl DiscNum for f64 {
     }
 }
 
-impl PlotNum for f64 {
-    type StepInfo = f64;
 
-    fn is_hole(&self) -> bool {
-        self.is_nan()
-    }
+pub struct DefaultFloatContext;
+impl PlotNumContext for DefaultFloatContext {
+    type Num=f64;
+    type StepInfo = f64;
 
     fn tick_fmt(
         &mut self,
+        val:Self::Num,
         writer: &mut dyn fmt::Write,
-        _bound:[Self;2],
+        _bound:[Self::Num;2],
         info: &mut Self::StepInfo,
     ) -> std::fmt::Result {
-        util::write_interval_float(writer, *self, Some(*info))
+        util::write_interval_float(writer, val, Some(*info))
     }
 
-    fn where_fmt(&mut self, writer:&mut dyn std::fmt::Write,_bound:[Self;2],) ->std::fmt::Result {
-        util::write_interval_float(writer, *self, None)
+    fn where_fmt(&mut self, val:f64,writer:&mut dyn std::fmt::Write,_bound:[f64;2],) ->std::fmt::Result {
+        util::write_interval_float(writer, val, None)
     }
 
-    fn scale(&self, range: [f64; 2], max: f64) -> f64 {
-        let val = *self;
+    fn scale(&mut self, val:f64,range: [f64; 2], max: f64) -> f64 {
         let diff = range[1] - range[0];
         let scale = max / diff;
         val * scale
     }
 
-    fn compute_ticks(ideal_num_steps: u32, range: [f64; 2], dash: DashInfo) -> TickInfo<f64> {
+    fn compute_ticks(&mut self,ideal_num_steps: u32, range: [f64; 2], dash: DashInfo) -> TickInfo<f64,f64> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -64,7 +63,7 @@ impl PlotNum for f64 {
             let dash_multiple = good_normalized_step;
             let max = dash.max;
             let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = step.scale(range, max);
+            let one_step = self.scale(step,range, max);
 
             assert!(dash_multiple > 0);
 
@@ -91,13 +90,21 @@ impl PlotNum for f64 {
         }
         //compute_ticks(ideal_num_steps, &[1, 2, 5, 10], range)
     }
-    fn unit_range(offset: Option<f64>) -> [f64; 2] {
+    fn unit_range(&mut self,offset: Option<f64>) -> [f64; 2] {
         if let Some(o) = offset {
             [o - 1.0, o + 1.0]
         } else {
             [-1.0, 1.0]
         }
     }
+}
+
+impl PlotNum for f64 {
+
+    fn is_hole(&self) -> bool {
+        self.is_nan()
+    }
+
 }
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {

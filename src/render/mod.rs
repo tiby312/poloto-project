@@ -1,16 +1,26 @@
 use crate::*;
 
+
+
+pub struct Data<X:PlotNum,Y:PlotNum>{
+    pub boundx:[X;2],
+    pub boundy:[Y;2],
+    pub tickx:TickInfo<X>,
+    pub ticky:TickInfo<Y>
+}
+
+
 #[derive(Copy, Clone)]
 pub(super) struct Canvas {
-    ideal_num_xsteps: u32,
-    ideal_num_ysteps: u32,
+    pub ideal_num_xsteps: u32,
+    pub ideal_num_ysteps: u32,
     width: f64,
     height: f64,
     padding: f64,
     paddingy: f64,
     aspect_offset: f64,
-    scalex2: f64,
-    scaley2: f64,
+    pub scalex2: f64,
+    pub scaley2: f64,
     spacing: f64,
     legendx1: f64,
     num_css_classes: Option<usize>,
@@ -61,43 +71,12 @@ impl Canvas {
         }
     }
 
-    pub fn gen_ticks<X: PlotNum, Y: PlotNum>(
-        &mut self,
-        plotter: &PlotterRes<X, Y>,
-    ) -> TickResult<X, Y> {
-        if let Some(a) = plotter.xaxis.ideal_num {
-            self.ideal_num_xsteps = a;
-        }
-        if let Some(a) = plotter.yaxis.ideal_num {
-            self.ideal_num_ysteps = a;
-        }
 
-        let tickx = X::compute_ticks(
-            self.ideal_num_xsteps,
-            plotter.boundx,
-            DashInfo {
-                ideal_dash_size: 30.0,
-                max: self.scalex2,
-            },
-        );
-
-        let ticky = Y::compute_ticks(
-            self.ideal_num_ysteps,
-            plotter.boundy,
-            DashInfo {
-                ideal_dash_size: 30.0,
-                max: self.scaley2,
-            },
-        );
-
-        TickResult { tickx, ticky }
-    }
-
-    pub fn render<X: PlotNum, Y: PlotNum>(
+    pub fn render<X: PlotNumContext, Y: PlotNumContext>(
         &self,
         writer: impl std::fmt::Write,
-        mut plotter: PlotterRes<X, Y>,
-        ticks: TickResult<X, Y>,
+        plotter: &mut Plotter<X, Y>,
+        data:Data<X::Num,Y::Num>
     ) -> std::fmt::Result {
         let Canvas {
             width,
@@ -113,10 +92,13 @@ impl Canvas {
             ..
         } = *self;
 
-        let [minx, maxx] = plotter.boundx;
-        let [miny, maxy] = plotter.boundy;
+        let [minx, maxx] = data.boundx;
+        let [miny, maxy] = data.boundy;
 
         let mut writer = tagger::new(writer);
+
+        let xcontext=&mut plotter.xcontext;
+        let ycontext=&mut plotter.ycontext;
 
         let mut color_iter = {
             let max = if let Some(nn) = num_css_classes {
@@ -146,26 +128,28 @@ impl Canvas {
                     Ok(wc.get_counter() != 0)
                 })?;
 
-            let aa = minx.scale([minx, maxx], scalex2);
-            let bb = miny.scale([miny, maxy], scaley2);
+            let aa = xcontext.scale(minx,[minx, maxx], scalex2);
+            let bb = ycontext.scale(miny,[miny, maxy], scaley2);
 
-            struct PlotIter<X, Y> {
+            struct PlotIter<X:PlotNumContext, Y:PlotNumContext> {
                 basex_ii: f64,
                 basey_ii: f64,
-                rangex_ii: [X; 2],
-                rangey_ii: [Y; 2],
+                rangex_ii: [X::Num; 2],
+                rangey_ii: [Y::Num; 2],
                 maxx_ii: f64,
                 maxy_ii: f64,
             }
-            impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
+            impl<X: PlotNumContext, Y: PlotNumContext> PlotIter<X, Y> {
                 fn gen_iter<'a>(
                     &'a self,
-                    p: &'a mut Plot<X, Y>,
+                    p: &'a mut Plot<X::Num, Y::Num>,
+                    xcontext:&'a mut X,
+                    ycontext:&'a mut Y
                 ) -> impl Iterator<Item = [f64; 2]> + 'a {
                     p.plots.iter_second().map(move |(x, y)| {
                         [
-                            self.basex_ii + x.scale(self.rangex_ii, self.maxx_ii),
-                            self.basey_ii - y.scale(self.rangey_ii, self.maxy_ii),
+                            self.basex_ii + xcontext.scale(x,self.rangex_ii, self.maxx_ii),
+                            self.basey_ii - ycontext.scale(y,self.rangey_ii, self.maxy_ii),
                         ]
                     })
                 }
@@ -205,7 +189,7 @@ impl Canvas {
                         d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                         d.attr("fill", "none")?;
                         d.attr("stroke", "black")?;
-                        d.path(|a| render::line(a, plot_iter.gen_iter(&mut p)))
+                        d.path(|a| render::line(a, plot_iter.gen_iter(&mut p,xcontext,ycontext)))
                     })?;
                 }
                 PlotType::Scatter => {
@@ -234,7 +218,7 @@ impl Canvas {
                         d.path(|a| {
                             use tagger::PathCommand::*;
                             for [x, y] in plot_iter
-                                .gen_iter(&mut p)
+                                .gen_iter(&mut p,xcontext,ycontext)
                                 .filter(|&[x, y]| x.is_finite() && y.is_finite())
                             {
                                 a.put(M(x, y))?;
@@ -271,7 +255,7 @@ impl Canvas {
                             let mut last = None;
                             //TODO dont necesarily filter?
                             for [x, y] in plot_iter
-                                .gen_iter(&mut p)
+                                .gen_iter(&mut p,xcontext,ycontext)
                                 .filter(|&[x, y]| x.is_finite() && y.is_finite())
                             {
                                 if let Some((lx, ly)) = last {
@@ -317,7 +301,7 @@ impl Canvas {
                         d.path(|path| {
                             render::line_fill(
                                 path,
-                                plot_iter.gen_iter(&mut p),
+                                plot_iter.gen_iter(&mut p,xcontext,ycontext),
                                 height - paddingy,
                                 true,
                             )
@@ -351,7 +335,7 @@ impl Canvas {
                         d.path(|path| {
                             render::line_fill(
                                 path,
-                                plot_iter.gen_iter(&mut p),
+                                plot_iter.gen_iter(&mut p,xcontext,ycontext),
                                 height - paddingy,
                                 false,
                             )
@@ -361,16 +345,16 @@ impl Canvas {
             }
         }
 
-        self.draw_base(&mut writer, plotter, ticks)?;
+        self.draw_base(&mut writer, plotter, data)?;
 
         Ok(())
     }
 
-    pub fn draw_base<X: PlotNum, Y: PlotNum, T: fmt::Write>(
+    pub fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
         &self,
         writer: &mut tagger::ElemWriter<T>,
-        mut plotter: PlotterRes<X, Y>,
-        ticks: TickResult<X, Y>,
+        plotter: &mut Plotter<X, Y>,
+        data: Data<X::Num, Y::Num>,
     ) -> std::fmt::Result {
         let Canvas {
             width,
@@ -384,14 +368,17 @@ impl Canvas {
             ..
         } = *self;
 
-        let boundx = plotter.boundx;
-        let boundy = plotter.boundy;
+        use std::fmt::Write;
+        let boundx = data.boundx;
+        let boundy = data.boundy;
         let [minx, maxx] = boundx;
         let [miny, maxy] = boundy;
 
-        let mut xtick_info = ticks.tickx;
-        let mut ytick_info = ticks.ticky;
+        let mut xtick_info = data.tickx;
+        let mut ytick_info = data.ticky;
 
+        let xcontext=&mut plotter.xcontext;
+        let ycontext=&mut plotter.ycontext;
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
@@ -405,6 +392,8 @@ impl Canvas {
                 d.attr("y", padding / 4.0)
             })?
             .build(|w| {
+                write!(w.writer_safe(),"{}",plotter.title)
+                /* 
                 plotter.title.fmt_self(
                     &mut w.writer_safe(),
                     DataSingle {
@@ -415,7 +404,7 @@ impl Canvas {
                         bound: boundy,
                         step: &mut ytick_info.unit_data,
                     },
-                )
+                )*/
             })?;
 
         writer
@@ -428,6 +417,8 @@ impl Canvas {
                 d.attr("y", height - padding / 8.)
             })?
             .build(|w| {
+                write!(w.writer_safe(),"{}",plotter.xaxis.name)
+                /* 
                 plotter.xaxis.name.fmt_self(
                     &mut w.writer_safe(),
                     DataSingle {
@@ -435,6 +426,7 @@ impl Canvas {
                         step: &mut xtick_info.unit_data,
                     },
                 )
+                */
             })?;
 
         writer
@@ -451,6 +443,8 @@ impl Canvas {
                 d.attr("y", height / 2.0)
             })?
             .build(|w| {
+                write!(w.writer_safe(),"{}",plotter.yaxis.name)
+                /* 
                 plotter.yaxis.name.fmt_self(
                     &mut w.writer_safe(),
                     DataSingle {
@@ -458,6 +452,7 @@ impl Canvas {
                         step: &mut ytick_info.unit_data,
                     },
                 )
+                */
             })?;
 
         let xdash_size: Option<f64> = if plotter.xaxis.dash {
@@ -493,7 +488,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
 
-                        base.where_fmt(&mut w,boundx)
+                        xcontext.where_fmt(base, &mut w, boundx)
                     })?;
 
                 "j+"
@@ -503,8 +498,8 @@ impl Canvas {
 
             //Draw interva`l x text
             for &Tick { position,mut  value } in xtick_info.ticks.iter() {
-                let xx = (position.scale([minx, maxx], scalex2)
-                    - minx.scale([minx, maxx], scalex2))
+                let xx = (xcontext.scale(position,[minx, maxx], scalex2)
+                    - xcontext.scale(minx,[minx, maxx], scalex2))
                     + padding;
 
                 writer.single("line", |d| {
@@ -529,7 +524,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        value.tick_fmt(&mut w, boundx, &mut xtick_info.unit_data)
+                        xcontext.tick_fmt(value,&mut w, boundx, &mut xtick_info.unit_data)
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -562,7 +557,7 @@ impl Canvas {
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
 
-                        base.where_fmt(&mut w,boundy)
+                        ycontext.where_fmt(base,&mut w,boundy)
                     })?;
 
                 "k+"
@@ -598,8 +593,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        value.tick_fmt(&mut w, boundy, &mut ytick_info.unit_data)
-
+                        ycontext.tick_fmt(value, &mut w, boundy, &mut ytick_info.unit_data)
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -616,8 +610,8 @@ impl Canvas {
             }
         }
 
-        let d1 = minx.scale([minx, maxx], scalex2);
-        let d2 = first_tickx.position.scale([minx, maxx], scalex2);
+        let d1 = xcontext.scale(minx,[minx, maxx], scalex2);
+        let d2 = xcontext.scale(first_tickx.position,[minx, maxx], scalex2);
         let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
@@ -647,8 +641,8 @@ impl Canvas {
             })
         })?;
 
-        let d1 = miny.scale([miny, maxy], scaley2);
-        let d2 = first_ticky.position.scale([miny, maxy], scaley2);
+        let d1 = ycontext.scale(miny,[miny, maxy], scaley2);
+        let d2 = ycontext.scale(first_ticky.position,[miny, maxy], scaley2);
         let distance_to_firsty = d2 - d1;
 
         writer.single("path", |d| {

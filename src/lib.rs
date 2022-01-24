@@ -115,12 +115,12 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
-    title: impl PlotterNameFmt<X, Y> + 'a,
-    xname: impl PlotterNameSingleFmt<X> + 'a,
-    yname: impl PlotterNameSingleFmt<Y> + 'a,
-) -> Plotter<'a, X, Y> {
-    Plotter::new(title, AxisBuilder::new(xname), AxisBuilder::new(yname))
+pub fn plot<'a, X: HasDefaultContext + 'a, Y: HasDefaultContext + 'a>(
+    title: impl Display + 'a,
+    xname: impl Display + 'a,
+    yname: impl Display +'a,
+) -> Plotter<'a, X::DefaultContext, Y::DefaultContext> {
+    Plotter::new(title,xname,yname, X::DefaultContext::default(), Y::DefaultContext::default())
 }
 
 //TODO remove this?
@@ -136,11 +136,11 @@ pub struct AxisBuilder<'a, X: PlotNum> {
     dash: bool,
     ideal_num: Option<u32>,
     markers: Vec<X>,
-    name: Box<dyn PlotterNameSingleFmt<X> + 'a>
+    name: Box<dyn Display + 'a>
 }
 
 impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
-    pub fn new(name: impl PlotterNameSingleFmt<X> + 'a) -> Self {
+    pub fn new(name: impl Display + 'a) -> Self {
         AxisBuilder {
             dash: true,
             ideal_num: None,
@@ -157,10 +157,6 @@ impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
         self.ideal_num = Some(a);
         self
     }
-    pub fn with_name(&mut self, a: impl PlotterNameSingleFmt<X> + 'a) -> &mut Self {
-        self.name = Box::new(a);
-        self
-    }
 
     pub fn no_dash(&mut self) -> &mut Self {
         self.dash = false;
@@ -168,17 +164,6 @@ impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
     }
 }
 
-//TODO remove this?
-struct PlotterRes<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    plots: Vec<Plot<'a, X, Y>>,
-    boundx: [X; 2],
-    boundy: [Y; 2],
-    title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    xaxis: AxisBuilder<'a, X>,
-    yaxis: AxisBuilder<'a, Y>,
-    preserve_aspect: bool,
-    num_css_classes: Option<usize>,
-}
 
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
@@ -189,16 +174,18 @@ struct PlotterRes<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
 ///
-pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    plots: Vec<Plot<'a, X, Y>>,
+pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
+    title: Box<dyn Display + 'a>,
+    plots: Vec<Plot<'a, X::Num, Y::Num>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xaxis: AxisBuilder<'a, X>,
-    yaxis: AxisBuilder<'a, Y>,
+    xaxis: AxisBuilder<'a,X::Num>,
+    yaxis: AxisBuilder<'a,Y::Num>,
+    xcontext:X,
+    ycontext:Y
 }
 
-impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
+impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     ///
     /// Create a plotter with the specified element.
     ///
@@ -207,31 +194,24 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
-        title: impl PlotterNameFmt<X, Y> + 'a,
-        xaxis: AxisBuilder<'a, X>,
-        yaxis: AxisBuilder<'a, Y>,
+        title: impl Display + 'a,
+        xname:impl Display +'a,
+        yname:impl Display+'a,
+        xcontext: X,
+        ycontext: Y,
     ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
             plots: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xaxis,
-            yaxis,
+            xaxis:AxisBuilder::new(xname),
+            yaxis:AxisBuilder::new(yname),
+            xcontext,
+            ycontext
         }
     }
 
-    pub fn with_name(&mut self, a: impl PlotterNameFmt<X, Y> + 'a) -> &mut Self {
-        self.title = Box::new(a);
-        self
-    }
-    pub fn xaxis(&mut self) -> &mut AxisBuilder<'a, X> {
-        &mut self.xaxis
-    }
-
-    pub fn yaxis(&mut self) -> &mut AxisBuilder<'a, Y> {
-        &mut self.yaxis
-    }
 
     /// Create a line from plots using a SVG polyline element.
     /// The element belongs to the `.poloto[N]stroke` css class.
@@ -245,7 +225,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<X::Num, Y::Num>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -269,7 +249,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<X::Num, Y::Num>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -294,7 +274,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<X::Num, Y::Num>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFillRaw,
@@ -320,7 +300,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<X::Num, Y::Num>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -345,7 +325,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<X::Num, Y::Num>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
@@ -355,27 +335,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
             )),
         });
         self
-    }
-
-    fn find_bounds(&mut self) -> PlotterRes<'a, X, Y> {
-        let mut pp = self.move_into();
-
-        let (boundx, boundy) = num::find_bounds(
-            pp.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            &pp.xaxis.markers,
-            &pp.yaxis.markers,
-        );
-
-        PlotterRes {
-            title: pp.title,
-            plots: pp.plots,
-            boundx,
-            boundy,
-            xaxis: pp.xaxis,
-            yaxis: pp.yaxis,
-            num_css_classes: pp.num_css_classes,
-            preserve_aspect: pp.preserve_aspect,
-        }
     }
 
     ///
@@ -404,6 +363,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         self
     }
 
+    /* TODO add back
     ///
     /// Move a plotter out from behind a mutable reference leaving
     /// an empty plotter.
@@ -413,6 +373,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
         core::mem::swap(&mut empty, self);
         empty
     }
+    */
 
     ///
     /// Use the plot iterators to write out the graph elements.
@@ -433,15 +394,51 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
-        let data = self.find_bounds();
+        
 
-        //knowldge of canvas dim
-        let mut canvas = render::Canvas::with_options(data.preserve_aspect, data.num_css_classes);
+        let (boundx, boundy) = num::find_bounds(
+            self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
+            &self.xaxis.markers,
+            &self.yaxis.markers,
+        );
 
-        //compute step info
-        let ticks = canvas.gen_ticks(&data);
+         //knowldge of canvas dim
+         let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
 
-        canvas.render(a, data, ticks)
+        if let Some(a) = self.xaxis.ideal_num {
+            canvas.ideal_num_xsteps = a;
+        }
+        if let Some(a) = self.yaxis.ideal_num {
+            canvas.ideal_num_ysteps = a;
+        }
+
+        let tickx = self.xcontext.compute_ticks(
+            canvas.ideal_num_xsteps,
+            boundx,
+            DashInfo {
+                ideal_dash_size: 30.0,
+                max: canvas.scalex2,
+            },
+        );
+
+        let ticky = self.ycontext.compute_ticks(
+            canvas.ideal_num_ysteps,
+            boundy,
+            DashInfo {
+                ideal_dash_size: 30.0,
+                max: canvas.scaley2,
+            },
+        );
+
+       
+        let data=render::Data{
+            boundx,
+            boundy,
+            tickx,
+            ticky
+        };
+
+        canvas.render(a, self, data)
     }
 }
 

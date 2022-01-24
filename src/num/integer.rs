@@ -70,31 +70,35 @@ pub fn compute_ticks(
 }
 */
 
-impl PlotNum for i128 {
+
+pub struct DefaultIntegerContext;
+impl PlotNumContext for DefaultIntegerContext {
     type StepInfo = i128;
+    type Num=i128;
+
 
     fn tick_fmt(
         &mut self,
+        val:i128,
         writer: &mut dyn fmt::Write,
-        _bound:[Self;2],
+        _bound:[i128;2],
         info: &mut Self::StepInfo,
     ) -> std::fmt::Result {
-        util::write_interval_i128(writer, *self, Some(*info))
+        util::write_interval_i128(writer, val, Some(*info))
     }
 
-    fn where_fmt(&mut self, writer:&mut dyn std::fmt::Write,_bound:[Self;2],) ->std::fmt::Result {
-        util::write_interval_i128(writer, *self, None)
+    fn where_fmt(&mut self, val:i128,writer:&mut dyn std::fmt::Write,_bound:[i128;2],) ->std::fmt::Result {
+        util::write_interval_i128(writer, val, None)
     }
 
-    fn scale(&self, range: [i128; 2], max: f64) -> f64 {
-        let val = *self;
+    fn scale(&mut self, val:i128,range: [i128; 2], max: f64) -> f64 {
         let diff = (range[1] - range[0]) as f64;
 
         let scale = max / diff;
 
         val as f64 * scale
     }
-    fn compute_ticks(ideal_num_steps: u32, range: [i128; 2], dash: DashInfo) -> TickInfo<i128> {
+    fn compute_ticks(&mut self,ideal_num_steps: u32, range: [i128; 2], dash: DashInfo) -> TickInfo<i128,i128> {
         let good_ticks = &[1, 2, 5, 10];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
@@ -120,7 +124,7 @@ impl PlotNum for i128 {
             let dash_multiple = good_normalized_step;
             let max = dash.max;
             let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = step.scale(range, max);
+            let one_step = self.scale(step,range, max);
 
             assert!(dash_multiple > 0);
 
@@ -148,13 +152,16 @@ impl PlotNum for i128 {
         }
     }
 
-    fn unit_range(offset: Option<i128>) -> [i128; 2] {
+    fn unit_range(&mut self,offset: Option<i128>) -> [i128; 2] {
         if let Some(o) = offset {
             [o - 1, o + 1]
         } else {
             [-1, 1]
         }
     }
+}
+impl PlotNum for i128 {
+
 }
 
 /*

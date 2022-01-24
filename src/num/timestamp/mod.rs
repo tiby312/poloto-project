@@ -30,11 +30,13 @@ impl std::fmt::Display for TimestampType {
     }
 }
 
-impl PlotNum for UnixTime {
-    type StepInfo = TimestampType;
 
-    fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
-        let val = *self;
+pub struct DefaultUnixTimeContext;
+impl PlotNumContext for DefaultUnixTimeContext {
+    type StepInfo = TimestampType;
+    type Num=UnixTime;
+
+    fn scale(&mut self, val:UnixTime,range: [UnixTime; 2], max: f64) -> f64 {
         let [val1, val2] = range;
         let [val1, val2] = [val1.0, val2.0];
         assert!(val1 <= val2);
@@ -45,22 +47,24 @@ impl PlotNum for UnixTime {
 
     fn tick_fmt(
         &mut self,
+        val:UnixTime,
         writer: &mut dyn fmt::Write,
-        _bound:[Self;2],
+        _bound:[UnixTime;2],
         info: &mut TimestampType,
     ) -> std::fmt::Result {
-        write!(writer,"{}",self.dynamic_format(info))
+        write!(writer,"{}",val.dynamic_format(info))
     }
 
-    fn where_fmt(&mut self, writer:&mut dyn std::fmt::Write, _bound:[Self;2]) ->std::fmt::Result {
-        write!(writer,"{}",self)
+    fn where_fmt(&mut self,val:UnixTime, writer:&mut dyn std::fmt::Write, _bound:[UnixTime;2]) ->std::fmt::Result {
+        write!(writer,"{}",val)
     }
 
     fn compute_ticks(
+        &mut self,
         ideal_num_steps: u32,
         range: [UnixTime; 2],
         _info: DashInfo,
-    ) -> TickInfo<UnixTime> {
+    ) -> TickInfo<UnixTime,TimestampType> {
         assert!(range[0] <= range[1]);
 
         let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
@@ -129,13 +133,18 @@ impl PlotNum for UnixTime {
         }
     }
 
-    fn unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
+    fn unit_range(&mut self,offset: Option<UnixTime>) -> [UnixTime; 2] {
         if let Some(o) = offset {
             [o, UnixTime(o.0 + 1)]
         } else {
             [UnixTime(0), UnixTime(1)]
         }
     }
+}
+
+
+impl PlotNum for UnixTime {
+
 }
 
 
