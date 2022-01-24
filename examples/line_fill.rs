@@ -10,9 +10,7 @@ fn main() {
         title,
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        poloto::ctx::<f64>()
-            .with_tick_fmt(|v, w, b, s| write!(w, "{} f", v))
-            .with_where_fmt(|v, w, b| write!(w, "{}", v)),
+        poloto::ctx::<f64>(),
         poloto::ctx::<f64>(),
     );
 

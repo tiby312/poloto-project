@@ -6,6 +6,8 @@ fn main() {
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
+        poloto::ctx::<f64>(),
+        poloto::ctx::<f64>(),
     );
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));

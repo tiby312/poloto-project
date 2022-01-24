@@ -364,7 +364,6 @@ impl Canvas {
             ..
         } = *self;
 
-        use std::fmt::Write;
         let boundx = data.boundx;
         let boundy = data.boundy;
         let [minx, maxx] = boundx;
@@ -466,7 +465,7 @@ impl Canvas {
 
         {
             //step num is assured to be atleast 1.
-            let extra = if let Some(mut base) = xtick_info.display_relative {
+            let extra = if let Some(base) = xtick_info.display_relative {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -489,11 +488,7 @@ impl Canvas {
             };
 
             //Draw interva`l x text
-            for &Tick {
-                position,
-                mut value,
-            } in xtick_info.ticks.iter()
-            {
+            for &Tick { position, value } in xtick_info.ticks.iter() {
                 let xx = (xcontext.scale(position, [minx, maxx], scalex2)
                     - xcontext.scale(minx, [minx, maxx], scalex2))
                     + padding;
@@ -539,7 +534,7 @@ impl Canvas {
 
         {
             //step num is assured to be atleast 1.
-            let extra = if let Some(mut base) = ytick_info.display_relative {
+            let extra = if let Some(base) = ytick_info.display_relative {
                 writer
                     .elem("text", |d| {
                         d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -562,11 +557,7 @@ impl Canvas {
             };
 
             //Draw interval y text
-            for &Tick {
-                position,
-                mut value,
-            } in ytick_info.ticks.iter()
-            {
+            for &Tick { position, value } in ytick_info.ticks.iter() {
                 let yy = height
                     - (ycontext.scale(position, [miny, maxy], scaley2)
                         - ycontext.scale(miny, [miny, maxy], scaley2))

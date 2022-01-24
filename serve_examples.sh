@@ -23,6 +23,5 @@ cargo run --example days > assets/days.svg
 cargo run --example hours > assets/hours.svg
 cargo run --example minutes > assets/minutes.svg
 cargo run --example seconds > assets/seconds.svg
-cargo run --example custom_unix > assets/custom_unix.svg
 cd assets
 python3 -m http.server

@@ -79,9 +79,9 @@ pub trait SimpleTheme {
 }
 
 impl<X: PlotNumContext, Y: PlotNumContext> SimpleTheme for Plotter<'_, X, Y> {
-    fn simple_theme(&mut self, mut a: &mut dyn fmt::Write) -> std::fmt::Result {
+    fn simple_theme(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result {
         write!(
-            &mut a,
+            a,
             "{}<style>{}</style>{}{}",
             SVG_HEADER,
             STYLE_CONFIG_LIGHT_DEFAULT,
@@ -90,9 +90,9 @@ impl<X: PlotNumContext, Y: PlotNumContext> SimpleTheme for Plotter<'_, X, Y> {
         )
     }
 
-    fn simple_theme_dark(&mut self, mut a: &mut dyn fmt::Write) -> std::fmt::Result {
+    fn simple_theme_dark(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result {
         write!(
-            &mut a,
+            a,
             "{}<style>{}</style>{}{}",
             SVG_HEADER,
             STYLE_CONFIG_DARK_DEFAULT,

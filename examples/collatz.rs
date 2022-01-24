@@ -1,3 +1,4 @@
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
@@ -13,8 +14,13 @@ fn main() {
         .fuse()
     };
 
-    let mut plotter = poloto::plot("collatz", "x", "y");
-    plotter.yaxis().marker(0);
+    let mut plotter = poloto::plot(
+        "collatz",
+        "x",
+        "y",
+        poloto::ctx::<i128>(),
+        poloto::ctx::<i128>().with_marker(0),
+    );
     for i in 1000..1006 {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }

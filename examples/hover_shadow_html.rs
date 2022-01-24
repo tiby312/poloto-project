@@ -2,7 +2,13 @@ use poloto::prelude::*;
 fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let mut s = poloto::plot("Demo: Hovering and shadows", "x", "y");
+    let mut s = poloto::plot(
+        "Demo: Hovering and shadows",
+        "x",
+        "y",
+        poloto::ctx::<f64>(),
+        poloto::ctx::<f64>(),
+    );
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
