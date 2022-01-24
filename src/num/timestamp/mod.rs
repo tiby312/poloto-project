@@ -52,6 +52,10 @@ impl PlotNum for UnixTime {
         write!(writer,"{}",self.dynamic_format(info))
     }
 
+    fn where_fmt(&mut self, writer:&mut dyn std::fmt::Write, _bound:[Self;2]) ->std::fmt::Result {
+        write!(writer,"{}",self)
+    }
+
     fn compute_ticks(
         ideal_num_steps: u32,
         range: [UnixTime; 2],

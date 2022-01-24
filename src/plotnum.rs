@@ -24,7 +24,7 @@ pub struct TickFmt<'a, T: PlotNum> {
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
 ///
-pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
+pub trait PlotNum: PartialOrd + Copy {
     type StepInfo;
 
     /// Is this a hole value to inject discontinuty?
@@ -51,17 +51,13 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Display {
         writer: &mut dyn std::fmt::Write,
         _bound:[Self;2],
         _extra: &mut Self::StepInfo,
-    ) -> std::fmt::Result {
-        write!(writer, "{}", self)
-    }
+    ) -> std::fmt::Result ;
 
     fn where_fmt(
         &mut self,
         writer:&mut dyn std::fmt::Write,
         _bound:[Self;2]
-    )->std::fmt::Result{
-        write!(writer,"{}",self)
-    }
+    )->std::fmt::Result;
 }
 
 pub struct DashInfo {
@@ -82,6 +78,11 @@ pub struct Tick<I> {
     /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
     pub value: I,
 }
+impl<I> Tick<I>{
+    pub fn map<J>(self,func:impl Fn(I)->J)->Tick<J>{
+        Tick { position: func(self.position), value: func(self.value) }
+    }
+}
 
 ///
 /// Information on the properties of all the interval ticks for one dimension.
@@ -100,4 +101,10 @@ pub struct TickInfo<I: PlotNum> {
     /// If we want to display the tick values relatively, this will
     /// have the base start to start with.
     pub display_relative: Option<I>,
+}
+
+impl<I:PlotNum> TickInfo<I>{
+    pub fn map<J:PlotNum<StepInfo=I::StepInfo>>(self,func:impl Fn(I)->J+Copy)->TickInfo<J> {
+        TickInfo { unit_data:self.unit_data, ticks: self.ticks.into_iter().map(move |x|x.map(func)).collect(), dash_size: self.dash_size, display_relative: self.display_relative.map(|a|func(a)) }
+    }
 }
