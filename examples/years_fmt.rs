@@ -20,26 +20,17 @@ fn main() {
     ];
 
     use poloto::polotofmt;
-    let title = polotofmt::name_ext(|w, x: polotofmt::DataSingle<UnixTime>, _| {
-        let srt = x.bound[0].dynamic_format(x.step);
-        let end = x.bound[1].dynamic_format(x.step);
-        write!(w, "Entries from {} to {} in {}", srt, end, x.step)
+    let title = polotofmt::title(|w, ([min,max],xs),_| {
+        let srt = UnixTime::dynamic_format(&min,xs);
+        let end = UnixTime::dynamic_format(&max,xs);
+        write!(w, "Entries from {} to {} in {}", srt, end, xs)
     });
 
-    let xname = poloto::AxisBuilder::new(polotofmt::name_single_ext(
-        |w, p: polotofmt::DataSingle<UnixTime>| {
-            let srt = p.bound[0].dynamic_format(p.step);
-            let end = p.bound[1].dynamic_format(p.step);
-            write!(w, "Entries from {} to {} in {}", srt, end, p.step)
-        },
-    ));
-
-    let mut plotter = poloto::Plotter::new(title, xname, poloto::AxisBuilder::new("entires"));
+    let mut plotter = poloto::Plotter::new(title, "xname","yname",poloto::ctx::<UnixTime>(),poloto::ctx::<i128>());
 
     plotter.line("foo", &data);
 
-    plotter.yaxis().marker(0).no_dash();
-
+    
     println!(
         "{}<style>{}{}</style>{}{}",
         poloto::simple_theme::SVG_HEADER,
