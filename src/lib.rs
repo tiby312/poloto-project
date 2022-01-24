@@ -117,7 +117,7 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 /// Create a Plotter
 ///
 pub fn plot<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a>(
-    title: impl Display + 'a,
+    title: impl PlotterNameFmt<X,Y> + 'a,
     xname: impl Display + 'a,
     yname: impl Display +'a,
     xcontext:X,
@@ -177,7 +177,7 @@ impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
-    title: Box<dyn Display + 'a>,
+    title: Box<dyn PlotterNameFmt<X,Y> + 'a>,
     plots: Vec<Plot<'a, X::Num, Y::Num>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
@@ -196,7 +196,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
-        title: impl Display + 'a,
+        title: impl PlotterNameFmt<X,Y> + 'a,
         xname:impl Display +'a,
         yname:impl Display+'a,
         xcontext: X,

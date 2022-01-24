@@ -3,11 +3,15 @@ use poloto::prelude::*;
 fn main() {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
+    let title=poloto::polotofmt::title(|w,(x,xs),_|{
+        write!(w,"from {} to {} in {}",x[0],x[1],xs)
+    });
+
     let mut plotter = poloto::plot(
-        "Some Trigonometry Plots 🥳",
+        title,
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        poloto::ctx::<f64>().with_tick_fmt(|v,w,b,s|write!(w,"{} f",v)),
+        poloto::ctx::<f64>().with_tick_fmt(|v,w,b,s|write!(w,"{} f",v)).with_where_fmt(|v,w,b|write!(w,"{}",v)),
         poloto::ctx::<f64>()
     );
 

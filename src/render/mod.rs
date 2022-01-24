@@ -392,19 +392,13 @@ impl Canvas {
                 d.attr("y", padding / 4.0)
             })?
             .build(|w| {
-                write!(w.writer_safe(),"{}",plotter.title)
-                /* 
+                //write!(w.writer_safe(),"{}",plotter.title)
+                
                 plotter.title.fmt_self(
                     &mut w.writer_safe(),
-                    DataSingle {
-                        bound: boundx,
-                        step: &mut xtick_info.unit_data,
-                    },
-                    DataSingle {
-                        bound: boundy,
-                        step: &mut ytick_info.unit_data,
-                    },
-                )*/
+                    (boundx,&mut xtick_info.unit_data),
+                    (boundy,&mut ytick_info.unit_data),
+                )
             })?;
 
         writer
