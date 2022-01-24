@@ -46,6 +46,7 @@ pub mod prelude {
     pub use super::formatm;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
+    pub use super::plotnum::PlotNumContextExt;
 }
 
 ///The width of the svg tag.
@@ -115,12 +116,18 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 ///
 /// Create a Plotter
 ///
-pub fn plot<'a, X: HasDefaultContext + 'a, Y: HasDefaultContext + 'a>(
+pub fn plot<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a>(
     title: impl Display + 'a,
     xname: impl Display + 'a,
     yname: impl Display +'a,
-) -> Plotter<'a, X::DefaultContext, Y::DefaultContext> {
-    Plotter::new(title,xname,yname, X::DefaultContext::default(), Y::DefaultContext::default())
+    xcontext:X,
+    ycontext:Y
+) -> Plotter<'a, X, Y> {
+    Plotter::new(title,xname,yname, xcontext, ycontext)
+}
+
+pub fn ctx<X:HasDefaultContext>()->X::DefaultContext{
+    X::DefaultContext::default()
 }
 
 

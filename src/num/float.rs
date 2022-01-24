@@ -10,6 +10,7 @@ impl DiscNum for f64 {
 }
 
 
+#[derive(Default)]
 pub struct DefaultFloatContext;
 impl PlotNumContext for DefaultFloatContext {
     type Num=f64;
@@ -105,6 +106,10 @@ impl PlotNum for f64 {
         self.is_nan()
     }
 
+}
+
+impl HasDefaultContext for f64{
+    type DefaultContext = DefaultFloatContext;
 }
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {

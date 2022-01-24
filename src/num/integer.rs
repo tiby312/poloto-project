@@ -70,7 +70,7 @@ pub fn compute_ticks(
 }
 */
 
-
+#[derive(Default)]
 pub struct DefaultIntegerContext;
 impl PlotNumContext for DefaultIntegerContext {
     type StepInfo = i128;
@@ -160,6 +160,12 @@ impl PlotNumContext for DefaultIntegerContext {
         }
     }
 }
+
+
+impl HasDefaultContext for i128{
+    type DefaultContext = DefaultIntegerContext;
+}
+
 impl PlotNum for i128 {
 
 }

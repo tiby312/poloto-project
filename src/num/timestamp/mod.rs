@@ -30,7 +30,7 @@ impl std::fmt::Display for TimestampType {
     }
 }
 
-
+#[derive(Default)]
 pub struct DefaultUnixTimeContext;
 impl PlotNumContext for DefaultUnixTimeContext {
     type StepInfo = TimestampType;
@@ -140,6 +140,11 @@ impl PlotNumContext for DefaultUnixTimeContext {
             [UnixTime(0), UnixTime(1)]
         }
     }
+}
+
+
+impl HasDefaultContext for UnixTime{
+    type DefaultContext = DefaultUnixTimeContext;
 }
 
 
