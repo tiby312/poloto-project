@@ -21,7 +21,7 @@ fn main() {
 
     use poloto::polotofmt;
     let title = polotofmt::name_ext(|w, x: polotofmt::DataSingle<UnixTime>, _| {
-        let srt=x.bound[0].dynamic_format(x.step);
+        let srt = x.bound[0].dynamic_format(x.step);
         let end = x.bound[1].dynamic_format(x.step);
         write!(w, "Entries from {} to {} in {}", srt, end, x.step)
     });

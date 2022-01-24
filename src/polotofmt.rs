@@ -5,7 +5,7 @@
 use super::*;
 use std::fmt;
 
-/* 
+/*
 ///
 /// Allows to override the default tick formatting using information
 /// such as min and max bounds and step information.
@@ -45,8 +45,7 @@ pub fn tick_fmt_ext<X: PlotNum>(
 }
 */
 
-
-/* 
+/*
 
 pub trait PlotterNameSingleFmt<X: PlotNum> {
     fn fmt_self(&mut self, w: &mut dyn fmt::Write, data: DataSingle<X>) -> std::fmt::Result;
@@ -135,38 +134,51 @@ pub struct DataSingle<'a, X: PlotNum,I> {
 
 */
 
-
 pub trait PlotterNameFmt<X: PlotNumContext, Y: PlotNumContext> {
     fn fmt_self(
         &mut self,
         w: &mut dyn fmt::Write,
-        x: ([X::Num;2],&mut X::StepInfo),
-        y: ([Y::Num;2],&mut Y::StepInfo),
+        x: ([X::Num; 2], &mut X::StepInfo),
+        y: ([Y::Num; 2], &mut Y::StepInfo),
     ) -> std::fmt::Result;
 }
 
-impl<K:Display,X:PlotNumContext,Y:PlotNumContext> PlotterNameFmt<X,Y> for K{
+impl<K: Display, X: PlotNumContext, Y: PlotNumContext> PlotterNameFmt<X, Y> for K {
     fn fmt_self(
         &mut self,
         w: &mut dyn fmt::Write,
-        _x: ([X::Num;2],&mut X::StepInfo),
-        _y: ([Y::Num;2],&mut Y::StepInfo),
-    ) -> std::fmt::Result{
-        write!(w,"{}",self)
+        _x: ([X::Num; 2], &mut X::StepInfo),
+        _y: ([Y::Num; 2], &mut Y::StepInfo),
+    ) -> std::fmt::Result {
+        write!(w, "{}", self)
     }
 }
 
-pub fn title<X:PlotNumContext,Y:PlotNumContext>(func:impl FnMut(&mut dyn fmt::Write,([X::Num;2],&mut X::StepInfo),([Y::Num;2],&mut Y::StepInfo))->fmt::Result )->impl PlotterNameFmt<X,Y>{
-    
+pub fn title<X: PlotNumContext, Y: PlotNumContext>(
+    func: impl FnMut(
+        &mut dyn fmt::Write,
+        ([X::Num; 2], &mut X::StepInfo),
+        ([Y::Num; 2], &mut Y::StepInfo),
+    ) -> fmt::Result,
+) -> impl PlotterNameFmt<X, Y> {
     pub struct Foo<X>(X);
-    impl<X:PlotNumContext,Y:PlotNumContext,F:FnMut(&mut dyn fmt::Write,([X::Num;2],&mut X::StepInfo),([Y::Num;2],&mut Y::StepInfo))->fmt::Result> PlotterNameFmt<X,Y> for Foo<F>{
+    impl<
+            X: PlotNumContext,
+            Y: PlotNumContext,
+            F: FnMut(
+                &mut dyn fmt::Write,
+                ([X::Num; 2], &mut X::StepInfo),
+                ([Y::Num; 2], &mut Y::StepInfo),
+            ) -> fmt::Result,
+        > PlotterNameFmt<X, Y> for Foo<F>
+    {
         fn fmt_self(
             &mut self,
             w: &mut dyn fmt::Write,
-            x: ([X::Num;2],&mut X::StepInfo),
-            y: ([Y::Num;2],&mut Y::StepInfo),
-        ) -> std::fmt::Result{
-            (self.0)(w,x,y)
+            x: ([X::Num; 2], &mut X::StepInfo),
+            y: ([Y::Num; 2], &mut Y::StepInfo),
+        ) -> std::fmt::Result {
+            (self.0)(w, x, y)
         }
     }
     Foo(func)

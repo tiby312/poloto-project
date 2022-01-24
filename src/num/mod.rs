@@ -41,8 +41,8 @@ pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
     it: impl IntoIterator<Item = (X::Num, Y::Num)>,
     xmarkers: &[X::Num],
     ymarkers: &[Y::Num],
-    xcontext:&mut X,
-    ycontext:&mut Y
+    xcontext: &mut X,
+    ycontext: &mut Y,
 ) -> ([X::Num; 2], [Y::Num; 2]) {
     //let xmarkers = xcontext.get_markers();
     //let ymarkers = ycontext.get_markers();

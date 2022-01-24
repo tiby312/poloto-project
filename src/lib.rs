@@ -44,9 +44,9 @@ pub mod polotofmt;
 ///
 pub mod prelude {
     pub use super::formatm;
+    pub use super::plotnum::PlotNumContextExt;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
-    pub use super::plotnum::PlotNumContextExt;
 }
 
 ///The width of the svg tag.
@@ -117,37 +117,34 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 /// Create a Plotter
 ///
 pub fn plot<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a>(
-    title: impl PlotterNameFmt<X,Y> + 'a,
+    title: impl PlotterNameFmt<X, Y> + 'a,
     xname: impl Display + 'a,
-    yname: impl Display +'a,
-    xcontext:X,
-    ycontext:Y
+    yname: impl Display + 'a,
+    xcontext: X,
+    ycontext: Y,
 ) -> Plotter<'a, X, Y> {
-    Plotter::new(title,xname,yname, xcontext, ycontext)
+    Plotter::new(title, xname, yname, xcontext, ycontext)
 }
 
-pub fn ctx<X:HasDefaultContext>()->X::DefaultContext{
+pub fn ctx<X: HasDefaultContext>() -> X::DefaultContext {
     X::DefaultContext::default()
 }
-
 
 ///
 /// Specify option for the x and y axis.
 ///
-pub struct AxisBuilder<'a, X: PlotNum> {
+pub struct AxisBuilder<X: PlotNum> {
     dash: bool,
     ideal_num: Option<u32>,
     markers: Vec<X>,
-    name: Box<dyn Display + 'a>
 }
 
-impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
-    pub fn new(name: impl Display + 'a) -> Self {
+impl<X: PlotNum> AxisBuilder<X> {
+    pub fn new() -> Self {
         AxisBuilder {
             dash: true,
             ideal_num: None,
             markers: vec![],
-            name: Box::new(name),
         }
     }
 
@@ -166,7 +163,6 @@ impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
     }
 }
 
-
 /// Keeps track of plots.
 /// User supplies iterators that will be iterated on when
 /// render is called.
@@ -177,14 +173,16 @@ impl<'a, X: PlotNum + 'a> AxisBuilder<'a, X> {
 /// * The background belongs to the `poloto_background` class.
 ///
 pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
-    title: Box<dyn PlotterNameFmt<X,Y> + 'a>,
+    title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    xname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
+    yname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
     plots: Vec<Plot<'a, X::Num, Y::Num>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xaxis: AxisBuilder<'a,X::Num>,
-    yaxis: AxisBuilder<'a,Y::Num>,
-    xcontext:X,
-    ycontext:Y
+    xaxis: AxisBuilder<X::Num>,
+    yaxis: AxisBuilder<Y::Num>,
+    xcontext: X,
+    ycontext: Y,
 }
 
 impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
@@ -196,24 +194,25 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
-        title: impl PlotterNameFmt<X,Y> + 'a,
-        xname:impl Display +'a,
-        yname:impl Display+'a,
+        title: impl PlotterNameFmt<X, Y> + 'a,
+        xname: impl PlotterNameFmt<X, Y> + 'a,
+        yname: impl PlotterNameFmt<X, Y> + 'a,
         xcontext: X,
         ycontext: Y,
     ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
+            xname: Box::new(xname),
+            yname: Box::new(yname),
             plots: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xaxis:AxisBuilder::new(xname),
-            yaxis:AxisBuilder::new(yname),
+            xaxis: AxisBuilder::new(),
+            yaxis: AxisBuilder::new(),
             xcontext,
-            ycontext
+            ycontext,
         }
     }
-
 
     /// Create a line from plots using a SVG polyline element.
     /// The element belongs to the `.poloto[N]stroke` css class.
@@ -396,18 +395,16 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
-        
-
         let (boundx, boundy) = num::find_bounds(
             self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
             &self.xaxis.markers,
             &self.yaxis.markers,
             &mut self.xcontext,
-            &mut self.ycontext
+            &mut self.ycontext,
         );
 
-         //knowldge of canvas dim
-         let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
+        //knowldge of canvas dim
+        let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
 
         if let Some(a) = self.xaxis.ideal_num {
             canvas.ideal_num_xsteps = a;
@@ -434,12 +431,11 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             },
         );
 
-       
-        let data=render::Data{
+        let data = render::Data {
             boundx,
             boundy,
             tickx,
-            ticky
+            ticky,
         };
 
         canvas.render(a, self, data)
@@ -470,6 +466,3 @@ pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
 pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
     util::DisplayableClosure::new(a)
 }
-
-
-

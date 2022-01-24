@@ -194,16 +194,16 @@ impl UnixTime {
         }
     }
 
-    pub fn format<'a>(&self,a:&'a str)->chrono::format::DelayedFormat<chrono::format::StrftimeItems<'a>>{
+    pub fn format<'a>(
+        &self,
+        a: &'a str,
+    ) -> chrono::format::DelayedFormat<chrono::format::StrftimeItems<'a>> {
         let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         this.format(a)
     }
 
-    pub fn dynamic_format<'a>(
-        &'a self,
-        info: &'a TimestampType,
-    ) -> impl Display+'a {
-        crate::disp_const(move |formatter|{
+    pub fn dynamic_format<'a>(&'a self, info: &'a TimestampType) -> impl Display + 'a {
+        crate::disp_const(move |formatter| {
             let val = self;
             use TimestampType::*;
 
@@ -243,7 +243,6 @@ impl UnixTime {
                     write!(formatter, "{}:{}", val.minute(), val.second())
                 }
             }
-        
         })
     }
 }

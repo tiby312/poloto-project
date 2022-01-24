@@ -1,14 +1,11 @@
 use crate::*;
 
-
-
-pub struct Data<X,Y,J,K>{
-    pub boundx:[X;2],
-    pub boundy:[Y;2],
-    pub tickx:TickInfo<X,J>,
-    pub ticky:TickInfo<Y,K>
+pub struct Data<X, Y, J, K> {
+    pub boundx: [X; 2],
+    pub boundy: [Y; 2],
+    pub tickx: TickInfo<X, J>,
+    pub ticky: TickInfo<Y, K>,
 }
-
 
 #[derive(Copy, Clone)]
 pub(super) struct Canvas {
@@ -71,12 +68,11 @@ impl Canvas {
         }
     }
 
-
     pub fn render<X: PlotNumContext, Y: PlotNumContext>(
         &self,
         writer: impl std::fmt::Write,
         plotter: &mut Plotter<X, Y>,
-        data:Data<X::Num,Y::Num,X::StepInfo,Y::StepInfo>
+        data: Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
     ) -> std::fmt::Result {
         let Canvas {
             width,
@@ -97,8 +93,8 @@ impl Canvas {
 
         let mut writer = tagger::new(writer);
 
-        let xcontext=&mut plotter.xcontext;
-        let ycontext=&mut plotter.ycontext;
+        let xcontext = &mut plotter.xcontext;
+        let ycontext = &mut plotter.ycontext;
 
         let mut color_iter = {
             let max = if let Some(nn) = num_css_classes {
@@ -128,10 +124,10 @@ impl Canvas {
                     Ok(wc.get_counter() != 0)
                 })?;
 
-            let aa = xcontext.scale(minx,[minx, maxx], scalex2);
-            let bb = ycontext.scale(miny,[miny, maxy], scaley2);
+            let aa = xcontext.scale(minx, [minx, maxx], scalex2);
+            let bb = ycontext.scale(miny, [miny, maxy], scaley2);
 
-            struct PlotIter<X:PlotNumContext, Y:PlotNumContext> {
+            struct PlotIter<X: PlotNumContext, Y: PlotNumContext> {
                 basex_ii: f64,
                 basey_ii: f64,
                 rangex_ii: [X::Num; 2],
@@ -143,13 +139,13 @@ impl Canvas {
                 fn gen_iter<'a>(
                     &'a self,
                     p: &'a mut Plot<X::Num, Y::Num>,
-                    xcontext:&'a mut X,
-                    ycontext:&'a mut Y
+                    xcontext: &'a mut X,
+                    ycontext: &'a mut Y,
                 ) -> impl Iterator<Item = [f64; 2]> + 'a {
                     p.plots.iter_second().map(move |(x, y)| {
                         [
-                            self.basex_ii + xcontext.scale(x,self.rangex_ii, self.maxx_ii),
-                            self.basey_ii - ycontext.scale(y,self.rangey_ii, self.maxy_ii),
+                            self.basex_ii + xcontext.scale(x, self.rangex_ii, self.maxx_ii),
+                            self.basey_ii - ycontext.scale(y, self.rangey_ii, self.maxy_ii),
                         ]
                     })
                 }
@@ -189,7 +185,7 @@ impl Canvas {
                         d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                         d.attr("fill", "none")?;
                         d.attr("stroke", "black")?;
-                        d.path(|a| render::line(a, plot_iter.gen_iter(&mut p,xcontext,ycontext)))
+                        d.path(|a| render::line(a, plot_iter.gen_iter(&mut p, xcontext, ycontext)))
                     })?;
                 }
                 PlotType::Scatter => {
@@ -218,7 +214,7 @@ impl Canvas {
                         d.path(|a| {
                             use tagger::PathCommand::*;
                             for [x, y] in plot_iter
-                                .gen_iter(&mut p,xcontext,ycontext)
+                                .gen_iter(&mut p, xcontext, ycontext)
                                 .filter(|&[x, y]| x.is_finite() && y.is_finite())
                             {
                                 a.put(M(x, y))?;
@@ -255,7 +251,7 @@ impl Canvas {
                             let mut last = None;
                             //TODO dont necesarily filter?
                             for [x, y] in plot_iter
-                                .gen_iter(&mut p,xcontext,ycontext)
+                                .gen_iter(&mut p, xcontext, ycontext)
                                 .filter(|&[x, y]| x.is_finite() && y.is_finite())
                             {
                                 if let Some((lx, ly)) = last {
@@ -301,7 +297,7 @@ impl Canvas {
                         d.path(|path| {
                             render::line_fill(
                                 path,
-                                plot_iter.gen_iter(&mut p,xcontext,ycontext),
+                                plot_iter.gen_iter(&mut p, xcontext, ycontext),
                                 height - paddingy,
                                 true,
                             )
@@ -335,7 +331,7 @@ impl Canvas {
                         d.path(|path| {
                             render::line_fill(
                                 path,
-                                plot_iter.gen_iter(&mut p,xcontext,ycontext),
+                                plot_iter.gen_iter(&mut p, xcontext, ycontext),
                                 height - paddingy,
                                 false,
                             )
@@ -354,7 +350,7 @@ impl Canvas {
         &self,
         writer: &mut tagger::ElemWriter<T>,
         plotter: &mut Plotter<X, Y>,
-        data: Data<X::Num, Y::Num,X::StepInfo,Y::StepInfo>,
+        data: Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
     ) -> std::fmt::Result {
         let Canvas {
             width,
@@ -377,8 +373,8 @@ impl Canvas {
         let mut xtick_info = data.tickx;
         let mut ytick_info = data.ticky;
 
-        let xcontext=&mut plotter.xcontext;
-        let ycontext=&mut plotter.ycontext;
+        let xcontext = &mut plotter.xcontext;
+        let ycontext = &mut plotter.ycontext;
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
@@ -393,11 +389,11 @@ impl Canvas {
             })?
             .build(|w| {
                 //write!(w.writer_safe(),"{}",plotter.title)
-                
+
                 plotter.title.fmt_self(
                     &mut w.writer_safe(),
-                    (boundx,&mut xtick_info.unit_data),
-                    (boundy,&mut ytick_info.unit_data),
+                    (boundx, &mut xtick_info.unit_data),
+                    (boundy, &mut ytick_info.unit_data),
                 )
             })?;
 
@@ -411,8 +407,13 @@ impl Canvas {
                 d.attr("y", height - padding / 8.)
             })?
             .build(|w| {
-                write!(w.writer_safe(),"{}",plotter.xaxis.name)
-                /* 
+                //write!(w.writer_safe(),"{}",plotter.xaxis.name)
+                plotter.xname.fmt_self(
+                    &mut w.writer_safe(),
+                    (boundx, &mut xtick_info.unit_data),
+                    (boundy, &mut ytick_info.unit_data),
+                )
+                /*
                 plotter.xaxis.name.fmt_self(
                     &mut w.writer_safe(),
                     DataSingle {
@@ -437,8 +438,13 @@ impl Canvas {
                 d.attr("y", height / 2.0)
             })?
             .build(|w| {
-                write!(w.writer_safe(),"{}",plotter.yaxis.name)
-                /* 
+                //write!(w.writer_safe(),"{}",plotter.yaxis.name)
+                plotter.yname.fmt_self(
+                    &mut w.writer_safe(),
+                    (boundx, &mut xtick_info.unit_data),
+                    (boundy, &mut ytick_info.unit_data),
+                )
+                /*
                 plotter.yaxis.name.fmt_self(
                     &mut w.writer_safe(),
                     DataSingle {
@@ -491,9 +497,13 @@ impl Canvas {
             };
 
             //Draw interva`l x text
-            for &Tick { position,mut  value } in xtick_info.ticks.iter() {
-                let xx = (xcontext.scale(position,[minx, maxx], scalex2)
-                    - xcontext.scale(minx,[minx, maxx], scalex2))
+            for &Tick {
+                position,
+                mut value,
+            } in xtick_info.ticks.iter()
+            {
+                let xx = (xcontext.scale(position, [minx, maxx], scalex2)
+                    - xcontext.scale(minx, [minx, maxx], scalex2))
                     + padding;
 
                 writer.single("line", |d| {
@@ -518,7 +528,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        xcontext.tick_fmt(value,&mut w, boundx, &mut xtick_info.unit_data)
+                        xcontext.tick_fmt(value, &mut w, boundx, &mut xtick_info.unit_data)
                         /*
                         w.put_raw(format_args!(
                             "{}{}",
@@ -551,7 +561,7 @@ impl Canvas {
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
 
-                        ycontext.where_fmt(base,&mut w,boundy)
+                        ycontext.where_fmt(base, &mut w, boundy)
                     })?;
 
                 "k+"
@@ -560,9 +570,14 @@ impl Canvas {
             };
 
             //Draw interval y text
-            for &Tick { position, mut value } in ytick_info.ticks.iter() {
+            for &Tick {
+                position,
+                mut value,
+            } in ytick_info.ticks.iter()
+            {
                 let yy = height
-                    - (ycontext.scale(position,[miny, maxy], scaley2) - ycontext.scale(miny,[miny, maxy], scaley2))
+                    - (ycontext.scale(position, [miny, maxy], scaley2)
+                        - ycontext.scale(miny, [miny, maxy], scaley2))
                     - paddingy;
 
                 writer.single("line", |d| {
@@ -604,8 +619,8 @@ impl Canvas {
             }
         }
 
-        let d1 = xcontext.scale(minx,[minx, maxx], scalex2);
-        let d2 = xcontext.scale(first_tickx.position,[minx, maxx], scalex2);
+        let d1 = xcontext.scale(minx, [minx, maxx], scalex2);
+        let d2 = xcontext.scale(first_tickx.position, [minx, maxx], scalex2);
         let distance_to_firstx = d2 - d1;
 
         writer.single("path", |d| {
@@ -635,8 +650,8 @@ impl Canvas {
             })
         })?;
 
-        let d1 = ycontext.scale(miny,[miny, maxy], scaley2);
-        let d2 = ycontext.scale(first_ticky.position,[miny, maxy], scaley2);
+        let d1 = ycontext.scale(miny, [miny, maxy], scaley2);
+        let d2 = ycontext.scale(first_ticky.position, [miny, maxy], scaley2);
         let distance_to_firsty = d2 - d1;
 
         writer.single("path", |d| {
