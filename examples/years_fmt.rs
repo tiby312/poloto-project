@@ -19,30 +19,25 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let (title, xname) = {
-        use poloto::polotofmt;
-        let title = polotofmt::name_ext(|w, x: polotofmt::DataSingle<UnixTime>, _| {
-            let srt=x.bound[0].format("%Y");
-            let end = x.bound[1].dynamic_format(x.step);
-            write!(w, "Entries from {} to {} in {}", srt, end, x.step)
-        });
+    use poloto::polotofmt;
+    let title = polotofmt::name_ext(|w, x: polotofmt::DataSingle<UnixTime>, _| {
+        let srt=x.bound[0].dynamic_format(x.step);
+        let end = x.bound[1].dynamic_format(x.step);
+        write!(w, "Entries from {} to {} in {}", srt, end, x.step)
+    });
 
-        let mut xname = poloto::AxisBuilder::new(polotofmt::name_single_ext(
-            |w, p: polotofmt::DataSingle<UnixTime>| {
-                let srt = p.bound[0].dynamic_format(p.step);
-                let end = p.bound[1].dynamic_format(p.step);
-                write!(w, "Entries from {} to {} in {}", srt, end, p.step)
-            },
-        ));
-
-        xname.with_ideal_num(2);
-
-        (title, xname)
-    };
+    let xname = poloto::AxisBuilder::new(polotofmt::name_single_ext(
+        |w, p: polotofmt::DataSingle<UnixTime>| {
+            let srt = p.bound[0].dynamic_format(p.step);
+            let end = p.bound[1].dynamic_format(p.step);
+            write!(w, "Entries from {} to {} in {}", srt, end, p.step)
+        },
+    ));
 
     let mut plotter = poloto::Plotter::new(title, xname, poloto::AxisBuilder::new("entires"));
 
     plotter.line("foo", &data);
+
     plotter.yaxis().marker(0).no_dash();
 
     println!(
