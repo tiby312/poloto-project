@@ -10,6 +10,7 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
+
 pub trait HasDefaultContext {
     type DefaultContext: PlotNumContext + Default;
 }
