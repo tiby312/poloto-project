@@ -21,6 +21,12 @@ impl<X: chrono::TimeZone> From<chrono::DateTime<X>> for UnixTime {
     }
 }
 
+impl From<UnixTime> for chrono::DateTime<chrono::Utc> {
+    fn from(a: UnixTime) -> Self {
+        a.datetime(&chrono::Utc)
+    }
+}
+
 impl UnixTime {
     pub fn parse_from_str(s: &str, fmt: &str) -> ParseResult<UnixTime> {
         NaiveDateTime::parse_from_str(s, fmt).map(|x| UnixTime(x.timestamp()))
