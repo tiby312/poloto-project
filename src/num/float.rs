@@ -13,8 +13,8 @@ impl DiscNum for f64 {
 /// Default float context. It will attempt to find reasonable step sizes, and format them as regular floats.
 ///
 #[derive(Default)]
-pub struct DefaultFloatContext;
-impl PlotNumContext for DefaultFloatContext {
+pub struct FloatContext;
+impl PlotNumContext for FloatContext {
     type Num = f64;
     type StepInfo = f64;
 
@@ -119,7 +119,7 @@ impl PlotNum for f64 {
 }
 
 impl HasDefaultContext for f64 {
-    type DefaultContext = DefaultFloatContext;
+    type DefaultContext = FloatContext;
 }
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {

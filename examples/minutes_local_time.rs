@@ -1,4 +1,4 @@
-use poloto::num::timestamp::{DefaultUnixTimeContext, UnixTime};
+use poloto::num::timestamp::{UnixTimeContext, UnixTime};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -32,7 +32,7 @@ fn main() {
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        DefaultUnixTimeContext::new(chrono::Local),
+        UnixTimeContext::new(chrono::Local),
         i128::ctx().with_marker(0),
     );
     s.line("", &data);

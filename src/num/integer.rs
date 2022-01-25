@@ -63,8 +63,8 @@ fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]
 /// Default integer context. It will attempt to find reasonable step sizes, and format them as regular integers.
 ///
 #[derive(Default)]
-pub struct DefaultIntegerContext;
-impl PlotNumContext for DefaultIntegerContext {
+pub struct IntegerContext;
+impl PlotNumContext for IntegerContext {
     type StepInfo = i128;
     type Num = i128;
 
@@ -163,7 +163,7 @@ impl PlotNumContext for DefaultIntegerContext {
 }
 
 impl HasDefaultContext for i128 {
-    type DefaultContext = DefaultIntegerContext;
+    type DefaultContext = IntegerContext;
 }
 
 impl PlotNum for i128 {}

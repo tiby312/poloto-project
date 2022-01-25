@@ -36,25 +36,25 @@ impl std::fmt::Display for TimestampType {
 ///
 /// Default [`UnixTime`] context.
 ///
-pub struct DefaultUnixTimeContext<T: chrono::TimeZone> {
+pub struct UnixTimeContext<T: chrono::TimeZone> {
     timezone: T,
 }
 
-impl<T: chrono::TimeZone> DefaultUnixTimeContext<T> {
+impl<T: chrono::TimeZone> UnixTimeContext<T> {
     pub fn new(timezone: T) -> Self {
-        DefaultUnixTimeContext { timezone }
+        UnixTimeContext { timezone }
     }
 }
 
-impl Default for DefaultUnixTimeContext<Utc> {
+impl Default for UnixTimeContext<Utc> {
     fn default() -> Self {
-        DefaultUnixTimeContext {
+        UnixTimeContext {
             timezone: chrono::Utc,
         }
     }
 }
 
-impl<T: chrono::TimeZone> PlotNumContext for DefaultUnixTimeContext<T> {
+impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T> {
     type StepInfo = TimestampType;
     type Num = UnixTime;
 
@@ -170,7 +170,7 @@ impl<T: chrono::TimeZone> PlotNumContext for DefaultUnixTimeContext<T> {
 }
 
 impl HasDefaultContext for UnixTime {
-    type DefaultContext = DefaultUnixTimeContext<chrono::Utc>;
+    type DefaultContext = UnixTimeContext<chrono::Utc>;
 }
 
 impl PlotNum for UnixTime {}
