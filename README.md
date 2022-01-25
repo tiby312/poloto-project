@@ -231,6 +231,11 @@ fn main() {
 
 
 
+## Escape protection
+
+If a user tried to inject html through the title/xname/yname/tick format/ or plot names, the html escapes
+will get turned into their encoded values. This protection is provided by the `tagger` dependency crate.
+
 ## CSS Usage Example
 
 See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccoli_report/)
