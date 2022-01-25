@@ -20,8 +20,8 @@ impl PlotNumContext for DefaultFloatContext {
 
     fn tick_fmt(
         &mut self,
-        val: Self::Num,
         writer: &mut dyn fmt::Write,
+        val: Self::Num,
         _bound: [Self::Num; 2],
         info: &mut Self::StepInfo,
     ) -> std::fmt::Result {
@@ -30,8 +30,8 @@ impl PlotNumContext for DefaultFloatContext {
 
     fn where_fmt(
         &mut self,
-        val: f64,
         writer: &mut dyn std::fmt::Write,
+        val: f64,
         _bound: [f64; 2],
     ) -> std::fmt::Result {
         util::write_interval_float(writer, val, None)

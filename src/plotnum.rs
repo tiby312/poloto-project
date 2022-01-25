@@ -35,7 +35,7 @@ pub mod ext {
         func: F,
     }
 
-    impl<X: PlotNumContext, F: FnMut(X::Num, &mut dyn fmt::Write, [X::Num; 2]) -> fmt::Result>
+    impl<X: PlotNumContext, F: FnMut(&mut dyn fmt::Write, X::Num, [X::Num; 2]) -> fmt::Result>
         PlotNumContext for WhereFmt<X, F>
     {
         type StepInfo = X::StepInfo;
@@ -60,21 +60,21 @@ pub mod ext {
 
         fn tick_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
             extra: &mut Self::StepInfo,
         ) -> std::fmt::Result {
-            self.ctx.tick_fmt(val, writer, bound, extra)
+            self.ctx.tick_fmt(writer, val, bound, extra)
         }
 
         fn where_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
         ) -> std::fmt::Result {
-            (self.func)(val, writer, bound)
+            (self.func)(writer, val, bound)
         }
 
         fn markers(&self) -> Vec<Self::Num> {
@@ -96,7 +96,7 @@ pub mod ext {
 
     impl<
             X: PlotNumContext,
-            F: FnMut(X::Num, &mut dyn fmt::Write, [X::Num; 2], &mut X::StepInfo) -> fmt::Result,
+            F: FnMut(&mut dyn fmt::Write, X::Num, [X::Num; 2], &mut X::StepInfo) -> fmt::Result,
         > PlotNumContext for TickFmt<X, F>
     {
         type StepInfo = X::StepInfo;
@@ -121,21 +121,21 @@ pub mod ext {
 
         fn tick_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
             extra: &mut Self::StepInfo,
         ) -> std::fmt::Result {
-            (self.func)(val, writer, bound, extra)
+            (self.func)(writer, val, bound, extra)
         }
 
         fn where_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
         ) -> std::fmt::Result {
-            self.ctx.where_fmt(val, writer, bound)
+            self.ctx.where_fmt(writer, val, bound)
         }
 
         fn markers(&self) -> Vec<Self::Num> {
@@ -179,21 +179,21 @@ pub mod ext {
 
         fn tick_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
             extra: &mut Self::StepInfo,
         ) -> std::fmt::Result {
-            self.ctx.tick_fmt(val, writer, bound, extra)
+            self.ctx.tick_fmt(writer, val, bound, extra)
         }
 
         fn where_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
         ) -> std::fmt::Result {
-            self.ctx.where_fmt(val, writer, bound)
+            self.ctx.where_fmt(writer, val, bound)
         }
 
         fn markers(&self) -> Vec<Self::Num> {
@@ -236,21 +236,21 @@ pub mod ext {
 
         fn tick_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
             extra: &mut Self::StepInfo,
         ) -> std::fmt::Result {
-            self.ctx.tick_fmt(val, writer, bound, extra)
+            self.ctx.tick_fmt(writer, val, bound, extra)
         }
 
         fn where_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
         ) -> std::fmt::Result {
-            self.ctx.where_fmt(val, writer, bound)
+            self.ctx.where_fmt(writer, val, bound)
         }
 
         fn markers(&self) -> Vec<Self::Num> {
@@ -295,21 +295,21 @@ pub mod ext {
 
         fn tick_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
             extra: &mut Self::StepInfo,
         ) -> std::fmt::Result {
-            self.ctx.tick_fmt(val, writer, bound, extra)
+            self.ctx.tick_fmt(writer, val, bound, extra)
         }
 
         fn where_fmt(
             &mut self,
-            val: Self::Num,
             writer: &mut dyn std::fmt::Write,
+            val: Self::Num,
             bound: [Self::Num; 2],
         ) -> std::fmt::Result {
-            self.ctx.where_fmt(val, writer, bound)
+            self.ctx.where_fmt(writer, val, bound)
         }
 
         fn markers(&self) -> Vec<Self::Num> {
@@ -326,8 +326,8 @@ pub mod ext {
     pub trait PlotNumContextExt: PlotNumContext + Sized {
         fn with_tick_fmt<
             F: FnMut(
-                Self::Num,
                 &mut dyn fmt::Write,
+                Self::Num,
                 [Self::Num; 2],
                 &mut Self::StepInfo,
             ) -> fmt::Result,
@@ -339,7 +339,7 @@ pub mod ext {
         }
 
         fn with_where_fmt<
-            F: FnMut(Self::Num, &mut dyn fmt::Write, [Self::Num; 2]) -> fmt::Result,
+            F: FnMut(&mut dyn fmt::Write, Self::Num, [Self::Num; 2]) -> fmt::Result,
         >(
             self,
             func: F,
@@ -395,16 +395,16 @@ pub trait PlotNumContext {
 
     fn tick_fmt(
         &mut self,
-        val: Self::Num,
         writer: &mut dyn std::fmt::Write,
+        val: Self::Num,
         _bound: [Self::Num; 2],
         _extra: &mut Self::StepInfo,
     ) -> std::fmt::Result;
 
     fn where_fmt(
         &mut self,
-        val: Self::Num,
         writer: &mut dyn std::fmt::Write,
+        val: Self::Num,
         _bound: [Self::Num; 2],
     ) -> std::fmt::Result;
 

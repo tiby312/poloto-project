@@ -53,8 +53,8 @@ impl PlotNumContext for DefaultUnixTimeContext {
 
     fn tick_fmt(
         &mut self,
-        val: UnixTime,
         writer: &mut dyn fmt::Write,
+        val: UnixTime,
         _bound: [UnixTime; 2],
         info: &mut TimestampType,
     ) -> std::fmt::Result {
@@ -63,8 +63,8 @@ impl PlotNumContext for DefaultUnixTimeContext {
 
     fn where_fmt(
         &mut self,
-        val: UnixTime,
         writer: &mut dyn std::fmt::Write,
+        val: UnixTime,
         _bound: [UnixTime; 2],
     ) -> std::fmt::Result {
         write!(writer, "{}", val)

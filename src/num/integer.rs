@@ -70,8 +70,8 @@ impl PlotNumContext for DefaultIntegerContext {
 
     fn tick_fmt(
         &mut self,
-        val: i128,
         writer: &mut dyn fmt::Write,
+        val: i128,
         _bound: [i128; 2],
         info: &mut Self::StepInfo,
     ) -> std::fmt::Result {
@@ -80,8 +80,8 @@ impl PlotNumContext for DefaultIntegerContext {
 
     fn where_fmt(
         &mut self,
-        val: i128,
         writer: &mut dyn std::fmt::Write,
+        val: i128,
         _bound: [i128; 2],
     ) -> std::fmt::Result {
         util::write_interval_i128(writer, val, None)

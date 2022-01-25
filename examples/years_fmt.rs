@@ -30,7 +30,7 @@ fn main() {
         "title",
         xname,
         "yname",
-        UnixTime::ctx().with_tick_fmt(|v, w, _b, s| write!(w, "{} yr", v.dynamic_format(s))),
+        UnixTime::ctx().with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(s))),
         i128::ctx().with_no_dash().with_marker(0).with_no_dash(),
     );
 

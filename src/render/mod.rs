@@ -457,7 +457,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "Where j = ")?;
 
-                        xcontext.where_fmt(base, &mut w, boundx)
+                        xcontext.where_fmt(&mut w, base, boundx)
                     })?;
 
                 "j+"
@@ -493,7 +493,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        xcontext.tick_fmt(value, &mut w, boundx, &mut xtick_info.unit_data)
+                        xcontext.tick_fmt(&mut w, value, boundx, &mut xtick_info.unit_data)
                     })?;
             }
         }
@@ -514,7 +514,7 @@ impl Canvas {
                         let mut w = w.writer_safe();
                         write!(w, "Where k = ")?;
 
-                        ycontext.where_fmt(base, &mut w, boundy)
+                        ycontext.where_fmt(&mut w, base, boundy)
                     })?;
 
                 "k+"
@@ -551,7 +551,7 @@ impl Canvas {
                         use std::fmt::Write;
                         write!(w, "{}", extra)?;
 
-                        ycontext.tick_fmt(value, &mut w, boundy, &mut ytick_info.unit_data)
+                        ycontext.tick_fmt(&mut w, value, boundy, &mut ytick_info.unit_data)
                     })?;
             }
         }
