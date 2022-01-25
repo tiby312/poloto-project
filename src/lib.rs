@@ -153,7 +153,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     ///
     /// ```
     /// use poloto::prelude::*;
-    /// let mut p = poloto::Plotter::new("title", "x", "y",i128::ctx(),i128::ctx());
+    /// let mut p = poloto::Plotter::new("title", "x", "y",i128::default_ctx(),i128::default_ctx());
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
@@ -181,7 +181,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
     /// plotter.line("", &data);
     /// ```
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -206,7 +206,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
     /// plotter.line_fill("", &data);
     /// ```
     pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -232,7 +232,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
     /// plotter.line_fill_raw("", &data);
     /// ```
     pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -259,7 +259,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
     /// plotter.scatter("", &data);
     /// ```
     pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -285,7 +285,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
     /// plotter.histogram("", &data);
     /// ```
     pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -321,7 +321,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
     /// plotter.line("", &data);
     /// plotter.num_css_class(Some(30));
     /// ```
@@ -365,7 +365,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
     /// plotter.line("", &data);
     /// let mut k=String::new();
     /// plotter.render(&mut k);
@@ -411,16 +411,16 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             },
         );
 
-        let data = render::Data {
+        let mut data = render::Data {
             boundx,
             boundy,
             tickx,
             ticky,
         };
 
-        canvas.render(&mut a, self, &data)?;
+        canvas.render_plots(&mut a, self, &data)?;
 
-        canvas.draw_base(a, self, data)
+        canvas.render_base(a, self, &mut data)
     }
 }
 

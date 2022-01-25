@@ -30,7 +30,7 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let mut plotter = poloto::plot("gaussian", "x", "y", f64::ctx(), f64::ctx());
+    let mut plotter = poloto::plot("gaussian", "x", "y", f64::default_ctx(), f64::default_ctx());
 
     plotter.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
@@ -48,25 +48,27 @@ fn main() {
 ## Data Example
 
 ```rust
-use poloto::num::timestamp::UnixTime;
+use poloto::num::timestamp::{UnixTime, UnixTimeContext};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
+    let timezone = &chrono::Utc;
+
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
-        (UnixTime::from_year(chrono::Utc, 2010), 3144000),
-        (UnixTime::from_year(chrono::Utc, 2011), 3518000),
-        (UnixTime::from_year(chrono::Utc, 2012), 3835000),
-        (UnixTime::from_year(chrono::Utc, 2013), 4133000),
-        (UnixTime::from_year(chrono::Utc, 2014), 4413000),
-        (UnixTime::from_year(chrono::Utc, 2015), 4682000),
-        (UnixTime::from_year(chrono::Utc, 2016), 5045000),
-        (UnixTime::from_year(chrono::Utc, 2017), 5321200),
-        (UnixTime::from_year(chrono::Utc, 2018), 5541900),
-        (UnixTime::from_year(chrono::Utc, 2019), 5773600),
-        (UnixTime::from_year(chrono::Utc, 2020), 5989400),
-        (UnixTime::from_year(chrono::Utc, 2021), 6219700),
-        (UnixTime::from_year(chrono::Utc, 2022), 0), //To complete our histogram, we manually specify when 2021 ends.
+        (UnixTime::from_year(timezone, 2010), 3144000),
+        (UnixTime::from_year(timezone, 2011), 3518000),
+        (UnixTime::from_year(timezone, 2012), 3835000),
+        (UnixTime::from_year(timezone, 2013), 4133000),
+        (UnixTime::from_year(timezone, 2014), 4413000),
+        (UnixTime::from_year(timezone, 2015), 4682000),
+        (UnixTime::from_year(timezone, 2016), 5045000),
+        (UnixTime::from_year(timezone, 2017), 5321200),
+        (UnixTime::from_year(timezone, 2018), 5541900),
+        (UnixTime::from_year(timezone, 2019), 5773600),
+        (UnixTime::from_year(timezone, 2020), 5989400),
+        (UnixTime::from_year(timezone, 2021), 6219700),
+        (UnixTime::from_year(timezone, 2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
     let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
@@ -80,9 +82,12 @@ fn main() {
         "title",
         xname,
         "yname",
-        UnixTime::ctx()
-            .with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(&chrono::Utc, s))),
-        i128::ctx().with_no_dash().with_marker(0).with_no_dash(),
+        UnixTimeContext::new(timezone)
+            .with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(timezone, s))),
+        i128::default_ctx()
+            .with_no_dash()
+            .with_marker(0)
+            .with_no_dash(),
     );
 
     plotter.line("foo", &data);
@@ -123,7 +128,7 @@ fn main() {
         .fuse()
     };
 
-    let mut plotter = poloto::plot("collatz", "x", "y", i128::ctx(), i128::ctx().with_marker(0));
+    let mut plotter = poloto::plot("collatz", "x", "y", i128::default_ctx(), i128::default_ctx().with_marker(0));
     for i in 1000..1006 {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
@@ -165,8 +170,8 @@ fn main() {
         "Heart Graph",
         "x",
         "y",
-        f64::ctx().with_marker(-20.0).with_marker(20.0),
-        f64::ctx().with_marker(-20.0).with_marker(20.0),
+        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
+        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
     );
 
     plotter.line_fill_raw("heart", range.map(heart));
@@ -194,8 +199,8 @@ fn main() {
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        f64::ctx(),
-        f64::ctx(),
+        f64::default_ctx(),
+        f64::default_ctx(),
     );
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.

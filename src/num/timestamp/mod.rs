@@ -41,8 +41,10 @@ pub struct UnixTimeContext<T: chrono::TimeZone> {
 }
 
 impl<T: chrono::TimeZone> UnixTimeContext<T> {
-    pub fn new(timezone: T) -> Self {
-        UnixTimeContext { timezone }
+    pub fn new(timezone: &T) -> Self {
+        UnixTimeContext {
+            timezone: timezone.clone(),
+        }
     }
 }
 

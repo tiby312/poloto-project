@@ -4,13 +4,15 @@ use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let day1 = (2020, 1, 30);
+
+    let timezone = &chrono::Utc;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
-        (UnixTime::from_ymd_hms(chrono::Utc, day1, 1, 1, 59), 3144000),
-        (UnixTime::from_ymd_hms(chrono::Utc, day1, 1, 2, 0), 3518000),
-        (UnixTime::from_ymd_hms(chrono::Utc, day1, 1, 2, 30), 3835000),
-        (UnixTime::from_ymd_hms(chrono::Utc, day1, 1, 2, 40), 2133000),
-        (UnixTime::from_ymd_hms(chrono::Utc, day1, 1, 3, 0), 4133000),
+        (UnixTime::from_ymd_hms(timezone, day1, 1, 1, 59), 3144000),
+        (UnixTime::from_ymd_hms(timezone, day1, 1, 2, 0), 3518000),
+        (UnixTime::from_ymd_hms(timezone, day1, 1, 2, 30), 3835000),
+        (UnixTime::from_ymd_hms(timezone, day1, 1, 2, 40), 2133000),
+        (UnixTime::from_ymd_hms(timezone, day1, 1, 3, 0), 4133000),
     ];
 
     let mut s = poloto::plot(
