@@ -354,7 +354,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, a: T) -> sfmt::Result {
+    pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> sfmt::Result {
         let (boundx, boundy) = num::find_bounds(
             self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
             &mut self.xcontext,
@@ -376,7 +376,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             boundx,
             DashInfo {
                 ideal_dash_size: 30.0,
-                max: canvas.scalex2,
+                max: canvas.scalex,
             },
         );
 
@@ -385,7 +385,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             boundy,
             DashInfo {
                 ideal_dash_size: 30.0,
-                max: canvas.scaley2,
+                max: canvas.scaley,
             },
         );
 
@@ -396,7 +396,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             ticky,
         };
 
-        canvas.render(a, self, data)
+        canvas.render(&mut a, self, &data)?;
+
+        canvas.draw_base(a, self, data)
     }
 }
 
