@@ -9,6 +9,9 @@ impl DiscNum for f64 {
     }
 }
 
+///
+/// Default float context. It will attempt to find reasonable step sizes, and format them as regular floats.
+///
 #[derive(Default)]
 pub struct DefaultFloatContext;
 impl PlotNumContext for DefaultFloatContext {

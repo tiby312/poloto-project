@@ -21,7 +21,7 @@ mod test_readme {
     external_doc_test!(include_str!("../README.md"));
 }
 
-use std::fmt;
+use std::fmt as sfmt;
 
 pub use tagger::upgrade_write;
 
@@ -36,16 +36,16 @@ use plotnum::*;
 pub mod num;
 pub mod simple_theme;
 
-use polotofmt::*;
-pub mod polotofmt;
+use fmt::*;
+pub mod fmt;
 
 ///
 /// The poloto prelude.
 ///
 pub mod prelude {
     pub use super::formatm;
+    pub use super::plotnum::ext::PlotNumContextExt;
     pub use super::plotnum::HasDefaultContext;
-    pub use super::plotnum::PlotNumContextExt;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
 }
@@ -56,7 +56,7 @@ const WIDTH: f64 = 800.0;
 const HEIGHT: f64 = 500.0;
 
 trait PlotTrait<X: PlotNum, Y: PlotNum> {
-    fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
+    fn write_name(&self, a: &mut dyn sfmt::Write) -> sfmt::Result;
 
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
@@ -64,7 +64,7 @@ trait PlotTrait<X: PlotNum, Y: PlotNum> {
 
 use std::marker::PhantomData;
 
-use fmt::Display;
+use sfmt::Display;
 struct PlotStruct<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)> + Clone, F: Display> {
     first: I,
     second: I,
@@ -89,7 +89,7 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)> + Clone, F: Display>
 impl<X: PlotNum, Y: PlotNum, D: Iterator<Item = (X, Y)> + Clone, F: Display> PlotTrait<X, Y>
     for PlotStruct<X, Y, D, F>
 {
-    fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
+    fn write_name(&self, a: &mut dyn sfmt::Write) -> sfmt::Result {
         write!(a, "{}", self.func)
     }
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
@@ -119,8 +119,8 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 ///
 pub fn plot<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a>(
     title: impl PlotterNameFmt<X, Y> + 'a,
-    xname: impl Display + 'a,
-    yname: impl Display + 'a,
+    xname: impl PlotterNameFmt<X, Y> + 'a,
+    yname: impl PlotterNameFmt<X, Y> + 'a,
     xcontext: X,
     ycontext: Y,
 ) -> Plotter<'a, X, Y> {
@@ -354,7 +354,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, a: T) -> fmt::Result {
+    pub fn render<T: std::fmt::Write>(&mut self, a: T) -> sfmt::Result {
         let (boundx, boundy) = num::find_bounds(
             self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
             &mut self.xcontext,
@@ -410,9 +410,9 @@ macro_rules! formatm {
 }
 
 ///
-/// Leverage rust's display format system using `RefCell` under the hood.
+/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
 ///
-pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
+pub fn disp<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result>(
     a: F,
 ) -> util::DisplayableClosureOnce<F> {
     util::DisplayableClosureOnce::new(a)
@@ -421,6 +421,8 @@ pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
 ///
 /// Convert a closure to a object that implements Display
 ///
-pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
+pub fn disp_const<F: Fn(&mut sfmt::Formatter) -> sfmt::Result>(
+    a: F,
+) -> util::DisplayableClosure<F> {
     util::DisplayableClosure::new(a)
 }

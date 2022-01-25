@@ -249,7 +249,6 @@ impl Canvas {
                         })?
                         .build(|writer| {
                             let mut last = None;
-                            //TODO dont necesarily filter?
                             for [x, y] in plot_iter
                                 .gen_iter(&mut p, xcontext, ycontext)
                                 .filter(|&[x, y]| x.is_finite() && y.is_finite())
@@ -346,7 +345,7 @@ impl Canvas {
         Ok(())
     }
 
-    pub fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: fmt::Write>(
+    pub fn draw_base<X: PlotNumContext, Y: PlotNumContext, T: sfmt::Write>(
         &self,
         writer: &mut tagger::ElemWriter<T>,
         plotter: &mut Plotter<X, Y>,
@@ -666,7 +665,7 @@ pub fn line_fill<T: std::fmt::Write>(
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
     add_start_end_base: bool,
-) -> fmt::Result {
+) -> sfmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 
@@ -714,7 +713,7 @@ pub fn line_fill<T: std::fmt::Write>(
 pub fn line<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
-) -> fmt::Result {
+) -> sfmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 

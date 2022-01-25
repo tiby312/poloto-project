@@ -6,7 +6,7 @@
 use super::*;
 const SCIENCE: usize = 4;
 
-fn write_normal_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
+fn write_normal_float<T: sfmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> sfmt::Result {
     if let Some(step) = step {
         let k = (-step.log10()).ceil();
         let k = k.max(0.0);
@@ -16,7 +16,7 @@ fn write_normal_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fm
     }
 }
 
-fn write_science_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
+fn write_science_float<T: sfmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> sfmt::Result {
     if let Some(step) = step {
         let precision = if a == 0.0 {
             0
@@ -45,7 +45,7 @@ fn write_science_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> f
 /// If the step size is not specified, the number will be formatted
 /// with no limit to the precision.
 ///
-pub fn write_interval_float<T: fmt::Write>(
+pub fn write_interval_float<T: sfmt::Write>(
     mut fm: T,
     a: f64,
     step: Option<f64>,
@@ -78,7 +78,7 @@ pub fn write_interval_float<T: fmt::Write>(
 /// If the step size is not specified, the number will be formatted
 /// with no limit to the precision if scientific mode is picked.
 ///
-pub fn write_interval_i128<T: fmt::Write>(
+pub fn write_interval_i128<T: sfmt::Write>(
     mut fm: T,
     a: i128,
     step: Option<i128>,
@@ -121,13 +121,13 @@ use std::cell::RefCell;
 /// has a shorter lifetime.
 pub struct DisplayableClosure<F>(pub F);
 
-impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
+impl<F: Fn(&mut sfmt::Formatter) -> sfmt::Result> DisplayableClosure<F> {
     pub fn new(a: F) -> Self {
         DisplayableClosure(a)
     }
 }
-impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+impl<F: Fn(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for DisplayableClosure<F> {
+    fn fmt(&self, formatter: &mut sfmt::Formatter) -> sfmt::Result {
         (self.0)(formatter)
     }
 }
@@ -137,13 +137,13 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
 ///
 pub struct DisplayableClosureOnce<F>(pub RefCell<Option<F>>);
 
-impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureOnce<F> {
+impl<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result> DisplayableClosureOnce<F> {
     pub fn new(a: F) -> Self {
         DisplayableClosureOnce(RefCell::new(Some(a)))
     }
 }
-impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureOnce<F> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+impl<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for DisplayableClosureOnce<F> {
+    fn fmt(&self, formatter: &mut sfmt::Formatter) -> sfmt::Result {
         if let Some(f) = (self.0.borrow_mut()).take() {
             (f)(formatter)
         } else {

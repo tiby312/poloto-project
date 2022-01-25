@@ -14,6 +14,9 @@ use chrono::prelude::*;
 use chrono::DateTime;
 pub use unixtime::*;
 
+///
+/// Conveys what unit is being used for step sizes.
+///
 #[derive(Copy, Clone, Debug)]
 pub enum TimestampType {
     YR,
@@ -30,6 +33,9 @@ impl std::fmt::Display for TimestampType {
     }
 }
 
+///
+/// Default [`UnixTime`] context.
+///
 #[derive(Default)]
 pub struct DefaultUnixTimeContext;
 impl PlotNumContext for DefaultUnixTimeContext {

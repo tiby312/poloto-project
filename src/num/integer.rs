@@ -59,17 +59,9 @@ fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]
     (best.0 as i128 * step_power, best.0)
 }
 
-/*
-/// Generate out good tick interval defaults for `i128`.
-pub fn compute_ticks(
-    ideal_num_steps: u32,
-    good_ticks: &[u32],
-    range: [i128; 2],
-) -> TickInfo<i128, StepAmount> {
-
-}
-*/
-
+///
+/// Default integer context. It will attempt to find reasonable step sizes, and format them as regular integers.
+///
 #[derive(Default)]
 pub struct DefaultIntegerContext;
 impl PlotNumContext for DefaultIntegerContext {

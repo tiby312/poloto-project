@@ -19,16 +19,15 @@ fn main() {
         (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    use poloto::polotofmt;
-    let title = polotofmt::title(|w, ([min, max], xs), _| {
+    let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
         let srt = UnixTime::dynamic_format(&min, xs);
         let end = UnixTime::dynamic_format(&max, xs);
         write!(w, "Entries from {} to {} in {}", srt, end, xs)
     });
 
-    let mut plotter = poloto::Plotter::new(
-        title,
-        "xname",
+    let mut plotter = poloto::plot(
+        "title",
+        xname,
         "yname",
         UnixTime::ctx().with_tick_fmt(|v, w, _b, _s| write!(w, "{}", v.format("%D"))),
         i128::ctx().with_no_dash().with_marker(0).with_no_dash(),

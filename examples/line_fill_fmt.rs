@@ -3,8 +3,9 @@ use poloto::prelude::*;
 fn main() {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let title =
-        poloto::polotofmt::title(|w, (x, xs), _| write!(w, "from {} to {} in {}", x[0], x[1], xs));
+    let title = poloto::fmt::name_ext(|w, (x, xs), _| {
+        write!(w, "from {} to {} in steps of {}", x[0], x[1], xs)
+    });
 
     let mut plotter = poloto::plot(
         title,

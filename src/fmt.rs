@@ -154,7 +154,7 @@ impl<K: Display, X: PlotNumContext, Y: PlotNumContext> PlotterNameFmt<X, Y> for 
     }
 }
 
-pub fn title<X: PlotNumContext, Y: PlotNumContext>(
+pub fn name_ext<X: PlotNumContext, Y: PlotNumContext>(
     func: impl FnMut(
         &mut dyn fmt::Write,
         ([X::Num; 2], &mut X::StepInfo),

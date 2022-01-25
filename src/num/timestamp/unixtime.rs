@@ -1,5 +1,8 @@
 use super::*;
 
+///
+/// A 64 bit integer unix timestamp in seconds since the epoch.
+///
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Copy, Clone)]
 pub struct UnixTime(pub i64);
 
@@ -261,6 +264,9 @@ impl std::fmt::Display for UnixTime {
     }
 }
 
+///
+/// Used by [`UnixTime::years()`]
+///
 #[derive(Clone)]
 pub struct UnixYears {
     counter: i32,
@@ -317,6 +323,10 @@ mod helper {
         }
     }
 }
+
+///
+/// Used by [`UnixTime::months()`]
+///
 #[derive(Debug, Clone)]
 pub struct UnixMonths {
     counter: helper::MonthCounter,
@@ -337,6 +347,9 @@ impl Iterator for UnixMonths {
     }
 }
 
+///
+/// Used by [`UnixTime::days()`]
+///
 #[derive(Clone)]
 pub struct UnixDays {
     counter: i64,
@@ -352,6 +365,9 @@ impl Iterator for UnixDays {
     }
 }
 
+///
+/// Used by [`UnixTime::hours()`]
+///
 #[derive(Clone)]
 pub struct UnixHours {
     counter: i64,
@@ -367,6 +383,9 @@ impl Iterator for UnixHours {
     }
 }
 
+///
+/// Used by [`UnixTime::minutes()`]
+///
 #[derive(Clone)]
 pub struct UnixMinutes {
     counter: i64,
@@ -381,6 +400,9 @@ impl Iterator for UnixMinutes {
     }
 }
 
+///
+/// Used by [`UnixTime::seconds()`]
+///
 #[derive(Clone)]
 pub struct UnixSeconds {
     counter: i64,

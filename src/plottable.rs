@@ -37,9 +37,10 @@ impl<A: PlotNum, B: PlotNum> Plottable<A, B> for &(A, B) {
     }
 }
 
-//pub use crop::Crop;
-//pub use crop::Croppable;
 pub mod crop {
+    //!
+    //! Contains the [`Croppable`] trait which allows replacing values with disconnect values.
+    //!
     use crate::Plottable;
 
     use crate::DiscNum;
