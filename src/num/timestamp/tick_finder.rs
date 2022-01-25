@@ -4,7 +4,7 @@ macro_rules! make_consider {
     ($fn_name1:ident,$fn_name2:ident,$ee:expr) => {
         pub fn $fn_name1(&mut self, step_sizes: &[i64], dash_nums: &'a [i64]) {
             for &a in step_sizes.iter().rev() {
-                if let Some(ticks) = self.gen_tick(self.start.$fn_name2(a)) {
+                if let Some(ticks) = self.gen_tick(self.start.$fn_name2(&self.timezone, a)) {
                     self.consider_set(Candidate {
                         ticks,
                         unit_data: $ee,
@@ -32,16 +32,17 @@ pub struct Candidate<'a> {
 }
 
 #[derive(Debug)]
-pub struct BestTickFinder<'a> {
+pub struct BestTickFinder<'a, T: chrono::TimeZone> {
     ideal_num_steps: u32,
     start: UnixTime,
     end: UnixTime,
     //The number of ticks at which to give up on this candidate.
     max_tick_num: u32,
     best: Candidate<'a>,
+    timezone: T,
 }
-impl<'a> BestTickFinder<'a> {
-    pub fn new(range: [UnixTime; 2], ideal_num_steps: u32) -> Self {
+impl<'a, T: chrono::TimeZone> BestTickFinder<'a, T> {
+    pub fn new(timezone: T, range: [UnixTime; 2], ideal_num_steps: u32) -> Self {
         let [start, end] = range;
         BestTickFinder {
             ideal_num_steps,
@@ -54,6 +55,7 @@ impl<'a> BestTickFinder<'a> {
                 dash_nums: &[],
                 chosen_tick: 0,
             },
+            timezone,
         }
     }
     pub fn into_best(self) -> Option<Candidate<'a>> {

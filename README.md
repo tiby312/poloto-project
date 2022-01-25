@@ -42,7 +42,7 @@ fn main() {
 ```
 ## Output
 
-<img src="./assets/gaussian.svg" alt="demo">
+<img src="./target/assets/gaussian.svg" alt="demo">
 
 
 ## Data Example
@@ -54,25 +54,25 @@ use poloto::prelude::*;
 fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
-        (UnixTime::from_year(2010), 3144000),
-        (UnixTime::from_year(2011), 3518000),
-        (UnixTime::from_year(2012), 3835000),
-        (UnixTime::from_year(2013), 4133000),
-        (UnixTime::from_year(2014), 4413000),
-        (UnixTime::from_year(2015), 4682000),
-        (UnixTime::from_year(2016), 5045000),
-        (UnixTime::from_year(2017), 5321200),
-        (UnixTime::from_year(2018), 5541900),
-        (UnixTime::from_year(2019), 5773600),
-        (UnixTime::from_year(2020), 5989400),
-        (UnixTime::from_year(2021), 6219700),
-        (UnixTime::from_year(2022), 0), //To complete our histogram, we manually specify when 2021 ends.
+        (UnixTime::from_year(chrono::Utc, 2010), 3144000),
+        (UnixTime::from_year(chrono::Utc, 2011), 3518000),
+        (UnixTime::from_year(chrono::Utc, 2012), 3835000),
+        (UnixTime::from_year(chrono::Utc, 2013), 4133000),
+        (UnixTime::from_year(chrono::Utc, 2014), 4413000),
+        (UnixTime::from_year(chrono::Utc, 2015), 4682000),
+        (UnixTime::from_year(chrono::Utc, 2016), 5045000),
+        (UnixTime::from_year(chrono::Utc, 2017), 5321200),
+        (UnixTime::from_year(chrono::Utc, 2018), 5541900),
+        (UnixTime::from_year(chrono::Utc, 2019), 5773600),
+        (UnixTime::from_year(chrono::Utc, 2020), 5989400),
+        (UnixTime::from_year(chrono::Utc, 2021), 6219700),
+        (UnixTime::from_year(chrono::Utc, 2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
     let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
         //Use dynamic or static formatting
-        let srt = UnixTime::dynamic_format(&min, xs);
-        let end = UnixTime::format(&max, "%Y");
+        let srt = UnixTime::dynamic_format(&min, &chrono::Utc, xs);
+        let end = UnixTime::format(&max, &chrono::Utc, "%Y");
         write!(w, "Entries from {} to {} in {}", srt, end, xs)
     });
 
@@ -80,7 +80,8 @@ fn main() {
         "title",
         xname,
         "yname",
-        UnixTime::ctx().with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(s))),
+        UnixTime::ctx()
+            .with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(&chrono::Utc, s))),
         i128::ctx().with_no_dash().with_marker(0).with_no_dash(),
     );
 
@@ -100,7 +101,7 @@ fn main() {
 
 ## Output
 
-<img src="./assets/years_fmt.svg" alt="demo">
+<img src="./target/assets/years_fmt.svg" alt="demo">
 
 
 ## Collatz Example
@@ -141,7 +142,7 @@ fn main() {
 ## Output
 
 
-<img src="./assets/collatz.svg" alt="demo">
+<img src="./target/assets/collatz.svg" alt="demo">
 
 
 ## Parametric Example
@@ -178,7 +179,7 @@ fn main() {
 
 ## Output
 
-<img src="./assets/heart.svg" alt="demo">
+<img src="./target/assets/heart.svg" alt="demo">
 
 
 ## Trig Example 
@@ -221,7 +222,7 @@ fn main() {
 
 ## Output
 
-<img src="./assets/trig.svg" alt="demo">
+<img src="./target/assets/trig.svg" alt="demo">
 
 
 

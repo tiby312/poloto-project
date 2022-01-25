@@ -1,2 +1,3 @@
 /target
+!/target/assets
 Cargo.lock

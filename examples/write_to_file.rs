@@ -11,7 +11,7 @@ fn main() -> std::io::Result<()> {
     s.line_fill("sin-20", x.clone().map(|x| [x, x.sin() - 20.]));
 
     //Write the graph to a file
-    let mut file = std::fs::File::create("assets/write_to_file.svg")?;
+    let mut file = std::fs::File::create("target/assets/write_to_file.svg")?;
     use std::io::Write;
     write!(file, "{}", poloto::disp(|a| s.simple_theme(a)))
 }

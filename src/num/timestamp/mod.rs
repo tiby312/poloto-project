@@ -36,9 +36,25 @@ impl std::fmt::Display for TimestampType {
 ///
 /// Default [`UnixTime`] context.
 ///
-#[derive(Default)]
-pub struct DefaultUnixTimeContext;
-impl PlotNumContext for DefaultUnixTimeContext {
+pub struct DefaultUnixTimeContext<T: chrono::TimeZone> {
+    timezone: T,
+}
+
+impl<T: chrono::TimeZone> DefaultUnixTimeContext<T> {
+    pub fn new(timezone: T) -> Self {
+        DefaultUnixTimeContext { timezone }
+    }
+}
+
+impl Default for DefaultUnixTimeContext<Utc> {
+    fn default() -> Self {
+        DefaultUnixTimeContext {
+            timezone: chrono::Utc,
+        }
+    }
+}
+
+impl<T: chrono::TimeZone> PlotNumContext for DefaultUnixTimeContext<T> {
     type StepInfo = TimestampType;
     type Num = UnixTime;
 
@@ -58,7 +74,7 @@ impl PlotNumContext for DefaultUnixTimeContext {
         _bound: [UnixTime; 2],
         info: &mut TimestampType,
     ) -> std::fmt::Result {
-        write!(writer, "{}", val.dynamic_format(info))
+        write!(writer, "{}", val.dynamic_format(&self.timezone, info))
     }
 
     fn where_fmt(
@@ -78,7 +94,7 @@ impl PlotNumContext for DefaultUnixTimeContext {
     ) -> TickInfo<UnixTime, TimestampType> {
         assert!(range[0] <= range[1]);
 
-        let mut t = tick_finder::BestTickFinder::new(range, ideal_num_steps);
+        let mut t = tick_finder::BestTickFinder::new(self.timezone.clone(), range, ideal_num_steps);
 
         let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
         let steps_mo = &[1, 2, 3, 6];
@@ -154,7 +170,7 @@ impl PlotNumContext for DefaultUnixTimeContext {
 }
 
 impl HasDefaultContext for UnixTime {
-    type DefaultContext = DefaultUnixTimeContext;
+    type DefaultContext = DefaultUnixTimeContext<chrono::Utc>;
 }
 
 impl PlotNum for UnixTime {}

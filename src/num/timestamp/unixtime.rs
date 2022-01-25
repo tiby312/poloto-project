@@ -15,86 +15,63 @@ fn round_up_to_nearest_multiple(val: i64, multiple: i64) -> i64 {
     ((val + ss) / multiple) * multiple
 }
 
+impl<X: chrono::TimeZone> From<chrono::DateTime<X>> for UnixTime {
+    fn from(a: chrono::DateTime<X>) -> UnixTime {
+        UnixTime(a.timestamp())
+    }
+}
+
 impl UnixTime {
     pub fn parse_from_str(s: &str, fmt: &str) -> ParseResult<UnixTime> {
         NaiveDateTime::parse_from_str(s, fmt).map(|x| UnixTime(x.timestamp()))
     }
-    pub fn from_year(year: i32) -> UnixTime {
+
+    /// Convenience function.
+    pub fn from_year<T: TimeZone>(timezone: T, year: i32) -> UnixTime {
+        UnixTime(timezone.yo(year, 1).and_hms(0, 0, 0).timestamp())
+    }
+
+    pub fn datetime<T: TimeZone>(&self, timezone: &T) -> DateTime<T> {
+        timezone.from_utc_datetime(&chrono::NaiveDateTime::from_timestamp(self.0, 0))
+    }
+
+    /// Convenience function.
+    pub fn from_ymd<T: TimeZone>(timezone: T, year: i32, month: u32, day: u32) -> UnixTime {
+        UnixTime(timezone.ymd(year, month, day).and_hms(0, 0, 0).timestamp())
+    }
+
+    /// Convenience function.
+    pub fn from_ymd_hms<T: TimeZone>(
+        timezone: T,
+        (year, month, day): (i32, u32, u32),
+        hours: u32,
+        min: u32,
+        seconds: u32,
+    ) -> UnixTime {
         UnixTime(
-            NaiveDateTime::new(
-                NaiveDate::from_ymd(year, 1, 1),
-                NaiveTime::from_hms(0, 0, 0),
-            )
-            .timestamp(),
+            timezone
+                .ymd(year, month, day)
+                .and_hms(hours, min, seconds)
+                .timestamp(),
         )
     }
 
-    pub fn from_ymd(year: i32, month: u32, day: u32) -> UnixTime {
-        UnixTime(
-            NaiveDateTime::new(
-                NaiveDate::from_ymd(year, month, day),
-                NaiveTime::from_hms(0, 0, 0),
-            )
-            .timestamp(),
-        )
-    }
+    pub fn years<T: TimeZone>(&self, timezone: &T, step_value: i64) -> UnixYears<T> {
+        let this = self.datetime(timezone);
 
-    pub fn from_ymd_hms(day: (i32, u32, u32), hours: u32, min: u32, seconds: u32) -> UnixTime {
-        let (year, month, day) = day;
-        UnixTime(
-            NaiveDateTime::new(
-                NaiveDate::from_ymd(year, month, day),
-                NaiveTime::from_hms(hours, min, seconds),
-            )
-            .timestamp(),
-        )
-    }
-
-    pub fn year(&self) -> i32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).year()
-    }
-    //1 to 12
-    pub fn month(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).month()
-    }
-
-    pub fn weekday(&self) -> chrono::Weekday {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).weekday()
-    }
-
-    //1 to 30
-    pub fn day(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).day()
-    }
-
-    //0 to 23
-    pub fn hour(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).hour()
-    }
-    //0 to 59
-    pub fn minute(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).minute()
-    }
-
-    //0 to 59
-    pub fn second(&self) -> u32 {
-        chrono::NaiveDateTime::from_timestamp(self.0, 0).second()
-    }
-
-    pub fn years(&self, step_value: i64) -> UnixYears {
-        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
         let yy = this.year() as i64;
 
         let counter = round_up_to_nearest_multiple(yy, step_value) as i32;
 
         UnixYears {
+            timezone: timezone.clone(),
             counter,
             step_value: step_value as i32,
         }
     }
 
-    pub fn months(&self, step_value: i64) -> UnixMonths {
-        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+    pub fn months<T: chrono::TimeZone>(&self, timezone: &T, step_value: i64) -> UnixMonths<T> {
+        let this = self.datetime(timezone);
 
         let mm = this.month0() as i64;
 
@@ -108,13 +85,15 @@ impl UnixTime {
         m.round_up_to_nearest_multiple_month(step_value as u32);
 
         UnixMonths {
+            timezone: timezone.clone(),
             counter: m,
             step_value: step_value as u32,
         }
     }
 
-    pub fn days(&self, step_value: i64) -> UnixDays {
-        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+    pub fn days<T: chrono::TimeZone>(&self, timezone: &T, step_value: i64) -> UnixDays<T> {
+        let this = self.datetime(timezone);
+
         let mut dd = this.day0() as i64;
 
         //round up to nearest day.
@@ -124,21 +103,20 @@ impl UnixTime {
 
         let dd = round_up_to_nearest_multiple(dd, step_value);
 
-        let base = chrono::NaiveDateTime::new(
-            NaiveDate::from_ymd(this.year(), this.month(), 1),
-            chrono::NaiveTime::from_hms(0, 0, 0),
-        );
+        let base = timezone.ymd(this.year(), this.month(), 1).and_hms(0, 0, 0);
 
         let counter = base.timestamp() + dd * 24 * 60 * 60;
 
         UnixDays {
+            _timezone: timezone.clone(),
             counter,
             step_value,
         }
     }
 
-    pub fn hours(&self, step_value: i64) -> UnixHours {
-        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+    pub fn hours<T: chrono::TimeZone>(&self, timezone: &T, step_value: i64) -> UnixHours<T> {
+        let this = self.datetime(timezone);
+
         let mut hh = this.hour() as i64;
 
         //round up to nearest hour.
@@ -147,18 +125,20 @@ impl UnixTime {
         }
         let hh = round_up_to_nearest_multiple(hh, step_value);
 
-        let base = chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(0, 0, 0));
+        let base = this.date().and_hms(0, 0, 0);
 
         let counter = base.timestamp() + hh * 60 * 60;
 
         UnixHours {
+            _timezone: this.timezone(),
             counter,
             step_value,
         }
     }
 
-    pub fn minutes(&self, step_value: i64) -> UnixMinutes {
-        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+    pub fn minutes<T: TimeZone>(&self, timezone: &T, step_value: i64) -> UnixMinutes<T> {
+        let this = self.datetime(timezone);
+
         let mut mm = this.minute() as i64;
 
         //round up to nearest minute
@@ -168,46 +148,53 @@ impl UnixTime {
 
         let mm = round_up_to_nearest_multiple(mm, step_value);
 
-        let base =
-            chrono::NaiveDateTime::new(this.date(), chrono::NaiveTime::from_hms(this.hour(), 0, 0));
+        let base = this.date().and_hms(this.hour(), 0, 0);
 
         let counter = base.timestamp() + mm * 60;
 
         UnixMinutes {
+            _timezone: timezone.clone(),
             counter,
             step_value,
         }
     }
 
-    pub fn seconds(&self, step_value: i64) -> UnixSeconds {
-        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
+    pub fn seconds<T: TimeZone>(&self, timezone: &T, step_value: i64) -> UnixSeconds<T> {
+        let this = self.datetime(timezone);
+
         let ss = this.second() as i64;
 
         let ss = round_up_to_nearest_multiple(ss, step_value);
-        let base = chrono::NaiveDateTime::new(
-            this.date(),
-            chrono::NaiveTime::from_hms(this.hour(), this.minute(), 0),
-        );
+
+        let base = this.date().and_hms(this.hour(), this.minute(), 0);
 
         let counter = base.timestamp() + ss;
 
         UnixSeconds {
+            _timezone: timezone.clone(),
             counter,
             step_value,
         }
     }
 
-    pub fn format<'a>(
+    pub fn format<'a, T: TimeZone + 'a>(
         &self,
+        timezone: &'a T,
         a: &'a str,
-    ) -> chrono::format::DelayedFormat<chrono::format::StrftimeItems<'a>> {
-        let this = chrono::NaiveDateTime::from_timestamp(self.0, 0);
-        this.format(a)
+    ) -> chrono::format::DelayedFormat<chrono::format::StrftimeItems<'a>>
+    where
+        T::Offset: Display,
+    {
+        self.datetime(timezone).format(a)
     }
 
-    pub fn dynamic_format<'a>(&'a self, info: &'a TimestampType) -> impl Display + 'a {
+    pub fn dynamic_format<'a, T: TimeZone + 'a>(
+        &'a self,
+        timezone: &'a T,
+        info: &'a TimestampType,
+    ) -> impl Display + 'a {
         crate::disp_const(move |formatter| {
-            let val = self;
+            let val = self.datetime(timezone);
             use TimestampType::*;
 
             let m = match val.month() {
@@ -264,22 +251,21 @@ impl std::fmt::Display for UnixTime {
     }
 }
 
+use chrono::TimeZone;
 ///
 /// Used by [`UnixTime::years()`]
 ///
 #[derive(Clone)]
-pub struct UnixYears {
+pub struct UnixYears<T: TimeZone> {
+    timezone: T,
     counter: i32,
     step_value: i32,
 }
 
-impl Iterator for UnixYears {
+impl<T: TimeZone> Iterator for UnixYears<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let y = chrono::NaiveDateTime::new(
-            chrono::NaiveDate::from_yo(self.counter, 1),
-            chrono::NaiveTime::from_hms(0, 0, 0),
-        );
+        let y = self.timezone.yo(self.counter, 1).and_hms(0, 0, 0);
         self.counter += self.step_value;
         Some(UnixTime(y.timestamp()))
     }
@@ -328,18 +314,19 @@ mod helper {
 /// Used by [`UnixTime::months()`]
 ///
 #[derive(Debug, Clone)]
-pub struct UnixMonths {
+pub struct UnixMonths<T: TimeZone> {
+    timezone: T,
     counter: helper::MonthCounter,
     step_value: u32,
 }
 
-impl Iterator for UnixMonths {
+impl<T: TimeZone> Iterator for UnixMonths<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let y = chrono::NaiveDateTime::new(
-            chrono::NaiveDate::from_ymd(self.counter.year(), self.counter.month() + 1, 1),
-            chrono::NaiveTime::from_hms(0, 0, 0),
-        );
+        let y = self
+            .timezone
+            .ymd(self.counter.year(), self.counter.month() + 1, 1)
+            .and_hms(0, 0, 0);
 
         self.counter.step(self.step_value);
 
@@ -351,12 +338,13 @@ impl Iterator for UnixMonths {
 /// Used by [`UnixTime::days()`]
 ///
 #[derive(Clone)]
-pub struct UnixDays {
+pub struct UnixDays<T: TimeZone> {
+    _timezone: T,
     counter: i64,
     step_value: i64,
 }
 
-impl Iterator for UnixDays {
+impl<T: TimeZone> Iterator for UnixDays<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
         let r = self.counter;
@@ -369,12 +357,13 @@ impl Iterator for UnixDays {
 /// Used by [`UnixTime::hours()`]
 ///
 #[derive(Clone)]
-pub struct UnixHours {
+pub struct UnixHours<T: TimeZone> {
+    _timezone: T,
     counter: i64,
     step_value: i64,
 }
 
-impl Iterator for UnixHours {
+impl<T: TimeZone> Iterator for UnixHours<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
         let r = self.counter;
@@ -387,11 +376,12 @@ impl Iterator for UnixHours {
 /// Used by [`UnixTime::minutes()`]
 ///
 #[derive(Clone)]
-pub struct UnixMinutes {
+pub struct UnixMinutes<T: TimeZone> {
+    _timezone: T,
     counter: i64,
     step_value: i64,
 }
-impl Iterator for UnixMinutes {
+impl<T: TimeZone> Iterator for UnixMinutes<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
         let r = self.counter;
@@ -404,11 +394,12 @@ impl Iterator for UnixMinutes {
 /// Used by [`UnixTime::seconds()`]
 ///
 #[derive(Clone)]
-pub struct UnixSeconds {
+pub struct UnixSeconds<T: TimeZone> {
+    _timezone: T,
     counter: i64,
     step_value: i64,
 }
-impl Iterator for UnixSeconds {
+impl<T: TimeZone> Iterator for UnixSeconds<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
         let r = self.counter;
@@ -417,21 +408,20 @@ impl Iterator for UnixSeconds {
     }
 }
 
-/*
 #[test]
 fn test_hours() {
     // 1642123584 (update)
     // (2022-01-14T01:26:24+00:00)
 
     let a = UnixTime(1642232500);
-    println!("start:{}", a);
-    let mut it = a.hours(5);
 
-    for a in it.take(4) {
-        println!("{}", a);
-    }
+    println!(
+        "{}  {}  vx {} tz",
+        a,
+        a.datetime(&chrono::Utc).hour(),
+        a.datetime(&chrono::Local).hour()
+    );
 
-    panic!();
     /*
     assert_eq!(2, it.next().unwrap().hour());
     assert_eq!(3, it.next().unwrap().hour());
@@ -460,6 +450,7 @@ fn test_hours() {
     assert_eq!(2, it.next().unwrap().hour());
     */
 }
+/*
 
 #[test]
 fn test_years() {
