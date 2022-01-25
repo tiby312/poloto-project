@@ -73,8 +73,8 @@ fn main() {
 
     let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
         //Use dynamic or static formatting
-        let srt = UnixTime::dynamic_format(&min, &chrono::Utc, xs);
-        let end = UnixTime::format(&max, &chrono::Utc, "%Y");
+        let srt = UnixTime::dynamic_format(&min, timezone, xs);
+        let end = UnixTime::format(&max, timezone, "%Y");
         write!(w, "Entries from {} to {} in {}", srt, end, xs)
     });
 
