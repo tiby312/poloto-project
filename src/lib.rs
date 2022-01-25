@@ -143,8 +143,8 @@ pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
     plots: Vec<Plot<'a, X::Num, Y::Num>>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
-    xcontext: X,
-    ycontext: Y,
+    xcontext: Option<X>,
+    ycontext: Option<Y>,
 }
 
 impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
@@ -152,7 +152,8 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// Create a plotter with the specified element.
     ///
     /// ```
-    /// let mut p = poloto::Plotter::new("title", "x", "y");
+    /// use poloto::prelude::*;
+    /// let mut p = poloto::Plotter::new("title", "x", "y",i128::ctx(),i128::ctx());
     /// p.line("",[[1,1]]);
     /// ```
     pub fn new(
@@ -169,8 +170,8 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             plots: Vec::new(),
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xcontext,
-            ycontext,
+            xcontext: Some(xcontext),
+            ycontext: Some(ycontext),
         }
     }
 
@@ -178,8 +179,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// The element belongs to the `.poloto[N]stroke` css class.
     ///
     /// ```
+    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
     /// plotter.line("", &data);
     /// ```
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -202,8 +204,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// The path element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
+    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
     /// plotter.line_fill("", &data);
     /// ```
     pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -227,8 +230,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// The path element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
+    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
     /// plotter.line_fill_raw("", &data);
     /// ```
     pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -253,8 +257,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// with the latter class overriding the former.
     ///
     /// ```
+    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
     /// plotter.scatter("", &data);
     /// ```
     pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -278,8 +283,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// Each rect element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
+    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
     /// plotter.histogram("", &data);
     /// ```
     pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -313,8 +319,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// A value of None, means it will never wrap around.
     ///
     /// ```
+    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
     /// plotter.line("", &data);
     /// plotter.num_css_class(Some(30));
     /// ```
@@ -324,17 +331,25 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
         self
     }
 
-    /* TODO add back
     ///
     /// Move a plotter out from behind a mutable reference leaving
     /// an empty plotter.
     ///
     pub fn move_into(&mut self) -> Plotter<'a, X, Y> {
-        let mut empty = crate::plot("", "", "");
+        let mut empty = Plotter {
+            title: Box::new(""),
+            xname: Box::new(""),
+            yname: Box::new(""),
+            plots: Vec::new(),
+            num_css_classes: None,
+            preserve_aspect: false,
+            xcontext: None,
+            ycontext: None,
+        };
+
         core::mem::swap(&mut empty, self);
         empty
     }
-    */
 
     ///
     /// Use the plot iterators to write out the graph elements.
@@ -348,30 +363,37 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// this function will mutable borrow the Plotter and leave it with empty data.
     ///
     /// ```
+    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y");
+    /// let mut plotter = poloto::plot("title", "x", "y",f64::ctx(),f64::ctx());
     /// plotter.line("", &data);
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> sfmt::Result {
+        assert!(self.xcontext.is_some());
+        assert!(self.ycontext.is_some());
+
+        let xcontext = self.xcontext.as_mut().unwrap();
+        let ycontext = self.ycontext.as_mut().unwrap();
+
         let (boundx, boundy) = num::find_bounds(
             self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            &mut self.xcontext,
-            &mut self.ycontext,
+            xcontext,
+            ycontext,
         );
 
         //knowldge of canvas dim
         let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
 
-        if let Some(a) = self.xcontext.ideal_num_ticks() {
+        if let Some(a) = xcontext.ideal_num_ticks() {
             canvas.ideal_num_xsteps = a;
         }
-        if let Some(a) = self.ycontext.ideal_num_ticks() {
+        if let Some(a) = ycontext.ideal_num_ticks() {
             canvas.ideal_num_ysteps = a;
         }
 
-        let tickx = self.xcontext.compute_ticks(
+        let tickx = xcontext.compute_ticks(
             canvas.ideal_num_xsteps,
             boundx,
             DashInfo {
@@ -380,7 +402,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             },
         );
 
-        let ticky = self.ycontext.compute_ticks(
+        let ticky = ycontext.compute_ticks(
             canvas.ideal_num_ysteps,
             boundy,
             DashInfo {

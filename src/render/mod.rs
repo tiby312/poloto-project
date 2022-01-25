@@ -93,8 +93,8 @@ impl Canvas {
 
         let mut writer = tagger::new(writer);
 
-        let xcontext = &mut plotter.xcontext;
-        let ycontext = &mut plotter.ycontext;
+        let xcontext = plotter.xcontext.as_mut().unwrap();
+        let ycontext = plotter.ycontext.as_mut().unwrap();
 
         let mut color_iter = {
             let max = if let Some(nn) = num_css_classes {
@@ -371,8 +371,9 @@ impl Canvas {
         let mut xtick_info = data.tickx;
         let mut ytick_info = data.ticky;
 
-        let xcontext = &mut plotter.xcontext;
-        let ycontext = &mut plotter.ycontext;
+        let xcontext = plotter.xcontext.as_mut().unwrap();
+        let ycontext = plotter.ycontext.as_mut().unwrap();
+
         let texty_padding = paddingy * 0.3;
         let textx_padding = padding * 0.1;
 
