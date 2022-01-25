@@ -15,7 +15,7 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let mut plotter = poloto::plot("gaussian", "x", "y", f64::ctx(), f64::ctx());
+    let mut plotter = poloto::plot("gaussian", "x", "y", f64::default_ctx(), f64::default_ctx());
 
     plotter.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));

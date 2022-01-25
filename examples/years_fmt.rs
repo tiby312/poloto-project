@@ -30,9 +30,12 @@ fn main() {
         "title",
         xname,
         "yname",
-        UnixTime::ctx()
+        UnixTime::default_ctx()
             .with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(&chrono::Utc, s))),
-        i128::ctx().with_no_dash().with_marker(0).with_no_dash(),
+        i128::default_ctx()
+            .with_no_dash()
+            .with_marker(0)
+            .with_no_dash(),
     );
 
     plotter.line("foo", &data);

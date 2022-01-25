@@ -33,7 +33,7 @@ fn main() {
         "Year",
         "Number of Articles",
         UnixTimeContext::new(chrono::Local),
-        i128::ctx().with_marker(0),
+        i128::default_ctx().with_marker(0),
     );
     s.line("", &data);
 

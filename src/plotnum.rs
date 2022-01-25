@@ -16,7 +16,7 @@ pub trait DiscNum: PlotNum {
 pub trait HasDefaultContext {
     type DefaultContext: PlotNumContext + Default;
 
-    fn ctx() -> Self::DefaultContext {
+    fn default_ctx() -> Self::DefaultContext {
         Self::DefaultContext::default()
     }
 }

@@ -7,8 +7,8 @@ fn main() {
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        f64::ctx(),
-        f64::ctx(),
+        f64::default_ctx(),
+        f64::default_ctx(),
     );
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.

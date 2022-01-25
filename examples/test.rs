@@ -74,8 +74,8 @@ fn main() -> std::fmt::Result {
                                     formatm!("test {}", i),
                                     "x",
                                     "y",
-                                    f64::ctx(),
-                                    f64::ctx(),
+                                    f64::default_ctx(),
+                                    f64::default_ctx(),
                                 )
                                 .scatter("", test)
                                 .render(a)
@@ -97,8 +97,8 @@ fn main() -> std::fmt::Result {
                                     formatm!("test {}", i),
                                     "x",
                                     "y",
-                                    i128::ctx(),
-                                    i128::ctx(),
+                                    i128::default_ctx(),
+                                    i128::default_ctx(),
                                 )
                                 .scatter("", test)
                                 .render(a)

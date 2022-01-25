@@ -23,8 +23,8 @@ fn main() {
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        UnixTime::ctx(),
-        i128::ctx().with_marker(0),
+        UnixTime::default_ctx(),
+        i128::default_ctx().with_marker(0),
     );
     s.line("", &data);
 

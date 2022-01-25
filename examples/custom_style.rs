@@ -8,8 +8,8 @@ fn main() {
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
-        f64::ctx(),
-        f64::ctx(),
+        f64::default_ctx(),
+        f64::default_ctx(),
     );
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));

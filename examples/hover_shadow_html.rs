@@ -6,8 +6,8 @@ fn main() {
         "Demo: Hovering and shadows",
         "x",
         "y",
-        f64::ctx(),
-        f64::ctx(),
+        f64::default_ctx(),
+        f64::default_ctx(),
     );
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
