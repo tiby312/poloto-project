@@ -1,6 +1,7 @@
 //!
 //! Contains the [`PlotNumContextExt`] trait that provides adaptor functions modifying a [`PlotNumContext`].
 //!
+
 use super::*;
 
 ///

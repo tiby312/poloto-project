@@ -1,7 +1,7 @@
 //!
 //! Contains the [`PlotNum`] trait and their supporting structs.
 //!
-///
+
 pub mod ext;
 
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
