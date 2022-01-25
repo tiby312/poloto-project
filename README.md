@@ -70,8 +70,9 @@ fn main() {
     ];
 
     let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
+        //Use dynamic or static formatting
         let srt = UnixTime::dynamic_format(&min, xs);
-        let end = UnixTime::dynamic_format(&max, xs);
+        let end = UnixTime::format(&max, "%Y");
         write!(w, "Entries from {} to {} in {}", srt, end, xs)
     });
 
@@ -79,7 +80,7 @@ fn main() {
         "title",
         xname,
         "yname",
-        UnixTime::ctx().with_tick_fmt(|v, w, _b, _s| write!(w, "{}", v.format("%D"))),
+        UnixTime::ctx().with_tick_fmt(|v, w, _b, s| write!(w, "{} yr", v.dynamic_format(s))),
         i128::ctx().with_no_dash().with_marker(0).with_no_dash(),
     );
 
