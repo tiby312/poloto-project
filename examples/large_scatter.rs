@@ -1,8 +1,14 @@
-use poloto::*;
+use poloto::prelude::*;
 fn main() {
     let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
 
-    let mut plotter = plot("cows per year", "year", "cows");
+    let mut plotter = poloto::plot(
+        "cows per year",
+        "year",
+        "cows",
+        f64::default_ctx(),
+        f64::default_ctx(),
+    );
 
     plotter.scatter("a", x.clone().map(|x| (x, x.cos())));
 
@@ -10,10 +16,10 @@ fn main() {
 
     println!(
         "{}<style>{}{}</style>{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
         poloto::disp(|a| plotter.render(a)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     );
 }

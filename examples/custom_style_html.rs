@@ -1,9 +1,16 @@
+use poloto::prelude::*;
 ///This displays the same exact image as in the `custom_style.rs`,
 ///with the exception that the styles are not in the svg itself.
 ///The svg is embedded in the html, and we can modify its style by
 ///using styles that override the svg's style.
 fn main() {
-    let mut s = poloto::plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
+    let mut s = poloto::plot(
+        "Demo: you can use CSS patterns if you embed SVG!",
+        "x",
+        "y",
+        f64::default_ctx(),
+        f64::default_ctx(),
+    );
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -28,7 +35,7 @@ fn main() {
 </html>
         "###,
         HEADER,
-        poloto::disp(move |a| poloto::simple_theme(a, s))
+        poloto::disp(move |a| s.simple_theme(a))
     );
 }
 

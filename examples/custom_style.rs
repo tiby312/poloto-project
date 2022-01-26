@@ -1,3 +1,5 @@
+use poloto::prelude::*;
+
 //PIPE me to a file!
 fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
@@ -6,6 +8,8 @@ fn main() {
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
+        f64::default_ctx(),
+        f64::default_ctx(),
     );
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
@@ -13,8 +17,8 @@ fn main() {
 
     println!(
         "{}<style>{}</style>{}{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         r###"
     <defs>
         <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
@@ -30,6 +34,6 @@ fn main() {
     }
     </style>"###,
         poloto::disp(|a| s.render(a)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     );
 }

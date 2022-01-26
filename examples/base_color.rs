@@ -1,16 +1,22 @@
+use poloto::prelude::*;
 fn main() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let mut plotter = poloto::plot("cows per year", "year", "cow")
-        .scatter("", &data)
-        .move_into();
+    let mut plotter = poloto::plot(
+        "cows per year",
+        "year",
+        "cow",
+        f64::default_ctx(),
+        f64::default_ctx(),
+    );
+    plotter.scatter("", &data);
 
     println!(
         "{}<style>{}{}</style>{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}",
         poloto::disp(|a| plotter.render(a)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     )
 }

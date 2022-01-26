@@ -13,6 +13,7 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 ## Gaussian Example
 
 ```rust
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
@@ -29,63 +30,89 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let plotter = poloto::plot("gaussian", "x", "y")
-        .line("σ = 1.0", range.clone().map(|x| [x, g1(x)]))
-        .line("σ = 0.5", range.clone().map(|x| [x, g2(x)]))
-        .line("σ = 0.3", range.clone().map(|x| [x, g3(x)]))
-        .ymarker(0.0)
-        .move_into();
+    let mut plotter = poloto::plot("gaussian", "x", "y", f64::default_ctx(), f64::default_ctx());
 
-    println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
+    plotter.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
+    plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
+    plotter.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+
+    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
+
 ```
 ## Output
 
-<img src="./assets/gaussian.svg" alt="demo">
+<img src="./target/assets/gaussian.svg" alt="demo">
 
 
 ## Data Example
 
 ```rust
+use poloto::num::timestamp::{UnixTime, UnixTimeContext};
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
+    let timezone = &chrono::Utc;
+
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
-        [2010, 3144000],
-        [2011, 3518000],
-        [2012, 3835000],
-        [2013, 4133000],
-        [2014, 4413000],
-        [2015, 4682000],
-        [2016, 5045000],
-        [2017, 5321200],
-        [2018, 5541900],
-        [2019, 5773600],
-        [2020, 5989400],
-        [2021, 6219700],
-        [2022, 0], //To complete our histogram, we manually specify when 2021 ends.
+        (UnixTime::from_year(timezone, 2010), 3144000),
+        (UnixTime::from_year(timezone, 2011), 3518000),
+        (UnixTime::from_year(timezone, 2012), 3835000),
+        (UnixTime::from_year(timezone, 2013), 4133000),
+        (UnixTime::from_year(timezone, 2014), 4413000),
+        (UnixTime::from_year(timezone, 2015), 4682000),
+        (UnixTime::from_year(timezone, 2016), 5045000),
+        (UnixTime::from_year(timezone, 2017), 5321200),
+        (UnixTime::from_year(timezone, 2018), 5541900),
+        (UnixTime::from_year(timezone, 2019), 5773600),
+        (UnixTime::from_year(timezone, 2020), 5989400),
+        (UnixTime::from_year(timezone, 2021), 6219700),
+        (UnixTime::from_year(timezone, 2022), 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let mut s = poloto::plot("Number of Wikipedia Articles", "Year", "Number of Articles");
+    let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
+        //Use dynamic or static formatting
+        let srt = UnixTime::dynamic_format(&min, timezone, xs);
+        let end = UnixTime::format(&max, timezone, "%Y");
+        write!(w, "Entries from {} to {} in {}", srt, end, xs)
+    });
 
-    s.histogram("", &data);
+    let mut plotter = poloto::plot(
+        "title",
+        xname,
+        "yname",
+        UnixTimeContext::new(timezone)
+            .with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(timezone, s))),
+        i128::default_ctx()
+            .with_no_dash()
+            .with_marker(0)
+            .with_no_dash(),
+    );
 
-    //Scale grpah to include up to the year 2025.
-    //Also scale to include a value of 0 articles.
-    s.xmarker(2025).ymarker(0);
+    plotter.line("foo", &data);
 
-    println!("{}", poloto::disp(|a| poloto::simple_theme(a, s)));
+    println!(
+        "{}<style>{}{}</style>{}{}",
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
+        ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
+        poloto::disp(|w| plotter.render(w)),
+        poloto::simple_theme::SVG_END
+    )
 }
+
 ```
 
 ## Output
 
-<img src="./assets/simple.svg" alt="demo">
+<img src="./target/assets/years_fmt.svg" alt="demo">
 
 
 ## Collatz Example
 
 ```rust
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
@@ -101,21 +128,18 @@ fn main() {
         .fuse()
     };
 
-    let mut plotter = poloto::plot("collatz", "x", "y");
-
-    plotter.ymarker(0);
-
+    let mut plotter = poloto::plot("collatz", "x", "y", i128::default_ctx(), i128::default_ctx().with_marker(0));
     for i in 1000..1006 {
         plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
     println!(
         "{}<style>{}{}</style>{}{}",
-        poloto::SVG_HEADER,
-        poloto::STYLE_CONFIG_DARK_DEFAULT,
+        poloto::simple_theme::SVG_HEADER,
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
         poloto::disp(|a| plotter.render(a)),
-        poloto::SVG_END
+        poloto::simple_theme::SVG_END
     )
 }
 
@@ -123,13 +147,14 @@ fn main() {
 ## Output
 
 
-<img src="./assets/collatz.svg" alt="demo">
+<img src="./target/assets/collatz.svg" alt="demo">
 
 
 ## Parametric Example
 
 ```rust
 // PIPE me to a file!
+use poloto::prelude::*;
 fn main() {
     // https://mathworld.wolfram.com/HeartCurve.html
     let heart = |t: f64| {
@@ -141,29 +166,31 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let plotter = poloto::plot("Heart Graph", "x", "y")
-        .line_fill("heart", range.map(heart))
-        .preserve_aspect()
-        .move_into();
-
-    println!(
-        "{}",
-        poloto::disp(|a| poloto::simple_theme_dark(a, plotter))
+    let mut plotter = poloto::plot(
+        "Heart Graph",
+        "x",
+        "y",
+        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
+        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
     );
+
+    plotter.line_fill_raw("heart", range.map(heart));
+    plotter.preserve_aspect();
+
+    println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
 }
 
 ```
 
 ## Output
 
-<img src="./assets/heart.svg" alt="demo">
+<img src="./target/assets/heart.svg" alt="demo">
 
 
 ## Trig Example 
 
 ```rust
-use poloto::formatm;
-
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
@@ -172,9 +199,10 @@ fn main() {
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
+        f64::default_ctx(),
+        f64::default_ctx(),
     );
 
-    use poloto::Croppable;
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
     plotter.line(
         "tan(x)",
@@ -192,59 +220,21 @@ fn main() {
         x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
-    println!("{}", poloto::disp(|a| poloto::simple_theme(a, plotter)));
-}
-```
-
-## Output
-
-<img src="./assets/trig.svg" alt="demo">
-
-
-## String Interval Example
-
-```rust
-use std::convert::TryFrom;
-
-// PIPE me to a file!
-fn main() {
-    use poloto::util::MonthIndex;
-
-    let data = [
-        ("Jan", 3144000),
-        ("Feb", 3518000),
-        ("Mar", 3835000),
-        ("Apr", 4133000),
-        ("May", 4413000),
-        ("Jun", 4682000),
-        ("Jul", 5045000),
-        ("Aug", 5321200),
-        ("Sep", 5541900),
-        ("Oct", 5773600),
-        ("Nov", 5989400),
-        ("Dec", 6219700),
-        ("Jan", 3518000),
-        ("Feb", 3518000),
-    ];
-
-    let mut s = poloto::plot("Number of Foos in 2021", "Months of 2021", "Foos");
-
-    //Map the strings to indexes
-    s.histogram("", (0..).map(MonthIndex).zip(data.iter().map(|x| x.1)));
-
-    s.ymarker(0);
-
-    //Lookup the strings with the index
-    s.xinterval_fmt(|fmt, val, _| write!(fmt, "{}", data[usize::try_from(val.0).unwrap()].0));
-
-    println!("{}", poloto::disp(|a| poloto::simple_theme_dark(a, s)));
+    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
 
 ```
 
 ## Output
 
-<img src="./assets/month.svg" alt="demo">
+<img src="./target/assets/trig.svg" alt="demo">
+
+
+
+## Escape protection
+
+If a user tried to inject html through the title/xname/yname/tick format/ or plot names, the html escapes
+will get turned into their encoded values. This protection is provided by the `tagger` dependency crate.
 
 ## CSS Usage Example
 
