@@ -40,7 +40,7 @@ fn main() {
             .with_no_dash(),
     );
 
-    plotter.line("foo", &data);
+    plotter.histogram("foo", &data);
 
     println!(
         "{}<style>{}{}</style>{}{}",
