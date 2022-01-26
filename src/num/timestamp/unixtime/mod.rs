@@ -34,7 +34,7 @@ impl UnixTime {
     }
 
     pub fn datetime<T: TimeZone>(&self, timezone: &T) -> DateTime<T> {
-        timezone.from_utc_datetime(&chrono::NaiveDateTime::from_timestamp(self.0, 0))
+        timezone.timestamp(self.0, 0)
     }
 
     /// Convenience function.
@@ -107,13 +107,10 @@ impl UnixTime {
 
         let base = timezone.ymd(this.year(), this.month(), 1).and_hms(0, 0, 0);
 
-        let d=chrono::Duration::days(dd);
-        let base=base+d;
+        let d = chrono::Duration::days(dd);
+        let base = base + d;
 
-        UnixDays {
-            base,
-            step_value,
-        }
+        UnixDays { base, step_value }
     }
 
     pub fn hours<T: chrono::TimeZone>(&self, timezone: &T, step_value: i64) -> UnixHours<T> {
@@ -233,13 +230,7 @@ impl UnixTime {
 }
 impl std::fmt::Display for UnixTime {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        let naive = NaiveDateTime::from_timestamp(self.0, 0);
-
-        // Create a normal DateTime from the NaiveDateTime
-        let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
-
-        // Format the datetime how you want
-        //let newdate = datetime.format("%Y-%m-%d %H:%M:%S");
+        let datetime = chrono::Utc.timestamp(self.0, 0);
 
         // Print the newly formatted date and time
         write!(f, "{}", datetime)
@@ -334,7 +325,7 @@ impl<T: TimeZone> Iterator for UnixMonths<T> {
 ///
 #[derive(Clone)]
 pub struct UnixDays<T: TimeZone> {
-    base:chrono::DateTime<T>,
+    base: chrono::DateTime<T>,
     step_value: i64,
 }
 
