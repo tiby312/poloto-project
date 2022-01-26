@@ -56,7 +56,7 @@ impl Default for UnixTimeContext<Utc> {
     }
 }
 
-impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T> {
+impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T> where T::Offset:Display {
     type StepInfo = TimestampType;
     type Num = UnixTime;
 
@@ -85,7 +85,7 @@ impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T> {
         val: UnixTime,
         _bound: [UnixTime; 2],
     ) -> std::fmt::Result {
-        write!(writer, "{}", val)
+        write!(writer, "{}", val.datetime(&self.timezone))
     }
 
     fn compute_ticks(
