@@ -20,7 +20,7 @@ fn main() {
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        UnixTimeContext::new(timezone).with_tick_fmt(|w, v, b, s| {
+        UnixTimeContext::new(timezone).with_tick_fmt(|w, v, _, _| {
             use chrono::Timelike;
             write!(w, "{}", v.datetime(timezone).hour())
         }),
