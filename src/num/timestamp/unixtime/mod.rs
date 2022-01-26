@@ -9,8 +9,6 @@ mod tests;
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Copy, Clone)]
 pub struct UnixTime(pub i64);
 
-pub use chrono::ParseResult;
-pub use chrono::Weekday;
 
 fn round_up_to_nearest_multiple(val: i64, multiple: i64) -> i64 {
     let ss = if val >= 0 { multiple - 1 } else { 0 };
