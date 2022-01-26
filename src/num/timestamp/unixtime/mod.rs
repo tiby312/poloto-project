@@ -9,7 +9,6 @@ mod tests;
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Copy, Clone)]
 pub struct UnixTime(pub i64);
 
-
 fn round_up_to_nearest_multiple(val: i64, multiple: i64) -> i64 {
     let ss = if val >= 0 { multiple - 1 } else { 0 };
 
@@ -126,17 +125,16 @@ impl UnixTime {
         if this.minute() != 0 || this.second() != 0 {
             hh += 1;
         }
+
         let hh = round_up_to_nearest_multiple(hh, step_value);
 
         let base = this.date().and_hms(0, 0, 0);
 
-        let counter = base.timestamp() + hh * 60 * 60;
+        let dur = chrono::Duration::hours(hh);
 
-        UnixHours {
-            _timezone: this.timezone(),
-            counter,
-            step_value,
-        }
+        let base = base + dur;
+
+        UnixHours { base, step_value }
     }
 
     pub fn minutes<T: TimeZone>(&self, timezone: &T, step_value: i64) -> UnixMinutes<T> {
@@ -153,13 +151,11 @@ impl UnixTime {
 
         let base = this.date().and_hms(this.hour(), 0, 0);
 
-        let counter = base.timestamp() + mm * 60;
+        let dur = chrono::Duration::minutes(mm);
+        let base = base + dur;
+        //let counter = base.timestamp() + mm * 60;
 
-        UnixMinutes {
-            _timezone: timezone.clone(),
-            counter,
-            step_value,
-        }
+        UnixMinutes { base, step_value }
     }
 
     pub fn seconds<T: TimeZone>(&self, timezone: &T, step_value: i64) -> UnixSeconds<T> {
@@ -171,13 +167,9 @@ impl UnixTime {
 
         let base = this.date().and_hms(this.hour(), this.minute(), 0);
 
-        let counter = base.timestamp() + ss;
-
-        UnixSeconds {
-            _timezone: timezone.clone(),
-            counter,
-            step_value,
-        }
+        let dur = chrono::Duration::seconds(ss);
+        let base = base + dur;
+        UnixSeconds { base, step_value }
     }
 
     pub fn format<'a, T: TimeZone + 'a>(
@@ -247,10 +239,10 @@ impl std::fmt::Display for UnixTime {
         let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
 
         // Format the datetime how you want
-        let newdate = datetime.format("%Y-%m-%d %H:%M:%S");
+        //let newdate = datetime.format("%Y-%m-%d %H:%M:%S");
 
         // Print the newly formatted date and time
-        write!(f, "{}", newdate)
+        write!(f, "{}", datetime)
     }
 }
 
@@ -361,16 +353,16 @@ impl<T: TimeZone> Iterator for UnixDays<T> {
 ///
 #[derive(Clone)]
 pub struct UnixHours<T: TimeZone> {
-    _timezone: T,
-    counter: i64,
+    base: chrono::DateTime<T>,
     step_value: i64,
 }
 
 impl<T: TimeZone> Iterator for UnixHours<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let r = self.counter;
-        self.counter += 60 * 60 * self.step_value;
+        let r = self.base.timestamp();
+        let dur = chrono::Duration::hours(self.step_value);
+        self.base = self.base.clone() + dur;
         Some(UnixTime(r))
     }
 }
@@ -380,15 +372,16 @@ impl<T: TimeZone> Iterator for UnixHours<T> {
 ///
 #[derive(Clone)]
 pub struct UnixMinutes<T: TimeZone> {
-    _timezone: T,
-    counter: i64,
+    base: chrono::DateTime<T>,
     step_value: i64,
 }
 impl<T: TimeZone> Iterator for UnixMinutes<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let r = self.counter;
-        self.counter += 60 * self.step_value;
+        let r = self.base.timestamp();
+        let dur = chrono::Duration::minutes(self.step_value);
+        self.base = self.base.clone() + dur;
+
         Some(UnixTime(r))
     }
 }
@@ -398,15 +391,15 @@ impl<T: TimeZone> Iterator for UnixMinutes<T> {
 ///
 #[derive(Clone)]
 pub struct UnixSeconds<T: TimeZone> {
-    _timezone: T,
-    counter: i64,
+    base: chrono::DateTime<T>,
     step_value: i64,
 }
 impl<T: TimeZone> Iterator for UnixSeconds<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let r = self.counter;
-        self.counter += self.step_value;
+        let r = self.base.timestamp();
+        let dur = chrono::Duration::seconds(self.step_value);
+        self.base = self.base.clone() + dur;
         Some(UnixTime(r))
     }
 }

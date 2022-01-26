@@ -17,7 +17,7 @@ fn main() {
 
     let mut s = poloto::plot(
         "Number of Wikipedia Articles",
-        "Year",
+        "duration",
         "Number of Articles",
         UnixTime::default_ctx(),
         i128::default_ctx().with_marker(0),

@@ -9,7 +9,7 @@ fn main() {
 
     let day1 = (2020, 1, 30);
 
-    let timezone = &chrono::Utc;
+    let timezone = &chrono::Local;
 
     let data = trend
         .into_iter()
