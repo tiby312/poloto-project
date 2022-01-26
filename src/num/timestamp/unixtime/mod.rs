@@ -107,11 +107,11 @@ impl UnixTime {
 
         let base = timezone.ymd(this.year(), this.month(), 1).and_hms(0, 0, 0);
 
-        let counter = base.timestamp() + dd * 24 * 60 * 60;
+        let d=chrono::Duration::days(dd);
+        let base=base+d;
 
         UnixDays {
-            _timezone: timezone.clone(),
-            counter,
+            base,
             step_value,
         }
     }
@@ -334,16 +334,16 @@ impl<T: TimeZone> Iterator for UnixMonths<T> {
 ///
 #[derive(Clone)]
 pub struct UnixDays<T: TimeZone> {
-    _timezone: T,
-    counter: i64,
+    base:chrono::DateTime<T>,
     step_value: i64,
 }
 
 impl<T: TimeZone> Iterator for UnixDays<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let r = self.counter;
-        self.counter += 60 * 60 * 24 * self.step_value;
+        let r = self.base.timestamp();
+        let dur = chrono::Duration::days(self.step_value);
+        self.base = self.base.clone() + dur;
         Some(UnixTime(r))
     }
 }
