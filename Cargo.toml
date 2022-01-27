@@ -13,9 +13,14 @@ include = ["src/**/*", "LICENSE-MIT", "README.md"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = ["timestamp"]
+timestamp = ["chrono"]
+
+
 [dependencies]
 tagger = "4.2"
-chrono = "0.4"
+chrono = {version="0.4", optional = true}
 
 [package.metadata.docs.rs]
 # This sets the default target to `x86_64-unknown-linux-gnu`
