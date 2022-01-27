@@ -21,6 +21,12 @@ impl<X: chrono::TimeZone> From<chrono::DateTime<X>> for UnixTime {
     }
 }
 
+impl<X: chrono::TimeZone> From<chrono::Date<X>> for UnixTime {
+    fn from(a: chrono::Date<X>) -> UnixTime {
+        UnixTime(a.and_hms(0, 0, 0).timestamp())
+    }
+}
+
 impl From<UnixTime> for chrono::DateTime<chrono::Utc> {
     fn from(a: UnixTime) -> Self {
         a.datetime(&chrono::Utc)
