@@ -2,18 +2,18 @@ use super::*;
 
 #[test]
 fn leap_second() {
-    let dt1 = Utc.ymd(2015, 6, 30).and_hms_nano(23, 59, 59, 1_000_000_000);
+    let dt1 = Utc.ymd(2015, 6, 30).and_hms_milli(23, 59, 59, 1_000);
     let t1 = dt1.timestamp() + (dt1.timestamp_subsec_millis() as i64) / 1000;
-    let dt2 = Utc.ymd(2015, 7, 1).and_hms_nano(0, 0, 0, 0);
+    let dt2 = Utc.ymd(2015, 7, 1).and_hms_milli(0, 0, 0, 0);
     let t2 = dt2.timestamp();
 
     assert_eq!(t1, t2);
 
     let dt1: UnixTime = Utc
         .ymd(2015, 6, 30)
-        .and_hms_nano(23, 59, 59, 1_000_000_000)
+        .and_hms_milli(23, 59, 59, 1_000)
         .into();
-    let dt2: UnixTime = Utc.ymd(2015, 7, 1).and_hms_nano(0, 0, 0, 0).into();
+    let dt2: UnixTime = Utc.ymd(2015, 7, 1).and_hms_milli(0, 0, 0, 0).into();
 
     //When a UnixTime is created from a DateTime, it ignores subsecond millis, which is where the leap second
     //information is stored in chrono DateTime.
