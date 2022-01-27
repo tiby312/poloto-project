@@ -1,6 +1,27 @@
 use super::*;
 
 #[test]
+fn leap_second() {
+    let dt1 = Utc.ymd(2015, 6, 30).and_hms_nano(23, 59, 59, 1_000_000_000);
+    let t1 = dt1.timestamp() + (dt1.timestamp_subsec_millis() as i64) / 1000;
+    let dt2 = Utc.ymd(2015, 7, 1).and_hms_nano(0, 0, 0, 0);
+    let t2 = dt2.timestamp();
+
+    assert_eq!(t1, t2);
+
+    let dt1: UnixTime = Utc
+        .ymd(2015, 6, 30)
+        .and_hms_nano(23, 59, 59, 1_000_000_000)
+        .into();
+    let dt2: UnixTime = Utc.ymd(2015, 7, 1).and_hms_nano(0, 0, 0, 0).into();
+
+    //When a UnixTime is created from a DateTime, it ignores subsecond millis, which is where the leap second
+    //information is stored in chrono DateTime.
+    assert_ne!(dt1, dt2);
+}
+
+/*
+#[test]
 fn test_hours() {
     // 1642123584 (update)
     // (2022-01-14T01:26:24+00:00)
@@ -42,7 +63,8 @@ fn test_hours() {
     assert_eq!(2, it.next().unwrap().hour());
     */
 }
-/*
+
+
 
 #[test]
 fn test_years() {
