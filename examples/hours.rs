@@ -21,7 +21,7 @@ fn main() {
         "Number of rides",
         UnixTimeContext::new(timezone).with_tick_fmt(|w, v, _, _| {
             use chrono::Timelike;
-            write!(w, "{}", chrono::DateTime::from(v).hour())
+            write!(w, "{}", v.datetime(timezone).hour())
         }),
         i128::default_ctx().with_marker(0),
     );
