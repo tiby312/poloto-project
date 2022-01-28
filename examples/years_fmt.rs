@@ -47,7 +47,7 @@ fn main() {
         poloto::simple_theme::SVG_HEADER,
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
-        poloto::disp(|w| plotter.render(w)),
+        poloto::disp_mut(|w| plotter.render(w)),
         poloto::simple_theme::SVG_END
     )
 }

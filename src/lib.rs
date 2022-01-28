@@ -443,6 +443,15 @@ pub fn disp<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result>(
 }
 
 ///
+/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
+///
+pub fn disp_mut<F: FnMut(&mut sfmt::Formatter) -> sfmt::Result>(
+    a: F,
+) -> util::DisplayableClosureMut<F> {
+    util::DisplayableClosureMut::new(a)
+}
+
+///
 /// Convert a closure to a object that implements Display
 ///
 pub fn disp_const<F: Fn(&mut sfmt::Formatter) -> sfmt::Result>(

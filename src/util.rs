@@ -152,6 +152,22 @@ impl<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for Displaya
     }
 }
 
+///
+/// Wrap a mutable closure in a `RefCell` to allow it to be called inside of `fmt::Display::fmt`
+///
+pub struct DisplayableClosureMut<F>(pub RefCell<F>);
+
+impl<F: FnMut(&mut sfmt::Formatter) -> sfmt::Result> DisplayableClosureMut<F> {
+    pub fn new(a: F) -> Self {
+        DisplayableClosureMut(RefCell::new(a))
+    }
+}
+impl<F: FnMut(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for DisplayableClosureMut<F> {
+    fn fmt(&self, formatter: &mut sfmt::Formatter) -> sfmt::Result {
+        (self.0.borrow_mut())(formatter)
+    }
+}
+
 pub(crate) struct WriteCounter<T> {
     counter: usize,
     writer: T,

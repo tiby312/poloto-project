@@ -13,5 +13,5 @@ fn main() -> std::io::Result<()> {
     //Write the graph to a file
     let mut file = std::fs::File::create("target/assets/write_to_file.svg")?;
     use std::io::Write;
-    write!(file, "{}", poloto::disp(|a| s.simple_theme(a)))
+    write!(file, "{}", poloto::disp_mut(|a| s.simple_theme(a)))
 }
