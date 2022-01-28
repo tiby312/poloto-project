@@ -56,10 +56,6 @@ impl Default for UnixTimeContext<Utc> {
     }
 }
 
-pub trait UnixTimeBuilderTrait {
-    fn valid_scales(&mut self) -> Vec<(TimestampType, &[u32])>;
-}
-
 impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T>
 where
     T::Offset: Display,
