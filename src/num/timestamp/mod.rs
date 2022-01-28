@@ -56,6 +56,10 @@ impl Default for UnixTimeContext<Utc> {
     }
 }
 
+pub trait UnixTimeBuilderTrait {
+    fn valid_scales(&mut self) -> Vec<(TimestampType, &[u32])>;
+}
+
 impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T>
 where
     T::Offset: Display,
@@ -99,7 +103,8 @@ where
     ) -> TickInfo<UnixTime, TimestampType> {
         assert!(range[0] <= range[1]);
 
-        let mut t = tick_finder::BestTickFinder::new(self.timezone.clone(), range, ideal_num_steps);
+        let [start, end] = range;
+        let mut t = tick_finder::BestTickFinder::new(end, ideal_num_steps);
 
         let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
         let steps_mo = &[1, 2, 3, 6];
@@ -108,14 +113,12 @@ where
         let steps_mi = &[1, 2, 10, 15, 30];
         let steps_se = &[1, 2, 5, 10, 15, 30];
 
-        t.consider_yr(steps_yr, steps_mo);
-        t.consider_mo(steps_mo, steps_dy);
-        t.consider_dy(steps_dy, steps_hr);
-        t.consider_hr(steps_hr, steps_mi);
-        t.consider_mi(steps_mi, steps_se);
-        t.consider_se(steps_se, &[1, 2, 5, 10]);
-
-        //TODO handle dashes???
+        t.consider_meta(TimestampType::YR, start.years(&self.timezone), steps_yr);
+        t.consider_meta(TimestampType::MO, start.months(&self.timezone), steps_mo);
+        t.consider_meta(TimestampType::DY, start.days(&self.timezone), steps_dy);
+        t.consider_meta(TimestampType::HR, start.hours(&self.timezone), steps_hr);
+        t.consider_meta(TimestampType::MI, start.minutes(&self.timezone), steps_mi);
+        t.consider_meta(TimestampType::SE, start.seconds(&self.timezone), steps_se);
 
         let ret = t.into_best().unwrap();
 
@@ -130,37 +133,10 @@ where
 
         assert!(ticks.len() >= 2);
 
-        let dash_size = None;
-
-        /*
-        let dash_size = {
-            /*
-            let dash_multiple = good_normalized_step;
-            let max = dash.max;
-            let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = step.scale(range, max);
-
-            assert!(dash_multiple > 0);
-
-            if dash_multiple == 1 || dash_multiple == 10 {
-                let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
-                let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
-                if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
-                    Some(a)
-                } else {
-                    Some(b)
-                }
-            } else {
-                Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
-            }
-            */
-        };
-        */
-
         TickInfo {
             unit_data: ret.unit_data,
             ticks,
-            dash_size,
+            dash_size: None,
             display_relative: None, //Never want to do this for unix time.
         }
     }

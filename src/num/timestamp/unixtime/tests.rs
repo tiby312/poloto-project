@@ -25,7 +25,7 @@ fn test_leap_day() {
 
     let vt = &chrono::FixedOffset::east(3600 * -5);
 
-    let t = dt1.months(vt, 2).nth(10).unwrap();
+    let t = dt1.months(vt).generate(2).nth(10).unwrap();
 
     let exp = vt.ymd(2025, 09, 01).into();
 

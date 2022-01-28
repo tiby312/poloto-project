@@ -151,3 +151,91 @@ impl<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for Displaya
         }
     }
 }
+
+pub(crate) struct WriteCounter<T> {
+    counter: usize,
+    writer: T,
+}
+impl<T: std::fmt::Write> WriteCounter<T> {
+    pub fn new(writer: T) -> WriteCounter<T> {
+        WriteCounter { writer, counter: 0 }
+    }
+    pub fn get_counter(&self) -> usize {
+        self.counter
+    }
+}
+impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        self.counter += s.len();
+        self.writer.write_str(s)
+    }
+}
+
+pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
+    it: impl IntoIterator<Item = (X::Num, Y::Num)>,
+    xcontext: &mut X,
+    ycontext: &mut Y,
+) -> ([X::Num; 2], [Y::Num; 2]) {
+    let xmarkers = xcontext.markers();
+    let ymarkers = ycontext.markers();
+
+    let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
+
+    if let Some((x, y)) = ii.next() {
+        let mut val = ([x, x], [y, y]);
+        let mut xmoved = false;
+        let mut ymoved = false;
+
+        let ii = ii
+            .chain(
+                xmarkers
+                    .into_iter()
+                    .filter(|a| !a.is_hole())
+                    .map(|xx| (xx, y)),
+            )
+            .chain(
+                ymarkers
+                    .into_iter()
+                    .filter(|a| !a.is_hole())
+                    .map(|yy| (x, yy)),
+            );
+
+        ii.fold(&mut val, |val, (x, y)| {
+            if x < val.0[0] {
+                val.0[0] = x;
+                if !xmoved {
+                    xmoved = true
+                };
+            } else if x > val.0[1] {
+                val.0[1] = x;
+                if !xmoved {
+                    xmoved = true
+                };
+            }
+            if y < val.1[0] {
+                val.1[0] = y;
+                if !ymoved {
+                    ymoved = true
+                };
+            } else if y > val.1[1] {
+                val.1[1] = y;
+                if !ymoved {
+                    ymoved = true
+                };
+            }
+            val
+        });
+
+        if !xmoved {
+            val.0 = xcontext.unit_range(Some(x));
+        }
+
+        if !ymoved {
+            val.1 = ycontext.unit_range(Some(y));
+        }
+
+        val
+    } else {
+        (xcontext.unit_range(None), ycontext.unit_range(None))
+    }
+}

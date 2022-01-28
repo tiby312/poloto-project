@@ -377,7 +377,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
         let xcontext = self.xcontext.as_mut().unwrap();
         let ycontext = self.ycontext.as_mut().unwrap();
 
-        let (boundx, boundy) = num::find_bounds(
+        let (boundx, boundy) = util::find_bounds(
             self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
             xcontext,
             ycontext,

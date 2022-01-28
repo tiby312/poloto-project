@@ -51,7 +51,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                 d.attr("y", paddingy + (i as f64) * spacing)
             })?
             .build(|d| {
-                let mut wc = num::WriteCounter::new(d.writer_safe());
+                let mut wc = util::WriteCounter::new(d.writer_safe());
                 p.plots.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
