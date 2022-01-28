@@ -1,18 +1,18 @@
-use poloto::num::timestamp::{UnixTime, UnixTimeContext};
+use poloto::num::timestamp::UnixTimeContext;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
-    let day1 = (2020, 1, 30);
-    let day2 = (2020, 1, 31);
     let time_zone = &chrono::Local;
-
+    let day1 = time_zone.ymd(2020, 1, 30);
+    let day2 = time_zone.ymd(2020, 1, 31);
+    use chrono::TimeZone;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
-        (UnixTime::from_ymd_hms(time_zone, day1, 23, 30, 59), 3144000),
-        (UnixTime::from_ymd_hms(time_zone, day2, 1, 2, 0), 3518000),
-        (UnixTime::from_ymd_hms(time_zone, day2, 1, 5, 1), 3835000),
-        (UnixTime::from_ymd_hms(time_zone, day2, 1, 30, 59), 2133000),
-        (UnixTime::from_ymd_hms(time_zone, day2, 1, 50, 1), 4133000),
+        (day1.and_hms(23, 30, 59).into(), 3144000),
+        (day2.and_hms(1, 2, 0).into(), 3518000),
+        (day2.and_hms(1, 5, 1).into(), 3835000),
+        (day2.and_hms(1, 30, 59).into(), 2133000),
+        (day2.and_hms(1, 50, 1).into(), 4133000),
     ];
 
     let mut s = poloto::plot(

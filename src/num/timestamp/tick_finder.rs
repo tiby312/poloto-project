@@ -100,7 +100,7 @@ impl BestTickFinder {
         }
     }
 
-    pub fn consider_meta<I: UnixTimeGenerator>(
+    pub(crate) fn consider_meta<I: UnixTimeGenerator>(
         &mut self,
         unit_data: TimestampType,
         gen: I,

@@ -3,16 +3,19 @@ use poloto::prelude::*;
 
 // PIPE me to a file!
 fn main() {
-    let day1 = (2020, 1, 30);
+    use chrono::TimeZone;
 
     let timezone = &chrono::Utc;
+
+    let date = timezone.ymd(2020, 1, 30);
+
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
-        (UnixTime::from_ymd_hms(timezone, day1, 1, 1, 59), 3144000),
-        (UnixTime::from_ymd_hms(timezone, day1, 1, 2, 0), 3518000),
-        (UnixTime::from_ymd_hms(timezone, day1, 1, 2, 30), 3835000),
-        (UnixTime::from_ymd_hms(timezone, day1, 1, 2, 40), 2133000),
-        (UnixTime::from_ymd_hms(timezone, day1, 1, 3, 0), 4133000),
+        (date.and_hms(1, 1, 59).into(), 3144000),
+        (date.and_hms(1, 2, 0).into(), 3518000),
+        (date.and_hms(1, 2, 30).into(), 3835000),
+        (date.and_hms(1, 2, 40).into(), 2133000),
+        (date.and_hms(1, 3, 0).into(), 4133000),
     ];
 
     let mut s = poloto::plot(

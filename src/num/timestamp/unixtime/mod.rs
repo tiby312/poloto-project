@@ -6,13 +6,13 @@ mod tests;
 ///
 /// Common trait among unix time step generators.
 ///
-pub trait UnixTimeGenerator {
+pub(crate) trait UnixTimeGenerator {
     type Iter: Iterator<Item = UnixTime>;
     fn generate(&self, step_size: i64) -> Self::Iter;
 }
 
 ///
-/// A 64 bit integer unix timestamp in seconds since the epoch.
+/// A 64 bit integer unix timestamp in seconds since the epoch in UTC.
 ///
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Copy, Clone)]
 pub struct UnixTime(pub i64);
@@ -42,14 +42,16 @@ impl From<UnixTime> for chrono::DateTime<chrono::Utc> {
 }
 
 impl UnixTime {
+    pub fn datetime<T: TimeZone>(&self, timezone: &T) -> DateTime<T> {
+        timezone.timestamp(self.0, 0)
+    }
+    /*
     /// Convenience function.
     pub fn from_year<T: TimeZone>(timezone: &T, year: i32) -> UnixTime {
         UnixTime(timezone.yo(year, 1).and_hms(0, 0, 0).timestamp())
     }
 
-    pub fn datetime<T: TimeZone>(&self, timezone: &T) -> DateTime<T> {
-        timezone.timestamp(self.0, 0)
-    }
+
 
     /// Convenience function.
     pub fn from_ymd<T: TimeZone>(timezone: &T, year: i32, month: u32, day: u32) -> UnixTime {
@@ -71,43 +73,44 @@ impl UnixTime {
                 .timestamp(),
         )
     }
+    */
 
-    pub fn years<T: TimeZone>(&self, timezone: &T) -> UnixYearGenerator<T> {
+    pub(crate) fn years<T: TimeZone>(&self, timezone: &T) -> UnixYearGenerator<T> {
         UnixYearGenerator {
             val: *self,
             timezone: timezone.clone(),
         }
     }
 
-    pub fn months<T: TimeZone>(&self, timezone: &T) -> UnixMonthGenerator<T> {
+    pub(crate) fn months<T: TimeZone>(&self, timezone: &T) -> UnixMonthGenerator<T> {
         UnixMonthGenerator {
             val: *self,
             timezone: timezone.clone(),
         }
     }
 
-    pub fn days<T: TimeZone>(&self, timezone: &T) -> UnixDayGenerator<T> {
+    pub(crate) fn days<T: TimeZone>(&self, timezone: &T) -> UnixDayGenerator<T> {
         UnixDayGenerator {
             val: *self,
             timezone: timezone.clone(),
         }
     }
 
-    pub fn hours<T: TimeZone>(&self, timezone: &T) -> UnixHourGenerator<T> {
+    pub(crate) fn hours<T: TimeZone>(&self, timezone: &T) -> UnixHourGenerator<T> {
         UnixHourGenerator {
             val: *self,
             timezone: timezone.clone(),
         }
     }
 
-    pub fn minutes<T: TimeZone>(&self, timezone: &T) -> UnixMinuteGenerator<T> {
+    pub(crate) fn minutes<T: TimeZone>(&self, timezone: &T) -> UnixMinuteGenerator<T> {
         UnixMinuteGenerator {
             val: *self,
             timezone: timezone.clone(),
         }
     }
 
-    pub fn seconds<T: TimeZone>(&self, timezone: &T) -> UnixSecondGenerator<T> {
+    pub(crate) fn seconds<T: TimeZone>(&self, timezone: &T) -> UnixSecondGenerator<T> {
         UnixSecondGenerator {
             val: *self,
             timezone: timezone.clone(),
@@ -185,7 +188,7 @@ impl std::fmt::Display for UnixTime {
 ///
 /// Used by [`UnixTime::years()`]
 ///
-pub struct UnixYearGenerator<T: TimeZone> {
+pub(crate) struct UnixYearGenerator<T: TimeZone> {
     val: UnixTime,
     timezone: T,
 }
@@ -210,7 +213,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixYearGenerator<T> {
 ///
 /// Used by [`UnixTime::months()`]
 ///
-pub struct UnixMonthGenerator<T: TimeZone> {
+pub(crate) struct UnixMonthGenerator<T: TimeZone> {
     val: UnixTime,
     timezone: T,
 }
@@ -242,7 +245,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixMonthGenerator<T> {
 ///
 /// Used by [`UnixTime::days()`]
 ///
-pub struct UnixDayGenerator<T: TimeZone> {
+pub(crate) struct UnixDayGenerator<T: TimeZone> {
     val: UnixTime,
     timezone: T,
 }
@@ -276,7 +279,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixDayGenerator<T> {
 ///
 /// Used by [`UnixTime::months()`]
 ///
-pub struct UnixHourGenerator<T: TimeZone> {
+pub(crate) struct UnixHourGenerator<T: TimeZone> {
     val: UnixTime,
     timezone: T,
 }
@@ -308,7 +311,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixHourGenerator<T> {
 ///
 /// Used by [`UnixTime::minutes()`]
 ///
-pub struct UnixMinuteGenerator<T: TimeZone> {
+pub(crate) struct UnixMinuteGenerator<T: TimeZone> {
     val: UnixTime,
     timezone: T,
 }
@@ -340,7 +343,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixMinuteGenerator<T> {
 ///
 /// Used by [`UnixTime::seconds()`]
 ///
-pub struct UnixSecondGenerator<T: TimeZone> {
+pub(crate) struct UnixSecondGenerator<T: TimeZone> {
     val: UnixTime,
     timezone: T,
 }
@@ -367,7 +370,7 @@ use chrono::TimeZone;
 /// Used by [`UnixTime::years()`]
 ///
 #[derive(Clone)]
-pub struct UnixYears<T: TimeZone> {
+pub(crate) struct UnixYears<T: TimeZone> {
     timezone: T,
     counter: i32,
     step_value: i32,
@@ -425,7 +428,7 @@ mod helper {
 /// Used by [`UnixTime::months()`]
 ///
 #[derive(Debug, Clone)]
-pub struct UnixMonths<T: TimeZone> {
+pub(crate) struct UnixMonths<T: TimeZone> {
     timezone: T,
     counter: helper::MonthCounter,
     step_value: u32,
@@ -449,7 +452,7 @@ impl<T: TimeZone> Iterator for UnixMonths<T> {
 /// Used by [`UnixTime::days()`]
 ///
 #[derive(Clone)]
-pub struct UnixDays<T: TimeZone> {
+pub(crate) struct UnixDays<T: TimeZone> {
     base: chrono::DateTime<T>,
     step_value: i64,
 }
@@ -468,7 +471,7 @@ impl<T: TimeZone> Iterator for UnixDays<T> {
 /// Used by [`UnixTime::hours()`]
 ///
 #[derive(Clone)]
-pub struct UnixHours<T: TimeZone> {
+pub(crate) struct UnixHours<T: TimeZone> {
     base: chrono::DateTime<T>,
     step_value: i64,
 }
@@ -487,7 +490,7 @@ impl<T: TimeZone> Iterator for UnixHours<T> {
 /// Used by [`UnixTime::minutes()`]
 ///
 #[derive(Clone)]
-pub struct UnixMinutes<T: TimeZone> {
+pub(crate) struct UnixMinutes<T: TimeZone> {
     base: chrono::DateTime<T>,
     step_value: i64,
 }
@@ -506,7 +509,7 @@ impl<T: TimeZone> Iterator for UnixMinutes<T> {
 /// Used by [`UnixTime::seconds()`]
 ///
 #[derive(Clone)]
-pub struct UnixSeconds<T: TimeZone> {
+pub(crate) struct UnixSeconds<T: TimeZone> {
     base: chrono::DateTime<T>,
     step_value: i64,
 }

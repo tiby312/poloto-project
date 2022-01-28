@@ -1,4 +1,5 @@
-use poloto::num::timestamp::{UnixTime, UnixTimeContext};
+use chrono::TimeZone;
+use poloto::num::timestamp::UnixTimeContext;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -7,14 +8,12 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let day1 = (2020, 1, 30);
-
     let timezone = &chrono::Local;
 
     let data = trend
         .into_iter()
         .zip(0..)
-        .map(|(x, i)| (UnixTime::from_ymd_hms(timezone, day1, i, 0, 0), x));
+        .map(|(x, i)| (timezone.ymd(2020, 1, 30).and_hms(i, 0, 0).into(), x));
 
     let mut s = poloto::plot(
         "Number of rides at theme park hourly",
@@ -22,7 +21,7 @@ fn main() {
         "Number of rides",
         UnixTimeContext::new(timezone).with_tick_fmt(|w, v, _, _| {
             use chrono::Timelike;
-            write!(w, "{}", v.datetime(timezone).hour())
+            write!(w, "{}", chrono::DateTime::from(v).hour())
         }),
         i128::default_ctx().with_marker(0),
     );
