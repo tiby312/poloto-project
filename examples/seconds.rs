@@ -18,9 +18,19 @@ fn main() {
         (date.and_hms(1, 3, 0).into(), 4133000),
     ];
 
+    let xname = poloto::fmt::name_ext(|w, ([min, max], step), _| {
+        write!(
+            w,
+            "{} to {} in {}",
+            UnixTime::dynamic_format(&min, timezone, step),
+            UnixTime::dynamic_format(&max, timezone, step),
+            step
+        )
+    });
+
     let mut s = poloto::plot(
         "Number of Wikipedia Articles",
-        "duration",
+        xname,
         "Number of Articles",
         UnixTime::default_ctx(),
         i128::default_ctx().with_marker(0),

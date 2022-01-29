@@ -29,7 +29,16 @@ pub enum TimestampType {
 
 impl std::fmt::Display for TimestampType {
     fn fmt(&self, a: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(a, "{:?}", self)
+        use TimestampType::*;
+        let val = match &self {
+            YR => "Years",
+            MO => "Months",
+            DY => "Days",
+            HR => "Hours",
+            MI => "Minutes",
+            SE => "Seconds",
+        };
+        write!(a, "{}", val)
     }
 }
 
