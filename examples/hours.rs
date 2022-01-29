@@ -8,7 +8,7 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let timezone = &chrono::Local;
+    let timezone = &chrono::FixedOffset::east(-3600 * 5);
 
     let data = trend
         .into_iter()

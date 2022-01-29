@@ -2,7 +2,8 @@ use poloto::num::timestamp::UnixTimeContext;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
-    let time_zone = &chrono::Local;
+    let time_zone = &chrono::FixedOffset::east(-3600 * 5);
+
     let day1 = time_zone.ymd(2020, 1, 30);
     let day2 = time_zone.ymd(2020, 1, 31);
     use chrono::TimeZone;

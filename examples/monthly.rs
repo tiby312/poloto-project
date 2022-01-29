@@ -6,7 +6,7 @@ fn main() {
     // monthly trend over one day.
     let trend: [i128; 12] = [0, 3, 5, 10, 30, 40, 25, 23, 21, 5, 4, 2];
 
-    let timezone = &chrono::Local;
+    let timezone = &chrono::FixedOffset::east(-3600 * 5);
 
     let data = trend
         .into_iter()
