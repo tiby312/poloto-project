@@ -8,11 +8,14 @@ fn main() {
     let data = [
         (timezone.ymd(2020, 1, 30).into(), 3144000),
         (timezone.ymd(2020, 1, 31).into(), 3518000),
-        (timezone.ymd(2020, 2, 1).into(), 3835000),
-        (timezone.ymd(2020, 2, 1).and_hms(12, 59, 59).into(), 2133000),
-        (timezone.ymd(2020, 2, 2).into(), 4133000),
-        (timezone.ymd(2020, 2, 3).into(), 4413000),
-        (timezone.ymd(2020, 2, 4).into(), 4682000),
+        (timezone.ymd(2020, 2, 01).into(), 3835000),
+        (
+            timezone.ymd(2020, 2, 01).and_hms(12, 59, 59).into(),
+            2133000,
+        ),
+        (timezone.ymd(2020, 2, 02).into(), 4133000),
+        (timezone.ymd(2020, 2, 03).into(), 4413000),
+        (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
     let mut s = poloto::plot(
