@@ -27,7 +27,7 @@ fn main() {
     let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
         //Use dynamic or static formatting
         let srt = UnixTime::dynamic_format(&min, timezone, xs);
-        let end = UnixTime::format(&max, timezone, "%Y");
+        let end = UnixTime::datetime(&max, timezone).format("%Y");
         write!(w, "Entries from {} to {} in {}", srt, end, xs)
     });
 

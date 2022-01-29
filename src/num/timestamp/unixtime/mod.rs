@@ -41,6 +41,9 @@ impl From<UnixTime> for chrono::DateTime<chrono::Utc> {
     }
 }
 
+///
+/// Used by [`UnixTime::dynamic_format()`]
+///
 pub struct DynamicFormatter<T: TimeZone> {
     a: UnixTime,
     timezone: T,
@@ -79,6 +82,9 @@ impl<T: TimeZone> Display for DynamicFormatter<T> {
 }
 
 impl UnixTime {
+    ///
+    /// Convert to a `chrono::DateTime` object.
+    ///
     pub fn datetime<T: TimeZone>(&self, timezone: &T) -> DateTime<T> {
         timezone.timestamp(self.0, 0)
     }
@@ -125,17 +131,12 @@ impl UnixTime {
         }
     }
 
-    pub fn format<'a, T: TimeZone + 'a>(
-        &self,
-        timezone: &'a T,
-        a: &'a str,
-    ) -> chrono::format::DelayedFormat<chrono::format::StrftimeItems<'a>>
-    where
-        T::Offset: Display,
-    {
-        self.datetime(timezone).format(a)
-    }
-
+    ///
+    /// Format a UnixTime with the given step unit specified.
+    /// It will display that unit plus, the unit one above.
+    /// So for example, if the step size is in hours,
+    /// it will display the hour as well as the day of the week.
+    ///
     pub fn dynamic_format<'a, T: TimeZone + 'a>(
         &'a self,
         timezone: &'a T,
