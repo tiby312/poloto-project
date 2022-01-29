@@ -9,10 +9,10 @@ fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
         (day1.and_hms(23, 30, 59).into(), 3144000),
-        (day2.and_hms(1, 2, 0).into(), 3518000),
-        (day2.and_hms(1, 5, 1).into(), 3835000),
-        (day2.and_hms(1, 30, 59).into(), 2133000),
-        (day2.and_hms(1, 50, 1).into(), 4133000),
+        (day2.and_hms(01, 02, 00).into(), 3518000),
+        (day2.and_hms(01, 05, 01).into(), 3835000),
+        (day2.and_hms(01, 30, 59).into(), 2133000),
+        (day2.and_hms(01, 50, 01).into(), 4133000),
     ];
 
     let mut s = poloto::plot(

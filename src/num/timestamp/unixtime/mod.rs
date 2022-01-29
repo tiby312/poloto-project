@@ -3,10 +3,6 @@ use super::*;
 #[cfg(test)]
 mod tests;
 
-
-
-
-
 ///
 /// Common trait among unix time step generators.
 ///
@@ -45,41 +41,47 @@ impl From<UnixTime> for chrono::DateTime<chrono::Utc> {
     }
 }
 
+pub struct DynamicFormatter<T: TimeZone> {
+    a: UnixTime,
+    timezone: T,
+    info: TimestampType,
+}
+impl<T: TimeZone> Display for DynamicFormatter<T> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let timezone = &self.timezone;
+        let info = self.info;
+        let val = self.a.datetime(timezone);
+        use TimestampType::*;
 
+        let m = month_str(val.month());
+
+        match info {
+            YR => {
+                write!(formatter, "{}", val.year())
+            }
+            MO => {
+                write!(formatter, "{} {}", val.year(), m)
+            }
+            DY => {
+                write!(formatter, "{} {}", m, val.day())
+            }
+            HR => {
+                write!(formatter, "{}:{}", val.weekday(), val.hour())
+            }
+            MI => {
+                write!(formatter, "{}:{}", val.hour(), val.minute())
+            }
+            SE => {
+                write!(formatter, "{}:{}", val.minute(), val.second())
+            }
+        }
+    }
+}
 
 impl UnixTime {
     pub fn datetime<T: TimeZone>(&self, timezone: &T) -> DateTime<T> {
         timezone.timestamp(self.0, 0)
     }
-    /*
-    /// Convenience function.
-    pub fn from_year<T: TimeZone>(timezone: &T, year: i32) -> UnixTime {
-        UnixTime(timezone.yo(year, 1).and_hms(0, 0, 0).timestamp())
-    }
-
-
-
-    /// Convenience function.
-    pub fn from_ymd<T: TimeZone>(timezone: &T, year: i32, month: u32, day: u32) -> UnixTime {
-        UnixTime(timezone.ymd(year, month, day).and_hms(0, 0, 0).timestamp())
-    }
-
-    /// Convenience function.
-    pub fn from_ymd_hms<T: TimeZone>(
-        timezone: &T,
-        (year, month, day): (i32, u32, u32),
-        hours: u32,
-        min: u32,
-        seconds: u32,
-    ) -> UnixTime {
-        UnixTime(
-            timezone
-                .ymd(year, month, day)
-                .and_hms(hours, min, seconds)
-                .timestamp(),
-        )
-    }
-    */
 
     pub(crate) fn years<T: TimeZone>(&self, timezone: &T) -> UnixYearGenerator<T> {
         UnixYearGenerator {
@@ -138,34 +140,12 @@ impl UnixTime {
         &'a self,
         timezone: &'a T,
         info: &'a TimestampType,
-    ) -> impl Display + 'a {
-        crate::disp_const(move |formatter| {
-            let val = self.datetime(timezone);
-            use TimestampType::*;
-
-            let m=month_str(val.month());
-
-            match info {
-                YR => {
-                    write!(formatter, "{}", val.year())
-                }
-                MO => {
-                    write!(formatter, "{} {}", val.year(), m)
-                }
-                DY => {
-                    write!(formatter, "{} {}", m, val.day())
-                }
-                HR => {
-                    write!(formatter, "{}:{}", val.weekday(), val.hour())
-                }
-                MI => {
-                    write!(formatter, "{}:{}", val.hour(), val.minute())
-                }
-                SE => {
-                    write!(formatter, "{}:{}", val.minute(), val.second())
-                }
-            }
-        })
+    ) -> DynamicFormatter<T> {
+        DynamicFormatter {
+            timezone: timezone.clone(),
+            info: info.clone(),
+            a: self.clone(),
+        }
     }
 }
 impl std::fmt::Display for UnixTime {

@@ -7,17 +7,17 @@ fn main() {
     use chrono::TimeZone;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
-        (timezone.ymd(2020, 8, 1).into(), 8144000),
-        (timezone.ymd(2020, 9, 30).into(), 3144000),
-        (timezone.ymd(2020, 10, 4).into(), 3518000),
-        (timezone.ymd(2020, 11, 1).into(), 3835000),
+        (timezone.ymd(2020, 08, 01).into(), 8144000),
+        (timezone.ymd(2020, 09, 30).into(), 3144000),
+        (timezone.ymd(2020, 10, 04).into(), 3518000),
+        (timezone.ymd(2020, 11, 01).into(), 3835000),
         (
-            timezone.ymd(2020, 11, 1).and_hms(12, 59, 59).into(),
+            timezone.ymd(2020, 11, 01).and_hms(12, 59, 59).into(),
             2133000,
         ),
-        (timezone.ymd(2021, 1, 2).into(), 4133000),
-        (timezone.ymd(2021, 2, 3).into(), 4413000),
-        (timezone.ymd(2021, 3, 4).into(), 4682000),
+        (timezone.ymd(2021, 01, 02).into(), 4133000),
+        (timezone.ymd(2021, 02, 03).into(), 4413000),
+        (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
     let mut s = poloto::plot(
