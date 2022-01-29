@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "4.1.6"
+version = "4.1.7"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -20,7 +20,10 @@ timestamp = ["chrono"]
 
 [dependencies]
 tagger = "4.2"
-chrono = {version="0.4" ,optional = true,default-features=false,features=["std"]}
+chrono = {version="0.4", optional = true, default-features = false}
+
+[dev-dependencies]
+chrono = {version="0.4", default-features=false, features=["std"]}
 
 [package.metadata.docs.rs]
 # This sets the default target to `x86_64-unknown-linux-gnu`
