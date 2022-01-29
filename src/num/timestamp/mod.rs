@@ -14,6 +14,27 @@ use chrono::prelude::*;
 use chrono::DateTime;
 pub use unixtime::*;
 
+
+///
+/// Returns a 3 letter string for a month. input must be in the range `[1,12]` or it will panic.
+/// 
+pub fn month_str(month:u32)->&'static str{
+    match month {
+        1 => "Jan",
+        2 => "Feb",
+        3 => "Mar",
+        4 => "Apr",
+        5 => "May",
+        6 => "Jun",
+        7 => "Jul",
+        8 => "Aug",
+        9 => "Sep",
+        10 => "Oct",
+        11 => "Nov",
+        12 => "Dec",
+        _ => unreachable!(),
+    }
+}
 ///
 /// Conveys what unit is being used for step sizes.
 ///

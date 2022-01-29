@@ -19,6 +19,7 @@ cargo run --example heart > target/assets/heart.svg
 cargo run --example line_fill_fmt > target/assets/line_fill.svg
 cargo run --example years_fmt > target/assets/years_fmt.svg
 cargo run --example months > target/assets/months.svg
+cargo run --example monthly > target/assets/monthly.svg
 cargo run --example days > target/assets/days.svg
 cargo run --example hours > target/assets/hours.svg
 cargo run --example minutes_local_time > target/assets/minutes_local_time.svg
