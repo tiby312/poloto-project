@@ -9,7 +9,6 @@ fn main() {
 
     let date = timezone.ymd(2020, 1, 30);
 
-    //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
         (date.and_hms(1, 1, 59).into(), 3144000),
         (date.and_hms(1, 2, 00).into(), 3518000),

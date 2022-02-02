@@ -4,7 +4,7 @@ use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let timezone = &chrono::Utc;
-    //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
+
     let data = [
         (timezone.ymd(2020, 1, 30).into(), 3144000),
         (timezone.ymd(2020, 1, 31).into(), 3518000),

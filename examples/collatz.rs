@@ -3,7 +3,6 @@ use poloto::prelude::*;
 fn main() {
     let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
-            //Base case
             if a == 1 {
                 None
             } else {
