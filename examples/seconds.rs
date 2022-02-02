@@ -22,8 +22,8 @@ fn main() {
         write!(
             w,
             "{} to {} in {}",
-            UnixTime::dynamic_format(&min, timezone, step),
-            UnixTime::dynamic_format(&max, timezone, step),
+            UnixTime::datetime(&min, timezone).format("%H:%M:%S"),
+            UnixTime::datetime(&max, timezone).format("%H:%M:%S"),
             step
         )
     });
@@ -32,7 +32,8 @@ fn main() {
         "Number of Wikipedia Articles",
         xname,
         "Number of Articles",
-        UnixTime::default_ctx(),
+        UnixTime::default_ctx()
+            .with_tick_fmt(|w, v, _, _| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
         i128::default_ctx().with_marker(0),
     );
     s.line("", &data);
