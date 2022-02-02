@@ -28,7 +28,7 @@ macro_rules! make_consider {
 #[derive(Debug)]
 pub struct Candidate {
     pub ticks: Vec<UnixTime>,
-    pub unit_data: TimestampType,
+    pub unit_data: StepUnit,
     //pub dash_nums: &'a [i64],
     pub chosen_tick: i64,
 }
@@ -49,7 +49,7 @@ impl BestTickFinder {
             max_tick_num: ideal_num_steps * 2,
             best: Candidate {
                 ticks: Vec::new(),
-                unit_data: TimestampType::YR,
+                unit_data: StepUnit::YR,
                 //dash_nums: &[],
                 chosen_tick: 0,
             },
@@ -102,7 +102,7 @@ impl BestTickFinder {
 
     pub(crate) fn consider_meta<I: UnixTimeGenerator>(
         &mut self,
-        unit_data: TimestampType,
+        unit_data: StepUnit,
         gen: I,
         step_sizes: &[i64],
     ) {

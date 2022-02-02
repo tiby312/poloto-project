@@ -1,5 +1,5 @@
 use chrono::TimeZone;
-use poloto::num::timestamp::{month_str, TimestampType, UnixTimeContext};
+use poloto::num::timestamp::{month_str, StepUnit, UnixTimeContext};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -18,13 +18,12 @@ fn main() {
         "Month",
         "Things",
         UnixTimeContext::new(timezone).with_tick_fmt(|w, v, _, s| {
-            if let TimestampType::MO = s {
-                // Custom formatting if month steps is chosen.
-                use chrono::Datelike;
-                write!(w, "{}", month_str(v.datetime(timezone).month()))
-            } else {
-                write!(w, "{}", v.dynamic_format(timezone, s))
-            }
+            // Assume the steps are in months given the data we provided.
+            assert_eq!(*s, StepUnit::MO);
+
+            // Custom formatting if month steps is chosen.
+            use chrono::Datelike;
+            write!(w, "{}", month_str(v.datetime(timezone).month()))
         }),
         i128::default_ctx().with_marker(0),
     );

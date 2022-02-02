@@ -47,14 +47,14 @@ impl From<UnixTime> for chrono::DateTime<chrono::Utc> {
 pub struct DynamicFormatter<T: TimeZone> {
     a: UnixTime,
     timezone: T,
-    info: TimestampType,
+    info: StepUnit,
 }
 impl<T: TimeZone> Display for DynamicFormatter<T> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let timezone = &self.timezone;
         let info = self.info;
         let val = self.a.datetime(timezone);
-        use TimestampType::*;
+        use StepUnit::*;
 
         let m = month_str(val.month());
 
@@ -140,7 +140,7 @@ impl UnixTime {
     pub fn dynamic_format<'a, T: TimeZone + 'a>(
         &'a self,
         timezone: &'a T,
-        info: &'a TimestampType,
+        info: &'a StepUnit,
     ) -> DynamicFormatter<T> {
         DynamicFormatter {
             timezone: timezone.clone(),

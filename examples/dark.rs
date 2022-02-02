@@ -14,5 +14,5 @@ fn main() {
 
     plotter.line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
 
-    println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
+    println!("{}", poloto::disp_mut(|a| plotter.simple_theme_dark(a)));
 }

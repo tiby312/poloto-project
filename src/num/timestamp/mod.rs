@@ -34,11 +34,17 @@ pub fn month_str(month: u32) -> &'static str {
         _ => unreachable!(),
     }
 }
+
+#[deprecated(
+    note = "TimestampType has been renamed to StepUnit as that is more descriptive of what it represents. Use StepUnit instead."
+)]
+pub type TimestampType = StepUnit;
+
 ///
 /// Conveys what unit is being used for step sizes.
 ///
-#[derive(Copy, Clone, Debug)]
-pub enum TimestampType {
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum StepUnit {
     YR,
     MO,
     DY,
@@ -47,9 +53,9 @@ pub enum TimestampType {
     SE,
 }
 
-impl std::fmt::Display for TimestampType {
+impl std::fmt::Display for StepUnit {
     fn fmt(&self, a: &mut std::fmt::Formatter) -> std::fmt::Result {
-        use TimestampType::*;
+        use StepUnit::*;
         let val = match &self {
             YR => "Years",
             MO => "Months",
@@ -89,7 +95,7 @@ impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T>
 where
     T::Offset: Display,
 {
-    type StepInfo = TimestampType;
+    type StepInfo = StepUnit;
     type Num = UnixTime;
 
     fn scale(&mut self, val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
@@ -106,7 +112,7 @@ where
         writer: &mut dyn fmt::Write,
         val: UnixTime,
         _bound: [UnixTime; 2],
-        info: &mut TimestampType,
+        info: &mut StepUnit,
     ) -> std::fmt::Result {
         write!(writer, "{}", val.dynamic_format(&self.timezone, info))
     }
@@ -125,7 +131,7 @@ where
         ideal_num_steps: u32,
         range: [UnixTime; 2],
         _info: DashInfo,
-    ) -> TickInfo<UnixTime, TimestampType> {
+    ) -> TickInfo<UnixTime, StepUnit> {
         assert!(range[0] <= range[1]);
 
         let [start, end] = range;
@@ -138,12 +144,12 @@ where
         let steps_mi = &[1, 2, 10, 15, 30];
         let steps_se = &[1, 2, 5, 10, 15, 30];
 
-        t.consider_meta(TimestampType::YR, start.years(&self.timezone), steps_yr);
-        t.consider_meta(TimestampType::MO, start.months(&self.timezone), steps_mo);
-        t.consider_meta(TimestampType::DY, start.days(&self.timezone), steps_dy);
-        t.consider_meta(TimestampType::HR, start.hours(&self.timezone), steps_hr);
-        t.consider_meta(TimestampType::MI, start.minutes(&self.timezone), steps_mi);
-        t.consider_meta(TimestampType::SE, start.seconds(&self.timezone), steps_se);
+        t.consider_meta(StepUnit::YR, start.years(&self.timezone), steps_yr);
+        t.consider_meta(StepUnit::MO, start.months(&self.timezone), steps_mo);
+        t.consider_meta(StepUnit::DY, start.days(&self.timezone), steps_dy);
+        t.consider_meta(StepUnit::HR, start.hours(&self.timezone), steps_hr);
+        t.consider_meta(StepUnit::MI, start.minutes(&self.timezone), steps_mi);
+        t.consider_meta(StepUnit::SE, start.seconds(&self.timezone), steps_se);
 
         let ret = t.into_best().unwrap();
 
