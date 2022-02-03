@@ -31,11 +31,12 @@ fn main() {
         "Number of Wikipedia Articles",
         xname,
         "Number of Articles",
-        UnixTime::default_ctx().with_tick_fmt(|w, v, _, s| {
-            // Assume the steps are in seconds given the data we provided.
-            assert_eq!(*s, poloto::num::timestamp::StepUnit::SE);
-            write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))
-        }),
+        UnixTime::default_ctx()
+            .with_init(|_, &s| {
+                // Assume the steps are in seconds given the data we provided.
+                assert_eq!(s, poloto::num::timestamp::StepUnit::SE);
+            })
+            .with_tick_fmt(|w, v, _, _| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
         i128::default_ctx().with_marker(0),
     );
     s.line("", &data);

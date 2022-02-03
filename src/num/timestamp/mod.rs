@@ -112,7 +112,7 @@ where
         writer: &mut dyn fmt::Write,
         val: UnixTime,
         _bound: [UnixTime; 2],
-        info: &mut StepUnit,
+        info: &StepUnit,
     ) -> std::fmt::Result {
         write!(writer, "{}", val.dynamic_format(&self.timezone, info))
     }

@@ -50,14 +50,16 @@ pub trait PlotNumContext {
     /// the range to display in the graph.
     fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2];
 
+    /// Format each tick.
     fn tick_fmt(
         &mut self,
         writer: &mut dyn std::fmt::Write,
         val: Self::Num,
         _bound: [Self::Num; 2],
-        _extra: &mut Self::StepInfo,
+        _extra: &Self::StepInfo,
     ) -> std::fmt::Result;
 
+    /// Format the where clause
     fn where_fmt(
         &mut self,
         writer: &mut dyn std::fmt::Write,
@@ -65,13 +67,19 @@ pub trait PlotNumContext {
         _bound: [Self::Num; 2],
     ) -> std::fmt::Result;
 
+    /// List of invisible points
     fn markers(&self) -> Vec<Self::Num> {
         vec![]
     }
 
+    /// Called before [`PlotNumContext::compute_ticks`] is called.
+    /// If none, [`crate::Plotter`] will pick a number of ticks.
     fn ideal_num_ticks(&self) -> Option<u32> {
         None
     }
+
+    /// Called once after [`PlotNumContext::compute_ticks`] is called.
+    fn init(&mut self, _bound: [Self::Num; 2], _extra: &Self::StepInfo) {}
 }
 
 ///

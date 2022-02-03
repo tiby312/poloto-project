@@ -23,7 +23,7 @@ impl PlotNumContext for FloatContext {
         writer: &mut dyn fmt::Write,
         val: Self::Num,
         _bound: [Self::Num; 2],
-        info: &mut Self::StepInfo,
+        info: &Self::StepInfo,
     ) -> std::fmt::Result {
         util::write_interval_float(writer, val, Some(*info))
     }

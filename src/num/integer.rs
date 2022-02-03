@@ -73,7 +73,7 @@ impl PlotNumContext for IntegerContext {
         writer: &mut dyn fmt::Write,
         val: i128,
         _bound: [i128; 2],
-        info: &mut Self::StepInfo,
+        info: &Self::StepInfo,
     ) -> std::fmt::Result {
         util::write_interval_i128(writer, val, Some(*info))
     }

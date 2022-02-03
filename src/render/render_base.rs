@@ -31,6 +31,9 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
     let xcontext = plotter.xcontext.as_mut().unwrap();
     let ycontext = plotter.ycontext.as_mut().unwrap();
 
+    xcontext.init(boundx, &xtick_info.unit_data);
+    ycontext.init(boundy, &ytick_info.unit_data);
+
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
 

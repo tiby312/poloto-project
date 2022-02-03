@@ -17,8 +17,8 @@ pub trait PlotterNameFmt<X: PlotNumContext, Y: PlotNumContext> {
     fn fmt_self(
         &mut self,
         w: &mut dyn fmt::Write,
-        x: ([X::Num; 2], &mut X::StepInfo),
-        y: ([Y::Num; 2], &mut Y::StepInfo),
+        x: ([X::Num; 2], &X::StepInfo),
+        y: ([Y::Num; 2], &Y::StepInfo),
     ) -> std::fmt::Result;
 }
 
@@ -26,8 +26,8 @@ impl<K: Display, X: PlotNumContext, Y: PlotNumContext> PlotterNameFmt<X, Y> for 
     fn fmt_self(
         &mut self,
         w: &mut dyn fmt::Write,
-        _x: ([X::Num; 2], &mut X::StepInfo),
-        _y: ([Y::Num; 2], &mut Y::StepInfo),
+        _x: ([X::Num; 2], &X::StepInfo),
+        _y: ([Y::Num; 2], &Y::StepInfo),
     ) -> std::fmt::Result {
         write!(w, "{}", self)
     }
@@ -41,8 +41,8 @@ impl<K: Display, X: PlotNumContext, Y: PlotNumContext> PlotterNameFmt<X, Y> for 
 pub fn name_ext<X: PlotNumContext, Y: PlotNumContext>(
     func: impl FnMut(
         &mut dyn fmt::Write,
-        ([X::Num; 2], &mut X::StepInfo),
-        ([Y::Num; 2], &mut Y::StepInfo),
+        ([X::Num; 2], &X::StepInfo),
+        ([Y::Num; 2], &Y::StepInfo),
     ) -> fmt::Result,
 ) -> impl PlotterNameFmt<X, Y> {
     pub struct Foo<X>(X);
@@ -51,16 +51,16 @@ pub fn name_ext<X: PlotNumContext, Y: PlotNumContext>(
             Y: PlotNumContext,
             F: FnMut(
                 &mut dyn fmt::Write,
-                ([X::Num; 2], &mut X::StepInfo),
-                ([Y::Num; 2], &mut Y::StepInfo),
+                ([X::Num; 2], &X::StepInfo),
+                ([Y::Num; 2], &Y::StepInfo),
             ) -> fmt::Result,
         > PlotterNameFmt<X, Y> for Foo<F>
     {
         fn fmt_self(
             &mut self,
             w: &mut dyn fmt::Write,
-            x: ([X::Num; 2], &mut X::StepInfo),
-            y: ([Y::Num; 2], &mut Y::StepInfo),
+            x: ([X::Num; 2], &X::StepInfo),
+            y: ([Y::Num; 2], &Y::StepInfo),
         ) -> std::fmt::Result {
             (self.0)(w, x, y)
         }

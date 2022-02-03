@@ -49,7 +49,7 @@ fn main() {
 
 ```rust
 use chrono::TimeZone;
-use poloto::num::timestamp::{TimestampType, UnixTimeContext};
+use poloto::num::timestamp::{StepUnit, UnixTimeContext};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -69,15 +69,16 @@ fn main() {
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        UnixTimeContext::new(timezone).with_tick_fmt(|w, v, _, s| {
-            if let TimestampType::HR = s {
+        UnixTimeContext::new(timezone)
+            .with_init(|_, &s| {
+                // Assume the steps are in hours given the data we provided.
+                assert_eq!(s, StepUnit::HR);
+            })
+            .with_tick_fmt(|w, v, _, _| {
                 // Custom formatting if hour steps is chosen.
                 use chrono::Timelike;
                 write!(w, "{} hr", v.datetime(timezone).hour())
-            } else {
-                write!(w, "{}", v.dynamic_format(timezone, s))
-            }
-        }),
+            }),
         i128::default_ctx().with_marker(0),
     );
     s.histogram("", data);

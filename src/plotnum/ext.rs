@@ -4,6 +4,63 @@
 
 use super::*;
 
+pub struct WithInit<X, F> {
+    ctx: X,
+    func: F,
+}
+impl<X: PlotNumContext, F: FnMut([X::Num; 2], &X::StepInfo)> PlotNumContext for WithInit<X, F> {
+    type StepInfo = X::StepInfo;
+    type Num = X::Num;
+
+    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64 {
+        self.ctx.scale(val, range, max)
+    }
+
+    fn compute_ticks(
+        &mut self,
+        ideal_num_steps: u32,
+        range: [Self::Num; 2],
+        dash: DashInfo,
+    ) -> TickInfo<Self::Num, Self::StepInfo> {
+        self.ctx.compute_ticks(ideal_num_steps, range, dash)
+    }
+
+    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2] {
+        self.ctx.unit_range(offset)
+    }
+
+    fn tick_fmt(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: Self::Num,
+        bound: [Self::Num; 2],
+        extra: &Self::StepInfo,
+    ) -> std::fmt::Result {
+        self.ctx.tick_fmt(writer, val, bound, extra)
+    }
+
+    fn where_fmt(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: Self::Num,
+        bound: [Self::Num; 2],
+    ) -> std::fmt::Result {
+        self.ctx.where_fmt(writer, val, bound)
+    }
+
+    fn markers(&self) -> Vec<Self::Num> {
+        self.ctx.markers()
+    }
+
+    fn ideal_num_ticks(&self) -> Option<u32> {
+        self.ctx.ideal_num_ticks()
+    }
+
+    fn init(&mut self, bound: [Self::Num; 2], extra: &Self::StepInfo) {
+        (self.func)(bound, extra)
+    }
+}
+
 ///
 /// Used by [`PlotNumContextExt::with_where_fmt()`]
 ///
@@ -40,7 +97,7 @@ impl<X: PlotNumContext, F: FnMut(&mut dyn fmt::Write, X::Num, [X::Num; 2]) -> fm
         writer: &mut dyn std::fmt::Write,
         val: Self::Num,
         bound: [Self::Num; 2],
-        extra: &mut Self::StepInfo,
+        extra: &Self::StepInfo,
     ) -> std::fmt::Result {
         self.ctx.tick_fmt(writer, val, bound, extra)
     }
@@ -61,6 +118,10 @@ impl<X: PlotNumContext, F: FnMut(&mut dyn fmt::Write, X::Num, [X::Num; 2]) -> fm
     fn ideal_num_ticks(&self) -> Option<u32> {
         self.ctx.ideal_num_ticks()
     }
+
+    fn init(&mut self, bound: [Self::Num; 2], extra: &Self::StepInfo) {
+        self.ctx.init(bound, extra)
+    }
 }
 
 ///
@@ -73,7 +134,7 @@ pub struct TickFmt<X, F> {
 
 impl<
         X: PlotNumContext,
-        F: FnMut(&mut dyn fmt::Write, X::Num, [X::Num; 2], &mut X::StepInfo) -> fmt::Result,
+        F: FnMut(&mut dyn fmt::Write, X::Num, [X::Num; 2], &X::StepInfo) -> fmt::Result,
     > PlotNumContext for TickFmt<X, F>
 {
     type StepInfo = X::StepInfo;
@@ -101,7 +162,7 @@ impl<
         writer: &mut dyn std::fmt::Write,
         val: Self::Num,
         bound: [Self::Num; 2],
-        extra: &mut Self::StepInfo,
+        extra: &Self::StepInfo,
     ) -> std::fmt::Result {
         (self.func)(writer, val, bound, extra)
     }
@@ -121,6 +182,10 @@ impl<
 
     fn ideal_num_ticks(&self) -> Option<u32> {
         self.ctx.ideal_num_ticks()
+    }
+
+    fn init(&mut self, bound: [Self::Num; 2], extra: &Self::StepInfo) {
+        self.ctx.init(bound, extra)
     }
 }
 
@@ -159,7 +224,7 @@ impl<X: PlotNumContext> PlotNumContext for NoDash<X> {
         writer: &mut dyn std::fmt::Write,
         val: Self::Num,
         bound: [Self::Num; 2],
-        extra: &mut Self::StepInfo,
+        extra: &Self::StepInfo,
     ) -> std::fmt::Result {
         self.ctx.tick_fmt(writer, val, bound, extra)
     }
@@ -179,6 +244,10 @@ impl<X: PlotNumContext> PlotNumContext for NoDash<X> {
 
     fn ideal_num_ticks(&self) -> Option<u32> {
         self.ctx.ideal_num_ticks()
+    }
+
+    fn init(&mut self, bound: [Self::Num; 2], extra: &Self::StepInfo) {
+        self.ctx.init(bound, extra)
     }
 }
 
@@ -216,7 +285,7 @@ impl<X: PlotNumContext> PlotNumContext for WithMarker<X> {
         writer: &mut dyn std::fmt::Write,
         val: Self::Num,
         bound: [Self::Num; 2],
-        extra: &mut Self::StepInfo,
+        extra: &Self::StepInfo,
     ) -> std::fmt::Result {
         self.ctx.tick_fmt(writer, val, bound, extra)
     }
@@ -238,6 +307,10 @@ impl<X: PlotNumContext> PlotNumContext for WithMarker<X> {
 
     fn ideal_num_ticks(&self) -> Option<u32> {
         self.ctx.ideal_num_ticks()
+    }
+
+    fn init(&mut self, bound: [Self::Num; 2], extra: &Self::StepInfo) {
+        self.ctx.init(bound, extra)
     }
 }
 
@@ -275,7 +348,7 @@ impl<X: PlotNumContext> PlotNumContext for WithNumTick<X> {
         writer: &mut dyn std::fmt::Write,
         val: Self::Num,
         bound: [Self::Num; 2],
-        extra: &mut Self::StepInfo,
+        extra: &Self::StepInfo,
     ) -> std::fmt::Result {
         self.ctx.tick_fmt(writer, val, bound, extra)
     }
@@ -296,13 +369,17 @@ impl<X: PlotNumContext> PlotNumContext for WithNumTick<X> {
     fn ideal_num_ticks(&self) -> Option<u32> {
         Some(self.num_ticks)
     }
+
+    fn init(&mut self, bound: [Self::Num; 2], extra: &Self::StepInfo) {
+        self.ctx.init(bound, extra)
+    }
 }
 
 use std::fmt;
 
 pub trait PlotNumContextExt: PlotNumContext + Sized {
     fn with_tick_fmt<
-        F: FnMut(&mut dyn fmt::Write, Self::Num, [Self::Num; 2], &mut Self::StepInfo) -> fmt::Result,
+        F: FnMut(&mut dyn fmt::Write, Self::Num, [Self::Num; 2], &Self::StepInfo) -> fmt::Result,
     >(
         self,
         func: F,
@@ -330,6 +407,10 @@ pub trait PlotNumContextExt: PlotNumContext + Sized {
             ctx: self,
             num_ticks,
         }
+    }
+
+    fn with_init<F: FnMut([Self::Num; 2], &Self::StepInfo)>(self, func: F) -> WithInit<Self, F> {
+        WithInit { ctx: self, func }
     }
 }
 
