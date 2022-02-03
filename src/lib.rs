@@ -422,6 +422,13 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
 
         canvas.render_base(a, self, &mut data)
     }
+
+    ///
+    /// Retrieve the contexts pass in at construction.
+    /// 
+    pub fn into_contexts(self)->(X,Y){
+        (self.xcontext.unwrap(),self.ycontext.unwrap())
+    }
 }
 
 /// Shorthand for `moveable_format(move |w|write!(w,...))`
