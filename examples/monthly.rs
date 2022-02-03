@@ -17,16 +17,14 @@ fn main() {
         "Some monthly data",
         "Month",
         "Things",
-        UnixTimeContext::new(timezone)
-            .with_init(|_, &s| {
-                // Assume the steps are in months given the data we provided.
-                assert_eq!(s, StepUnit::MO);
-            })
-            .with_tick_fmt(|w, v, _, _| {
-                // Custom formatting if month steps is chosen.
-                use chrono::Datelike;
-                write!(w, "{}", month_str(v.datetime(timezone).month()))
-            }),
+        UnixTimeContext::new(timezone).with_tick_fmt(|w, v, _, &s| {
+            // Assume the steps are in months given the data we provided.
+            assert_eq!(s, StepUnit::MO);
+
+            // Custom formatting if month steps is chosen.
+            use chrono::Datelike;
+            write!(w, "{}", month_str(v.datetime(timezone).month()))
+        }),
         i128::default_ctx().with_marker(0),
     );
     s.histogram("", data);

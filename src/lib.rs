@@ -425,9 +425,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
 
     ///
     /// Retrieve the contexts pass in at construction.
-    /// 
-    pub fn into_contexts(self)->(X,Y){
-        (self.xcontext.unwrap(),self.ycontext.unwrap())
+    ///
+    pub fn into_contexts(self) -> (X, Y) {
+        (self.xcontext.unwrap(), self.ycontext.unwrap())
     }
 }
 
