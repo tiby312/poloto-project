@@ -49,7 +49,7 @@ impl PlotNumContext for FloatContext {
         range: [f64; 2],
         dash: DashInfo,
     ) -> TickInfo<f64, f64> {
-        let good_ticks = &[1, 2, 5, 10];
+        let good_ticks = &[1, 2, 5];
 
         let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
         let (start_step, step_num) = get_range_info(step, range);
