@@ -1,6 +1,7 @@
 //!
 //! Plot floats
 //!
+
 use super::*;
 
 impl DiscNum for f64 {
@@ -69,23 +70,37 @@ impl PlotNumContext for FloatContext {
         assert!(ticks.len() >= 2);
 
         let dash_size = {
-            let dash_multiple = normalized_step;
+            //let dash_multiple = normalized_step;
             let max = dash.max;
             let ideal_dash_size = dash.ideal_dash_size;
             let one_step = self.scale(step, range, max);
 
 
-            if dash_multiple == 1  {
-                let a = test_multiple(ideal_dash_size, one_step, 2, range, max).unwrap();
-                let b = test_multiple(ideal_dash_size, one_step, 5, range, max).unwrap();
-                if (a - ideal_dash_size).abs() < (b - ideal_dash_size).abs() {
-                    Some(a)
-                } else {
-                    Some(b)
+
+            // On a ruler, you can see that one inch gets split
+            // in a 2,2,5 fashion. Copy this.  
+            let div_cycle=vec![2,2,5].into_iter().cycle();
+            let start=one_step;
+            let ideal=ideal_dash_size;
+            let dash_size=match normalized_step{
+                1=>div_find(start,ideal,div_cycle),
+                2=>div_find(start,ideal,std::iter::once(2).chain(div_cycle)),
+                5=>div_find(start,ideal,std::iter::once(5).chain(div_cycle)),
+                _=>unreachable!()
+            };
+
+
+            fn div_find(mut start:f64,ideal:f64,div_cycle:impl std::iter::Iterator<Item=u32>)->f64{
+                for a in div_cycle.take(1000){
+                    if start<= ideal{
+                        return start;
+                    }
+                    start/=a as f64;
                 }
-            } else {
-                Some(test_multiple(ideal_dash_size, one_step, dash_multiple, range, max).unwrap())
+                unreachable!()
             }
+
+            Some(dash_size)
         };
 
         TickInfo {
