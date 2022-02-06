@@ -50,63 +50,20 @@ impl PlotNumContext for FloatContext {
         range: [f64; 2],
         dash: DashInfo,
     ) -> TickInfo<f64, f64> {
-        let good_ticks = &[1, 2, 5];
+        let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
+        let (display_relative, ticks) = tick_layout.generate();
 
-        let tick_layout=find_good_step(good_ticks,ideal_num_steps,range);
-
-        let TickLayout{step,normalized_step,start_tick,num_steps}=tick_layout;
-        
-        let display_relative = util::should_fmt_offset(
-            start_tick,
-            start_tick + ((num_steps - 1) as f64) * step,
-            step,
-        );
-
-        let first_tick = if display_relative { 0.0 } else { start_tick };
-
-        let ticks=tick_layout.generate(first_tick);
-
-        assert!(ticks.len() >= 2);
-
-        let dash_size = {
-            //let dash_multiple = normalized_step;
-            let max = dash.max;
-            let ideal_dash_size = dash.ideal_dash_size;
-            let one_step = self.scale(step, range, max);
-
-
-
-            // On a ruler, you can see that one inch gets split
-            // in a 2,2,5 fashion. Copy this.  
-            let div_cycle=vec![2,2,5].into_iter().cycle();
-            let start=one_step;
-            let ideal=ideal_dash_size;
-            let dash_size=match normalized_step{
-                1=>div_find(start,ideal,div_cycle),
-                2=>div_find(start,ideal,std::iter::once(2).chain(div_cycle)),
-                5=>div_find(start,ideal,std::iter::once(5).chain(div_cycle)),
-                _=>unreachable!()
-            };
-
-
-            fn div_find(mut start:f64,ideal:f64,div_cycle:impl std::iter::Iterator<Item=u32>)->f64{
-                for a in div_cycle.take(1000){
-                    if start<= ideal{
-                        return start;
-                    }
-                    start/=a as f64;
-                }
-                unreachable!()
-            }
-
-            Some(dash_size)
-        };
+        let dash_size = Some(compute_best_dash_1_2_5(
+            self.scale(tick_layout.step, range, dash.max),
+            dash.ideal_dash_size,
+            tick_layout.normalized_step,
+        ));
 
         TickInfo {
-            unit_data: step,
+            unit_data: tick_layout.step,
             ticks,
-            display_relative: display_relative.then(|| start_tick),
+            display_relative,
             dash_size,
         }
     }
@@ -133,35 +90,37 @@ fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple
 }
 
-fn get_range_info(step: f64, range_all: [f64; 2]) -> (f64, u32) {
-    let start_step = round_up_to_nearest_multiple(range_all[0], step);
+pub struct TickLayout {
+    step: f64,
+    start_tick: f64,
+    num_steps: u32,
+    normalized_step: u32,
+}
+impl TickLayout {
+    fn generate(&self) -> (Option<f64>, Vec<Tick<f64>>) {
+        let (display_relative, first_tick) = {
+            let tick_layout = self;
+            let end =
+                tick_layout.start_tick + ((tick_layout.num_steps - 1) as f64) * tick_layout.step;
 
-    let step_num = {
-        let mut counter = start_step;
-        let mut res = 0;
-        for a in 0.. {
-            if counter > range_all[1] {
-                res = a;
-                break;
+            let mut start_s = String::new();
+            let mut end_s = String::new();
+
+            util::write_interval_float(
+                &mut start_s,
+                tick_layout.start_tick,
+                Some(tick_layout.step),
+            )
+            .unwrap();
+            util::write_interval_float(&mut end_s, end, Some(tick_layout.step)).unwrap();
+
+            if start_s.len() > 7 || end_s.len() > 7 {
+                (Some(tick_layout.start_tick), 0.0)
+            } else {
+                (None, tick_layout.start_tick)
             }
+        };
 
-            assert!(step + counter > counter, "{:?}", (step, range_all));
-            counter += step;
-        }
-        res
-    };
-
-    (start_step, step_num)
-}
-
-pub struct TickLayout{
-    step:f64,
-    start_tick:f64,
-    num_steps:u32,
-    normalized_step:u32
-}
-impl TickLayout{
-    fn generate(&self,first_tick:f64)->Vec<Tick<f64>>{
         let mut ticks = Vec::with_capacity(usize::try_from(self.num_steps).unwrap());
         for a in 0..self.num_steps {
             let position = self.start_tick + self.step * (a as f64);
@@ -169,34 +128,52 @@ impl TickLayout{
 
             ticks.push(Tick { position, value });
         }
-        ticks
-
+        (display_relative, ticks)
     }
-}
 
+    fn new(good_steps: &[u32], ideal_num_steps: u32, range_all: [f64; 2]) -> TickLayout {
+        let ideal_num_steps = ideal_num_steps.max(2);
 
-fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [f64; 2]) -> TickLayout {
-    let range = range_all[1] - range_all[0];
+        let range = range_all[1] - range_all[0];
 
-    let rough_step = range / (ideal_num_steps - 1) as f64;
+        let rough_step = range / (ideal_num_steps - 1) as f64;
 
-    let step_power = 10.0f64.powf((rough_step as f64).log10().floor());
+        let step_power = 10.0f64.powf((rough_step as f64).log10().floor());
 
-    let cc = good_steps.iter().map(|&normalized_step| {
-        assert!(normalized_step>0);
-        let step=normalized_step as f64*step_power;
-        let (start_tick,num_steps) = get_range_info(step, range_all);
+        let cc = good_steps.iter().map(|&normalized_step| {
+            assert!(normalized_step > 0);
+            let step = normalized_step as f64 * step_power;
 
-        let res=TickLayout{
-            step,
-            normalized_step,
-            num_steps,
-            start_tick,
-        };
+            let start_tick = round_up_to_nearest_multiple(range_all[0], step);
 
-        (res,(num_steps as i32 - ideal_num_steps as i32).abs())
-    });
+            let num_steps = {
+                let mut counter = start_tick;
+                let mut res = 0;
+                for a in 0.. {
+                    if counter > range_all[1] {
+                        res = a;
+                        break;
+                    }
 
-    let best = cc.min_by(|a, b| a.1.cmp(&b.1)).unwrap();
-    best.0
+                    assert!(step + counter > counter, "{:?}", (step, range_all));
+                    counter += step;
+                }
+                res
+            };
+
+            let res = TickLayout {
+                step,
+                normalized_step,
+                num_steps,
+                start_tick,
+            };
+
+            (res, (num_steps as i32 - ideal_num_steps as i32).abs())
+        });
+
+        let best = cc.min_by(|a, b| a.1.cmp(&b.1)).unwrap();
+        let best = best.0;
+        assert!(best.num_steps >= 2);
+        best
+    }
 }

@@ -133,6 +133,7 @@ where
         _info: DashInfo,
     ) -> TickInfo<UnixTime, StepUnit> {
         assert!(range[0] <= range[1]);
+        let ideal_num_steps = ideal_num_steps.max(2);
 
         let [start, end] = range;
         let mut t = tick_finder::BestTickFinder::new(end, ideal_num_steps);

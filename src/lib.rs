@@ -393,11 +393,14 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             canvas.ideal_num_ysteps = a;
         }
 
+        //TODO put this somewhere?
+        let ideal_dash_size = 20.0;
+
         let tickx = xcontext.compute_ticks(
             canvas.ideal_num_xsteps,
             boundx,
             DashInfo {
-                ideal_dash_size: 30.0,
+                ideal_dash_size,
                 max: canvas.scalex,
             },
         );
@@ -406,7 +409,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             canvas.ideal_num_ysteps,
             boundy,
             DashInfo {
-                ideal_dash_size: 30.0,
+                ideal_dash_size,
                 max: canvas.scaley,
             },
         );
