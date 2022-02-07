@@ -90,7 +90,7 @@ fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple
 }
 
-pub struct TickLayout {
+struct TickLayout {
     step: f64,
     start_tick: f64,
     num_steps: u32,

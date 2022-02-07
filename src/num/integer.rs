@@ -171,7 +171,7 @@ impl HasDefaultContext for i128 {
 
 impl PlotNum for i128 {}
 
-pub struct TickLayout {
+struct TickLayout {
     step: i128,
     start_tick: i128,
     num_steps: u32,
