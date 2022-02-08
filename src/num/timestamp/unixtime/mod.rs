@@ -89,48 +89,6 @@ impl UnixTime {
         timezone.timestamp(self.0, 0)
     }
 
-    pub(crate) fn years<T: TimeZone>(&self, timezone: &T) -> UnixYearGenerator<T> {
-        UnixYearGenerator {
-            val: *self,
-            timezone: timezone.clone(),
-        }
-    }
-
-    pub(crate) fn months<T: TimeZone>(&self, timezone: &T) -> UnixMonthGenerator<T> {
-        UnixMonthGenerator {
-            val: *self,
-            timezone: timezone.clone(),
-        }
-    }
-
-    pub(crate) fn days<T: TimeZone>(&self, timezone: &T) -> UnixDayGenerator<T> {
-        UnixDayGenerator {
-            val: *self,
-            timezone: timezone.clone(),
-        }
-    }
-
-    pub(crate) fn hours<T: TimeZone>(&self, timezone: &T) -> UnixHourGenerator<T> {
-        UnixHourGenerator {
-            val: *self,
-            timezone: timezone.clone(),
-        }
-    }
-
-    pub(crate) fn minutes<T: TimeZone>(&self, timezone: &T) -> UnixMinuteGenerator<T> {
-        UnixMinuteGenerator {
-            val: *self,
-            timezone: timezone.clone(),
-        }
-    }
-
-    pub(crate) fn seconds<T: TimeZone>(&self, timezone: &T) -> UnixSecondGenerator<T> {
-        UnixSecondGenerator {
-            val: *self,
-            timezone: timezone.clone(),
-        }
-    }
-
     ///
     /// Format a UnixTime with the given step unit specified.
     /// It will display that unit plus, the unit one above.
@@ -158,25 +116,25 @@ impl std::fmt::Display for UnixTime {
     }
 }
 
+use chrono::Datelike;
 ///
 /// Used by [`UnixTime::years()`]
 ///
 pub(crate) struct UnixYearGenerator<T: TimeZone> {
-    val: UnixTime,
-    timezone: T,
+    pub date: DateTime<T>,
 }
 
 impl<T: TimeZone> UnixTimeGenerator for UnixYearGenerator<T> {
     type Iter = UnixYears<T>;
     fn generate(&self, step_value: i64) -> Self::Iter {
-        let this = self.val.datetime(&self.timezone);
+        let this = self.date.clone();
 
         let yy = this.year() as i64;
 
         let counter = round_up_to_nearest_multiple(yy, step_value) as i32;
 
         UnixYears {
-            timezone: self.timezone.clone(),
+            timezone: this.timezone().clone(),
             counter,
             step_value: step_value as i32,
         }
@@ -187,14 +145,13 @@ impl<T: TimeZone> UnixTimeGenerator for UnixYearGenerator<T> {
 /// Used by [`UnixTime::months()`]
 ///
 pub(crate) struct UnixMonthGenerator<T: TimeZone> {
-    val: UnixTime,
-    timezone: T,
+    pub date: DateTime<T>,
 }
 
 impl<T: TimeZone> UnixTimeGenerator for UnixMonthGenerator<T> {
     type Iter = UnixMonths<T>;
     fn generate(&self, step_value: i64) -> Self::Iter {
-        let this = self.val.datetime(&self.timezone);
+        let this = self.date.clone();
 
         let mm = this.month0() as i64;
 
@@ -208,7 +165,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixMonthGenerator<T> {
         m.round_up_to_nearest_multiple_month(step_value as u32);
 
         UnixMonths {
-            timezone: self.timezone.clone(),
+            timezone: this.timezone().clone(),
             counter: m,
             step_value: step_value as u32,
         }
@@ -219,14 +176,13 @@ impl<T: TimeZone> UnixTimeGenerator for UnixMonthGenerator<T> {
 /// Used by [`UnixTime::days()`]
 ///
 pub(crate) struct UnixDayGenerator<T: TimeZone> {
-    val: UnixTime,
-    timezone: T,
+    pub date: DateTime<T>,
 }
 
 impl<T: TimeZone> UnixTimeGenerator for UnixDayGenerator<T> {
     type Iter = UnixDays<T>;
     fn generate(&self, step_value: i64) -> Self::Iter {
-        let this = self.val.datetime(&self.timezone);
+        let this = self.date.clone();
 
         let mut dd = this.day0() as i64;
 
@@ -237,8 +193,8 @@ impl<T: TimeZone> UnixTimeGenerator for UnixDayGenerator<T> {
 
         let dd = round_up_to_nearest_multiple(dd, step_value);
 
-        let base = self
-            .timezone
+        let base = this
+            .timezone()
             .ymd(this.year(), this.month(), 1)
             .and_hms(0, 0, 0);
 
@@ -253,14 +209,13 @@ impl<T: TimeZone> UnixTimeGenerator for UnixDayGenerator<T> {
 /// Used by [`UnixTime::months()`]
 ///
 pub(crate) struct UnixHourGenerator<T: TimeZone> {
-    val: UnixTime,
-    timezone: T,
+    pub date: DateTime<T>,
 }
 
 impl<T: TimeZone> UnixTimeGenerator for UnixHourGenerator<T> {
     type Iter = UnixHours<T>;
     fn generate(&self, step_value: i64) -> Self::Iter {
-        let this = self.val.datetime(&self.timezone);
+        let this = self.date.clone();
 
         let mut hh = this.hour() as i64;
 
@@ -285,14 +240,13 @@ impl<T: TimeZone> UnixTimeGenerator for UnixHourGenerator<T> {
 /// Used by [`UnixTime::minutes()`]
 ///
 pub(crate) struct UnixMinuteGenerator<T: TimeZone> {
-    val: UnixTime,
-    timezone: T,
+    pub date: DateTime<T>,
 }
 
 impl<T: TimeZone> UnixTimeGenerator for UnixMinuteGenerator<T> {
     type Iter = UnixMinutes<T>;
     fn generate(&self, step_value: i64) -> Self::Iter {
-        let this = self.val.datetime(&self.timezone);
+        let this = self.date.clone();
 
         let mut mm = this.minute() as i64;
 
@@ -317,14 +271,13 @@ impl<T: TimeZone> UnixTimeGenerator for UnixMinuteGenerator<T> {
 /// Used by [`UnixTime::seconds()`]
 ///
 pub(crate) struct UnixSecondGenerator<T: TimeZone> {
-    val: UnixTime,
-    timezone: T,
+    pub date: DateTime<T>,
 }
 
 impl<T: TimeZone> UnixTimeGenerator for UnixSecondGenerator<T> {
     type Iter = UnixSeconds<T>;
     fn generate(&self, step_value: i64) -> Self::Iter {
-        let this = self.val.datetime(&self.timezone);
+        let this = self.date.clone();
 
         let ss = this.second() as i64;
 

@@ -145,12 +145,14 @@ where
         let steps_mi = &[1, 2, 10, 15, 30];
         let steps_se = &[1, 2, 5, 10, 15, 30];
 
-        t.consider_meta(StepUnit::YR, start.years(&self.timezone), steps_yr);
-        t.consider_meta(StepUnit::MO, start.months(&self.timezone), steps_mo);
-        t.consider_meta(StepUnit::DY, start.days(&self.timezone), steps_dy);
-        t.consider_meta(StepUnit::HR, start.hours(&self.timezone), steps_hr);
-        t.consider_meta(StepUnit::MI, start.minutes(&self.timezone), steps_mi);
-        t.consider_meta(StepUnit::SE, start.seconds(&self.timezone), steps_se);
+        let d = start.datetime(&self.timezone);
+        use StepUnit::*;
+        t.consider_meta(YR, UnixYearGenerator { date: d.clone() }, steps_yr);
+        t.consider_meta(MO, UnixMonthGenerator { date: d.clone() }, steps_mo);
+        t.consider_meta(DY, UnixDayGenerator { date: d.clone() }, steps_dy);
+        t.consider_meta(HR, UnixHourGenerator { date: d.clone() }, steps_hr);
+        t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
+        t.consider_meta(SE, UnixSecondGenerator { date: d.clone() }, steps_se);
 
         let ret = t.into_best().unwrap();
 
