@@ -68,8 +68,6 @@ impl std::fmt::Display for StepUnit {
     }
 }
 
-impl<T: chrono::TimeZone> PlotNum for DateTime<T> where T::Offset: Copy {}
-
 ///
 /// Default [`UnixTime`] context.
 ///
@@ -146,6 +144,7 @@ where
         let steps_hr = &[1, 2, 4, 6];
         let steps_mi = &[1, 2, 10, 15, 30];
         let steps_se = &[1, 2, 5, 10, 15, 30];
+
 
         let date = start.datetime(&self.timezone);
         t.consider_meta(StepUnit::YR, UnixYearGenerator { date }, steps_yr);
