@@ -68,6 +68,8 @@ impl std::fmt::Display for StepUnit {
     }
 }
 
+impl<T: chrono::TimeZone> PlotNum for DateTime<T> where T::Offset: Copy {}
+
 ///
 /// Default [`UnixTime`] context.
 ///
@@ -93,7 +95,7 @@ impl Default for UnixTimeContext<Utc> {
 
 impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T>
 where
-    T::Offset: Display,
+    T::Offset: Display + Copy,
 {
     type StepInfo = StepUnit;
     type Num = UnixTime;
@@ -145,12 +147,13 @@ where
         let steps_mi = &[1, 2, 10, 15, 30];
         let steps_se = &[1, 2, 5, 10, 15, 30];
 
-        t.consider_meta(StepUnit::YR, start.years(&self.timezone), steps_yr);
-        t.consider_meta(StepUnit::MO, start.months(&self.timezone), steps_mo);
-        t.consider_meta(StepUnit::DY, start.days(&self.timezone), steps_dy);
-        t.consider_meta(StepUnit::HR, start.hours(&self.timezone), steps_hr);
-        t.consider_meta(StepUnit::MI, start.minutes(&self.timezone), steps_mi);
-        t.consider_meta(StepUnit::SE, start.seconds(&self.timezone), steps_se);
+        let date = start.datetime(&self.timezone);
+        t.consider_meta(StepUnit::YR, UnixYearGenerator { date }, steps_yr);
+        t.consider_meta(StepUnit::MO, UnixMonthGenerator { date }, steps_mo);
+        t.consider_meta(StepUnit::DY, UnixDayGenerator { date }, steps_dy);
+        t.consider_meta(StepUnit::HR, UnixHourGenerator { date }, steps_hr);
+        t.consider_meta(StepUnit::MI, UnixMinuteGenerator { date }, steps_mi);
+        t.consider_meta(StepUnit::SE, UnixSecondGenerator { date }, steps_se);
 
         let ret = t.into_best().unwrap();
 

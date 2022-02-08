@@ -21,11 +21,14 @@ fn leap_second() {
 fn test_leap_day() {
     // 2024 2 29 is a leap day.
 
-    let dt1: UnixTime = Utc.ymd(2023, 12, 1).into();
-
     let vt = &chrono::FixedOffset::east(3600 * -5);
 
-    let t = dt1.months(vt).generate(2).nth(10).unwrap();
+    let t = UnixMonthGenerator {
+        date: vt.ymd(2023, 12, 1).and_hms(0, 0, 0),
+    }
+    .generate(2)
+    .nth(10)
+    .unwrap();
 
     let exp = vt.ymd(2025, 09, 01).into();
 
