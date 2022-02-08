@@ -434,8 +434,8 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     }
 }
 
-/// Shorthand for `moveable_format(move |w|write!(w,...))`
-/// Similar to `format_args!()` except has a more flexible lifetime.
+/// Shorthand for `disp_const(move |w|write!(w,...))`
+/// Similar to `std::format_args!()` except has a more flexible lifetime.
 #[macro_export]
 macro_rules! formatm {
     ($($arg:tt)*) => {
