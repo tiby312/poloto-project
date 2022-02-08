@@ -93,7 +93,7 @@ impl Default for UnixTimeContext<Utc> {
 
 impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T>
 where
-    T::Offset: Display + Copy,
+    T::Offset: Display,
 {
     type StepInfo = StepUnit;
     type Num = UnixTime;
@@ -145,14 +145,14 @@ where
         let steps_mi = &[1, 2, 10, 15, 30];
         let steps_se = &[1, 2, 5, 10, 15, 30];
 
-
-        let date = start.datetime(&self.timezone);
-        t.consider_meta(StepUnit::YR, UnixYearGenerator { date }, steps_yr);
-        t.consider_meta(StepUnit::MO, UnixMonthGenerator { date }, steps_mo);
-        t.consider_meta(StepUnit::DY, UnixDayGenerator { date }, steps_dy);
-        t.consider_meta(StepUnit::HR, UnixHourGenerator { date }, steps_hr);
-        t.consider_meta(StepUnit::MI, UnixMinuteGenerator { date }, steps_mi);
-        t.consider_meta(StepUnit::SE, UnixSecondGenerator { date }, steps_se);
+        let d = start.datetime(&self.timezone);
+        use StepUnit::*;
+        t.consider_meta(YR, UnixYearGenerator { date: d.clone() }, steps_yr);
+        t.consider_meta(MO, UnixMonthGenerator { date: d.clone() }, steps_mo);
+        t.consider_meta(DY, UnixDayGenerator { date: d.clone() }, steps_dy);
+        t.consider_meta(HR, UnixHourGenerator { date: d.clone() }, steps_hr);
+        t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
+        t.consider_meta(SE, UnixSecondGenerator { date: d.clone() }, steps_se);
 
         let ret = t.into_best().unwrap();
 
