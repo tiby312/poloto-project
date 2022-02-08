@@ -152,7 +152,7 @@ where
         t.consider_meta(DY, UnixDayGenerator { date: d.clone() }, steps_dy);
         t.consider_meta(HR, UnixHourGenerator { date: d.clone() }, steps_hr);
         t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
-        t.consider_meta(SE, UnixSecondGenerator { date: d.clone() }, steps_se);
+        t.consider_meta(SE, UnixSecondGenerator { date: d }, steps_se);
 
         let ret = t.into_best().unwrap();
 

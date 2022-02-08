@@ -102,8 +102,8 @@ impl UnixTime {
     ) -> DynamicFormatter<T> {
         DynamicFormatter {
             timezone: timezone.clone(),
-            info: info.clone(),
-            a: self.clone(),
+            info: *info,
+            a: *self,
         }
     }
 }
@@ -134,7 +134,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixYearGenerator<T> {
         let counter = round_up_to_nearest_multiple(yy, step_value) as i32;
 
         UnixYears {
-            timezone: this.timezone().clone(),
+            timezone: this.timezone(),
             counter,
             step_value: step_value as i32,
         }
@@ -165,7 +165,7 @@ impl<T: TimeZone> UnixTimeGenerator for UnixMonthGenerator<T> {
         m.round_up_to_nearest_multiple_month(step_value as u32);
 
         UnixMonths {
-            timezone: this.timezone().clone(),
+            timezone: this.timezone(),
             counter: m,
             step_value: step_value as u32,
         }

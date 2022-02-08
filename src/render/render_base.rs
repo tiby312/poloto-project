@@ -153,7 +153,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "{}", extra)?;
 
-                    xcontext.tick_fmt(&mut w, value, boundx, &mut xtick_info.unit_data)
+                    xcontext.tick_fmt(&mut w, value, boundx, &xtick_info.unit_data)
                 })?;
         }
     }
@@ -211,7 +211,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "{}", extra)?;
 
-                    ycontext.tick_fmt(&mut w, value, boundy, &mut ytick_info.unit_data)
+                    ycontext.tick_fmt(&mut w, value, boundy, &ytick_info.unit_data)
                 })?;
         }
     }
