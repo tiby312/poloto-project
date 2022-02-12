@@ -38,10 +38,8 @@ impl PlotNumContext for FloatContext {
         util::write_interval_float(writer, val, None)
     }
 
-    fn scale(&mut self, val: f64, range: [f64; 2], max: f64) -> f64 {
-        let diff = range[1] - range[0];
-        let scale = max / diff;
-        val * scale
+    fn scale(&mut self, mut val: f64, range: [f64; 2], max: f64) -> f64 {
+        val.default_scale(range, max)
     }
 
     fn compute_ticks(
@@ -68,17 +66,26 @@ impl PlotNumContext for FloatContext {
         }
     }
     fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
-        if let Some(o) = offset {
-            [o - 1.0, o + 1.0]
-        } else {
-            [-1.0, 1.0]
-        }
+        f64::default_unit_range(offset)
     }
 }
 
 impl PlotNum for f64 {
     fn is_hole(&self) -> bool {
         self.is_nan()
+    }
+    fn default_scale(&mut self, range: [f64; 2], max: f64) -> f64 {
+        let val = *self;
+        let diff = range[1] - range[0];
+        let scale = max / diff;
+        val * scale
+    }
+    fn default_unit_range(offset: Option<f64>) -> [f64; 2] {
+        if let Some(o) = offset {
+            [o - 1.0, o + 1.0]
+        } else {
+            [-1.0, 1.0]
+        }
     }
 }
 

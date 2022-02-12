@@ -48,8 +48,6 @@ fn main() {
 ## Data Example
 
 ```rust
-use chrono::TimeZone;
-use poloto::num::timestamp::{StepUnit, UnixTimeContext};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -57,30 +55,24 @@ fn main() {
     let trend: [i128; 24] = [
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
-
-    let timezone = &chrono::FixedOffset::east(-3600 * 5);
-
+    
     let data = trend
         .into_iter()
         .zip(0..)
-        .map(|(x, i)| (timezone.ymd(2020, 1, 30).and_hms(i, 0, 0).into(), x));
+        .map(|(x, i)| (i, x));
 
     let mut s = poloto::plot(
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        UnixTimeContext::new(timezone).with_tick_fmt(|w, v, _, &s| {
-            // Assume the steps are in hours given the data we provided.
-            assert_eq!(s, StepUnit::HR);
-            // Custom formatting if hour steps is chosen.
-            write!(w, "{} hr", v.datetime(timezone).format("%H"))
-        }),
+        poloto::steps((0..24).step_by(5),|w,v|write!(w,"{} hr",v)),
         i128::default_ctx().with_marker(0),
     );
     s.histogram("", data);
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }
+
 ```
 
 ## Output
@@ -208,6 +200,81 @@ fn main() {
 
 <img src="./target/assets/trig.svg" alt="demo">
 
+
+## Timestamp Example
+
+```rust
+use poloto::num::timestamp::UnixTime;
+use poloto::prelude::*;
+
+// PIPE me to a file!
+fn main() {
+    use chrono::TimeZone;
+
+    let timezone = &chrono::Utc;
+
+    let date = timezone.ymd(2020, 1, 30);
+
+    let data = [
+        (date.and_hms(1, 1, 59).into(), 3144000),
+        (date.and_hms(1, 2, 00).into(), 3518000),
+        (date.and_hms(1, 2, 30).into(), 3835000),
+        (date.and_hms(1, 2, 40).into(), 2133000),
+        (date.and_hms(1, 3, 00).into(), 4133000),
+    ];
+
+    let xname = poloto::fmt::name_ext(|w, ([min, max], step), _| {
+        write!(
+            w,
+            "{} to {} in {}",
+            UnixTime::datetime(&min, timezone).format("%H:%M:%S"),
+            UnixTime::datetime(&max, timezone).format("%H:%M:%S"),
+            step
+        )
+    });
+
+    let mut s = poloto::plot(
+        "Number of Wikipedia Articles",
+        xname,
+        "Number of Articles",
+        UnixTime::default_ctx().with_tick_fmt(|w, v, _, &s| {
+            // Assume the steps are in seconds given the data we provided.
+            assert_eq!(s, poloto::num::timestamp::StepUnit::SE);
+
+            write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))
+        }),
+        i128::default_ctx().with_marker(0),
+    );
+    s.line("", &data);
+
+    println!("{}", poloto::disp(|a| s.simple_theme(a)));
+}
+
+```
+
+## Output
+
+<img src="./target/assets/seconds.svg" alt="demo">
+
+
+## Guide
+
+Poloto provides by default 3 tick layouting methods via:
+
+`IntegerContext`
+`FloatContext`
+`UnixTimeContext`
+
+The above contexts have the advantage of automatically selecting reasonable
+tick intervals. The user can change the formatting of the ticks while still using
+the ticks that were selected via its automatic methods using `with_tick_fmt`.
+
+However, sometimes you may want more control on the ticks, or want to use a type
+other than `i128`/`f64`/`UnixTime`. One way would be to write your own implementation of `PlotNumContext`.
+Alternatively you can use the `step` function that just takes an iterator of ticks. 
+This puts more responsiblity on the user to pass a decent number of ticks. This should only really be used when the user
+knows up front the min and max values of that axis. This is typically the case for
+at least one of the axis, typically the x axis.
 
 
 ## Escape protection

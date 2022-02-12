@@ -1,10 +1,6 @@
-use poloto::num::timestamp::{UnixTime, UnixTimeContext};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
-    let timezone = &chrono::Utc;
-
-    use chrono::TimeZone;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
         (2010, 3144000),
@@ -22,21 +18,11 @@ fn main() {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let data = data.into_iter().map(|(x, y)| (timezone.yo(x, 1).into(), y));
-
-    let xname = poloto::fmt::name_ext(|w, ([min, max], xs), _| {
-        //Use dynamic or static formatting
-        let srt = UnixTime::dynamic_format(&min, timezone, xs);
-        let end = UnixTime::datetime(&max, timezone).format("%Y");
-        write!(w, "Entries from {} to {} in {}", srt, end, xs)
-    });
-
     let mut plotter = poloto::plot(
         "title",
-        xname,
+        "xname",
         "yname",
-        UnixTimeContext::new(timezone)
-            .with_tick_fmt(|w, v, _b, s| write!(w, "{} yr", v.dynamic_format(timezone, s))),
+        poloto::steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v)),
         i128::default_ctx()
             .with_no_dash()
             .with_marker(0)

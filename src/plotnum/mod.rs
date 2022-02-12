@@ -91,6 +91,10 @@ pub trait PlotNum: PartialOrd + Copy {
     fn is_hole(&self) -> bool {
         false
     }
+
+    fn default_scale(&mut self, range: [Self; 2], max: f64) -> f64;
+
+    fn default_unit_range(offset: Option<Self>) -> [Self; 2];
 }
 
 ///

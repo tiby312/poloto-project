@@ -17,12 +17,13 @@ cargo run --example gaussian > target/assets/gaussian.svg
 cargo run --example collatz > target/assets/collatz.svg
 cargo run --example heart > target/assets/heart.svg
 cargo run --example line_fill_fmt > target/assets/line_fill.svg
-cargo run --example years_fmt > target/assets/years_fmt.svg
+cargo run --example years > target/assets/years.svg
 cargo run --example months > target/assets/months.svg
-cargo run --example monthly > target/assets/monthly.svg
 cargo run --example days > target/assets/days.svg
 cargo run --example hours > target/assets/hours.svg
 cargo run --example minutes_local_time > target/assets/minutes_local_time.svg
 cargo run --example seconds > target/assets/seconds.svg
+cargo run --example marathon > target/assets/marathon.svg
+
 cd target/assets
 python3 -m http.server

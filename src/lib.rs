@@ -469,3 +469,97 @@ pub fn disp_const<F: Fn(&mut sfmt::Formatter) -> sfmt::Result>(
 ) -> util::DisplayableClosure<F> {
     util::DisplayableClosure::new(a)
 }
+
+///
+/// Create a [`Steps`].
+///
+pub fn steps<
+    J: PlotNum,
+    I: Iterator<Item = J>,
+    F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result,
+>(
+    steps: I,
+    func: F,
+) -> Steps<I, F> {
+    Steps::new(steps, func)
+}
+
+///
+/// A distribution of steps manually specified by the user via an iterator.
+///
+/// Considering using contexts that automatically pick a good step distribution
+/// before resulting to using this.
+///
+pub struct Steps<I, F> {
+    pub steps: I,
+    pub func: F,
+}
+
+impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result>
+    Steps<I, F>
+{
+    pub fn new(steps: I, func: F) -> Steps<I, F> {
+        Steps { steps, func }
+    }
+}
+
+impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result>
+    PlotNumContext for Steps<I, F>
+{
+    type StepInfo = ();
+    type Num = J;
+
+    fn tick_fmt(
+        &mut self,
+        writer: &mut dyn sfmt::Write,
+        val: J,
+        _bound: [J; 2],
+        _info: &Self::StepInfo,
+    ) -> std::fmt::Result {
+        (self.func)(writer, val)
+    }
+
+    fn where_fmt(
+        &mut self,
+        _writer: &mut dyn std::fmt::Write,
+        _val: J,
+        _bound: [J; 2],
+    ) -> std::fmt::Result {
+        unreachable!();
+    }
+
+    fn scale(&mut self, mut val: J, range: [J; 2], max: f64) -> f64 {
+        val.default_scale(range, max)
+    }
+    fn compute_ticks(
+        &mut self,
+        _ideal_num_steps: u32,
+        range: [J; 2],
+        _dash: DashInfo,
+    ) -> TickInfo<J, ()> {
+        let ticks: Vec<_> = (&mut self.steps)
+            .skip_while(|&x| x < range[0])
+            .take_while(|&x| x <= range[1])
+            .map(|x| Tick {
+                value: x,
+                position: x,
+            })
+            .collect();
+
+        assert!(
+            ticks.len() >= 2,
+            "Atleast two ticks must be created for the given data range."
+        );
+
+        TickInfo {
+            unit_data: (),
+            ticks,
+            dash_size: None,
+            display_relative: None,
+        }
+    }
+
+    fn unit_range(&mut self, offset: Option<J>) -> [J; 2] {
+        J::default_unit_range(offset)
+    }
+}

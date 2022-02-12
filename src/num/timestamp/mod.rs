@@ -98,13 +98,8 @@ where
     type StepInfo = StepUnit;
     type Num = UnixTime;
 
-    fn scale(&mut self, val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
-        let [val1, val2] = range;
-        let [val1, val2] = [val1.0, val2.0];
-        assert!(val1 <= val2);
-        let diff = (val2 - val1) as f64;
-        let scale = max / diff;
-        val.0 as f64 * scale
+    fn scale(&mut self, mut val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
+        val.default_scale(range, max)
     }
 
     fn tick_fmt(
@@ -176,11 +171,7 @@ where
     }
 
     fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
-        if let Some(o) = offset {
-            [o, UnixTime(o.0 + 1)]
-        } else {
-            [UnixTime(0), UnixTime(1)]
-        }
+        UnixTime::default_unit_range(offset)
     }
 }
 
@@ -188,4 +179,21 @@ impl HasDefaultContext for UnixTime {
     type DefaultContext = UnixTimeContext<chrono::Utc>;
 }
 
-impl PlotNum for UnixTime {}
+impl PlotNum for UnixTime {
+    fn default_scale(&mut self, range: [UnixTime; 2], max: f64) -> f64 {
+        let val = *self;
+        let [val1, val2] = range;
+        let [val1, val2] = [val1.0, val2.0];
+        assert!(val1 <= val2);
+        let diff = (val2 - val1) as f64;
+        let scale = max / diff;
+        val.0 as f64 * scale
+    }
+    fn default_unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
+        if let Some(o) = offset {
+            [o, UnixTime(o.0 + 1)]
+        } else {
+            [UnixTime(0), UnixTime(1)]
+        }
+    }
+}

@@ -90,12 +90,8 @@ impl PlotNumContext for IntegerContext {
         util::write_interval_i128(writer, val, None)
     }
 
-    fn scale(&mut self, val: i128, range: [i128; 2], max: f64) -> f64 {
-        let diff = (range[1] - range[0]) as f64;
-
-        let scale = max / diff;
-
-        val as f64 * scale
+    fn scale(&mut self, mut val: i128, range: [i128; 2], max: f64) -> f64 {
+        val.default_scale(range, max)
     }
     fn compute_ticks(
         &mut self,
@@ -157,11 +153,7 @@ impl PlotNumContext for IntegerContext {
     }
 
     fn unit_range(&mut self, offset: Option<i128>) -> [i128; 2] {
-        if let Some(o) = offset {
-            [o - 1, o + 1]
-        } else {
-            [-1, 1]
-        }
+        i128::default_unit_range(offset)
     }
 }
 
@@ -169,7 +161,24 @@ impl HasDefaultContext for i128 {
     type DefaultContext = IntegerContext;
 }
 
-impl PlotNum for i128 {}
+impl PlotNum for i128 {
+    fn default_scale(&mut self, range: [i128; 2], max: f64) -> f64 {
+        let val = *self;
+        let diff = (range[1] - range[0]) as f64;
+
+        let scale = max / diff;
+
+        val as f64 * scale
+    }
+
+    fn default_unit_range(offset: Option<i128>) -> [i128; 2] {
+        if let Some(o) = offset {
+            [o - 1, o + 1]
+        } else {
+            [-1, 1]
+        }
+    }
+}
 
 struct TickLayout {
     step: i128,
