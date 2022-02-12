@@ -12,7 +12,7 @@ fn main() {
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        poloto::steps((0..24).step_by(5), |w, v| write!(w, "{} hr", v)),
+        poloto::steps((0..).step_by(6), |w, v| write!(w, "{} hr", v)),
         i128::default_ctx().with_marker(0),
     );
 
