@@ -82,7 +82,6 @@ impl PlotNum for f64 {
     }
 }
 
-
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple
 }

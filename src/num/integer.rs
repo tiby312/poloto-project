@@ -148,7 +148,6 @@ impl PlotNumContextFromBound for IntegerContext {
     }
 }
 
-
 impl PlotNum for i128 {
     type DefaultContext = IntegerContext;
 

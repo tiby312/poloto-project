@@ -12,8 +12,6 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
-
-
 pub trait PlotNumContextFromBound: PlotNumContext {
     fn new(a: &crate::Bound<Self::Num>) -> Self;
 }
@@ -63,7 +61,7 @@ pub trait PlotNum: PartialOrd + Copy {
     fn default_ctx(bound: &crate::Bound<Self>) -> Self::DefaultContext {
         Self::DefaultContext::new(bound)
     }
-    
+
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false

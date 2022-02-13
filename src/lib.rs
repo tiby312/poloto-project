@@ -157,8 +157,7 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext>
-    {
+    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext> {
         let x = X::DefaultContext::new(&self.boundx);
         let y = Y::DefaultContext::new(&self.boundy);
         self.plot_with(title, xname, yname, x, y)
@@ -203,13 +202,20 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         }
     }
 
+    pub fn xmarker(&mut self, a: X) {
+        self.xmarkers.push(a);
+    }
+
+    pub fn ymarker(&mut self, a: Y) {
+        self.ymarkers.push(a);
+    }
+
     pub fn plot(
         self,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext>
-    {
+    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext> {
         self.build().plot(title, xname, yname)
     }
 

@@ -1,15 +1,12 @@
 use poloto::prelude::*;
 fn main() {
-    let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
+    let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let mut plotter = poloto::plot(
-        "cows per year",
-        "year",
-        "cow",
-        f64::default_ctx(),
-        f64::default_ctx(),
-    );
-    plotter.scatter("", &data);
+    let data = poloto::data();
+
+    data.scatter("", points);
+
+    let mut plotter = data.plot("cows per year", "year", "cow");
 
     println!(
         "{}<style>{}{}</style>{}{}",
