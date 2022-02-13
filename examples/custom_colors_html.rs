@@ -1,17 +1,14 @@
 use poloto::prelude::*;
 fn main() {
-    let mut s = poloto::plot(
-        "Demo: you can use CSS patterns if you embed SVG!",
-        "x",
-        "y",
-        f64::default_ctx(),
-        f64::default_ctx(),
-    );
-
+    let mut s = poloto::data();
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
+
+    let mut s = s
+        .build()
+        .plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
     println!(
         r###"

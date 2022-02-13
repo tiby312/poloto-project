@@ -35,25 +35,26 @@ pub fn month_str(month: u32) -> &'static str {
     }
 }
 
-
-
-pub struct UnixTimeTickFmt<T:TimeZone> {
+pub struct UnixTimeTickFmt<T: TimeZone> {
     step: StepUnit,
-    timezone:T
+    timezone: T,
 }
-impl<T:TimeZone> UnixTimeTickFmt<T> {
-    pub fn step(&self)->StepUnit{
+impl<T: TimeZone> UnixTimeTickFmt<T> {
+    pub fn step(&self) -> StepUnit {
         self.step
     }
 }
-impl<T:TimeZone> TickFormat for UnixTimeTickFmt<T> {
+impl<T: TimeZone> TickFormat for UnixTimeTickFmt<T> {
     type Num = UnixTime;
 
-    fn write_tick(&self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-        write!(writer,"{}",val.dynamic_format(&self.timezone,&self.step))
+    fn write_tick(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
+        write!(writer, "{}", val.dynamic_format(&self.timezone, &self.step))
     }
 }
-
 
 ///
 /// Conveys what unit is being used for step sizes.
@@ -83,32 +84,35 @@ impl std::fmt::Display for StepUnit {
     }
 }
 
-
-
-
-
-impl Default for UnixTimeTickGen<Utc>{
-    fn default()->Self{
+impl Default for UnixTimeTickGen<Utc> {
+    fn default() -> Self {
         UnixTimeTickGen { timezone: Utc }
     }
 }
 
-pub struct UnixTimeTickGen<T:TimeZone>{
-    timezone:T
+pub struct UnixTimeTickGen<T: TimeZone> {
+    timezone: T,
+}
+
+impl<T: TimeZone> UnixTimeTickGen<T> {
+    pub fn new(timezone: &T) -> Self {
+        UnixTimeTickGen {
+            timezone: timezone.clone(),
+        }
+    }
 }
 //TODO use this thing!!!
 
-impl<T:TimeZone> TickGenerator for UnixTimeTickGen<T> {
+impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
     type Num = UnixTime;
     type Fmt = UnixTimeTickFmt<T>;
-    fn generate(&self,bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
-        
-        let range=[bound.min,bound.max];
-        
+    fn generate(self, bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
+        let range = [bound.min, bound.max];
+
         assert!(range[0] <= range[1]);
-        let ideal_num_steps=bound.ideal_num_steps;
-        let dash=bound.dash_info;
-        
+        let ideal_num_steps = bound.ideal_num_steps;
+        let dash = bound.dash_info;
+
         let ideal_num_steps = ideal_num_steps.max(2);
 
         let [start, end] = range;
@@ -143,7 +147,6 @@ impl<T:TimeZone> TickGenerator for UnixTimeTickGen<T> {
 
         assert!(ticks.len() >= 2);
 
-    
         (
             TickInfo {
                 ticks,
@@ -151,19 +154,12 @@ impl<T:TimeZone> TickGenerator for UnixTimeTickGen<T> {
                 display_relative: None, //Never want to do this for unix time.
             },
             UnixTimeTickFmt {
-                timezone:self.timezone.clone(),
+                timezone: self.timezone.clone(),
                 step: ret.unit_data,
             },
         )
     }
 }
-
-
-
-
-
-
-
 
 impl PlotNum for UnixTime {
     type DefaultTickGenerator = UnixTimeTickGen<Utc>;

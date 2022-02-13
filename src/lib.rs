@@ -46,6 +46,7 @@ pub mod prelude {
     pub use super::formatm;
     //pub use super::plotnum::ext::PlotNumContextExt;
     //pub use super::plotnum::HasDefaultContext;
+    pub use super::plotnum::TickFormat;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
 }
@@ -123,25 +124,28 @@ pub struct Bound<X> {
 }
 
 impl<X: PlotNum> Bound<X> {
-    pub fn default_tick_generate(&self) ->(TickInfo<X>,<X::DefaultTickGenerator as TickGenerator>::Fmt) where X::DefaultTickGenerator:Default{
+    pub fn default_tick_generate(
+        &self,
+    ) -> (TickInfo<X>, <X::DefaultTickGenerator as TickGenerator>::Fmt)
+    where
+        X::DefaultTickGenerator: Default,
+    {
         X::DefaultTickGenerator::default().generate(*self)
     }
 }
 
-/*
 impl<X: PlotNum> Bound<X> {
     ///
     /// Create a [`Steps`].
     ///
-    pub fn steps<I: Iterator<Item = X>, F: FnMut(&mut dyn sfmt::Write, X) -> sfmt::Result>(
+    pub fn steps<I: Iterator<Item = X>, F: FnMut(&mut dyn sfmt::Write, &X) -> sfmt::Result>(
         &self,
         steps: I,
         func: F,
-    ) -> Steps<X, I, F> {
-        Steps::new(self, steps, func)
+    ) -> (TickInfo<X>, StepFmt<X, F>) {
+        Steps::new(self, steps, func).generate(*self)
     }
 }
-*/
 
 //TODO only needs to implement iterator
 pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
@@ -158,18 +162,20 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         self.boundy
     }
 
-    
     pub fn plot(
         self,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a, X, Y> where X::DefaultTickGenerator:Default,Y::DefaultTickGenerator:Default{
-        let (x,x_fmt) = self.boundx.default_tick_generate();
-        let (y,y_fmt) = self.boundy.default_tick_generate();
-        self.plot_with(title, xname, yname, x, y,x_fmt,y_fmt)
+    ) -> Plotter<'a, X, Y>
+    where
+        X::DefaultTickGenerator: Default,
+        Y::DefaultTickGenerator: Default,
+    {
+        let (x, x_fmt) = self.boundx.default_tick_generate();
+        let (y, y_fmt) = self.boundy.default_tick_generate();
+        self.plot_with(title, xname, yname, x, y, x_fmt, y_fmt)
     }
-    
 
     pub fn plot_with(
         self,
@@ -515,7 +521,6 @@ pub fn disp_const<F: Fn(&mut sfmt::Formatter) -> sfmt::Result>(
     util::DisplayableClosure::new(a)
 }
 
-/*
 ///
 /// A distribution of steps manually specified by the user via an iterator.
 ///
@@ -528,7 +533,7 @@ pub struct Steps<N, I, F> {
     pub func: F,
 }
 
-impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result>
+impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, &J) -> sfmt::Result>
     Steps<J, I, F>
 {
     pub fn new(bound: &Bound<J>, steps: I, func: F) -> Steps<J, I, F> {
@@ -540,27 +545,31 @@ impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfm
     }
 }
 
-impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result>
-    PlotNumContext for Steps<J, I, F>
-{
-    type StepInfo = ();
+pub struct StepFmt<J, F> {
+    func: F,
+    _p: PhantomData<J>,
+}
+impl<J: PlotNum, F: FnMut(&mut dyn sfmt::Write, &J) -> sfmt::Result> TickFormat for StepFmt<J, F> {
     type Num = J;
-
-    fn tick_fmt(
+    fn write_tick(
         &mut self,
-        writer: &mut dyn sfmt::Write,
-        val: J,
-        _info: &Self::StepInfo,
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
     ) -> std::fmt::Result {
         (self.func)(writer, val)
     }
+}
 
-    fn where_fmt(&mut self, _writer: &mut dyn std::fmt::Write, _val: J) -> std::fmt::Result {
-        unreachable!();
-    }
+impl<N, I, F> TickGenerator for Steps<N, I, F>
+where
+    N: PlotNum,
+    I: Iterator<Item = N>,
+    F: FnMut(&mut dyn sfmt::Write, &N) -> sfmt::Result,
+{
+    type Num = N;
+    type Fmt = StepFmt<N, F>;
 
-    fn compute_ticks(&mut self) -> TickInfo<J, ()> {
-
+    fn generate(mut self, bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
         let ticks: Vec<_> = (&mut self.steps)
             .skip_while(|&x| x < self.bound.min)
             .take_while(|&x| x <= self.bound.max)
@@ -575,13 +584,16 @@ impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfm
             "Atleast two ticks must be created for the given data range."
         );
 
-        TickInfo {
-            unit_data: (),
-            ticks,
-            dash_size: None,
-            display_relative: None,
-        }
+        (
+            TickInfo {
+                ticks,
+                dash_size: None,
+                display_relative: None,
+            },
+            StepFmt {
+                func: self.func,
+                _p: PhantomData,
+            },
+        )
     }
 }
-
-*/

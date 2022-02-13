@@ -115,9 +115,6 @@ pub struct TickInfo<I> {
     pub display_relative: Option<I>,
 }
 
-
-
-
 pub trait TickGenerator {
     type Num: PlotNum;
     type Fmt: TickFormat<Num = Self::Num>;
@@ -127,32 +124,37 @@ pub trait TickGenerator {
     /// Calculate information related to where the interval ticks should go.
     /// Guaranteed to be called before fmt_tick.
     ///
-    fn generate(&self,bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt);
+    fn generate(self, bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt);
 }
 
 //TODO use this thing!!!
 pub trait TickFormat {
     type Num;
-    fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
-    fn write_where(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result{
-        self.write_tick(a,val)
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
+    fn write_where(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+        self.write_tick(a, val)
     }
 
-    fn with_tick_fmt<F>(self,func:F)->TickFmt<Self,F> where Self:Sized,F:Fn(&mut dyn std::fmt::Write,&Self::Num)->std::fmt::Result{
+    fn with_tick_fmt<F>(self, func: F) -> TickFmt<Self, F>
+    where
+        Self: Sized,
+        F: Fn(&mut dyn std::fmt::Write, &Self::Num) -> std::fmt::Result,
+    {
         TickFmt { inner: self, func }
     }
 }
-pub struct TickFmt<T,F>{
-    inner:T,
-    func:F
+pub struct TickFmt<T, F> {
+    inner: T,
+    func: F,
 }
-impl<T:TickFormat,F:Fn(&mut dyn std::fmt::Write,&T::Num)->std::fmt::Result> TickFormat for TickFmt<T,F>{
-    type Num=T::Num;
-    fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result{
-        (self.func)(a,val)
+impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result> TickFormat
+    for TickFmt<T, F>
+{
+    type Num = T::Num;
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+        (self.func)(a, val)
     }
-    fn write_where(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result{
-        self.inner.write_where(a,val)
+    fn write_where(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+        self.inner.write_where(a, val)
     }
-
 }

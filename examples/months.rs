@@ -20,14 +20,16 @@ fn main() {
         (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
-    let mut s = poloto::plot(
+    let s = poloto::data::<UnixTime, _>()
+        .line("", &data)
+        .ymarker(0)
+        .build();
+
+    let mut s = s.plot(
         "Number of Wikipedia Articles",
         "duration",
         "Number of Articles",
-        UnixTime::default_ctx(),
-        i128::default_ctx().with_marker(0),
     );
-    s.line("", &data);
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

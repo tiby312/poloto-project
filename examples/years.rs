@@ -18,18 +18,18 @@ fn main() {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let mut plotter = poloto::plot(
-        "title",
-        "xname",
-        "yname",
-        poloto::steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v)),
-        i128::default_ctx()
-            .with_no_dash()
-            .with_marker(0)
-            .with_no_dash(),
-    );
+    let data = poloto::data().histogram("foo", data).ymarker(0).build();
 
-    plotter.histogram("foo", data);
+    let (xtick, xtick_fmt) = data
+        .boundx()
+        .steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v));
+    let (ytick, ytick_fmt) = data.boundy().default_tick_generate();
+
+    //TODO add way to do no_dash.
+    
+    let mut plotter = data.plot_with(
+        "title", "xname", "yname", xtick, ytick, xtick_fmt, ytick_fmt,
+    );
 
     println!(
         "{}<style>{}{}</style>{}{}",

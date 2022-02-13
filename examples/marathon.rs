@@ -14,16 +14,15 @@ fn main() {
     ];
 
     // Have there be a tick every hour
-    let xtick = std::iter::successors(Some(0), |w| Some(w + hr));
 
-    let mut plotter = poloto::plot(
-        "collatz",
-        "x",
-        "y",
-        poloto::steps(xtick, |w, v| write!(w, "{} hr", v / hr)),
-        i128::default_ctx().with_marker(0),
-    );
-    plotter.line("hay", &heart_rate);
+    let data = poloto::data().line("hay", &heart_rate).build();
+
+    let xx = std::iter::successors(Some(0), |w| Some(w + hr));
+
+    let (xtick, xtickfmt) = data.boundx().steps(xx, |w, v| write!(w, "{} hr", v / hr));
+    let (ytick, ytickfmt) = data.boundy().default_tick_generate();
+
+    let mut plotter = data.plot_with("collatz", "x", "y", xtick, ytick, xtickfmt, ytickfmt);
 
     println!(
         "{}<style>{}{}</style>{}{}",

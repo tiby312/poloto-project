@@ -5,7 +5,7 @@ use poloto::prelude::*;
 fn main() {
     let timezone = &chrono::Utc;
 
-    let data:&[(UnixTime,i128)] = &[
+    let data = [
         (timezone.ymd(2020, 1, 30).into(), 3144000),
         (timezone.ymd(2020, 1, 31).into(), 3518000),
         (timezone.ymd(2020, 2, 01).into(), 3835000),
@@ -18,13 +18,12 @@ fn main() {
         (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let s=poloto::data().line("",&data).ymarker(0).build();
+    let s = poloto::data::<UnixTime, _>()
+        .line("", data)
+        .ymarker(0)
+        .build();
 
-    let mut s = s.plot(
-        "Number of Wikipedia Articles",
-        "Year",
-        "Number of Articles",
-    );
+    let mut s = s.plot("Number of Wikipedia Articles", "Year", "Number of Articles");
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

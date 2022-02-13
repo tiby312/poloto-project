@@ -1,4 +1,6 @@
-use poloto::{num::integer::IntegerTickGen, plotnum::TickGenerator, plotnum::TickFormat,prelude::*};
+use poloto::{
+    num::integer::IntegerTickGen, plotnum::TickFormat, plotnum::TickGenerator, prelude::*,
+};
 // PIPE me to a file!
 fn main() {
     // hourly trend over one day.
@@ -10,11 +12,7 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let (xticks, xtick_fmt) = data.boundx().default_tick_generate();
-
-    let xstep=xtick_fmt.step();
-    
-    let xtick_fmt=xtick_fmt.with_tick_fmt(|w,v|write!(w,"{} s{}",v,xstep));
+    let (xticks, xtick_fmt) = data.boundx().steps((0..).step_by(6),|w,v|write!(w,"{}",v));
 
     let (yticks, ytick_fmt) = data.boundy().default_tick_generate();
 

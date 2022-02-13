@@ -19,6 +19,5 @@ fn main() {
 
     let mut plotter = data.build().plot("Heart Graph", "x", "y");
 
-    
     println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
 }

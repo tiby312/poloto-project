@@ -21,22 +21,28 @@ pub struct FloatTickFmt {
     step: f64,
 }
 impl FloatTickFmt {
-    pub fn step(&self)->f64{
+    pub fn step(&self) -> f64 {
         self.step
     }
 }
 impl TickFormat for FloatTickFmt {
     type Num = f64;
 
-    fn write_tick(&self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+    fn write_tick(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
         util::write_interval_float(writer, *val, Some(self.step))
     }
-    fn write_where(&self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+    fn write_where(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
         util::write_interval_float(writer, *val, None)
     }
 }
-
-
 
 #[derive(Default)]
 pub struct FloatTickGen;
@@ -45,7 +51,7 @@ pub struct FloatTickGen;
 impl TickGenerator for FloatTickGen {
     type Num = f64;
     type Fmt = FloatTickFmt;
-    fn generate(&self,bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
+    fn generate(self, bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
         let range = [bound.min, bound.max];
         let ideal_num_steps = bound.ideal_num_steps;
         let dash = bound.dash_info;
