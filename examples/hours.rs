@@ -1,4 +1,4 @@
-use poloto::{plotnum::PlotNumContext, prelude::*};
+use poloto::{num::integer::IntegerTickGen, plotnum::TickGenerator, prelude::*};
 // PIPE me to a file!
 fn main() {
     // hourly trend over one day.
@@ -10,23 +10,18 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let mut cx = data.boundx().default_context();
-    let mut cy = data.boundy().default_context();
-    let tickx=cx.compute_ticks();
-    let ticky=cy.compute_ticks();
+    let (xticks, xtick_fmt) = IntegerTickGen::generate(data.boundx());
+    let (yticks, ytick_fmt) = IntegerTickGen::generate(data.boundx());
 
-
-    let mut plotter = data
-        .plot_with(
-            "Number of rides at theme park hourly",
-            "Hour",
-            "Number of rides",
-            tickx,
-            ticky,
-            cx,
-            cy
-        );
-        //.with_xtick(boundx.steps((0..).step_by(6), |w, v| write!(w, "{} hr", v)));
+    let mut plotter = data.plot_with(
+        "Number of rides at theme park hourly",
+        "Hour",
+        "Number of rides",
+        xticks,
+        yticks,
+        xtick_fmt,
+        ytick_fmt,
+    );
 
     println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
 }

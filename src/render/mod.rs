@@ -1,6 +1,5 @@
 use crate::*;
 
-
 mod render_base;
 mod render_plots;
 
@@ -22,7 +21,6 @@ pub struct Canvas {
 }
 impl Canvas {
     pub fn with_options(preserve_aspect: bool, num_css_classes: Option<usize>) -> Self {
-        
         let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
         let ideal_num_ysteps = 5;
 
@@ -66,16 +64,16 @@ impl Canvas {
         }
     }
 
-    pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
+    pub fn render_plots<X: PlotNum, Y: PlotNum>(
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter<X, Y>
+        plotter: &mut Plotter<X, Y>,
     ) -> std::fmt::Result {
         render_plots::render_plots(writer, plotter)
     }
 
-    pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
+    pub fn render_base<X: PlotNum, Y: PlotNum>(
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter< X, Y>
+        plotter: &mut Plotter<X, Y>,
     ) -> std::fmt::Result {
         render_base::render_base(writer, plotter)
     }

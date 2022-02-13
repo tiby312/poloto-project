@@ -12,9 +12,11 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
+/*
 pub trait PlotNumContextFromBound: PlotNumContext {
     fn new(a: &crate::Bound<Self::Num>) -> Self;
 }
+
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
@@ -22,7 +24,7 @@ pub trait PlotNumContextFromBound: PlotNumContext {
 pub trait PlotNumContext {
     type StepInfo;
     type Num: PlotNum;
-    
+
     ///
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
@@ -31,7 +33,7 @@ pub trait PlotNumContext {
     fn compute_ticks(
         &mut self,
     ) -> TickInfo<Self::Num, Self::StepInfo>;
-    
+
     /// Format each tick.
     fn tick_fmt(
         &mut self,
@@ -43,17 +45,18 @@ pub trait PlotNumContext {
     /// Format the where clause
     fn where_fmt(&mut self, writer: &mut dyn std::fmt::Write, val: Self::Num) -> std::fmt::Result;
 }
+*/
 
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy {
-    type DefaultContext: PlotNumContextFromBound<Num = Self>;
+    //type DefaultContext: PlotNumContextFromBound<Num = Self>;
 
-    fn default_ctx(bound: &crate::Bound<Self>) -> Self::DefaultContext {
-        Self::DefaultContext::new(bound)
-    }
+    //fn default_ctx(bound: &crate::Bound<Self>) -> Self::DefaultContext {
+    //    Self::DefaultContext::new(bound)
+    //}
 
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
@@ -68,7 +71,7 @@ pub trait PlotNum: PartialOrd + Copy {
 ///
 /// Used by [`PlotNumContext::compute_ticks`]
 ///
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub struct DashInfo {
     //The ideal dash size in the drawing area
     pub ideal_dash_size: f64,
@@ -101,8 +104,8 @@ impl<I> Tick<I> {
 /// Used by [`PlotNumContext::compute_ticks`]
 ///
 #[derive(Debug, Clone)]
-pub struct TickInfo<I, K> {
-    pub unit_data: K,
+pub struct TickInfo<I> {
+    //pub unit_data: K,
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
     pub ticks: Vec<Tick<I>>,
@@ -114,4 +117,23 @@ pub struct TickInfo<I, K> {
     /// If we want to display the tick values relatively, this will
     /// have the base start to start with.
     pub display_relative: Option<I>,
+}
+
+pub trait TickGenerator {
+    type Num: PlotNum;
+    type Fmt: TickFormat<Num = Self::Num>;
+
+    ///
+    /// Given an ideal number of intervals across the min and max values,
+    /// Calculate information related to where the interval ticks should go.
+    /// Guaranteed to be called before fmt_tick.
+    ///
+    fn generate(bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt);
+}
+
+//TODO use this thing!!!
+pub trait TickFormat {
+    type Num;
+    fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
+    fn write_where(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
 }

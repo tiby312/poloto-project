@@ -1,8 +1,8 @@
 use super::*;
 
-pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
+pub fn render_base<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<X, Y>
+    plotter: &mut Plotter<X, Y>,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 
@@ -18,16 +18,16 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
         ..
     } = plotter.plots.canvas;
 
-    let boundx = [plotter.plots.boundx.min,plotter.plots.boundx.max];
-    let boundy = [plotter.plots.boundy.min,plotter.plots.boundy.max];
+    let boundx = [plotter.plots.boundx.min, plotter.plots.boundx.max];
+    let boundy = [plotter.plots.boundy.min, plotter.plots.boundy.max];
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
 
     let xtick_info = &mut plotter.tickx;
     let ytick_info = &mut plotter.ticky;
 
-    let xcontext = plotter.xcontext.as_mut().unwrap();
-    let ycontext = plotter.ycontext.as_mut().unwrap();
+    let xcontext = &mut *plotter.xcontext;
+    let ycontext = &mut *plotter.ycontext;
 
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
@@ -103,7 +103,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "Where j = ")?;
 
-                    xcontext.where_fmt(&mut w, base)
+                    xcontext.write_where(&mut w, &base)
                 })?;
 
             "j+"
@@ -139,7 +139,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "{}", extra)?;
 
-                    xcontext.tick_fmt(&mut w, value, &xtick_info.unit_data)
+                    xcontext.write_tick(&mut w, &value)
                 })?;
         }
     }
@@ -160,7 +160,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     let mut w = w.writer_safe();
                     write!(w, "Where k = ")?;
 
-                    ycontext.where_fmt(&mut w, base)
+                    ycontext.write_where(&mut w, &base)
                 })?;
 
             "k+"
@@ -197,7 +197,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "{}", extra)?;
 
-                    ycontext.tick_fmt(&mut w, value, &ytick_info.unit_data)
+                    ycontext.write_tick(&mut w, &value)
                 })?;
         }
     }

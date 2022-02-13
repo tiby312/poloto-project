@@ -9,41 +9,38 @@ impl DiscNum for f64 {
         f64::NAN
     }
 }
-
+/*
 impl PlotNumContextFromBound for FloatContext {
     fn new(bound: &crate::Bound<f64>) -> Self {
         FloatContext { bound: *bound }
     }
 }
+*/
 
-///
-/// Default float context. It will attempt to find reasonable step sizes, and format them as regular floats.
-///
-pub struct FloatContext {
-    bound: crate::Bound<f64>,
+pub struct FloatTickFmt {
+    step: f64,
 }
-impl PlotNumContext for FloatContext {
+impl TickFormat for FloatTickFmt {
     type Num = f64;
-    type StepInfo = f64;
 
-    fn tick_fmt(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        val: Self::Num,
-        info: &Self::StepInfo,
-    ) -> std::fmt::Result {
-        util::write_interval_float(writer, val, Some(*info))
+    fn write_tick(&self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+        util::write_interval_float(writer, *val, Some(self.step))
     }
-
-    fn where_fmt(&mut self, writer: &mut dyn std::fmt::Write, val: f64) -> std::fmt::Result {
-        util::write_interval_float(writer, val, None)
+    fn write_where(&self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+        util::write_interval_float(writer, *val, None)
     }
+}
 
-    fn compute_ticks(&mut self) -> TickInfo<f64, f64> {
-        let range = [self.bound.min, self.bound.max];
-        let ideal_num_steps=self.bound.ideal_num_steps;
-        let dash=self.bound.dash_info;
-        
+pub struct FloatTickGen;
+//TODO use this thing!!!
+
+impl TickGenerator for FloatTickGen {
+    type Num = f64;
+    type Fmt = FloatTickFmt;
+    fn generate(bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
+        let range = [bound.min, bound.max];
+        let ideal_num_steps = bound.ideal_num_steps;
+        let dash = bound.dash_info;
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
@@ -55,18 +52,20 @@ impl PlotNumContext for FloatContext {
             tick_layout.normalized_step,
         ));
 
-        TickInfo {
-            unit_data: tick_layout.step,
-            ticks,
-            display_relative,
-            dash_size,
-        }
+        (
+            TickInfo {
+                ticks,
+                display_relative,
+                dash_size,
+            },
+            FloatTickFmt {
+                step: tick_layout.step,
+            },
+        )
     }
 }
 
 impl PlotNum for f64 {
-    type DefaultContext = FloatContext;
-
     fn is_hole(&self) -> bool {
         self.is_nan()
     }

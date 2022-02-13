@@ -17,23 +17,29 @@ fn main() {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let data=poloto::data().line("",&data).build();
+    let data = poloto::data().line("", &data).build();
 
-    let xtick=data.boundx().default_tick();
-    let xtick_step=xtick.step;
-    let xtick=xtick.with_tick_fmt(|w, v, _, &s| {
+    let xtick = data.boundx().default_tick();
+    let xtick_step = xtick.step;
+    let xtick = xtick.with_tick_fmt(|w, v, _, &s| {
         // Assume the steps are in seconds given the data we provided.
         assert_eq!(s, poloto::num::timestamp::StepUnit::SE);
 
         write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))
     });
 
-    let mut plotter=data.plot(
-        "Number of Wikipedia Articles",
-        formatm!("{} to {} in {}",UnixTime::datetime(&min, timezone).format("%H:%M:%S"),UnixTime::datetime(&max, timezone).format("%H:%M:%S"),xtick_step),
-        "Number of Articles"
-    ).with_xtick(xtick);
-
+    let mut plotter = data
+        .plot(
+            "Number of Wikipedia Articles",
+            formatm!(
+                "{} to {} in {}",
+                UnixTime::datetime(&min, timezone).format("%H:%M:%S"),
+                UnixTime::datetime(&max, timezone).format("%H:%M:%S"),
+                xtick_step
+            ),
+            "Number of Articles",
+        )
+        .with_xtick(xtick);
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }

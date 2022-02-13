@@ -36,8 +36,8 @@ use plotnum::*;
 pub mod num;
 pub mod simple_theme;
 
-use fmt::*;
-pub mod fmt;
+//use fmt::*;
+//pub mod fmt;
 
 ///
 /// The poloto prelude.
@@ -114,20 +114,21 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
 
-
 #[derive(Copy, Clone)]
 pub struct Bound<X> {
     pub min: X,
     pub max: X,
-    pub ideal_num_steps:u32,
-    pub dash_info:DashInfo
+    pub ideal_num_steps: u32,
+    pub dash_info: DashInfo,
 }
 
-impl<X: PlotNum> Bound<X> {
-    pub fn default_context(&self) -> X::DefaultContext {
-        X::DefaultContext::new(self)
-    }
-}
+//impl<X: PlotNum> Bound<X> {
+//    pub fn default_context(&self) -> X::DefaultContext {
+//        X::DefaultContext::new(self)
+//    }
+//}
+
+/*
 impl<X: PlotNum> Bound<X> {
     ///
     /// Create a [`Steps`].
@@ -140,13 +141,14 @@ impl<X: PlotNum> Bound<X> {
         Steps::new(self, steps, func)
     }
 }
+*/
 
 //TODO only needs to implement iterator
 pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     boundx: Bound<X>,
     boundy: Bound<Y>,
-    canvas:render::Canvas,
+    canvas: render::Canvas,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
 }
@@ -158,7 +160,7 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         self.boundy
     }
 
-    /* 
+    /*
     pub fn plot(
         self,
         title: impl Display + 'a,
@@ -171,25 +173,25 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     }
     */
 
-    pub fn plot_with<XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>(
+    pub fn plot_with(
         self,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-        tickx:TickInfo<XC::Num, XC::StepInfo>,
-        ticky:TickInfo<YC::Num, YC::StepInfo>,
-        x: XC,
-        y: YC,
-    ) -> Plotter<'a, XC, YC> {
+        tickx: TickInfo<X>,
+        ticky: TickInfo<Y>,
+        x: impl TickFormat<Num = X> + 'a,
+        y: impl TickFormat<Num = Y> + 'a,
+    ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
             xname: Box::new(xname),
             yname: Box::new(yname),
             plots: self,
-            xcontext: Some(x),
-            ycontext: Some(y),
+            xcontext: Box::new(x),
+            ycontext: Box::new(y),
             tickx,
-            ticky
+            ticky,
         }
     }
 }
@@ -211,8 +213,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
             plots: vec![],
             xmarkers: vec![],
             ymarkers: vec![],
-            num_css_classes:Some(8),
-            preserve_aspect:false
+            num_css_classes: Some(8),
+            preserve_aspect: false,
         }
     }
 
@@ -405,17 +407,20 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         let boundx = Bound {
             min: boundx[0],
             max: boundx[1],
-            ideal_num_steps:canvas.ideal_num_xsteps,
-            dash_info:DashInfo {
+            ideal_num_steps: canvas.ideal_num_xsteps,
+            dash_info: DashInfo {
                 ideal_dash_size,
                 max: canvas.scalex,
-            }
+            },
         };
         let boundy = Bound {
             min: boundy[0],
             max: boundy[1],
-            ideal_num_steps:canvas.ideal_num_ysteps,
-            dash_info:DashInfo { ideal_dash_size, max: canvas.scaley }
+            ideal_num_steps: canvas.ideal_num_ysteps,
+            dash_info: DashInfo {
+                ideal_dash_size,
+                max: canvas.scaley,
+            },
         };
 
         DataResult {
@@ -423,8 +428,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
             boundx,
             boundy,
             canvas,
-            num_css_classes:val.num_css_classes,
-            preserve_aspect:val.preserve_aspect
+            num_css_classes: val.num_css_classes,
+            preserve_aspect: val.preserve_aspect,
         }
     }
 }
@@ -438,20 +443,18 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
 /// * The axis line SVG elements belong to the `poloto_axis_lines` class.
 /// * The background belongs to the `poloto_background` class.
 ///
-pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
+pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn Display + 'a>,
     xname: Box<dyn Display + 'a>,
     yname: Box<dyn Display + 'a>,
-    plots: DataResult<'a, X::Num, Y::Num>,
-    xcontext: Option<X>,
-    ycontext: Option<Y>,
-    tickx:TickInfo<X::Num, X::StepInfo>,
-    ticky:TickInfo<Y::Num, Y::StepInfo>
+    plots: DataResult<'a, X, Y>,
+    xcontext: Box<dyn TickFormat<Num = X> + 'a>,
+    ycontext: Box<dyn TickFormat<Num = Y> + 'a>,
+    tickx: TickInfo<X>,
+    ticky: TickInfo<Y>,
 }
 
-impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
-    
-
+impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
@@ -472,25 +475,11 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> sfmt::Result {
-        assert!(self.xcontext.is_some());
-        assert!(self.ycontext.is_some());
-
-        let xcontext = self.xcontext.as_mut().unwrap();
-        let ycontext = self.ycontext.as_mut().unwrap();
-
         let boundx = [self.plots.boundx.min, self.plots.boundx.max];
         let boundy = [self.plots.boundy.min, self.plots.boundy.max];
 
-
         render::Canvas::render_plots(&mut a, self)?;
         render::Canvas::render_base(&mut a, self)
-    }
-
-    ///
-    /// Retrieve the contexts pass in at construction.
-    ///
-    pub fn into_contexts(self) -> (X, Y) {
-        (self.xcontext.unwrap(), self.ycontext.unwrap())
     }
 }
 
@@ -530,6 +519,7 @@ pub fn disp_const<F: Fn(&mut sfmt::Formatter) -> sfmt::Result>(
     util::DisplayableClosure::new(a)
 }
 
+/*
 ///
 /// A distribution of steps manually specified by the user via an iterator.
 ///
@@ -574,7 +564,7 @@ impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfm
     }
 
     fn compute_ticks(&mut self) -> TickInfo<J, ()> {
-        
+
         let ticks: Vec<_> = (&mut self.steps)
             .skip_while(|&x| x < self.bound.min)
             .take_while(|&x| x <= self.bound.max)
@@ -597,3 +587,5 @@ impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfm
         }
     }
 }
+
+*/
