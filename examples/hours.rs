@@ -11,7 +11,11 @@ fn main() {
         .build();
 
     let (xticks, xtick_fmt) = IntegerTickGen::generate(data.boundx());
-    let (yticks, ytick_fmt) = IntegerTickGen::generate(data.boundx());
+
+    let xstep=xtick_fmt.step();
+    let xtick_fmt=xtick_fmt.with_tick_fmt(|w,v|write!(w,"{}",v.dynamic_format(xstep)));
+
+    let (yticks, ytick_fmt) = IntegerTickGen::generate(data.boundy());
 
     let mut plotter = data.plot_with(
         "Number of rides at theme park hourly",

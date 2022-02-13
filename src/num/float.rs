@@ -20,6 +20,11 @@ impl PlotNumContextFromBound for FloatContext {
 pub struct FloatTickFmt {
     step: f64,
 }
+impl FloatTickFmt {
+    pub fn step(&self)->f64{
+        self.step
+    }
+}
 impl TickFormat for FloatTickFmt {
     type Num = f64;
 
