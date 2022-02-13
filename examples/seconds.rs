@@ -30,7 +30,7 @@ fn main() {
 
     let boundx = data.boundx();
 
-    let (ytick, ytick_fmt) = data.boundy().default_tick_generate();
+    let y = data.boundy().default_tick_generate();
 
     let mut plotter = data.plot_with(
         "Number of Wikipedia Articles",
@@ -41,10 +41,8 @@ fn main() {
             xtick_step
         ),
         "Number of Articles",
-        xtick,
-        ytick,
-        xtick_fmt,
-        ytick_fmt,
+        (xtick, xtick_fmt),
+        y,
     );
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));

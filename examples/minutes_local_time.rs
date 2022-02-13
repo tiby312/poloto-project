@@ -22,17 +22,15 @@ fn main() {
         .ymarker(0)
         .build();
 
-    let (tickx, tickx_fmt) = UnixTimeTickGen::new(time_zone).generate(s.boundx());
-    let (ticky, ticky_fmt) = s.boundy().default_tick_generate();
+    let x = UnixTimeTickGen::new(time_zone).generate(s.boundx());
+    let y = s.boundy().default_tick_generate();
 
     let mut s = s.plot_with(
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        tickx,
-        ticky,
-        tickx_fmt,
-        ticky_fmt,
+        x,
+        y,
     );
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));

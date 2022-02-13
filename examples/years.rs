@@ -20,16 +20,14 @@ fn main() {
 
     let data = poloto::data().histogram("foo", data).ymarker(0).build();
 
-    let (xtick, xtick_fmt) = data
+    let x = data
         .boundx()
         .steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v));
-    let (ytick, ytick_fmt) = data.boundy().default_tick_generate();
+    let y = data.boundy().default_tick_generate();
 
     //TODO add way to do no_dash.
-    
-    let mut plotter = data.plot_with(
-        "title", "xname", "yname", xtick, ytick, xtick_fmt, ytick_fmt,
-    );
+
+    let mut plotter = data.plot_with("title", "xname", "yname", x, y);
 
     println!(
         "{}<style>{}{}</style>{}{}",

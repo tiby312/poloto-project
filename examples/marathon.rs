@@ -19,10 +19,10 @@ fn main() {
 
     let xx = std::iter::successors(Some(0), |w| Some(w + hr));
 
-    let (xtick, xtickfmt) = data.boundx().steps(xx, |w, v| write!(w, "{} hr", v / hr));
-    let (ytick, ytickfmt) = data.boundy().default_tick_generate();
+    let x = data.boundx().steps(xx, |w, v| write!(w, "{} hr", v / hr));
+    let y = data.boundy().default_tick_generate();
 
-    let mut plotter = data.plot_with("collatz", "x", "y", xtick, ytick, xtickfmt, ytickfmt);
+    let mut plotter = data.plot_with("collatz", "x", "y", x, y);
 
     println!(
         "{}<style>{}{}</style>{}{}",

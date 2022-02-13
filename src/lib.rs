@@ -172,9 +172,9 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         X::DefaultTickGenerator: Default,
         Y::DefaultTickGenerator: Default,
     {
-        let (x, x_fmt) = self.boundx.default_tick_generate();
-        let (y, y_fmt) = self.boundy.default_tick_generate();
-        self.plot_with(title, xname, yname, x, y, x_fmt, y_fmt)
+        let x = self.boundx.default_tick_generate();
+        let y = self.boundy.default_tick_generate();
+        self.plot_with(title, xname, yname, x, y)
     }
 
     pub fn plot_with(
@@ -182,20 +182,18 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-        tickx: TickInfo<X>,
-        ticky: TickInfo<Y>,
-        x: impl TickFormat<Num = X> + 'a,
-        y: impl TickFormat<Num = Y> + 'a,
+        tickx: (TickInfo<X>, impl TickFormat<Num = X> + 'a),
+        ticky: (TickInfo<Y>, impl TickFormat<Num = Y> + 'a),
     ) -> Plotter<'a, X, Y> {
         Plotter {
             title: Box::new(title),
             xname: Box::new(xname),
             yname: Box::new(yname),
             plots: self,
-            xcontext: Box::new(x),
-            ycontext: Box::new(y),
-            tickx,
-            ticky,
+            xcontext: Box::new(tickx.1),
+            ycontext: Box::new(ticky.1),
+            tickx: tickx.0,
+            ticky: ticky.0,
         }
     }
 }
