@@ -52,11 +52,7 @@ pub trait PlotNumContext {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy {
-    //type DefaultContext: PlotNumContextFromBound<Num = Self>;
-
-    //fn default_ctx(bound: &crate::Bound<Self>) -> Self::DefaultContext {
-    //    Self::DefaultContext::new(bound)
-    //}
+    type DefaultTickGenerator: TickGenerator<Num = Self>;
 
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
@@ -119,6 +115,7 @@ pub struct TickInfo<I> {
     pub display_relative: Option<I>,
 }
 
+
 pub trait TickGenerator {
     type Num: PlotNum;
     type Fmt: TickFormat<Num = Self::Num>;
@@ -135,5 +132,25 @@ pub trait TickGenerator {
 pub trait TickFormat {
     type Num;
     fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
-    fn write_where(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
+    fn write_where(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result{
+        self.write_tick(a,val)
+    }
+
+    fn with_tick_fmt<F>(self,func:F)->TickFmt<Self,F> where Self:Sized,F:Fn(&mut dyn std::fmt::Write,&Self::Num)->std::fmt::Result{
+        TickFmt { inner: self, func }
+    }
+}
+pub struct TickFmt<T,F>{
+    inner:T,
+    func:F
+}
+impl<T:TickFormat,F:Fn(&mut dyn std::fmt::Write,&T::Num)->std::fmt::Result> TickFormat for TickFmt<T,F>{
+    type Num=T::Num;
+    fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result{
+        (self.func)(a,val)
+    }
+    fn write_where(&self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result{
+        self.inner.write_where(a,val)
+    }
+
 }

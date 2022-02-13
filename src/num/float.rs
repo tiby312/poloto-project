@@ -71,6 +71,7 @@ impl TickGenerator for FloatTickGen {
 }
 
 impl PlotNum for f64 {
+    type DefaultTickGenerator = FloatTickGen;
     fn is_hole(&self) -> bool {
         self.is_nan()
     }

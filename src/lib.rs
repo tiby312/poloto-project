@@ -122,11 +122,11 @@ pub struct Bound<X> {
     pub dash_info: DashInfo,
 }
 
-//impl<X: PlotNum> Bound<X> {
-//    pub fn default_context(&self) -> X::DefaultContext {
-//        X::DefaultContext::new(self)
-//    }
-//}
+impl<X: PlotNum> Bound<X> {
+    pub fn default_tick_generate(&self) ->(TickInfo<X>,<X::DefaultTickGenerator as TickGenerator>::Fmt) {
+        X::DefaultTickGenerator::generate(*self)
+    }
+}
 
 /*
 impl<X: PlotNum> Bound<X> {
@@ -149,8 +149,6 @@ pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
     boundx: Bound<X>,
     boundy: Bound<Y>,
     canvas: render::Canvas,
-    num_css_classes: Option<usize>,
-    preserve_aspect: bool,
 }
 impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     pub fn boundx(&self) -> Bound<X> {
@@ -160,18 +158,18 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         self.boundy
     }
 
-    /*
+    
     pub fn plot(
         self,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext> {
-        let x = X::DefaultContext::new(&self.boundx);
-        let y = Y::DefaultContext::new(&self.boundy);
-        self.plot_with(title, xname, yname, x, y)
+    ) -> Plotter<'a, X, Y> {
+        let (x,x_fmt) = X::DefaultTickGenerator::generate(self.boundx);
+        let (y,y_fmt) = Y::DefaultTickGenerator::generate(self.boundy);
+        self.plot_with(title, xname, yname, x, y,x_fmt,y_fmt)
     }
-    */
+    
 
     pub fn plot_with(
         self,
@@ -402,7 +400,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         let ideal_dash_size = 20.0;
 
         //knowldge of canvas dim
-        let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
+        let canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
 
         let boundx = Bound {
             min: boundx[0],
@@ -428,8 +426,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
             boundx,
             boundy,
             canvas,
-            num_css_classes: val.num_css_classes,
-            preserve_aspect: val.preserve_aspect,
         }
     }
 }

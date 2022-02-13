@@ -65,6 +65,11 @@ fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]
 pub struct IntegerTickFmt {
     step: i128,
 }
+impl IntegerTickFmt {
+    pub fn step(&self)->i128{
+        self.step
+    }
+}
 impl TickFormat for IntegerTickFmt {
     type Num = i128;
 
@@ -111,6 +116,7 @@ impl TickGenerator for IntegerTickGen {
 }
 
 impl PlotNum for i128 {
+    type DefaultTickGenerator = IntegerTickGen;
     fn default_scale(&self, range: [i128; 2], max: f64) -> f64 {
         let val = *self;
         let diff = (range[1] - range[0]) as f64;

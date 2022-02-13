@@ -1,4 +1,4 @@
-use poloto::{num::integer::IntegerTickGen, plotnum::TickGenerator, prelude::*};
+use poloto::{num::integer::IntegerTickGen, plotnum::TickGenerator, plotnum::TickFormat,prelude::*};
 // PIPE me to a file!
 fn main() {
     // hourly trend over one day.
@@ -10,12 +10,13 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let (xticks, xtick_fmt) = IntegerTickGen::generate(data.boundx());
+    let (xticks, xtick_fmt) = data.boundx().default_tick_generate();
 
     let xstep=xtick_fmt.step();
-    let xtick_fmt=xtick_fmt.with_tick_fmt(|w,v|write!(w,"{}",v.dynamic_format(xstep)));
+    
+    let xtick_fmt=xtick_fmt.with_tick_fmt(|w,v|write!(w,"{} s{}",v,xstep));
 
-    let (yticks, ytick_fmt) = IntegerTickGen::generate(data.boundy());
+    let (yticks, ytick_fmt) = data.boundy().default_tick_generate();
 
     let mut plotter = data.plot_with(
         "Number of rides at theme park hourly",
