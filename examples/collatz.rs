@@ -19,7 +19,7 @@ fn main() {
     }
     data.ymarker(0);
 
-    data.plot("collatz", "x", "y");
+    let plotter = data.plot("collatz", "x", "y");
 
     println!(
         "{}<style>{}{}</style>{}{}",

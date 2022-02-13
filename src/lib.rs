@@ -202,21 +202,14 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         }
     }
 
-    pub fn xmarker(&mut self, a: X) {
+    pub fn xmarker(&mut self, a: X) -> &mut Self {
         self.xmarkers.push(a);
+        self
     }
 
-    pub fn ymarker(&mut self, a: Y) {
+    pub fn ymarker(&mut self, a: Y) -> &mut Self {
         self.ymarkers.push(a);
-    }
-
-    pub fn plot(
-        self,
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext> {
-        self.build().plot(title, xname, yname)
+        self
     }
 
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -339,11 +332,23 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         self
     }
 
-    pub fn build(mut self) -> DataResult<'a, X, Y> {
+    pub fn move_into(&mut self) -> Self {
+        let mut val = Data {
+            plots: vec![],
+            xmarkers: vec![],
+            ymarkers: vec![],
+        };
+
+        std::mem::swap(&mut val, self);
+        val
+    }
+    pub fn build(&mut self) -> DataResult<'a, X, Y> {
+        let mut val = self.move_into();
+
         let (boundx, boundy) = util::find_bounds(
-            self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            self.xmarkers,
-            self.ymarkers,
+            val.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
+            val.xmarkers.clone(),
+            val.ymarkers.clone(),
         );
 
         let boundx = Bound {
@@ -356,7 +361,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         };
 
         DataResult {
-            plots: self.plots,
+            plots: val.plots,
             boundx,
             boundy,
         }

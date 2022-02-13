@@ -6,11 +6,9 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let data = {
-        let mut data = poloto::data();
-        data.histogram("", (0..).zip(trend.into_iter()));
-        data.build()
-    };
+    let data = poloto::data()
+        .histogram("", (0..).zip(trend.into_iter()))
+        .build();
 
     let boundx = data.boundx();
 

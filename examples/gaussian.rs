@@ -21,7 +21,7 @@ fn main() {
     data.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    let mut plotter = data.plot("gaussian", "x", "y");
+    let mut plotter = data.build().plot("gaussian", "x", "y");
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }

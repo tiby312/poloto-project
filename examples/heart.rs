@@ -13,12 +13,10 @@ fn main() {
 
     let mut data = poloto::data();
     data.line_fill_raw("heart", range.map(heart));
-    data.xmarker(-20.0);
-    data.xmarker(20.0);
-    data.ymarker(-20.0);
-    data.ymarker(20.0);
+    data.xmarker(-20.0).xmarker(20.0);
+    data.ymarker(-20.0).ymarker(20.0);
 
-    let plotter = data.plot("Heart Graph", "x", "y");
+    let plotter = data.build().plot("Heart Graph", "x", "y");
 
     plotter.preserve_aspect();
 
