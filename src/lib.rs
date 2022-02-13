@@ -44,8 +44,8 @@ pub mod fmt;
 ///
 pub mod prelude {
     pub use super::formatm;
-    pub use super::plotnum::ext::PlotNumContextExt;
-    pub use super::plotnum::HasDefaultContext;
+    //pub use super::plotnum::ext::PlotNumContextExt;
+    //pub use super::plotnum::HasDefaultContext;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
 }
@@ -114,81 +114,110 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
 
-///
-/// Create a Plotter
-///
-pub fn plot<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a>(
-    title: impl PlotterNameFmt<X, Y> + 'a,
-    xname: impl PlotterNameFmt<X, Y> + 'a,
-    yname: impl PlotterNameFmt<X, Y> + 'a,
-    xcontext: X,
-    ycontext: Y,
-) -> Plotter<'a, X, Y> {
-    Plotter::new(title, xname, yname, xcontext, ycontext)
+#[derive(Copy, Clone, Debug)]
+pub struct Bound<X> {
+    pub min: X,
+    pub max: X,
 }
 
-/// Keeps track of plots.
-/// User supplies iterators that will be iterated on when
-/// render is called.
-///
-/// * The svg element belongs to the `poloto` css class.
-/// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
-/// * The axis line SVG elements belong to the `poloto_axis_lines` class.
-/// * The background belongs to the `poloto_background` class.
-///
-pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
-    title: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    xname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    yname: Box<dyn PlotterNameFmt<X, Y> + 'a>,
-    plots: Vec<Plot<'a, X::Num, Y::Num>>,
-    num_css_classes: Option<usize>,
-    preserve_aspect: bool,
-    xcontext: Option<X>,
-    ycontext: Option<Y>,
+impl<X: PlotNum> Bound<X> {
+    pub fn default_context(&self) -> X::DefaultContext {
+        X::DefaultContext::new(self)
+    }
+}
+impl<X: PlotNum> Bound<X> {
+    ///
+    /// Create a [`Steps`].
+    ///
+    pub fn steps<I: Iterator<Item = X>, F: FnMut(&mut dyn sfmt::Write, X) -> sfmt::Result>(
+        &self,
+        steps: I,
+        func: F,
+    ) -> Steps<X, I, F> {
+        Steps::new(self, steps, func)
+    }
 }
 
-impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
-    ///
-    /// Create a plotter with the specified element.
-    ///
-    /// ```
-    /// use poloto::prelude::*;
-    /// let mut p = poloto::Plotter::new("title", "x", "y",i128::default_ctx(),i128::default_ctx());
-    /// p.line("",[[1,1]]);
-    /// ```
-    pub fn new(
-        title: impl PlotterNameFmt<X, Y> + 'a,
-        xname: impl PlotterNameFmt<X, Y> + 'a,
-        yname: impl PlotterNameFmt<X, Y> + 'a,
-        xcontext: X,
-        ycontext: Y,
-    ) -> Plotter<'a, X, Y> {
+//TODO only needs to implement iterator
+pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
+    plots: Vec<Plot<'a, X, Y>>,
+    boundx: Bound<X>,
+    boundy: Bound<Y>,
+}
+impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
+    pub fn boundx(&self) -> Bound<X> {
+        self.boundx
+    }
+    pub fn boundy(&self) -> Bound<Y> {
+        self.boundy
+    }
+
+    pub fn plot(
+        self,
+        title: impl Display + 'a,
+        xname: impl Display + 'a,
+        yname: impl Display + 'a,
+    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext>
+    {
+        let x = X::DefaultContext::new(&self.boundx);
+        let y = Y::DefaultContext::new(&self.boundy);
+        self.plot_with(title, xname, yname, x, y)
+    }
+
+    pub fn plot_with<XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>(
+        self,
+        title: impl Display + 'a,
+        xname: impl Display + 'a,
+        yname: impl Display + 'a,
+        x: XC,
+        y: YC,
+    ) -> Plotter<'a, XC, YC> {
         Plotter {
             title: Box::new(title),
             xname: Box::new(xname),
             yname: Box::new(yname),
-            plots: Vec::new(),
+            plots: self,
             num_css_classes: Some(8),
             preserve_aspect: false,
-            xcontext: Some(xcontext),
-            ycontext: Some(ycontext),
+            xcontext: Some(x),
+            ycontext: Some(y),
+        }
+    }
+}
+
+pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
+    Data::new()
+}
+
+pub struct Data<'a, X: PlotNum, Y: PlotNum> {
+    plots: Vec<Plot<'a, X, Y>>,
+    xmarkers: Vec<X>,
+    ymarkers: Vec<Y>,
+}
+impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
+    pub fn new() -> Self {
+        Data {
+            plots: vec![],
+            xmarkers: vec![],
+            ymarkers: vec![],
         }
     }
 
-    /// Create a line from plots using a SVG polyline element.
-    /// The element belongs to the `.poloto[N]stroke` css class.
-    ///
-    /// ```
-    /// use poloto::prelude::*;
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
-    /// plotter.line("", &data);
-    /// ```
+    pub fn plot(
+        self,
+        title: impl Display + 'a,
+        xname: impl Display + 'a,
+        yname: impl Display + 'a,
+    ) -> Plotter<'a, X::DefaultContext, Y::DefaultContext>
+    {
+        self.build().plot(title, xname, yname)
+    }
+
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
@@ -213,7 +242,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
@@ -239,7 +268,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFillRaw,
@@ -266,7 +295,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
@@ -292,7 +321,7 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     where
         I: IntoIterator,
         I::IntoIter: Clone + 'a,
-        I::Item: Plottable<X::Num, Y::Num>,
+        I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
@@ -302,6 +331,64 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
             )),
         });
         self
+    }
+
+    pub fn build(mut self) -> DataResult<'a, X, Y> {
+        let (boundx, boundy) = util::find_bounds(
+            self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
+            self.xmarkers,
+            self.ymarkers,
+        );
+
+        let boundx = Bound {
+            min: boundx[0],
+            max: boundx[1],
+        };
+        let boundy = Bound {
+            min: boundy[0],
+            max: boundy[1],
+        };
+
+        DataResult {
+            plots: self.plots,
+            boundx,
+            boundy,
+        }
+    }
+}
+
+/// Keeps track of plots.
+/// User supplies iterators that will be iterated on when
+/// render is called.
+///
+/// * The svg element belongs to the `poloto` css class.
+/// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
+/// * The axis line SVG elements belong to the `poloto_axis_lines` class.
+/// * The background belongs to the `poloto_background` class.
+///
+pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
+    title: Box<dyn Display + 'a>,
+    xname: Box<dyn Display + 'a>,
+    yname: Box<dyn Display + 'a>,
+    plots: DataResult<'a, X::Num, Y::Num>,
+    num_css_classes: Option<usize>,
+    preserve_aspect: bool,
+    xcontext: Option<X>,
+    ycontext: Option<Y>,
+}
+
+impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
+    pub fn with_xtick<XX: PlotNumContext<Num = X::Num>>(self, a: XX) -> Plotter<'a, XX, Y> {
+        Plotter {
+            title: self.title,
+            xname: self.xname,
+            yname: self.yname,
+            plots: self.plots,
+            num_css_classes: self.num_css_classes,
+            preserve_aspect: self.preserve_aspect,
+            xcontext: Some(a),
+            ycontext: self.ycontext,
+        }
     }
 
     ///
@@ -332,26 +419,6 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
     }
 
     ///
-    /// Move a plotter out from behind a mutable reference leaving
-    /// an empty plotter.
-    ///
-    pub fn move_into(&mut self) -> Plotter<'a, X, Y> {
-        let mut empty = Plotter {
-            title: Box::new(""),
-            xname: Box::new(""),
-            yname: Box::new(""),
-            plots: Vec::new(),
-            num_css_classes: None,
-            preserve_aspect: false,
-            xcontext: None,
-            ycontext: None,
-        };
-
-        core::mem::swap(&mut empty, self);
-        empty
-    }
-
-    ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
     /// Use this if you want to embed a svg into your html.
@@ -377,11 +444,8 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
         let xcontext = self.xcontext.as_mut().unwrap();
         let ycontext = self.ycontext.as_mut().unwrap();
 
-        let (boundx, boundy) = util::find_bounds(
-            self.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            xcontext,
-            ycontext,
-        );
+        let boundx = [self.plots.boundx.min, self.plots.boundx.max];
+        let boundy = [self.plots.boundy.min, self.plots.boundy.max];
 
         //knowldge of canvas dim
         let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
@@ -398,7 +462,6 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
 
         let tickx = xcontext.compute_ticks(
             canvas.ideal_num_xsteps,
-            boundx,
             DashInfo {
                 ideal_dash_size,
                 max: canvas.scalex,
@@ -407,7 +470,6 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
 
         let ticky = ycontext.compute_ticks(
             canvas.ideal_num_ysteps,
-            boundy,
             DashInfo {
                 ideal_dash_size,
                 max: canvas.scaley,
@@ -471,40 +533,31 @@ pub fn disp_const<F: Fn(&mut sfmt::Formatter) -> sfmt::Result>(
 }
 
 ///
-/// Create a [`Steps`].
-///
-pub fn steps<
-    J: PlotNum,
-    I: Iterator<Item = J>,
-    F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result,
->(
-    steps: I,
-    func: F,
-) -> Steps<I, F> {
-    Steps::new(steps, func)
-}
-
-///
 /// A distribution of steps manually specified by the user via an iterator.
 ///
 /// Considering using contexts that automatically pick a good step distribution
 /// before resulting to using this.
 ///
-pub struct Steps<I, F> {
+pub struct Steps<N, I, F> {
+    pub bound: Bound<N>,
     pub steps: I,
     pub func: F,
 }
 
 impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result>
-    Steps<I, F>
+    Steps<J, I, F>
 {
-    pub fn new(steps: I, func: F) -> Steps<I, F> {
-        Steps { steps, func }
+    pub fn new(bound: &Bound<J>, steps: I, func: F) -> Steps<J, I, F> {
+        Steps {
+            bound: *bound,
+            steps,
+            func,
+        }
     }
 }
 
 impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfmt::Result>
-    PlotNumContext for Steps<I, F>
+    PlotNumContext for Steps<J, I, F>
 {
     type StepInfo = ();
     type Num = J;
@@ -513,33 +566,19 @@ impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfm
         &mut self,
         writer: &mut dyn sfmt::Write,
         val: J,
-        _bound: [J; 2],
         _info: &Self::StepInfo,
     ) -> std::fmt::Result {
         (self.func)(writer, val)
     }
 
-    fn where_fmt(
-        &mut self,
-        _writer: &mut dyn std::fmt::Write,
-        _val: J,
-        _bound: [J; 2],
-    ) -> std::fmt::Result {
+    fn where_fmt(&mut self, _writer: &mut dyn std::fmt::Write, _val: J) -> std::fmt::Result {
         unreachable!();
     }
 
-    fn scale(&mut self, mut val: J, range: [J; 2], max: f64) -> f64 {
-        val.default_scale(range, max)
-    }
-    fn compute_ticks(
-        &mut self,
-        _ideal_num_steps: u32,
-        range: [J; 2],
-        _dash: DashInfo,
-    ) -> TickInfo<J, ()> {
+    fn compute_ticks(&mut self, _ideal_num_steps: u32, _dash: DashInfo) -> TickInfo<J, ()> {
         let ticks: Vec<_> = (&mut self.steps)
-            .skip_while(|&x| x < range[0])
-            .take_while(|&x| x <= range[1])
+            .skip_while(|&x| x < self.bound.min)
+            .take_while(|&x| x <= self.bound.max)
             .map(|x| Tick {
                 value: x,
                 position: x,
@@ -557,9 +596,5 @@ impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfm
             dash_size: None,
             display_relative: None,
         }
-    }
-
-    fn unit_range(&mut self, offset: Option<J>) -> [J; 2] {
-        J::default_unit_range(offset)
     }
 }

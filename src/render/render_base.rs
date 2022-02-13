@@ -31,9 +31,6 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
     let xcontext = plotter.xcontext.as_mut().unwrap();
     let ycontext = plotter.ycontext.as_mut().unwrap();
 
-    xcontext.init(boundx, &xtick_info.unit_data);
-    ycontext.init(boundy, &ytick_info.unit_data);
-
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
 
@@ -47,11 +44,8 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
             d.attr("y", padding / 4.0)
         })?
         .build(|w| {
-            plotter.title.fmt_self(
-                &mut w.writer_safe(),
-                (boundx, &mut xtick_info.unit_data),
-                (boundy, &mut ytick_info.unit_data),
-            )
+            use std::fmt::Write;
+            write!(w.writer_safe(), "{}", plotter.title)
         })?;
 
     writer
@@ -64,11 +58,8 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
             d.attr("y", height - padding / 8.)
         })?
         .build(|w| {
-            plotter.xname.fmt_self(
-                &mut w.writer_safe(),
-                (boundx, &mut xtick_info.unit_data),
-                (boundy, &mut ytick_info.unit_data),
-            )
+            use std::fmt::Write;
+            write!(w.writer_safe(), "{}", plotter.xname)
         })?;
 
     writer
@@ -85,11 +76,8 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
             d.attr("y", height / 2.0)
         })?
         .build(|w| {
-            plotter.yname.fmt_self(
-                &mut w.writer_safe(),
-                (boundx, &mut xtick_info.unit_data),
-                (boundy, &mut ytick_info.unit_data),
-            )
+            use std::fmt::Write;
+            write!(w.writer_safe(), "{}", plotter.yname)
         })?;
 
     let xdash_size = xtick_info.dash_size;
@@ -117,7 +105,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "Where j = ")?;
 
-                    xcontext.where_fmt(&mut w, base, boundx)
+                    xcontext.where_fmt(&mut w, base)
                 })?;
 
             "j+"
@@ -127,8 +115,8 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
 
         //Draw interva`l x text
         for &Tick { position, value } in xtick_info.ticks.iter() {
-            let xx = (xcontext.scale(position, [minx, maxx], scalex)
-                - xcontext.scale(minx, [minx, maxx], scalex))
+            let xx = (position.default_scale([minx, maxx], scalex)
+                - minx.default_scale([minx, maxx], scalex))
                 + padding;
 
             writer.single("line", |d| {
@@ -153,7 +141,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "{}", extra)?;
 
-                    xcontext.tick_fmt(&mut w, value, boundx, &xtick_info.unit_data)
+                    xcontext.tick_fmt(&mut w, value, &xtick_info.unit_data)
                 })?;
         }
     }
@@ -174,7 +162,7 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     let mut w = w.writer_safe();
                     write!(w, "Where k = ")?;
 
-                    ycontext.where_fmt(&mut w, base, boundy)
+                    ycontext.where_fmt(&mut w, base)
                 })?;
 
             "k+"
@@ -185,8 +173,8 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
         //Draw interval y text
         for &Tick { position, value } in ytick_info.ticks.iter() {
             let yy = height
-                - (ycontext.scale(position, [miny, maxy], scaley)
-                    - ycontext.scale(miny, [miny, maxy], scaley))
+                - (position.default_scale([miny, maxy], scaley)
+                    - miny.default_scale([miny, maxy], scaley))
                 - paddingy;
 
             writer.single("line", |d| {
@@ -211,13 +199,13 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
                     use std::fmt::Write;
                     write!(w, "{}", extra)?;
 
-                    ycontext.tick_fmt(&mut w, value, boundy, &ytick_info.unit_data)
+                    ycontext.tick_fmt(&mut w, value, &ytick_info.unit_data)
                 })?;
         }
     }
 
-    let d1 = xcontext.scale(minx, [minx, maxx], scalex);
-    let d2 = xcontext.scale(first_tickx.position, [minx, maxx], scalex);
+    let d1 = minx.default_scale([minx, maxx], scalex);
+    let d2 = first_tickx.position.default_scale([minx, maxx], scalex);
     let distance_to_firstx = d2 - d1;
 
     writer.single("path", |d| {
@@ -247,8 +235,8 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
         })
     })?;
 
-    let d1 = ycontext.scale(miny, [miny, maxy], scaley);
-    let d2 = ycontext.scale(first_ticky.position, [miny, maxy], scaley);
+    let d1 = miny.default_scale([miny, maxy], scaley);
+    let d2 = first_ticky.position.default_scale([miny, maxy], scaley);
     let distance_to_firsty = d2 - d1;
 
     writer.single("path", |d| {

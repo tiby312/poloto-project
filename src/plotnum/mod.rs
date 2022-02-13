@@ -2,7 +2,7 @@
 //! Contains the [`PlotNum`] trait and their supporting structs.
 //!
 
-pub mod ext;
+//pub mod ext;
 
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
 /// See [`crate::plottable::crop::Croppable`]
@@ -12,17 +12,11 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
-///
-/// Used to define a default context to associate with a plot number.
-///
-pub trait HasDefaultContext {
-    type DefaultContext: PlotNumContext + Default;
 
-    fn default_ctx() -> Self::DefaultContext {
-        Self::DefaultContext::default()
-    }
+
+pub trait PlotNumContextFromBound: PlotNumContext {
+    fn new(a: &crate::Bound<Self::Num>) -> Self;
 }
-
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
@@ -30,10 +24,6 @@ pub trait HasDefaultContext {
 pub trait PlotNumContext {
     type StepInfo;
     type Num: PlotNum;
-
-    /// Provided a min and max range, scale the current value against max.
-    fn scale(&mut self, val: Self::Num, range: [Self::Num; 2], max: f64) -> f64;
-
     ///
     /// Given an ideal number of intervals across the min and max values,
     /// Calculate information related to where the interval ticks should go.
@@ -42,44 +32,25 @@ pub trait PlotNumContext {
     fn compute_ticks(
         &mut self,
         ideal_num_steps: u32,
-        range: [Self::Num; 2],
         dash: DashInfo,
     ) -> TickInfo<Self::Num, Self::StepInfo>;
-
-    /// If there is only one point in a graph, or no point at all,
-    /// the range to display in the graph.
-    fn unit_range(&mut self, offset: Option<Self::Num>) -> [Self::Num; 2];
 
     /// Format each tick.
     fn tick_fmt(
         &mut self,
         writer: &mut dyn std::fmt::Write,
         val: Self::Num,
-        _bound: [Self::Num; 2],
         _extra: &Self::StepInfo,
     ) -> std::fmt::Result;
 
     /// Format the where clause
-    fn where_fmt(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        _bound: [Self::Num; 2],
-    ) -> std::fmt::Result;
-
-    /// List of invisible points
-    fn markers(&self) -> Vec<Self::Num> {
-        vec![]
-    }
+    fn where_fmt(&mut self, writer: &mut dyn std::fmt::Write, val: Self::Num) -> std::fmt::Result;
 
     /// Called before [`PlotNumContext::compute_ticks`] is called.
     /// If none, [`crate::Plotter`] will pick a number of ticks.
     fn ideal_num_ticks(&self) -> Option<u32> {
         None
     }
-
-    /// Called once after [`PlotNumContext::compute_ticks`] is called.
-    fn init(&mut self, _bound: [Self::Num; 2], _extra: &Self::StepInfo) {}
 }
 
 ///
@@ -87,12 +58,18 @@ pub trait PlotNumContext {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy {
+    type DefaultContext: PlotNumContextFromBound<Num = Self>;
+
+    fn default_ctx(bound: &crate::Bound<Self>) -> Self::DefaultContext {
+        Self::DefaultContext::new(bound)
+    }
+    
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
     }
 
-    fn default_scale(&mut self, range: [Self; 2], max: f64) -> f64;
+    fn default_scale(&self, range: [Self; 2], max: f64) -> f64;
 
     fn default_unit_range(offset: Option<Self>) -> [Self; 2];
 }

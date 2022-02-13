@@ -6,17 +6,23 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let data = (0..).zip(trend.into_iter());
+    let mut data = poloto::data();
 
-    let mut plotter = poloto::plot(
-        "Number of rides at theme park hourly",
-        "Hour",
-        "Number of rides",
-        poloto::steps((0..).step_by(6), |w, v| write!(w, "{} hr", v)),
-        i128::default_ctx().with_marker(0),
-    );
+    data.histogram("", (0..).zip(trend.into_iter()));
 
-    plotter.histogram("", data);
+    let res = data.build();
+
+    let boundx=res.boundx();
+    
+    let mut plotter = res
+        .plot(
+            "Number of rides at theme park hourly",
+            "Hour",
+            "Number of rides",
+        )
+        .with_xtick(
+            boundx.steps((0..).step_by(6), |w, v| write!(w, "{} hr", v)),
+        );
 
     println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
 }

@@ -65,8 +65,10 @@ fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]
 ///
 /// Default integer context. It will attempt to find reasonable step sizes, and format them as regular integers.
 ///
-#[derive(Default)]
-pub struct IntegerContext;
+///
+pub struct IntegerContext {
+    bound: crate::Bound<i128>,
+}
 impl PlotNumContext for IntegerContext {
     type StepInfo = i128;
     type Num = i128;
@@ -75,36 +77,23 @@ impl PlotNumContext for IntegerContext {
         &mut self,
         writer: &mut dyn fmt::Write,
         val: i128,
-        _bound: [i128; 2],
         info: &Self::StepInfo,
     ) -> std::fmt::Result {
         util::write_interval_i128(writer, val, Some(*info))
     }
 
-    fn where_fmt(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: i128,
-        _bound: [i128; 2],
-    ) -> std::fmt::Result {
+    fn where_fmt(&mut self, writer: &mut dyn std::fmt::Write, val: i128) -> std::fmt::Result {
         util::write_interval_i128(writer, val, None)
     }
 
-    fn scale(&mut self, mut val: i128, range: [i128; 2], max: f64) -> f64 {
-        val.default_scale(range, max)
-    }
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [i128; 2],
-        dash: DashInfo,
-    ) -> TickInfo<i128, i128> {
+    fn compute_ticks(&mut self, ideal_num_steps: u32, dash: DashInfo) -> TickInfo<i128, i128> {
+        let range = [self.bound.min, self.bound.max];
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (display_relative, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            self.scale(tick_layout.step, range, dash.max),
+            tick_layout.step.default_scale(range, dash.max),
             dash.ideal_dash_size,
             tick_layout.normalized_step,
         ));
@@ -151,18 +140,19 @@ impl PlotNumContext for IntegerContext {
         }
         */
     }
+}
 
-    fn unit_range(&mut self, offset: Option<i128>) -> [i128; 2] {
-        i128::default_unit_range(offset)
+impl PlotNumContextFromBound for IntegerContext {
+    fn new(bound: &crate::Bound<i128>) -> Self {
+        IntegerContext { bound: *bound }
     }
 }
 
-impl HasDefaultContext for i128 {
-    type DefaultContext = IntegerContext;
-}
 
 impl PlotNum for i128 {
-    fn default_scale(&mut self, range: [i128; 2], max: f64) -> f64 {
+    type DefaultContext = IntegerContext;
+
+    fn default_scale(&self, range: [i128; 2], max: f64) -> f64 {
         let val = *self;
         let diff = (range[1] - range[0]) as f64;
 

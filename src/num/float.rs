@@ -10,11 +10,18 @@ impl DiscNum for f64 {
     }
 }
 
+impl PlotNumContextFromBound for FloatContext {
+    fn new(bound: &crate::Bound<f64>) -> Self {
+        FloatContext { bound: *bound }
+    }
+}
+
 ///
 /// Default float context. It will attempt to find reasonable step sizes, and format them as regular floats.
 ///
-#[derive(Default)]
-pub struct FloatContext;
+pub struct FloatContext {
+    bound: crate::Bound<f64>,
+}
 impl PlotNumContext for FloatContext {
     type Num = f64;
     type StepInfo = f64;
@@ -23,37 +30,24 @@ impl PlotNumContext for FloatContext {
         &mut self,
         writer: &mut dyn fmt::Write,
         val: Self::Num,
-        _bound: [Self::Num; 2],
         info: &Self::StepInfo,
     ) -> std::fmt::Result {
         util::write_interval_float(writer, val, Some(*info))
     }
 
-    fn where_fmt(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: f64,
-        _bound: [f64; 2],
-    ) -> std::fmt::Result {
+    fn where_fmt(&mut self, writer: &mut dyn std::fmt::Write, val: f64) -> std::fmt::Result {
         util::write_interval_float(writer, val, None)
     }
 
-    fn scale(&mut self, mut val: f64, range: [f64; 2], max: f64) -> f64 {
-        val.default_scale(range, max)
-    }
+    fn compute_ticks(&mut self, ideal_num_steps: u32, dash: DashInfo) -> TickInfo<f64, f64> {
+        let range = [self.bound.min, self.bound.max];
 
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [f64; 2],
-        dash: DashInfo,
-    ) -> TickInfo<f64, f64> {
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (display_relative, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            self.scale(tick_layout.step, range, dash.max),
+            tick_layout.step.default_scale(range, dash.max),
             dash.ideal_dash_size,
             tick_layout.normalized_step,
         ));
@@ -65,16 +59,15 @@ impl PlotNumContext for FloatContext {
             dash_size,
         }
     }
-    fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
-        f64::default_unit_range(offset)
-    }
 }
 
 impl PlotNum for f64 {
+    type DefaultContext = FloatContext;
+
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
-    fn default_scale(&mut self, range: [f64; 2], max: f64) -> f64 {
+    fn default_scale(&self, range: [f64; 2], max: f64) -> f64 {
         let val = *self;
         let diff = range[1] - range[0];
         let scale = max / diff;
@@ -89,9 +82,6 @@ impl PlotNum for f64 {
     }
 }
 
-impl HasDefaultContext for f64 {
-    type DefaultContext = FloatContext;
-}
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {
     ((val) / multiple).ceil() * multiple

@@ -38,7 +38,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
         (0..max).cycle()
     };
 
-    for (i, mut p) in plotter.plots.drain(..).enumerate() {
+    for (i, mut p) in plotter.plots.plots.drain(..).enumerate() {
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
 
         let name_exists = writer
@@ -56,8 +56,8 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                 Ok(wc.get_counter() != 0)
             })?;
 
-        let aa = xcontext.scale(minx, [minx, maxx], scalex);
-        let bb = ycontext.scale(miny, [miny, maxy], scaley);
+        let aa = minx.default_scale([minx, maxx], scalex);
+        let bb = miny.default_scale([miny, maxy], scaley);
 
         struct PlotIter<X: PlotNumContext, Y: PlotNumContext> {
             basex_ii: f64,
@@ -74,10 +74,10 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                 xcontext: &'a mut X,
                 ycontext: &'a mut Y,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
-                p.plots.iter_second().map(move |(x, y)| {
+                p.plots.iter_second().map(move |(mut x, mut y)| {
                     [
-                        self.basex_ii + xcontext.scale(x, self.rangex_ii, self.maxx_ii),
-                        self.basey_ii - ycontext.scale(y, self.rangey_ii, self.maxy_ii),
+                        self.basex_ii + x.default_scale(self.rangex_ii, self.maxx_ii),
+                        self.basey_ii - y.default_scale(self.rangey_ii, self.maxy_ii),
                     ]
                 })
             }

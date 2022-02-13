@@ -177,14 +177,11 @@ impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
     }
 }
 
-pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
-    it: impl IntoIterator<Item = (X::Num, Y::Num)>,
-    xcontext: &mut X,
-    ycontext: &mut Y,
-) -> ([X::Num; 2], [Y::Num; 2]) {
-    let xmarkers = xcontext.markers();
-    let ymarkers = ycontext.markers();
-
+pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
+    it: impl IntoIterator<Item = (X, Y)>,
+    xmarkers: Vec<X>,
+    ymarkers: Vec<Y>,
+) -> ([X; 2], [Y; 2]) {
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
     if let Some((x, y)) = ii.next() {
@@ -233,15 +230,15 @@ pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
         });
 
         if !xmoved {
-            val.0 = xcontext.unit_range(Some(x));
+            val.0 = X::default_unit_range(Some(x));
         }
 
         if !ymoved {
-            val.1 = ycontext.unit_range(Some(y));
+            val.1 = Y::default_unit_range(Some(y));
         }
 
         val
     } else {
-        (xcontext.unit_range(None), ycontext.unit_range(None))
+        (X::default_unit_range(None), Y::default_unit_range(None))
     }
 }

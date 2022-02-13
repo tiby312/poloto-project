@@ -77,15 +77,19 @@ fn main() {
 
     let data = (0..).zip(trend.into_iter());
 
-    let mut plotter = poloto::plot(
+    let data=poloto::plot().histogram("", data).finish();
+
+    let tickx=data.boundx().decimal_dyn_ticks();
+    let ticky=data.boundy().decimal_dyn_ticks();
+
+    let mut plotter = data.plot(
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        poloto::steps((0..).step_by(6), |w, v| write!(w, "{} hr", v)),
-        i128::default_ctx().with_marker(0),
+        tickx,
+        ticky,
     );
 
-    plotter.histogram("", data);
 
     println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
 }
