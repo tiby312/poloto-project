@@ -1,11 +1,5 @@
 use crate::*;
 
-pub struct Data<X, Y, J, K> {
-    pub boundx: [X; 2],
-    pub boundy: [Y; 2],
-    pub tickx: TickInfo<X, J>,
-    pub ticky: TickInfo<Y, K>,
-}
 
 mod render_base;
 mod render_plots;
@@ -28,6 +22,7 @@ pub struct Canvas {
 }
 impl Canvas {
     pub fn with_options(preserve_aspect: bool, num_css_classes: Option<usize>) -> Self {
+        
         let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
         let ideal_num_ysteps = 5;
 
@@ -72,21 +67,17 @@ impl Canvas {
     }
 
     pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
-        &self,
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter<X, Y>,
-        data: &Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
+        plotter: &mut Plotter<X, Y>
     ) -> std::fmt::Result {
-        render_plots::render_plots(self, writer, plotter, data)
+        render_plots::render_plots(writer, plotter)
     }
 
     pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
-        &self,
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter<X, Y>,
-        data: &mut Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
+        plotter: &mut Plotter< X, Y>
     ) -> std::fmt::Result {
-        render_base::render_base(self, writer, plotter, data)
+        render_base::render_base(writer, plotter)
     }
 }
 

@@ -73,20 +73,22 @@ impl std::fmt::Display for StepUnit {
 ///
 pub struct UnixTimeContext<T: chrono::TimeZone> {
     timezone: T,
+    bound:Bound<UnixTime>
 }
 
-impl<T: chrono::TimeZone> UnixTimeContext<T> {
-    pub fn new(timezone: &T) -> Self {
-        UnixTimeContext {
-            timezone: timezone.clone(),
-        }
+
+impl PlotNumContextFromBound for UnixTimeContext<Utc> {
+    fn new(bound: &crate::Bound<UnixTime>) -> Self {
+        UnixTimeContext { timezone:Utc,bound: *bound }
     }
 }
 
-impl Default for UnixTimeContext<Utc> {
-    fn default() -> Self {
+
+impl<T: chrono::TimeZone> UnixTimeContext<T> {
+    pub fn new(timezone: &T,bound:&crate::Bound<UnixTime>) -> Self {
         UnixTimeContext {
-            timezone: chrono::Utc,
+            bound:*bound,
+            timezone: timezone.clone(),
         }
     }
 }
@@ -98,15 +100,11 @@ where
     type StepInfo = StepUnit;
     type Num = UnixTime;
 
-    fn scale(&mut self, mut val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
-        val.default_scale(range, max)
-    }
 
     fn tick_fmt(
         &mut self,
         writer: &mut dyn fmt::Write,
         val: UnixTime,
-        _bound: [UnixTime; 2],
         info: &StepUnit,
     ) -> std::fmt::Result {
         write!(writer, "{}", val.dynamic_format(&self.timezone, info))
@@ -116,18 +114,19 @@ where
         &mut self,
         writer: &mut dyn std::fmt::Write,
         val: UnixTime,
-        _bound: [UnixTime; 2],
     ) -> std::fmt::Result {
         write!(writer, "{}", val.datetime(&self.timezone))
     }
 
     fn compute_ticks(
         &mut self,
-        ideal_num_steps: u32,
-        range: [UnixTime; 2],
-        _info: DashInfo,
     ) -> TickInfo<UnixTime, StepUnit> {
+        let range=[self.bound.min,self.bound.max];
+        
         assert!(range[0] <= range[1]);
+        let ideal_num_steps=self.bound.ideal_num_steps;
+        let dash=self.bound.dash_info;
+        
         let ideal_num_steps = ideal_num_steps.max(2);
 
         let [start, end] = range;
@@ -170,17 +169,11 @@ where
         }
     }
 
-    fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
-        UnixTime::default_unit_range(offset)
-    }
-}
-
-impl HasDefaultContext for UnixTime {
-    type DefaultContext = UnixTimeContext<chrono::Utc>;
 }
 
 impl PlotNum for UnixTime {
-    fn default_scale(&mut self, range: [UnixTime; 2], max: f64) -> f64 {
+    type DefaultContext = UnixTimeContext<Utc>;
+    fn default_scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;
         let [val1, val2] = [val1.0, val2.0];

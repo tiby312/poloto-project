@@ -1,10 +1,8 @@
 use super::*;
 
 pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
-    canvas: &Canvas,
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<X, Y>,
-    data: &Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
+    plotter: &mut Plotter<X, Y>
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -18,10 +16,13 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
         legendx1,
         num_css_classes,
         ..
-    } = *canvas;
+    } = plotter.plots.canvas;
 
-    let [minx, maxx] = data.boundx;
-    let [miny, maxy] = data.boundy;
+    let boundx = [plotter.plots.boundx.min,plotter.plots.boundx.max];
+    let boundy = [plotter.plots.boundy.min,plotter.plots.boundy.max];
+    
+    let [minx, maxx] = boundx;
+    let [miny, maxy] = boundy;
 
     let mut writer = tagger::new(writer);
 
@@ -74,7 +75,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                 xcontext: &'a mut X,
                 ycontext: &'a mut Y,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
-                p.plots.iter_second().map(move |(mut x, mut y)| {
+                p.plots.iter_second().map(move |(x,y)| {
                     [
                         self.basex_ii + x.default_scale(self.rangex_ii, self.maxx_ii),
                         self.basey_ii - y.default_scale(self.rangey_ii, self.maxy_ii),

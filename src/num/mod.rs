@@ -12,8 +12,8 @@ use core::fmt;
 pub mod float;
 pub mod integer;
 
-//#[cfg(feature = "timestamp")]
-//pub mod timestamp;
+#[cfg(feature = "timestamp")]
+pub mod timestamp;
 
 use std::convert::TryFrom;
 

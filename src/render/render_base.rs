@@ -1,10 +1,8 @@
 use super::*;
 
 pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
-    canvas: &Canvas,
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<X, Y>,
-    data: &mut Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
+    plotter: &mut Plotter<X, Y>
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 
@@ -18,15 +16,15 @@ pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
         scaley,
         preserve_aspect,
         ..
-    } = *canvas;
+    } = plotter.plots.canvas;
 
-    let boundx = data.boundx;
-    let boundy = data.boundy;
+    let boundx = [plotter.plots.boundx.min,plotter.plots.boundx.max];
+    let boundy = [plotter.plots.boundy.min,plotter.plots.boundy.max];
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
 
-    let xtick_info = &mut data.tickx;
-    let ytick_info = &mut data.ticky;
+    let xtick_info = &mut plotter.tickx;
+    let ytick_info = &mut plotter.ticky;
 
     let xcontext = plotter.xcontext.as_mut().unwrap();
     let ycontext = plotter.ycontext.as_mut().unwrap();

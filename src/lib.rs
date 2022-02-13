@@ -114,10 +114,13 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
 
-#[derive(Copy, Clone, Debug)]
+
+#[derive(Copy, Clone)]
 pub struct Bound<X> {
     pub min: X,
     pub max: X,
+    pub ideal_num_steps:u32,
+    pub dash_info:DashInfo
 }
 
 impl<X: PlotNum> Bound<X> {
@@ -143,6 +146,9 @@ pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     boundx: Bound<X>,
     boundy: Bound<Y>,
+    canvas:render::Canvas,
+    num_css_classes: Option<usize>,
+    preserve_aspect: bool,
 }
 impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     pub fn boundx(&self) -> Bound<X> {
@@ -152,6 +158,7 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         self.boundy
     }
 
+    /* 
     pub fn plot(
         self,
         title: impl Display + 'a,
@@ -162,12 +169,15 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         let y = Y::DefaultContext::new(&self.boundy);
         self.plot_with(title, xname, yname, x, y)
     }
+    */
 
     pub fn plot_with<XC: PlotNumContext<Num = X>, YC: PlotNumContext<Num = Y>>(
         self,
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
+        tickx:TickInfo<XC::Num, XC::StepInfo>,
+        ticky:TickInfo<YC::Num, YC::StepInfo>,
         x: XC,
         y: YC,
     ) -> Plotter<'a, XC, YC> {
@@ -176,10 +186,10 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
             xname: Box::new(xname),
             yname: Box::new(yname),
             plots: self,
-            num_css_classes: Some(8),
-            preserve_aspect: false,
             xcontext: Some(x),
             ycontext: Some(y),
+            tickx,
+            ticky
         }
     }
 }
@@ -192,6 +202,8 @@ pub struct Data<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     xmarkers: Vec<X>,
     ymarkers: Vec<Y>,
+    num_css_classes: Option<usize>,
+    preserve_aspect: bool,
 }
 impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     pub fn new() -> Self {
@@ -199,6 +211,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
             plots: vec![],
             xmarkers: vec![],
             ymarkers: vec![],
+            num_css_classes:Some(8),
+            preserve_aspect:false
         }
     }
 
@@ -332,76 +346,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         self
     }
 
-    pub fn move_into(&mut self) -> Self {
-        let mut val = Data {
-            plots: vec![],
-            xmarkers: vec![],
-            ymarkers: vec![],
-        };
-
-        std::mem::swap(&mut val, self);
-        val
-    }
-    pub fn build(&mut self) -> DataResult<'a, X, Y> {
-        let mut val = self.move_into();
-
-        let (boundx, boundy) = util::find_bounds(
-            val.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
-            val.xmarkers.clone(),
-            val.ymarkers.clone(),
-        );
-
-        let boundx = Bound {
-            min: boundx[0],
-            max: boundx[1],
-        };
-        let boundy = Bound {
-            min: boundy[0],
-            max: boundy[1],
-        };
-
-        DataResult {
-            plots: val.plots,
-            boundx,
-            boundy,
-        }
-    }
-}
-
-/// Keeps track of plots.
-/// User supplies iterators that will be iterated on when
-/// render is called.
-///
-/// * The svg element belongs to the `poloto` css class.
-/// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
-/// * The axis line SVG elements belong to the `poloto_axis_lines` class.
-/// * The background belongs to the `poloto_background` class.
-///
-pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
-    title: Box<dyn Display + 'a>,
-    xname: Box<dyn Display + 'a>,
-    yname: Box<dyn Display + 'a>,
-    plots: DataResult<'a, X::Num, Y::Num>,
-    num_css_classes: Option<usize>,
-    preserve_aspect: bool,
-    xcontext: Option<X>,
-    ycontext: Option<Y>,
-}
-
-impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
-    pub fn with_xtick<XX: PlotNumContext<Num = X::Num>>(self, a: XX) -> Plotter<'a, XX, Y> {
-        Plotter {
-            title: self.title,
-            xname: self.xname,
-            yname: self.yname,
-            plots: self.plots,
-            num_css_classes: self.num_css_classes,
-            preserve_aspect: self.preserve_aspect,
-            xcontext: Some(a),
-            ycontext: self.ycontext,
-        }
-    }
-
     ///
     /// Preserve the aspect ratio by drawing a smaller graph in the same area.
     ///
@@ -428,6 +372,85 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
         self.num_css_classes = a;
         self
     }
+    pub fn move_into(&mut self) -> Self {
+        let mut val = Data {
+            plots: vec![],
+            xmarkers: vec![],
+            ymarkers: vec![],
+            num_css_classes: None,
+            preserve_aspect: false,
+        };
+
+        std::mem::swap(&mut val, self);
+        val
+    }
+    pub fn build(&mut self) -> DataResult<'a, X, Y> {
+        let mut val = self.move_into();
+
+        let (boundx, boundy) = util::find_bounds(
+            val.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
+            val.xmarkers.clone(),
+            val.ymarkers.clone(),
+        );
+
+        //let ideal_num_xsteps = if self.preserve_aspect { 4 } else { 6 };
+        //let ideal_num_ysteps = 5;
+
+        //TODO put this somewhere?
+        let ideal_dash_size = 20.0;
+
+        //knowldge of canvas dim
+        let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
+
+        let boundx = Bound {
+            min: boundx[0],
+            max: boundx[1],
+            ideal_num_steps:canvas.ideal_num_xsteps,
+            dash_info:DashInfo {
+                ideal_dash_size,
+                max: canvas.scalex,
+            }
+        };
+        let boundy = Bound {
+            min: boundy[0],
+            max: boundy[1],
+            ideal_num_steps:canvas.ideal_num_ysteps,
+            dash_info:DashInfo { ideal_dash_size, max: canvas.scaley }
+        };
+
+        DataResult {
+            plots: val.plots,
+            boundx,
+            boundy,
+            canvas,
+            num_css_classes:val.num_css_classes,
+            preserve_aspect:val.preserve_aspect
+        }
+    }
+}
+
+/// Keeps track of plots.
+/// User supplies iterators that will be iterated on when
+/// render is called.
+///
+/// * The svg element belongs to the `poloto` css class.
+/// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
+/// * The axis line SVG elements belong to the `poloto_axis_lines` class.
+/// * The background belongs to the `poloto_background` class.
+///
+pub struct Plotter<'a, X: PlotNumContext + 'a, Y: PlotNumContext + 'a> {
+    title: Box<dyn Display + 'a>,
+    xname: Box<dyn Display + 'a>,
+    yname: Box<dyn Display + 'a>,
+    plots: DataResult<'a, X::Num, Y::Num>,
+    xcontext: Option<X>,
+    ycontext: Option<Y>,
+    tickx:TickInfo<X::Num, X::StepInfo>,
+    ticky:TickInfo<Y::Num, Y::StepInfo>
+}
+
+impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
+    
 
     ///
     /// Use the plot iterators to write out the graph elements.
@@ -458,45 +481,9 @@ impl<'a, X: PlotNumContext, Y: PlotNumContext> Plotter<'a, X, Y> {
         let boundx = [self.plots.boundx.min, self.plots.boundx.max];
         let boundy = [self.plots.boundy.min, self.plots.boundy.max];
 
-        //knowldge of canvas dim
-        let mut canvas = render::Canvas::with_options(self.preserve_aspect, self.num_css_classes);
 
-        if let Some(a) = xcontext.ideal_num_ticks() {
-            canvas.ideal_num_xsteps = a;
-        }
-        if let Some(a) = ycontext.ideal_num_ticks() {
-            canvas.ideal_num_ysteps = a;
-        }
-
-        //TODO put this somewhere?
-        let ideal_dash_size = 20.0;
-
-        let tickx = xcontext.compute_ticks(
-            canvas.ideal_num_xsteps,
-            DashInfo {
-                ideal_dash_size,
-                max: canvas.scalex,
-            },
-        );
-
-        let ticky = ycontext.compute_ticks(
-            canvas.ideal_num_ysteps,
-            DashInfo {
-                ideal_dash_size,
-                max: canvas.scaley,
-            },
-        );
-
-        let mut data = render::Data {
-            boundx,
-            boundy,
-            tickx,
-            ticky,
-        };
-
-        canvas.render_plots(&mut a, self, &data)?;
-
-        canvas.render_base(a, self, &mut data)
+        render::Canvas::render_plots(&mut a, self)?;
+        render::Canvas::render_base(&mut a, self)
     }
 
     ///
@@ -586,7 +573,8 @@ impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn sfmt::Write, J) -> sfm
         unreachable!();
     }
 
-    fn compute_ticks(&mut self, _ideal_num_steps: u32, _dash: DashInfo) -> TickInfo<J, ()> {
+    fn compute_ticks(&mut self) -> TickInfo<J, ()> {
+        
         let ticks: Vec<_> = (&mut self.steps)
             .skip_while(|&x| x < self.bound.min)
             .take_while(|&x| x <= self.bound.max)

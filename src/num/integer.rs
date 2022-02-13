@@ -86,8 +86,11 @@ impl PlotNumContext for IntegerContext {
         util::write_interval_i128(writer, val, None)
     }
 
-    fn compute_ticks(&mut self, ideal_num_steps: u32, dash: DashInfo) -> TickInfo<i128, i128> {
+    fn compute_ticks(&mut self) -> TickInfo<i128, i128> {
         let range = [self.bound.min, self.bound.max];
+        let ideal_num_steps=self.bound.ideal_num_steps;
+        let dash=self.bound.dash_info;
+        
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (display_relative, ticks) = tick_layout.generate();
