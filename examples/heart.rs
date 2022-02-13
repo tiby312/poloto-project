@@ -15,10 +15,10 @@ fn main() {
     data.line_fill_raw("heart", range.map(heart));
     data.xmarker(-20.0).xmarker(20.0);
     data.ymarker(-20.0).ymarker(20.0);
+    data.preserve_aspect();
 
     let mut plotter = data.build().plot("Heart Graph", "x", "y");
 
-    plotter.preserve_aspect();
-
+    
     println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
 }

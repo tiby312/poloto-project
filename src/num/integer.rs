@@ -81,13 +81,16 @@ impl TickFormat for IntegerTickFmt {
     }
 }
 
+
+
+#[derive(Default)]
 pub struct IntegerTickGen;
 //TODO use this thing!!!
 
 impl TickGenerator for IntegerTickGen {
     type Num = i128;
     type Fmt = IntegerTickFmt;
-    fn generate(bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
+    fn generate(&self,bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
         let range = [bound.min, bound.max];
         let ideal_num_steps = bound.ideal_num_steps;
         let dash = bound.dash_info;

@@ -116,6 +116,8 @@ pub struct TickInfo<I> {
 }
 
 
+
+
 pub trait TickGenerator {
     type Num: PlotNum;
     type Fmt: TickFormat<Num = Self::Num>;
@@ -125,7 +127,7 @@ pub trait TickGenerator {
     /// Calculate information related to where the interval ticks should go.
     /// Guaranteed to be called before fmt_tick.
     ///
-    fn generate(bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt);
+    fn generate(&self,bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt);
 }
 
 //TODO use this thing!!!

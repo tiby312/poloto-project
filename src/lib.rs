@@ -123,8 +123,8 @@ pub struct Bound<X> {
 }
 
 impl<X: PlotNum> Bound<X> {
-    pub fn default_tick_generate(&self) ->(TickInfo<X>,<X::DefaultTickGenerator as TickGenerator>::Fmt) {
-        X::DefaultTickGenerator::generate(*self)
+    pub fn default_tick_generate(&self) ->(TickInfo<X>,<X::DefaultTickGenerator as TickGenerator>::Fmt) where X::DefaultTickGenerator:Default{
+        X::DefaultTickGenerator::default().generate(*self)
     }
 }
 
@@ -164,9 +164,9 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<'a, X, Y> {
-        let (x,x_fmt) = X::DefaultTickGenerator::generate(self.boundx);
-        let (y,y_fmt) = Y::DefaultTickGenerator::generate(self.boundy);
+    ) -> Plotter<'a, X, Y> where X::DefaultTickGenerator:Default,Y::DefaultTickGenerator:Default{
+        let (x,x_fmt) = self.boundx.default_tick_generate();
+        let (y,y_fmt) = self.boundy.default_tick_generate();
         self.plot_with(title, xname, yname, x, y,x_fmt,y_fmt)
     }
     

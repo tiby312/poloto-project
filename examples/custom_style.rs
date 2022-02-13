@@ -4,17 +4,17 @@ use poloto::prelude::*;
 fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let mut s = poloto::plot(
-        "Demo: you can change the style of the svg file itself!",
-        "x",
-        "y",
-        f64::default_ctx(),
-        f64::default_ctx(),
-    );
-
+    let mut s=poloto::data();
+    
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
+    let p=s.build().plot(
+        "Demo: you can change the style of the svg file itself!",
+        "x",
+        "y",
+    );
+    
     println!(
         "{}<style>{}</style>{}{}{}",
         poloto::simple_theme::SVG_HEADER,

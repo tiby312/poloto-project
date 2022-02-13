@@ -35,10 +35,25 @@ pub fn month_str(month: u32) -> &'static str {
     }
 }
 
-#[deprecated(
-    note = "TimestampType has been renamed to StepUnit as that is more descriptive of what it represents. Use StepUnit instead."
-)]
-pub type TimestampType = StepUnit;
+
+
+pub struct UnixTimeTickFmt<T:TimeZone> {
+    step: StepUnit,
+    timezone:T
+}
+impl<T:TimeZone> UnixTimeTickFmt<T> {
+    pub fn step(&self)->StepUnit{
+        self.step
+    }
+}
+impl<T:TimeZone> TickFormat for UnixTimeTickFmt<T> {
+    type Num = UnixTime;
+
+    fn write_tick(&self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+        write!(writer,"{}",val.dynamic_format(&self.timezone,&self.step))
+    }
+}
+
 
 ///
 /// Conveys what unit is being used for step sizes.
@@ -68,64 +83,31 @@ impl std::fmt::Display for StepUnit {
     }
 }
 
-///
-/// Default [`UnixTime`] context.
-///
-pub struct UnixTimeContext<T: chrono::TimeZone> {
-    timezone: T,
-    bound:Bound<UnixTime>
-}
 
 
-impl PlotNumContextFromBound for UnixTimeContext<Utc> {
-    fn new(bound: &crate::Bound<UnixTime>) -> Self {
-        UnixTimeContext { timezone:Utc,bound: *bound }
+
+
+impl Default for UnixTimeTickGen<Utc>{
+    fn default()->Self{
+        UnixTimeTickGen { timezone: Utc }
     }
 }
 
-
-impl<T: chrono::TimeZone> UnixTimeContext<T> {
-    pub fn new(timezone: &T,bound:&crate::Bound<UnixTime>) -> Self {
-        UnixTimeContext {
-            bound:*bound,
-            timezone: timezone.clone(),
-        }
-    }
+pub struct UnixTimeTickGen<T:TimeZone>{
+    timezone:T
 }
+//TODO use this thing!!!
 
-impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T>
-where
-    T::Offset: Display,
-{
-    type StepInfo = StepUnit;
+impl<T:TimeZone> TickGenerator for UnixTimeTickGen<T> {
     type Num = UnixTime;
-
-
-    fn tick_fmt(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        val: UnixTime,
-        info: &StepUnit,
-    ) -> std::fmt::Result {
-        write!(writer, "{}", val.dynamic_format(&self.timezone, info))
-    }
-
-    fn where_fmt(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: UnixTime,
-    ) -> std::fmt::Result {
-        write!(writer, "{}", val.datetime(&self.timezone))
-    }
-
-    fn compute_ticks(
-        &mut self,
-    ) -> TickInfo<UnixTime, StepUnit> {
-        let range=[self.bound.min,self.bound.max];
+    type Fmt = UnixTimeTickFmt<T>;
+    fn generate(&self,bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
+        
+        let range=[bound.min,bound.max];
         
         assert!(range[0] <= range[1]);
-        let ideal_num_steps=self.bound.ideal_num_steps;
-        let dash=self.bound.dash_info;
+        let ideal_num_steps=bound.ideal_num_steps;
+        let dash=bound.dash_info;
         
         let ideal_num_steps = ideal_num_steps.max(2);
 
@@ -161,18 +143,30 @@ where
 
         assert!(ticks.len() >= 2);
 
-        TickInfo {
-            unit_data: ret.unit_data,
-            ticks,
-            dash_size: None,
-            display_relative: None, //Never want to do this for unix time.
-        }
+    
+        (
+            TickInfo {
+                ticks,
+                dash_size: None,
+                display_relative: None, //Never want to do this for unix time.
+            },
+            UnixTimeTickFmt {
+                timezone:self.timezone.clone(),
+                step: ret.unit_data,
+            },
+        )
     }
-
 }
 
+
+
+
+
+
+
+
 impl PlotNum for UnixTime {
-    type DefaultContext = UnixTimeContext<Utc>;
+    type DefaultTickGenerator = UnixTimeTickGen<Utc>;
     fn default_scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;
