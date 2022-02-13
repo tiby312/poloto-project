@@ -13,13 +13,13 @@ fn main() {
         .fuse()
     };
 
-    let data = poloto::data();
+    let mut data = poloto::data();
     for i in 1000..1006 {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
     data.ymarker(0);
 
-    let plotter = data.plot("collatz", "x", "y");
+    let mut plotter = data.build().plot("collatz", "x", "y");
 
     println!(
         "{}<style>{}{}</style>{}{}",
