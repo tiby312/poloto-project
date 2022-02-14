@@ -18,7 +18,7 @@ pub trait DiscNum: PlotNum {
 ///
 pub trait PlotNum: PartialOrd + Copy {
     ///
-    /// Used by [`Bound::default_ticks`](crate::Bound::default_ticks)
+    /// Used by [`Bound::default_ticks`](crate::Bound::default_gen)
     ///
     type DefaultTickGenerator;
 

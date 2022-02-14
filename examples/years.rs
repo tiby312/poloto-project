@@ -20,9 +20,9 @@ fn main() {
     let data = poloto::data().histogram("foo", data).ymarker(0).build();
 
     let x = data
-        .boundx()
-        .steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v));
-    let y = data.boundy().default_ticks().with_no_dash();
+        .boundx().from_gen(poloto::steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v)));
+
+    let y = data.boundy().default_gen().with_no_dash();
 
     let mut plotter = data.plot_with("title", "xname", "yname", x, y);
 

@@ -28,7 +28,7 @@
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own implementation of [`TickGenerator`].
-//! Alternatively you can use the [`Bound::steps`] function that just takes an iterator of ticks.
+//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks.
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
@@ -153,26 +153,24 @@ impl<X: PlotNum> Bound<X> {
     ///
     /// Create the default tick generator associated with a PlotNum.
     ///
-    pub fn default_ticks(&self) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
+    pub fn default_gen(&self) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
     where
         X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
     {
         X::DefaultTickGenerator::default().generate(*self)
     }
+    
+}
+///
+/// Create a [`num::Steps`].
+///
+pub fn steps<X:PlotNum,I: Iterator<Item = X>, F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
+    steps: I,
+    func: F,
+) -> num::Steps<X,I,F> {
+    num::Steps::new(steps, func)
 }
 
-impl<X: PlotNum> Bound<X> {
-    ///
-    /// Create a [`num::Steps`].
-    ///
-    pub fn steps<I: Iterator<Item = X>, F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
-        &self,
-        steps: I,
-        func: F,
-    ) -> TickDist<num::StepFmt<X, F>> {
-        num::Steps::new(steps, func).generate(*self)
-    }
-}
 
 ///
 /// Created by [`Data::build`]
@@ -205,8 +203,8 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
         Y::DefaultTickGenerator: TickGenerator<Num = Y> + Default,
     {
-        let x = self.boundx.default_ticks();
-        let y = self.boundy.default_ticks();
+        let x = self.boundx.default_gen();
+        let y = self.boundy.default_gen();
         self.plot_with(title, xname, yname, x, y)
     }
 

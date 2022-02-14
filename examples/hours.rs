@@ -13,9 +13,9 @@ fn main() {
 
     let x = data
         .boundx()
-        .steps((0..).step_by(6), |w, v| write!(w, "{}", v));
+        .from_gen(poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)));
 
-    let y = data.boundy().default_ticks();
+    let y = data.boundy().default_gen();
 
     let mut plotter = data.plot_with(
         "Number of rides at theme park hourly",

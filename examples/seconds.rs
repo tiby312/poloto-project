@@ -19,7 +19,7 @@ fn main() {
 
     let data = poloto::data::<UnixTime, _>().line("", &data).build();
 
-    let xtick = data.boundx().default_ticks();
+    let xtick = data.boundx().default_gen();
 
     let xtick_step = xtick.fmt.step();
     // Assume the steps are in seconds given the data we provided.
@@ -30,7 +30,7 @@ fn main() {
 
     let boundx = data.boundx();
 
-    let ytick = data.boundy().default_ticks();
+    let ytick = data.boundy().default_gen();
 
     let mut plotter = data.plot_with(
         "Number of Wikipedia Articles",

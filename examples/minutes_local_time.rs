@@ -22,7 +22,7 @@ fn main() {
         .build();
 
     let x = s.boundx().from_gen(UnixTimeTickGen::new(time_zone));
-    let y = s.boundy().default_ticks();
+    let y = s.boundy().default_gen();
 
     let mut s = s.plot_with(
         "Number of Wikipedia Articles",
