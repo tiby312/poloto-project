@@ -171,10 +171,9 @@ impl<X: PlotNum> Bound<X> {
     }
 }
 
-
 ///
 /// Created by [`Data::build`]
-/// 
+///
 pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     boundx: Bound<X>,
@@ -227,15 +226,14 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
 
 ///
 /// Start plotting.
-/// 
+///
 pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
     Data::default()
 }
 
-
 ///
 /// Plot collector.
-/// 
+///
 pub struct Data<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     xmarkers: Vec<X>,
@@ -285,9 +283,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// The path element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
-    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
+    /// let mut plotter = poloto::data();
     /// plotter.line_fill("", &data);
     /// ```
     pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -311,9 +308,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// The path element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
-    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
+    /// let mut plotter = poloto::data();
     /// plotter.line_fill_raw("", &data);
     /// ```
     pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -338,9 +334,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// with the latter class overriding the former.
     ///
     /// ```
-    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
+    /// let mut plotter = poloto::data();
     /// plotter.scatter("", &data);
     /// ```
     pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -364,9 +359,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// Each rect element belongs to the `.poloto[N]fill` css class.
     ///
     /// ```
-    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
+    /// let mut plotter = poloto::data();
     /// plotter.histogram("", &data);
     /// ```
     pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
@@ -400,9 +394,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// A value of None, means it will never wrap around.
     ///
     /// ```
-    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
+    /// let mut plotter = poloto::data();
     /// plotter.line("", &data);
     /// plotter.num_css_class(Some(30));
     /// ```
@@ -411,6 +404,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         self.num_css_classes = a;
         self
     }
+
     pub fn move_into(&mut self) -> Self {
         let mut val = Data {
             plots: vec![],
@@ -423,6 +417,17 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         std::mem::swap(&mut val, self);
         val
     }
+
+    ///
+    /// Compute min/max bounds and prepare for next stage in pipeline.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::data();
+    /// plotter.line("", &data);
+    /// plotter.build();
+    /// ```
+    ///
     pub fn build(&mut self) -> DataResult<'a, X, Y> {
         let mut val = self.move_into();
 
@@ -497,10 +502,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
     /// this function will mutable borrow the Plotter and leave it with empty data.
     ///
     /// ```
-    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::plot("title", "x", "y",f64::default_ctx(),f64::default_ctx());
-    /// plotter.line("", &data);
+    /// let mut s = poloto::data();
+    /// s.line("", &data);
+    /// let mut plotter=s.build().plot("title","x","y");
+    ///
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```

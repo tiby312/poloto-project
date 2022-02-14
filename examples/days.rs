@@ -23,7 +23,7 @@ fn main() {
         .ymarker(0)
         .build();
 
-    let mut s = s.plot("Number of Wikipedia Articles", "Year", "Number of Articles");
+    let mut s = s.plot("Number of Wikipedia Articles", "Day", "Number of Articles");
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }
