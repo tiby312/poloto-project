@@ -136,7 +136,7 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 
 ///
 /// Created once the min and max bounds of all the plots has been computed.
-/// Contains in it all the information needed to fed into a TickGenerator.
+/// Contains in it all the information needed to fed into a [`TickGenerator`].
 ///
 #[derive(Copy, Clone)]
 pub struct Bound<X> {
@@ -171,6 +171,10 @@ impl<X: PlotNum> Bound<X> {
     }
 }
 
+
+///
+/// Created by [`Data::build`]
+/// 
 pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     boundx: Bound<X>,
@@ -221,10 +225,17 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     }
 }
 
+///
+/// Start plotting.
+/// 
 pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
     Data::default()
 }
 
+
+///
+/// Plot collector.
+/// 
 pub struct Data<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
     xmarkers: Vec<X>,
