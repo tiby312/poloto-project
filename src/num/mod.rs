@@ -28,7 +28,7 @@ fn compute_best_dash_1_2_5(one_step: f64, ideal_dash_size: f64, normalized_step:
     //
     // in both cases, the end result is that we now have
     // a base unit that is a 10th of what we had originally,
-    // so we can continue this cycle indefinately.
+    // so we can continue this cycle indefinitely.
     //
     // lets chose whichever one is better.
 

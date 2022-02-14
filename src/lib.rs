@@ -29,7 +29,7 @@
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own implementation of [`TickGenerator`].
 //! Alternatively you can use the [`Bound::steps`] function that just takes an iterator of ticks.
-//! This puts more responsiblity on the user to pass a decent number of ticks. This should only really be used when the user
+//! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
 
