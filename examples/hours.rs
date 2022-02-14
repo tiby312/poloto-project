@@ -11,11 +11,12 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let x = data
-        .boundx()
-        .from_gen(poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)));
+    let x = poloto::from_gen(
+        data.boundx(),
+        poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)),
+    );
 
-    let y = data.boundy().default_gen();
+    let y = poloto::default_gen(data.boundy());
 
     let mut plotter = data.plot_with(
         "Number of rides at theme park hourly",

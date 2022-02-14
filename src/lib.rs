@@ -145,32 +145,32 @@ pub struct Bound<X> {
     pub dash_info: DashInfo,
 }
 
-impl<X: PlotNum> Bound<X> {
-
-    pub fn from_gen<T:TickGenerator<Num=X>>(&self,a:T)->TickDist<T::Fmt>{
-        a.generate(*self)
-    }
-    ///
-    /// Create the default tick generator associated with a PlotNum.
-    ///
-    pub fn default_gen(&self) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
-    where
-        X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
-    {
-        X::DefaultTickGenerator::default().generate(*self)
-    }
-    
+pub fn from_gen<T: TickGenerator>(bound: Bound<T::Num>, a: T) -> TickDist<T::Fmt> {
+    a.generate(bound)
 }
+
+pub fn default_gen<X: PlotNum>(
+    bound: Bound<X>,
+) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
+where
+    X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
+{
+    X::DefaultTickGenerator::default().generate(bound)
+}
+
 ///
 /// Create a [`num::Steps`].
 ///
-pub fn steps<X:PlotNum,I: Iterator<Item = X>, F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
+pub fn steps<
+    X: PlotNum,
+    I: Iterator<Item = X>,
+    F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result,
+>(
     steps: I,
     func: F,
-) -> num::Steps<X,I,F> {
+) -> num::Steps<X, I, F> {
     num::Steps::new(steps, func)
 }
-
 
 ///
 /// Created by [`Data::build`]
@@ -190,9 +190,9 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     }
 
     ///
-    /// Automatically create a tick distribution using the default 
+    /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
-    /// 
+    ///
     pub fn plot(
         self,
         title: impl Display + 'a,
@@ -203,16 +203,16 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
         Y::DefaultTickGenerator: TickGenerator<Num = Y> + Default,
     {
-        let x = self.boundx.default_gen();
-        let y = self.boundy.default_gen();
+        let x = default_gen(self.boundx);
+        let y = default_gen(self.boundy);
         self.plot_with(title, xname, yname, x, y)
     }
 
     ///
-    /// 
+    ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`DataResult::plot`] User must supply own tick distribution.
-    /// 
+    ///
     pub fn plot_with(
         self,
         title: impl Display + 'a,
@@ -479,7 +479,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     }
 }
 
-/// 
+///
 /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {

@@ -21,8 +21,8 @@ fn main() {
         .ymarker(0)
         .build();
 
-    let x = s.boundx().from_gen(UnixTimeTickGen::new(time_zone));
-    let y = s.boundy().default_gen();
+    let x = poloto::from_gen(s.boundx(), UnixTimeTickGen::new(time_zone));
+    let y = poloto::default_gen(s.boundy());
 
     let mut s = s.plot_with(
         "Number of Wikipedia Articles",
