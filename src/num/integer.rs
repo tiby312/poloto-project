@@ -105,7 +105,7 @@ impl TickGenerator for IntegerTickGen {
         let (display_relative, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            tick_layout.step.default_scale(range, dash.max),
+            tick_layout.step.scale(range, dash.max),
             dash.ideal_dash_size,
             tick_layout.normalized_step,
         ));
@@ -125,7 +125,7 @@ impl TickGenerator for IntegerTickGen {
 
 impl PlotNum for i128 {
     type DefaultTickGenerator = IntegerTickGen;
-    fn default_scale(&self, range: [i128; 2], max: f64) -> f64 {
+    fn scale(&self, range: [i128; 2], max: f64) -> f64 {
         let val = *self;
         let diff = (range[1] - range[0]) as f64;
 
@@ -134,7 +134,7 @@ impl PlotNum for i128 {
         val as f64 * scale
     }
 
-    fn default_unit_range(offset: Option<i128>) -> [i128; 2] {
+    fn unit_range(offset: Option<i128>) -> [i128; 2] {
         if let Some(o) = offset {
             [o - 1, o + 1]
         } else {

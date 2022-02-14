@@ -230,15 +230,15 @@ pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
         });
 
         if !xmoved {
-            val.0 = X::default_unit_range(Some(x));
+            val.0 = X::unit_range(Some(x));
         }
 
         if !ymoved {
-            val.1 = Y::default_unit_range(Some(y));
+            val.1 = Y::unit_range(Some(y));
         }
 
         val
     } else {
-        (X::default_unit_range(None), Y::default_unit_range(None))
+        (X::unit_range(None), Y::unit_range(None))
     }
 }

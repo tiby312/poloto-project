@@ -17,7 +17,7 @@
 //! * write everything to svg [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`TickGenerator`]:
-//! 
+//!
 //! * [`num::integer::IntegerTickGen`]
 //! * [`num::float::FloatTickGen`]
 //! * [`num::timestamp::UnixTimeTickGen`]
@@ -25,14 +25,13 @@
 //! The above generators have the advantage of automatically selecting reasonable
 //! tick intervals. The user can change the formatting of the ticks while still using
 //! the ticks that were selected via its automatic methods using [`TickDist::with_tick_fmt`].
-//! 
+//!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own implementation of [`TickGenerator`].
-//! Alternatively you can use the [`Bound::steps`] function that just takes an iterator of ticks. 
+//! Alternatively you can use the [`Bound::steps`] function that just takes an iterator of ticks.
 //! This puts more responsiblity on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
-
 
 #[cfg(doctest)]
 mod test_readme {
@@ -72,8 +71,8 @@ pub mod prelude {
     pub use super::simple_theme::SimpleTheme;
 }
 
-use std::marker::PhantomData;
 use fmt::Display;
+use std::marker::PhantomData;
 
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;
@@ -135,11 +134,10 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
 
-
 ///
 /// Created once the min and max bounds of all the plots has been computed.
 /// Contains in it all the information needed to fed into a TickGenerator.
-/// 
+///
 #[derive(Copy, Clone)]
 pub struct Bound<X> {
     pub min: X,
@@ -151,7 +149,7 @@ pub struct Bound<X> {
 impl<X: PlotNum> Bound<X> {
     ///
     /// Create the default tick generator associated with a PlotNum.
-    /// 
+    ///
     pub fn default_ticks(&self) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
     where
         X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
@@ -172,7 +170,6 @@ impl<X: PlotNum> Bound<X> {
         num::Steps::new(steps, func).generate(*self)
     }
 }
-
 
 pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
     plots: Vec<Plot<'a, X, Y>>,
@@ -225,7 +222,7 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
 }
 
 pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
-    Data::new()
+    Data::default()
 }
 
 pub struct Data<'a, X: PlotNum, Y: PlotNum> {
@@ -235,8 +232,8 @@ pub struct Data<'a, X: PlotNum, Y: PlotNum> {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
 }
-impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
-    pub fn new() -> Self {
+impl<'a, X: PlotNum, Y: PlotNum> Default for Data<'a, X, Y> {
+    fn default() -> Self {
         Data {
             plots: vec![],
             xmarkers: vec![],
@@ -245,7 +242,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
             preserve_aspect: false,
         }
     }
-
+}
+impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     pub fn xmarker(&mut self, a: X) -> &mut Self {
         self.xmarkers.push(a);
         self
@@ -416,7 +414,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     }
     pub fn build(&mut self) -> DataResult<'a, X, Y> {
         let mut val = self.move_into();
-        drop(self);
 
         let (boundx, boundy) = util::find_bounds(
             val.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
@@ -426,7 +423,6 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
 
         let ideal_dash_size = 20.0;
 
-        //knowldge of canvas dim
         let canvas = render::Canvas::with_options(val.preserve_aspect, val.num_css_classes);
 
         let boundx = Bound {
@@ -533,11 +529,6 @@ pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
 ///
 /// Convert a closure to a object that implements Display
 ///
-pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(
-    a: F,
-) -> util::DisplayableClosure<F> {
+pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
     util::DisplayableClosure::new(a)
 }
-
-
-

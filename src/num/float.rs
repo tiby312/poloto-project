@@ -60,7 +60,7 @@ impl TickGenerator for FloatTickGen {
         let (display_relative, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            tick_layout.step.default_scale(range, dash.max),
+            tick_layout.step.scale(range, dash.max),
             dash.ideal_dash_size,
             tick_layout.normalized_step,
         ));
@@ -83,13 +83,13 @@ impl PlotNum for f64 {
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
-    fn default_scale(&self, range: [f64; 2], max: f64) -> f64 {
+    fn scale(&self, range: [f64; 2], max: f64) -> f64 {
         let val = *self;
         let diff = range[1] - range[0];
         let scale = max / diff;
         val * scale
     }
-    fn default_unit_range(offset: Option<f64>) -> [f64; 2] {
+    fn unit_range(offset: Option<f64>) -> [f64; 2] {
         if let Some(o) = offset {
             [o - 1.0, o + 1.0]
         } else {

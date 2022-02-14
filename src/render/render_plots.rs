@@ -54,8 +54,8 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 Ok(wc.get_counter() != 0)
             })?;
 
-        let aa = minx.default_scale([minx, maxx], scalex);
-        let bb = miny.default_scale([miny, maxy], scaley);
+        let aa = minx.scale([minx, maxx], scalex);
+        let bb = miny.scale([miny, maxy], scaley);
 
         struct PlotIter<X: PlotNum, Y: PlotNum> {
             basex_ii: f64,
@@ -72,8 +72,8 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
                 p.plots.iter_second().map(move |(x, y)| {
                     [
-                        self.basex_ii + x.default_scale(self.rangex_ii, self.maxx_ii),
-                        self.basey_ii - y.default_scale(self.rangey_ii, self.maxy_ii),
+                        self.basex_ii + x.scale(self.rangex_ii, self.maxx_ii),
+                        self.basey_ii - y.scale(self.rangey_ii, self.maxy_ii),
                     ]
                 })
             }

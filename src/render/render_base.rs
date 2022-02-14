@@ -113,9 +113,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
 
         //Draw interva`l x text
         for &Tick { position, value } in xtick_info.ticks.iter() {
-            let xx = (position.default_scale([minx, maxx], scalex)
-                - minx.default_scale([minx, maxx], scalex))
-                + padding;
+            let xx =
+                (position.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
 
             writer.single("line", |d| {
                 d.attr("class", "poloto_axis_lines")?;
@@ -171,8 +170,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
         //Draw interval y text
         for &Tick { position, value } in ytick_info.ticks.iter() {
             let yy = height
-                - (position.default_scale([miny, maxy], scaley)
-                    - miny.default_scale([miny, maxy], scaley))
+                - (position.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
                 - paddingy;
 
             writer.single("line", |d| {
@@ -202,8 +200,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
         }
     }
 
-    let d1 = minx.default_scale([minx, maxx], scalex);
-    let d2 = first_tickx.position.default_scale([minx, maxx], scalex);
+    let d1 = minx.scale([minx, maxx], scalex);
+    let d2 = first_tickx.position.scale([minx, maxx], scalex);
     let distance_to_firstx = d2 - d1;
 
     writer.single("path", |d| {
@@ -233,8 +231,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
         })
     })?;
 
-    let d1 = miny.default_scale([miny, maxy], scaley);
-    let d2 = first_ticky.position.default_scale([miny, maxy], scaley);
+    let d1 = miny.scale([miny, maxy], scaley);
+    let d2 = first_ticky.position.scale([miny, maxy], scaley);
     let distance_to_firsty = d2 - d1;
 
     writer.single("path", |d| {

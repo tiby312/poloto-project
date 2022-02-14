@@ -152,7 +152,7 @@ impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
                 display_relative: None, //Never want to do this for unix time.
             },
             fmt: UnixTimeTickFmt {
-                timezone: self.timezone.clone(),
+                timezone: self.timezone,
                 step: ret.unit_data,
             },
         }
@@ -161,7 +161,7 @@ impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
 
 impl PlotNum for UnixTime {
     type DefaultTickGenerator = UnixTimeTickGen<Utc>;
-    fn default_scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
+    fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;
         let [val1, val2] = [val1.0, val2.0];
@@ -170,7 +170,7 @@ impl PlotNum for UnixTime {
         let scale = max / diff;
         val.0 as f64 * scale
     }
-    fn default_unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
+    fn unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
         if let Some(o) = offset {
             [o, UnixTime(o.0 + 1)]
         } else {

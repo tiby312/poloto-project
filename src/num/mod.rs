@@ -91,7 +91,6 @@ fn compute_best_dash_1_2_5(one_step: f64, ideal_dash_size: f64, normalized_step:
     }
 }
 
-
 ///
 /// A distribution of steps manually specified by the user via an iterator.
 ///

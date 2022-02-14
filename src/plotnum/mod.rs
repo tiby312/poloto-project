@@ -19,7 +19,7 @@ pub trait DiscNum: PlotNum {
 pub trait PlotNum: PartialOrd + Copy {
     ///
     /// Used by [`Bound::default_ticks`](crate::Bound::default_ticks)
-    /// 
+    ///
     type DefaultTickGenerator;
 
     /// Is this a hole value to inject discontinuty?
@@ -27,9 +27,9 @@ pub trait PlotNum: PartialOrd + Copy {
         false
     }
 
-    fn default_scale(&self, range: [Self; 2], max: f64) -> f64;
+    fn scale(&self, range: [Self; 2], max: f64) -> f64;
 
-    fn default_unit_range(offset: Option<Self>) -> [Self; 2];
+    fn unit_range(offset: Option<Self>) -> [Self; 2];
 }
 
 ///
@@ -83,7 +83,7 @@ pub struct TickInfo<I> {
 
 ///
 /// Returned by [`TickGenerator::generate`]
-/// 
+///
 pub struct TickDist<J: TickFormat> {
     pub ticks: TickInfo<J::Num>,
     pub fmt: J,
@@ -113,7 +113,7 @@ impl<J: TickFormat> TickDist<J> {
 ///
 /// From the given min and max bounds of a distribution of plots,
 /// generate out a distribution of ticks to display.
-/// 
+///
 pub trait TickGenerator {
     type Num: PlotNum;
     type Fmt: TickFormat<Num = Self::Num>;
@@ -128,7 +128,7 @@ pub trait TickGenerator {
 
 ///
 /// Formatter for a tick.
-/// 
+///
 pub trait TickFormat {
     type Num;
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
@@ -147,7 +147,7 @@ pub trait TickFormat {
 
 ///
 /// Used by [`TickFormat::with_tick_fmt`]
-/// 
+///
 pub struct TickFmt<T, F> {
     inner: T,
     func: F,
