@@ -188,6 +188,10 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         self.boundy
     }
 
+    ///
+    /// Automatically create a tick distribution using the default 
+    /// tick generators tied to a [`PlotNum`].
+    /// 
     pub fn plot(
         self,
         title: impl Display + 'a,
@@ -203,6 +207,11 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         self.plot_with(title, xname, yname, x, y)
     }
 
+    ///
+    /// 
+    /// Move to final stage in pipeline collecting the title/xname/yname.
+    /// Unlike [`DataResult::plot`] User must supply own tick distribution.
+    /// 
     pub fn plot_with(
         self,
         title: impl Display + 'a,
@@ -469,14 +478,8 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     }
 }
 
-/// Keeps track of plots.
-/// User supplies iterators that will be iterated on when
-/// render is called.
-///
-/// * The svg element belongs to the `poloto` css class.
-/// * The title,xname,yname,legend text SVG elements belong to the `poloto_text` class.
-/// * The axis line SVG elements belong to the `poloto_axis_lines` class.
-/// * The background belongs to the `poloto_background` class.
+/// 
+/// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn Display + 'a>,
