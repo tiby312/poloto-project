@@ -149,7 +149,7 @@ pub fn from_gen<T: TickGenerator>(bound: Bound<T::Num>, a: T) -> TickDist<T::Fmt
     a.generate(bound)
 }
 
-pub fn default_gen<X: PlotNum>(
+pub fn from_default<X: PlotNum>(
     bound: Bound<X>,
 ) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
 where
@@ -203,8 +203,8 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
         Y::DefaultTickGenerator: TickGenerator<Num = Y> + Default,
     {
-        let x = default_gen(self.boundx);
-        let y = default_gen(self.boundy);
+        let x = from_default(self.boundx);
+        let y = from_default(self.boundy);
         self.plot_with(title, xname, yname, x, y)
     }
 

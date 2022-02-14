@@ -24,7 +24,7 @@ fn main() {
         poloto::steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v)),
     );
 
-    let y = poloto::default_gen(data.boundy());
+    let y = poloto::from_default(data.boundy());
 
     let mut plotter = data.plot_with("title", "xname", "yname", x, y);
 

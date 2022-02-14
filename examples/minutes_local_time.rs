@@ -22,7 +22,7 @@ fn main() {
         .build();
 
     let x = poloto::from_gen(s.boundx(), UnixTimeTickGen::new(time_zone));
-    let y = poloto::default_gen(s.boundy());
+    let y = poloto::from_default(s.boundy());
 
     let mut s = s.plot_with(
         "Number of Wikipedia Articles",

@@ -21,7 +21,7 @@ fn main() {
         data.boundx(),
         poloto::steps(xx, |w, v| write!(w, "{} hr", v / hr)),
     );
-    let y = poloto::default_gen(data.boundy());
+    let y = poloto::from_default(data.boundy());
 
     let mut plotter = data.plot_with("collatz", "x", "y", x, y);
 
