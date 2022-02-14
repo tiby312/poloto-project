@@ -12,46 +12,14 @@ pub trait DiscNum: PlotNum {
     fn hole() -> Self;
 }
 
-/*
-pub trait PlotNumContextFromBound: PlotNumContext {
-    fn new(a: &crate::Bound<Self::Num>) -> Self;
-}
-
-///
-/// A plottable number. In order to be able to plot a number, we need information on how
-/// to display it as well as the interval ticks.
-///
-pub trait PlotNumContext {
-    type StepInfo;
-    type Num: PlotNum;
-
-    ///
-    /// Given an ideal number of intervals across the min and max values,
-    /// Calculate information related to where the interval ticks should go.
-    /// Guaranteed to be called before fmt_tick.
-    ///
-    fn compute_ticks(
-        &mut self,
-    ) -> TickInfo<Self::Num, Self::StepInfo>;
-
-    /// Format each tick.
-    fn tick_fmt(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: Self::Num,
-        _extra: &Self::StepInfo,
-    ) -> std::fmt::Result;
-
-    /// Format the where clause
-    fn where_fmt(&mut self, writer: &mut dyn std::fmt::Write, val: Self::Num) -> std::fmt::Result;
-}
-*/
-
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy {
+    ///
+    /// Used by [`Bound::default_ticks`](crate::Bound::default_ticks)
+    /// 
     type DefaultTickGenerator;
 
     /// Is this a hole value to inject discontinuty?
@@ -65,7 +33,7 @@ pub trait PlotNum: PartialOrd + Copy {
 }
 
 ///
-/// Used by [`PlotNumContext::compute_ticks`]
+/// Used by [`crate::Bound`]
 ///
 #[derive(Copy, Clone)]
 pub struct DashInfo {
@@ -97,11 +65,10 @@ impl<I> Tick<I> {
 
 ///
 /// Information on the properties of all the interval ticks for one dimension.
-/// Used by [`PlotNumContext::compute_ticks`]
+/// Used by [`TickDist`]
 ///
 #[derive(Debug, Clone)]
 pub struct TickInfo<I> {
-    //pub unit_data: K,
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
     pub ticks: Vec<Tick<I>>,
@@ -114,6 +81,9 @@ pub struct TickInfo<I> {
     pub display_relative: Option<I>,
 }
 
+///
+/// Returned by [`TickGenerator::generate`]
+/// 
 pub struct TickDist<J: TickFormat> {
     pub ticks: TickInfo<J::Num>,
     pub fmt: J,
@@ -140,6 +110,10 @@ impl<J: TickFormat> TickDist<J> {
     }
 }
 
+///
+/// From the given min and max bounds of a distribution of plots,
+/// generate out a distribution of ticks to display.
+/// 
 pub trait TickGenerator {
     type Num: PlotNum;
     type Fmt: TickFormat<Num = Self::Num>;
@@ -152,6 +126,9 @@ pub trait TickGenerator {
     fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt>;
 }
 
+///
+/// Formatter for a tick.
+/// 
 pub trait TickFormat {
     type Num;
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
@@ -167,6 +144,10 @@ pub trait TickFormat {
         TickFmt { inner: self, func }
     }
 }
+
+///
+/// Used by [`TickFormat::with_tick_fmt`]
+/// 
 pub struct TickFmt<T, F> {
     inner: T,
     func: F,

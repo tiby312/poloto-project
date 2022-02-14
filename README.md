@@ -10,23 +10,7 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 ## Guide
 
-Poloto provides by default 3 tick layouting methods via:
-
-`IntegerContext`
-`FloatContext`
-`UnixTimeContext`
-
-The above contexts have the advantage of automatically selecting reasonable
-tick intervals. The user can change the formatting of the ticks while still using
-the ticks that were selected via its automatic methods using `with_tick_fmt`.
-
-However, sometimes you may want more control on the ticks, or want to use a type
-other than `i128`/`f64`/`UnixTime`. One way would be to write your own implementation of `PlotNumContext`.
-Alternatively you can use the `step` function that just takes an iterator of ticks. 
-This puts more responsiblity on the user to pass a decent number of ticks. This should only really be used when the user
-knows up front the min and max values of that axis. This is typically the case for
-at least one of the axis, typically the x axis.
-
+See overview at [docs.rs](https://docs.rs/poloto).
 
 
 ## Gaussian Example

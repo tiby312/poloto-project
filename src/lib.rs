@@ -8,6 +8,31 @@
 //! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
 //!
 //!
+//!
+//! Pipeline:
+//! * collect plots ([`data`] function)
+//! * compute min/max (call [`Data::build`] and generate a [`DataResult`]).
+//! * create tick distributions. (using impls of [`TickGenerator`]) (This step can be done automatically by calling [`DataResult::plot`] instead of [`DataResult::plot_with`])
+//! * collect title/xname/yname (on creation of [`Plotter`])
+//! * write everything to svg [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
+//!
+//! Poloto provides by default 3 impls of [`TickGenerator`]:
+//! 
+//! * [`num::integer::IntegerTickGen`]
+//! * [`num::float::FloatTickGen`]
+//! * [`num::timestamp::UnixTimeTickGen`]
+//!
+//! The above generators have the advantage of automatically selecting reasonable
+//! tick intervals. The user can change the formatting of the ticks while still using
+//! the ticks that were selected via its automatic methods using [`TickDist::with_tick_fmt`].
+//! 
+//! However, sometimes you may want more control on the ticks, or want to use a type
+//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own implementation of [`TickGenerator`].
+//! Alternatively you can use the [`Bound::steps`] function that just takes an iterator of ticks. 
+//! This puts more responsiblity on the user to pass a decent number of ticks. This should only really be used when the user
+//! knows up front the min and max values of that axis. This is typically the case for
+//! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
+
 
 #[cfg(doctest)]
 mod test_readme {
@@ -110,6 +135,11 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Box<dyn PlotTrait<X, Y> + 'a>,
 }
 
+
+///
+/// Created once the min and max bounds of all the plots has been computed.
+/// Contains in it all the information needed to fed into a TickGenerator.
+/// 
 #[derive(Copy, Clone)]
 pub struct Bound<X> {
     pub min: X,
@@ -119,6 +149,9 @@ pub struct Bound<X> {
 }
 
 impl<X: PlotNum> Bound<X> {
+    ///
+    /// Create the default tick generator associated with a PlotNum.
+    /// 
     pub fn default_ticks(&self) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
     where
         X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
@@ -129,14 +162,14 @@ impl<X: PlotNum> Bound<X> {
 
 impl<X: PlotNum> Bound<X> {
     ///
-    /// Create a [`Steps`].
+    /// Create a [`num::Steps`].
     ///
     pub fn steps<I: Iterator<Item = X>, F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
         &self,
         steps: I,
         func: F,
-    ) -> TickDist<StepFmt<X, F>> {
-        Steps::new(steps, func).generate(*self)
+    ) -> TickDist<num::StepFmt<X, F>> {
+        num::Steps::new(steps, func).generate(*self)
     }
 }
 
@@ -437,9 +470,9 @@ pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn Display + 'a>,
     xname: Box<dyn Display + 'a>,
     yname: Box<dyn Display + 'a>,
-    plots: DataResult<'a, X, Y>,
     xcontext: Box<dyn TickFormat<Num = X> + 'a>,
     ycontext: Box<dyn TickFormat<Num = Y> + 'a>,
+    plots: DataResult<'a, X, Y>,
     tickx: TickInfo<X>,
     ticky: TickInfo<Y>,
 }
@@ -506,79 +539,5 @@ pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(
     util::DisplayableClosure::new(a)
 }
 
-///
-/// A distribution of steps manually specified by the user via an iterator.
-///
-/// Considering using contexts that automatically pick a good step distribution
-/// before resulting to using this.
-///
-pub struct Steps<N, I, F> {
-    pub steps: I,
-    pub func: F,
-    pub _p: PhantomData<N>,
-}
 
-impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn fmt::Write, &J) -> fmt::Result>
-    Steps<J, I, F>
-{
-    pub fn new(steps: I, func: F) -> Steps<J, I, F> {
-        Steps {
-            steps,
-            func,
-            _p: PhantomData,
-        }
-    }
-}
 
-pub struct StepFmt<J, F> {
-    func: F,
-    _p: PhantomData<J>,
-}
-impl<J: PlotNum, F: FnMut(&mut dyn fmt::Write, &J) -> fmt::Result> TickFormat for StepFmt<J, F> {
-    type Num = J;
-    fn write_tick(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
-        (self.func)(writer, val)
-    }
-}
-
-impl<N, I, F> TickGenerator for Steps<N, I, F>
-where
-    N: PlotNum,
-    I: Iterator<Item = N>,
-    F: FnMut(&mut dyn fmt::Write, &N) -> fmt::Result,
-{
-    type Num = N;
-    type Fmt = StepFmt<N, F>;
-
-    fn generate(mut self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
-        let ticks: Vec<_> = (&mut self.steps)
-            .skip_while(|&x| x < bound.min)
-            .take_while(|&x| x <= bound.max)
-            .map(|x| Tick {
-                value: x,
-                position: x,
-            })
-            .collect();
-
-        assert!(
-            ticks.len() >= 2,
-            "Atleast two ticks must be created for the given data range."
-        );
-
-        TickDist {
-            ticks: TickInfo {
-                ticks,
-                dash_size: None,
-                display_relative: None,
-            },
-            fmt: StepFmt {
-                func: self.func,
-                _p: PhantomData,
-            },
-        }
-    }
-}
