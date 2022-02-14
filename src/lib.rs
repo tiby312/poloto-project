@@ -5,16 +5,16 @@
 //! Documentation at [docs.rs](https://docs.rs/poloto)
 //!
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
-//! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/assets) folder.
+//! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/target/assets) folder.
 //!
 //!
 //!
 //! Pipeline:
-//! * collect plots ([`data`] function)
-//! * compute min/max (call [`Data::build`] and generate a [`DataResult`]).
-//! * create tick distributions. (using impls of [`TickGenerator`]) (This step can be done automatically by calling [`DataResult::plot`] instead of [`DataResult::plot_with`])
-//! * collect title/xname/yname (on creation of [`Plotter`])
-//! * write everything to svg [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
+//! * Collect plots ([`data`] function)
+//! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
+//! * Create tick distributions. (using impls of [`TickGenerator`]) (This step can be done automatically by calling [`DataResult::plot`] instead of [`DataResult::plot_with`])
+//! * Collect title/xname/yname (on creation of [`Plotter`])
+//! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`TickGenerator`]:
 //!
