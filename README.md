@@ -10,23 +10,7 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 ## Guide
 
-Poloto provides by default 3 tick layouting methods via:
-
-`IntegerContext`
-`FloatContext`
-`UnixTimeContext`
-
-The above contexts have the advantage of automatically selecting reasonable
-tick intervals. The user can change the formatting of the ticks while still using
-the ticks that were selected via its automatic methods using `with_tick_fmt`.
-
-However, sometimes you may want more control on the ticks, or want to use a type
-other than `i128`/`f64`/`UnixTime`. One way would be to write your own implementation of `PlotNumContext`.
-Alternatively you can use the `step` function that just takes an iterator of ticks. 
-This puts more responsiblity on the user to pass a decent number of ticks. This should only really be used when the user
-knows up front the min and max values of that axis. This is typically the case for
-at least one of the axis, typically the x axis.
-
+See overview at [docs.rs](https://docs.rs/poloto).
 
 
 ## Gaussian Example
@@ -49,11 +33,13 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let mut plotter = poloto::plot("gaussian", "x", "y", f64::default_ctx(), f64::default_ctx());
+    let mut data = poloto::data();
 
-    plotter.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
-    plotter.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
-    plotter.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+    data.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
+    data.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
+    data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+
+    let mut plotter = data.build().plot("gaussian", "x", "y");
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
@@ -68,6 +54,7 @@ fn main() {
 
 ```rust
 use poloto::prelude::*;
+
 // PIPE me to a file!
 fn main() {
     // hourly trend over one day.
@@ -75,17 +62,23 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let data = (0..).zip(trend.into_iter());
+    let data = poloto::data()
+        .histogram("", (0..).zip(trend.into_iter()))
+        .build();
 
-    let mut plotter = poloto::plot(
+    let x = data
+        .boundx()
+        .steps((0..).step_by(6), |w, v| write!(w, "{}", v));
+
+    let y = data.boundy().default_ticks();
+
+    let mut plotter = data.plot_with(
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        poloto::steps((0..).step_by(6), |w, v| write!(w, "{} hr", v)),
-        i128::default_ctx().with_marker(0),
+        x,
+        y,
     );
-
-    plotter.histogram("", data);
 
     println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
 }
@@ -100,12 +93,10 @@ fn main() {
 ## Collatz Example
 
 ```rust
-use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
-            //Base case
             if a == 1 {
                 None
             } else {
@@ -116,10 +107,13 @@ fn main() {
         .fuse()
     };
 
-    let mut plotter = poloto::plot("collatz", "x", "y", i128::default_ctx(), i128::default_ctx().with_marker(0));
+    let mut data = poloto::data();
     for i in 1000..1006 {
-        plotter.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+        data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
+    data.ymarker(0);
+
+    let mut plotter = data.build().plot("collatz", "x", "y");
 
     println!(
         "{}<style>{}{}</style>{}{}",
@@ -154,16 +148,13 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let mut plotter = poloto::plot(
-        "Heart Graph",
-        "x",
-        "y",
-        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
-        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
-    );
+    let mut data = poloto::data();
+    data.line_fill_raw("heart", range.map(heart));
+    data.xmarker(-20.0).xmarker(20.0);
+    data.ymarker(-20.0).ymarker(20.0);
+    data.preserve_aspect();
 
-    plotter.line_fill_raw("heart", range.map(heart));
-    plotter.preserve_aspect();
+    let mut plotter = data.build().plot("Heart Graph", "x", "y");
 
     println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
 }
@@ -183,16 +174,9 @@ use poloto::prelude::*;
 fn main() {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let mut plotter = poloto::plot(
-        "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-        f64::default_ctx(),
-        f64::default_ctx(),
-    );
-
+    let mut s = poloto::data();
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    plotter.line(
+    s.line(
         "tan(x)",
         x.clone()
             .map(|x| [x, x.tan()])
@@ -201,16 +185,21 @@ fn main() {
             .crop_left(2.0),
     );
 
-    plotter.line("sin(2x)", x.clone().map(|x| [x, (2.0 * x).sin()]));
+    s.line("sin(2x)", x.clone().map(|x| [x, (2.0 * x).sin()]));
 
-    plotter.line(
+    s.line(
         "2*cos(x)",
         x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
     );
 
+    let mut plotter = s.build().plot(
+        "Some Trigonometry Plots 🥳",
+        formatm!("This is the {} label", 'x'),
+        "This is the y label",
+    );
+
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
-
 ```
 
 ## Output
@@ -240,31 +229,35 @@ fn main() {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let xname = poloto::fmt::name_ext(|w, ([min, max], step), _| {
-        write!(
-            w,
-            "{} to {} in {}",
-            UnixTime::datetime(&min, timezone).format("%H:%M:%S"),
-            UnixTime::datetime(&max, timezone).format("%H:%M:%S"),
-            step
-        )
-    });
+    let data = poloto::data::<UnixTime, _>().line("", &data).build();
 
-    let mut s = poloto::plot(
+    let xtick = data.boundx().default_ticks();
+
+    let xtick_step = xtick.fmt.step();
+    // Assume the steps are in seconds given the data we provided.
+    assert_eq!(xtick_step, poloto::num::timestamp::StepUnit::SE);
+
+    let xtick =
+        xtick.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")));
+
+    let boundx = data.boundx();
+
+    let ytick = data.boundy().default_ticks();
+
+    let mut plotter = data.plot_with(
         "Number of Wikipedia Articles",
-        xname,
+        formatm!(
+            "{} to {} in {}",
+            UnixTime::datetime(&boundx.min, timezone).format("%H:%M:%S"),
+            UnixTime::datetime(&boundx.max, timezone).format("%H:%M:%S"),
+            xtick_step
+        ),
         "Number of Articles",
-        UnixTime::default_ctx().with_tick_fmt(|w, v, _, &s| {
-            // Assume the steps are in seconds given the data we provided.
-            assert_eq!(s, poloto::num::timestamp::StepUnit::SE);
-
-            write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))
-        }),
-        i128::default_ctx().with_marker(0),
+        xtick,
+        ytick,
     );
-    s.line("", &data);
 
-    println!("{}", poloto::disp(|a| s.simple_theme(a)));
+    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
 
 ```

@@ -1,10 +1,8 @@
 use super::*;
 
-pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
-    canvas: &Canvas,
+pub fn render_plots<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     plotter: &mut Plotter<X, Y>,
-    data: &Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -18,15 +16,15 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
         legendx1,
         num_css_classes,
         ..
-    } = *canvas;
+    } = plotter.plots.canvas;
 
-    let [minx, maxx] = data.boundx;
-    let [miny, maxy] = data.boundy;
+    let boundx = [plotter.plots.boundx.min, plotter.plots.boundx.max];
+    let boundy = [plotter.plots.boundy.min, plotter.plots.boundy.max];
+
+    let [minx, maxx] = boundx;
+    let [miny, maxy] = boundy;
 
     let mut writer = tagger::new(writer);
-
-    let xcontext = plotter.xcontext.as_mut().unwrap();
-    let ycontext = plotter.ycontext.as_mut().unwrap();
 
     let mut color_iter = {
         let max = if let Some(nn) = num_css_classes {
@@ -38,7 +36,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
         (0..max).cycle()
     };
 
-    for (i, mut p) in plotter.plots.drain(..).enumerate() {
+    for (i, mut p) in plotter.plots.plots.drain(..).enumerate() {
         let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
 
         let name_exists = writer
@@ -56,28 +54,26 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                 Ok(wc.get_counter() != 0)
             })?;
 
-        let aa = xcontext.scale(minx, [minx, maxx], scalex);
-        let bb = ycontext.scale(miny, [miny, maxy], scaley);
+        let aa = minx.scale([minx, maxx], scalex);
+        let bb = miny.scale([miny, maxy], scaley);
 
-        struct PlotIter<X: PlotNumContext, Y: PlotNumContext> {
+        struct PlotIter<X: PlotNum, Y: PlotNum> {
             basex_ii: f64,
             basey_ii: f64,
-            rangex_ii: [X::Num; 2],
-            rangey_ii: [Y::Num; 2],
+            rangex_ii: [X; 2],
+            rangey_ii: [Y; 2],
             maxx_ii: f64,
             maxy_ii: f64,
         }
-        impl<X: PlotNumContext, Y: PlotNumContext> PlotIter<X, Y> {
+        impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
             fn gen_iter<'a>(
                 &'a self,
-                p: &'a mut Plot<X::Num, Y::Num>,
-                xcontext: &'a mut X,
-                ycontext: &'a mut Y,
+                p: &'a mut Plot<X, Y>,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
                 p.plots.iter_second().map(move |(x, y)| {
                     [
-                        self.basex_ii + xcontext.scale(x, self.rangex_ii, self.maxx_ii),
-                        self.basey_ii - ycontext.scale(y, self.rangey_ii, self.maxy_ii),
+                        self.basex_ii + x.scale(self.rangex_ii, self.maxx_ii),
+                        self.basey_ii - y.scale(self.rangey_ii, self.maxy_ii),
                     ]
                 })
             }
@@ -117,7 +113,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                     d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                     d.attr("fill", "none")?;
                     d.attr("stroke", "black")?;
-                    d.path(|a| render::line(a, plot_iter.gen_iter(&mut p, xcontext, ycontext)))
+                    d.path(|a| render::line(a, plot_iter.gen_iter(&mut p)))
                 })?;
             }
             PlotType::Scatter => {
@@ -146,7 +142,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                     d.path(|a| {
                         use tagger::PathCommand::*;
                         for [x, y] in plot_iter
-                            .gen_iter(&mut p, xcontext, ycontext)
+                            .gen_iter(&mut p)
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             a.put(M(x, y))?;
@@ -182,7 +178,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                     .build(|writer| {
                         let mut last = None;
                         for [x, y] in plot_iter
-                            .gen_iter(&mut p, xcontext, ycontext)
+                            .gen_iter(&mut p)
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             if let Some((lx, ly)) = last {
@@ -226,12 +222,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                         format_args!("poloto_linefill poloto{}fill", colori),
                     )?;
                     d.path(|path| {
-                        render::line_fill(
-                            path,
-                            plot_iter.gen_iter(&mut p, xcontext, ycontext),
-                            height - paddingy,
-                            true,
-                        )
+                        render::line_fill(path, plot_iter.gen_iter(&mut p), height - paddingy, true)
                     })
                 })?;
             }
@@ -262,7 +253,7 @@ pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
                     d.path(|path| {
                         render::line_fill(
                             path,
-                            plot_iter.gen_iter(&mut p, xcontext, ycontext),
+                            plot_iter.gen_iter(&mut p),
                             height - paddingy,
                             false,
                         )

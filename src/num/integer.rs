@@ -62,107 +62,70 @@ fn find_good_step(good_steps: &[u32], ideal_num_steps: u32, range_all: [i128; 2]
 }
 */
 
-///
-/// Default integer context. It will attempt to find reasonable step sizes, and format them as regular integers.
-///
-#[derive(Default)]
-pub struct IntegerContext;
-impl PlotNumContext for IntegerContext {
-    type StepInfo = i128;
+pub struct IntegerTickFmt {
+    step: i128,
+}
+impl IntegerTickFmt {
+    pub fn step(&self) -> i128 {
+        self.step
+    }
+}
+impl TickFormat for IntegerTickFmt {
     type Num = i128;
 
-    fn tick_fmt(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        val: i128,
-        _bound: [i128; 2],
-        info: &Self::StepInfo,
-    ) -> std::fmt::Result {
-        util::write_interval_i128(writer, val, Some(*info))
-    }
-
-    fn where_fmt(
+    fn write_tick(
         &mut self,
         writer: &mut dyn std::fmt::Write,
-        val: i128,
-        _bound: [i128; 2],
+        val: &Self::Num,
     ) -> std::fmt::Result {
-        util::write_interval_i128(writer, val, None)
+        util::write_interval_i128(writer, *val, Some(self.step))
     }
-
-    fn scale(&mut self, mut val: i128, range: [i128; 2], max: f64) -> f64 {
-        val.default_scale(range, max)
-    }
-    fn compute_ticks(
+    fn write_where(
         &mut self,
-        ideal_num_steps: u32,
-        range: [i128; 2],
-        dash: DashInfo,
-    ) -> TickInfo<i128, i128> {
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
+        util::write_interval_i128(writer, *val, None)
+    }
+}
+
+#[derive(Default)]
+pub struct IntegerTickGen;
+
+impl TickGenerator for IntegerTickGen {
+    type Num = i128;
+    type Fmt = IntegerTickFmt;
+    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
+        let range = [bound.min, bound.max];
+        let ideal_num_steps = bound.ideal_num_steps;
+        let dash = bound.dash_info;
+
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (display_relative, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            self.scale(tick_layout.step, range, dash.max),
+            tick_layout.step.scale(range, dash.max),
             dash.ideal_dash_size,
             tick_layout.normalized_step,
         ));
 
-        TickInfo {
-            unit_data: tick_layout.step,
-            ticks,
-            display_relative,
-            dash_size,
+        TickDist {
+            ticks: TickInfo {
+                ticks,
+                display_relative,
+                dash_size,
+            },
+            fmt: IntegerTickFmt {
+                step: tick_layout.step,
+            },
         }
-        /*
-        let good_ticks = &[1, 2, 5];
-
-        let (step, good_normalized_step) = find_good_step(good_ticks, ideal_num_steps, range);
-        let (start_step, step_num) = get_range_info(step, range);
-
-        let display_relative = util::should_fmt_offset(
-            start_step as f64,
-            (start_step + ((step_num - 1) as i128) * step) as f64,
-            step as f64,
-        );
-
-        let first_tick = if display_relative { 0 } else { start_step };
-
-        let mut ticks = Vec::with_capacity(usize::try_from(step_num).unwrap());
-        for a in 0..step_num {
-            let position = start_step + step * (a as i128);
-            let value = first_tick + step * (a as i128);
-
-            ticks.push(Tick { position, value });
-        }
-
-        let dash_size = Some(compute_best_dash_1_2_5(
-            self.scale(step, range, dash.max),
-            dash.ideal_dash_size,
-            good_normalized_step,
-        ));
-
-        TickInfo {
-            unit_data: step,
-            ticks,
-            dash_size,
-            display_relative: display_relative.then(|| start_step),
-        }
-        */
     }
-
-    fn unit_range(&mut self, offset: Option<i128>) -> [i128; 2] {
-        i128::default_unit_range(offset)
-    }
-}
-
-impl HasDefaultContext for i128 {
-    type DefaultContext = IntegerContext;
 }
 
 impl PlotNum for i128 {
-    fn default_scale(&mut self, range: [i128; 2], max: f64) -> f64 {
+    type DefaultTickGenerator = IntegerTickGen;
+    fn scale(&self, range: [i128; 2], max: f64) -> f64 {
         let val = *self;
         let diff = (range[1] - range[0]) as f64;
 
@@ -171,7 +134,7 @@ impl PlotNum for i128 {
         val as f64 * scale
     }
 
-    fn default_unit_range(offset: Option<i128>) -> [i128; 2] {
+    fn unit_range(offset: Option<i128>) -> [i128; 2] {
         if let Some(o) = offset {
             [o - 1, o + 1]
         } else {

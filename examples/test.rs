@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 const fn generate_test() -> [&'static [[f64; 2]]; 9] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
@@ -70,15 +69,8 @@ fn main() -> std::fmt::Result {
                             poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                poloto::plot(
-                                    formatm!("test {}", i),
-                                    "x",
-                                    "y",
-                                    f64::default_ctx(),
-                                    f64::default_ctx(),
-                                )
-                                .scatter("", test)
-                                .render(a)
+                                let s = poloto::data().scatter("", test).build();
+                                s.plot(formatm!("test {}", i), "x", "y").render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;
@@ -93,15 +85,9 @@ fn main() -> std::fmt::Result {
                             poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                poloto::plot(
-                                    formatm!("test {}", i),
-                                    "x",
-                                    "y",
-                                    i128::default_ctx(),
-                                    i128::default_ctx(),
-                                )
-                                .scatter("", test)
-                                .render(a)
+                                let s = poloto::data().scatter("", test).build();
+
+                                s.plot(formatm!("test {}", i), "x", "y").render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;

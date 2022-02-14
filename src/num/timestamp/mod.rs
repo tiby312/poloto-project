@@ -35,10 +35,26 @@ pub fn month_str(month: u32) -> &'static str {
     }
 }
 
-#[deprecated(
-    note = "TimestampType has been renamed to StepUnit as that is more descriptive of what it represents. Use StepUnit instead."
-)]
-pub type TimestampType = StepUnit;
+pub struct UnixTimeTickFmt<T: TimeZone> {
+    step: StepUnit,
+    timezone: T,
+}
+impl<T: TimeZone> UnixTimeTickFmt<T> {
+    pub fn step(&self) -> StepUnit {
+        self.step
+    }
+}
+impl<T: TimeZone> TickFormat for UnixTimeTickFmt<T> {
+    type Num = UnixTime;
+
+    fn write_tick(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
+        write!(writer, "{}", val.dynamic_format(&self.timezone, &self.step))
+    }
+}
 
 ///
 /// Conveys what unit is being used for step sizes.
@@ -68,66 +84,33 @@ impl std::fmt::Display for StepUnit {
     }
 }
 
-///
-/// Default [`UnixTime`] context.
-///
-pub struct UnixTimeContext<T: chrono::TimeZone> {
+impl Default for UnixTimeTickGen<Utc> {
+    fn default() -> Self {
+        UnixTimeTickGen { timezone: Utc }
+    }
+}
+
+pub struct UnixTimeTickGen<T: TimeZone> {
     timezone: T,
 }
 
-impl<T: chrono::TimeZone> UnixTimeContext<T> {
+impl<T: TimeZone> UnixTimeTickGen<T> {
     pub fn new(timezone: &T) -> Self {
-        UnixTimeContext {
+        UnixTimeTickGen {
             timezone: timezone.clone(),
         }
     }
 }
 
-impl Default for UnixTimeContext<Utc> {
-    fn default() -> Self {
-        UnixTimeContext {
-            timezone: chrono::Utc,
-        }
-    }
-}
-
-impl<T: chrono::TimeZone> PlotNumContext for UnixTimeContext<T>
-where
-    T::Offset: Display,
-{
-    type StepInfo = StepUnit;
+impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
     type Num = UnixTime;
+    type Fmt = UnixTimeTickFmt<T>;
+    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
+        let range = [bound.min, bound.max];
 
-    fn scale(&mut self, mut val: UnixTime, range: [UnixTime; 2], max: f64) -> f64 {
-        val.default_scale(range, max)
-    }
-
-    fn tick_fmt(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        val: UnixTime,
-        _bound: [UnixTime; 2],
-        info: &StepUnit,
-    ) -> std::fmt::Result {
-        write!(writer, "{}", val.dynamic_format(&self.timezone, info))
-    }
-
-    fn where_fmt(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: UnixTime,
-        _bound: [UnixTime; 2],
-    ) -> std::fmt::Result {
-        write!(writer, "{}", val.datetime(&self.timezone))
-    }
-
-    fn compute_ticks(
-        &mut self,
-        ideal_num_steps: u32,
-        range: [UnixTime; 2],
-        _info: DashInfo,
-    ) -> TickInfo<UnixTime, StepUnit> {
         assert!(range[0] <= range[1]);
+        let ideal_num_steps = bound.ideal_num_steps;
+
         let ideal_num_steps = ideal_num_steps.max(2);
 
         let [start, end] = range;
@@ -162,25 +145,23 @@ where
 
         assert!(ticks.len() >= 2);
 
-        TickInfo {
-            unit_data: ret.unit_data,
-            ticks,
-            dash_size: None,
-            display_relative: None, //Never want to do this for unix time.
+        TickDist {
+            ticks: TickInfo {
+                ticks,
+                dash_size: None,
+                display_relative: None, //Never want to do this for unix time.
+            },
+            fmt: UnixTimeTickFmt {
+                timezone: self.timezone,
+                step: ret.unit_data,
+            },
         }
     }
-
-    fn unit_range(&mut self, offset: Option<UnixTime>) -> [UnixTime; 2] {
-        UnixTime::default_unit_range(offset)
-    }
-}
-
-impl HasDefaultContext for UnixTime {
-    type DefaultContext = UnixTimeContext<chrono::Utc>;
 }
 
 impl PlotNum for UnixTime {
-    fn default_scale(&mut self, range: [UnixTime; 2], max: f64) -> f64 {
+    type DefaultTickGenerator = UnixTimeTickGen<Utc>;
+    fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;
         let [val1, val2] = [val1.0, val2.0];
@@ -189,7 +170,7 @@ impl PlotNum for UnixTime {
         let scale = max / diff;
         val.0 as f64 * scale
     }
-    fn default_unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
+    fn unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
         if let Some(o) = offset {
             [o, UnixTime(o.0 + 1)]
         } else {

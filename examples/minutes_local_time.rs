@@ -1,4 +1,4 @@
-use poloto::num::timestamp::UnixTimeContext;
+use poloto::num::timestamp::{UnixTime, UnixTimeTickGen};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -16,14 +16,21 @@ fn main() {
         (day2.and_hms(01, 50, 01).into(), 4133000),
     ];
 
-    let mut s = poloto::plot(
+    let s = poloto::data::<UnixTime, _>()
+        .line("", &data)
+        .ymarker(0)
+        .build();
+
+    let x = UnixTimeTickGen::new(time_zone).generate(s.boundx());
+    let y = s.boundy().default_ticks();
+
+    let mut s = s.plot_with(
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        UnixTimeContext::new(time_zone),
-        i128::default_ctx().with_marker(0),
+        x,
+        y,
     );
-    s.line("", &data);
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }

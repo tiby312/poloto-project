@@ -3,16 +3,9 @@ use poloto::prelude::*;
 fn main() {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let mut plotter = poloto::plot(
-        "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-        f64::default_ctx(),
-        f64::default_ctx(),
-    );
-
+    let mut s = poloto::data();
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    plotter.line(
+    s.line(
         "tan(x)",
         x.clone()
             .map(|x| [x, x.tan()])
@@ -21,11 +14,17 @@ fn main() {
             .crop_left(2.0),
     );
 
-    plotter.line("sin(2x)", x.clone().map(|x| [x, (2.0 * x).sin()]));
+    s.line("sin(2x)", x.clone().map(|x| [x, (2.0 * x).sin()]));
 
-    plotter.line(
+    s.line(
         "2*cos(x)",
         x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
+    );
+
+    let mut plotter = s.build().plot(
+        "Some Trigonometry Plots 🥳",
+        formatm!("This is the {} label", 'x'),
+        "This is the y label",
     );
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));

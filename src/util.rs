@@ -6,7 +6,7 @@
 use super::*;
 const SCIENCE: usize = 4;
 
-fn write_normal_float<T: sfmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> sfmt::Result {
+fn write_normal_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
     if let Some(step) = step {
         let k = (-step.log10()).ceil();
         let k = k.max(0.0);
@@ -16,7 +16,7 @@ fn write_normal_float<T: sfmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> s
     }
 }
 
-fn write_science_float<T: sfmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> sfmt::Result {
+fn write_science_float<T: fmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> fmt::Result {
     if let Some(step) = step {
         let precision = if a == 0.0 {
             0
@@ -45,7 +45,7 @@ fn write_science_float<T: sfmt::Write>(mut fm: T, a: f64, step: Option<f64>) -> 
 /// If the step size is not specified, the number will be formatted
 /// with no limit to the precision.
 ///
-pub fn write_interval_float<T: sfmt::Write>(
+pub fn write_interval_float<T: fmt::Write>(
     mut fm: T,
     a: f64,
     step: Option<f64>,
@@ -78,7 +78,7 @@ pub fn write_interval_float<T: sfmt::Write>(
 /// If the step size is not specified, the number will be formatted
 /// with no limit to the precision if scientific mode is picked.
 ///
-pub fn write_interval_i128<T: sfmt::Write>(
+pub fn write_interval_i128<T: fmt::Write>(
     mut fm: T,
     a: i128,
     step: Option<i128>,
@@ -111,13 +111,13 @@ use std::cell::RefCell;
 /// has a shorter lifetime.
 pub struct DisplayableClosure<F>(pub F);
 
-impl<F: Fn(&mut sfmt::Formatter) -> sfmt::Result> DisplayableClosure<F> {
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
     pub fn new(a: F) -> Self {
         DisplayableClosure(a)
     }
 }
-impl<F: Fn(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for DisplayableClosure<F> {
-    fn fmt(&self, formatter: &mut sfmt::Formatter) -> sfmt::Result {
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         (self.0)(formatter)
     }
 }
@@ -127,13 +127,13 @@ impl<F: Fn(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for DisplayableC
 ///
 pub struct DisplayableClosureOnce<F>(pub RefCell<Option<F>>);
 
-impl<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result> DisplayableClosureOnce<F> {
+impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureOnce<F> {
     pub fn new(a: F) -> Self {
         DisplayableClosureOnce(RefCell::new(Some(a)))
     }
 }
-impl<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for DisplayableClosureOnce<F> {
-    fn fmt(&self, formatter: &mut sfmt::Formatter) -> sfmt::Result {
+impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureOnce<F> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         if let Some(f) = (self.0.borrow_mut()).take() {
             (f)(formatter)
         } else {
@@ -147,13 +147,13 @@ impl<F: FnOnce(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for Displaya
 ///
 pub struct DisplayableClosureMut<F>(pub RefCell<F>);
 
-impl<F: FnMut(&mut sfmt::Formatter) -> sfmt::Result> DisplayableClosureMut<F> {
+impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureMut<F> {
     pub fn new(a: F) -> Self {
         DisplayableClosureMut(RefCell::new(a))
     }
 }
-impl<F: FnMut(&mut sfmt::Formatter) -> sfmt::Result> sfmt::Display for DisplayableClosureMut<F> {
-    fn fmt(&self, formatter: &mut sfmt::Formatter) -> sfmt::Result {
+impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureMut<F> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         (self.0.borrow_mut())(formatter)
     }
 }
@@ -177,14 +177,11 @@ impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
     }
 }
 
-pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
-    it: impl IntoIterator<Item = (X::Num, Y::Num)>,
-    xcontext: &mut X,
-    ycontext: &mut Y,
-) -> ([X::Num; 2], [Y::Num; 2]) {
-    let xmarkers = xcontext.markers();
-    let ymarkers = ycontext.markers();
-
+pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
+    it: impl IntoIterator<Item = (X, Y)>,
+    xmarkers: Vec<X>,
+    ymarkers: Vec<Y>,
+) -> ([X; 2], [Y; 2]) {
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 
     if let Some((x, y)) = ii.next() {
@@ -233,15 +230,15 @@ pub(crate) fn find_bounds<X: PlotNumContext, Y: PlotNumContext>(
         });
 
         if !xmoved {
-            val.0 = xcontext.unit_range(Some(x));
+            val.0 = X::unit_range(Some(x));
         }
 
         if !ymoved {
-            val.1 = ycontext.unit_range(Some(y));
+            val.1 = Y::unit_range(Some(y));
         }
 
         val
     } else {
-        (xcontext.unit_range(None), ycontext.unit_range(None))
+        (X::unit_range(None), Y::unit_range(None))
     }
 }

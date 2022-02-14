@@ -1,12 +1,5 @@
 use crate::*;
 
-pub struct Data<X, Y, J, K> {
-    pub boundx: [X; 2],
-    pub boundy: [Y; 2],
-    pub tickx: TickInfo<X, J>,
-    pub ticky: TickInfo<Y, K>,
-}
-
 mod render_base;
 mod render_plots;
 
@@ -71,22 +64,18 @@ impl Canvas {
         }
     }
 
-    pub fn render_plots<X: PlotNumContext, Y: PlotNumContext>(
-        &self,
+    pub fn render_plots<X: PlotNum, Y: PlotNum>(
         writer: impl std::fmt::Write,
         plotter: &mut Plotter<X, Y>,
-        data: &Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
     ) -> std::fmt::Result {
-        render_plots::render_plots(self, writer, plotter, data)
+        render_plots::render_plots(writer, plotter)
     }
 
-    pub fn render_base<X: PlotNumContext, Y: PlotNumContext>(
-        &self,
+    pub fn render_base<X: PlotNum, Y: PlotNum>(
         writer: impl std::fmt::Write,
         plotter: &mut Plotter<X, Y>,
-        data: &mut Data<X::Num, Y::Num, X::StepInfo, Y::StepInfo>,
     ) -> std::fmt::Result {
-        render_base::render_base(self, writer, plotter, data)
+        render_base::render_base(writer, plotter)
     }
 }
 
@@ -95,7 +84,7 @@ pub fn line_fill<T: std::fmt::Write>(
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
     add_start_end_base: bool,
-) -> sfmt::Result {
+) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 
@@ -143,7 +132,7 @@ pub fn line_fill<T: std::fmt::Write>(
 pub fn line<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
-) -> sfmt::Result {
+) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 

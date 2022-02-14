@@ -9,88 +9,93 @@ impl DiscNum for f64 {
         f64::NAN
     }
 }
-
-///
-/// Default float context. It will attempt to find reasonable step sizes, and format them as regular floats.
-///
-#[derive(Default)]
-pub struct FloatContext;
-impl PlotNumContext for FloatContext {
-    type Num = f64;
-    type StepInfo = f64;
-
-    fn tick_fmt(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        val: Self::Num,
-        _bound: [Self::Num; 2],
-        info: &Self::StepInfo,
-    ) -> std::fmt::Result {
-        util::write_interval_float(writer, val, Some(*info))
+/*
+impl PlotNumContextFromBound for FloatContext {
+    fn new(bound: &crate::Bound<f64>) -> Self {
+        FloatContext { bound: *bound }
     }
+}
+*/
 
-    fn where_fmt(
+pub struct FloatTickFmt {
+    step: f64,
+}
+impl FloatTickFmt {
+    pub fn step(&self) -> f64 {
+        self.step
+    }
+}
+impl TickFormat for FloatTickFmt {
+    type Num = f64;
+
+    fn write_tick(
         &mut self,
         writer: &mut dyn std::fmt::Write,
-        val: f64,
-        _bound: [f64; 2],
+        val: &Self::Num,
     ) -> std::fmt::Result {
-        util::write_interval_float(writer, val, None)
+        util::write_interval_float(writer, *val, Some(self.step))
     }
-
-    fn scale(&mut self, mut val: f64, range: [f64; 2], max: f64) -> f64 {
-        val.default_scale(range, max)
-    }
-
-    fn compute_ticks(
+    fn write_where(
         &mut self,
-        ideal_num_steps: u32,
-        range: [f64; 2],
-        dash: DashInfo,
-    ) -> TickInfo<f64, f64> {
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
+        util::write_interval_float(writer, *val, None)
+    }
+}
+
+#[derive(Default)]
+pub struct FloatTickGen;
+
+impl TickGenerator for FloatTickGen {
+    type Num = f64;
+    type Fmt = FloatTickFmt;
+    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
+        let range = [bound.min, bound.max];
+        let ideal_num_steps = bound.ideal_num_steps;
+        let dash = bound.dash_info;
+
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (display_relative, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            self.scale(tick_layout.step, range, dash.max),
+            tick_layout.step.scale(range, dash.max),
             dash.ideal_dash_size,
             tick_layout.normalized_step,
         ));
 
-        TickInfo {
-            unit_data: tick_layout.step,
-            ticks,
-            display_relative,
-            dash_size,
+        TickDist {
+            ticks: TickInfo {
+                ticks,
+                display_relative,
+                dash_size,
+            },
+            fmt: FloatTickFmt {
+                step: tick_layout.step,
+            },
         }
-    }
-    fn unit_range(&mut self, offset: Option<f64>) -> [f64; 2] {
-        f64::default_unit_range(offset)
     }
 }
 
 impl PlotNum for f64 {
+    type DefaultTickGenerator = FloatTickGen;
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
-    fn default_scale(&mut self, range: [f64; 2], max: f64) -> f64 {
+    fn scale(&self, range: [f64; 2], max: f64) -> f64 {
         let val = *self;
         let diff = range[1] - range[0];
         let scale = max / diff;
         val * scale
     }
-    fn default_unit_range(offset: Option<f64>) -> [f64; 2] {
+    fn unit_range(offset: Option<f64>) -> [f64; 2] {
         if let Some(o) = offset {
             [o - 1.0, o + 1.0]
         } else {
             [-1.0, 1.0]
         }
     }
-}
-
-impl HasDefaultContext for f64 {
-    type DefaultContext = FloatContext;
 }
 
 fn round_up_to_nearest_multiple(val: f64, multiple: f64) -> f64 {

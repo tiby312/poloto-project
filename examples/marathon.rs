@@ -1,5 +1,3 @@
-use poloto::prelude::*;
-
 // PIPE me to a file!
 fn main() {
     let hr = 1000 * 60 * 60;
@@ -14,16 +12,15 @@ fn main() {
     ];
 
     // Have there be a tick every hour
-    let xtick = std::iter::successors(Some(0), |w| Some(w + hr));
 
-    let mut plotter = poloto::plot(
-        "collatz",
-        "x",
-        "y",
-        poloto::steps(xtick, |w, v| write!(w, "{} hr", v / hr)),
-        i128::default_ctx().with_marker(0),
-    );
-    plotter.line("hay", &heart_rate);
+    let data = poloto::data().line("hay", &heart_rate).ymarker(0).build();
+
+    let xx = std::iter::successors(Some(0), |w| Some(w + hr));
+
+    let x = data.boundx().steps(xx, |w, v| write!(w, "{} hr", v / hr));
+    let y = data.boundy().default_ticks();
+
+    let mut plotter = data.plot_with("collatz", "x", "y", x, y);
 
     println!(
         "{}<style>{}{}</style>{}{}",

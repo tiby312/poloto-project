@@ -11,16 +11,13 @@ fn main() {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let mut plotter = poloto::plot(
-        "Heart Graph",
-        "x",
-        "y",
-        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
-        f64::default_ctx().with_marker(-20.0).with_marker(20.0),
-    );
+    let mut data = poloto::data();
+    data.line_fill_raw("heart", range.map(heart));
+    data.xmarker(-20.0).xmarker(20.0);
+    data.ymarker(-20.0).ymarker(20.0);
+    data.preserve_aspect();
 
-    plotter.line_fill_raw("heart", range.map(heart));
-    plotter.preserve_aspect();
+    let mut plotter = data.build().plot("Heart Graph", "x", "y");
 
     println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
 }
