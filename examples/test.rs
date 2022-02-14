@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 const fn generate_test() -> [&'static [[f64; 2]]; 9] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 

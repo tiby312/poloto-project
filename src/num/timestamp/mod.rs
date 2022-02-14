@@ -101,17 +101,15 @@ impl<T: TimeZone> UnixTimeTickGen<T> {
         }
     }
 }
-//TODO use this thing!!!
 
 impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
     type Num = UnixTime;
     type Fmt = UnixTimeTickFmt<T>;
-    fn generate(self, bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
+    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
         let range = [bound.min, bound.max];
 
         assert!(range[0] <= range[1]);
         let ideal_num_steps = bound.ideal_num_steps;
-        let dash = bound.dash_info;
 
         let ideal_num_steps = ideal_num_steps.max(2);
 
@@ -147,17 +145,17 @@ impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
 
         assert!(ticks.len() >= 2);
 
-        (
-            TickInfo {
+        TickDist {
+            ticks: TickInfo {
                 ticks,
                 dash_size: None,
                 display_relative: None, //Never want to do this for unix time.
             },
-            UnixTimeTickFmt {
+            fmt: UnixTimeTickFmt {
                 timezone: self.timezone.clone(),
                 step: ret.unit_data,
             },
-        )
+        }
     }
 }
 

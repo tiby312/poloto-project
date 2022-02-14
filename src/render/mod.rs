@@ -84,7 +84,7 @@ pub fn line_fill<T: std::fmt::Write>(
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
     add_start_end_base: bool,
-) -> sfmt::Result {
+) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 
@@ -132,7 +132,7 @@ pub fn line_fill<T: std::fmt::Write>(
 pub fn line<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
-) -> sfmt::Result {
+) -> fmt::Result {
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 

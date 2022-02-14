@@ -46,12 +46,11 @@ impl TickFormat for FloatTickFmt {
 
 #[derive(Default)]
 pub struct FloatTickGen;
-//TODO use this thing!!!
 
 impl TickGenerator for FloatTickGen {
     type Num = f64;
     type Fmt = FloatTickFmt;
-    fn generate(self, bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt) {
+    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
         let range = [bound.min, bound.max];
         let ideal_num_steps = bound.ideal_num_steps;
         let dash = bound.dash_info;
@@ -66,16 +65,16 @@ impl TickGenerator for FloatTickGen {
             tick_layout.normalized_step,
         ));
 
-        (
-            TickInfo {
+        TickDist {
+            ticks: TickInfo {
                 ticks,
                 display_relative,
                 dash_size,
             },
-            FloatTickFmt {
+            fmt: FloatTickFmt {
                 step: tick_layout.step,
             },
-        )
+        }
     }
 }
 

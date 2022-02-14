@@ -1,5 +1,3 @@
-use poloto::prelude::*;
-
 //PIPE me to a file!
 fn main() {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);

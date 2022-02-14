@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 fn main() {
     let mut s = poloto::data();
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);

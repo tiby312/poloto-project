@@ -52,7 +52,7 @@ pub trait PlotNumContext {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy {
-    type DefaultTickGenerator: TickGenerator<Num = Self>;
+    type DefaultTickGenerator;
 
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
@@ -107,12 +107,37 @@ pub struct TickInfo<I> {
     pub ticks: Vec<Tick<I>>,
 
     /// The number of dashes between two ticks must be a multiple of this number.
-    //pub dash_multiple: u32,
     pub dash_size: Option<f64>,
 
     /// If we want to display the tick values relatively, this will
     /// have the base start to start with.
     pub display_relative: Option<I>,
+}
+
+pub struct TickDist<J: TickFormat> {
+    pub ticks: TickInfo<J::Num>,
+    pub fmt: J,
+}
+
+impl<J: TickFormat> TickDist<J> {
+    pub fn with_tick_fmt<F>(self, func: F) -> TickDist<TickFmt<J, F>>
+    where
+        Self: Sized,
+        F: Fn(&mut dyn std::fmt::Write, &J::Num) -> std::fmt::Result,
+    {
+        TickDist {
+            ticks: self.ticks,
+            fmt: TickFmt {
+                inner: self.fmt,
+                func,
+            },
+        }
+    }
+
+    pub fn with_no_dash(mut self) -> Self {
+        self.ticks.dash_size = None;
+        self
+    }
 }
 
 pub trait TickGenerator {
@@ -124,10 +149,9 @@ pub trait TickGenerator {
     /// Calculate information related to where the interval ticks should go.
     /// Guaranteed to be called before fmt_tick.
     ///
-    fn generate(self, bound: crate::Bound<Self::Num>) -> (TickInfo<Self::Num>, Self::Fmt);
+    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt>;
 }
 
-//TODO use this thing!!!
 pub trait TickFormat {
     type Num;
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;

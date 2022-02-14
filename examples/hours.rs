@@ -1,6 +1,5 @@
-use poloto::{
-    num::integer::IntegerTickGen, plotnum::TickFormat, plotnum::TickGenerator, prelude::*,
-};
+use poloto::prelude::*;
+
 // PIPE me to a file!
 fn main() {
     // hourly trend over one day.
@@ -16,7 +15,7 @@ fn main() {
         .boundx()
         .steps((0..).step_by(6), |w, v| write!(w, "{}", v));
 
-    let y = data.boundy().default_tick_generate();
+    let y = data.boundy().default_ticks();
 
     let mut plotter = data.plot_with(
         "Number of rides at theme park hourly",

@@ -26,9 +26,6 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
 
     let mut writer = tagger::new(writer);
 
-    let xcontext = &mut *plotter.xcontext;
-    let ycontext = &mut *plotter.ycontext;
-
     let mut color_iter = {
         let max = if let Some(nn) = num_css_classes {
             nn

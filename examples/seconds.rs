@@ -19,18 +19,18 @@ fn main() {
 
     let data = poloto::data::<UnixTime, _>().line("", &data).build();
 
-    let (xtick, xtick_fmt) = data.boundx().default_tick_generate();
+    let xtick = data.boundx().default_ticks();
 
-    let xtick_step = xtick_fmt.step();
+    let xtick_step = xtick.fmt.step();
     // Assume the steps are in seconds given the data we provided.
     assert_eq!(xtick_step, poloto::num::timestamp::StepUnit::SE);
 
-    let xtick_fmt =
-        xtick_fmt.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")));
+    let xtick =
+        xtick.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")));
 
     let boundx = data.boundx();
 
-    let y = data.boundy().default_tick_generate();
+    let ytick = data.boundy().default_ticks();
 
     let mut plotter = data.plot_with(
         "Number of Wikipedia Articles",
@@ -41,8 +41,8 @@ fn main() {
             xtick_step
         ),
         "Number of Articles",
-        (xtick, xtick_fmt),
-        y,
+        xtick,
+        ytick,
     );
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));

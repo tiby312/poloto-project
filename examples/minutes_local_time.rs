@@ -1,5 +1,4 @@
 use poloto::num::timestamp::{UnixTime, UnixTimeTickGen};
-use poloto::plotnum::TickGenerator;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -23,7 +22,7 @@ fn main() {
         .build();
 
     let x = UnixTimeTickGen::new(time_zone).generate(s.boundx());
-    let y = s.boundy().default_tick_generate();
+    let y = s.boundy().default_ticks();
 
     let mut s = s.plot_with(
         "Number of Wikipedia Articles",

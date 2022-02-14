@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
@@ -23,9 +22,7 @@ fn main() {
     let x = data
         .boundx()
         .steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v));
-    let y = data.boundy().default_tick_generate();
-
-    //TODO add way to do no_dash.
+    let y = data.boundy().default_ticks().with_no_dash();
 
     let mut plotter = data.plot_with("title", "xname", "yname", x, y);
 

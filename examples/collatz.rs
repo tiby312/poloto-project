@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
