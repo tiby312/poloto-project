@@ -66,7 +66,6 @@ pub mod simple_theme;
 pub mod prelude {
     pub use super::formatm;
     pub use super::plotnum::TickFormat;
-    pub use super::plotnum::TickGenerator;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
 }
@@ -147,6 +146,10 @@ pub struct Bound<X> {
 }
 
 impl<X: PlotNum> Bound<X> {
+
+    pub fn from_gen<T:TickGenerator<Num=X>>(&self,a:T)->TickDist<T::Fmt>{
+        a.generate(*self)
+    }
     ///
     /// Create the default tick generator associated with a PlotNum.
     ///

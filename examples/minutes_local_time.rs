@@ -21,7 +21,7 @@ fn main() {
         .ymarker(0)
         .build();
 
-    let x = UnixTimeTickGen::new(time_zone).generate(s.boundx());
+    let x = s.boundx().from_gen(UnixTimeTickGen::new(time_zone));
     let y = s.boundy().default_ticks();
 
     let mut s = s.plot_with(
