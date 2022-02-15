@@ -85,7 +85,7 @@ pub struct TickInfo<I> {
 }
 
 ///
-/// Returned by [`TickGenerator::generate`]
+/// A distribution of ticks. What [`crate::DataResult::plot_with`] accepts.
 ///
 pub struct TickDist<J: TickFormat> {
     pub ticks: TickInfo<J::Num>,
@@ -114,9 +114,9 @@ impl<J: TickFormat> TickDist<J> {
 }
 
 ///
-/// This is used to faciliate automatically getting a [`TickDist`] out of a 
+/// This is used to faciliate automatically getting a [`TickDist`] out of a
 /// [`PlotNum`].
-/// 
+///
 /// From the given min and max bounds of a distribution of plots,
 /// generate out a distribution of ticks to display.
 ///

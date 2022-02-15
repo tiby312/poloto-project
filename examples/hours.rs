@@ -15,7 +15,7 @@ fn main() {
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        poloto::steps(data.boundx, (0..).step_by(6), |w, v| write!(w, "{}", v)),
+        poloto::num::steps(data.boundx, (0..).step_by(6), |w, v| write!(w, "{}", v)),
         poloto::ticks_from_default(data.boundy),
     );
 

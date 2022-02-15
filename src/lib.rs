@@ -28,7 +28,7 @@
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickDist`].
-//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks and returns a [`TickDist`].
+//! Alternatively you can use the [`num::steps`] function that just takes an iterator of ticks and returns a [`TickDist`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
@@ -135,7 +135,8 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 
 ///
 /// Created once the min and max bounds of all the plots has been computed.
-/// Contains in it all the information needed to fed into a [`TickGenerator`].
+/// Contains in it all the information typically needed to make a [`TickDist`].
+///
 ///
 #[derive(Debug, Clone)]
 pub struct Bound<X> {
@@ -144,7 +145,6 @@ pub struct Bound<X> {
     pub ideal_num_steps: u32,
     pub dash_info: DashInfo,
 }
-
 
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
@@ -156,21 +156,6 @@ where
     X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
 {
     X::DefaultTickGenerator::default().generate(bound)
-}
-
-///
-/// Create a [`num::Steps`].
-///
-pub fn steps<
-    X: PlotNum,
-    I: Iterator<Item = X>,
-    F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result,
->(
-    bound:Bound<X>,
-    steps: I,
-    func: F,
-) -> plotnum::TickDist<num::StepFmt<X, F>> {
-    num::Steps::new(steps, func).generate(bound)
 }
 
 ///

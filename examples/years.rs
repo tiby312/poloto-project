@@ -23,7 +23,7 @@ fn main() {
         "title",
         "xname",
         "yname",
-        poloto::steps(data.boundx, (2010..).step_by(2), |w, v| {
+        poloto::num::steps(data.boundx, (2010..).step_by(2), |w, v| {
             write!(w, "{} yr", v)
         }),
         poloto::ticks_from_default(data.boundy),

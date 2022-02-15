@@ -1,5 +1,5 @@
 //!
-//! Utility functions to help build numbers that implement [`PlotNum`] and [`DiscNum`].
+//! Some impls of [`PlotNum`] and some functions that product a [`TickDist`].
 //!
 use super::*;
 use crate::util;
@@ -92,12 +92,28 @@ fn compute_best_dash_1_2_5(one_step: f64, ideal_dash_size: f64, normalized_step:
 }
 
 ///
+/// Create a [`plotnum::TickDist`] from a step iterator.
+///
+pub fn steps<
+    X: PlotNum,
+    I: Iterator<Item = X>,
+    F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result,
+>(
+    bound: Bound<X>,
+    steps: I,
+    func: F,
+) -> plotnum::TickDist<num::StepFmt<X, F>> {
+    Steps::new(steps, func).generate(bound)
+}
+
+///
+///
 /// A distribution of steps manually specified by the user via an iterator.
 ///
 /// Considering using contexts that automatically pick a good step distribution
 /// before resulting to using this.
 ///
-pub struct Steps<N, I, F> {
+struct Steps<N, I, F> {
     pub steps: I,
     pub func: F,
     pub _p: PhantomData<N>,
