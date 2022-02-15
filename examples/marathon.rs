@@ -15,12 +15,17 @@ fn main() {
 
     let data = poloto::data().line("hay", &heart_rate).ymarker(0).build();
 
-    let xx = std::iter::successors(Some(0), |w| Some(w + hr));
-
-    let x = poloto::num::steps(data.boundx, xx, |w, v| write!(w, "{} hr", v / hr));
-    let y = poloto::ticks_from_default(data.boundy);
-
-    let mut plotter = data.inner.plot_with("collatz", "x", "y", x, y);
+    let mut plotter = data.inner.plot_with(
+        "collatz",
+        "x",
+        "y",
+        poloto::num::steps(
+            data.boundx,
+            std::iter::successors(Some(0), |w| Some(w + hr)),
+            |w, v| write!(w, "{} hr", v / hr),
+        ),
+        poloto::ticks_from_default(data.boundy),
+    );
 
     println!(
         "{}<style>{}{}</style>{}{}",
