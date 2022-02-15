@@ -18,7 +18,7 @@ pub trait DiscNum: PlotNum {
 ///
 pub trait PlotNum: PartialOrd + Copy {
     ///
-    /// Used by [`Bound::default_ticks`](crate::Bound::default_gen)
+    /// Used by [`ticks_from_default`](crate::ticks_from_default)
     ///
     type DefaultTickGenerator;
 
@@ -35,7 +35,7 @@ pub trait PlotNum: PartialOrd + Copy {
 ///
 /// Used by [`crate::Bound`]
 ///
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct DashInfo {
     //The ideal dash size in the drawing area
     pub ideal_dash_size: f64,
@@ -69,6 +69,9 @@ impl<I> Tick<I> {
 ///
 #[derive(Debug, Clone)]
 pub struct TickInfo<I> {
+    /// Original bound
+    pub bound: crate::Bound<I>,
+
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
     pub ticks: Vec<Tick<I>>,

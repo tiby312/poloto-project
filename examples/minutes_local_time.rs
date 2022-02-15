@@ -21,15 +21,12 @@ fn main() {
         .ymarker(0)
         .build();
 
-    let x = poloto::ticks_from_gen(s.boundx(), UnixTimeTickGen::new(time_zone));
-    let y = poloto::ticks_from_default(s.boundy());
-
-    let mut s = s.plot_with(
+    let mut s = s.inner.plot_with(
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        x,
-        y,
+        poloto::ticks_from_gen(s.boundx, UnixTimeTickGen::new(time_zone)),
+        poloto::ticks_from_default(s.boundy),
     );
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));

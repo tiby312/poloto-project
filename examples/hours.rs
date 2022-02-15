@@ -11,19 +11,15 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let x = poloto::ticks_from_gen(
-        data.boundx(),
-        poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)),
-    );
-
-    let y = poloto::ticks_from_default(data.boundy());
-
-    let mut plotter = data.plot_with(
+    let mut plotter = data.inner.plot_with(
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        x,
-        y,
+        poloto::ticks_from_gen(
+            data.boundx,
+            poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)),
+        ),
+        poloto::ticks_from_default(data.boundy),
     );
 
     println!("{}", poloto::disp(|w| plotter.simple_theme(w)));

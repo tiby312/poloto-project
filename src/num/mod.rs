@@ -156,6 +156,7 @@ where
 
         TickDist {
             ticks: TickInfo {
+                bound,
                 ticks,
                 dash_size: None,
                 display_relative: None,

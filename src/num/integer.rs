@@ -112,6 +112,7 @@ impl TickGenerator for IntegerTickGen {
 
         TickDist {
             ticks: TickInfo {
+                bound,
                 ticks,
                 display_relative,
                 dash_size,

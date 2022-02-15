@@ -11,8 +11,8 @@
 //!
 //! Pipeline:
 //! * Collect plots ([`data`] function)
-//! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
-//! * Create tick distributions. (using impls of [`TickGenerator`]) (This step can be done automatically by calling [`DataResult::plot`] instead of [`DataResult::plot_with`])
+//! * Compute min/max (call [`Data::build`] and generate a [`DataResultWrapper`]).
+//! * Create tick distributions. (using impls of [`TickGenerator`]) (This step can be done automatically by calling [`DataResultWrapper::plot`] instead of [`DataResult::plot_with`])
 //! * Collect title/xname/yname (on creation of [`Plotter`])
 //! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
@@ -137,7 +137,7 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 /// Created once the min and max bounds of all the plots has been computed.
 /// Contains in it all the information needed to fed into a [`TickGenerator`].
 ///
-#[derive(Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Bound<X> {
     pub min: X,
     pub max: X,
@@ -145,17 +145,16 @@ pub struct Bound<X> {
     pub dash_info: DashInfo,
 }
 
-
 ///
 /// Create a tick distribution for a tick generator.
-/// 
+///
 pub fn ticks_from_gen<T: TickGenerator>(bound: Bound<T::Num>, a: T) -> TickDist<T::Fmt> {
     a.generate(bound)
 }
 
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
-/// 
+///
 pub fn ticks_from_default<X: PlotNum>(
     bound: Bound<X>,
 ) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
@@ -182,20 +181,13 @@ pub fn steps<
 ///
 /// Created by [`Data::build`]
 ///
-pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
-    plots: Vec<Plot<'a, X, Y>>,
-    boundx: Bound<X>,
-    boundy: Bound<Y>,
-    canvas: render::Canvas,
+pub struct DataResultWrapper<'a, X: PlotNum, Y: PlotNum> {
+    pub inner: DataResult<'a, X, Y>,
+    pub boundx: Bound<X>,
+    pub boundy: Bound<Y>,
 }
-impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
-    pub fn boundx(&self) -> Bound<X> {
-        self.boundx
-    }
-    pub fn boundy(&self) -> Bound<Y> {
-        self.boundy
-    }
 
+impl<'a, X: PlotNum, Y: PlotNum> DataResultWrapper<'a, X, Y> {
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -212,13 +204,21 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     {
         let x = ticks_from_default(self.boundx);
         let y = ticks_from_default(self.boundy);
-        self.plot_with(title, xname, yname, x, y)
+        self.inner.plot_with(title, xname, yname, x, y)
     }
-
+}
+///
+/// Created by [`Data::build`]
+///
+pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
+    plots: Vec<Plot<'a, X, Y>>,
+    canvas: render::Canvas,
+}
+impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     ///
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
-    /// Unlike [`DataResult::plot`] User must supply own tick distribution.
+    /// Unlike [`DataResultWrapper::plot`] User must supply own tick distribution.
     ///
     pub fn plot_with(
         self,
@@ -445,7 +445,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// plotter.build();
     /// ```
     ///
-    pub fn build(&mut self) -> DataResult<'a, X, Y> {
+    pub fn build(&mut self) -> DataResultWrapper<'a, X, Y> {
         let mut val = self.move_into();
 
         let (boundx, boundy) = util::find_bounds(
@@ -477,17 +477,19 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
             },
         };
 
-        DataResult {
-            plots: val.plots,
+        DataResultWrapper {
+            inner: DataResult {
+                plots: val.plots,
+                canvas,
+            },
             boundx,
             boundy,
-            canvas,
         }
     }
 }
 
 ///
-/// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
+/// Created by [`DataResultWrapper::plot`] or [`DataResult::plot_with`]
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     title: Box<dyn Display + 'a>,

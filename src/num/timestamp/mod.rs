@@ -147,6 +147,7 @@ impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
 
         TickDist {
             ticks: TickInfo {
+                bound,
                 ticks,
                 dash_size: None,
                 display_relative: None, //Never want to do this for unix time.

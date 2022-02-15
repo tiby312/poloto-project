@@ -66,19 +66,15 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let x = poloto::ticks_from_gen(
-        data.boundx(),
-        poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)),
-    );
-
-    let y = poloto::ticks_from_default(data.boundy());
-
-    let mut plotter = data.plot_with(
+    let mut plotter = data.inner.plot_with(
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        x,
-        y,
+        poloto::ticks_from_gen(
+            data.boundx,
+            poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)),
+        ),
+        poloto::ticks_from_default(data.boundy),
     );
 
     println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
@@ -232,20 +228,16 @@ fn main() {
 
     let data = poloto::data::<UnixTime, _>().line("", &data).build();
 
-    let xtick = poloto::ticks_from_default(data.boundx());
+    let boundx = data.boundx.clone();
+
+    let xtick = poloto::ticks_from_default(data.boundx);
 
     let xtick_step = xtick.fmt.step();
+    
     // Assume the steps are in seconds given the data we provided.
     assert_eq!(xtick_step, poloto::num::timestamp::StepUnit::SE);
 
-    let xtick =
-        xtick.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")));
-
-    let boundx = data.boundx();
-
-    let ytick = poloto::ticks_from_default(data.boundy());
-
-    let mut plotter = data.plot_with(
+    let mut plotter = data.inner.plot_with(
         "Number of Wikipedia Articles",
         formatm!(
             "{} to {} in {}",
@@ -254,8 +246,8 @@ fn main() {
             xtick_step
         ),
         "Number of Articles",
-        xtick,
-        ytick,
+        xtick.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
+        poloto::ticks_from_default(data.boundy),
     );
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));

@@ -67,6 +67,7 @@ impl TickGenerator for FloatTickGen {
 
         TickDist {
             ticks: TickInfo {
+                bound,
                 ticks,
                 display_relative,
                 dash_size,
