@@ -1,4 +1,4 @@
-use poloto::num::timestamp::{UnixTime, UnixTimeTickGen};
+use poloto::num::timestamp::{unixtime_ticks, UnixTime};
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -25,7 +25,7 @@ fn main() {
         "Number of Wikipedia Articles",
         "Year",
         "Number of Articles",
-        poloto::ticks_from_gen(s.boundx, UnixTimeTickGen::new(time_zone)),
+        unixtime_ticks(s.boundx, time_zone),
         poloto::ticks_from_default(s.boundy),
     );
 

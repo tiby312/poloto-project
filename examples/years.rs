@@ -23,10 +23,9 @@ fn main() {
         "title",
         "xname",
         "yname",
-        poloto::ticks_from_gen(
-            data.boundx,
-            poloto::steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v)),
-        ),
+        poloto::steps(data.boundx, (2010..).step_by(2), |w, v| {
+            write!(w, "{} yr", v)
+        }),
         poloto::ticks_from_default(data.boundy),
     );
 

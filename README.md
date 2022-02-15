@@ -70,10 +70,7 @@ fn main() {
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",
-        poloto::ticks_from_gen(
-            data.boundx,
-            poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)),
-        ),
+        poloto::steps(data.boundx, (0..).step_by(6), |w, v| write!(w, "{}", v)),
         poloto::ticks_from_default(data.boundy),
     );
 
@@ -233,7 +230,7 @@ fn main() {
     let xtick = poloto::ticks_from_default(data.boundx);
 
     let xtick_step = xtick.fmt.step();
-    
+
     // Assume the steps are in seconds given the data we provided.
     assert_eq!(xtick_step, poloto::num::timestamp::StepUnit::SE);
 

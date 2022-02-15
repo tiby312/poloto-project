@@ -17,10 +17,7 @@ fn main() {
 
     let xx = std::iter::successors(Some(0), |w| Some(w + hr));
 
-    let x = poloto::ticks_from_gen(
-        data.boundx,
-        poloto::steps(xx, |w, v| write!(w, "{} hr", v / hr)),
-    );
+    let x = poloto::steps(data.boundx, xx, |w, v| write!(w, "{} hr", v / hr));
     let y = poloto::ticks_from_default(data.boundy);
 
     let mut plotter = data.inner.plot_with("collatz", "x", "y", x, y);

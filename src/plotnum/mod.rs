@@ -114,6 +114,9 @@ impl<J: TickFormat> TickDist<J> {
 }
 
 ///
+/// This is used to faciliate automatically getting a [`TickDist`] out of a 
+/// [`PlotNum`].
+/// 
 /// From the given min and max bounds of a distribution of plots,
 /// generate out a distribution of ticks to display.
 ///

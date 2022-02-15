@@ -90,6 +90,13 @@ impl Default for UnixTimeTickGen<Utc> {
     }
 }
 
+pub fn unixtime_ticks<T: TimeZone>(
+    bound: crate::Bound<UnixTime>,
+    timezone: &T,
+) -> TickDist<UnixTimeTickFmt<T>> {
+    UnixTimeTickGen::new(timezone).generate(bound)
+}
+
 pub struct UnixTimeTickGen<T: TimeZone> {
     timezone: T,
 }

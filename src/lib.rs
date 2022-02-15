@@ -12,7 +12,7 @@
 //! Pipeline:
 //! * Collect plots ([`data`] function)
 //! * Compute min/max (call [`Data::build`] and generate a [`DataResultWrapper`]).
-//! * Create tick distributions. (using impls of [`TickGenerator`]) (This step can be done automatically by calling [`DataResultWrapper::plot`] instead of [`DataResult::plot_with`])
+//! * Create tick distributions. (This step can be done automatically using [`DataResultWrapper::plot`] instead of [`DataResult::plot_with`])
 //! * Collect title/xname/yname (on creation of [`Plotter`])
 //! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
@@ -27,8 +27,8 @@
 //! the ticks that were selected via its automatic methods using [`TickDist::with_tick_fmt`].
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
-//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own implementation of [`TickGenerator`].
-//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks.
+//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickDist`].
+//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks and returns a [`TickDist`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
@@ -145,12 +145,6 @@ pub struct Bound<X> {
     pub dash_info: DashInfo,
 }
 
-///
-/// Create a tick distribution for a tick generator.
-///
-pub fn ticks_from_gen<T: TickGenerator>(bound: Bound<T::Num>, a: T) -> TickDist<T::Fmt> {
-    a.generate(bound)
-}
 
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
@@ -172,10 +166,11 @@ pub fn steps<
     I: Iterator<Item = X>,
     F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result,
 >(
+    bound:Bound<X>,
     steps: I,
     func: F,
-) -> num::Steps<X, I, F> {
-    num::Steps::new(steps, func)
+) -> plotnum::TickDist<num::StepFmt<X, F>> {
+    num::Steps::new(steps, func).generate(bound)
 }
 
 ///
