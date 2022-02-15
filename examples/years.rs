@@ -19,12 +19,12 @@ fn main() {
 
     let data = poloto::data().histogram("foo", data).ymarker(0).build();
 
-    let x = poloto::from_gen(
+    let x = poloto::ticks_from_gen(
         data.boundx(),
         poloto::steps((2010..).step_by(2), |w, v| write!(w, "{} yr", v)),
     );
 
-    let y = poloto::from_default(data.boundy());
+    let y = poloto::ticks_from_default(data.boundy());
 
     let mut plotter = data.plot_with("title", "xname", "yname", x, y);
 

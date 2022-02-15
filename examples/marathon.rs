@@ -17,11 +17,11 @@ fn main() {
 
     let xx = std::iter::successors(Some(0), |w| Some(w + hr));
 
-    let x = poloto::from_gen(
+    let x = poloto::ticks_from_gen(
         data.boundx(),
         poloto::steps(xx, |w, v| write!(w, "{} hr", v / hr)),
     );
-    let y = poloto::from_default(data.boundy());
+    let y = poloto::ticks_from_default(data.boundy());
 
     let mut plotter = data.plot_with("collatz", "x", "y", x, y);
 

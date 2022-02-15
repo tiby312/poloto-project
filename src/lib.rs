@@ -145,11 +145,18 @@ pub struct Bound<X> {
     pub dash_info: DashInfo,
 }
 
-pub fn from_gen<T: TickGenerator>(bound: Bound<T::Num>, a: T) -> TickDist<T::Fmt> {
+
+///
+/// Create a tick distribution for a tick generator.
+/// 
+pub fn ticks_from_gen<T: TickGenerator>(bound: Bound<T::Num>, a: T) -> TickDist<T::Fmt> {
     a.generate(bound)
 }
 
-pub fn from_default<X: PlotNum>(
+///
+/// Create a tick distribution from the default tick generator for the plotnum type.
+/// 
+pub fn ticks_from_default<X: PlotNum>(
     bound: Bound<X>,
 ) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
 where
@@ -203,8 +210,8 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
         Y::DefaultTickGenerator: TickGenerator<Num = Y> + Default,
     {
-        let x = from_default(self.boundx);
-        let y = from_default(self.boundy);
+        let x = ticks_from_default(self.boundx);
+        let y = ticks_from_default(self.boundy);
         self.plot_with(title, xname, yname, x, y)
     }
 

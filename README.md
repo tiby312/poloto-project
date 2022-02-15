@@ -66,12 +66,12 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let x = poloto::from_gen(
+    let x = poloto::ticks_from_gen(
         data.boundx(),
         poloto::steps((0..).step_by(6), |w, v| write!(w, "{}", v)),
     );
 
-    let y = poloto::from_default(data.boundy());
+    let y = poloto::ticks_from_default(data.boundy());
 
     let mut plotter = data.plot_with(
         "Number of rides at theme park hourly",
@@ -232,7 +232,7 @@ fn main() {
 
     let data = poloto::data::<UnixTime, _>().line("", &data).build();
 
-    let xtick = poloto::from_default(data.boundx());
+    let xtick = poloto::ticks_from_default(data.boundx());
 
     let xtick_step = xtick.fmt.step();
     // Assume the steps are in seconds given the data we provided.
@@ -243,7 +243,7 @@ fn main() {
 
     let boundx = data.boundx();
 
-    let ytick = poloto::from_default(data.boundy());
+    let ytick = poloto::ticks_from_default(data.boundy());
 
     let mut plotter = data.plot_with(
         "Number of Wikipedia Articles",
