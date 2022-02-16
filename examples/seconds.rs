@@ -29,7 +29,9 @@ fn main() {
     let xtick_step = xtick.fmt.step();
 
     // Assume the steps are in seconds given the data we provided.
-    assert_eq!(xtick_step, poloto::num::timestamp::StepUnit::SE);
+    // We are going to use a custom time format that won't work
+    // if the steps were years, for example.
+    assert!(xtick_step.is_seconds());
 
     let mut plotter = data.inner.plot_with(
         "Number of Wikipedia Articles",

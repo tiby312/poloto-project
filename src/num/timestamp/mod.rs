@@ -69,6 +69,28 @@ pub enum StepUnit {
     SE,
 }
 
+impl StepUnit {
+    pub fn is_years(&self) -> bool {
+        *self == StepUnit::YR
+    }
+    pub fn is_months(&self) -> bool {
+        *self == StepUnit::MO
+    }
+    pub fn is_days(&self) -> bool {
+        *self == StepUnit::DY
+    }
+    pub fn is_hours(&self) -> bool {
+        *self == StepUnit::HR
+    }
+
+    pub fn is_minutes(&self) -> bool {
+        *self == StepUnit::MI
+    }
+
+    pub fn is_seconds(&self) -> bool {
+        *self == StepUnit::SE
+    }
+}
 impl std::fmt::Display for StepUnit {
     fn fmt(&self, a: &mut std::fmt::Formatter) -> std::fmt::Result {
         use StepUnit::*;
