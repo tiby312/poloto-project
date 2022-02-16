@@ -17,9 +17,12 @@ fn main() {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let data = poloto::data::<UnixTime, _>().line("", &data).build();
+    let data = poloto::data::<UnixTime, _>()
+        .line("", &data)
+        .ymarker(0)
+        .build();
 
-    let boundx = data.boundx.clone();
+    let (xmin, xmax) = (data.boundx.min, data.boundx.max);
 
     let xtick = poloto::ticks_from_default(data.boundx);
 
@@ -32,8 +35,8 @@ fn main() {
         "Number of Wikipedia Articles",
         formatm!(
             "{} to {} in {}",
-            UnixTime::datetime(&boundx.min, timezone).format("%H:%M:%S"),
-            UnixTime::datetime(&boundx.max, timezone).format("%H:%M:%S"),
+            xmin.datetime(timezone).format("%H:%M:%S"),
+            xmax.datetime(timezone).format("%H:%M:%S"),
             xtick_step
         ),
         "Number of Articles",
