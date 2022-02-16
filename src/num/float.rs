@@ -9,13 +9,6 @@ impl DiscNum for f64 {
         f64::NAN
     }
 }
-/*
-impl PlotNumContextFromBound for FloatContext {
-    fn new(bound: &crate::Bound<f64>) -> Self {
-        FloatContext { bound: *bound }
-    }
-}
-*/
 
 pub struct FloatTickFmt {
     step: f64,
@@ -44,13 +37,9 @@ impl TickFormat for FloatTickFmt {
     }
 }
 
-#[derive(Default)]
-pub struct FloatTickGen;
-
-impl TickGenerator for FloatTickGen {
-    type Num = f64;
+impl HasDefaultTicks for f64 {
     type Fmt = FloatTickFmt;
-    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
+    fn generate(bound: crate::Bound<f64>) -> TickDist<Self::Fmt> {
         let range = [bound.min, bound.max];
         let ideal_num_steps = bound.ideal_num_steps;
         let dash = bound.dash_info;
@@ -80,7 +69,6 @@ impl TickGenerator for FloatTickGen {
 }
 
 impl PlotNum for f64 {
-    type DefaultTickGenerator = FloatTickGen;
     fn is_hole(&self) -> bool {
         self.is_nan()
     }

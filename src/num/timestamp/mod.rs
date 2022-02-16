@@ -106,9 +106,10 @@ impl std::fmt::Display for StepUnit {
     }
 }
 
-impl Default for UnixTimeTickGen<Utc> {
-    fn default() -> Self {
-        UnixTimeTickGen { timezone: Utc }
+impl HasDefaultTicks for UnixTime {
+    type Fmt = UnixTimeTickFmt<Utc>;
+    fn generate(bound: crate::Bound<UnixTime>) -> TickDist<Self::Fmt> {
+        unixtime_ticks(bound, &Utc)
     }
 }
 
@@ -116,81 +117,60 @@ pub fn unixtime_ticks<T: TimeZone>(
     bound: crate::Bound<UnixTime>,
     timezone: &T,
 ) -> TickDist<UnixTimeTickFmt<T>> {
-    UnixTimeTickGen::new(timezone).generate(bound)
-}
+    let range = [bound.min, bound.max];
 
-pub struct UnixTimeTickGen<T: TimeZone> {
-    timezone: T,
-}
+    assert!(range[0] <= range[1]);
+    let ideal_num_steps = bound.ideal_num_steps;
 
-impl<T: TimeZone> UnixTimeTickGen<T> {
-    pub fn new(timezone: &T) -> Self {
-        UnixTimeTickGen {
+    let ideal_num_steps = ideal_num_steps.max(2);
+
+    let [start, end] = range;
+    let mut t = tick_finder::BestTickFinder::new(end, ideal_num_steps);
+
+    let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
+    let steps_mo = &[1, 2, 3, 6];
+    let steps_dy = &[1, 2, 4, 5, 7];
+    let steps_hr = &[1, 2, 4, 6];
+    let steps_mi = &[1, 2, 10, 15, 30];
+    let steps_se = &[1, 2, 5, 10, 15, 30];
+
+    let d = start.datetime(timezone);
+    use StepUnit::*;
+    t.consider_meta(YR, UnixYearGenerator { date: d.clone() }, steps_yr);
+    t.consider_meta(MO, UnixMonthGenerator { date: d.clone() }, steps_mo);
+    t.consider_meta(DY, UnixDayGenerator { date: d.clone() }, steps_dy);
+    t.consider_meta(HR, UnixHourGenerator { date: d.clone() }, steps_hr);
+    t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
+    t.consider_meta(SE, UnixSecondGenerator { date: d }, steps_se);
+
+    let ret = t.into_best().unwrap();
+
+    let ticks: Vec<_> = ret
+        .ticks
+        .into_iter()
+        .map(|x| Tick {
+            position: x,
+            value: x,
+        })
+        .collect();
+
+    assert!(ticks.len() >= 2);
+
+    TickDist {
+        ticks: TickInfo {
+            bound,
+            ticks,
+            dash_size: None,
+            display_relative: None, //Never want to do this for unix time.
+        },
+        fmt: UnixTimeTickFmt {
             timezone: timezone.clone(),
-        }
-    }
-}
-
-impl<T: TimeZone> TickGenerator for UnixTimeTickGen<T> {
-    type Num = UnixTime;
-    type Fmt = UnixTimeTickFmt<T>;
-    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
-        let range = [bound.min, bound.max];
-
-        assert!(range[0] <= range[1]);
-        let ideal_num_steps = bound.ideal_num_steps;
-
-        let ideal_num_steps = ideal_num_steps.max(2);
-
-        let [start, end] = range;
-        let mut t = tick_finder::BestTickFinder::new(end, ideal_num_steps);
-
-        let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
-        let steps_mo = &[1, 2, 3, 6];
-        let steps_dy = &[1, 2, 4, 5, 7];
-        let steps_hr = &[1, 2, 4, 6];
-        let steps_mi = &[1, 2, 10, 15, 30];
-        let steps_se = &[1, 2, 5, 10, 15, 30];
-
-        let d = start.datetime(&self.timezone);
-        use StepUnit::*;
-        t.consider_meta(YR, UnixYearGenerator { date: d.clone() }, steps_yr);
-        t.consider_meta(MO, UnixMonthGenerator { date: d.clone() }, steps_mo);
-        t.consider_meta(DY, UnixDayGenerator { date: d.clone() }, steps_dy);
-        t.consider_meta(HR, UnixHourGenerator { date: d.clone() }, steps_hr);
-        t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
-        t.consider_meta(SE, UnixSecondGenerator { date: d }, steps_se);
-
-        let ret = t.into_best().unwrap();
-
-        let ticks: Vec<_> = ret
-            .ticks
-            .into_iter()
-            .map(|x| Tick {
-                position: x,
-                value: x,
-            })
-            .collect();
-
-        assert!(ticks.len() >= 2);
-
-        TickDist {
-            ticks: TickInfo {
-                bound,
-                ticks,
-                dash_size: None,
-                display_relative: None, //Never want to do this for unix time.
-            },
-            fmt: UnixTimeTickFmt {
-                timezone: self.timezone,
-                step: ret.unit_data,
-            },
-        }
+            step: ret.unit_data,
+        },
     }
 }
 
 impl PlotNum for UnixTime {
-    type DefaultTickGenerator = UnixTimeTickGen<Utc>;
     fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;

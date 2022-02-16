@@ -16,13 +16,13 @@
 //! * Collect title/xname/yname (on creation of [`Plotter`])
 //! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
-//! Poloto provides by default 3 impls of [`TickGenerator`]:
+//! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
 //!
-//! * [`num::integer::IntegerTickGen`]
-//! * [`num::float::FloatTickGen`]
-//! * [`num::timestamp::UnixTimeTickGen`]
+//! * [`i128`] - decimal/scientific notation ticks.
+//! * [`f64`] - decimal/scientific notation ticks.
+//! * [`UnixTime`](num::timestamp::UnixTime) - date/time
 //!
-//! The above generators have the advantage of automatically selecting reasonable
+//! The above types have the advantage of automatically selecting reasonable
 //! tick intervals. The user can change the formatting of the ticks while still using
 //! the ticks that were selected via its automatic methods using [`TickDist::with_tick_fmt`].
 //!
@@ -149,13 +149,8 @@ pub struct Bound<X> {
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn ticks_from_default<X: PlotNum>(
-    bound: Bound<X>,
-) -> TickDist<<X::DefaultTickGenerator as TickGenerator>::Fmt>
-where
-    X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
-{
-    X::DefaultTickGenerator::default().generate(bound)
+pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> TickDist<X::Fmt> {
+    X::generate(bound)
 }
 
 ///
@@ -179,8 +174,8 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResultWrapper<'a, X, Y> {
         yname: impl Display + 'a,
     ) -> Plotter<'a, X, Y>
     where
-        X::DefaultTickGenerator: TickGenerator<Num = X> + Default,
-        Y::DefaultTickGenerator: TickGenerator<Num = Y> + Default,
+        X: HasDefaultTicks,
+        Y: HasDefaultTicks,
     {
         let x = ticks_from_default(self.boundx);
         let y = ticks_from_default(self.boundy);

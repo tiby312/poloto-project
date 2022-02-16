@@ -103,31 +103,31 @@ pub fn steps<
     steps: I,
     func: F,
 ) -> plotnum::TickDist<num::StepFmt<X, F>> {
-    Steps::new(steps, func).generate(bound)
-}
+    let ticks: Vec<_> = steps
+        .skip_while(|&x| x < bound.min)
+        .take_while(|&x| x <= bound.max)
+        .map(|x| Tick {
+            value: x,
+            position: x,
+        })
+        .collect();
 
-///
-///
-/// A distribution of steps manually specified by the user via an iterator.
-///
-/// Considering using contexts that automatically pick a good step distribution
-/// before resulting to using this.
-///
-struct Steps<N, I, F> {
-    pub steps: I,
-    pub func: F,
-    pub _p: PhantomData<N>,
-}
+    assert!(
+        ticks.len() >= 2,
+        "Atleast two ticks must be created for the given data range."
+    );
 
-impl<J: PlotNum, I: Iterator<Item = J>, F: FnMut(&mut dyn fmt::Write, &J) -> fmt::Result>
-    Steps<J, I, F>
-{
-    pub fn new(steps: I, func: F) -> Steps<J, I, F> {
-        Steps {
-            steps,
+    TickDist {
+        ticks: TickInfo {
+            bound,
+            ticks,
+            dash_size: None,
+            display_relative: None,
+        },
+        fmt: StepFmt {
             func,
             _p: PhantomData,
-        }
+        },
     }
 }
 
@@ -143,44 +143,5 @@ impl<J: PlotNum, F: FnMut(&mut dyn fmt::Write, &J) -> fmt::Result> TickFormat fo
         val: &Self::Num,
     ) -> std::fmt::Result {
         (self.func)(writer, val)
-    }
-}
-
-impl<N, I, F> TickGenerator for Steps<N, I, F>
-where
-    N: PlotNum,
-    I: Iterator<Item = N>,
-    F: FnMut(&mut dyn fmt::Write, &N) -> fmt::Result,
-{
-    type Num = N;
-    type Fmt = StepFmt<N, F>;
-
-    fn generate(mut self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt> {
-        let ticks: Vec<_> = (&mut self.steps)
-            .skip_while(|&x| x < bound.min)
-            .take_while(|&x| x <= bound.max)
-            .map(|x| Tick {
-                value: x,
-                position: x,
-            })
-            .collect();
-
-        assert!(
-            ticks.len() >= 2,
-            "Atleast two ticks must be created for the given data range."
-        );
-
-        TickDist {
-            ticks: TickInfo {
-                bound,
-                ticks,
-                dash_size: None,
-                display_relative: None,
-            },
-            fmt: StepFmt {
-                func: self.func,
-                _p: PhantomData,
-            },
-        }
     }
 }

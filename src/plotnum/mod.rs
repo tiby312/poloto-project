@@ -17,11 +17,6 @@ pub trait DiscNum: PlotNum {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy {
-    ///
-    /// Used by [`ticks_from_default`](crate::ticks_from_default)
-    ///
-    type DefaultTickGenerator;
-
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false
@@ -114,22 +109,13 @@ impl<J: TickFormat> TickDist<J> {
 }
 
 ///
-/// This is used to faciliate automatically getting a [`TickDist`] out of a
-/// [`PlotNum`].
+/// Trait to allow a plotnum to have a default tick distribution.
 ///
-/// From the given min and max bounds of a distribution of plots,
-/// generate out a distribution of ticks to display.
+/// Used by [`crate::DataResultWrapper::plot`]
 ///
-pub trait TickGenerator {
-    type Num: PlotNum;
-    type Fmt: TickFormat<Num = Self::Num>;
-
-    ///
-    /// Given an ideal number of intervals across the min and max values,
-    /// Calculate information related to where the interval ticks should go.
-    /// Guaranteed to be called before fmt_tick.
-    ///
-    fn generate(self, bound: crate::Bound<Self::Num>) -> TickDist<Self::Fmt>;
+pub trait HasDefaultTicks: PlotNum {
+    type Fmt: TickFormat<Num = Self>;
+    fn generate(bound: crate::Bound<Self>) -> TickDist<Self::Fmt>;
 }
 
 ///
