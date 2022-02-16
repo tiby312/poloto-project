@@ -537,3 +537,49 @@ pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
 pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
     util::DisplayableClosure::new(a)
 }
+
+///
+/// Create a [`plotnum::TickDist`] from a step iterator.
+///
+pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
+    bound: Bound<X>,
+    steps: I,
+) -> plotnum::TickDist<StepFmt<X>> {
+    let ticks: Vec<_> = steps
+        .skip_while(|&x| x < bound.min)
+        .take_while(|&x| x <= bound.max)
+        .map(|x| Tick {
+            value: x,
+            position: x,
+        })
+        .collect();
+
+    assert!(
+        ticks.len() >= 2,
+        "Atleast two ticks must be created for the given data range."
+    );
+
+    TickDist {
+        ticks: TickInfo {
+            bound,
+            ticks,
+            dash_size: None,
+            display_relative: None,
+        },
+        fmt: StepFmt { _p: PhantomData },
+    }
+}
+
+pub struct StepFmt<T> {
+    _p: PhantomData<T>,
+}
+impl<J: PlotNum + Display> TickFormat for StepFmt<J> {
+    type Num = J;
+    fn write_tick(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
+        write!(writer, "{}", val)
+    }
+}

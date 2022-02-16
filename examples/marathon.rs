@@ -19,11 +19,11 @@ fn main() {
         "collatz",
         "x",
         "y",
-        poloto::num::steps(
+        poloto::steps(
             data.boundx,
             std::iter::successors(Some(0), |w| Some(w + hr)),
-            |w, v| write!(w, "{} hr", v / hr),
-        ),
+        )
+        .with_tick_fmt(|w, v| write!(w, "{} hr", v / hr)),
         poloto::ticks_from_default(data.boundy),
     );
 
