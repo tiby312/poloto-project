@@ -23,7 +23,7 @@ fn main() {
 
     let mut s = s.inner.plot_with(
         "Number of Wikipedia Articles",
-        "Year",
+        "time",
         "Number of Articles",
         unixtime_ticks(s.boundx, time_zone),
         poloto::ticks_from_default(s.boundy),

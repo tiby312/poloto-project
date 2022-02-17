@@ -89,32 +89,22 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
 
     {
         //step num is assured to be atleast 1.
-        let extra = if let Some(base) = xtick_info.display_relative {
-            writer
-                .elem("text", |d| {
-                    d.attr("class", "poloto_tick_labels poloto_text")?;
-                    d.attr("alignment-baseline", "middle")?;
-                    d.attr("text-anchor", "start")?;
-                    d.attr("x", width * 0.55)?;
-                    d.attr("y", paddingy * 0.7)
-                })?
-                .build(|d| {
-                    let mut w = d.writer_safe();
-                    use std::fmt::Write;
-                    write!(w, "Where j = ")?;
-
-                    xcontext.write_where(&mut w, &base)
-                })?;
-
-            "j+"
-        } else {
-            ""
-        };
+        writer
+            .elem("text", |d| {
+                d.attr("class", "poloto_tick_labels poloto_text")?;
+                d.attr("alignment-baseline", "middle")?;
+                d.attr("text-anchor", "start")?;
+                d.attr("x", width * 0.55)?;
+                d.attr("y", paddingy * 0.7)
+            })?
+            .build(|d| {
+                let mut w = d.writer_safe();
+                xcontext.write_where(&mut w)
+            })?;
 
         //Draw interva`l x text
-        for &Tick { position, value } in xtick_info.ticks.iter() {
-            let xx =
-                (position.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
+        for &val in xtick_info.ticks.iter() {
+            let xx = (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
 
             writer.single("line", |d| {
                 d.attr("class", "poloto_axis_lines")?;
@@ -135,42 +125,32 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 })?
                 .build(|w| {
                     let mut w = w.writer_safe();
-                    use std::fmt::Write;
-                    write!(w, "{}", extra)?;
 
-                    xcontext.write_tick(&mut w, &value)
+                    xcontext.write_tick(&mut w, &val)
                 })?;
         }
     }
 
     {
         //step num is assured to be atleast 1.
-        let extra = if let Some(base) = ytick_info.display_relative {
-            writer
-                .elem("text", |d| {
-                    d.attr("class", "poloto_tick_labels poloto_text")?;
-                    d.attr("alignment-baseline", "middle")?;
-                    d.attr("text-anchor", "start")?;
-                    d.attr("x", padding)?;
-                    d.attr("y", paddingy * 0.7)
-                })?
-                .build(|w| {
-                    use std::fmt::Write;
-                    let mut w = w.writer_safe();
-                    write!(w, "Where k = ")?;
+        writer
+            .elem("text", |d| {
+                d.attr("class", "poloto_tick_labels poloto_text")?;
+                d.attr("alignment-baseline", "middle")?;
+                d.attr("text-anchor", "start")?;
+                d.attr("x", padding)?;
+                d.attr("y", paddingy * 0.7)
+            })?
+            .build(|w| {
+                let mut w = w.writer_safe();
 
-                    ycontext.write_where(&mut w, &base)
-                })?;
-
-            "k+"
-        } else {
-            ""
-        };
+                ycontext.write_where(&mut w)
+            })?;
 
         //Draw interval y text
-        for &Tick { position, value } in ytick_info.ticks.iter() {
+        for &val in ytick_info.ticks.iter() {
             let yy = height
-                - (position.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
+                - (val.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
                 - paddingy;
 
             writer.single("line", |d| {
@@ -192,16 +172,13 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 })?
                 .build(|w| {
                     let mut w = w.writer_safe();
-                    use std::fmt::Write;
-                    write!(w, "{}", extra)?;
-
-                    ycontext.write_tick(&mut w, &value)
+                    ycontext.write_tick(&mut w, &val)
                 })?;
         }
     }
 
     let d1 = minx.scale([minx, maxx], scalex);
-    let d2 = first_tickx.position.scale([minx, maxx], scalex);
+    let d2 = first_tickx.scale([minx, maxx], scalex);
     let distance_to_firstx = d2 - d1;
 
     writer.single("path", |d| {
@@ -232,7 +209,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
     })?;
 
     let d1 = miny.scale([miny, maxy], scaley);
-    let d2 = first_ticky.position.scale([miny, maxy], scaley);
+    let d2 = first_ticky.scale([miny, maxy], scaley);
     let distance_to_firsty = d2 - d1;
 
     writer.single("path", |d| {

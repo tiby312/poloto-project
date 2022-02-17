@@ -38,13 +38,27 @@ pub fn month_str(month: u32) -> &'static str {
 pub struct UnixTimeTickFmt<T: TimeZone> {
     step: StepUnit,
     timezone: T,
+    start: UnixTime,
+    axis: Axis,
 }
 impl<T: TimeZone> UnixTimeTickFmt<T> {
     pub fn step(&self) -> StepUnit {
         self.step
     }
+    pub fn timezone(&self) -> &T {
+        &self.timezone
+    }
+    pub fn start(&self) -> UnixTime {
+        self.start
+    }
+    pub fn axis(&self) -> Axis {
+        self.axis
+    }
 }
-impl<T: TimeZone> TickFormat for UnixTimeTickFmt<T> {
+impl<T: TimeZone + Display> TickFormat for UnixTimeTickFmt<T>
+where
+    T::Offset: Display,
+{
     type Num = UnixTime;
 
     fn write_tick(
@@ -53,6 +67,27 @@ impl<T: TimeZone> TickFormat for UnixTimeTickFmt<T> {
         val: &Self::Num,
     ) -> std::fmt::Result {
         write!(writer, "{}", val.dynamic_format(&self.timezone, &self.step))
+    }
+
+    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        match self.axis {
+            Axis::X => {
+                write!(
+                    writer,
+                    "X: {} in {}",
+                    self.start.dynamic_where_format(&self.timezone, &self.step),
+                    self.step
+                )
+            }
+            Axis::Y => {
+                write!(
+                    writer,
+                    "Y: {} in {}",
+                    self.start.dynamic_where_format(&self.timezone, &self.step),
+                    self.step
+                )
+            }
+        }
     }
 }
 
@@ -113,10 +148,13 @@ impl HasDefaultTicks for UnixTime {
     }
 }
 
-pub fn unixtime_ticks<T: TimeZone>(
+pub fn unixtime_ticks<T: TimeZone + Display>(
     bound: crate::Bound<UnixTime>,
     timezone: &T,
-) -> TickDist<UnixTimeTickFmt<T>> {
+) -> TickDist<UnixTimeTickFmt<T>>
+where
+    T::Offset: Display,
+{
     let range = [bound.min, bound.max];
 
     assert!(range[0] <= range[1]);
@@ -145,27 +183,23 @@ pub fn unixtime_ticks<T: TimeZone>(
 
     let ret = t.into_best().unwrap();
 
-    let ticks: Vec<_> = ret
-        .ticks
-        .into_iter()
-        .map(|x| Tick {
-            position: x,
-            value: x,
-        })
-        .collect();
+    let ticks: Vec<_> = ret.ticks.into_iter().collect();
 
     assert!(ticks.len() >= 2);
 
+    let axis = bound.axis;
+    let start = ticks[0];
     TickDist {
         ticks: TickInfo {
             bound,
             ticks,
             dash_size: None,
-            display_relative: None, //Never want to do this for unix time.
         },
         fmt: UnixTimeTickFmt {
             timezone: timezone.clone(),
             step: ret.unit_data,
+            axis,
+            start,
         },
     }
 }

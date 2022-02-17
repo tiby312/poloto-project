@@ -12,10 +12,19 @@ impl DiscNum for f64 {
 
 pub struct FloatTickFmt {
     step: f64,
+    offset: Option<f64>,
+    axis: crate::Axis,
 }
 impl FloatTickFmt {
     pub fn step(&self) -> f64 {
         self.step
+    }
+
+    pub fn axis(&self) -> Axis {
+        self.axis
+    }
+    pub fn offset(&self) -> Option<f64> {
+        self.offset
     }
 }
 impl TickFormat for FloatTickFmt {
@@ -26,14 +35,37 @@ impl TickFormat for FloatTickFmt {
         writer: &mut dyn std::fmt::Write,
         val: &Self::Num,
     ) -> std::fmt::Result {
-        util::write_interval_float(writer, *val, Some(self.step))
+        let val = if let Some(offset) = self.offset {
+            let val = *val - offset;
+            match self.axis {
+                Axis::X => {
+                    write!(writer, "j+")?;
+                }
+                Axis::Y => {
+                    write!(writer, "k+")?;
+                }
+            }
+            val
+        } else {
+            *val
+        };
+
+        util::write_interval_float(writer, val, Some(self.step))
     }
-    fn write_where(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
-        util::write_interval_float(writer, *val, None)
+    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        if let Some(offset) = self.offset {
+            match self.axis {
+                Axis::X => {
+                    write!(writer, "where j=")?;
+                }
+                Axis::Y => {
+                    write!(writer, "where k=")?;
+                }
+            }
+            util::write_interval_float(writer, offset, None)
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -46,7 +78,7 @@ impl HasDefaultTicks for f64 {
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
-        let (display_relative, ticks) = tick_layout.generate();
+        let (offset, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
             tick_layout.step.scale(range, dash.max),
@@ -54,14 +86,16 @@ impl HasDefaultTicks for f64 {
             tick_layout.normalized_step,
         ));
 
+        let axis = bound.axis;
         TickDist {
             ticks: TickInfo {
                 bound,
                 ticks,
-                display_relative,
                 dash_size,
             },
             fmt: FloatTickFmt {
+                offset,
+                axis,
                 step: tick_layout.step,
             },
         }
@@ -98,8 +132,8 @@ struct TickLayout {
     normalized_step: u32,
 }
 impl TickLayout {
-    fn generate(&self) -> (Option<f64>, Vec<Tick<f64>>) {
-        let (display_relative, first_tick) = {
+    fn generate(&self) -> (Option<f64>, Vec<f64>) {
+        let display_relative = {
             let tick_layout = self;
             let end =
                 tick_layout.start_tick + ((tick_layout.num_steps - 1) as f64) * tick_layout.step;
@@ -116,18 +150,17 @@ impl TickLayout {
             util::write_interval_float(&mut end_s, end, Some(tick_layout.step)).unwrap();
 
             if start_s.len() > 7 || end_s.len() > 7 {
-                (Some(tick_layout.start_tick), 0.0)
+                Some(tick_layout.start_tick)
             } else {
-                (None, tick_layout.start_tick)
+                None
             }
         };
 
         let mut ticks = Vec::with_capacity(usize::try_from(self.num_steps).unwrap());
         for a in 0..self.num_steps {
             let position = self.start_tick + self.step * (a as f64);
-            let value = first_tick + self.step * (a as f64);
 
-            ticks.push(Tick { position, value });
+            ticks.push(position);
         }
         (display_relative, ticks)
     }

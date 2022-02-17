@@ -40,25 +40,6 @@ pub struct DashInfo {
 }
 
 ///
-/// One interval tick.
-/// Used by [`TickInfo`]
-///
-#[derive(Debug, Clone, Copy)]
-pub struct Tick<I> {
-    pub position: I,
-    /// If [`TickInfo::display_relative`] is `None`, then this has the same value as [`Tick::position`]
-    pub value: I,
-}
-impl<I> Tick<I> {
-    pub fn map<J>(self, func: impl Fn(I) -> J) -> Tick<J> {
-        Tick {
-            position: func(self.position),
-            value: func(self.value),
-        }
-    }
-}
-
-///
 /// Information on the properties of all the interval ticks for one dimension.
 /// Used by [`TickDist`]
 ///
@@ -69,14 +50,10 @@ pub struct TickInfo<I> {
 
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
-    pub ticks: Vec<Tick<I>>,
+    pub ticks: Vec<I>,
 
     /// The number of dashes between two ticks must be a multiple of this number.
     pub dash_size: Option<f64>,
-
-    /// If we want to display the tick values relatively, this will
-    /// have the base start to start with.
-    pub display_relative: Option<I>,
 }
 
 ///
@@ -118,14 +95,20 @@ pub trait HasDefaultTicks: PlotNum {
     fn generate(bound: crate::Bound<Self>) -> TickDist<Self::Fmt>;
 }
 
+#[derive(Debug, Copy, Clone)]
+pub enum Axis {
+    X,
+    Y,
+}
+
 ///
 /// Formatter for a tick.
 ///
 pub trait TickFormat {
     type Num;
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
-    fn write_where(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-        self.write_tick(a, val)
+    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        Ok(())
     }
 
     fn with_tick_fmt<F>(self, func: F) -> TickFmt<Self, F>
@@ -134,6 +117,33 @@ pub trait TickFormat {
         F: Fn(&mut dyn std::fmt::Write, &Self::Num) -> std::fmt::Result,
     {
         TickFmt { inner: self, func }
+    }
+
+    fn with_where_fmt<F>(self, func: F) -> WhereFmt<Self, F>
+    where
+        Self: Sized,
+        F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result,
+    {
+        WhereFmt { inner: self, func }
+    }
+}
+
+///
+/// Used by [`TickFormat::with_where_fmt`]
+///
+pub struct WhereFmt<T, F> {
+    inner: T,
+    func: F,
+}
+impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result> TickFormat
+    for WhereFmt<T, F>
+{
+    type Num = T::Num;
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+        self.inner.write_tick(a, val)
+    }
+    fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        (self.func)(a)
     }
 }
 
@@ -151,7 +161,7 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
         (self.func)(a, val)
     }
-    fn write_where(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-        self.inner.write_where(a, val)
+    fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        self.inner.write_where(a)
     }
 }

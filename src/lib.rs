@@ -28,7 +28,7 @@
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickDist`].
-//! Alternatively you can use the [`num::steps`] function that just takes an iterator of ticks and returns a [`TickDist`].
+//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks and returns a [`TickDist`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
@@ -144,6 +144,7 @@ pub struct Bound<X> {
     pub max: X,
     pub ideal_num_steps: u32,
     pub dash_info: DashInfo,
+    pub axis: Axis,
 }
 
 ///
@@ -441,6 +442,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
                 ideal_dash_size,
                 max: canvas.scalex,
             },
+            axis: Axis::X,
         };
         let boundy = Bound {
             min: boundy[0],
@@ -450,6 +452,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
                 ideal_dash_size,
                 max: canvas.scaley,
             },
+            axis: Axis::Y,
         };
 
         DataResultWrapper {
@@ -548,10 +551,6 @@ pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
     let ticks: Vec<_> = steps
         .skip_while(|&x| x < bound.min)
         .take_while(|&x| x <= bound.max)
-        .map(|x| Tick {
-            value: x,
-            position: x,
-        })
         .collect();
 
     assert!(
@@ -564,7 +563,6 @@ pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
             bound,
             ticks,
             dash_size: None,
-            display_relative: None,
         },
         fmt: StepFmt { _p: PhantomData },
     }

@@ -66,18 +66,84 @@ impl<T: TimeZone> Display for DynamicFormatter<T> {
                 write!(formatter, "{} {}", val.year(), m)
             }
             DY => {
-                write!(formatter, "{} {}", m, val.day())
+                write!(formatter, "{} {:02}", m, val.day())
             }
             HR => {
-                write!(formatter, "{}:{}", val.weekday(), val.hour())
+                write!(formatter, "{:02} {:02}", val.day(), val.hour())
             }
             MI => {
-                write!(formatter, "{}:{}", val.hour(), val.minute())
+                write!(formatter, "{:02}:{:02}", val.hour(), val.minute())
             }
             SE => {
-                write!(formatter, "{}:{}", val.minute(), val.second())
+                write!(formatter, "{:02}:{:02}", val.minute(), val.second())
             }
         }
+    }
+}
+
+pub struct DynamicWhereFormatter<T: TimeZone> {
+    a: UnixTime,
+    timezone: T,
+    info: StepUnit,
+}
+impl<T: TimeZone> Display for DynamicWhereFormatter<T>
+where
+    T: Display,
+{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let timezone = &self.timezone;
+        let info = self.info;
+        let val = self.a.datetime(timezone);
+        use StepUnit::*;
+
+        let m = month_str(val.month());
+
+        match info {
+            YR => {
+                write!(formatter, "{}", val.year())
+            }
+            MO => {
+                write!(formatter, "{} {}", val.year(), m)
+            }
+            DY => {
+                write!(formatter, "{} {} {:02}", val.year(), m, val.day())
+            }
+            HR => {
+                write!(
+                    formatter,
+                    "{} {} {} {:02}",
+                    val.year(),
+                    m,
+                    val.day(),
+                    val.hour()
+                )
+            }
+            MI => {
+                write!(
+                    formatter,
+                    "{} {} {} {:02}:{:02}",
+                    val.year(),
+                    m,
+                    val.day(),
+                    val.hour(),
+                    val.minute()
+                )
+            }
+            SE => {
+                write!(
+                    formatter,
+                    "{} {} {} {:02}:{:02}:{:02}",
+                    val.year(),
+                    m,
+                    val.day(),
+                    val.hour(),
+                    val.minute(),
+                    val.second()
+                )
+            }
+        }?;
+
+        write!(formatter, " {}", timezone)
     }
 }
 
@@ -101,6 +167,18 @@ impl UnixTime {
         info: &'a StepUnit,
     ) -> DynamicFormatter<T> {
         DynamicFormatter {
+            timezone: timezone.clone(),
+            info: *info,
+            a: *self,
+        }
+    }
+
+    pub fn dynamic_where_format<'a, T: TimeZone + 'a>(
+        &'a self,
+        timezone: &'a T,
+        info: &'a StepUnit,
+    ) -> DynamicWhereFormatter<T> {
+        DynamicWhereFormatter {
             timezone: timezone.clone(),
             info: *info,
             a: *self,

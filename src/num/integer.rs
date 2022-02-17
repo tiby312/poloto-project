@@ -11,10 +11,18 @@ fn round_up_to_nearest_multiple(val: i128, multiple: i128) -> i128 {
 
 pub struct IntegerTickFmt {
     step: i128,
+    offset: Option<i128>,
+    axis: crate::Axis,
 }
 impl IntegerTickFmt {
     pub fn step(&self) -> i128 {
         self.step
+    }
+    pub fn axis(&self) -> Axis {
+        self.axis
+    }
+    pub fn offset(&self) -> Option<i128> {
+        self.offset
     }
 }
 impl TickFormat for IntegerTickFmt {
@@ -25,14 +33,37 @@ impl TickFormat for IntegerTickFmt {
         writer: &mut dyn std::fmt::Write,
         val: &Self::Num,
     ) -> std::fmt::Result {
-        util::write_interval_i128(writer, *val, Some(self.step))
+        let val = if let Some(offset) = self.offset {
+            let val = *val - offset;
+            match self.axis {
+                Axis::X => {
+                    write!(writer, "j+")?;
+                }
+                Axis::Y => {
+                    write!(writer, "k+")?;
+                }
+            }
+            val
+        } else {
+            *val
+        };
+
+        util::write_interval_i128(writer, val, Some(self.step))
     }
-    fn write_where(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
-        util::write_interval_i128(writer, *val, None)
+    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        if let Some(offset) = self.offset {
+            match self.axis {
+                Axis::X => {
+                    write!(writer, "where j=")?;
+                }
+                Axis::Y => {
+                    write!(writer, "where k=")?;
+                }
+            }
+            util::write_interval_i128(writer, offset, None)
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -45,7 +76,7 @@ impl HasDefaultTicks for i128 {
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
-        let (display_relative, ticks) = tick_layout.generate();
+        let (offset, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
             tick_layout.step.scale(range, dash.max),
@@ -53,15 +84,17 @@ impl HasDefaultTicks for i128 {
             tick_layout.normalized_step,
         ));
 
+        let axis = bound.axis;
         TickDist {
             ticks: TickInfo {
                 bound,
                 ticks,
-                display_relative,
                 dash_size,
             },
             fmt: IntegerTickFmt {
                 step: tick_layout.step,
+                offset,
+                axis,
             },
         }
     }
@@ -93,8 +126,8 @@ struct TickLayout {
     normalized_step: u32,
 }
 impl TickLayout {
-    fn generate(&self) -> (Option<i128>, Vec<Tick<i128>>) {
-        let (display_relative, first_tick) = {
+    fn generate(&self) -> (Option<i128>, Vec<i128>) {
+        let display_relative = {
             let tick_layout = self;
             let end =
                 tick_layout.start_tick + ((tick_layout.num_steps - 1) as i128) * tick_layout.step;
@@ -112,18 +145,17 @@ impl TickLayout {
                 .unwrap();
 
             if start_s.len() > 7 || end_s.len() > 7 {
-                (Some(tick_layout.start_tick), 0)
+                Some(tick_layout.start_tick)
             } else {
-                (None, tick_layout.start_tick)
+                None
             }
         };
 
         let mut ticks = Vec::with_capacity(usize::try_from(self.num_steps).unwrap());
         for a in 0..self.num_steps {
             let position = self.start_tick + self.step * (a as i128);
-            let value = first_tick + self.step * (a as i128);
 
-            ticks.push(Tick { position, value });
+            ticks.push(position);
         }
         (display_relative, ticks)
     }
