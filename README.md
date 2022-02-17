@@ -66,12 +66,19 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
+    let (xtick, xtick_fmt) = poloto::steps(data.boundx, (0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+
     let mut plotter = data.inner.plot_with(
-        "Number of rides at theme park hourly",
-        "Hour",
-        "Number of rides",
-        poloto::steps(data.boundx, (0..).step_by(6)),
-        poloto::ticks_from_default(data.boundy),
+        xtick,
+        ytick,
+        poloto::plot_fmt(
+            "Number of rides at theme park hourly",
+            "Hour",
+            "Number of rides",
+            xtick_fmt,
+            ytick_fmt,
+        ),
     );
 
     println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
