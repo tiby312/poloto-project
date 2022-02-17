@@ -21,12 +21,19 @@ fn main() {
         .ymarker(0)
         .build();
 
+    let (xtick, xtick_fmt) = unixtime_ticks(s.boundx, time_zone);
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(s.boundy);
+
     let mut s = s.inner.plot_with(
-        "Number of Wikipedia Articles",
-        "time",
-        "Number of Articles",
-        unixtime_ticks(s.boundx, time_zone),
-        poloto::ticks_from_default(s.boundy),
+        xtick,
+        ytick,
+        poloto::plot_fmt(
+            "Number of Wikipedia Articles",
+            "time",
+            "Number of Articles",
+            xtick_fmt,
+            ytick_fmt,
+        ),
     );
 
     println!("{}", poloto::disp(|a| s.simple_theme(a)));

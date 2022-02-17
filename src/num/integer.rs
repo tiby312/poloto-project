@@ -69,7 +69,7 @@ impl TickFormat for IntegerTickFmt {
 
 impl HasDefaultTicks for i128 {
     type Fmt = IntegerTickFmt;
-    fn generate(bound: crate::Bound<i128>) -> TickDist<Self::Fmt> {
+    fn generate(bound: crate::Bound<i128>) -> (TickInfo<i128>, IntegerTickFmt) {
         let range = [bound.min, bound.max];
         let ideal_num_steps = bound.ideal_num_steps;
         let dash = bound.dash_info;
@@ -85,18 +85,19 @@ impl HasDefaultTicks for i128 {
         ));
 
         let axis = bound.axis;
-        TickDist {
-            ticks: TickInfo {
+
+        (
+            TickInfo {
                 bound,
                 ticks,
                 dash_size,
             },
-            fmt: IntegerTickFmt {
+            IntegerTickFmt {
                 step: tick_layout.step,
                 offset,
                 axis,
             },
-        }
+        )
     }
 }
 

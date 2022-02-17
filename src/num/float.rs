@@ -71,7 +71,7 @@ impl TickFormat for FloatTickFmt {
 
 impl HasDefaultTicks for f64 {
     type Fmt = FloatTickFmt;
-    fn generate(bound: crate::Bound<f64>) -> TickDist<Self::Fmt> {
+    fn generate(bound: crate::Bound<f64>) -> (TickInfo<f64>, FloatTickFmt) {
         let range = [bound.min, bound.max];
         let ideal_num_steps = bound.ideal_num_steps;
         let dash = bound.dash_info;
@@ -87,18 +87,18 @@ impl HasDefaultTicks for f64 {
         ));
 
         let axis = bound.axis;
-        TickDist {
-            ticks: TickInfo {
+        (
+            TickInfo {
                 bound,
                 ticks,
                 dash_size,
             },
-            fmt: FloatTickFmt {
+            FloatTickFmt {
                 offset,
                 axis,
                 step: tick_layout.step,
             },
-        }
+        )
     }
 }
 

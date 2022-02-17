@@ -24,11 +24,11 @@
 //!
 //! The above types have the advantage of automatically selecting reasonable
 //! tick intervals. The user can change the formatting of the ticks while still using
-//! the ticks that were selected via its automatic methods using [`TickDist::with_tick_fmt`].
+//! the ticks that were selected via its automatic methods using [`TickFormat::with_tick_fmt`].
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
-//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickDist`].
-//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks and returns a [`TickDist`].
+//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickInfo`].
+//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks and returns a [`TickInfo`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
@@ -135,7 +135,7 @@ struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
 
 ///
 /// Created once the min and max bounds of all the plots has been computed.
-/// Contains in it all the information typically needed to make a [`TickDist`].
+/// Contains in it all the information typically needed to make a [`TickInfo`].
 ///
 ///
 #[derive(Debug, Clone)]
@@ -150,7 +150,7 @@ pub struct Bound<X> {
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> TickDist<X::Fmt> {
+pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X>, X::Fmt) {
     X::generate(bound)
 }
 
@@ -178,9 +178,10 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResultWrapper<'a, X, Y> {
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
     {
-        let x = ticks_from_default(self.boundx);
-        let y = ticks_from_default(self.boundy);
-        self.inner.plot_with(title, xname, yname, x, y)
+        let (x, xt) = ticks_from_default(self.boundx);
+        let (y, yt) = ticks_from_default(self.boundy);
+        let p = plot_fmt(title, xname, yname, xt, yt);
+        self.inner.plot_with(x, y, p)
     }
 }
 ///
@@ -192,74 +193,10 @@ pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
 }
 impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     ///
-    ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`DataResultWrapper::plot`] User must supply own tick distribution.
     ///
     pub fn plot_with(
-        self,
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-        tickx: TickDist<impl TickFormat<Num = X> + 'a>,
-        ticky: TickDist<impl TickFormat<Num = Y> + 'a>,
-    ) -> Plotter<'a, X, Y> {
-        struct SimplePlotFormatter<A, B, C, D, E> {
-            title: A,
-            xname: B,
-            yname: C,
-            tickx: D,
-            ticky: E,
-        }
-        impl<A, B, C, D, E> PlotFmt for SimplePlotFormatter<A, B, C, D, E>
-        where
-            A: Display,
-            B: Display,
-            C: Display,
-            D: TickFormat,
-            E: TickFormat,
-        {
-            type X = D::Num;
-            type Y = E::Num;
-            fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-                write!(writer, "{}", self.title)
-            }
-            fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-                write!(writer, "{}", self.xname)
-            }
-            fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-                write!(writer, "{}", self.yname)
-            }
-            fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
-                self.tickx.write_tick(writer, val)
-            }
-            fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
-                self.ticky.write_tick(writer, val)
-            }
-            fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-                self.tickx.write_where(writer)
-            }
-            fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-                self.ticky.write_where(writer)
-            }
-        }
-
-        let plot_fmt = Box::new(SimplePlotFormatter {
-            title,
-            xname,
-            yname,
-            tickx: tickx.fmt,
-            ticky: ticky.fmt,
-        });
-
-        Plotter {
-            plot_fmt,
-            plots: self,
-            tickx: tickx.ticks,
-            ticky: ticky.ticks,
-        }
-    }
-    pub fn plot_with_plotfmt(
         self,
         tickx: TickInfo<X>,
         ticky: TickInfo<Y>,
@@ -271,6 +208,72 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
             tickx,
             ticky,
         }
+    }
+}
+
+///
+/// Create a plot formatter that implements [`plotnum::PlotFmt`]
+///
+pub fn plot_fmt<A, B, C, D, E>(
+    title: A,
+    xname: B,
+    yname: C,
+    tickx: D,
+    ticky: E,
+) -> SimplePlotFormatter<A, B, C, D, E>
+where
+    A: Display,
+    B: Display,
+    C: Display,
+    D: TickFormat,
+    E: TickFormat,
+{
+    SimplePlotFormatter {
+        title,
+        xname,
+        yname,
+        tickx,
+        ticky,
+    }
+}
+
+pub struct SimplePlotFormatter<A, B, C, D, E> {
+    pub title: A,
+    pub xname: B,
+    pub yname: C,
+    pub tickx: D,
+    pub ticky: E,
+}
+impl<A, B, C, D, E> PlotFmt for SimplePlotFormatter<A, B, C, D, E>
+where
+    A: Display,
+    B: Display,
+    C: Display,
+    D: TickFormat,
+    E: TickFormat,
+{
+    type X = D::Num;
+    type Y = E::Num;
+    fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        write!(writer, "{}", self.title)
+    }
+    fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        write!(writer, "{}", self.xname)
+    }
+    fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        write!(writer, "{}", self.yname)
+    }
+    fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
+        self.tickx.write_tick(writer, val)
+    }
+    fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
+        self.ticky.write_tick(writer, val)
+    }
+    fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        self.tickx.write_where(writer)
+    }
+    fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        self.ticky.write_where(writer)
     }
 }
 
@@ -595,12 +598,12 @@ pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::Disp
 }
 
 ///
-/// Create a [`plotnum::TickDist`] from a step iterator.
+/// Create a [`plotnum::TickInfo`] from a step iterator.
 ///
 pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
     bound: Bound<X>,
     steps: I,
-) -> plotnum::TickDist<StepFmt<X>> {
+) -> (TickInfo<X>, StepFmt<X>) {
     let ticks: Vec<_> = steps
         .skip_while(|&x| x < bound.min)
         .take_while(|&x| x <= bound.max)
@@ -611,14 +614,14 @@ pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
         "Atleast two ticks must be created for the given data range."
     );
 
-    TickDist {
-        ticks: TickInfo {
+    (
+        TickInfo {
             bound,
             ticks,
             dash_size: None,
         },
-        fmt: StepFmt { _p: PhantomData },
-    }
+        StepFmt { _p: PhantomData },
+    )
 }
 
 pub struct StepFmt<T> {

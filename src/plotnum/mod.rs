@@ -41,7 +41,6 @@ pub struct DashInfo {
 
 ///
 /// Information on the properties of all the interval ticks for one dimension.
-/// Used by [`TickDist`]
 ///
 #[derive(Debug, Clone)]
 pub struct TickInfo<I> {
@@ -57,42 +56,13 @@ pub struct TickInfo<I> {
 }
 
 ///
-/// A distribution of ticks. What [`crate::DataResult::plot_with`] accepts.
-///
-pub struct TickDist<J: TickFormat> {
-    pub ticks: TickInfo<J::Num>,
-    pub fmt: J,
-}
-
-impl<J: TickFormat> TickDist<J> {
-    pub fn with_tick_fmt<F>(self, func: F) -> TickDist<TickFmt<J, F>>
-    where
-        Self: Sized,
-        F: Fn(&mut dyn std::fmt::Write, &J::Num) -> std::fmt::Result,
-    {
-        TickDist {
-            ticks: self.ticks,
-            fmt: TickFmt {
-                inner: self.fmt,
-                func,
-            },
-        }
-    }
-
-    pub fn with_no_dash(mut self) -> Self {
-        self.ticks.dash_size = None;
-        self
-    }
-}
-
-///
 /// Trait to allow a plotnum to have a default tick distribution.
 ///
 /// Used by [`crate::DataResultWrapper::plot`]
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
-    fn generate(bound: crate::Bound<Self>) -> TickDist<Self::Fmt>;
+    fn generate(bound: crate::Bound<Self>) -> (TickInfo<Self>, Self::Fmt);
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -168,7 +138,7 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
 
 use std::fmt;
 ///
-/// Used by [`crate::DataResult::plot_with_plotfmt`]
+/// Used by [`crate::DataResult::plot_with`]
 ///
 pub trait PlotFmt {
     type X: PlotNum;

@@ -1,3 +1,5 @@
+use poloto::prelude::*;
+
 // PIPE me to a file!
 fn main() {
     let hr = 1000 * 60 * 60;
@@ -15,16 +17,23 @@ fn main() {
 
     let data = poloto::data().line("hay", &heart_rate).ymarker(0).build();
 
+    let (xtick, xtick_fmt) = poloto::steps(
+        data.boundx,
+        std::iter::successors(Some(0), |w| Some(w + hr)),
+    );
+
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+
     let mut plotter = data.inner.plot_with(
-        "collatz",
-        "x",
-        "y",
-        poloto::steps(
-            data.boundx,
-            std::iter::successors(Some(0), |w| Some(w + hr)),
-        )
-        .with_tick_fmt(|w, v| write!(w, "{} hr", v / hr)),
-        poloto::ticks_from_default(data.boundy),
+        xtick,
+        ytick,
+        poloto::plot_fmt(
+            "collatz",
+            "x",
+            "y",
+            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v / hr)),
+            ytick_fmt,
+        ),
     );
 
     println!(

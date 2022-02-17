@@ -24,26 +24,33 @@ fn main() {
 
     let (xmin, xmax) = (data.boundx.min, data.boundx.max);
 
-    let xtick = poloto::ticks_from_default(data.boundx);
+    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx);
 
-    let xtick_step = xtick.fmt.step();
+    let xtick_step = xtick_fmt.step();
 
     // Assume the steps are in seconds given the data we provided.
     // We are going to use a custom time format that won't work
     // if the steps were years, for example.
     assert!(xtick_step.is_seconds());
 
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+
     let mut plotter = data.inner.plot_with(
-        "Number of Wikipedia Articles",
-        formatm!(
-            "{} to {} in {}",
-            xmin.datetime(timezone).format("%H:%M:%S"),
-            xmax.datetime(timezone).format("%H:%M:%S"),
-            xtick_step
+        xtick,
+        ytick,
+        poloto::plot_fmt(
+            "Number of Wikipedia Articles",
+            formatm!(
+                "{} to {} in {}",
+                xmin.datetime(timezone).format("%H:%M:%S"),
+                xmax.datetime(timezone).format("%H:%M:%S"),
+                xtick_step
+            ),
+            "Number of Articles",
+            xtick_fmt
+                .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
+            ytick_fmt,
         ),
-        "Number of Articles",
-        xtick.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
-        poloto::ticks_from_default(data.boundy),
     );
 
     println!("{}", poloto::disp(|a| plotter.simple_theme(a)));

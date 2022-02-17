@@ -1,7 +1,7 @@
 ///
 /// Example where we pass a uncopiable/unclonable object to each formatting function.
 ///
-use poloto::plotnum::PlotFmt;
+use poloto::{plotnum::PlotFmt, prelude::TickFormat};
 use std::fmt;
 
 struct Dummy;
@@ -12,6 +12,8 @@ impl fmt::Display for Dummy {
 }
 struct Foo {
     dummy: Dummy,
+    xtick_fmt: poloto::StepFmt<i128>,
+    ytick_fmt: poloto::num::integer::IntegerTickFmt,
 }
 
 impl PlotFmt for Foo {
@@ -28,16 +30,20 @@ impl PlotFmt for Foo {
         write!(writer, "hello {}", self.dummy)
     }
     fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "hello {}", self.dummy)
+        self.xtick_fmt.write_where(writer)?;
+        write!(writer, "{}", self.dummy)
     }
     fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "hello {}", self.dummy)
+        self.ytick_fmt.write_where(writer)?;
+        write!(writer, "{}", self.dummy)
     }
     fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
-        write!(writer, "{}{}", val, self.dummy)
+        self.xtick_fmt.write_tick(writer, val)?;
+        write!(writer, "{}", self.dummy)
     }
     fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
-        write!(writer, "{}{}", val, self.dummy)
+        self.ytick_fmt.write_tick(writer, val)?;
+        write!(writer, "{}", self.dummy)
     }
 }
 
@@ -62,10 +68,17 @@ fn main() {
 
     let data = poloto::data().histogram("foo", data).ymarker(0).build();
 
-    let mut plotter = data.inner.plot_with_plotfmt(
-        poloto::steps(data.boundx, (2010..).step_by(2)).ticks,
-        poloto::ticks_from_default(data.boundy).ticks,
-        Foo { dummy: Dummy },
+    let (xtick, xtick_fmt) = poloto::steps(data.boundx, (2010..).step_by(2));
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+
+    let mut plotter = data.inner.plot_with(
+        xtick,
+        ytick,
+        Foo {
+            dummy: Dummy,
+            xtick_fmt,
+            ytick_fmt,
+        },
     );
 
     println!(
