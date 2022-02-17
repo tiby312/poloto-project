@@ -24,6 +24,7 @@ cargo run --example hours > target/assets/hours.svg
 cargo run --example minutes_local_time > target/assets/minutes_local_time.svg
 cargo run --example seconds > target/assets/seconds.svg
 cargo run --example marathon > target/assets/marathon.svg
+cargo run --example thread_needle > target/assets/thread_needle.svg
 
 cd target/assets
 python3 -m http.server

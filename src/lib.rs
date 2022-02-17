@@ -204,47 +204,52 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
         tickx: TickDist<impl TickFormat<Num = X> + 'a>,
         ticky: TickDist<impl TickFormat<Num = Y> + 'a>,
     ) -> Plotter<'a, X, Y> {
-        struct SimplePlotFormatter<A,B,C,D,E>{
-            title:A,
-            xname:B,
-            yname:C,
-            tickx:D,
-            ticky:E
+        struct SimplePlotFormatter<A, B, C, D, E> {
+            title: A,
+            xname: B,
+            yname: C,
+            tickx: D,
+            ticky: E,
         }
-        impl<A,B,C,D,E> PlotFmt for SimplePlotFormatter<A,B,C,D,E>
-        where A:Display,B:Display,C:Display,D:TickFormat,E:TickFormat{
-            type X=D::Num;
-            type Y=E::Num;
-            fn write_title(&mut self,writer:&mut dyn fmt::Write)->fmt::Result{
-                write!(writer,"{}",self.title)
+        impl<A, B, C, D, E> PlotFmt for SimplePlotFormatter<A, B, C, D, E>
+        where
+            A: Display,
+            B: Display,
+            C: Display,
+            D: TickFormat,
+            E: TickFormat,
+        {
+            type X = D::Num;
+            type Y = E::Num;
+            fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+                write!(writer, "{}", self.title)
             }
-            fn write_xname(&mut self,writer:&mut dyn fmt::Write)->fmt::Result{
-                write!(writer,"{}",self.xname)
+            fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+                write!(writer, "{}", self.xname)
             }
-            fn write_yname(&mut self,writer:&mut dyn fmt::Write)->fmt::Result{
-                write!(writer,"{}",self.yname)
+            fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+                write!(writer, "{}", self.yname)
             }
-            fn write_xtick(&mut self,writer:&mut dyn fmt::Write,val:Self::X)->fmt::Result{
-                self.tickx.write_tick(writer,&val)
+            fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
+                self.tickx.write_tick(writer, val)
             }
-            fn write_ytick(&mut self,writer:&mut dyn fmt::Write,val:Self::Y)->fmt::Result{
-                self.ticky.write_tick(writer,&val)
+            fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
+                self.ticky.write_tick(writer, val)
             }
-            fn write_xwher(&mut self,writer:&mut dyn fmt::Write)->fmt::Result{
+            fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
                 self.tickx.write_where(writer)
             }
-            fn write_ywher(&mut self,writer:&mut dyn fmt::Write)->fmt::Result{
+            fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
                 self.ticky.write_where(writer)
             }
-            
         }
-        
-        let plot_fmt=Box::new(SimplePlotFormatter{
+
+        let plot_fmt = Box::new(SimplePlotFormatter {
             title,
             xname,
             yname,
-            tickx:tickx.fmt,
-            ticky:ticky.fmt
+            tickx: tickx.fmt,
+            ticky: ticky.fmt,
         });
 
         Plotter {
@@ -256,24 +261,18 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     }
     pub fn plot_with_plotfmt(
         self,
-        tickx:TickInfo<X>,
-        ticky:TickInfo<Y>,
-        plot_fmt:impl PlotFmt<X=X,Y=Y>+'a
+        tickx: TickInfo<X>,
+        ticky: TickInfo<Y>,
+        plot_fmt: impl PlotFmt<X = X, Y = Y> + 'a,
     ) -> Plotter<'a, X, Y> {
-        
         Plotter {
-            plot_fmt:Box::new(plot_fmt),
+            plot_fmt: Box::new(plot_fmt),
             plots: self,
             tickx,
             ticky,
         }
     }
 }
-
-
-
-
-
 
 ///
 /// Start plotting.
@@ -528,7 +527,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
 /// Created by [`DataResultWrapper::plot`] or [`DataResult::plot_with`]
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    plot_fmt:Box<dyn PlotFmt<X=X,Y=Y>+'a>,
+    plot_fmt: Box<dyn PlotFmt<X = X, Y = Y> + 'a>,
     plots: DataResult<'a, X, Y>,
     tickx: TickInfo<X>,
     ticky: TickInfo<Y>,

@@ -26,7 +26,6 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
     let xtick_info = &mut plotter.tickx;
     let ytick_info = &mut plotter.ticky;
 
-    
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
 
@@ -39,9 +38,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             d.attr("x", width / 2.0)?;
             d.attr("y", padding / 4.0)
         })?
-        .build(|w| {
-            plotter.plot_fmt.write_title(&mut w.writer_safe())
-        })?;
+        .build(|w| plotter.plot_fmt.write_title(&mut w.writer_safe()))?;
 
     writer
         .elem("text", |d| {
@@ -52,9 +49,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             d.attr("x", width / 2.0)?;
             d.attr("y", height - padding / 8.)
         })?
-        .build(|w| {
-            plotter.plot_fmt.write_xname(&mut w.writer_safe())
-        })?;
+        .build(|w| plotter.plot_fmt.write_xname(&mut w.writer_safe()))?;
 
     writer
         .elem("text", |d| {
@@ -69,9 +64,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             d.attr("x", padding / 4.0)?;
             d.attr("y", height / 2.0)
         })?
-        .build(|w| {
-            plotter.plot_fmt.write_yname(&mut w.writer_safe())
-        })?;
+        .build(|w| plotter.plot_fmt.write_yname(&mut w.writer_safe()))?;
 
     let xdash_size = xtick_info.dash_size;
     let ydash_size = ytick_info.dash_size;
@@ -92,9 +85,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("x", width * 0.55)?;
                 d.attr("y", paddingy * 0.7)
             })?
-            .build(|d| {
-                plotter.plot_fmt.write_xwher(&mut d.writer_safe())
-            })?;
+            .build(|d| plotter.plot_fmt.write_xwher(&mut d.writer_safe()))?;
 
         //Draw interva`l x text
         for &val in xtick_info.ticks.iter() {
@@ -117,9 +108,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                     d.attr("x", aspect_offset + xx)?;
                     d.attr("y", height - paddingy + texty_padding)
                 })?
-                .build(|w| {
-                    plotter.plot_fmt.write_xtick(&mut w.writer_safe(),val)
-                })?;
+                .build(|w| plotter.plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
         }
     }
 
@@ -133,9 +122,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("x", padding)?;
                 d.attr("y", paddingy * 0.7)
             })?
-            .build(|w| {
-                plotter.plot_fmt.write_ywher(&mut w.writer_safe())
-            })?;
+            .build(|w| plotter.plot_fmt.write_ywher(&mut w.writer_safe()))?;
 
         //Draw interval y text
         for &val in ytick_info.ticks.iter() {
@@ -160,9 +147,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                     d.attr("x", aspect_offset + padding - textx_padding)?;
                     d.attr("y", yy)
                 })?
-                .build(|w| {
-                    plotter.plot_fmt.write_ytick(&mut w.writer_safe(),val)
-                })?;
+                .build(|w| plotter.plot_fmt.write_ytick(&mut w.writer_safe(), &val))?;
         }
     }
 
