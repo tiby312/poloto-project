@@ -18,8 +18,9 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
         ..
     } = plotter.plots.canvas;
 
-    let boundx = [plotter.tickx.bound.min, plotter.tickx.bound.max];
-    let boundy = [plotter.ticky.bound.min, plotter.ticky.bound.max];
+    let boundx = [plotter.plots.boundx.min, plotter.plots.boundx.max];
+    let boundy = [plotter.plots.boundy.min, plotter.plots.boundy.max];
+
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
 

@@ -19,10 +19,10 @@ fn main() {
 
     let data = poloto::data().histogram("foo", data).ymarker(0).build();
 
-    let (xticks, xtick_fmt) = poloto::steps(data.boundx, (2010..).step_by(2));
-    let (yticks, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+    let (xticks, xtick_fmt) = poloto::steps(data.boundx(), (2010..).step_by(2));
+    let (yticks, ytick_fmt) = poloto::ticks_from_default(data.boundy());
 
-    let mut plotter = data.inner.plot_with(
+    let mut plotter = data.plot_with(
         xticks,
         yticks,
         poloto::plot_fmt("title", "xname", "yname", xtick_fmt, ytick_fmt),

@@ -22,9 +22,9 @@ fn main() {
         .ymarker(0)
         .build();
 
-    let (xmin, xmax) = (data.boundx.min, data.boundx.max);
+    let (xmin, xmax) = (data.boundx().min, data.boundx().max);
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx);
+    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx());
 
     let xtick_step = xtick_fmt.step();
 
@@ -33,9 +33,9 @@ fn main() {
     // if the steps were years, for example.
     assert!(xtick_step.is_seconds());
 
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
 
-    let mut plotter = data.inner.plot_with(
+    let mut plotter = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

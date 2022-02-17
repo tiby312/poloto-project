@@ -11,8 +11,8 @@
 //!
 //! Pipeline:
 //! * Collect plots ([`data`] function)
-//! * Compute min/max (call [`Data::build`] and generate a [`DataResultWrapper`]).
-//! * Create tick distributions. (This step can be done automatically using [`DataResultWrapper::plot`] instead of [`DataResult::plot_with`])
+//! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
+//! * Create tick distributions. (This step can be done automatically using [`DataResult::plot`] instead of [`DataResult::plot_with`])
 //! * Collect title/xname/yname (on creation of [`Plotter`])
 //! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
@@ -150,20 +150,27 @@ pub struct Bound<X> {
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X>, X::Fmt) {
+pub fn ticks_from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X>, X::Fmt) {
     X::generate(bound)
 }
 
 ///
 /// Created by [`Data::build`]
 ///
-pub struct DataResultWrapper<'a, X: PlotNum, Y: PlotNum> {
-    pub inner: DataResult<'a, X, Y>,
-    pub boundx: Bound<X>,
-    pub boundy: Bound<Y>,
+pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
+    plots: Vec<Plot<'a, X, Y>>,
+    canvas: render::Canvas,
+    boundx: Bound<X>,
+    boundy: Bound<Y>,
 }
+impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
+    pub fn boundx(&self) -> &Bound<X> {
+        &self.boundx
+    }
+    pub fn boundy(&self) -> &Bound<Y> {
+        &self.boundy
+    }
 
-impl<'a, X: PlotNum, Y: PlotNum> DataResultWrapper<'a, X, Y> {
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -178,23 +185,14 @@ impl<'a, X: PlotNum, Y: PlotNum> DataResultWrapper<'a, X, Y> {
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
     {
-        let (x, xt) = ticks_from_default(self.boundx);
-        let (y, yt) = ticks_from_default(self.boundy);
+        let (x, xt) = ticks_from_default(&self.boundx);
+        let (y, yt) = ticks_from_default(&self.boundy);
         let p = plot_fmt(title, xname, yname, xt, yt);
-        self.inner.plot_with(x, y, p)
+        self.plot_with(x, y, p)
     }
-}
-///
-/// Created by [`Data::build`]
-///
-pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
-    plots: Vec<Plot<'a, X, Y>>,
-    canvas: render::Canvas,
-}
-impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
-    /// Unlike [`DataResultWrapper::plot`] User must supply own tick distribution.
+    /// Unlike [`DataResult::plot`] User must supply own tick distribution.
     ///
     pub fn plot_with(
         self,
@@ -481,7 +479,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// plotter.build();
     /// ```
     ///
-    pub fn build(&mut self) -> DataResultWrapper<'a, X, Y> {
+    pub fn build(&mut self) -> DataResult<'a, X, Y> {
         let mut val = self.move_into();
 
         let (boundx, boundy) = util::find_bounds(
@@ -515,11 +513,9 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
             axis: Axis::Y,
         };
 
-        DataResultWrapper {
-            inner: DataResult {
-                plots: val.plots,
-                canvas,
-            },
+        DataResult {
+            plots: val.plots,
+            canvas,
             boundx,
             boundy,
         }
@@ -527,7 +523,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
 }
 
 ///
-/// Created by [`DataResultWrapper::plot`] or [`DataResult::plot_with`]
+/// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
 pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plot_fmt: Box<dyn PlotFmt<X = X, Y = Y> + 'a>,
@@ -601,7 +597,7 @@ pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::Disp
 /// Create a [`plotnum::TickInfo`] from a step iterator.
 ///
 pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
-    bound: Bound<X>,
+    bound: &Bound<X>,
     steps: I,
 ) -> (TickInfo<X>, StepFmt<X>) {
     let ticks: Vec<_> = steps
@@ -616,7 +612,6 @@ pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
 
     (
         TickInfo {
-            bound,
             ticks,
             dash_size: None,
         },

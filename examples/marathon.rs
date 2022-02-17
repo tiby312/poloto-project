@@ -18,13 +18,13 @@ fn main() {
     let data = poloto::data().line("hay", &heart_rate).ymarker(0).build();
 
     let (xtick, xtick_fmt) = poloto::steps(
-        data.boundx,
+        data.boundx(),
         std::iter::successors(Some(0), |w| Some(w + hr)),
     );
 
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
 
-    let mut plotter = data.inner.plot_with(
+    let mut plotter = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

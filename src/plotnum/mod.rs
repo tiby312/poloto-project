@@ -44,9 +44,6 @@ pub struct DashInfo {
 ///
 #[derive(Debug, Clone)]
 pub struct TickInfo<I> {
-    /// Original bound
-    pub bound: crate::Bound<I>,
-
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
     pub ticks: Vec<I>,
@@ -58,11 +55,11 @@ pub struct TickInfo<I> {
 ///
 /// Trait to allow a plotnum to have a default tick distribution.
 ///
-/// Used by [`crate::DataResultWrapper::plot`]
+/// Used by [`crate::DataResult::plot`]
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
-    fn generate(bound: crate::Bound<Self>) -> (TickInfo<Self>, Self::Fmt);
+    fn generate(bound: &crate::Bound<Self>) -> (TickInfo<Self>, Self::Fmt);
 }
 
 #[derive(Debug, Copy, Clone)]

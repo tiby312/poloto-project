@@ -11,10 +11,10 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let (xtick, xtick_fmt) = poloto::steps(data.boundx, (0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy);
+    let (xtick, xtick_fmt) = poloto::steps(data.boundx(), (0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
 
-    let mut plotter = data.inner.plot_with(
+    let mut plotter = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

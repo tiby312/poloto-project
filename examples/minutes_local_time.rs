@@ -21,10 +21,10 @@ fn main() {
         .ymarker(0)
         .build();
 
-    let (xtick, xtick_fmt) = unixtime_ticks(s.boundx, time_zone);
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(s.boundy);
+    let (xtick, xtick_fmt) = unixtime_ticks(s.boundx(), time_zone);
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(s.boundy());
 
-    let mut s = s.inner.plot_with(
+    let mut s = s.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

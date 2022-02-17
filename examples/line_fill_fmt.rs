@@ -14,7 +14,7 @@ fn main() {
         )
         .build();
 
-    let boundx = s.boundx.clone();
+    let boundx = s.boundx().clone();
 
     let mut plotter = s.plot(
         formatm!("from {} to {}", boundx.min, boundx.max),
