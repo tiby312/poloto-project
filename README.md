@@ -204,62 +204,41 @@ fn main() {
 ## Timestamp Example
 
 ```rust
+use chrono::TimeZone;
 use poloto::num::timestamp::UnixTime;
 use poloto::prelude::*;
-
 // PIPE me to a file!
 fn main() {
-    use chrono::TimeZone;
-
     let timezone = &chrono::Utc;
 
-    let date = timezone.ymd(2020, 1, 30);
-
     let data = [
-        (date.and_hms(1, 1, 59).into(), 3144000),
-        (date.and_hms(1, 2, 00).into(), 3518000),
-        (date.and_hms(1, 2, 30).into(), 3835000),
-        (date.and_hms(1, 2, 40).into(), 2133000),
-        (date.and_hms(1, 3, 00).into(), 4133000),
+        (timezone.ymd(2020, 1, 30).into(), 3144000),
+        (timezone.ymd(2020, 1, 31).into(), 3518000),
+        (timezone.ymd(2020, 2, 01).into(), 3835000),
+        (
+            timezone.ymd(2020, 2, 01).and_hms(12, 59, 59).into(),
+            2133000,
+        ),
+        (timezone.ymd(2020, 2, 02).into(), 4133000),
+        (timezone.ymd(2020, 2, 03).into(), 4413000),
+        (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let data = poloto::data::<UnixTime, _>()
-        .line("", &data)
+    let s = poloto::data::<UnixTime, _>()
+        .line("", data)
         .ymarker(0)
         .build();
 
-    let (xmin, xmax) = (data.boundx.min, data.boundx.max);
+    let mut s = s.plot("Number of Wikipedia Articles", "Day", "Number of Articles");
 
-    let xtick = poloto::ticks_from_default(data.boundx);
-
-    let xtick_step = xtick.fmt.step();
-
-    // Assume the steps are in seconds given the data we provided.
-    // We are going to use a custom time format that won't work
-    // if the steps were years, for example.
-    assert!(xtick_step.is_seconds());
-
-    let mut plotter = data.inner.plot_with(
-        "Number of Wikipedia Articles",
-        formatm!(
-            "{} to {} in {}",
-            xmin.datetime(timezone).format("%H:%M:%S"),
-            xmax.datetime(timezone).format("%H:%M:%S"),
-            xtick_step
-        ),
-        "Number of Articles",
-        xtick.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
-        poloto::ticks_from_default(data.boundy),
-    );
-
-    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
+    println!("{}", poloto::disp(|a| s.simple_theme(a)));
 }
 
 ```
 
 ## Output
 
-<img src="./target/assets/seconds.svg" alt="demo">
+<img src="./target/assets/days.svg" alt="demo">
 
 
 ## Escape protection
