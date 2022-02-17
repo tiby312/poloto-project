@@ -48,7 +48,6 @@ pub struct TickInfo<I> {
     /// This must have a length of as least 2.
     pub ticks: Vec<I>,
 
-    /// The number of dashes between two ticks must be a multiple of this number.
     pub dash_size: Option<f64>,
 }
 
