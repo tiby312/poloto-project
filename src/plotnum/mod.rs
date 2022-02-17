@@ -105,7 +105,7 @@ pub enum Axis {
 /// Formatter for a tick.
 ///
 pub trait TickFormat {
-    type Num;
+    type Num:PlotNum;
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
     fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
@@ -164,4 +164,22 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
     fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
         self.inner.write_where(a)
     }
+}
+
+
+
+use std::fmt;
+///
+/// Used by [`crate::DataResult::plot_with_plotfmt`]
+/// 
+pub trait PlotFmt{
+    type X:PlotNum;
+    type Y:PlotNum;
+    fn write_title(&mut self,writer:&mut dyn fmt::Write)->fmt::Result;
+    fn write_xname(&mut self,writer:&mut dyn fmt::Write)->fmt::Result;
+    fn write_yname(&mut self,writer:&mut dyn fmt::Write)->fmt::Result;
+    fn write_xwher(&mut self,writer:&mut dyn fmt::Write)->fmt::Result;
+    fn write_ywher(&mut self,writer:&mut dyn fmt::Write)->fmt::Result;
+    fn write_xtick(&mut self,writer:&mut dyn fmt::Write,val:Self::X)->fmt::Result;
+    fn write_ytick(&mut self,writer:&mut dyn fmt::Write,val:Self::Y)->fmt::Result;   
 }
