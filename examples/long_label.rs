@@ -13,9 +13,22 @@ fn main() {
     };
 
     let mut data = poloto::data();
-    for i in 1000..1006 {
-        data.line(poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", i), (0..).zip(collatz(i)));
-    }
+
+    data.text("⚠️ Here is an example note using the text() function. ⚠️");
+    data.line(
+        poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1000),
+        (0..).zip(collatz(1000)),
+    );
+    data.line(
+        poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1001),
+        (0..).zip(collatz(1001)),
+    );
+    data.text(" 🍆 Here is another note using the text() function.🍎");
+    data.line(
+        poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
+        (0..).zip(collatz(1002)),
+    );
+
     data.ymarker(0);
 
     let mut plotter = data.build().plot("collatz", "x", "y");

@@ -126,6 +126,7 @@ enum PlotType {
     Histo,
     LineFill,
     LineFillRaw,
+    Text,
 }
 
 struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
@@ -314,6 +315,29 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         self
     }
 
+    ///
+    /// Write some text in the legend. This doesnt increment the plot number.
+    ///
+    /// ```
+    /// let mut plotter = poloto::data::<f64,f64>();
+    /// plotter.text("This is a note");
+    /// ```
+    pub fn text(&mut self, name: impl Display + 'a) -> &mut Self {
+        self.plots.push(Plot {
+            plot_type: PlotType::Text,
+            plots: Box::new(PlotStruct::new(std::iter::empty(), name)),
+        });
+        self
+    }
+
+    /// Create a line from plots using a SVG path element.
+    /// The path element belongs to the `.poloto[N]fill` css class.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::data();
+    /// plotter.line("", &data);
+    /// ```
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: IntoIterator,

@@ -88,10 +88,13 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
             maxy_ii: scaley,
         };
 
-        let colori = color_iter.next().unwrap();
-
         match p.plot_type {
+            PlotType::Text => {
+                // do nothing
+            }
             PlotType::Line => {
+                let colori = color_iter.next().unwrap();
+
                 if name_exists {
                     writer.single("line", |d| {
                         d.attr(
@@ -117,6 +120,8 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 })?;
             }
             PlotType::Scatter => {
+                let colori = color_iter.next().unwrap();
+
                 if name_exists {
                     writer.single("line", |d| {
                         d.attr(
@@ -153,6 +158,8 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 })?;
             }
             PlotType::Histo => {
+                let colori = color_iter.next().unwrap();
+
                 if name_exists {
                     writer.single("rect", |d| {
                         d.attr(
@@ -198,6 +205,8 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                     })?;
             }
             PlotType::LineFill => {
+                let colori = color_iter.next().unwrap();
+
                 if name_exists {
                     writer.single("rect", |d| {
                         d.attr(
@@ -227,6 +236,8 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 })?;
             }
             PlotType::LineFillRaw => {
+                let colori = color_iter.next().unwrap();
+
                 if name_exists {
                     writer.single("rect", |d| {
                         d.attr(
