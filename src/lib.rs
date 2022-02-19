@@ -347,7 +347,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot()),
@@ -368,7 +368,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot()),
@@ -390,7 +390,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot()),
@@ -413,7 +413,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot()),
@@ -435,7 +435,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot()),

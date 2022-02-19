@@ -6,32 +6,37 @@ use super::*;
 
 /// Iterators that are passed to the [`Plotter`] plot functions must produce
 /// items that implement this trait.
-pub trait Plottable<X: PlotNum, Y: PlotNum> {
+pub trait Plottable {
+    type Item;
     /// Produce one plot
-    fn make_plot(self) -> (X, Y);
+    fn make_plot(self) -> Self::Item;
 }
 
-impl<T: PlotNum> Plottable<T, T> for [T; 2] {
+impl<T: PlotNum> Plottable for [T; 2] {
+    type Item = (T, T);
     fn make_plot(self) -> (T, T) {
         let [x, y] = self;
         (x, y)
     }
 }
 
-impl<T: PlotNum> Plottable<T, T> for &[T; 2] {
+impl<T: PlotNum> Plottable for &[T; 2] {
+    type Item = (T, T);
     fn make_plot(self) -> (T, T) {
         let [x, y] = *self;
         (x, y)
     }
 }
 
-impl<A: PlotNum, B: PlotNum> Plottable<A, B> for (A, B) {
+impl<A: PlotNum, B: PlotNum> Plottable for (A, B) {
+    type Item = (A, B);
     fn make_plot(self) -> (A, B) {
         self
     }
 }
 
-impl<A: PlotNum, B: PlotNum> Plottable<A, B> for &(A, B) {
+impl<A: PlotNum, B: PlotNum> Plottable for &(A, B) {
+    type Item = (A, B);
     fn make_plot(self) -> (A, B) {
         *self
     }
@@ -64,7 +69,7 @@ pub mod crop {
     }
     impl<X: DiscNum, Y: DiscNum, I: Iterator> Iterator for Crop<X, Y, I>
     where
-        I::Item: Plottable<X, Y>,
+        I::Item: Plottable<Item = (X, Y)>,
     {
         type Item = (X, Y);
         fn next(&mut self) -> Option<(X, Y)> {
@@ -151,5 +156,8 @@ pub mod crop {
         }
     }
 
-    impl<X: DiscNum, Y: DiscNum, T: Iterator> Croppable<X, Y> for T where T::Item: Plottable<X, Y> {}
+    impl<X: DiscNum, Y: DiscNum, T: Iterator> Croppable<X, Y> for T where
+        T::Item: Plottable<Item = (X, Y)>
+    {
+    }
 }
