@@ -55,6 +55,7 @@ use plottable::Plottable;
 mod render;
 pub mod util;
 
+pub mod buffered_iter;
 pub mod plotnum;
 use plotnum::*;
 pub mod num;
@@ -80,12 +81,14 @@ const HEIGHT: f64 = 500.0;
 
 trait PlotTrait<X: PlotNum, Y: PlotNum> {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
-    fn iter_first<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a>;
-    fn iter_second<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a>;
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
 }
 
 struct PlotStruct<X: PlotNum, Y: PlotNum, I: PlotIter<Item = (X, Y)>, F: Display> {
     iter: Option<I>,
+    it1: Option<I::It1>,
+    it2: Option<I::It2>,
     func: F,
     _p: PhantomData<(X, Y)>,
 }
@@ -94,6 +97,8 @@ impl<X: PlotNum, Y: PlotNum, I: PlotIter<Item = (X, Y)>, F: Display> PlotStruct<
     fn new(iter: I, func: F) -> Self {
         PlotStruct {
             iter: Some(iter),
+            it1: None,
+            it2: None,
             func,
             _p: PhantomData,
         }
@@ -106,12 +111,15 @@ impl<X: PlotNum, Y: PlotNum, D: PlotIter<Item = (X, Y)>, F: Display> PlotTrait<X
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
         write!(a, "{}", self.func)
     }
-    fn iter_first<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a> {
-        Box::new(self.iter.as_mut().unwrap().first())
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
+        self.it1 = Some(self.iter.as_mut().unwrap().first());
+        self.it1.as_mut().unwrap()
     }
 
-    fn iter_second<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a> {
-        Box::new(self.iter.take().unwrap().second())
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
+        let j = self.iter.take().unwrap().second(self.it1.take().unwrap());
+        self.it2 = Some(j);
+        self.it2.as_mut().unwrap()
     }
 }
 

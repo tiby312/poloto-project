@@ -162,7 +162,7 @@ pub trait PlotIter {
     fn first(&mut self) -> Self::It1;
 
     /// Return an iterator that returns the same data as before in order to scale the plots.
-    fn second(self) -> Self::It2;
+    fn second(self, last: Self::It1) -> Self::It2;
 }
 
 impl<I: IntoIterator + Clone> PlotIter for I {
@@ -173,7 +173,7 @@ impl<I: IntoIterator + Clone> PlotIter for I {
     fn first(&mut self) -> Self::It1 {
         self.clone().into_iter()
     }
-    fn second(self) -> Self::It2 {
+    fn second(self, _last: Self::It1) -> Self::It2 {
         self.into_iter()
     }
 }
@@ -189,19 +189,51 @@ pub(super) trait PlotIterExt: PlotIter {
 impl<I: PlotIter> PlotIterExt for I {}
 
 pub(super) struct Map<I, F> {
-    iter: I,
+    pub iter: I,
     func: F,
 }
 
 impl<B, I: PlotIter, F: FnMut(I::Item) -> B + Clone> PlotIter for Map<I, F> {
     type Item = B;
-    type It1 = std::iter::Map<I::It1, F>;
-    type It2 = std::iter::Map<I::It2, F>;
+    type It1 = map::Map<I::It1, F>;
+    type It2 = map::Map<I::It2, F>;
 
     fn first(&mut self) -> Self::It1 {
-        self.iter.first().map(self.func.clone())
+        map::Map::new(self.iter.first(), self.func.clone())
     }
-    fn second(self) -> Self::It2 {
-        self.iter.second().map(self.func)
+    fn second(self, last: Self::It1) -> Self::It2 {
+        map::Map::new(self.iter.second(last.iter), self.func)
+    }
+}
+
+mod map {
+    /// Like std::iter::map but you can access the original iterator.
+
+    pub struct Map<I, F> {
+        pub iter: I,
+        f: F,
+    }
+
+    impl<I, F> Map<I, F> {
+        pub fn new(iter: I, f: F) -> Map<I, F> {
+            Map { iter, f }
+        }
+    }
+
+    impl<B, I: Iterator, F> Iterator for Map<I, F>
+    where
+        F: FnMut(I::Item) -> B,
+    {
+        type Item = B;
+
+        #[inline]
+        fn next(&mut self) -> Option<B> {
+            self.iter.next().map(&mut self.f)
+        }
+
+        #[inline]
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            self.iter.size_hint()
+        }
     }
 }
