@@ -50,7 +50,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
             })?
             .build(|d| {
                 let mut wc = util::WriteCounter::new(d.writer_safe());
-                p.plots.write_name(&mut wc)?;
+                p.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
 
@@ -68,9 +68,9 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
         impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
             fn gen_iter<'a>(
                 &'a self,
-                p: &'a mut Plot<(X, Y)>,
+                p: &'a mut dyn PlotTrait<Item = (X, Y)>,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
-                p.plots.iter_second().map(move |(x, y)| {
+                p.iter_second().map(move |(x, y)| {
                     [
                         self.basex_ii + x.scale(self.rangex_ii, self.maxx_ii),
                         self.basey_ii - y.scale(self.rangey_ii, self.maxy_ii),
@@ -88,7 +88,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
             maxy_ii: scaley,
         };
 
-        match p.plot_type {
+        match p.plot_type() {
             PlotType::Text => {
                 // do nothing
             }
@@ -116,7 +116,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                     d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                     d.attr("fill", "none")?;
                     d.attr("stroke", "black")?;
-                    d.path(|a| render::line(a, plot_iter.gen_iter(&mut p)))
+                    d.path(|a| render::line(a, plot_iter.gen_iter(p.as_mut())))
                 })?;
             }
             PlotType::Scatter => {
@@ -147,7 +147,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                     d.path(|a| {
                         use tagger::PathCommand::*;
                         for [x, y] in plot_iter
-                            .gen_iter(&mut p)
+                            .gen_iter(p.as_mut())
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             a.put(M(x, y))?;
@@ -185,7 +185,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                     .build(|writer| {
                         let mut last = None;
                         for [x, y] in plot_iter
-                            .gen_iter(&mut p)
+                            .gen_iter(p.as_mut())
                             .filter(|&[x, y]| x.is_finite() && y.is_finite())
                         {
                             if let Some((lx, ly)) = last {
@@ -231,7 +231,12 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                         format_args!("poloto_linefill poloto{}fill", colori),
                     )?;
                     d.path(|path| {
-                        render::line_fill(path, plot_iter.gen_iter(&mut p), height - paddingy, true)
+                        render::line_fill(
+                            path,
+                            plot_iter.gen_iter(p.as_mut()),
+                            height - paddingy,
+                            true,
+                        )
                     })
                 })?;
             }
@@ -264,7 +269,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                     d.path(|path| {
                         render::line_fill(
                             path,
-                            plot_iter.gen_iter(&mut p),
+                            plot_iter.gen_iter(p.as_mut()),
                             height - paddingy,
                             false,
                         )

@@ -81,12 +81,14 @@ const HEIGHT: f64 = 500.0;
 
 trait PlotTrait {
     type Item;
+    fn plot_type(&self) -> PlotType;
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
 }
 
 struct PlotStruct<I: PlotIter, F: Display> {
+    ptype: PlotType,
     iter: Option<I>,
     it1: Option<I::It1>,
     it2: Option<I::It2>,
@@ -94,18 +96,22 @@ struct PlotStruct<I: PlotIter, F: Display> {
 }
 
 impl<I: PlotIter, F: Display> PlotStruct<I, F> {
-    fn new(iter: I, func: F) -> Self {
+    fn new(iter: I, func: F, ptype: PlotType) -> Self {
         PlotStruct {
             iter: Some(iter),
             it1: None,
             it2: None,
             func,
+            ptype,
         }
     }
 }
 
 impl<D: PlotIter, F: Display> PlotTrait for PlotStruct<D, F> {
     type Item = D::Item;
+    fn plot_type(&self) -> PlotType {
+        self.ptype
+    }
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
         write!(a, "{}", self.func)
     }
@@ -121,6 +127,7 @@ impl<D: PlotIter, F: Display> PlotTrait for PlotStruct<D, F> {
     }
 }
 
+#[derive(Copy, Clone, Debug)]
 enum PlotType {
     Scatter,
     Line,
@@ -128,11 +135,6 @@ enum PlotType {
     LineFill,
     LineFillRaw,
     Text,
-}
-
-struct Plot<'a, X: 'a> {
-    plot_type: PlotType,
-    plots: Box<dyn PlotTrait<Item = X> + 'a>,
 }
 
 ///
@@ -160,7 +162,7 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X>,
 /// Created by [`Data::build`]
 ///
 pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
-    plots: Vec<Plot<'a, (X, Y)>>,
+    plots: Vec<Box<dyn PlotTrait<Item = (X, Y)> + 'a>>,
     canvas: render::Canvas,
     boundx: Bound<X>,
     boundy: Bound<Y>,
@@ -289,8 +291,8 @@ use plotnum::PlotIter;
 ///
 /// Plot collector.
 ///
-pub struct Data<'a, X: PlotNum, Y: PlotNum> {
-    plots: Vec<Plot<'a, (X, Y)>>,
+pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
+    plots: Vec<Box<dyn PlotTrait<Item = (X, Y)> + 'a>>,
     xmarkers: Vec<X>,
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
@@ -326,10 +328,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// plotter.text("This is a note");
     /// ```
     pub fn text(&mut self, name: impl Display + 'a) -> &mut Self {
-        self.plots.push(Plot {
-            plot_type: PlotType::Text,
-            plots: Box::new(PlotStruct::new(std::iter::empty(), name)),
-        });
+        self.plots.push(Box::new(PlotStruct::new(
+            std::iter::empty(),
+            name,
+            PlotType::Text,
+        )));
         self
     }
 
@@ -346,10 +349,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
-        self.plots.push(Plot {
-            plot_type: PlotType::Line,
-            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
-        });
+        self.plots.push(Box::new(PlotStruct::new(
+            plots.map_plot(|x| x.make_plot()),
+            name,
+            PlotType::Line,
+        )));
         self
     }
 
@@ -366,10 +370,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
-        self.plots.push(Plot {
-            plot_type: PlotType::LineFill,
-            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
-        });
+        self.plots.push(Box::new(PlotStruct::new(
+            plots.map_plot(|x| x.make_plot()),
+            name,
+            PlotType::LineFill,
+        )));
         self
     }
 
@@ -387,10 +392,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
-        self.plots.push(Plot {
-            plot_type: PlotType::LineFillRaw,
-            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
-        });
+        self.plots.push(Box::new(PlotStruct::new(
+            plots.map_plot(|x| x.make_plot()),
+            name,
+            PlotType::LineFillRaw,
+        )));
         self
     }
 
@@ -409,10 +415,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
-        self.plots.push(Plot {
-            plot_type: PlotType::Scatter,
-            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
-        });
+        self.plots.push(Box::new(PlotStruct::new(
+            plots.map_plot(|x| x.make_plot()),
+            name,
+            PlotType::Scatter,
+        )));
         self
     }
 
@@ -430,10 +437,11 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
-        self.plots.push(Plot {
-            plot_type: PlotType::Histo,
-            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
-        });
+        self.plots.push(Box::new(PlotStruct::new(
+            plots.map_plot(|x| x.make_plot()),
+            name,
+            PlotType::Histo,
+        )));
         self
     }
 
@@ -490,7 +498,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
         let mut val = self.move_into();
 
         let (boundx, boundy) = util::find_bounds(
-            val.plots.iter_mut().flat_map(|x| x.plots.iter_first()),
+            val.plots.iter_mut().flat_map(|x| x.iter_first()),
             val.xmarkers.clone(),
             val.ymarkers.clone(),
         );

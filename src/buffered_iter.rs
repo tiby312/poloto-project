@@ -3,7 +3,7 @@
 //!
 //! If you have an iterator where each call to next() does
 //! an expensive calculation, using a buffered iterator might be desireable.
-//! 
+//!
 //! [`PlotIter`] has a blanket impl on all iterators that implement clone.
 //! If an iterator isn't clonable, we can instead iterate over it once,
 //! but as we do, clone the items and store them in a vec, to be used
