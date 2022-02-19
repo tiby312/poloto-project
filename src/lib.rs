@@ -55,7 +55,9 @@ use plottable::Plottable;
 mod render;
 pub mod util;
 
+pub mod bounded_iter;
 pub mod buffered_iter;
+
 pub mod plotnum;
 use plotnum::*;
 pub mod num;

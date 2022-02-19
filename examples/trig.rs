@@ -17,7 +17,14 @@ fn main() {
         ),
     );
 
-    s.line("sin(2x)", buffered(x.clone().map(|x| [x, (2.0 * x).sin()])));
+    s.line(
+        "sin(2x)",
+        poloto::bounded_iter::from_bounds(
+            [0.0, 10.0],
+            [0.0, 10.0],
+            x.clone().map(|x| [x, (2.0 * x).sin()]),
+        ),
+    );
 
     s.line(
         "2*cos(x)",
