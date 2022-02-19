@@ -188,7 +188,7 @@ pub(super) trait PlotIterExt: PlotIter {
 }
 impl<I: PlotIter> PlotIterExt for I {}
 
-pub struct Map<I, F> {
+pub(super) struct Map<I, F> {
     iter: I,
     func: F,
 }
