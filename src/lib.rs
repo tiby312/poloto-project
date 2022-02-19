@@ -86,39 +86,35 @@ trait PlotTrait {
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
 }
 
-struct PlotStruct<X, I: PlotIter, F: Display> {
+struct PlotStruct<I: PlotIter, F: Display> {
     iter: Option<I>,
     it1: Option<I::It1>,
     it2: Option<I::It2>,
     func: F,
-    _p: PhantomData<X>,
 }
 
-impl<X, I: PlotIter<Item = X>, F: Display> PlotStruct<X, I, F> {
+impl<I: PlotIter, F: Display> PlotStruct<I, F> {
     fn new(iter: I, func: F) -> Self {
         PlotStruct {
             iter: Some(iter),
             it1: None,
             it2: None,
             func,
-            _p: PhantomData,
         }
     }
 }
 
-impl<X, D: PlotIter<Item = X>, F: Display> PlotTrait
-    for PlotStruct<X, D, F>
-{
-    type Item=X;
+impl<D: PlotIter, F: Display> PlotTrait for PlotStruct<D, F> {
+    type Item = D::Item;
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
         write!(a, "{}", self.func)
     }
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = X> {
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = Self::Item> {
         self.it1 = Some(self.iter.as_mut().unwrap().first());
         self.it1.as_mut().unwrap()
     }
 
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = X> {
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = Self::Item> {
         let j = self.iter.take().unwrap().second(self.it1.take().unwrap());
         self.it2 = Some(j);
         self.it2.as_mut().unwrap()
@@ -134,9 +130,9 @@ enum PlotType {
     Text,
 }
 
-struct Plot<'a, X : 'a> {
+struct Plot<'a, X: 'a> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait<Item=X> + 'a>,
+    plots: Box<dyn PlotTrait<Item = X> + 'a>,
 }
 
 ///

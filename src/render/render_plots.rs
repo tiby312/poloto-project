@@ -68,7 +68,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
         impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
             fn gen_iter<'a>(
                 &'a self,
-                p: &'a mut Plot<X, Y>,
+                p: &'a mut Plot<(X, Y)>,
             ) -> impl Iterator<Item = [f64; 2]> + 'a {
                 p.plots.iter_second().map(move |(x, y)| {
                     [
