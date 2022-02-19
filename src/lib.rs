@@ -161,13 +161,13 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X>,
 ///
 /// Created by [`Data::build`]
 ///
-pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
+pub struct DataResult<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Vec<Box<dyn PlotTrait<Item = (X, Y)> + 'a>>,
     canvas: render::Canvas,
     boundx: Bound<X>,
     boundy: Bound<Y>,
 }
-impl<'a, X: PlotNum, Y: PlotNum> DataResult<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     pub fn boundx(&self) -> &Bound<X> {
         &self.boundx
     }
@@ -298,7 +298,7 @@ pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
 }
-impl<'a, X: PlotNum, Y: PlotNum> Default for Data<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
     fn default() -> Self {
         Data {
             plots: vec![],
@@ -309,7 +309,7 @@ impl<'a, X: PlotNum, Y: PlotNum> Default for Data<'a, X, Y> {
         }
     }
 }
-impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn xmarker(&mut self, a: X) -> &mut Self {
         self.xmarkers.push(a);
         self
@@ -547,7 +547,7 @@ pub struct Plotter<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     ticky: TickInfo<Y>,
 }
 
-impl<'a, X: PlotNum, Y: PlotNum> Plotter<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Plotter<'a, X, Y> {
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
