@@ -147,3 +147,61 @@ pub trait PlotFmt {
     fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result;
     fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result;
 }
+
+///
+/// Iterator that is accepted by poloto.
+/// The second function will only get called after
+/// the first iterator has been fully consumed.
+///
+pub trait PlotIter {
+    type Item;
+    type It1: Iterator<Item = Self::Item>;
+    type It2: Iterator<Item = Self::Item>;
+
+    /// Return an iterator that will be used to find min max bounds.
+    fn first(&mut self) -> Self::It1;
+
+    /// Return an iterator that returns the same data as before in order to scale the plots.
+    fn second(self) -> Self::It2;
+}
+
+impl<I: IntoIterator + Clone> PlotIter for I {
+    type Item = I::Item;
+    type It1 = I::IntoIter;
+    type It2 = I::IntoIter;
+
+    fn first(&mut self) -> Self::It1 {
+        self.clone().into_iter()
+    }
+    fn second(self) -> Self::It2 {
+        self.into_iter()
+    }
+}
+
+pub(super) trait PlotIterExt: PlotIter {
+    fn map_plot<B, F: FnMut(Self::Item) -> B>(self, func: F) -> Map<Self, F>
+    where
+        Self: Sized,
+    {
+        Map { iter: self, func }
+    }
+}
+impl<I: PlotIter> PlotIterExt for I {}
+
+pub struct Map<I, F> {
+    iter: I,
+    func: F,
+}
+
+impl<B, I: PlotIter, F: FnMut(I::Item) -> B + Clone> PlotIter for Map<I, F> {
+    type Item = B;
+    type It1 = std::iter::Map<I::It1, F>;
+    type It2 = std::iter::Map<I::It2, F>;
+
+    fn first(&mut self) -> Self::It1 {
+        self.iter.first().map(self.func.clone())
+    }
+    fn second(self) -> Self::It2 {
+        self.iter.second().map(self.func)
+    }
+}

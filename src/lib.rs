@@ -80,43 +80,38 @@ const HEIGHT: f64 = 500.0;
 
 trait PlotTrait<X: PlotNum, Y: PlotNum> {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
+    fn iter_first<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a>;
+    fn iter_second<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a>;
 }
 
-struct PlotStruct<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)> + Clone, F: Display> {
-    first: I,
-    second: I,
+struct PlotStruct<X: PlotNum, Y: PlotNum, I: PlotIter<Item = (X, Y)>, F: Display> {
+    iter: Option<I>,
     func: F,
     _p: PhantomData<(X, Y)>,
 }
 
-impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)> + Clone, F: Display>
-    PlotStruct<X, Y, I, F>
-{
-    fn new(it: I, func: F) -> Self {
-        let it2 = it.clone();
+impl<X: PlotNum, Y: PlotNum, I: PlotIter<Item = (X, Y)>, F: Display> PlotStruct<X, Y, I, F> {
+    fn new(iter: I, func: F) -> Self {
         PlotStruct {
-            first: it,
-            second: it2,
+            iter: Some(iter),
             func,
             _p: PhantomData,
         }
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, D: Iterator<Item = (X, Y)> + Clone, F: Display> PlotTrait<X, Y>
+impl<X: PlotNum, Y: PlotNum, D: PlotIter<Item = (X, Y)>, F: Display> PlotTrait<X, Y>
     for PlotStruct<X, Y, D, F>
 {
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
         write!(a, "{}", self.func)
     }
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
-        &mut self.first
+    fn iter_first<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a> {
+        Box::new(self.iter.as_mut().unwrap().first())
     }
 
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
-        &mut self.second
+    fn iter_second<'a>(&'a mut self) -> Box<dyn Iterator<Item = (X, Y)> + 'a> {
+        Box::new(self.iter.take().unwrap().second())
     }
 }
 
@@ -283,6 +278,8 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
     Data::default()
 }
 
+use plotnum::PlotIter;
+
 ///
 /// Plot collector.
 ///
@@ -340,16 +337,12 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// ```
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator,
-        I::IntoIter: Clone + 'a,
+        I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Line,
-            plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| x.make_plot()),
-                name,
-            )),
+            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
         });
         self
     }
@@ -364,16 +357,12 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// ```
     pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator,
-        I::IntoIter: Clone + 'a,
+        I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFill,
-            plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| x.make_plot()),
-                name,
-            )),
+            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
         });
         self
     }
@@ -389,16 +378,12 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// ```
     pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator,
-        I::IntoIter: Clone + 'a,
+        I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::LineFillRaw,
-            plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| x.make_plot()),
-                name,
-            )),
+            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
         });
         self
     }
@@ -415,16 +400,12 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// ```
     pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator,
-        I::IntoIter: Clone + 'a,
+        I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Scatter,
-            plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| x.make_plot()),
-                name,
-            )),
+            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
         });
         self
     }
@@ -440,16 +421,12 @@ impl<'a, X: PlotNum, Y: PlotNum> Data<'a, X, Y> {
     /// ```
     pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
-        I: IntoIterator,
-        I::IntoIter: Clone + 'a,
+        I: PlotIter + 'a,
         I::Item: Plottable<X, Y>,
     {
         self.plots.push(Plot {
             plot_type: PlotType::Histo,
-            plots: Box::new(PlotStruct::new(
-                plots.into_iter().map(|x| x.make_plot()),
-                name,
-            )),
+            plots: Box::new(PlotStruct::new(plots.map_plot(|x| x.make_plot()), name)),
         });
         self
     }
