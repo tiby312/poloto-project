@@ -79,21 +79,22 @@ const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
-trait PlotTrait<X: PlotNum, Y: PlotNum> {
+trait PlotTrait {
+    type Item;
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)>;
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
 }
 
-struct PlotStruct<X: PlotNum, Y: PlotNum, I: PlotIter<Item = (X, Y)>, F: Display> {
+struct PlotStruct<X, I: PlotIter, F: Display> {
     iter: Option<I>,
     it1: Option<I::It1>,
     it2: Option<I::It2>,
     func: F,
-    _p: PhantomData<(X, Y)>,
+    _p: PhantomData<X>,
 }
 
-impl<X: PlotNum, Y: PlotNum, I: PlotIter<Item = (X, Y)>, F: Display> PlotStruct<X, Y, I, F> {
+impl<X, I: PlotIter<Item = X>, F: Display> PlotStruct<X, I, F> {
     fn new(iter: I, func: F) -> Self {
         PlotStruct {
             iter: Some(iter),
@@ -105,18 +106,19 @@ impl<X: PlotNum, Y: PlotNum, I: PlotIter<Item = (X, Y)>, F: Display> PlotStruct<
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, D: PlotIter<Item = (X, Y)>, F: Display> PlotTrait<X, Y>
-    for PlotStruct<X, Y, D, F>
+impl<X, D: PlotIter<Item = X>, F: Display> PlotTrait
+    for PlotStruct<X, D, F>
 {
+    type Item=X;
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
         write!(a, "{}", self.func)
     }
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
+    fn iter_first(&mut self) -> &mut dyn Iterator<Item = X> {
         self.it1 = Some(self.iter.as_mut().unwrap().first());
         self.it1.as_mut().unwrap()
     }
 
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = (X, Y)> {
+    fn iter_second(&mut self) -> &mut dyn Iterator<Item = X> {
         let j = self.iter.take().unwrap().second(self.it1.take().unwrap());
         self.it2 = Some(j);
         self.it2.as_mut().unwrap()
@@ -132,9 +134,9 @@ enum PlotType {
     Text,
 }
 
-struct Plot<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
+struct Plot<'a, X : 'a> {
     plot_type: PlotType,
-    plots: Box<dyn PlotTrait<X, Y> + 'a>,
+    plots: Box<dyn PlotTrait<Item=X> + 'a>,
 }
 
 ///
@@ -162,7 +164,7 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X>,
 /// Created by [`Data::build`]
 ///
 pub struct DataResult<'a, X: PlotNum, Y: PlotNum> {
-    plots: Vec<Plot<'a, X, Y>>,
+    plots: Vec<Plot<'a, (X, Y)>>,
     canvas: render::Canvas,
     boundx: Bound<X>,
     boundy: Bound<Y>,
@@ -292,7 +294,7 @@ use plotnum::PlotIter;
 /// Plot collector.
 ///
 pub struct Data<'a, X: PlotNum, Y: PlotNum> {
-    plots: Vec<Plot<'a, X, Y>>,
+    plots: Vec<Plot<'a, (X, Y)>>,
     xmarkers: Vec<X>,
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
