@@ -518,7 +518,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         );
 
         let canvas =
-            render::Canvas::with_options(val.dim, val.preserve_aspect, val.num_css_classes);
+            render::Canvas::with_options(boundx,boundy,val.dim, val.preserve_aspect, val.num_css_classes);
 
         let ideal_dash_size = canvas.ideal_dash_size;
         let boundx = Bound {

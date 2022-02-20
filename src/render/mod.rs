@@ -13,56 +13,79 @@ pub struct Canvas {
     padding: f64,
     paddingy: f64,
     xaspect_offset: f64,
-    _yaspect_offset: f64,
+    yaspect_offset: f64,
     pub scalex: f64,
     pub scaley: f64,
     spacing: f64,
     legendx1: f64,
     num_css_classes: Option<usize>,
-    preserve_aspect: bool,
+
 }
 impl Canvas {
     pub fn get_dim(&self) -> [f64; 2] {
         [self.width, self.height]
     }
-    pub fn with_options(
+    pub fn with_options<X:PlotNum,Y:PlotNum>(
+        boundx:[X;2],
+        boundy:[Y;2],
         dim: Option<[f64; 2]>,
         preserve_aspect: bool,
         num_css_classes: Option<usize>,
     ) -> Self {
-        let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
-        let ideal_num_ysteps = 5;
-
+        
         let (width, height) = if let Some([x, y]) = dim {
             (x, y)
         } else {
             (crate::WIDTH as f64, crate::HEIGHT as f64)
         };
 
+        let ideal_dash_size = 20.0;
         let padding = 150.0;
         let paddingy = 100.0;
 
-        let xaspect_offset = if preserve_aspect {
-            width / 2.0 - height + paddingy * 2.0
-        } else {
-            0.0
-        };
-
-        let _yaspect_offset = 0.0;
 
         //The range over which the data will be scaled to fit
-        let scalex = if preserve_aspect {
-            height - paddingy * 2.0
+        let (scalex,scaley) = if preserve_aspect {
+            if width>height{
+                (height - paddingy * 2.0,height - paddingy * 2.0)
+            }else{
+                (width - padding * 2.0,width-padding*2.0)
+            }            
         } else {
-            width - padding * 2.0
+            (width - padding * 2.0,height - paddingy * 2.0)
         };
 
-        let scaley = height - paddingy * 2.0;
+        let [minx, maxx] = boundx;
+        let [miny, maxy] = boundy;
+
+        let distancex_min_to_max=maxx.scale([minx,maxx],scalex)-minx.scale([minx,maxx],scalex);
+        let distancey_min_to_max=maxy.scale([miny,maxy],scaley)-miny.scale([miny,maxy],scaley);
+
+        let (xaspect_offset,yaspect_offset) = if preserve_aspect {
+            if width>height{
+                (-padding+width/2.0-distancey_min_to_max/2.0,0.0)
+            }else{
+                (0.0,-height + paddingy   +height/2.0 +distancey_min_to_max/2.0)
+            }
+        } else {
+            (0.0,0.0)
+        };
+
+
+        let ideal_xtick_spacing=60.0;
+        let ideal_ytick_spacing=60.0;
+
+
+        let ideal_num_xsteps=(distancex_min_to_max/ideal_xtick_spacing ).floor() as u32;
+        let ideal_num_ysteps=(distancey_min_to_max/ideal_ytick_spacing).floor() as u32;
+        let ideal_num_xsteps=ideal_num_xsteps.max(2);
+        let ideal_num_ysteps=ideal_num_ysteps.max(2);
+        
+
 
         let spacing = padding / 3.0;
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
-        let ideal_dash_size = 20.0;
         Canvas {
             ideal_num_xsteps,
             ideal_num_ysteps,
@@ -72,13 +95,12 @@ impl Canvas {
             padding,
             paddingy,
             xaspect_offset,
-            _yaspect_offset,
+            yaspect_offset,
             scalex,
             scaley,
             spacing,
             legendx1,
             num_css_classes,
-            preserve_aspect,
         }
     }
 

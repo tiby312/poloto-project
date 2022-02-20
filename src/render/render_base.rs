@@ -12,9 +12,9 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
         padding,
         paddingy,
         xaspect_offset,
+        yaspect_offset,
         scalex,
         scaley,
-        preserve_aspect,
         ..
     } = plotter.plots.canvas;
 
@@ -97,8 +97,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("stroke", "black")?;
                 d.attr("x1", xaspect_offset + xx)?;
                 d.attr("x2", xaspect_offset + xx)?;
-                d.attr("y1", height - paddingy)?;
-                d.attr("y2", height - paddingy * 0.95)
+                d.attr("y1", yaspect_offset + height - paddingy)?;
+                d.attr("y2", yaspect_offset + height - paddingy * 0.95)
             })?;
 
             writer
@@ -107,7 +107,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                     d.attr("alignment-baseline", "start")?;
                     d.attr("text-anchor", "middle")?;
                     d.attr("x", xaspect_offset + xx)?;
-                    d.attr("y", height - paddingy + texty_padding)
+                    d.attr("y", yaspect_offset + height - paddingy + texty_padding)
                 })?
                 .build(|w| plotter.plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
         }
@@ -136,8 +136,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("stroke", "black")?;
                 d.attr("x1", xaspect_offset + padding)?;
                 d.attr("x2", xaspect_offset + padding * 0.96)?;
-                d.attr("y1", yy)?;
-                d.attr("y2", yy)
+                d.attr("y1", yaspect_offset + yy)?;
+                d.attr("y2", yaspect_offset + yy)
             })?;
 
             writer
@@ -146,7 +146,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                     d.attr("alignment-baseline", "middle")?;
                     d.attr("text-anchor", "end")?;
                     d.attr("x", xaspect_offset + padding - textx_padding)?;
-                    d.attr("y", yy)
+                    d.attr("y", yaspect_offset + yy)
                 })?
                 .build(|w| plotter.plot_fmt.write_ytick(&mut w.writer_safe(), &val))?;
         }
@@ -155,7 +155,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
     let d1 = minx.scale([minx, maxx], scalex);
     let d2 = first_tickx.scale([minx, maxx], scalex);
     let distance_to_firstx = d2 - d1;
-
+    let distancex_min_to_max=maxx.scale([minx,maxx],scalex)-d1;
+    
     writer.single("path", |d| {
         d.attr("stroke", "black")?;
         d.attr("fill", "none")?;
@@ -171,21 +172,17 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             )?;
         }
         d.path(|p| {
-            p.put(M(padding + xaspect_offset, height - paddingy))?;
-            if preserve_aspect {
-                p.put(L(
-                    height - paddingy / 2.0 + xaspect_offset,
-                    height - paddingy,
-                ))
-            } else {
-                p.put(L(width - padding + xaspect_offset, height - paddingy))
-            }
+            p.put(M(padding + xaspect_offset, height - paddingy+yaspect_offset))?;
+            p.put(L(padding + xaspect_offset+distancex_min_to_max, height - paddingy+yaspect_offset))
+            
         })
     })?;
 
     let d1 = miny.scale([miny, maxy], scaley);
     let d2 = first_ticky.scale([miny, maxy], scaley);
     let distance_to_firsty = d2 - d1;
+    let distancey_min_to_max=maxy.scale([miny,maxy],scaley)-d1;
+
 
     writer.single("path", |d| {
         d.attr("stroke", "black")?;
@@ -202,8 +199,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             )?;
         }
         d.path(|p| {
-            p.put(M(xaspect_offset + padding, height - paddingy))?;
-            p.put(L(xaspect_offset + padding, paddingy))
+            p.put(M(xaspect_offset + padding, yaspect_offset + height - paddingy))?;
+            p.put(L(xaspect_offset + padding, yaspect_offset + height - paddingy-distancey_min_to_max))
         })
     })?;
 
