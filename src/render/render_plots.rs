@@ -9,7 +9,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
         height,
         padding,
         paddingy,
-        aspect_offset,
+        xaspect_offset,
         scalex,
         scaley,
         spacing,
@@ -80,7 +80,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
         }
 
         let plot_iter = PlotIter {
-            basex_ii: aspect_offset + padding - aa,
+            basex_ii: xaspect_offset + padding - aa,
             basey_ii: height - paddingy + bb,
             rangex_ii: [minx, maxx],
             rangey_ii: [miny, maxy],

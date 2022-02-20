@@ -12,7 +12,8 @@ pub struct Canvas {
     height: f64,
     padding: f64,
     paddingy: f64,
-    aspect_offset: f64,
+    xaspect_offset: f64,
+    _yaspect_offset: f64,
     pub scalex: f64,
     pub scaley: f64,
     spacing: f64,
@@ -41,11 +42,13 @@ impl Canvas {
         let padding = 150.0;
         let paddingy = 100.0;
 
-        let aspect_offset = if preserve_aspect {
+        let xaspect_offset = if preserve_aspect {
             width / 2.0 - height + paddingy * 2.0
         } else {
             0.0
         };
+
+        let _yaspect_offset = 0.0;
 
         //The range over which the data will be scaled to fit
         let scalex = if preserve_aspect {
@@ -68,7 +71,8 @@ impl Canvas {
             height,
             padding,
             paddingy,
-            aspect_offset,
+            xaspect_offset,
+            _yaspect_offset,
             scalex,
             scaley,
             spacing,

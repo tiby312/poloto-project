@@ -11,7 +11,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
         height,
         padding,
         paddingy,
-        aspect_offset,
+        xaspect_offset,
         scalex,
         scaley,
         preserve_aspect,
@@ -95,8 +95,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             writer.single("line", |d| {
                 d.attr("class", "poloto_axis_lines")?;
                 d.attr("stroke", "black")?;
-                d.attr("x1", aspect_offset + xx)?;
-                d.attr("x2", aspect_offset + xx)?;
+                d.attr("x1", xaspect_offset + xx)?;
+                d.attr("x2", xaspect_offset + xx)?;
                 d.attr("y1", height - paddingy)?;
                 d.attr("y2", height - paddingy * 0.95)
             })?;
@@ -106,7 +106,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                     d.attr("class", "poloto_tick_labels poloto_text")?;
                     d.attr("alignment-baseline", "start")?;
                     d.attr("text-anchor", "middle")?;
-                    d.attr("x", aspect_offset + xx)?;
+                    d.attr("x", xaspect_offset + xx)?;
                     d.attr("y", height - paddingy + texty_padding)
                 })?
                 .build(|w| plotter.plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
@@ -134,8 +134,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             writer.single("line", |d| {
                 d.attr("class", "poloto_axis_lines")?;
                 d.attr("stroke", "black")?;
-                d.attr("x1", aspect_offset + padding)?;
-                d.attr("x2", aspect_offset + padding * 0.96)?;
+                d.attr("x1", xaspect_offset + padding)?;
+                d.attr("x2", xaspect_offset + padding * 0.96)?;
                 d.attr("y1", yy)?;
                 d.attr("y2", yy)
             })?;
@@ -145,7 +145,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                     d.attr("class", "poloto_tick_labels poloto_text")?;
                     d.attr("alignment-baseline", "middle")?;
                     d.attr("text-anchor", "end")?;
-                    d.attr("x", aspect_offset + padding - textx_padding)?;
+                    d.attr("x", xaspect_offset + padding - textx_padding)?;
                     d.attr("y", yy)
                 })?
                 .build(|w| plotter.plot_fmt.write_ytick(&mut w.writer_safe(), &val))?;
@@ -171,14 +171,14 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             )?;
         }
         d.path(|p| {
-            p.put(M(padding + aspect_offset, height - paddingy))?;
+            p.put(M(padding + xaspect_offset, height - paddingy))?;
             if preserve_aspect {
                 p.put(L(
-                    height - paddingy / 2.0 + aspect_offset,
+                    height - paddingy / 2.0 + xaspect_offset,
                     height - paddingy,
                 ))
             } else {
-                p.put(L(width - padding + aspect_offset, height - paddingy))
+                p.put(L(width - padding + xaspect_offset, height - paddingy))
             }
         })
     })?;
@@ -202,8 +202,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             )?;
         }
         d.path(|p| {
-            p.put(M(aspect_offset + padding, height - paddingy))?;
-            p.put(L(aspect_offset + padding, paddingy))
+            p.put(M(xaspect_offset + padding, height - paddingy))?;
+            p.put(L(xaspect_offset + padding, paddingy))
         })
     })?;
 
