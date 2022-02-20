@@ -109,8 +109,8 @@ impl<I: PlotIter, F: Display> PlotStruct<I, F> {
     }
 }
 
-impl<D: PlotIter, F: Display> PlotTrait for PlotStruct<D, F> {
-    type Item = D::Item;
+impl<X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)>, F: Display> PlotTrait for PlotStruct<D, F> {
+    type Item = (X, Y);
     fn plot_type(&self) -> PlotType {
         self.ptype
     }
@@ -349,10 +349,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<Item = (X, Y)>,
+        I::Item1: Plottable<Item = (X, Y)>,
+        I::Item2: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot()),
+            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
             PlotType::Line,
         )));
@@ -370,10 +371,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<Item = (X, Y)>,
+        I::Item1: Plottable<Item = (X, Y)>,
+        I::Item2: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot()),
+            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
             PlotType::LineFill,
         )));
@@ -392,10 +394,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<Item = (X, Y)>,
+        I::Item1: Plottable<Item = (X, Y)>,
+        I::Item2: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot()),
+            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
             PlotType::LineFillRaw,
         )));
@@ -415,10 +418,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<Item = (X, Y)>,
+        I::Item1: Plottable<Item = (X, Y)>,
+        I::Item2: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot()),
+            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
             PlotType::Scatter,
         )));
@@ -437,10 +441,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
-        I::Item: Plottable<Item = (X, Y)>,
+        I::Item1: Plottable<Item = (X, Y)>,
+        I::Item2: Plottable<Item = (X, Y)>,
     {
         self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot()),
+            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
             PlotType::Histo,
         )));

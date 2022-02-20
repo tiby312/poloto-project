@@ -1,4 +1,3 @@
-use poloto::buffered_iter::buffered;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -8,7 +7,7 @@ fn main() {
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
     s.line(
         "tan(x)",
-        buffered(
+        poloto::buffered_iter::buffered(
             x.clone()
                 .map(|x| [x, x.tan()])
                 .crop_above(10.0)
@@ -19,7 +18,7 @@ fn main() {
 
     s.line(
         "sin(2x)",
-        poloto::bounded_iter::from_bounds(
+        poloto::bounded_iter::from_rect(
             [0.0, 10.0],
             [0.0, 10.0],
             x.clone().map(|x| [x, (2.0 * x).sin()]),
@@ -28,7 +27,7 @@ fn main() {
 
     s.line(
         "2*cos(x)",
-        buffered(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)),
+        poloto::buffered_iter::buffered(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)),
     );
 
     let mut plotter = s.build().plot(

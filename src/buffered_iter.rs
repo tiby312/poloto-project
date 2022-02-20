@@ -64,7 +64,8 @@ impl<I: Iterator> PlotIter for VecBackedIter<I>
 where
     I::Item: Clone,
 {
-    type Item = I::Item;
+    type Item1 = I::Item;
+    type Item2 = I::Item;
     type It1 = WrapperIter<I>;
     type It2 = std::vec::IntoIter<I::Item>;
     fn first(&mut self) -> Self::It1 {

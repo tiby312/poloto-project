@@ -12,20 +12,6 @@ pub trait Plottable {
     fn make_plot(self) -> Self::Item;
 }
 
-pub trait FromOrig {
-    type X;
-    type Y;
-    fn from_orig(a: Self::X, b: Self::Y) -> Self;
-}
-
-impl<T> FromOrig for [T; 2] {
-    type X = T;
-    type Y = T;
-    fn from_orig(a: Self::X, b: Self::Y) -> Self {
-        [a, b]
-    }
-}
-
 impl<T: PlotNum> Plottable for [T; 2] {
     type Item = (T, T);
     fn make_plot(self) -> (T, T) {
@@ -39,14 +25,6 @@ impl<T: PlotNum> Plottable for &[T; 2] {
     fn make_plot(self) -> (T, T) {
         let [x, y] = *self;
         (x, y)
-    }
-}
-
-impl<A, B> FromOrig for (A, B) {
-    type X = A;
-    type Y = B;
-    fn from_orig(a: Self::X, b: Self::Y) -> Self {
-        (a, b)
     }
 }
 

@@ -154,9 +154,10 @@ pub trait PlotFmt {
 /// the first iterator has been fully consumed.
 ///
 pub trait PlotIter {
-    type Item;
-    type It1: Iterator<Item = Self::Item>;
-    type It2: Iterator<Item = Self::Item>;
+    type Item1;
+    type Item2;
+    type It1: Iterator<Item = Self::Item1>;
+    type It2: Iterator<Item = Self::Item2>;
 
     /// Return an iterator that will be used to find min max bounds.
     fn first(&mut self) -> Self::It1;
@@ -166,7 +167,8 @@ pub trait PlotIter {
 }
 
 impl<I: IntoIterator + Clone> PlotIter for I {
-    type Item = I::Item;
+    type Item1 = I::Item;
+    type Item2 = I::Item;
     type It1 = I::IntoIter;
     type It2 = I::IntoIter;
 
@@ -179,30 +181,42 @@ impl<I: IntoIterator + Clone> PlotIter for I {
 }
 
 pub(super) trait PlotIterExt: PlotIter {
-    fn map_plot<B, F: FnMut(Self::Item) -> B>(self, func: F) -> Map<Self, F>
+    fn map_plot<B1, B2, F1: FnMut(Self::Item1) -> B1, F2: FnMut(Self::Item2) -> B2>(
+        self,
+        func1: F1,
+        func2: F2,
+    ) -> Map<Self, F1, F2>
     where
         Self: Sized,
     {
-        Map { iter: self, func }
+        Map {
+            iter: self,
+            func1: Some(func1),
+            func2,
+        }
     }
 }
 impl<I: PlotIter> PlotIterExt for I {}
 
-pub(super) struct Map<I, F> {
+pub(super) struct Map<I, F1, F2> {
     pub iter: I,
-    func: F,
+    func1: Option<F1>,
+    func2: F2,
 }
 
-impl<B, I: PlotIter, F: FnMut(I::Item) -> B + Clone> PlotIter for Map<I, F> {
-    type Item = B;
-    type It1 = map::Map<I::It1, F>;
-    type It2 = map::Map<I::It2, F>;
+impl<B1, B2, I: PlotIter, F1: FnMut(I::Item1) -> B1, F2: FnMut(I::Item2) -> B2> PlotIter
+    for Map<I, F1, F2>
+{
+    type Item1 = B1;
+    type Item2 = B2;
+    type It1 = map::Map<I::It1, F1>;
+    type It2 = map::Map<I::It2, F2>;
 
     fn first(&mut self) -> Self::It1 {
-        map::Map::new(self.iter.first(), self.func.clone())
+        map::Map::new(self.iter.first(), self.func1.take().unwrap())
     }
     fn second(self, last: Self::It1) -> Self::It2 {
-        map::Map::new(self.iter.second(last.iter), self.func)
+        map::Map::new(self.iter.second(last.iter), self.func2)
     }
 }
 
