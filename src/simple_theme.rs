@@ -80,10 +80,13 @@ pub trait SimpleTheme {
 
 impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
     fn simple_theme(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result {
+        let dim = self.get_dim();
+
         write!(
             a,
-            "{}<style>{}</style>{}{}",
-            SVG_HEADER,
+            "<svg class=\"poloto\" width=\"{0}\" height=\"{1}\" viewBox=\"0 0 {0} {1}\" xmlns=\"http://www.w3.org/2000/svg\"><style>{2}</style>{3}{4}",
+            dim[0],
+            dim[1],
             STYLE_CONFIG_LIGHT_DEFAULT,
             disp(|a| self.render(a)),
             SVG_END
@@ -91,10 +94,13 @@ impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
     }
 
     fn simple_theme_dark(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result {
+        let dim = self.get_dim();
+
         write!(
             a,
-            "{}<style>{}</style>{}{}",
-            SVG_HEADER,
+            "<svg class=\"poloto\" width=\"{0}\" height=\"{1}\" viewBox=\"0 0 {0} {1}\" xmlns=\"http://www.w3.org/2000/svg\"><style>{2}</style>{3}{4}",
+            dim[0],
+            dim[1],
             STYLE_CONFIG_DARK_DEFAULT,
             disp(|a| self.render(a)),
             SVG_END

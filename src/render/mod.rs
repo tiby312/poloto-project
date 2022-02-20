@@ -7,6 +7,7 @@ mod render_plots;
 pub struct Canvas {
     pub ideal_num_xsteps: u32,
     pub ideal_num_ysteps: u32,
+    pub ideal_dash_size: f64,
     width: f64,
     height: f64,
     padding: f64,
@@ -20,12 +21,23 @@ pub struct Canvas {
     preserve_aspect: bool,
 }
 impl Canvas {
-    pub fn with_options(preserve_aspect: bool, num_css_classes: Option<usize>) -> Self {
+    pub fn get_dim(&self) -> [f64; 2] {
+        [self.width, self.height]
+    }
+    pub fn with_options(
+        dim: Option<[f64; 2]>,
+        preserve_aspect: bool,
+        num_css_classes: Option<usize>,
+    ) -> Self {
         let ideal_num_xsteps = if preserve_aspect { 4 } else { 6 };
         let ideal_num_ysteps = 5;
 
-        let width = crate::WIDTH as f64;
-        let height = crate::HEIGHT as f64;
+        let (width, height) = if let Some([x, y]) = dim {
+            (x, y)
+        } else {
+            (crate::WIDTH as f64, crate::HEIGHT as f64)
+        };
+
         let padding = 150.0;
         let paddingy = 100.0;
 
@@ -47,9 +59,11 @@ impl Canvas {
         let spacing = padding / 3.0;
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
+        let ideal_dash_size = 20.0;
         Canvas {
             ideal_num_xsteps,
             ideal_num_ysteps,
+            ideal_dash_size,
             width,
             height,
             padding,

@@ -299,6 +299,7 @@ pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
+    dim: Option<[f64; 2]>,
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
     fn default() -> Self {
@@ -308,10 +309,15 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
             ymarkers: vec![],
             num_css_classes: Some(8),
             preserve_aspect: false,
+            dim: None,
         }
     }
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
+    pub fn with_dim(&mut self, x: f64, y: f64) -> &mut Self {
+        self.dim = Some([x, y]);
+        self
+    }
     pub fn xmarker(&mut self, a: X) -> &mut Self {
         self.xmarkers.push(a);
         self
@@ -485,6 +491,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             ymarkers: vec![],
             num_css_classes: None,
             preserve_aspect: false,
+            dim: None,
         };
 
         std::mem::swap(&mut val, self);
@@ -510,10 +517,10 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             val.ymarkers.clone(),
         );
 
-        let ideal_dash_size = 20.0;
+        let canvas =
+            render::Canvas::with_options(val.dim, val.preserve_aspect, val.num_css_classes);
 
-        let canvas = render::Canvas::with_options(val.preserve_aspect, val.num_css_classes);
-
+        let ideal_dash_size = canvas.ideal_dash_size;
         let boundx = Bound {
             min: boundx[0],
             max: boundx[1],
@@ -578,6 +585,10 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Plotter<'a, X, Y> {
     pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> fmt::Result {
         render::Canvas::render_plots(&mut a, self)?;
         render::Canvas::render_base(&mut a, self)
+    }
+
+    pub fn get_dim(&self) -> [f64; 2] {
+        self.plots.canvas.get_dim()
     }
 }
 
