@@ -83,14 +83,14 @@ const HEIGHT: f64 = 500.0;
 
 trait PlotTrait {
     type Item;
-    fn plot_type(&self) -> PlotType;
+    fn plot_type(&self) -> PlotMetaType;
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
     fn iter_second(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
 }
 
 struct PlotStruct<I: PlotIter, F: Display> {
-    ptype: PlotType,
+    ptype: PlotMetaType,
     iter: Option<I>,
     it1: Option<I::It1>,
     it2: Option<I::It2>,
@@ -98,7 +98,7 @@ struct PlotStruct<I: PlotIter, F: Display> {
 }
 
 impl<I: PlotIter, F: Display> PlotStruct<I, F> {
-    fn new(iter: I, func: F, ptype: PlotType) -> Self {
+    fn new(iter: I, func: F, ptype: PlotMetaType) -> Self {
         PlotStruct {
             iter: Some(iter),
             it1: None,
@@ -111,7 +111,7 @@ impl<I: PlotIter, F: Display> PlotStruct<I, F> {
 
 impl<X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)>, F: Display> PlotTrait for PlotStruct<D, F> {
     type Item = (X, Y);
-    fn plot_type(&self) -> PlotType {
+    fn plot_type(&self) -> PlotMetaType {
         self.ptype
     }
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
@@ -136,6 +136,11 @@ enum PlotType {
     Histo,
     LineFill,
     LineFillRaw,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum PlotMetaType {
+    Plot(PlotType),
     Text,
 }
 
@@ -339,7 +344,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self.plots.push(Box::new(PlotStruct::new(
             std::iter::empty(),
             name,
-            PlotType::Text,
+            PlotMetaType::Text,
         )));
         self
     }
@@ -361,7 +366,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
-            PlotType::Line,
+            PlotMetaType::Plot(PlotType::Line),
         )));
         self
     }
@@ -383,7 +388,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
-            PlotType::LineFill,
+            PlotMetaType::Plot(PlotType::LineFill),
         )));
         self
     }
@@ -406,7 +411,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
-            PlotType::LineFillRaw,
+            PlotMetaType::Plot(PlotType::LineFillRaw),
         )));
         self
     }
@@ -430,7 +435,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
-            PlotType::Scatter,
+            PlotMetaType::Plot(PlotType::Scatter),
         )));
         self
     }
@@ -453,7 +458,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self.plots.push(Box::new(PlotStruct::new(
             plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
-            PlotType::Histo,
+            PlotMetaType::Plot(PlotType::Histo),
         )));
         self
     }

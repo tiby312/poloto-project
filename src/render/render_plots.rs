@@ -89,13 +89,18 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
             maxy_ii: scaley,
         };
 
-        match p.plot_type() {
-            PlotType::Text => {
-                // do nothing
+        let p_type = match p.plot_type() {
+            PlotMetaType::Text => {
+                // don't need to render any legend
+                continue;
             }
-            PlotType::Line => {
-                let colori = color_iter.next().unwrap();
+            PlotMetaType::Plot(p) => p,
+        };
 
+        let colori = color_iter.next().unwrap();
+
+        match p_type {
+            PlotType::Line => {
                 if name_exists {
                     writer.single("line", |d| {
                         d.attr(
@@ -121,8 +126,6 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 })?;
             }
             PlotType::Scatter => {
-                let colori = color_iter.next().unwrap();
-
                 if name_exists {
                     writer.single("line", |d| {
                         d.attr(
@@ -159,8 +162,6 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 })?;
             }
             PlotType::Histo => {
-                let colori = color_iter.next().unwrap();
-
                 if name_exists {
                     writer.single("rect", |d| {
                         d.attr(
@@ -206,8 +207,6 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                     })?;
             }
             PlotType::LineFill => {
-                let colori = color_iter.next().unwrap();
-
                 if name_exists {
                     writer.single("rect", |d| {
                         d.attr(
@@ -242,8 +241,6 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 })?;
             }
             PlotType::LineFillRaw => {
-                let colori = color_iter.next().unwrap();
-
                 if name_exists {
                     writer.single("rect", |d| {
                         d.attr(
