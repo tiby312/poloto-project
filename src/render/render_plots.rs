@@ -91,7 +91,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
 
         let p_type = match p.plot_type() {
             PlotMetaType::Text => {
-                // don't need to render any legend
+                // don't need to render any legend or plots
                 continue;
             }
             PlotMetaType::Plot(p) => p,
