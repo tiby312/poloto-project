@@ -38,7 +38,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
     };
 
     for (i, mut p) in plotter.plots.plots.drain(..).enumerate() {
-        let legendy1 = paddingy - padding / 8.0 + (i as f64) * spacing;
+        let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
 
         let name_exists = writer
             .elem("text", |d| {
@@ -47,7 +47,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
                 d.attr("text-anchor", "start")?;
                 d.attr("font-size", "large")?;
                 d.attr("x", width - padding / 1.2)?;
-                d.attr("y", paddingy + (i as f64) * spacing)
+                d.attr("y", paddingy - yaspect_offset + (i as f64) * spacing)
             })?
             .build(|d| {
                 let mut wc = util::WriteCounter::new(d.writer_safe());
