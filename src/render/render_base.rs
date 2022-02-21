@@ -155,8 +155,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
     let d1 = minx.scale([minx, maxx], scalex);
     let d2 = first_tickx.scale([minx, maxx], scalex);
     let distance_to_firstx = d2 - d1;
-    let distancex_min_to_max=maxx.scale([minx,maxx],scalex)-d1;
-    
+    let distancex_min_to_max = maxx.scale([minx, maxx], scalex) - d1;
+
     writer.single("path", |d| {
         d.attr("stroke", "black")?;
         d.attr("fill", "none")?;
@@ -172,17 +172,21 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             )?;
         }
         d.path(|p| {
-            p.put(M(padding + xaspect_offset, height - paddingy+yaspect_offset))?;
-            p.put(L(padding + xaspect_offset+distancex_min_to_max, height - paddingy+yaspect_offset))
-            
+            p.put(M(
+                padding + xaspect_offset,
+                height - paddingy + yaspect_offset,
+            ))?;
+            p.put(L(
+                padding + xaspect_offset + distancex_min_to_max,
+                height - paddingy + yaspect_offset,
+            ))
         })
     })?;
 
     let d1 = miny.scale([miny, maxy], scaley);
     let d2 = first_ticky.scale([miny, maxy], scaley);
     let distance_to_firsty = d2 - d1;
-    let distancey_min_to_max=maxy.scale([miny,maxy],scaley)-d1;
-
+    let distancey_min_to_max = maxy.scale([miny, maxy], scaley) - d1;
 
     writer.single("path", |d| {
         d.attr("stroke", "black")?;
@@ -199,8 +203,14 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             )?;
         }
         d.path(|p| {
-            p.put(M(xaspect_offset + padding, yaspect_offset + height - paddingy))?;
-            p.put(L(xaspect_offset + padding, yaspect_offset + height - paddingy-distancey_min_to_max))
+            p.put(M(
+                xaspect_offset + padding,
+                yaspect_offset + height - paddingy,
+            ))?;
+            p.put(L(
+                xaspect_offset + padding,
+                yaspect_offset + height - paddingy - distancey_min_to_max,
+            ))
         })
     })?;
 
