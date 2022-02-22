@@ -74,6 +74,7 @@ impl Canvas {
         };
 
         let ideal_xtick_spacing = 80.0;
+        
         let ideal_ytick_spacing = 60.0;
 
         let ideal_num_xsteps = (distancex_min_to_max / ideal_xtick_spacing).floor() as u32;

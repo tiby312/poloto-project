@@ -27,6 +27,8 @@ cargo run --example marathon > target/assets/marathon.svg
 cargo run --example thread_needle > target/assets/thread_needle.svg
 cargo run --example long_label > target/assets/long_label.svg
 cargo run --example custom_dim > target/assets/custom_dim.svg
+cargo run --example world_record > target/assets/world_record.svg
+
 
 cd target/assets
 python3 -m http.server

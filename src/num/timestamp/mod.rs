@@ -165,7 +165,7 @@ where
     let [start, end] = range;
     let mut t = tick_finder::BestTickFinder::new(end, ideal_num_steps);
 
-    let steps_yr = &[1, 2, 5, 100, 200, 500, 1000, 2000, 5000];
+    let steps_yr = &[1, 2, 5, 10,20,25,50,100, 200, 500, 1000, 2000, 5000];
     let steps_mo = &[1, 2, 3, 6];
     let steps_dy = &[1, 2, 4, 5, 7];
     let steps_hr = &[1, 2, 4, 6];
@@ -181,6 +181,7 @@ where
     t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
     t.consider_meta(SE, UnixSecondGenerator { date: d }, steps_se);
 
+    
     let ret = t.into_best().unwrap();
 
     let ticks: Vec<_> = ret.ticks.into_iter().collect();
