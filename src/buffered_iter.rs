@@ -2,7 +2,7 @@
 //! Create a [`PlotIter`] from an iterator that does not implement `Clone`.
 //!
 //! If you have an iterator where each call to next() does
-//! an expensive calculation, using a buffered iterator might be desireable.
+//! an expensive calculation, using a buffered iterator might be desirable.
 //!
 //! [`PlotIter`] has a blanket impl on all iterators that implement clone.
 //! If an iterator isn't clonable, we can instead iterate over it once,

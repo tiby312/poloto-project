@@ -80,21 +80,18 @@ impl BestTickFinder {
 
     ///Returns true if the candidate was chosen
     fn consider_set(&mut self, candidate: Candidate) -> bool {
-
-        if candidate.ticks.len()<2{
+        if candidate.ticks.len() < 2 {
             return false;
         }
 
-        if self.best.ticks.len()<2{
-            self.best=candidate;
+        if self.best.ticks.len() < 2 {
+            self.best = candidate;
             return true;
         }
-
 
         let new_closeness = (self.ideal_num_steps as i64 - candidate.ticks.len() as i64).abs();
         let old_closeness = (self.ideal_num_steps as i64 - self.best.ticks.len() as i64).abs();
 
-        
         use std::cmp::Ordering;
         let is_better = match new_closeness.cmp(&old_closeness) {
             Ordering::Less => true,
@@ -118,7 +115,6 @@ impl BestTickFinder {
         step_sizes: &[i64],
     ) {
         for &a in step_sizes.iter().rev() {
-            
             if let Some(ticks) = self.gen_tick(gen.generate(a)) {
                 self.consider_set(Candidate {
                     ticks,
