@@ -24,5 +24,5 @@ fn main() {
         ),
     );
 
-    println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
+    print!("{}", poloto::disp(|w| plotter.simple_theme(w)));
 }

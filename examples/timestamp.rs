@@ -43,5 +43,5 @@ fn main() {
         "Mark (in meters)",
     );
 
-    println!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
+    print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }

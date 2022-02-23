@@ -23,5 +23,5 @@ fn main() {
 
     let mut plotter = data.build().plot("gaussian", "x", "y");
 
-    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
+    print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }

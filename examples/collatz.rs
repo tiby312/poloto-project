@@ -20,7 +20,7 @@ fn main() {
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 
-    println!(
+    print!(
         "{}<style>{}{}</style>{}{}",
         poloto::simple_theme::SVG_HEADER,
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,

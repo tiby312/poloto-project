@@ -41,7 +41,7 @@ fn main() {
 
     let mut plotter = data.build().plot("gaussian", "x", "y");
 
-    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
+    print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
 
 ```
@@ -76,7 +76,7 @@ fn main() {
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 
-    println!(
+    print!(
         "{}<style>{}{}</style>{}{}",
         poloto::simple_theme::SVG_HEADER,
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
@@ -142,7 +142,7 @@ fn main() {
         "Mark (in meters)",
     );
 
-    println!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
+    print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }
 
 ```
@@ -181,7 +181,7 @@ fn main() {
         ),
     );
 
-    println!("{}",poloto::disp(|w|plotter.simple_theme(w)));
+    print!("{}",poloto::disp(|w|plotter.simple_theme(w)));
 }
 ```
 
