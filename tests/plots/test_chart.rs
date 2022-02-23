@@ -1,3 +1,5 @@
+use super::*;
+
 const fn generate_test() -> [&'static [[f64; 2]]; 9] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
@@ -53,8 +55,11 @@ const fn generate_test_int() -> [&'static [[i128; 2]]; 9] {
 use poloto::formatm;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
-fn main() -> std::fmt::Result {
-    let mut e = tagger::new(tagger::upgrade_write(std::io::stdout()));
+#[test]
+fn test_chart() -> std::fmt::Result {
+    let w = util::create_test_file("test_chart.html");
+
+    let mut e = tagger::new(w);
 
     e.elem("html", |e| e.attr("style", "background-color:#262626"))?
         .build(|e| {

@@ -1,6 +1,6 @@
 use poloto::num::timestamp::UnixTime;
 use poloto::prelude::*;
-// PIPE me to a file!
+
 fn main() {
     let timezone = &chrono::Utc;
     use chrono::TimeZone;
@@ -43,5 +43,5 @@ fn main() {
         "Mark (in meters)",
     );
 
-    println!("{}", poloto::disp(|a| { plotter.simple_theme(a) }));
+    println!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }

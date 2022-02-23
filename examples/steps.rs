@@ -1,6 +1,4 @@
 use poloto::prelude::*;
-
-// PIPE me to a file!
 fn main() {
     // hourly trend over one day.
     let trend: [i128; 24] = [

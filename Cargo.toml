@@ -22,6 +22,10 @@ timestamp = ["chrono"]
 tagger = "4.2"
 chrono = {version="0.4", optional = true, default-features = false}
 
+[lib]
+doctest = false
+
+
 [dev-dependencies]
 chrono = {version="0.4", default-features=false, features=["std"]}
 

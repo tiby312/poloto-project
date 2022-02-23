@@ -1,8 +1,8 @@
 ///
 /// Example where we pass a uncopiable/unclonable object to each formatting function.
 ///
+use super::*;
 use poloto::{plotnum::PlotFmt, prelude::TickFormat};
-use std::fmt;
 
 struct Dummy;
 impl fmt::Display for Dummy {
@@ -47,8 +47,8 @@ impl PlotFmt for Foo {
     }
 }
 
-// PIPE me to a file!
-fn main() {
+#[test]
+fn thread_needle() -> fmt::Result {
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data = [
         (2010, 3144000),
@@ -81,7 +81,10 @@ fn main() {
         },
     );
 
-    println!(
+    let mut w = util::create_test_file("thread_needle.svg");
+
+    write!(
+        w,
         "{}<style>{}{}</style>{}{}",
         poloto::simple_theme::SVG_HEADER,
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,

@@ -50,46 +50,6 @@ fn main() {
 <img src="./target/assets/gaussian.svg" alt="demo">
 
 
-## Data Example
-
-```rust
-use poloto::prelude::*;
-
-// PIPE me to a file!
-fn main() {
-    // hourly trend over one day.
-    let trend: [i128; 24] = [
-        0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
-    ];
-
-    let data = poloto::data()
-        .histogram("", (0..).zip(trend.into_iter()))
-        .build();
-
-    let (xtick, xtick_fmt) = poloto::steps(data.boundx(), (0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
-
-    let mut plotter = data.plot_with(
-        xtick,
-        ytick,
-        poloto::plot_fmt(
-            "Number of rides at theme park hourly",
-            "Hour",
-            "Number of rides",
-            xtick_fmt,
-            ytick_fmt,
-        ),
-    );
-
-    println!("{}", poloto::disp(|w| plotter.simple_theme(w)));
-}
-
-```
-
-## Output
-
-<img src="./target/assets/hours.svg" alt="demo">
-
 
 ## Collatz Example
 
@@ -133,80 +93,6 @@ fn main() {
 <img src="./target/assets/collatz.svg" alt="demo">
 
 
-## Parametric Example
-
-```rust
-// PIPE me to a file!
-use poloto::prelude::*;
-fn main() {
-    // https://mathworld.wolfram.com/HeartCurve.html
-    let heart = |t: f64| {
-        [
-            16.0 * t.sin().powi(3),
-            13.0 * t.cos() - 5.0 * (2.0 * t).cos() - 2.0 * (3.0 * t).cos() - (4.0 * t).cos(),
-        ]
-    };
-
-    let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
-
-    let mut data = poloto::data();
-    data.line_fill_raw("heart", range.map(heart));
-    data.xmarker(-20.0).xmarker(20.0);
-    data.ymarker(-20.0).ymarker(20.0);
-    data.preserve_aspect();
-
-    let mut plotter = data.build().plot("Heart Graph", "x", "y");
-
-    println!("{}", poloto::disp(|a| plotter.simple_theme_dark(a)));
-}
-
-```
-
-## Output
-
-<img src="./target/assets/heart.svg" alt="demo">
-
-
-## Trig Example 
-
-```rust
-use poloto::prelude::*;
-// PIPE me to a file!
-fn main() {
-    let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
-
-    let mut s = poloto::data();
-    // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    s.line(
-        "tan(x)",
-        x.clone()
-            .map(|x| [x, x.tan()])
-            .crop_above(10.0)
-            .crop_below(-10.0)
-            .crop_left(2.0),
-    );
-
-    s.line("sin(2x)", x.clone().map(|x| [x, (2.0 * x).sin()]));
-
-    s.line(
-        "2*cos(x)",
-        x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-    );
-
-    let mut plotter = s.build().plot(
-        "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-    );
-
-    println!("{}", poloto::disp(|a| plotter.simple_theme(a)));
-}
-```
-
-## Output
-
-<img src="./target/assets/trig.svg" alt="demo">
-
 
 ## Timestamp Example
 
@@ -245,7 +131,45 @@ fn main() {
 
 ## Output
 
-<img src="./target/assets/days.svg" alt="demo">
+<img src="./target/assets/timestamp.svg" alt="demo">
+
+
+## Step Example
+
+```rust
+use poloto::prelude::*;
+fn main() {
+    // hourly trend over one day.
+    let trend: [i128; 24] = [
+        0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
+    ];
+
+    let data = poloto::data()
+        .histogram("", (0..).zip(trend.into_iter()))
+        .build();
+
+    let (xtick, xtick_fmt) = poloto::steps(data.boundx(), (0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
+
+    let mut plotter = data.plot_with(
+        xtick,
+        ytick,
+        poloto::plot_fmt(
+            "Number of rides at theme park hourly",
+            "Hour",
+            "Number of rides",
+            xtick_fmt,
+            ytick_fmt,
+        ),
+    );
+
+    println!("{}",poloto::disp(|w|plotter.simple_theme(w)));
+}
+```
+
+## Output
+
+<img src="./target/assets/steps.svg" alt="demo">
 
 
 ## Escape protection

@@ -78,12 +78,12 @@ pub fn write_header<T: std::fmt::Write>(mut w: T, width: f64, height: f64) -> st
 /// Create a simple theme.
 ///
 pub trait SimpleTheme {
-    fn simple_theme(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result;
-    fn simple_theme_dark(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result;
+    fn simple_theme<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
+    fn simple_theme_dark<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
 }
 
 impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
-    fn simple_theme(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result {
+    fn simple_theme<T: fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
         let dim = self.get_dim();
 
         write!(
@@ -96,7 +96,7 @@ impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
         )
     }
 
-    fn simple_theme_dark(&mut self, a: &mut dyn fmt::Write) -> std::fmt::Result {
+    fn simple_theme_dark<T: fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
         let dim = self.get_dim();
 
         write!(
