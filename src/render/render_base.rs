@@ -76,21 +76,20 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
 
     let first_ticky = ytick_info.ticks[0];
 
-
-    let (distance_to_firstx,distancex_min_to_max)={
+    let (distance_to_firstx, distancex_min_to_max) = {
         let d1 = minx.scale([minx, maxx], scalex);
         let d2 = first_tickx.scale([minx, maxx], scalex);
         let distance_to_firstx = d2 - d1;
         let distancex_min_to_max = maxx.scale([minx, maxx], scalex) - d1;
-        (distance_to_firstx,distancex_min_to_max)
+        (distance_to_firstx, distancex_min_to_max)
     };
 
-    let (distance_to_firsty,distancey_min_to_max)={
+    let (distance_to_firsty, distancey_min_to_max) = {
         let d1 = miny.scale([miny, maxy], scaley);
         let d2 = first_ticky.scale([miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
         let distancey_min_to_max = maxy.scale([miny, maxy], scaley) - d1;
-        (distance_to_firsty,distancey_min_to_max)
+        (distance_to_firsty, distancey_min_to_max)
     };
 
     {
@@ -125,7 +124,10 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                     d.attr("x1", xaspect_offset + xx)?;
                     d.attr("x2", xaspect_offset + xx)?;
                     d.attr("y1", yaspect_offset + height - paddingy)?;
-                    d.attr("y2", yaspect_offset + height - paddingy - distancey_min_to_max)
+                    d.attr(
+                        "y2",
+                        yaspect_offset + height - paddingy - distancey_min_to_max,
+                    )
                 })?;
             }
 
@@ -141,8 +143,6 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
         }
     }
 
-
-    
     {
         //step num is assured to be atleast 1.
         writer
@@ -218,7 +218,6 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             ))
         })
     })?;
-
 
     writer.single("path", |d| {
         d.attr("stroke", "black")?;

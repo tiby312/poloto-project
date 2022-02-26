@@ -17,7 +17,7 @@ fn heart() -> fmt::Result {
     data.xmarker(-20.0).xmarker(20.0);
     data.ymarker(-20.0).ymarker(20.0);
     data.preserve_aspect();
-    
+
     let mut plotter = data.build().plot("Heart Graph", "x", "y");
 
     let w = util::create_test_file("heart.svg");
