@@ -22,6 +22,7 @@ pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
     background-color: AliceBlue;\
     } \
     .poloto_scatter{stroke-width:7} \
+    .poloto_tick_line{stroke:gray;stroke-width:0.5} \
     .poloto_line{stroke-width:2} \
     .poloto_text{fill: black;} \
     .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none} \
@@ -50,6 +51,7 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     background-color: #262626;\
     } \
     .poloto_scatter{stroke-width:7} \
+    .poloto_tick_line{stroke:dimgray;stroke-width:0.5} \
     .poloto_line{stroke-width:2} \
     .poloto_text{fill: white;} \
     .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none} \

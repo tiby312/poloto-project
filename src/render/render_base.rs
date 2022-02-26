@@ -101,6 +101,17 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("y2", yaspect_offset + height - paddingy * 0.95)
             })?;
 
+            if plotter.plots.xtick_line {
+                writer.single("line", |d| {
+                    d.attr("class", "poloto_tick_line")?;
+                    d.attr("stroke", "black")?;
+                    d.attr("x1", xaspect_offset + xx)?;
+                    d.attr("x2", xaspect_offset + xx)?;
+                    d.attr("y1", yaspect_offset + height - paddingy)?;
+                    d.attr("y2", yaspect_offset + paddingy)
+                })?;
+            }
+
             writer
                 .elem("text", |d| {
                     d.attr("class", "poloto_tick_labels poloto_text")?;
@@ -139,6 +150,17 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("y1", yaspect_offset + yy)?;
                 d.attr("y2", yaspect_offset + yy)
             })?;
+
+            if plotter.plots.ytick_line {
+                writer.single("line", |d| {
+                    d.attr("class", "poloto_tick_line")?;
+                    d.attr("stroke", "black")?;
+                    d.attr("x1", xaspect_offset + padding)?;
+                    d.attr("x2", xaspect_offset + width - padding)?;
+                    d.attr("y1", yaspect_offset + yy)?;
+                    d.attr("y2", yaspect_offset + yy)
+                })?;
+            }
 
             writer
                 .elem("text", |d| {

@@ -20,6 +20,7 @@ fn main() {
     data.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     data.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+    data.ymarker(0.0);
 
     let mut plotter = data.build().plot("gaussian", "x", "y");
 

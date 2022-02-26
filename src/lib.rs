@@ -173,6 +173,8 @@ pub struct DataResult<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     canvas: render::Canvas,
     boundx: Bound<X>,
     boundy: Bound<Y>,
+    xtick_line: bool,
+    ytick_line: bool,
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     pub fn boundx(&self) -> &Bound<X> {
@@ -305,6 +307,8 @@ pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
     dim: Option<[f64; 2]>,
+    xtick_line: bool,
+    ytick_line: bool,
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
     fn default() -> Self {
@@ -315,6 +319,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
             num_css_classes: Some(8),
             preserve_aspect: false,
             dim: None,
+            xtick_line: false,
+            ytick_line: false,
         }
     }
 }
@@ -330,6 +336,15 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
 
     pub fn ymarker(&mut self, a: Y) -> &mut Self {
         self.ymarkers.push(a);
+        self
+    }
+
+    pub fn xtick_lines(&mut self) -> &mut Self {
+        self.xtick_line = true;
+        self
+    }
+    pub fn ytick_lines(&mut self) -> &mut Self {
+        self.ytick_line = true;
         self
     }
 
@@ -497,6 +512,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             num_css_classes: None,
             preserve_aspect: false,
             dim: None,
+            xtick_line: false,
+            ytick_line: false,
         };
 
         std::mem::swap(&mut val, self);
@@ -557,6 +574,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             canvas,
             boundx,
             boundy,
+            xtick_line: val.xtick_line,
+            ytick_line: val.ytick_line,
         }
     }
 }

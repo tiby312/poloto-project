@@ -16,7 +16,7 @@ fn main() {
     for i in 1000..1006 {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
-    data.ymarker(0);
+    data.ymarker(0).xtick_lines().ytick_lines();
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 

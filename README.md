@@ -38,6 +38,7 @@ fn main() {
     data.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     data.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+    data.ymarker(0.0);
 
     let mut plotter = data.build().plot("gaussian", "x", "y");
 
@@ -72,7 +73,7 @@ fn main() {
     for i in 1000..1006 {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
-    data.ymarker(0);
+    data.ymarker(0).xtick_lines().ytick_lines();
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 
@@ -220,6 +221,7 @@ These are the css classes added through `Plotter::render`
 * `poloto_histo` - histogram and legend icon 
 * `poloto_linefill` - line fill and legend icon
 * `poloto_linefillraw` - line fill raw and legend icon
+* `poloto_tick_line` - grid lines that occur on each tick.
 
 These are the css classes added through `poloto::SVG_HEADER` which is used by `simple_theme` and `simple_theme_dark`.
 
