@@ -76,8 +76,16 @@ where
 
     use tagger::PathCommand::*;
 
-    let mut xticks = xtick_info.ticks.into_iter();
-    let mut yticks = ytick_info.ticks.into_iter();
+    let mut xticks = xtick_info
+        .ticks
+        .into_iter()
+        .skip_while(|&x| x < boundx[0])
+        .take_while(|&x| x <= boundx[1]);
+    let mut yticks = ytick_info
+        .ticks
+        .into_iter()
+        .skip_while(|&x| x < boundy[0])
+        .take_while(|&x| x <= boundy[1]);
 
     let first_tickx = xticks.next().unwrap(); //[0];
 

@@ -663,18 +663,10 @@ pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::Disp
 /// Create a [`plotnum::TickInfo`] from a step iterator.
 ///
 pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
-    bound: &Bound<X>,
-    steps: I,
-) -> (TickInfo<Vec<X>>, StepFmt<X>) {
-    let ticks: Vec<_> = steps
-        .skip_while(|&x| x < bound.min)
-        .take_while(|&x| x <= bound.max)
-        .collect();
-
-    assert!(
-        ticks.len() >= 2,
-        "Atleast two ticks must be created for the given data range."
-    );
+    _bound: &Bound<X>,
+    ticks: I,
+) -> (TickInfo<I>, StepFmt<X>) {
+    
 
     (
         TickInfo {
