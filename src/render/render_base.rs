@@ -1,8 +1,8 @@
 use super::*;
 
-pub fn render_base<XI: IntoIterator, YI: IntoIterator,PF:PlotFmt<X=XI::Item,Y=YI::Item>>(
+pub fn render_base<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<XI, YI,PF>,
+    plotter: &mut Plotter<XI, YI, PF>,
 ) -> std::fmt::Result
 where
     XI::Item: PlotNum,

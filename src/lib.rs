@@ -188,12 +188,13 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
-    pub fn plot<A:Display,B:Display,C:Display>(
+    #[allow(clippy::type_complexity)]
+    pub fn plot<A: Display, B: Display, C: Display>(
         self,
         title: A,
         xname: B,
         yname: C,
-    ) -> Plotter<'a, X::IntoIter, Y::IntoIter,SimplePlotFormatter<A,B,C,X::Fmt,Y::Fmt>>
+    ) -> Plotter<'a, X::IntoIter, Y::IntoIter, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -207,12 +208,16 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`DataResult::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<XI: IntoIterator<Item = X>, YI: IntoIterator<Item = Y>,PF:PlotFmt<X=X,Y=Y>>(
+    pub fn plot_with<
+        XI: IntoIterator<Item = X>,
+        YI: IntoIterator<Item = Y>,
+        PF: PlotFmt<X = X, Y = Y>,
+    >(
         self,
         tickx: TickInfo<XI>,
         ticky: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> Plotter<'a, XI, YI,PF> {
+    ) -> Plotter<'a, XI, YI, PF> {
         Plotter {
             plot_fmt,
             plots: self,
@@ -583,14 +588,16 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
 ///
 /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
-pub struct Plotter<'a, XI: IntoIterator, YI: IntoIterator,PF:PlotFmt<X=XI::Item,Y=YI::Item>> {
+pub struct Plotter<'a, XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>>
+{
     plot_fmt: PF,
     plots: DataResult<'a, XI::Item, YI::Item>,
     tickx: Option<TickInfo<XI>>,
     ticky: Option<TickInfo<YI>>,
 }
 
-impl<'a, XI: IntoIterator, YI: IntoIterator,PF:PlotFmt<X=XI::Item,Y=YI::Item>> Plotter<'a, XI, YI,PF>
+impl<'a, XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>>
+    Plotter<'a, XI, YI, PF>
 where
     XI::Item: PlotNum,
     YI::Item: PlotNum,
