@@ -103,9 +103,9 @@ impl Canvas {
         }
     }
 
-    pub fn render_plots<XI: IntoIterator, YI: IntoIterator>(
+    pub fn render_plots<XI: IntoIterator, YI: IntoIterator,PF:PlotFmt<X=XI::Item,Y=YI::Item>>(
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter<XI, YI>,
+        plotter: &mut Plotter<XI, YI,PF>,
     ) -> std::fmt::Result
     where
         XI::Item: PlotNum,
@@ -114,9 +114,9 @@ impl Canvas {
         render_plots::render_plots(writer, plotter)
     }
 
-    pub fn render_base<XI: IntoIterator, YI: IntoIterator>(
+    pub fn render_base<XI: IntoIterator, YI: IntoIterator,PF:PlotFmt<X=XI::Item,Y=YI::Item>>(
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter<XI, YI>,
+        plotter: &mut Plotter<XI, YI,PF>,
     ) -> std::fmt::Result
     where
         XI::Item: PlotNum,
