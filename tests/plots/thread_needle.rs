@@ -12,7 +12,7 @@ impl fmt::Display for Dummy {
 }
 struct Foo {
     dummy: Dummy,
-    xtick_fmt: poloto::StepFmt<i128>,
+    xtick_fmt: poloto::TickIterFmt<i128>,
     ytick_fmt: poloto::num::integer::IntegerTickFmt,
 }
 
@@ -68,7 +68,7 @@ fn thread_needle() -> fmt::Result {
 
     let data = poloto::data().histogram("foo", data).ymarker(0).build();
 
-    let (xtick, xtick_fmt) = poloto::steps(data.boundx(), (2010..).step_by(2));
+    let (xtick, xtick_fmt) = poloto::ticks_from_iter((2010..).step_by(2));
     let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
 
     let mut plotter = data.plot_with(

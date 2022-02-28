@@ -28,7 +28,7 @@
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickInfo`].
-//! Alternatively you can use the [`steps`] function that just takes an iterator of ticks and returns a [`TickInfo`].
+//! Alternatively you can use the [`ticks_from_iter`] function that just takes an iterator of ticks and returns a [`TickInfo`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
@@ -674,23 +674,43 @@ pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::Disp
 ///
 /// Create a [`plotnum::TickInfo`] from a step iterator.
 ///
+#[deprecated(note = "Use ticks_from_iter() instead.")]
 pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
     _bound: &Bound<X>,
     ticks: I,
-) -> (TickInfo<I>, StepFmt<X>) {
+) -> (TickInfo<I>, TickIterFmt<X>) {
     (
         TickInfo {
             ticks,
             dash_size: None,
         },
-        StepFmt { _p: PhantomData },
+        TickIterFmt { _p: PhantomData },
     )
 }
 
-pub struct StepFmt<T> {
+///
+/// Create a [`plotnum::TickInfo`] from a step iterator.
+///
+///
+pub fn ticks_from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(
+    ticks: I,
+) -> (TickInfo<I>, TickIterFmt<X>) {
+    (
+        TickInfo {
+            ticks,
+            dash_size: None,
+        },
+        TickIterFmt { _p: PhantomData },
+    )
+}
+
+#[deprecated(note = "Use TickIterFmt instead.")]
+pub type StepFmt<T> = TickIterFmt<T>;
+
+pub struct TickIterFmt<T> {
     _p: PhantomData<T>,
 }
-impl<J: PlotNum + Display> TickFormat for StepFmt<J> {
+impl<J: PlotNum + Display> TickFormat for TickIterFmt<J> {
     type Num = J;
     fn write_tick(
         &mut self,
