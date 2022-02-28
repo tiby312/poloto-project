@@ -167,7 +167,7 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let (xtick, xtick_fmt) = poloto::steps(data.boundx(), (0..).step_by(6));
+    let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
     let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
 
     let mut plotter = data.plot_with(
@@ -177,13 +177,14 @@ fn main() {
             "Number of rides at theme park hourly",
             "Hour",
             "Number of rides",
-            xtick_fmt,
+            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v)),
             ytick_fmt,
         ),
     );
 
-    print!("{}",poloto::disp(|w|plotter.simple_theme(w)));
+    print!("{}", poloto::disp(|w| plotter.simple_theme(w)));
 }
+
 ```
 
 ## Output
