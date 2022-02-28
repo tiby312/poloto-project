@@ -87,9 +87,29 @@ where
         .skip_while(|&x| x < boundy[0])
         .take_while(|&x| x <= boundy[1]);
 
-    let first_tickx = xticks.next().unwrap(); //[0];
+    let mut xticks = {
+        let a = xticks
+            .next()
+            .expect("There must be atleast two ticks for each axis");
+        let b = xticks
+            .next()
+            .expect("There must be atleast two ticks for each axis");
+        vec![a, b].into_iter().chain(xticks)
+    };
 
-    let first_ticky = yticks.next().unwrap(); //[0];
+    let mut yticks = {
+        let a = yticks
+            .next()
+            .expect("There must be atleast two ticks for each axis");
+        let b = yticks
+            .next()
+            .expect("There must be atleast two ticks for each axis");
+        vec![a, b].into_iter().chain(yticks)
+    };
+
+    let first_tickx = xticks.next().unwrap();
+
+    let first_ticky = yticks.next().unwrap();
 
     let (distance_to_firstx, distancex_min_to_max) = {
         let d1 = minx.scale([minx, maxx], scalex);

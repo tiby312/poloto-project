@@ -666,8 +666,6 @@ pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
     _bound: &Bound<X>,
     ticks: I,
 ) -> (TickInfo<I>, StepFmt<X>) {
-    
-
     (
         TickInfo {
             ticks,
