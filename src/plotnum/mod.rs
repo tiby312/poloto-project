@@ -43,10 +43,10 @@ pub struct DashInfo {
 /// Information on the properties of all the interval ticks for one dimension.
 ///
 #[derive(Debug, Clone)]
-pub struct TickInfo<I> {
+pub struct TickInfo<I: IntoIterator> {
     /// List of the position of each tick to be displayed.
     /// This must have a length of as least 2.
-    pub ticks: Vec<I>,
+    pub ticks: I,
 
     pub dash_size: Option<f64>,
 }
@@ -58,7 +58,8 @@ pub struct TickInfo<I> {
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
-    fn generate(bound: &crate::Bound<Self>) -> (TickInfo<Self>, Self::Fmt);
+    type IntoIter: IntoIterator<Item = Self>;
+    fn generate(bound: &crate::Bound<Self>) -> (TickInfo<Self::IntoIter>, Self::Fmt);
 }
 
 #[derive(Debug, Copy, Clone)]

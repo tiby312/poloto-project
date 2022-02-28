@@ -1,9 +1,13 @@
 use super::*;
 
-pub fn render_base<X: PlotNum, Y: PlotNum>(
+pub fn render_base<XI: IntoIterator, YI: IntoIterator>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<X, Y>,
-) -> std::fmt::Result {
+    plotter: &mut Plotter<XI, YI>,
+) -> std::fmt::Result
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
     let mut writer = tagger::new(writer);
 
     let Canvas {
@@ -24,8 +28,8 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
 
-    let xtick_info = &mut plotter.tickx;
-    let ytick_info = &mut plotter.ticky;
+    let xtick_info = plotter.tickx.take().unwrap();
+    let ytick_info = plotter.ticky.take().unwrap();
 
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
@@ -72,9 +76,12 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
 
     use tagger::PathCommand::*;
 
-    let first_tickx = xtick_info.ticks[0];
+    let mut xticks = xtick_info.ticks.into_iter();
+    let mut yticks = ytick_info.ticks.into_iter();
 
-    let first_ticky = ytick_info.ticks[0];
+    let first_tickx = xticks.next().unwrap(); //[0];
+
+    let first_ticky = yticks.next().unwrap(); //[0];
 
     let (distance_to_firstx, distancex_min_to_max) = {
         let d1 = minx.scale([minx, maxx], scalex);
@@ -105,7 +112,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             .build(|d| plotter.plot_fmt.write_xwher(&mut d.writer_safe()))?;
 
         //Draw interva`l x text
-        for &val in xtick_info.ticks.iter() {
+        for val in std::iter::once(first_tickx).chain(xticks) {
             let xx = (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
 
             writer.single("line", |d| {
@@ -156,7 +163,7 @@ pub fn render_base<X: PlotNum, Y: PlotNum>(
             .build(|w| plotter.plot_fmt.write_ywher(&mut w.writer_safe()))?;
 
         //Draw interval y text
-        for &val in ytick_info.ticks.iter() {
+        for val in std::iter::once(first_ticky).chain(yticks) {
             let yy = height
                 - (val.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
                 - paddingy;

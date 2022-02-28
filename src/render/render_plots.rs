@@ -1,9 +1,13 @@
 use super::*;
 
-pub fn render_plots<X: PlotNum, Y: PlotNum>(
+pub fn render_plots<XI: IntoIterator, YI: IntoIterator>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<X, Y>,
-) -> std::fmt::Result {
+    plotter: &mut Plotter<XI, YI>,
+) -> std::fmt::Result
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
     let Canvas {
         width,
         height,

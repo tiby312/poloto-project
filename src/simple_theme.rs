@@ -84,7 +84,11 @@ pub trait SimpleTheme {
     fn simple_theme_dark<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
 }
 
-impl<X: PlotNum, Y: PlotNum> SimpleTheme for Plotter<'_, X, Y> {
+impl<XI: IntoIterator, YI: IntoIterator> SimpleTheme for Plotter<'_, XI, YI>
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
     fn simple_theme<T: fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
         let dim = self.get_dim();
 
