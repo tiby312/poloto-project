@@ -626,9 +626,18 @@ where
     }
 }
 
-///
-/// Trait to specify the title/xname/yname/xtick names/ytick names/xticks/yticks.
-///
+/// 
+/// Trait that captures all user defined formatting. This includes:
+/// 
+/// * The distribution of ticks on each axis, 
+/// 
+/// * The formatting of:
+///     * title
+///     * xname
+///     * yname
+///     * xticks
+///     * yticks
+/// 
 pub trait PlotAll {
     type X: PlotNum;
     type Y: PlotNum;
