@@ -1,13 +1,9 @@
 use super::*;
 
-pub fn render_plots<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>>(
+pub fn render_plots<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<XI, YI, PF>,
-) -> std::fmt::Result
-where
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-{
+    plots: &mut DataResult<X, Y>,
+) -> std::fmt::Result {
     let Canvas {
         width,
         height,
@@ -20,10 +16,10 @@ where
         spacing,
         num_css_classes,
         ..
-    } = plotter.plots.canvas;
+    } = plots.canvas;
 
-    let boundx = [plotter.plots.boundx.min, plotter.plots.boundx.max];
-    let boundy = [plotter.plots.boundy.min, plotter.plots.boundy.max];
+    let boundx = [plots.boundx.min, plots.boundx.max];
+    let boundy = [plots.boundy.min, plots.boundy.max];
 
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
@@ -40,7 +36,7 @@ where
         (0..max).cycle()
     };
 
-    for (i, mut p) in plotter.plots.plots.drain(..).enumerate() {
+    for (i, mut p) in plots.plots.drain(..).enumerate() {
         let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
 
         let name_exists = writer
@@ -81,7 +77,7 @@ where
                     writer: &mut writer,
                     p: p.as_mut(),
                     plot_iter,
-                    canvas: &plotter.plots.canvas,
+                    canvas: &plots.canvas,
                     p_type,
                     name_exists,
                     colori,

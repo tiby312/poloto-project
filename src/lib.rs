@@ -189,12 +189,15 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     /// tick generators tied to a [`PlotNum`].
     ///
     #[allow(clippy::type_complexity)]
-    pub fn plot<A, B, C>(
+    pub fn plot<A: 'a, B: 'a, C: 'a>(
         self,
         title: A,
         xname: B,
         yname: C,
-    ) -> Plotter<'a, X::IntoIter, Y::IntoIter, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>
+    ) -> Plotter<
+        'a,
+        PlotAllStruct<X::IntoIter, Y::IntoIter, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>,
+    >
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -204,29 +207,40 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     {
         let (x, xt) = ticks_from_default(&self.boundx);
         let (y, yt) = ticks_from_default(&self.boundy);
+
         let p = plot_fmt(title, xname, yname, xt, yt);
         self.plot_with(x, y, p)
     }
+
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`DataResult::plot`] User must supply own tick distribution.
     ///
     pub fn plot_with<XI, YI, PF>(
         self,
-        tickx: TickInfo<XI>,
-        ticky: TickInfo<YI>,
+        xtick: TickInfo<XI>,
+        ytick: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> Plotter<'a, XI, YI, PF>
+    ) -> Plotter<'a, PlotAllStruct<XI, YI, PF>>
     where
         XI: IntoIterator<Item = X>,
         YI: IntoIterator<Item = Y>,
         PF: PlotFmt<X = X, Y = Y>,
     {
         Plotter {
-            plot_fmt,
+            plot_all: Some(PlotAllStruct {
+                fmt: plot_fmt,
+                xtick,
+                ytick,
+            }),
             plots: self,
-            tickx: Some(tickx),
-            ticky: Some(ticky),
+        }
+    }
+
+    pub fn plot_with_all<PF: PlotAll<X = X, Y = Y>>(self, p: PF) -> Plotter<'a, PF> {
+        Plotter {
+            plot_all: Some(p),
+            plots: self,
         }
     }
 }
@@ -589,24 +603,50 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     }
 }
 
+pub struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt> {
+    pub xtick: TickInfo<XI>,
+    pub ytick: TickInfo<YI>,
+    pub fmt: PF,
+}
+
+impl<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>> PlotAll
+    for PlotAllStruct<XI, YI, PF>
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
+    type X = PF::X;
+    type Y = PF::Y;
+    type Fmt = PF;
+    type XI = XI;
+    type YI = YI;
+
+    fn split(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>) {
+        (self.fmt, self.xtick, self.ytick)
+    }
+}
+
+///
+/// Trait to specify the title/xname/yname/xtick names/ytick names/xticks/yticks.
+///
+pub trait PlotAll {
+    type X: PlotNum;
+    type Y: PlotNum;
+    type Fmt: PlotFmt<X = Self::X, Y = Self::Y>;
+    type XI: IntoIterator<Item = Self::X>;
+    type YI: IntoIterator<Item = Self::Y>;
+    fn split(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
+}
+
 ///
 /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
-pub struct Plotter<'a, XI: IntoIterator, YI: IntoIterator, PF> {
-    plot_fmt: PF,
-    plots: DataResult<'a, XI::Item, YI::Item>,
-    tickx: Option<TickInfo<XI>>,
-    ticky: Option<TickInfo<YI>>,
+pub struct Plotter<'a, PF: PlotAll> {
+    plot_all: Option<PF>,
+    plots: DataResult<'a, PF::X, PF::Y>,
 }
 
-impl<'a, XI, YI, PF> Plotter<'a, XI, YI, PF>
-where
-    XI: IntoIterator,
-    YI: IntoIterator,
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-    PF: PlotFmt<X = XI::Item, Y = YI::Item>,
-{
+impl<'a, PF: PlotAll> Plotter<'a, PF> {
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
@@ -628,7 +668,7 @@ where
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> fmt::Result {
-        render::Canvas::render_plots(&mut a, self)?;
+        render::Canvas::render_plots(&mut a, &mut self.plots)?;
         render::Canvas::render_base(&mut a, self)
     }
 

@@ -1,13 +1,9 @@
 use super::*;
 
-pub fn render_base<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>>(
+pub fn render_base<PF: PlotAll>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<XI, YI, PF>,
-) -> std::fmt::Result
-where
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-{
+    plotter: &mut Plotter<PF>,
+) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 
     let Canvas {
@@ -28,8 +24,7 @@ where
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
 
-    let xtick_info = plotter.tickx.take().unwrap();
-    let ytick_info = plotter.ticky.take().unwrap();
+    let (mut plot_fmt, xtick_info, ytick_info) = plotter.plot_all.take().unwrap().split();
 
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
@@ -43,7 +38,7 @@ where
             d.attr("x", width / 2.0)?;
             d.attr("y", padding / 4.0)
         })?
-        .build(|w| plotter.plot_fmt.write_title(&mut w.writer_safe()))?;
+        .build(|w| plot_fmt.write_title(&mut w.writer_safe()))?;
 
     writer
         .elem("text", |d| {
@@ -54,7 +49,7 @@ where
             d.attr("x", width / 2.0)?;
             d.attr("y", height - padding / 8.)
         })?
-        .build(|w| plotter.plot_fmt.write_xname(&mut w.writer_safe()))?;
+        .build(|w| plot_fmt.write_xname(&mut w.writer_safe()))?;
 
     writer
         .elem("text", |d| {
@@ -69,7 +64,7 @@ where
             d.attr("x", padding / 4.0)?;
             d.attr("y", height / 2.0)
         })?
-        .build(|w| plotter.plot_fmt.write_yname(&mut w.writer_safe()))?;
+        .build(|w| plot_fmt.write_yname(&mut w.writer_safe()))?;
 
     let xdash_size = xtick_info.dash_size;
     let ydash_size = ytick_info.dash_size;
@@ -137,7 +132,7 @@ where
                 d.attr("x", width * 0.55)?;
                 d.attr("y", paddingy * 0.7)
             })?
-            .build(|d| plotter.plot_fmt.write_xwher(&mut d.writer_safe()))?;
+            .build(|d| plot_fmt.write_xwher(&mut d.writer_safe()))?;
 
         //Draw interva`l x text
         for val in std::iter::once(first_tickx).chain(xticks) {
@@ -174,7 +169,7 @@ where
                     d.attr("x", xaspect_offset + xx)?;
                     d.attr("y", yaspect_offset + height - paddingy + texty_padding)
                 })?
-                .build(|w| plotter.plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
+                .build(|w| plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
         }
     }
 
@@ -188,7 +183,7 @@ where
                 d.attr("x", padding)?;
                 d.attr("y", paddingy * 0.7)
             })?
-            .build(|w| plotter.plot_fmt.write_ywher(&mut w.writer_safe()))?;
+            .build(|w| plot_fmt.write_ywher(&mut w.writer_safe()))?;
 
         //Draw interval y text
         for val in std::iter::once(first_ticky).chain(yticks) {
@@ -224,7 +219,7 @@ where
                     d.attr("x", xaspect_offset + padding - textx_padding)?;
                     d.attr("y", yaspect_offset + yy)
                 })?
-                .build(|w| plotter.plot_fmt.write_ytick(&mut w.writer_safe(), &val))?;
+                .build(|w| plot_fmt.write_ytick(&mut w.writer_safe(), &val))?;
         }
     }
 

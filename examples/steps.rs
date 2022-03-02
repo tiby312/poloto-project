@@ -12,7 +12,7 @@ fn main() {
     let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
     let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
 
-    let mut plotter = data.plot_with(
+    let mut pp = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(
@@ -24,5 +24,5 @@ fn main() {
         ),
     );
 
-    print!("{}", poloto::disp(|w| plotter.simple_theme(w)));
+    print!("{}", poloto::disp(|w| pp.simple_theme(w)));
 }

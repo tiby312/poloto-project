@@ -134,12 +134,14 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
 }
 
 use std::fmt;
+
 ///
 /// Used by [`crate::DataResult::plot_with`]
 ///
 pub trait PlotFmt {
     type X: PlotNum;
     type Y: PlotNum;
+
     fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
     fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
     fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;

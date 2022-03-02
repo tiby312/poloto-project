@@ -103,33 +103,17 @@ impl Canvas {
         }
     }
 
-    pub fn render_plots<
-        XI: IntoIterator,
-        YI: IntoIterator,
-        PF: PlotFmt<X = XI::Item, Y = YI::Item>,
-    >(
+    pub fn render_plots<X: PlotNum, Y: PlotNum>(
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter<XI, YI, PF>,
-    ) -> std::fmt::Result
-    where
-        XI::Item: PlotNum,
-        YI::Item: PlotNum,
-    {
+        plotter: &mut DataResult<X, Y>,
+    ) -> std::fmt::Result {
         render_plots::render_plots(writer, plotter)
     }
 
-    pub fn render_base<
-        XI: IntoIterator,
-        YI: IntoIterator,
-        PF: PlotFmt<X = XI::Item, Y = YI::Item>,
-    >(
+    pub fn render_base<PF: PlotAll>(
         writer: impl std::fmt::Write,
-        plotter: &mut Plotter<XI, YI, PF>,
-    ) -> std::fmt::Result
-    where
-        XI::Item: PlotNum,
-        YI::Item: PlotNum,
-    {
+        plotter: &mut Plotter<PF>,
+    ) -> std::fmt::Result {
         render_base::render_base(writer, plotter)
     }
 }
