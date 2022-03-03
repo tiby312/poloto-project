@@ -193,7 +193,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         title: impl Display,
         xname: impl Display,
         yname: impl Display,
-    ) -> Plotter<'a, impl PlotAll<X = X, Y = Y>>
+    ) -> Plotter<'a, impl PlotFmtAll<X = X, Y = Y>>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -214,14 +214,14 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> Plotter<'a, impl PlotAll<X = X, Y = Y>>
+    ) -> Plotter<'a, impl PlotFmtAll<X = X, Y = Y>>
     where
         XI: IntoIterator<Item = X>,
         YI: IntoIterator<Item = Y>,
         PF: PlotFmt<X = X, Y = Y>,
     {
         ///
-        /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotAll`] trait.
+        /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotFmtAll`] trait.
         ///
         struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt> {
             xtick: TickInfo<XI>,
@@ -229,7 +229,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             fmt: PF,
         }
 
-        impl<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>> PlotAll
+        impl<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>> PlotFmtAll
             for PlotAllStruct<XI, YI, PF>
         where
             XI::Item: PlotNum,
@@ -257,9 +257,9 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     }
 
     ///
-    /// Create a plotter directly from a [`PlotAll`]
-    /// 
-    pub fn plot_with_all<PF: PlotAll<X = X, Y = Y>>(self, p: PF) -> Plotter<'a, PF> {
+    /// Create a plotter directly from a [`PlotFmtAll`]
+    ///
+    pub fn plot_with_all<PF: PlotFmtAll<X = X, Y = Y>>(self, p: PF) -> Plotter<'a, PF> {
         Plotter {
             plot_all: Some(p),
             plots: self,
@@ -629,12 +629,12 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
 ///
 /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
-pub struct Plotter<'a, PF: PlotAll> {
+pub struct Plotter<'a, PF: PlotFmtAll> {
     plot_all: Option<PF>,
     plots: DataResult<'a, PF::X, PF::Y>,
 }
 
-impl<'a, PF: PlotAll> Plotter<'a, PF> {
+impl<'a, PF: PlotFmtAll> Plotter<'a, PF> {
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.

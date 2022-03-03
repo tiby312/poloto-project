@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn render_base<PF: PlotAll>(
+pub fn render_base<PF: PlotFmtAll>(
     writer: impl std::fmt::Write,
     plotter: &mut Plotter<PF>,
 ) -> std::fmt::Result {

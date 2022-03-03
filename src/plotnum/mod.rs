@@ -271,7 +271,7 @@ mod map {
 ///     * xticks
 ///     * yticks
 ///
-pub trait PlotAll {
+pub trait PlotFmtAll {
     type X: PlotNum;
     type Y: PlotNum;
     type Fmt: PlotFmt<X = Self::X, Y = Self::Y>;
