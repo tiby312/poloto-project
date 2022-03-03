@@ -16,13 +16,16 @@ fn main() {
     for i in 1000..1006 {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
-    data.ymarker(0).xtick_lines().ytick_lines();
+
+    let dim=[2000.0,800.0];
+
+    data.ymarker(0).xtick_lines().ytick_lines().with_dim(dim);
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 
     print!(
         "{}<style>{}{}</style>{}{}",
-        poloto::simple_theme::SVG_HEADER,
+        poloto::disp(|a| poloto::simple_theme::write_header(a,dim)),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
         poloto::disp(|a| plotter.render(a)),

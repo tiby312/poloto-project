@@ -371,8 +371,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
     }
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
-    pub fn with_dim(&mut self, x: f64, y: f64) -> &mut Self {
-        self.dim = Some([x, y]);
+    pub fn with_dim(&mut self, dim:[f64;2]) -> &mut Self {
+        self.dim = Some(dim);
         self
     }
     pub fn xmarker(&mut self, a: X) -> &mut Self {

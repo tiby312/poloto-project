@@ -72,8 +72,8 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     .poloto6fill{fill:orange;} \
     .poloto7fill{fill:chocolate;}";
 
-pub fn write_header<T: std::fmt::Write>(mut w: T, width: f64, height: f64) -> std::fmt::Result {
-    write!(w,"<svg class=\"poloto\" width=\"{0}\" height=\"{1}\" viewBox=\"0 0 {0} {1}\" xmlns=\"http://www.w3.org/2000/svg\">",width,height)
+pub fn write_header<T: std::fmt::Write>(mut w: T, dim:[f64;2]) -> std::fmt::Result {
+    write!(w,"<svg class=\"poloto\" width=\"{0}\" height=\"{1}\" viewBox=\"0 0 {0} {1}\" xmlns=\"http://www.w3.org/2000/svg\">",dim[0],dim[1])
 }
 
 ///
@@ -91,7 +91,7 @@ impl<PF: PlotFmtAll> SimpleTheme for Plotter<'_, PF> {
         write!(
             a,
             "{}<style>{}</style>{}{}",
-            disp_const(|w| write_header(w, dim[0], dim[1])),
+            disp_const(|w| write_header(w, dim)),
             STYLE_CONFIG_LIGHT_DEFAULT,
             disp(|a| self.render(a)),
             SVG_END
@@ -104,7 +104,7 @@ impl<PF: PlotFmtAll> SimpleTheme for Plotter<'_, PF> {
         write!(
             a,
             "{}<style>{}</style>{}{}",
-            disp_const(|w| write_header(w, dim[0], dim[1])),
+            disp_const(|w| write_header(w, dim)),
             STYLE_CONFIG_DARK_DEFAULT,
             disp(|a| self.render(a)),
             SVG_END
