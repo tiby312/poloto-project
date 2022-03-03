@@ -24,7 +24,7 @@ pub fn render_base<PF: PlotAll>(
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
 
-    let (mut plot_fmt, xtick_info, ytick_info) = plotter.plot_all.take().unwrap().split();
+    let (mut plot_fmt, xtick_info, ytick_info) = plotter.plot_all.take().unwrap().gen();
 
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;

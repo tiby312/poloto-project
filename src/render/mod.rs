@@ -1,7 +1,7 @@
 use crate::*;
 
-mod render_base;
-mod render_plots;
+pub mod render_base;
+pub mod render_plots;
 
 #[derive(Copy, Clone)]
 pub struct Canvas {
@@ -101,20 +101,6 @@ impl Canvas {
             legendx1,
             num_css_classes,
         }
-    }
-
-    pub fn render_plots<X: PlotNum, Y: PlotNum>(
-        writer: impl std::fmt::Write,
-        plotter: &mut DataResult<X, Y>,
-    ) -> std::fmt::Result {
-        render_plots::render_plots(writer, plotter)
-    }
-
-    pub fn render_base<PF: PlotAll>(
-        writer: impl std::fmt::Write,
-        plotter: &mut Plotter<PF>,
-    ) -> std::fmt::Result {
-        render_base::render_base(writer, plotter)
     }
 }
 

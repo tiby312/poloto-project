@@ -68,16 +68,7 @@ pub enum Axis {
     Y,
 }
 
-///
-/// Formatter for a tick.
-///
-pub trait TickFormat {
-    type Num: PlotNum;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
-    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        Ok(())
-    }
-
+pub trait TickFormatExt: TickFormat {
     fn with_tick_fmt<F>(self, func: F) -> TickFmt<Self, F>
     where
         Self: Sized,
@@ -95,8 +86,21 @@ pub trait TickFormat {
     }
 }
 
+impl<T: TickFormat> TickFormatExt for T {}
+
 ///
-/// Used by [`TickFormat::with_where_fmt`]
+/// Formatter for a tick.
+///
+pub trait TickFormat {
+    type Num: PlotNum;
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
+    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        Ok(())
+    }
+}
+
+///
+/// Used by [`TickFormatExt::with_where_fmt`]
 ///
 pub struct WhereFmt<T, F> {
     inner: T,
@@ -115,7 +119,7 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result> TickFor
 }
 
 ///
-/// Used by [`TickFormat::with_tick_fmt`]
+/// Used by [`TickFormatExt::with_tick_fmt`]
 ///
 pub struct TickFmt<T, F> {
     inner: T,
@@ -253,4 +257,25 @@ mod map {
             self.iter.size_hint()
         }
     }
+}
+
+///
+/// Trait that captures all user defined plot formatting. This includes:
+///
+/// * The distribution of ticks on each axis,
+///
+/// * The formatting of:
+///     * title
+///     * xname
+///     * yname
+///     * xticks
+///     * yticks
+///
+pub trait PlotAll {
+    type X: PlotNum;
+    type Y: PlotNum;
+    type Fmt: PlotFmt<X = Self::X, Y = Self::Y>;
+    type XI: IntoIterator<Item = Self::X>;
+    type YI: IntoIterator<Item = Self::Y>;
+    fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
 }

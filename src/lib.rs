@@ -24,7 +24,7 @@
 //!
 //! The above types have the advantage of automatically selecting reasonable
 //! tick intervals. The user can change the formatting of the ticks while still using
-//! the ticks that were selected via its automatic methods using [`TickFormat::with_tick_fmt`].
+//! the ticks that were selected via its automatic methods using [`TickFormatExt::with_tick_fmt`].
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickInfo`].
@@ -68,7 +68,7 @@ pub mod simple_theme;
 ///
 pub mod prelude {
     pub use super::formatm;
-    pub use super::plotnum::TickFormat;
+    pub use super::plotnum::TickFormatExt;
     pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
 }
@@ -188,22 +188,15 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
-    #[allow(clippy::type_complexity)]
-    pub fn plot<A: 'a, B: 'a, C: 'a>(
+    pub fn plot(
         self,
-        title: A,
-        xname: B,
-        yname: C,
-    ) -> Plotter<
-        'a,
-        PlotAllStruct<X::IntoIter, Y::IntoIter, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>,
-    >
+        title: impl Display,
+        xname: impl Display,
+        yname: impl Display,
+    ) -> Plotter<'a, impl PlotAll<X = X, Y = Y>>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
-        A: Display,
-        B: Display,
-        C: Display,
     {
         let (x, xt) = ticks_from_default(&self.boundx);
         let (y, yt) = ticks_from_default(&self.boundy);
@@ -221,12 +214,38 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> Plotter<'a, PlotAllStruct<XI, YI, PF>>
+    ) -> Plotter<'a, impl PlotAll<X = X, Y = Y>>
     where
         XI: IntoIterator<Item = X>,
         YI: IntoIterator<Item = Y>,
         PF: PlotFmt<X = X, Y = Y>,
     {
+        ///
+        /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotAll`] trait.
+        ///
+        struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt> {
+            xtick: TickInfo<XI>,
+            ytick: TickInfo<YI>,
+            fmt: PF,
+        }
+
+        impl<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>> PlotAll
+            for PlotAllStruct<XI, YI, PF>
+        where
+            XI::Item: PlotNum,
+            YI::Item: PlotNum,
+        {
+            type X = PF::X;
+            type Y = PF::Y;
+            type Fmt = PF;
+            type XI = XI;
+            type YI = YI;
+
+            fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>) {
+                (self.fmt, self.xtick, self.ytick)
+            }
+        }
+
         Plotter {
             plot_all: Some(PlotAllStruct {
                 fmt: plot_fmt,
@@ -237,6 +256,9 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         }
     }
 
+    ///
+    /// Create a plotter directly from a [`PlotAll`]
+    /// 
     pub fn plot_with_all<PF: PlotAll<X = X, Y = Y>>(self, p: PF) -> Plotter<'a, PF> {
         Plotter {
             plot_all: Some(p),
@@ -248,66 +270,67 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
 ///
 /// Create a plot formatter that implements [`plotnum::PlotFmt`]
 ///
-pub fn plot_fmt<A, B, C, D, E>(
-    title: A,
-    xname: B,
-    yname: C,
+pub fn plot_fmt<D, E>(
+    title: impl Display,
+    xname: impl Display,
+    yname: impl Display,
     tickx: D,
     ticky: E,
-) -> SimplePlotFormatter<A, B, C, D, E>
+) -> impl PlotFmt<X = D::Num, Y = E::Num>
 where
-    A: Display,
-    B: Display,
-    C: Display,
     D: TickFormat,
     E: TickFormat,
 {
+    ///
+    /// A simple plot formatter that is composed of
+    /// display objects as TickFormats.
+    ///
+    struct SimplePlotFormatter<A, B, C, D, E> {
+        title: A,
+        xname: B,
+        yname: C,
+        tickx: D,
+        ticky: E,
+    }
+    impl<A, B, C, D, E> PlotFmt for SimplePlotFormatter<A, B, C, D, E>
+    where
+        A: Display,
+        B: Display,
+        C: Display,
+        D: TickFormat,
+        E: TickFormat,
+    {
+        type X = D::Num;
+        type Y = E::Num;
+        fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+            write!(writer, "{}", self.title)
+        }
+        fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+            write!(writer, "{}", self.xname)
+        }
+        fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+            write!(writer, "{}", self.yname)
+        }
+        fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
+            self.tickx.write_tick(writer, val)
+        }
+        fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
+            self.ticky.write_tick(writer, val)
+        }
+        fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+            self.tickx.write_where(writer)
+        }
+        fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+            self.ticky.write_where(writer)
+        }
+    }
+
     SimplePlotFormatter {
         title,
         xname,
         yname,
         tickx,
         ticky,
-    }
-}
-
-pub struct SimplePlotFormatter<A, B, C, D, E> {
-    pub title: A,
-    pub xname: B,
-    pub yname: C,
-    pub tickx: D,
-    pub ticky: E,
-}
-impl<A, B, C, D, E> PlotFmt for SimplePlotFormatter<A, B, C, D, E>
-where
-    A: Display,
-    B: Display,
-    C: Display,
-    D: TickFormat,
-    E: TickFormat,
-{
-    type X = D::Num;
-    type Y = E::Num;
-    fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.title)
-    }
-    fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.xname)
-    }
-    fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.yname)
-    }
-    fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
-        self.tickx.write_tick(writer, val)
-    }
-    fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
-        self.ticky.write_tick(writer, val)
-    }
-    fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        self.tickx.write_where(writer)
-    }
-    fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        self.ticky.write_where(writer)
     }
 }
 
@@ -603,50 +626,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     }
 }
 
-pub struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt> {
-    pub xtick: TickInfo<XI>,
-    pub ytick: TickInfo<YI>,
-    pub fmt: PF,
-}
-
-impl<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>> PlotAll
-    for PlotAllStruct<XI, YI, PF>
-where
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-{
-    type X = PF::X;
-    type Y = PF::Y;
-    type Fmt = PF;
-    type XI = XI;
-    type YI = YI;
-
-    fn split(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>) {
-        (self.fmt, self.xtick, self.ytick)
-    }
-}
-
-/// 
-/// Trait that captures all user defined formatting. This includes:
-/// 
-/// * The distribution of ticks on each axis, 
-/// 
-/// * The formatting of:
-///     * title
-///     * xname
-///     * yname
-///     * xticks
-///     * yticks
-/// 
-pub trait PlotAll {
-    type X: PlotNum;
-    type Y: PlotNum;
-    type Fmt: PlotFmt<X = Self::X, Y = Self::Y>;
-    type XI: IntoIterator<Item = Self::X>;
-    type YI: IntoIterator<Item = Self::Y>;
-    fn split(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
-}
-
 ///
 /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
@@ -677,8 +656,8 @@ impl<'a, PF: PlotAll> Plotter<'a, PF> {
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> fmt::Result {
-        render::Canvas::render_plots(&mut a, &mut self.plots)?;
-        render::Canvas::render_base(&mut a, self)
+        render::render_plots::render_plots(&mut a, &mut self.plots)?;
+        render::render_base::render_base(a, self)
     }
 
     pub fn get_dim(&self) -> [f64; 2] {
@@ -756,6 +735,9 @@ pub fn ticks_from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(
 #[deprecated(note = "Use TickIterFmt instead.")]
 pub type StepFmt<T> = TickIterFmt<T>;
 
+///
+/// Used by [`ticks_from_iter`]
+///
 pub struct TickIterFmt<T> {
     _p: PhantomData<T>,
 }
