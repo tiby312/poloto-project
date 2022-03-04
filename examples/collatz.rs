@@ -17,7 +17,7 @@ fn main() {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
-    let dim=[1200.0,600.0];
+    let dim = [1200.0, 600.0];
 
     data.ymarker(0).xtick_lines().ytick_lines().with_dim(dim);
 
@@ -25,7 +25,7 @@ fn main() {
 
     print!(
         "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a,[Some(800.0),None],dim)),
+        poloto::disp(|a| poloto::simple_theme::write_header(a, [Some(800.0), None], dim)),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
         poloto::disp(|a| plotter.render(a)),
