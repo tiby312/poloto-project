@@ -72,8 +72,35 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     .poloto6fill{fill:orange;} \
     .poloto7fill{fill:chocolate;}";
 
-pub fn write_header<T: std::fmt::Write>(mut w: T, dim:[f64;2],viewbox:[f64;2]) -> std::fmt::Result {
-    write!(w,"<svg class=\"poloto\" width=\"{0}\" height=\"{1}\" viewBox=\"0 0 {2} {3}\" xmlns=\"http://www.w3.org/2000/svg\">",dim[0],dim[1],viewbox[0],viewbox[1])
+
+///
+/// Allow passing Option<f64> or f64 to [`write_header`]
+/// 
+pub trait IntoOpt:Copy{
+    fn create(self)->Option<f64>;
+}
+impl IntoOpt for Option<f64>{
+    fn create(self)->Option<f64>{
+        self
+    }
+}
+
+impl IntoOpt for f64{
+    fn create(self)->Option<f64>{
+        Some(self)
+    }
+}
+
+pub fn write_header<T: std::fmt::Write,O:IntoOpt>(mut w: T, dim:[O;2],viewbox:[f64;2]) -> std::fmt::Result {
+    write!(w,"<svg class=\"poloto\" ")?;
+    if let Some(x)=dim[0].create(){
+        write!(w,"width=\"{}\" ",x)?;
+    }
+    if let Some(y)=dim[1].create(){
+        write!(w,"height=\"{}\" ",y)?;
+    }
+    
+    write!(w,"viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\">",viewbox[0],viewbox[1])
 }
 
 ///
