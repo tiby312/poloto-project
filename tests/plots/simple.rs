@@ -120,7 +120,7 @@ fn long_label() -> fmt::Result {
     write!(
         w,
         "{}<style>{}</style>{}{}",
-        poloto::disp_const(|w| poloto::simple_theme::write_header(w, [1200.0, 500.0])),
+        poloto::disp_const(|w| poloto::simple_theme::write_header(w, [1200.0, 500.0],[1200.0, 500.0])),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         poloto::disp(|a| plotter.render(a)),
         poloto::simple_theme::SVG_END
@@ -191,7 +191,7 @@ fn custom_dim() -> fmt::Result {
     write!(
         w,
         "{}<style>{}{}</style>{}{}",
-        poloto::disp_const(|w| poloto::simple_theme::write_header(w, [2000.0, 1000.0])),
+        poloto::disp_const(|w| poloto::simple_theme::write_header(w, [2000.0, 1000.0],[2000.0, 1000.0])),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
         poloto::disp(|a| plotter.render(a)),
