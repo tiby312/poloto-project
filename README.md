@@ -55,33 +55,39 @@ fn main() {
 ## Collatz Example
 
 ```rust
-use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
-    // See https://en.wikipedia.org/wiki/Gaussian_function
-    let gaussian = |sigma: f64, mu: f64| {
-        use std::f64::consts::TAU;
-        let s = sigma.powi(2);
-        let k = (sigma * TAU).sqrt().recip();
-        move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
+    let collatz = |mut a: i128| {
+        std::iter::from_fn(move || {
+            if a == 1 {
+                None
+            } else {
+                a = if a % 2 == 0 { a / 2 } else { 3 * a + 1 };
+                Some(a)
+            }
+        })
+        .fuse()
     };
 
-    let range = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0);
-
-    let g1 = gaussian(1.0, 0.0);
-    let g2 = gaussian(0.5, 0.0);
-    let g3 = gaussian(0.3, 0.0);
-
     let mut data = poloto::data();
+    for i in 1000..1006 {
+        data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+    }
 
-    data.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
-    data.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
-    data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
-    data.ymarker(0.0);
+    let dim = [1200.0, 600.0];
 
-    let mut plotter = data.build().plot("gaussian", "x", "y");
+    data.ymarker(0).xtick_lines().ytick_lines().with_dim(dim);
 
-    print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
+    let mut plotter = data.build().plot("collatz", "x", "y");
+
+    print!(
+        "{}<style>{}{}</style>{}{}",
+        poloto::disp(|a| poloto::simple_theme::write_header(a, [Some(800.0), None], dim)),
+        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
+        ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
+        poloto::disp(|a| plotter.render(a)),
+        poloto::simple_theme::SVG_END
+    )
 }
 
 ```
