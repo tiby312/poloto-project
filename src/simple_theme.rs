@@ -99,13 +99,14 @@ pub fn write_header<T: std::fmt::Write, O: IntoOpt>(
     if let Some(x) = dim[0].create() {
         write!(w, "width=\"{}\" ", x)?;
     }
+
     if let Some(y) = dim[1].create() {
         write!(w, "height=\"{}\" ", y)?;
     }
 
     write!(
         w,
-        "viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\">",
+        "viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\" style=\"overflow:hidden;\">",
         viewbox[0], viewbox[1]
     )
 }
