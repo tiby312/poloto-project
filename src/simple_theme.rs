@@ -90,28 +90,25 @@ impl IntoOpt for f64 {
     }
 }
 
-pub fn write_header<T: std::fmt::Write, O: IntoOpt>(
+pub fn determine_height_from_width(viewport:[f64;2],width:f64)->f64{
+    let [xx,yy]=viewport;
+    let height=width*(yy/xx);
+    height
+
+}
+
+pub fn write_header<T: std::fmt::Write>(
     mut w: T,
-    dim: [O; 2],
+    dim: [f64; 2],
     viewbox: [f64; 2],
 ) -> std::fmt::Result {
 
     write!(w, "<svg class=\"poloto\" ")?;
-    if let Some(x) = dim[0].create() {
-        write!(w, "width=\"{}\" ", x)?;
-    }else{
-        write!(w,"width=\"auto\" ")?;
-    }
-
-    if let Some(y) = dim[1].create() {
-        write!(w, "height=\"{}\" ", y)?;
-    }else{
-        write!(w,"height=\"auto\" ")?;
-    }
-
+    write!(w, "width=\"{}\" ", dim[0])?;
+    write!(w, "height=\"{}\" ", dim[1])?;
     write!(
         w,
-        "viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\" preserveAspectRatio=\"xMidYMid meet\">",
+        "viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\">",
         viewbox[0], viewbox[1]
     )
 }

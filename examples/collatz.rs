@@ -23,9 +23,11 @@ fn main() {
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 
+    let hh=poloto::simple_theme::determine_height_from_width(plotter.get_dim(),800.0);
+    
     print!(
         "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a, [Some(800.0), None], dim)),
+        poloto::disp(|a| poloto::simple_theme::write_header(a, [800.0, hh], dim)),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
         poloto::disp(|a| plotter.render(a)),
