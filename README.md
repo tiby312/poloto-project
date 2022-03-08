@@ -74,17 +74,20 @@ fn main() {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
-    let dim = [1200.0, 600.0];
+    //Make the plotting area slightly larger.
+    let dim = [1300.0, 600.0];
 
     data.ymarker(0).xtick_lines().ytick_lines().with_dim(dim);
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 
+    let hh=poloto::determine_height_from_width(plotter.get_dim(),800.0);
+    
     print!(
         "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a, [Some(800.0), None], dim)),
+        poloto::disp(|a| poloto::simple_theme::write_header(a, [800.0, hh], dim)),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
+        ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
         poloto::disp(|a| plotter.render(a)),
         poloto::simple_theme::SVG_END
     )
