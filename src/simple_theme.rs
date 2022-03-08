@@ -90,16 +90,14 @@ impl IntoOpt for f64 {
     }
 }
 
-
 ///
 /// Write the svg header with the specified width and viewport.
-/// 
+///
 pub fn write_header<T: std::fmt::Write>(
     mut w: T,
     dim: [f64; 2],
     viewbox: [f64; 2],
 ) -> std::fmt::Result {
-
     write!(w, "<svg class=\"poloto\" ")?;
     write!(w, "width=\"{}\" ", dim[0])?;
     write!(w, "height=\"{}\" ", dim[1])?;
@@ -144,4 +142,12 @@ impl<PF: PlotFmtAll> SimpleTheme for Plotter<'_, PF> {
             SVG_END
         )
     }
+}
+
+///
+/// Based on a svg viewport and a desired width, determine the height.
+///
+pub fn determine_height_from_width(viewport: [f64; 2], width: f64) -> f64 {
+    let [xx, yy] = viewport;
+    width * (yy / xx)
 }

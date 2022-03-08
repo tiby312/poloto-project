@@ -24,8 +24,8 @@ fn main() {
 
     let mut plotter = data.build().plot("collatz", "x", "y");
 
-    let hh=poloto::determine_height_from_width(plotter.get_dim(),800.0);
-    
+    let hh = poloto::simple_theme::determine_height_from_width(plotter.get_dim(), 800.0);
+
     print!(
         "{}<style>{}{}</style>{}{}",
         poloto::disp(|a| poloto::simple_theme::write_header(a, [800.0, hh], dim)),
