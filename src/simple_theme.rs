@@ -106,7 +106,7 @@ pub fn write_header<T: std::fmt::Write, O: IntoOpt>(
 
     write!(
         w,
-        "viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\" preserveAspectRatio=\"xMinYMin meet\">",
+        "viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\" preserveAspectRatio=\"xMidYMid meet\">",
         viewbox[0], viewbox[1]
     )
 }
