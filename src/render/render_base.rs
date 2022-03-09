@@ -1,9 +1,9 @@
 use super::*;
 
-pub(crate) fn render_base<PF: BaseFmtAndTicks>(
+pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    extra: &Extra<PF::X, PF::Y>,
-    base: PF,
+    extra: &Extra<X, Y>,
+    base: impl BaseFmtAndTicks<X = X, Y = Y>,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 

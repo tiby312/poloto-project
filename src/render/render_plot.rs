@@ -1,9 +1,9 @@
 use super::*;
 
-pub(crate) fn render_plot<AF: AllPlotFmt<Item2 = (X, Y)>, X: PlotNum, Y: PlotNum>(
+pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     plots: &Extra<X, Y>,
-    plots_all: AF,
+    plots_all: impl AllPlotFmt<Item2 = (X, Y)>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -83,9 +83,9 @@ pub(crate) fn render_plot<AF: AllPlotFmt<Item2 = (X, Y)>, X: PlotNum, Y: PlotNum
                 };
 
                 render(
+                    &mut writer,
                     it,
                     PlotRenderInfo {
-                        writer: &mut writer,
                         canvas: &plots.canvas,
                         p_type,
                         name_exists,
@@ -100,8 +100,7 @@ pub(crate) fn render_plot<AF: AllPlotFmt<Item2 = (X, Y)>, X: PlotNum, Y: PlotNum
     Ok(())
 }
 
-struct PlotRenderInfo<'a, W: fmt::Write> {
-    writer: &'a mut tagger::ElemWriter<W>,
+struct PlotRenderInfo<'a> {
     canvas: &'a Canvas,
     p_type: PlotType,
     name_exists: bool,
@@ -110,11 +109,11 @@ struct PlotRenderInfo<'a, W: fmt::Write> {
 }
 
 fn render<W: fmt::Write>(
+    writer: &mut tagger::ElemWriter<W>,
     it: impl Iterator<Item = [f64; 2]>,
-    info: PlotRenderInfo<W>,
+    info: PlotRenderInfo,
 ) -> fmt::Result {
     let PlotRenderInfo {
-        writer,
         canvas,
         p_type,
         name_exists,
