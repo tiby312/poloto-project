@@ -127,21 +127,6 @@ impl<'a, X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)> + 'a, F: Display> Plo
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum PlotType {
-    Scatter,
-    Line,
-    Histo,
-    LineFill,
-    LineFillRaw,
-}
-
-#[derive(Copy, Clone, Debug)]
-pub enum PlotMetaType {
-    Plot(PlotType),
-    Text,
-}
-
 ///
 /// Created once the min and max bounds of all the plots has been computed.
 /// Contains in it all the information typically needed to make a [`TickInfo`].
@@ -680,7 +665,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     }
 }
 
-pub struct Extra<X, Y> {
+struct Extra<X, Y> {
     canvas: render::Canvas,
     boundx: Bound<X>,
     boundy: Bound<Y>,

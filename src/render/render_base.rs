@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn render_base<PF: BaseFmtAndTicks>(
+pub(crate) fn render_base<PF: BaseFmtAndTicks>(
     writer: impl std::fmt::Write,
     extra: &Extra<PF::X, PF::Y>,
     base: PF,

@@ -302,3 +302,18 @@ pub trait BaseAndPlotsFmt {
     type B: AllPlotFmt<Item2 = (Self::X, Self::Y)>;
     fn gen(self) -> (Self::A, Self::B);
 }
+
+#[derive(Copy, Clone, Debug)]
+pub enum PlotType {
+    Scatter,
+    Line,
+    Histo,
+    LineFill,
+    LineFillRaw,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum PlotMetaType {
+    Plot(PlotType),
+    Text,
+}
