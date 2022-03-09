@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn render_plots<AF: AllPlots<Item2 = (X, Y)>, X: PlotNum, Y: PlotNum>(
+pub fn render_plots<AF: AllPlotFmt<Item2 = (X, Y)>, X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     plots_all: AF,
     plots: &Extra<X, Y>,

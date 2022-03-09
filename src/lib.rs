@@ -191,7 +191,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> Plotter<impl PlotsAndBase + 'a>
+    ) -> Plotter<impl BaseAndPlotsFmt + 'a>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -212,22 +212,22 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> Plotter<impl PlotsAndBase + 'a>
+    ) -> Plotter<impl BaseAndPlotsFmt + 'a>
     where
         XI: IntoIterator<Item = X>,
         YI: IntoIterator<Item = Y>,
-        PF: PlotFmt<X = X, Y = Y>,
+        PF: BaseFmt<X = X, Y = Y>,
     {
         ///
         /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotFmtAll`] trait.
         ///
-        struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt> {
+        struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt> {
             xtick: TickInfo<XI>,
             ytick: TickInfo<YI>,
             fmt: PF,
         }
 
-        impl<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>> PlotFmtAll
+        impl<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt<X = XI::Item, Y = YI::Item>> BaseFmtAndTicks
             for PlotAllStruct<XI, YI, PF>
         where
             XI::Item: PlotNum,
@@ -254,10 +254,10 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     ///
     /// Create a plotter directly from a [`PlotFmtAll`]
     ///
-    pub fn plot_with_all<PF: PlotFmtAll<X = X, Y = Y> + 'a>(
+    pub fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
         self,
         p: PF,
-    ) -> Plotter<impl PlotsAndBase + 'a> {
+    ) -> Plotter<impl BaseAndPlotsFmt + 'a> {
         struct Foo2<'a, X, Y> {
             plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
         }
@@ -265,7 +265,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         struct One<'a, X, Y> {
             one: Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>,
         }
-        impl<'a, X, Y> OnePlot for One<'a, X, Y> {
+        impl<'a, X, Y> OnePlotFmt for One<'a, X, Y> {
             type It = Box<dyn Iterator<Item = Self::Item> + 'a>;
             type Item = (X, Y);
             fn plot_type(&mut self) -> PlotMetaType {
@@ -281,7 +281,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             }
         }
 
-        impl<'a, X: 'a, Y: 'a> AllPlots for Foo2<'a, X, Y> {
+        impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
             type Item2 = (X, Y);
             type It = Box<dyn Iterator<Item = One<'a, X, Y>> + 'a>;
             type InnerIt = One<'a, X, Y>;
@@ -290,12 +290,12 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             }
         }
 
-        pub struct Combine<A: PlotFmtAll, B: AllPlots> {
+        pub struct Combine<A: BaseFmtAndTicks, B: AllPlotFmt> {
             pub a: A,
             pub b: B,
         }
 
-        impl<A: PlotFmtAll, B: AllPlots<Item2 = (A::X, A::Y)>> PlotsAndBase for Combine<A, B> {
+        impl<A: BaseFmtAndTicks, B: AllPlotFmt<Item2 = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
             type X = A::X;
             type Y = A::Y;
             type A = A;
@@ -330,7 +330,7 @@ pub fn plot_fmt<D, E>(
     yname: impl Display,
     tickx: D,
     ticky: E,
-) -> impl PlotFmt<X = D::Num, Y = E::Num>
+) -> impl BaseFmt<X = D::Num, Y = E::Num>
 where
     D: TickFormat,
     E: TickFormat,
@@ -346,7 +346,7 @@ where
         tickx: D,
         ticky: E,
     }
-    impl<A, B, C, D, E> PlotFmt for SimplePlotFormatter<A, B, C, D, E>
+    impl<A, B, C, D, E> BaseFmt for SimplePlotFormatter<A, B, C, D, E>
     where
         A: Display,
         B: Display,
@@ -691,14 +691,12 @@ pub struct Extra<X, Y> {
 ///
 /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
-pub struct Plotter<PF: PlotsAndBase> {
+pub struct Plotter<PF: BaseAndPlotsFmt> {
     all: Option<PF>,
-    //plot_all: Option<PF::A>,
-    //all_plots:Option<PF::B>,
     plots: Extra<PF::X, PF::Y>,
 }
 
-impl<PF: PlotsAndBase> Plotter<PF> {
+impl<PF: BaseAndPlotsFmt> Plotter<PF> {
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.

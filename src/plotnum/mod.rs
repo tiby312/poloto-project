@@ -142,7 +142,7 @@ use std::fmt;
 ///
 /// Used by [`crate::DataResult::plot_with`]
 ///
-pub trait PlotFmt {
+pub trait BaseFmt {
     type X: PlotNum;
     type Y: PlotNum;
 
@@ -271,16 +271,16 @@ mod map {
 ///     * xticks
 ///     * yticks
 ///
-pub trait PlotFmtAll {
+pub trait BaseFmtAndTicks {
     type X: PlotNum;
     type Y: PlotNum;
-    type Fmt: PlotFmt<X = Self::X, Y = Self::Y>;
+    type Fmt: BaseFmt<X = Self::X, Y = Self::Y>;
     type XI: IntoIterator<Item = Self::X>;
     type YI: IntoIterator<Item = Self::Y>;
     fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
 }
 
-pub trait OnePlot {
+pub trait OnePlotFmt {
     type Item;
     type It: Iterator<Item = Self::Item>;
     fn get_iter(&mut self) -> Self::It;
@@ -288,17 +288,17 @@ pub trait OnePlot {
     fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
 }
 
-pub trait AllPlots {
+pub trait AllPlotFmt {
     type Item2;
-    type InnerIt: OnePlot<Item = Self::Item2>;
+    type InnerIt: OnePlotFmt<Item = Self::Item2>;
     type It: Iterator<Item = Self::InnerIt>;
     fn iter(self) -> Self::It;
 }
 
-pub trait PlotsAndBase {
+pub trait BaseAndPlotsFmt {
     type X: PlotNum;
     type Y: PlotNum;
-    type A: PlotFmtAll<X = Self::X, Y = Self::Y>;
-    type B: AllPlots<Item2 = (Self::X, Self::Y)>;
+    type A: BaseFmtAndTicks<X = Self::X, Y = Self::Y>;
+    type B: AllPlotFmt<Item2 = (Self::X, Self::Y)>;
     fn gen(self) -> (Self::A, Self::B);
 }

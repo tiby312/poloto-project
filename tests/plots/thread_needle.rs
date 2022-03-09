@@ -2,7 +2,7 @@
 /// Example where we pass a uncopiable/unclonable object to each formatting function.
 ///
 use super::*;
-use poloto::{plotnum::PlotFmt, plotnum::TickFormat};
+use poloto::{plotnum::BaseFmt, plotnum::TickFormat};
 
 struct Dummy;
 impl fmt::Display for Dummy {
@@ -16,7 +16,7 @@ struct Foo {
     ytick_fmt: poloto::num::integer::IntegerTickFmt,
 }
 
-impl PlotFmt for Foo {
+impl BaseFmt for Foo {
     type X = i128;
     type Y = i128;
 
