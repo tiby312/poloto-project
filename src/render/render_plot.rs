@@ -2,7 +2,7 @@ use super::*;
 
 pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    plots: &Extra<X, Y>,
+    extra: &Extra<X, Y>,
     plots_all: impl AllPlotFmt<Item2 = (X, Y)>,
 ) -> std::fmt::Result {
     let Canvas {
@@ -17,10 +17,10 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
         spacing,
         num_css_classes,
         ..
-    } = plots.canvas;
+    } = extra.canvas;
 
-    let boundx = [plots.boundx.min, plots.boundx.max];
-    let boundy = [plots.boundy.min, plots.boundy.max];
+    let boundx = [extra.boundx.min, extra.boundx.max];
+    let boundy = [extra.boundy.min, extra.boundy.max];
 
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
@@ -86,7 +86,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                     &mut writer,
                     it,
                     PlotRenderInfo {
-                        canvas: &plots.canvas,
+                        canvas: &extra.canvas,
                         p_type,
                         name_exists,
                         colori,
