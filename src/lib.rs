@@ -295,7 +295,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
                 a: p,
                 b: Foo2 { plots: self.plots },
             }),
-            plots: Extra {
+            extra: Extra {
                 canvas: self.canvas,
                 boundx: self.boundx,
                 boundy: self.boundy,
@@ -678,7 +678,7 @@ struct Extra<X, Y> {
 ///
 pub struct Plotter<PF: BaseAndPlotsFmt> {
     all: Option<PF>,
-    plots: Extra<PF::X, PF::Y>,
+    extra: Extra<PF::X, PF::Y>,
 }
 
 impl<PF: BaseAndPlotsFmt> Plotter<PF> {
@@ -702,14 +702,14 @@ impl<PF: BaseAndPlotsFmt> Plotter<PF> {
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> fmt::Result {
-        let (fmt, ba) = Option::take(&mut self.all).unwrap().gen();
-        render::render_plots::render_plots(&mut a, ba, &self.plots)?;
-        render::render_base::render_base(a, &self.plots, fmt)
+    pub fn render<T: std::fmt::Write>(&mut self, mut writer: T) -> fmt::Result {
+        let (base_fmt, plot_fmt) = Option::take(&mut self.all).unwrap().gen();
+        render::render_plot::render_plot(&mut writer, &self.extra, plot_fmt)?;
+        render::render_base::render_base(&mut writer, &self.extra, base_fmt)
     }
 
     pub fn get_dim(&self) -> [f64; 2] {
-        self.plots.canvas.get_dim()
+        self.extra.canvas.get_dim()
     }
 }
 

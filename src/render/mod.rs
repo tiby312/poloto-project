@@ -1,7 +1,7 @@
 use crate::*;
 
 pub mod render_base;
-pub mod render_plots;
+pub mod render_plot;
 
 #[derive(Copy, Clone)]
 pub struct Canvas {

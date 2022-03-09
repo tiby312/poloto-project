@@ -1,9 +1,9 @@
 use super::*;
 
-pub(crate) fn render_plots<AF: AllPlotFmt<Item2 = (X, Y)>, X: PlotNum, Y: PlotNum>(
+pub(crate) fn render_plot<AF: AllPlotFmt<Item2 = (X, Y)>, X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    plots_all: AF,
     plots: &Extra<X, Y>,
+    plots_all: AF,
 ) -> std::fmt::Result {
     let Canvas {
         width,
