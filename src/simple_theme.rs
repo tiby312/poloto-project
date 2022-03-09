@@ -116,7 +116,7 @@ pub trait SimpleTheme {
     fn simple_theme_dark<T: fmt::Write>(&mut self, a: T) -> std::fmt::Result;
 }
 
-impl<PF: PlotFmtAll,AF:AllPlots<Item2=(PF::X,PF::Y)>> SimpleTheme for Plotter< PF,AF> {
+impl<PF: PlotsAndBase> SimpleTheme for Plotter<PF> {
     fn simple_theme<T: fmt::Write>(&mut self, mut a: T) -> std::fmt::Result {
         let dim = self.get_dim();
 

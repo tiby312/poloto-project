@@ -1,8 +1,9 @@
 use super::*;
 
-pub fn render_base<PF: PlotFmtAll,AF:AllPlots<Item2=(PF::X,PF::Y)>>(
+pub fn render_base<PF: PlotFmtAll>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<PF,AF>,
+    extra: &Extra<PF::X, PF::Y>,
+    base: PF,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 
@@ -16,15 +17,15 @@ pub fn render_base<PF: PlotFmtAll,AF:AllPlots<Item2=(PF::X,PF::Y)>>(
         scalex,
         scaley,
         ..
-    } = plotter.plots.canvas;
+    } = extra.canvas;
 
-    let boundx = [plotter.plots.boundx.min, plotter.plots.boundx.max];
-    let boundy = [plotter.plots.boundy.min, plotter.plots.boundy.max];
+    let boundx = [extra.boundx.min, extra.boundx.max];
+    let boundy = [extra.boundy.min, extra.boundy.max];
 
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
 
-    let (mut plot_fmt, xtick_info, ytick_info) = plotter.plot_all.take().unwrap().gen();
+    let (mut plot_fmt, xtick_info, ytick_info) = base.gen();
 
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
@@ -147,7 +148,7 @@ pub fn render_base<PF: PlotFmtAll,AF:AllPlots<Item2=(PF::X,PF::Y)>>(
                 d.attr("y2", yaspect_offset + height - paddingy * 0.95)
             })?;
 
-            if plotter.plots.xtick_lines {
+            if extra.xtick_lines {
                 writer.single("line", |d| {
                     d.attr("class", "poloto_tick_line")?;
                     d.attr("stroke", "black")?;
@@ -200,7 +201,7 @@ pub fn render_base<PF: PlotFmtAll,AF:AllPlots<Item2=(PF::X,PF::Y)>>(
                 d.attr("y2", yaspect_offset + yy)
             })?;
 
-            if plotter.plots.ytick_lines {
+            if extra.ytick_lines {
                 writer.single("line", |d| {
                     d.attr("class", "poloto_tick_line")?;
                     d.attr("stroke", "black")?;

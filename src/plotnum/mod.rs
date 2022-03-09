@@ -279,3 +279,26 @@ pub trait PlotFmtAll {
     type YI: IntoIterator<Item = Self::Y>;
     fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
 }
+
+pub trait OnePlot {
+    type Item;
+    type It: Iterator<Item = Self::Item>;
+    fn get_iter(&mut self) -> Self::It;
+    fn plot_type(&mut self) -> crate::PlotMetaType;
+    fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
+}
+
+pub trait AllPlots {
+    type Item2;
+    type InnerIt: OnePlot<Item = Self::Item2>;
+    type It: Iterator<Item = Self::InnerIt>;
+    fn iter(self) -> Self::It;
+}
+
+pub trait PlotsAndBase {
+    type X: PlotNum;
+    type Y: PlotNum;
+    type A: PlotFmtAll<X = Self::X, Y = Self::Y>;
+    type B: AllPlots<Item2 = (Self::X, Self::Y)>;
+    fn gen(self) -> (Self::A, Self::B);
+}
