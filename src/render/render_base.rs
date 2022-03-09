@@ -1,8 +1,8 @@
 use super::*;
 
-pub fn render_base<PF: PlotFmtAll>(
+pub fn render_base<PF: PlotFmtAll,AF:AllPlots<Item2=(PF::X,PF::Y)>>(
     writer: impl std::fmt::Write,
-    plotter: &mut Plotter<PF>,
+    plotter: &mut Plotter<PF,AF>,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 
