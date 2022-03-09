@@ -227,8 +227,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             fmt: PF,
         }
 
-        impl<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt<X = XI::Item, Y = YI::Item>> BaseFmtAndTicks
-            for PlotAllStruct<XI, YI, PF>
+        impl<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt<X = XI::Item, Y = YI::Item>>
+            BaseFmtAndTicks for PlotAllStruct<XI, YI, PF>
         where
             XI::Item: PlotNum,
             YI::Item: PlotNum,
@@ -252,7 +252,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     }
 
     ///
-    /// Create a plotter directly from a [`PlotFmtAll`]
+    /// Create a plotter directly from a [`BaseFmtAndTicks`]
     ///
     pub fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
         self,
@@ -322,7 +322,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
 }
 
 ///
-/// Create a plot formatter that implements [`plotnum::PlotFmt`]
+/// Create a plot formatter that implements [`plotnum::BaseFmt`]
 ///
 pub fn plot_fmt<D, E>(
     title: impl Display,
