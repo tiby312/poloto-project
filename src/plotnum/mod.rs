@@ -280,7 +280,7 @@ pub trait BaseFmtAndTicks {
     fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
 }
 
-pub trait OnePlotFmt {
+pub(crate) trait OnePlotFmt {
     type Item;
     type It: Iterator<Item = Self::Item>;
     fn get_iter(&mut self) -> Self::It;
@@ -288,14 +288,14 @@ pub trait OnePlotFmt {
     fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
 }
 
-pub trait AllPlotFmt {
+pub(crate) trait AllPlotFmt {
     type Item2;
     type InnerIt: OnePlotFmt<Item = Self::Item2>;
     type It: Iterator<Item = Self::InnerIt>;
     fn iter(self) -> Self::It;
 }
 
-pub trait BaseAndPlotsFmt {
+pub(crate) trait BaseAndPlotsFmt {
     type X: PlotNum;
     type Y: PlotNum;
     type A: BaseFmtAndTicks<X = Self::X, Y = Self::Y>;
