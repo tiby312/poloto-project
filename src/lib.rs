@@ -14,7 +14,7 @@
 //! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
 //! * Create tick distributions. (This step can be done automatically using [`DataResult::plot`] instead of [`DataResult::plot_with`])
 //! * Collect title/xname/yname
-//! * Write everything to svg. [`DispContainer::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
+//! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
 //!
@@ -176,7 +176,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         title: impl Display + 'a,
         xname: impl Display + 'a,
         yname: impl Display + 'a,
-    ) -> DispContainer<impl Disp + 'a>
+    ) -> Plotter<impl Disp + 'a>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -197,7 +197,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> DispContainer<impl Disp + 'a>
+    ) -> Plotter<impl Disp + 'a>
     where
         XI: IntoIterator<Item = X>,
         YI: IntoIterator<Item = Y>,
@@ -242,7 +242,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     pub fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
         self,
         p: PF,
-    ) -> DispContainer<impl Disp + 'a> {
+    ) -> Plotter<impl Disp + 'a> {
         struct Foo2<'a, X, Y> {
             plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
         }
@@ -293,24 +293,24 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         ///
         /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
         ///
-        struct Plotter<PF: BaseAndPlotsFmt> {
-            all: Option<PF>,
+        struct InnerPlotter<PF: BaseAndPlotsFmt> {
+            all: PF,
             extra: Extra<PF::X, PF::Y>,
         }
 
-        impl<PF: BaseAndPlotsFmt> Disp for Plotter<PF> {
-            fn disp<T: std::fmt::Write>(&mut self, mut writer: T) -> fmt::Result {
-                let (base_fmt, plot_fmt) = Option::take(&mut self.all).unwrap().gen();
+        impl<PF: BaseAndPlotsFmt> Disp for InnerPlotter<PF> {
+            fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
+                let (base_fmt, plot_fmt) = self.all.gen();
                 render::render_plot::render_plot(&mut writer, &self.extra, plot_fmt)?;
                 render::render_base::render_base(&mut writer, &self.extra, base_fmt)
             }
         }
 
-        let inner = Plotter {
-            all: Some(Combine {
+        let pp = InnerPlotter {
+            all: Combine {
                 a: p,
                 b: Foo2 { plots: self.plots },
-            }),
+            },
             extra: Extra {
                 canvas: self.canvas,
                 boundx: self.boundx,
@@ -320,8 +320,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             },
         };
 
-        let dim = inner.extra.canvas.get_dim();
-        DispContainer { inner, dim }
+        let dim = pp.extra.canvas.get_dim();
+        Plotter {
+            inner: Some(pp),
+            dim,
+        }
     }
 }
 
@@ -693,14 +696,14 @@ struct Extra<X, Y> {
 }
 
 pub trait Disp {
-    fn disp<T: fmt::Write>(&mut self, writer: T) -> fmt::Result;
+    fn disp<T: fmt::Write>(self, writer: T) -> fmt::Result;
 }
 
-pub struct DispContainer<A: Disp> {
-    inner: A,
+pub struct Plotter<A: Disp> {
+    inner: Option<A>,
     dim: [f64; 2],
 }
-impl<A: Disp> DispContainer<A> {
+impl<A: Disp> Plotter<A> {
     pub fn get_dim(&self) -> [f64; 2] {
         self.dim
     }
@@ -727,7 +730,7 @@ impl<A: Disp> DispContainer<A> {
     /// ```
 
     pub fn render<T: std::fmt::Write>(&mut self, writer: T) -> fmt::Result {
-        self.inner.disp(writer)
+        self.inner.take().unwrap().disp(writer)
     }
 }
 
