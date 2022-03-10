@@ -81,6 +81,8 @@ const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
+use render::*;
+
 trait PlotTrait<'a> {
     type Item;
     fn plot_type(&self) -> PlotMetaType;
@@ -297,9 +299,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
 
         impl<PF: BaseAndPlotsFmt> Disp for InnerPlotter<PF> {
             fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
-                let (base_fmt, plot_fmt) = self.all.gen();
-                render::render_plot::render_plot(&mut writer, &self.extra, plot_fmt)?;
-                render::render_base::render_base(&mut writer, &self.extra, base_fmt)
+                render::render(&mut writer,self.all,&self.extra)
             }
         }
 
@@ -684,13 +684,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     }
 }
 
-struct Extra<X, Y> {
-    canvas: render::Canvas,
-    boundx: Bound<X>,
-    boundy: Bound<Y>,
-    xtick_lines: bool,
-    ytick_lines: bool,
-}
 
 ///
 /// One-time function to write to a `fmt::Write`.

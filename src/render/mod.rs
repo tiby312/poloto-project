@@ -1,7 +1,86 @@
 use crate::*;
 
-pub mod render_base;
-pub mod render_plot;
+mod render_base;
+mod render_plot;
+
+
+pub struct Extra<X, Y> {
+    pub canvas: render::Canvas,
+    pub boundx: Bound<X>,
+    pub boundy: Bound<Y>,
+    pub xtick_lines: bool,
+    pub ytick_lines: bool,
+}
+
+
+pub fn render<P:BaseAndPlotsFmt>(mut writer:impl fmt::Write,all:P,extra:&Extra<P::X,P::Y>)->fmt::Result{
+    let (base_fmt, plot_fmt) = all.gen();
+    render::render_plot::render_plot(&mut writer, extra, plot_fmt)?;
+    render::render_base::render_base(&mut writer, extra, base_fmt)
+}
+
+pub trait BaseAndPlotsFmt {
+    type X: PlotNum;
+    type Y: PlotNum;
+    type A: BaseFmtAndTicks<X = Self::X, Y = Self::Y>;
+    type B: AllPlotFmt<Item2 = (Self::X, Self::Y)>;
+    fn gen(self) -> (Self::A, Self::B);
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum PlotType {
+    Scatter,
+    Line,
+    Histo,
+    LineFill,
+    LineFillRaw,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum PlotMetaType {
+    Plot(PlotType),
+    Text,
+}
+
+pub trait OnePlotFmt {
+    type Item;
+    type It: Iterator<Item = Self::Item>;
+    fn get_iter(&mut self) -> Self::It;
+    fn plot_type(&mut self) -> PlotMetaType;
+    fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
+}
+
+pub trait AllPlotFmt {
+    type Item2;
+    type InnerIt: OnePlotFmt<Item = Self::Item2>;
+    type It: Iterator<Item = Self::InnerIt>;
+    fn iter(self) -> Self::It;
+}
+
+
+///
+/// Trait that captures all user defined plot formatting. This includes:
+///
+/// * The distribution of ticks on each axis,
+///
+/// * The formatting of:
+///     * title
+///     * xname
+///     * yname
+///     * xticks
+///     * yticks
+///
+pub trait BaseFmtAndTicks {
+    type X: PlotNum;
+    type Y: PlotNum;
+    type Fmt: BaseFmt<X = Self::X, Y = Self::Y>;
+    type XI: IntoIterator<Item = Self::X>;
+    type YI: IntoIterator<Item = Self::Y>;
+    fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
+}
+
+
+
 
 #[derive(Copy, Clone)]
 pub struct Canvas {
