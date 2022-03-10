@@ -271,7 +271,7 @@ mod map {
 ///     * xticks
 ///     * yticks
 ///
-pub trait BaseFmtAndTicks {
+pub(crate) trait BaseFmtAndTicks {
     type X: PlotNum;
     type Y: PlotNum;
     type Fmt: BaseFmt<X = Self::X, Y = Self::Y>;
@@ -304,7 +304,7 @@ pub(crate) trait BaseAndPlotsFmt {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum PlotType {
+pub(crate) enum PlotType {
     Scatter,
     Line,
     Histo,
@@ -313,7 +313,7 @@ pub enum PlotType {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum PlotMetaType {
+pub(crate) enum PlotMetaType {
     Plot(PlotType),
     Text,
 }

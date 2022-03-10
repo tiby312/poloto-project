@@ -239,7 +239,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     ///
     /// Create a plotter directly from a [`BaseFmtAndTicks`]
     ///
-    pub fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
+    fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
         self,
         p: PF,
     ) -> Plotter<impl Disp + 'a> {
@@ -290,9 +290,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             }
         }
 
-        ///
-        /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
-        ///
         struct InnerPlotter<PF: BaseAndPlotsFmt> {
             all: PF,
             extra: Extra<PF::X, PF::Y>,
@@ -695,10 +692,16 @@ struct Extra<X, Y> {
     ytick_lines: bool,
 }
 
+///
+/// One-time function to write to a `fmt::Write`.
+///
 pub trait Disp {
     fn disp<T: fmt::Write>(self, writer: T) -> fmt::Result;
 }
 
+///
+/// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
+///
 pub struct Plotter<A: Disp> {
     inner: Option<A>,
     dim: [f64; 2],
