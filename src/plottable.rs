@@ -4,7 +4,7 @@
 
 use super::*;
 
-/// Iterators that are passed to the [`Plotter`] plot functions must produce
+/// Iterators that are passed to the [`Data`] plot functions must produce
 /// items that implement this trait.
 pub trait Plottable {
     type Item;

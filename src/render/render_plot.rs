@@ -1,8 +1,9 @@
 use super::*;
 
-pub fn render_plots<X: PlotNum, Y: PlotNum>(
+pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    plots: &mut DataResult<X, Y>,
+    extra: &Extra<X, Y>,
+    plots_all: impl AllPlotFmt<Item2 = (X, Y)>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -16,10 +17,10 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
         spacing,
         num_css_classes,
         ..
-    } = plots.canvas;
+    } = extra.canvas;
 
-    let boundx = [plots.boundx.min, plots.boundx.max];
-    let boundy = [plots.boundy.min, plots.boundy.max];
+    let boundx = [extra.boundx.min, extra.boundx.max];
+    let boundy = [extra.boundy.min, extra.boundy.max];
 
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
@@ -36,7 +37,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
         (0..max).cycle()
     };
 
-    for (i, mut p) in plots.plots.drain(..).enumerate() {
+    for (i, mut ppp) in plots_all.iter().enumerate() {
         let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
 
         let name_exists = writer
@@ -50,39 +51,48 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
             })?
             .build(|d| {
                 let mut wc = util::WriteCounter::new(d.writer_safe());
-                p.write_name(&mut wc)?;
+                ppp.fmt(&mut wc)?;
+                //p.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
 
         let aa = minx.scale([minx, maxx], scalex);
         let bb = miny.scale([miny, maxy], scaley);
 
-        match p.plot_type() {
+        match ppp.plot_type() {
             PlotMetaType::Text => {
                 // don't need to render any legend or plots
             }
             PlotMetaType::Plot(p_type) => {
                 let colori = color_iter.next().unwrap();
 
-                let plot_iter = PlotIter {
-                    basex_ii: xaspect_offset + padding - aa,
-                    basey_ii: yaspect_offset + height - paddingy + bb,
-                    rangex_ii: [minx, maxx],
-                    rangey_ii: [miny, maxy],
-                    maxx_ii: scalex,
-                    maxy_ii: scaley,
+                let it = {
+                    let basex_ii = xaspect_offset + padding - aa;
+                    let basey_ii = yaspect_offset + height - paddingy + bb;
+                    let rangex_ii = [minx, maxx];
+                    let rangey_ii = [miny, maxy];
+                    let maxx_ii = scalex;
+                    let maxy_ii = scaley;
+
+                    ppp.get_iter().map(move |(x, y)| {
+                        [
+                            basex_ii + x.scale(rangex_ii, maxx_ii),
+                            basey_ii - y.scale(rangey_ii, maxy_ii),
+                        ]
+                    })
                 };
 
-                render(PlotRenderInfo {
-                    writer: &mut writer,
-                    p: p.as_mut(),
-                    plot_iter,
-                    canvas: &plots.canvas,
-                    p_type,
-                    name_exists,
-                    colori,
-                    legendy1,
-                })?;
+                render(
+                    &mut writer,
+                    it,
+                    PlotRenderInfo {
+                        canvas: &extra.canvas,
+                        p_type,
+                        name_exists,
+                        colori,
+                        legendy1,
+                    },
+                )?;
             }
         }
     }
@@ -90,32 +100,7 @@ pub fn render_plots<X: PlotNum, Y: PlotNum>(
     Ok(())
 }
 
-struct PlotIter<X: PlotNum, Y: PlotNum> {
-    basex_ii: f64,
-    basey_ii: f64,
-    rangex_ii: [X; 2],
-    rangey_ii: [Y; 2],
-    maxx_ii: f64,
-    maxy_ii: f64,
-}
-impl<X: PlotNum, Y: PlotNum> PlotIter<X, Y> {
-    fn gen_iter<'a>(
-        &'a self,
-        p: &'a mut dyn PlotTrait<Item = (X, Y)>,
-    ) -> impl Iterator<Item = [f64; 2]> + 'a {
-        p.iter_second().map(move |(x, y)| {
-            [
-                self.basex_ii + x.scale(self.rangex_ii, self.maxx_ii),
-                self.basey_ii - y.scale(self.rangey_ii, self.maxy_ii),
-            ]
-        })
-    }
-}
-
-struct PlotRenderInfo<'a, W: fmt::Write, X: PlotNum, Y: PlotNum> {
-    writer: &'a mut tagger::ElemWriter<W>,
-    p: &'a mut dyn PlotTrait<Item = (X, Y)>,
-    plot_iter: PlotIter<X, Y>,
+struct PlotRenderInfo<'a> {
     canvas: &'a Canvas,
     p_type: PlotType,
     name_exists: bool,
@@ -123,11 +108,12 @@ struct PlotRenderInfo<'a, W: fmt::Write, X: PlotNum, Y: PlotNum> {
     legendy1: f64,
 }
 
-fn render<W: fmt::Write, X: PlotNum, Y: PlotNum>(info: PlotRenderInfo<W, X, Y>) -> fmt::Result {
+fn render<W: fmt::Write>(
+    writer: &mut tagger::ElemWriter<W>,
+    it: impl Iterator<Item = [f64; 2]>,
+    info: PlotRenderInfo,
+) -> fmt::Result {
     let PlotRenderInfo {
-        writer,
-        p,
-        plot_iter,
         canvas,
         p_type,
         name_exists,
@@ -166,7 +152,7 @@ fn render<W: fmt::Write, X: PlotNum, Y: PlotNum>(info: PlotRenderInfo<W, X, Y>) 
                 d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                 d.attr("fill", "none")?;
                 d.attr("stroke", "black")?;
-                d.path(|a| render::line(a, plot_iter.gen_iter(p)))
+                d.path(|a| render::line(a, it))
             })?;
         }
         PlotType::Scatter => {
@@ -194,10 +180,7 @@ fn render<W: fmt::Write, X: PlotNum, Y: PlotNum>(info: PlotRenderInfo<W, X, Y>) 
                 )?;
                 d.path(|a| {
                     use tagger::PathCommand::*;
-                    for [x, y] in plot_iter
-                        .gen_iter(p)
-                        .filter(|&[x, y]| x.is_finite() && y.is_finite())
-                    {
+                    for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                         a.put(M(x, y))?;
                         a.put(H_(0))?;
                     }
@@ -230,10 +213,7 @@ fn render<W: fmt::Write, X: PlotNum, Y: PlotNum>(info: PlotRenderInfo<W, X, Y>) 
                 })?
                 .build(|writer| {
                     let mut last = None;
-                    for [x, y] in plot_iter
-                        .gen_iter(p)
-                        .filter(|&[x, y]| x.is_finite() && y.is_finite())
-                    {
+                    for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                         if let Some((lx, ly)) = last {
                             writer.single("rect", |d| {
                                 d.attr("x", lx)?;
@@ -271,9 +251,7 @@ fn render<W: fmt::Write, X: PlotNum, Y: PlotNum>(info: PlotRenderInfo<W, X, Y>) 
                     "class",
                     format_args!("poloto_linefill poloto{}fill", colori),
                 )?;
-                d.path(|path| {
-                    render::line_fill(path, plot_iter.gen_iter(p), height - paddingy, true)
-                })
+                d.path(|path| render::line_fill(path, it, height - paddingy, true))
             })?;
         }
         PlotType::LineFillRaw => {
@@ -300,9 +278,7 @@ fn render<W: fmt::Write, X: PlotNum, Y: PlotNum>(info: PlotRenderInfo<W, X, Y>) 
                     "class",
                     format_args!("poloto_linefillraw poloto{}fill", colori),
                 )?;
-                d.path(|path| {
-                    render::line_fill(path, plot_iter.gen_iter(p), height - paddingy, false)
-                })
+                d.path(|path| render::line_fill(path, it, height - paddingy, false))
             })?;
         }
     }

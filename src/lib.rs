@@ -13,7 +13,7 @@
 //! * Collect plots ([`data`] function)
 //! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
 //! * Create tick distributions. (This step can be done automatically using [`DataResult::plot`] instead of [`DataResult::plot_with`])
-//! * Collect title/xname/yname (on creation of [`Plotter`])
+//! * Collect title/xname/yname
 //! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
@@ -81,19 +81,18 @@ const WIDTH: f64 = 800.0;
 ///The height of the svg tag.
 const HEIGHT: f64 = 500.0;
 
-trait PlotTrait {
+trait PlotTrait<'a> {
     type Item;
     fn plot_type(&self) -> PlotMetaType;
     fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
     fn iter_first(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
+    fn iter_second(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a>;
 }
 
 struct PlotStruct<I: PlotIter, F: Display> {
     ptype: PlotMetaType,
     iter: Option<I>,
     it1: Option<I::It1>,
-    it2: Option<I::It2>,
     func: F,
 }
 
@@ -102,14 +101,15 @@ impl<I: PlotIter, F: Display> PlotStruct<I, F> {
         PlotStruct {
             iter: Some(iter),
             it1: None,
-            it2: None,
             func,
             ptype,
         }
     }
 }
 
-impl<X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)>, F: Display> PlotTrait for PlotStruct<D, F> {
+impl<'a, X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)> + 'a, F: Display> PlotTrait<'a>
+    for PlotStruct<D, F>
+{
     type Item = (X, Y);
     fn plot_type(&self) -> PlotMetaType {
         self.ptype
@@ -122,26 +122,9 @@ impl<X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)>, F: Display> PlotTrait fo
         self.it1.as_mut().unwrap()
     }
 
-    fn iter_second(&mut self) -> &mut dyn Iterator<Item = Self::Item> {
-        let j = self.iter.take().unwrap().second(self.it1.take().unwrap());
-        self.it2 = Some(j);
-        self.it2.as_mut().unwrap()
+    fn iter_second(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
+        Box::new(self.iter.take().unwrap().second(self.it1.take().unwrap()))
     }
-}
-
-#[derive(Copy, Clone, Debug)]
-enum PlotType {
-    Scatter,
-    Line,
-    Histo,
-    LineFill,
-    LineFillRaw,
-}
-
-#[derive(Copy, Clone, Debug)]
-enum PlotMetaType {
-    Plot(PlotType),
-    Text,
 }
 
 ///
@@ -169,7 +152,7 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X::
 /// Created by [`Data::build`]
 ///
 pub struct DataResult<'a, X: 'a, Y: 'a> {
-    plots: Vec<Box<dyn PlotTrait<Item = (X, Y)> + 'a>>,
+    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
     canvas: render::Canvas,
     boundx: Bound<X>,
     boundy: Bound<Y>,
@@ -190,10 +173,10 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     ///
     pub fn plot(
         self,
-        title: impl Display,
-        xname: impl Display,
-        yname: impl Display,
-    ) -> Plotter<'a, impl PlotFmtAll<X = X, Y = Y>>
+        title: impl Display + 'a,
+        xname: impl Display + 'a,
+        yname: impl Display + 'a,
+    ) -> Plotter<impl Disp + 'a>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -209,28 +192,28 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`DataResult::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<XI, YI, PF>(
+    pub fn plot_with<XI: 'a, YI: 'a, PF: 'a>(
         self,
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> Plotter<'a, impl PlotFmtAll<X = X, Y = Y>>
+    ) -> Plotter<impl Disp + 'a>
     where
         XI: IntoIterator<Item = X>,
         YI: IntoIterator<Item = Y>,
-        PF: PlotFmt<X = X, Y = Y>,
+        PF: BaseFmt<X = X, Y = Y>,
     {
         ///
         /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotFmtAll`] trait.
         ///
-        struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt> {
+        struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt> {
             xtick: TickInfo<XI>,
             ytick: TickInfo<YI>,
             fmt: PF,
         }
 
-        impl<XI: IntoIterator, YI: IntoIterator, PF: PlotFmt<X = XI::Item, Y = YI::Item>> PlotFmtAll
-            for PlotAllStruct<XI, YI, PF>
+        impl<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt<X = XI::Item, Y = YI::Item>>
+            BaseFmtAndTicks for PlotAllStruct<XI, YI, PF>
         where
             XI::Item: PlotNum,
             YI::Item: PlotNum,
@@ -246,29 +229,104 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             }
         }
 
-        Plotter {
-            plot_all: Some(PlotAllStruct {
-                fmt: plot_fmt,
-                xtick,
-                ytick,
-            }),
-            plots: self,
-        }
+        self.plot_with_all(PlotAllStruct {
+            fmt: plot_fmt,
+            xtick,
+            ytick,
+        })
     }
 
     ///
-    /// Create a plotter directly from a [`PlotFmtAll`]
+    /// Create a plotter directly from a [`BaseFmtAndTicks`]
     ///
-    pub fn plot_with_all<PF: PlotFmtAll<X = X, Y = Y>>(self, p: PF) -> Plotter<'a, PF> {
+    fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
+        self,
+        p: PF,
+    ) -> Plotter<impl Disp + 'a> {
+        struct Foo2<'a, X, Y> {
+            plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
+        }
+
+        struct One<'a, X, Y> {
+            one: Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>,
+        }
+        impl<'a, X, Y> OnePlotFmt for One<'a, X, Y> {
+            type It = Box<dyn Iterator<Item = Self::Item> + 'a>;
+            type Item = (X, Y);
+            fn plot_type(&mut self) -> PlotMetaType {
+                self.one.plot_type()
+            }
+
+            fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+                self.one.write_name(writer)
+            }
+
+            fn get_iter(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
+                self.one.iter_second()
+            }
+        }
+
+        impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
+            type Item2 = (X, Y);
+            type It = Box<dyn Iterator<Item = One<'a, X, Y>> + 'a>;
+            type InnerIt = One<'a, X, Y>;
+            fn iter(self) -> Self::It {
+                Box::new(self.plots.into_iter().map(|one| One { one }))
+            }
+        }
+
+        struct Combine<A: BaseFmtAndTicks, B: AllPlotFmt> {
+            pub a: A,
+            pub b: B,
+        }
+
+        impl<A: BaseFmtAndTicks, B: AllPlotFmt<Item2 = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
+            type X = A::X;
+            type Y = A::Y;
+            type A = A;
+            type B = B;
+            fn gen(self) -> (Self::A, Self::B) {
+                (self.a, self.b)
+            }
+        }
+
+        struct InnerPlotter<PF: BaseAndPlotsFmt> {
+            all: PF,
+            extra: Extra<PF::X, PF::Y>,
+        }
+
+        impl<PF: BaseAndPlotsFmt> Disp for InnerPlotter<PF> {
+            fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
+                let (base_fmt, plot_fmt) = self.all.gen();
+                render::render_plot::render_plot(&mut writer, &self.extra, plot_fmt)?;
+                render::render_base::render_base(&mut writer, &self.extra, base_fmt)
+            }
+        }
+
+        let pp = InnerPlotter {
+            all: Combine {
+                a: p,
+                b: Foo2 { plots: self.plots },
+            },
+            extra: Extra {
+                canvas: self.canvas,
+                boundx: self.boundx,
+                boundy: self.boundy,
+                xtick_lines: self.xtick_lines,
+                ytick_lines: self.ytick_lines,
+            },
+        };
+
+        let dim = pp.extra.canvas.get_dim();
         Plotter {
-            plot_all: Some(p),
-            plots: self,
+            inner: Some(pp),
+            dim,
         }
     }
 }
 
 ///
-/// Create a plot formatter that implements [`plotnum::PlotFmt`]
+/// Create a plot formatter that implements [`plotnum::BaseFmt`]
 ///
 pub fn plot_fmt<D, E>(
     title: impl Display,
@@ -276,7 +334,7 @@ pub fn plot_fmt<D, E>(
     yname: impl Display,
     tickx: D,
     ticky: E,
-) -> impl PlotFmt<X = D::Num, Y = E::Num>
+) -> impl BaseFmt<X = D::Num, Y = E::Num>
 where
     D: TickFormat,
     E: TickFormat,
@@ -292,7 +350,7 @@ where
         tickx: D,
         ticky: E,
     }
-    impl<A, B, C, D, E> PlotFmt for SimplePlotFormatter<A, B, C, D, E>
+    impl<A, B, C, D, E> BaseFmt for SimplePlotFormatter<A, B, C, D, E>
     where
         A: Display,
         B: Display,
@@ -347,7 +405,7 @@ use plotnum::PlotIter;
 /// Plot collector.
 ///
 pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    plots: Vec<Box<dyn PlotTrait<Item = (X, Y)> + 'a>>,
+    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
     xmarkers: Vec<X>,
     ymarkers: Vec<Y>,
     num_css_classes: Option<usize>,
@@ -626,15 +684,33 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     }
 }
 
+struct Extra<X, Y> {
+    canvas: render::Canvas,
+    boundx: Bound<X>,
+    boundy: Bound<Y>,
+    xtick_lines: bool,
+    ytick_lines: bool,
+}
+
+///
+/// One-time function to write to a `fmt::Write`.
+///
+pub trait Disp {
+    fn disp<T: fmt::Write>(self, writer: T) -> fmt::Result;
+}
+
 ///
 /// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
 ///
-pub struct Plotter<'a, PF: PlotFmtAll> {
-    plot_all: Option<PF>,
-    plots: DataResult<'a, PF::X, PF::Y>,
+pub struct Plotter<A: Disp> {
+    inner: Option<A>,
+    dim: [f64; 2],
 }
+impl<A: Disp> Plotter<A> {
+    pub fn get_dim(&self) -> [f64; 2] {
+        self.dim
+    }
 
-impl<'a, PF: PlotFmtAll> Plotter<'a, PF> {
     ///
     /// Use the plot iterators to write out the graph elements.
     /// Does not add a svg tag, or any styling elements.
@@ -655,13 +731,9 @@ impl<'a, PF: PlotFmtAll> Plotter<'a, PF> {
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, mut a: T) -> fmt::Result {
-        render::render_plots::render_plots(&mut a, &mut self.plots)?;
-        render::render_base::render_base(a, self)
-    }
 
-    pub fn get_dim(&self) -> [f64; 2] {
-        self.plots.canvas.get_dim()
+    pub fn render<T: std::fmt::Write>(&mut self, writer: T) -> fmt::Result {
+        self.inner.take().unwrap().disp(writer)
     }
 }
 
