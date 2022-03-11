@@ -28,7 +28,7 @@ fn main() {
 
     print!(
         "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a,[800.0, hh], dim)),
+        poloto::disp(|a| poloto::simple_theme::write_header(a, [800.0, hh], dim)),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
         poloto::disp(|a| plotter.render(a)),

@@ -160,6 +160,7 @@ pub struct DataResult<'a, X: 'a, Y: 'a> {
     boundy: Bound<Y>,
     xtick_lines: bool,
     ytick_lines: bool,
+    precision: usize,
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     pub fn boundx(&self) -> &Bound<X> {
@@ -299,7 +300,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
 
         impl<PF: BaseAndPlotsFmt> Disp for InnerPlotter<PF> {
             fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
-                render::render(&mut writer,self.all,&self.extra)
+                render::render(&mut writer, self.all, &self.extra)
             }
         }
 
@@ -309,6 +310,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
                 b: Foo2 { plots: self.plots },
             },
             extra: Extra {
+                precision: self.precision,
                 canvas: self.canvas,
                 boundx: self.boundx,
                 boundy: self.boundy,
@@ -413,6 +415,7 @@ pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     dim: Option<[f64; 2]>,
     xtick_lines: bool,
     ytick_lines: bool,
+    precision: usize,
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
     fn default() -> Self {
@@ -425,6 +428,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
             dim: None,
             xtick_lines: false,
             ytick_lines: false,
+            precision: 2,
         }
     }
 }
@@ -618,10 +622,24 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             dim: None,
             xtick_lines: false,
             ytick_lines: false,
+            precision: 0,
         };
 
         std::mem::swap(&mut val, self);
         val
+    }
+
+    ///
+    /// Specify the number of decimal places of each plot value in the SVG output itself.
+    /// Defaults to a precision of 2 (2 decimal places).
+    ///
+    /// For most usecases, you don't need a high precision. However, if you plan on blowing
+    /// up the svg output significantly or zooming in a bunch, then you might want better
+    /// precision.
+    ///
+    pub fn with_precision(&mut self, precision: usize) -> &mut Self {
+        self.precision = precision;
+        self
     }
 
     ///
@@ -674,6 +692,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         };
 
         DataResult {
+            precision: val.precision,
             plots: val.plots,
             canvas,
             boundx,
@@ -683,7 +702,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         }
     }
 }
-
 
 ///
 /// One-time function to write to a `fmt::Write`.

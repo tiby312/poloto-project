@@ -1,11 +1,9 @@
 use super::*;
 
-
-
 pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     extra: &Extra<X, Y>,
-    plots_all: impl AllPlotFmt<Item2 = (X, Y)>
+    plots_all: impl AllPlotFmt<Item2 = (X, Y)>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -81,6 +79,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                     })
                 };
 
+                let precision = extra.precision;
                 render(
                     &mut writer,
                     it,
@@ -90,6 +89,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                         name_exists,
                         colori,
                         legendy1,
+                        precision,
                     },
                 )?;
             }
@@ -99,31 +99,29 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     Ok(())
 }
 
-
-
-struct Hay{
-    num:f64
+struct Hay {
+    num: f64,
+    precision: usize,
 }
-impl Display for Hay{
-    fn fmt(&self,f:&mut fmt::Formatter)->fmt::Result{
-        write!(f,"{:.2}",self.num)
+impl Display for Hay {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:.*}", self.precision, self.num)
     }
 }
 
-struct Roundf64{
-    //TODO round considering dimensions.
+struct Roundf64 {
+    precision: usize,
 }
 
-impl NumFmt for Roundf64{
-    type K=Hay;
-    fn fmt(&self,num:f64)->Self::K{
-        Hay{num}
+impl NumFmt for Roundf64 {
+    type K = Hay;
+    fn fmt(&self, num: f64) -> Self::K {
+        Hay {
+            num,
+            precision: self.precision,
+        }
     }
 }
-
-
-
-
 
 struct PlotRenderInfo<'a> {
     canvas: &'a Canvas,
@@ -131,6 +129,7 @@ struct PlotRenderInfo<'a> {
     name_exists: bool,
     colori: usize,
     legendy1: f64,
+    precision: usize,
 }
 
 fn render<W: fmt::Write>(
@@ -138,16 +137,13 @@ fn render<W: fmt::Write>(
     it: impl Iterator<Item = [f64; 2]>,
     info: PlotRenderInfo,
 ) -> fmt::Result {
-
-    let num_fmt=Roundf64{};
-
-
     let PlotRenderInfo {
         canvas,
         p_type,
         name_exists,
         colori,
         legendy1,
+        precision,
     } = info;
 
     let Canvas {
@@ -157,6 +153,8 @@ fn render<W: fmt::Write>(
         legendx1,
         ..
     } = *canvas;
+
+    let num_fmt = Roundf64 { precision };
 
     match p_type {
         PlotType::Line => {
@@ -181,7 +179,7 @@ fn render<W: fmt::Write>(
                 d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                 d.attr("fill", "none")?;
                 d.attr("stroke", "black")?;
-                d.path(|a| render::line(a, it,num_fmt))
+                d.path(|a| render::line(a, it, num_fmt))
             })?;
         }
         PlotType::Scatter => {
@@ -280,7 +278,7 @@ fn render<W: fmt::Write>(
                     "class",
                     format_args!("poloto_linefill poloto{}fill", colori),
                 )?;
-                d.path(|path| render::line_fill(path, it, height - paddingy, true,num_fmt))
+                d.path(|path| render::line_fill(path, it, height - paddingy, true, num_fmt))
             })?;
         }
         PlotType::LineFillRaw => {
@@ -307,7 +305,7 @@ fn render<W: fmt::Write>(
                     "class",
                     format_args!("poloto_linefillraw poloto{}fill", colori),
                 )?;
-                d.path(|path| render::line_fill(path, it, height - paddingy, false,num_fmt))
+                d.path(|path| render::line_fill(path, it, height - paddingy, false, num_fmt))
             })?;
         }
     }

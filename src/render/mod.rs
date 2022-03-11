@@ -3,30 +3,31 @@ use crate::*;
 mod render_base;
 mod render_plot;
 
-
 pub struct Extra<X, Y> {
     pub canvas: render::Canvas,
     pub boundx: Bound<X>,
     pub boundy: Bound<Y>,
     pub xtick_lines: bool,
     pub ytick_lines: bool,
+    pub precision: usize,
 }
-
-
 
 ///
 /// Main render function.
-/// 
-pub fn render<P:BaseAndPlotsFmt>(mut writer:impl fmt::Write,all:P,extra:&Extra<P::X,P::Y>)->fmt::Result{
+///
+pub fn render<P: BaseAndPlotsFmt>(
+    mut writer: impl fmt::Write,
+    all: P,
+    extra: &Extra<P::X, P::Y>,
+) -> fmt::Result {
     let (base_fmt, plot_fmt) = all.gen();
 
     //render background
     {
         let mut writer = tagger::new(&mut writer);
-        writer
-        .single("circle", |d| {
+        writer.single("circle", |d| {
             d.attr("r", "1e5")?;
-            d.attr("class","poloto_background")
+            d.attr("class", "poloto_background")
         })?;
     }
 
@@ -72,7 +73,6 @@ pub trait AllPlotFmt {
     fn iter(self) -> Self::It;
 }
 
-
 ///
 /// Trait that captures all user defined plot formatting. This includes:
 ///
@@ -93,9 +93,6 @@ pub trait BaseFmtAndTicks {
     type YI: IntoIterator<Item = Self::Y>;
     fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
 }
-
-
-
 
 #[derive(Copy, Clone)]
 pub struct Canvas {
@@ -198,23 +195,20 @@ impl Canvas {
     }
 }
 
-
-
-pub trait NumFmt{
-    type K:Display;
-    fn fmt(&self,a:f64)->Self::K;
+pub trait NumFmt {
+    type K: Display;
+    fn fmt(&self, a: f64) -> Self::K;
 }
 
-
-pub struct MyPathBuilder<'a,'b,T:fmt::Write,K>{
-    num_fmt:K,
-    path:&'a mut tagger::PathBuilder<'b,T>
+pub struct MyPathBuilder<'a, 'b, T: fmt::Write, K> {
+    num_fmt: K,
+    path: &'a mut tagger::PathBuilder<'b, T>,
 }
-impl<T:fmt::Write,K:NumFmt> MyPathBuilder<'_,'_,T,K>{
-    pub fn put(&mut self,a:tagger::PathCommand<f64>)->fmt::Result{
-        self.path.put(a.map(|x|self.num_fmt.fmt(x)))
+impl<T: fmt::Write, K: NumFmt> MyPathBuilder<'_, '_, T, K> {
+    pub fn put(&mut self, a: tagger::PathCommand<f64>) -> fmt::Result {
+        self.path.put(a.map(|x| self.num_fmt.fmt(x)))
     }
-    pub fn put_z(&mut self)->fmt::Result{
+    pub fn put_z(&mut self) -> fmt::Result {
         self.path.put(tagger::PathCommand::Z(""))
     }
 }
@@ -224,10 +218,9 @@ pub fn line_fill<T: std::fmt::Write>(
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
     add_start_end_base: bool,
-    num_fmt:impl NumFmt
+    num_fmt: impl NumFmt,
 ) -> fmt::Result {
-
-    let mut path=MyPathBuilder{num_fmt,path};
+    let mut path = MyPathBuilder { num_fmt, path };
 
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
@@ -276,9 +269,9 @@ pub fn line_fill<T: std::fmt::Write>(
 pub fn line<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
-    num_fmt:impl NumFmt
+    num_fmt: impl NumFmt,
 ) -> fmt::Result {
-    let mut path=MyPathBuilder{num_fmt,path};
+    let mut path = MyPathBuilder { num_fmt, path };
 
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
