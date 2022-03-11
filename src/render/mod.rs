@@ -13,8 +13,23 @@ pub struct Extra<X, Y> {
 }
 
 
+
+///
+/// Main render function.
+/// 
 pub fn render<P:BaseAndPlotsFmt>(mut writer:impl fmt::Write,all:P,extra:&Extra<P::X,P::Y>)->fmt::Result{
     let (base_fmt, plot_fmt) = all.gen();
+
+    //render background
+    {
+        let mut writer = tagger::new(&mut writer);
+        writer
+        .single("circle", |d| {
+            d.attr("r", "1e5")?;
+            d.attr("class","poloto_background")
+        })?;
+    }
+
     render::render_plot::render_plot(&mut writer, extra, plot_fmt)?;
     render::render_base::render_base(&mut writer, extra, base_fmt)
 }

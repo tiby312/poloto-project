@@ -18,14 +18,18 @@ pub const SVG_END: &str = "</svg>";
 pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
     stroke-linecap:round; \
     stroke-linejoin:round; \
-    font-family: 'Tahoma', sans-serif; \
-    background-color: AliceBlue;\
+    font-family: Roboto,sans-serif ; \
+    font-size:16px; \
     } \
+    .poloto_background{fill:AliceBlue;} \
     .poloto_scatter{stroke-width:7} \
     .poloto_tick_line{stroke:gray;stroke-width:0.5} \
     .poloto_line{stroke-width:2} \
     .poloto_text{fill: black;} \
     .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none} \
+    .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
+    .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
+    .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
     .poloto0stroke{stroke:  blue;} \
     .poloto1stroke{stroke:  red;} \
     .poloto2stroke{stroke:  green;} \
@@ -47,14 +51,18 @@ pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
 pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto { \
     stroke-linecap:round; \
     stroke-linejoin:round; \
-    font-family: 'Tahoma', sans-serif; \
-    background-color: #262626;\
+    font-family: Roboto,sans-serif ; \
+    font-size:16px; \
     } \
+    .poloto_background{fill:#262626;} \
     .poloto_scatter{stroke-width:7} \
     .poloto_tick_line{stroke:dimgray;stroke-width:0.5} \
     .poloto_line{stroke-width:2} \
     .poloto_text{fill: white;} \
     .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none} \
+    .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
+    .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
+    .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
     .poloto0stroke{stroke:  blue;} \
     .poloto1stroke{stroke:  red;} \
     .poloto2stroke{stroke:  green;} \

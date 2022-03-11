@@ -33,9 +33,6 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
     writer
         .elem("text", |d| {
             d.attr("class", "poloto_labels poloto_text poloto_title")?;
-            d.attr("alignment-baseline", "start")?;
-            d.attr("text-anchor", "middle")?;
-            d.attr("font-size", "x-large")?;
             d.attr("x", width / 2.0)?;
             d.attr("y", padding / 4.0)
         })?
@@ -44,9 +41,6 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
     writer
         .elem("text", |d| {
             d.attr("class", "poloto_labels poloto_text poloto_xname")?;
-            d.attr("alignment-baseline", "start")?;
-            d.attr("text-anchor", "middle")?;
-            d.attr("font-size", "x-large")?;
             d.attr("x", width / 2.0)?;
             d.attr("y", height - padding / 8.)
         })?
@@ -55,9 +49,6 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
     writer
         .elem("text", |d| {
             d.attr("class", "poloto_labels poloto_text poloto_yname")?;
-            d.attr("alignment-baseline", "start")?;
-            d.attr("text-anchor", "middle")?;
-            d.attr("font-size", "x-large")?;
             d.attr(
                 "transform",
                 format_args!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
@@ -128,7 +119,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
         writer
             .elem("text", |d| {
                 d.attr("class", "poloto_tick_labels poloto_text")?;
-                d.attr("alignment-baseline", "middle")?;
+                d.attr("dominant-baseline", "middle")?;
                 d.attr("text-anchor", "start")?;
                 d.attr("x", width * 0.55)?;
                 d.attr("y", paddingy * 0.7)
@@ -165,7 +156,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
             writer
                 .elem("text", |d| {
                     d.attr("class", "poloto_tick_labels poloto_text")?;
-                    d.attr("alignment-baseline", "start")?;
+                    d.attr("dominant-baseline", "start")?;
                     d.attr("text-anchor", "middle")?;
                     d.attr("x", xaspect_offset + xx)?;
                     d.attr("y", yaspect_offset + height - paddingy + texty_padding)
@@ -179,7 +170,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
         writer
             .elem("text", |d| {
                 d.attr("class", "poloto_tick_labels poloto_text")?;
-                d.attr("alignment-baseline", "middle")?;
+                d.attr("dominant-baseline", "middle")?;
                 d.attr("text-anchor", "start")?;
                 d.attr("x", padding)?;
                 d.attr("y", paddingy * 0.7)
@@ -215,7 +206,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
             writer
                 .elem("text", |d| {
                     d.attr("class", "poloto_tick_labels poloto_text")?;
-                    d.attr("alignment-baseline", "middle")?;
+                    d.attr("dominant-baseline", "middle")?;
                     d.attr("text-anchor", "end")?;
                     d.attr("x", xaspect_offset + padding - textx_padding)?;
                     d.attr("y", yaspect_offset + yy)
