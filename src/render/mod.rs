@@ -198,12 +198,37 @@ impl Canvas {
     }
 }
 
+
+
+pub trait NumFmt{
+    type K:Display;
+    fn fmt(&self,a:f64)->Self::K;
+}
+
+
+pub struct MyPathBuilder<'a,'b,T:fmt::Write,K>{
+    num_fmt:K,
+    path:&'a mut tagger::PathBuilder<'b,T>
+}
+impl<T:fmt::Write,K:NumFmt> MyPathBuilder<'_,'_,T,K>{
+    pub fn put(&mut self,a:tagger::PathCommand<f64>)->fmt::Result{
+        self.path.put(a.map(|x|self.num_fmt.fmt(x)))
+    }
+    pub fn put_z(&mut self)->fmt::Result{
+        self.path.put(tagger::PathCommand::Z(""))
+    }
+}
+
 pub fn line_fill<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
     base_line: f64,
     add_start_end_base: bool,
+    num_fmt:impl NumFmt
 ) -> fmt::Result {
+
+    let mut path=MyPathBuilder{num_fmt,path};
+
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 
@@ -242,7 +267,7 @@ pub fn line_fill<T: std::fmt::Write>(
             if add_start_end_base {
                 path.put(L(x, base_line))?;
             }
-            path.put(Z(""))?;
+            path.put_z()?;
         }
     }
     Ok(())
@@ -251,7 +276,10 @@ pub fn line_fill<T: std::fmt::Write>(
 pub fn line<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
+    num_fmt:impl NumFmt
 ) -> fmt::Result {
+    let mut path=MyPathBuilder{num_fmt,path};
+
     if let Some([startx, starty]) = it.next() {
         use tagger::PathCommand::*;
 

@@ -1,9 +1,11 @@
 use super::*;
 
+
+
 pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     extra: &Extra<X, Y>,
-    plots_all: impl AllPlotFmt<Item2 = (X, Y)>,
+    plots_all: impl AllPlotFmt<Item2 = (X, Y)>
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -97,6 +99,32 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     Ok(())
 }
 
+
+
+struct Hay{
+    num:f64
+}
+impl Display for Hay{
+    fn fmt(&self,f:&mut fmt::Formatter)->fmt::Result{
+        write!(f,"{:.2}",self.num)
+    }
+}
+
+struct Roundf64{
+    //TODO round considering dimensions.
+}
+
+impl NumFmt for Roundf64{
+    type K=Hay;
+    fn fmt(&self,num:f64)->Self::K{
+        Hay{num}
+    }
+}
+
+
+
+
+
 struct PlotRenderInfo<'a> {
     canvas: &'a Canvas,
     p_type: PlotType,
@@ -110,6 +138,10 @@ fn render<W: fmt::Write>(
     it: impl Iterator<Item = [f64; 2]>,
     info: PlotRenderInfo,
 ) -> fmt::Result {
+
+    let num_fmt=Roundf64{};
+
+
     let PlotRenderInfo {
         canvas,
         p_type,
@@ -149,7 +181,7 @@ fn render<W: fmt::Write>(
                 d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
                 d.attr("fill", "none")?;
                 d.attr("stroke", "black")?;
-                d.path(|a| render::line(a, it))
+                d.path(|a| render::line(a, it,num_fmt))
             })?;
         }
         PlotType::Scatter => {
@@ -178,7 +210,7 @@ fn render<W: fmt::Write>(
                 d.path(|a| {
                     use tagger::PathCommand::*;
                     for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                        a.put(M(x, y))?;
+                        a.put(M(num_fmt.fmt(x), num_fmt.fmt(y)))?;
                         a.put(H_(0))?;
                     }
                     Ok(())
@@ -213,8 +245,8 @@ fn render<W: fmt::Write>(
                     for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                         if let Some((lx, ly)) = last {
                             writer.single("rect", |d| {
-                                d.attr("x", lx)?;
-                                d.attr("y", ly)?;
+                                d.attr("x", num_fmt.fmt(lx))?;
+                                d.attr("y", num_fmt.fmt(ly))?;
                                 d.attr("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))?;
                                 d.attr("height", height - paddingy - ly)
                             })?;
@@ -248,7 +280,7 @@ fn render<W: fmt::Write>(
                     "class",
                     format_args!("poloto_linefill poloto{}fill", colori),
                 )?;
-                d.path(|path| render::line_fill(path, it, height - paddingy, true))
+                d.path(|path| render::line_fill(path, it, height - paddingy, true,num_fmt))
             })?;
         }
         PlotType::LineFillRaw => {
@@ -275,7 +307,7 @@ fn render<W: fmt::Write>(
                     "class",
                     format_args!("poloto_linefillraw poloto{}fill", colori),
                 )?;
-                d.path(|path| render::line_fill(path, it, height - paddingy, false))
+                d.path(|path| render::line_fill(path, it, height - paddingy, false,num_fmt))
             })?;
         }
     }
