@@ -30,6 +30,7 @@ pub const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto { \
     .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
     .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
     .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;} \
+    .poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}\
     .poloto0stroke{stroke:  blue;} \
     .poloto1stroke{stroke:  red;} \
     .poloto2stroke{stroke:  green;} \

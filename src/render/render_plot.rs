@@ -43,9 +43,6 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
         let name_exists = writer
             .elem("text", |d| {
                 d.attr("class", "poloto_text poloto_legend_text")?;
-                d.attr("dominant-baseline", "middle")?;
-                d.attr("text-anchor", "start")?;
-                d.attr("font-size", "large")?;
                 d.attr("x", width - padding / 1.2)?;
                 d.attr("y", paddingy - yaspect_offset + (i as f64) * spacing)
             })?
