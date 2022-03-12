@@ -10,7 +10,7 @@ fn main() {
 
     let (xtick,xtick_fmt)=poloto::ticks_from_default(data.boundx());
 
-    let (ytick,ytick_fmt)=poloto::set::gen_set(data.boundy(),&[
+    let (ytick,ytick_fmt)=poloto::bar::gen_bar(data.boundy(),&[
         "potato",
         "chicken",
         "pizza",

@@ -402,7 +402,7 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
 }
 
 
-pub mod set{
+pub mod bar{
     use super::*;
     pub struct Blop<'a,D>{
         ticks:&'a [D]
@@ -416,7 +416,7 @@ pub mod set{
         }
     }
 
-    pub fn gen_set<'a, D:Display>(bound:&Bound<i128>,vals:&'a [D])->(TickInfo<Vec<i128>>,Blop<'a,D>){
+    pub fn gen_bar<'a, D:Display>(bound:&Bound<i128>,vals:&'a [D])->(TickInfo<Vec<i128>>,Blop<'a,D>){
         assert!(vals.len()>0);
         assert_eq!(bound.max-bound.min,(vals.len()-1) as i128);
         let ticks=(0..vals.len()).map(|x|x as i128).collect();
