@@ -145,11 +145,10 @@ pub struct Bound<X> {
 ///
 pub fn ticks_from_default<X: HasDefaultTicks>(
     bound: &Bound<X>,
-    canvas: &crate::CanvasBound,
+    canvas: &CanvasBound,
 ) -> (TickInfo<X::IntoIter>, X::Fmt) {
     X::generate(bound, canvas)
 }
-
 ///
 /// Created by [`Data::build`]
 ///
@@ -167,6 +166,20 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         &self.boundy
     }
 
+    pub fn default_ticks_x(&self, canvas: &Canvas) -> (TickInfo<X::IntoIter>, X::Fmt)
+    where
+        X: HasDefaultTicks,
+    {
+        X::generate(self.boundx(), canvas.boundx())
+    }
+
+    pub fn default_ticks_y(&self, canvas: &Canvas) -> (TickInfo<Y::IntoIter>, Y::Fmt)
+    where
+        Y: HasDefaultTicks,
+    {
+        Y::generate(self.boundy(), canvas.boundy())
+    }
+
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -181,12 +194,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
     {
-        let canvas = crate::gen_canvas().build();
-        let (x, xt) = ticks_from_default(&self.boundx, canvas.boundx());
-        let (y, yt) = ticks_from_default(&self.boundy, canvas.boundy());
-
-        let p = plot_fmt(title, xname, yname, xt, yt);
-        self.plot_with_canvas_ext(canvas, x, y, p)
+        let canvas = crate::canvas().build();
+        self.plot_with_canvas(canvas, title, xname, yname)
     }
 
     ///
@@ -204,14 +213,14 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
     {
-        let (x, xt) = ticks_from_default(&self.boundx, canvas.boundx());
-        let (y, yt) = ticks_from_default(&self.boundy, canvas.boundy());
+        let (x, xt) = self.default_ticks_x(&canvas);
+        let (y, yt) = self.default_ticks_y(&canvas);
 
         let p = plot_fmt(title, xname, yname, xt, yt);
-        self.plot_with_canvas_ext(canvas, x, y, p)
+        self.plot_with_ticks_and_canvas(canvas, x, y, p)
     }
 
-    pub fn plot_with<XI: 'a, YI: 'a, PF: 'a>(
+    pub fn plot_with_ticks<XI: 'a, YI: 'a, PF: 'a>(
         self,
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
@@ -222,14 +231,14 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         YI: IntoIterator<Item = Y>,
         PF: BaseFmt<X = X, Y = Y>,
     {
-        let canvas = crate::gen_canvas().build();
-        self.plot_with_canvas_ext(canvas, xtick, ytick, plot_fmt)
+        let canvas = crate::canvas().build();
+        self.plot_with_ticks_and_canvas(canvas, xtick, ytick, plot_fmt)
     }
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`DataResult::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with_canvas_ext<XI: 'a, YI: 'a, PF: 'a>(
+    pub fn plot_with_ticks_and_canvas<XI: 'a, YI: 'a, PF: 'a>(
         self,
         canvas: Canvas,
         xtick: TickInfo<XI>,
@@ -437,7 +446,7 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
     Data::default()
 }
 
-pub fn gen_canvas() -> CanvasBuilder {
+pub fn canvas() -> CanvasBuilder {
     CanvasBuilder::default()
 }
 
@@ -511,15 +520,15 @@ impl Default for CanvasBuilder {
 }
 
 impl CanvasBuilder {
-    pub fn with_dim(mut self, dim: [f64; 2]) -> Self {
+    pub fn with_dim(&mut self, dim: [f64; 2]) -> &mut Self {
         self.dim = Some(dim);
         self
     }
-    pub fn xtick_lines(mut self) -> Self {
+    pub fn xtick_lines(&mut self) -> &mut Self {
         self.xtick_lines = true;
         self
     }
-    pub fn ytick_lines(mut self) -> Self {
+    pub fn ytick_lines(&mut self) -> &mut Self {
         self.ytick_lines = true;
         self
     }
@@ -536,7 +545,7 @@ impl CanvasBuilder {
     /// plotter.num_css_class(Some(30));
     /// ```
     ///
-    pub fn num_css_class(mut self, a: Option<usize>) -> Self {
+    pub fn num_css_class(&mut self, a: Option<usize>) -> &mut Self {
         self.num_css_classes = a;
         self
     }
@@ -549,24 +558,24 @@ impl CanvasBuilder {
     /// up the svg output significantly or zooming in a bunch, then you might want better
     /// precision.
     ///
-    pub fn with_precision(mut self, precision: usize) -> Self {
+    pub fn with_precision(&mut self, precision: usize) -> &mut Self {
         self.precision = precision;
         self
     }
     ///
     /// Preserve the aspect ratio by drawing a smaller graph in the same area.
     ///
-    pub fn preserve_aspect(mut self) -> Self {
+    pub fn preserve_aspect(&mut self) -> &mut Self {
         self.preserve_aspect = true;
         self
     }
 
-    pub fn bar_width(mut self, val: f64) -> Self {
+    pub fn bar_width(&mut self, val: f64) -> &mut Self {
         self.bar_width = val;
         self
     }
 
-    pub fn build(self) -> Canvas {
+    pub fn build(&mut self) -> Canvas {
         let (width, height) = if let Some([x, y]) = self.dim {
             (x, y)
         } else {
@@ -588,16 +597,8 @@ impl CanvasBuilder {
             (width - padding * 2.0, height - paddingy * 2.0)
         };
 
-        //let [minx, maxx] = boundx;
-        //let [miny, maxy] = boundy;
-
-        //let distancex_min_to_max =
-        //    maxx.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex);
         let distancex_min_to_max = scalex;
         let distancey_min_to_max = scaley;
-
-        //let distancey_min_to_max =
-        //    maxy.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley);
 
         let (xaspect_offset, yaspect_offset) = if self.preserve_aspect {
             if width > height {
@@ -627,18 +628,14 @@ impl CanvasBuilder {
         Canvas {
             boundx: CanvasBound {
                 ideal_num_steps: ideal_num_xsteps,
-                dash_info: DashInfo {
-                    ideal_dash_size,
-                    max: scalex,
-                },
+                ideal_dash_size,
+                max: scalex,
                 axis: Axis::X,
             },
             boundy: CanvasBound {
                 ideal_num_steps: ideal_num_ysteps,
-                dash_info: DashInfo {
-                    ideal_dash_size,
-                    max: scaley,
-                },
+                ideal_dash_size,
+                max: scaley,
                 axis: Axis::Y,
             },
 
@@ -648,8 +645,6 @@ impl CanvasBuilder {
             paddingy,
             xaspect_offset,
             yaspect_offset,
-            scalex,
-            scaley,
             spacing,
             legendx1,
             num_css_classes: self.num_css_classes,
@@ -662,7 +657,8 @@ impl CanvasBuilder {
 }
 pub struct CanvasBound {
     pub ideal_num_steps: u32,
-    pub dash_info: DashInfo,
+    pub ideal_dash_size: f64,
+    pub max: f64,
     pub axis: Axis,
 }
 
@@ -675,8 +671,6 @@ pub struct Canvas {
     paddingy: f64,
     xaspect_offset: f64,
     yaspect_offset: f64,
-    scalex: f64,
-    scaley: f64,
     spacing: f64,
     legendx1: f64,
     num_css_classes: Option<usize>,
@@ -906,37 +900,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             val.ymarkers.clone(),
         );
 
-        /*
-        let canvas = render::Canvas::with_options(
-            boundx,
-            boundy,
-            val.dim,
-            val.preserve_aspect,
-            val.num_css_classes,
-        );
-
-        let ideal_dash_size = canvas.ideal_dash_size;
-        let boundx = Bound {
-            min: boundx[0],
-            max: boundx[1],
-            ideal_num_steps: canvas.ideal_num_xsteps,
-            dash_info: DashInfo {
-                ideal_dash_size,
-                max: canvas.scalex,
-            },
-            axis: Axis::X,
-        };
-        let boundy = Bound {
-            min: boundy[0],
-            max: boundy[1],
-            ideal_num_steps: canvas.ideal_num_ysteps,
-            dash_info: DashInfo {
-                ideal_dash_size,
-                max: canvas.scaley,
-            },
-            axis: Axis::Y,
-        };
-        */
         let boundx = Bound {
             min: boundx[0],
             max: boundx[1],

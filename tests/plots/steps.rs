@@ -20,10 +20,10 @@ fn marathon() -> fmt::Result {
     let (xtick, xtick_fmt) =
         poloto::ticks_from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
 
-    let canvas = poloto::gen_canvas().build();
+    let canvas = poloto::canvas().build();
     let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(), canvas.boundy());
 
-    let mut plotter = data.plot_with_canvas_ext(
+    let mut plotter = data.plot_with_ticks_and_canvas(
         canvas,
         xtick,
         ytick,
@@ -72,11 +72,11 @@ fn years() -> fmt::Result {
 
     let (xticks, xtick_fmt) = poloto::ticks_from_iter((2010..).step_by(2));
 
-    let canvas = poloto::gen_canvas().build();
+    let canvas = poloto::canvas().build();
 
     let (yticks, ytick_fmt) = poloto::ticks_from_default(data.boundy(), canvas.boundy());
 
-    let mut plotter = data.plot_with_canvas_ext(
+    let mut plotter = data.plot_with_ticks_and_canvas(
         canvas,
         xticks,
         yticks,

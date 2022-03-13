@@ -9,12 +9,12 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let canvas = poloto::gen_canvas().build();
+    let canvas = poloto::canvas().build();
 
     let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(), canvas.boundy());
+    let (ytick, ytick_fmt) = data.default_ticks_y(&canvas);
 
-    let mut pp = data.plot_with_canvas_ext(
+    let mut pp = data.plot_with_ticks_and_canvas(
         canvas,
         xtick,
         ytick,

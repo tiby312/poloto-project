@@ -14,10 +14,11 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
         paddingy,
         xaspect_offset,
         yaspect_offset,
-        scalex,
-        scaley,
         ..
     } = extra.canvas;
+
+    let scalex = extra.canvas.boundx.max;
+    let scaley = extra.canvas.boundy.max;
 
     let boundx = [extra.boundx.min, extra.boundx.max];
     let boundy = [extra.boundy.min, extra.boundy.max];

@@ -53,11 +53,11 @@ fn minutes_local_time() -> fmt::Result {
         .ymarker(0)
         .build();
 
-    let canvas = poloto::gen_canvas().build();
+    let canvas = poloto::canvas().build();
     let (xtick, xtick_fmt) = unixtime_ticks(s.boundx(), canvas.boundx(), time_zone);
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(s.boundy(), canvas.boundy());
+    let (ytick, ytick_fmt) = s.default_ticks_y(&canvas);
 
-    let mut s = s.plot_with_canvas_ext(
+    let mut s = s.plot_with_ticks_and_canvas(
         canvas,
         xtick,
         ytick,
@@ -133,8 +133,8 @@ fn seconds() -> fmt::Result {
 
     let (xmin, xmax) = (data.boundx().min, data.boundx().max);
 
-    let canvas = poloto::gen_canvas().build();
-    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx(), canvas.boundx());
+    let canvas = poloto::canvas().build();
+    let (xtick, xtick_fmt) = data.default_ticks_x(&canvas);
 
     let xtick_step = xtick_fmt.step();
 
@@ -143,9 +143,9 @@ fn seconds() -> fmt::Result {
     // if the steps were years, for example.
     assert!(xtick_step.is_seconds());
 
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(), canvas.boundy());
+    let (ytick, ytick_fmt) = data.default_ticks_y(&canvas);
 
-    let mut plotter = data.plot_with_canvas_ext(
+    let mut plotter = data.plot_with_ticks_and_canvas(
         canvas,
         xtick,
         ytick,

@@ -78,15 +78,14 @@ impl HasDefaultTicks for f64 {
     ) -> (TickInfo<Vec<f64>>, FloatTickFmt) {
         let range = [bound.min, bound.max];
         let ideal_num_steps = canvas.ideal_num_steps;
-        let dash = canvas.dash_info;
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (offset, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            tick_layout.step.scale(range, dash.max),
-            dash.ideal_dash_size,
+            tick_layout.step.scale(range, canvas.max),
+            canvas.ideal_dash_size,
             tick_layout.normalized_step,
         ));
 
