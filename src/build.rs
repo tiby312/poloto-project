@@ -216,40 +216,39 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
 }
 
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
-    pub fn boundx(&self) -> &DataBound<X> {
+    pub fn data_boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
-    pub fn boundy(&self) -> &DataBound<Y> {
+    pub fn data_boundy(&self) -> &DataBound<Y> {
         &self.boundy
     }
 
-    pub fn default_ticks_x(&self, canvas: &Canvas) -> (TickInfo<X::IntoIter>, X::Fmt)
-    where
-        X: HasDefaultTicks,
-    {
-        X::generate(self.boundx(), canvas.boundx())
+    pub fn boundx<'b>(&'b self, canvas: &'b Canvas) -> Bound<'b, X> {
+        Bound {
+            data: &self.boundx,
+            canvas: canvas.boundx(),
+        }
+    }
+    pub fn boundy<'b>(&'b self, canvas: &'b Canvas) -> Bound<'b, Y> {
+        Bound {
+            data: &self.boundy,
+            canvas: canvas.boundy(),
+        }
     }
 
-    pub fn default_ticks_y(&self, canvas: &Canvas) -> (TickInfo<Y::IntoIter>, Y::Fmt)
-    where
-        Y: HasDefaultTicks,
-    {
-        Y::generate(self.boundy(), canvas.boundy())
-    }
-
-    pub fn prep(self) -> Prep<'a, X, Y> {
-        Prep {
+    pub fn stage(self) -> Stager<'a, X, Y> {
+        Stager {
             res: self,
             canvas: crate::canvas().build(),
         }
     }
 
-    pub fn prep_with(self, canvas: Canvas) -> Prep<'a, X, Y> {
-        Prep { res: self, canvas }
+    pub fn stage_with(self, canvas: Canvas) -> Stager<'a, X, Y> {
+        Stager { res: self, canvas }
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Prep<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Stager<'a, X, Y> {
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -269,8 +268,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Prep<'a, X, Y> {
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
     {
-        let (x, xt) = self.res.default_ticks_x(&self.canvas);
-        let (y, yt) = self.res.default_ticks_y(&self.canvas);
+        let (x, xt) = ticks_from_default(self.res.boundx(&self.canvas));
+        let (y, yt) = ticks_from_default(self.res.boundy(&self.canvas));
 
         let p = plot_fmt(title, xname, yname, xt, yt);
         self.plot_with(x, y, p)

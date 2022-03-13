@@ -29,7 +29,7 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let mut plotter = data.prep_with(canvas).plot("collatz", "x", "y");
+    let mut plotter = data.stage_with(canvas).plot("collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);

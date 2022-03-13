@@ -166,15 +166,18 @@ pub struct Canvas {
     bar_width: f64,
 }
 
+pub struct Bound<'a, X: PlotNum> {
+    pub data: &'a DataBound<X>,
+    pub canvas: &'a CanvasBound,
+}
+
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn ticks_from_default<X: HasDefaultTicks>(
-    bound: &DataBound<X>,
-    canvas: &CanvasBound,
-) -> (TickInfo<X::IntoIter>, X::Fmt) {
-    X::generate(bound, canvas)
+pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::IntoIter>, X::Fmt) {
+    X::generate(bound)
 }
+
 ///
 /// Created by [`Data::build`]
 ///
@@ -184,7 +187,7 @@ pub struct DataResult<'a, X: 'a, Y: 'a> {
     boundy: DataBound<Y>,
 }
 
-pub struct Prep<'a, X: 'a, Y: 'a> {
+pub struct Stager<'a, X: 'a, Y: 'a> {
     res: DataResult<'a, X, Y>,
     canvas: Canvas,
 }

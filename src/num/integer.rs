@@ -70,24 +70,21 @@ impl TickFormat for IntegerTickFmt {
 impl HasDefaultTicks for i128 {
     type Fmt = IntegerTickFmt;
     type IntoIter = Vec<i128>;
-    fn generate(
-        bound: &crate::DataBound<i128>,
-        canvas: &crate::CanvasBound,
-    ) -> (TickInfo<Vec<i128>>, IntegerTickFmt) {
-        let range = [bound.min, bound.max];
-        let ideal_num_steps = canvas.ideal_num_steps;
+    fn generate(bound: crate::Bound<i128>) -> (TickInfo<Vec<i128>>, IntegerTickFmt) {
+        let range = [bound.data.min, bound.data.max];
+        let ideal_num_steps = bound.canvas.ideal_num_steps;
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (offset, ticks) = tick_layout.generate();
 
         let dash_size = Some(compute_best_dash_1_2_5(
-            tick_layout.step.scale(range, canvas.max),
-            canvas.ideal_dash_size,
+            tick_layout.step.scale(range, bound.canvas.max),
+            bound.canvas.ideal_dash_size,
             tick_layout.normalized_step,
         ));
 
-        let axis = canvas.axis;
+        let axis = bound.canvas.axis;
 
         (
             TickInfo { ticks, dash_size },

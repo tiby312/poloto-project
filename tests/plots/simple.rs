@@ -18,7 +18,10 @@ fn heart() -> fmt::Result {
     data.ymarker(-20.0).ymarker(20.0);
 
     let canvas = poloto::canvas().preserve_aspect().build();
-    let mut plotter = data.build().prep_with(canvas).plot("Heart Graph", "x", "y");
+    let mut plotter = data
+        .build()
+        .stage_with(canvas)
+        .plot("Heart Graph", "x", "y");
 
     let w = util::create_test_file("heart.svg");
 
@@ -35,7 +38,7 @@ fn large_scatter() -> fmt::Result {
 
     s.line("b", x.clone().map(|x| (x, x.sin())));
 
-    let mut plotter = s.build().prep().plot("cows per year", "year", "cows");
+    let mut plotter = s.build().stage().plot("cows per year", "year", "cows");
 
     let mut w = util::create_test_file("large_scatter.svg");
 
@@ -65,9 +68,9 @@ fn line_fill_fmt() -> fmt::Result {
         )
         .build();
 
-    let boundx = s.boundx().clone();
+    let boundx = s.data_boundx().clone();
 
-    let mut plotter = s.prep().plot(
+    let mut plotter = s.stage().plot(
         formatm!("from {} to {}", boundx.min, boundx.max),
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -112,7 +115,7 @@ fn long_label() -> fmt::Result {
 
     data.ymarker(0);
 
-    let mut plotter = data.build().prep().plot("collatz", "x", "y");
+    let mut plotter = data.build().stage().plot("collatz", "x", "y");
 
     let mut w = util::create_test_file("long_label.svg");
 
@@ -137,7 +140,7 @@ fn magnitude() -> fmt::Result {
 
     let p = poloto::data().scatter("", &data).build();
 
-    let mut p = p.prep().plot("cows per year", "year", "cow");
+    let mut p = p.stage().plot("cows per year", "year", "cow");
 
     let w = util::create_test_file("magnitude.svg");
 
@@ -150,7 +153,7 @@ fn base_color() -> fmt::Result {
 
     let data = poloto::data().scatter("", points).build();
 
-    let mut plotter = data.prep().plot("cows per year", "year", "cow");
+    let mut plotter = data.stage().plot("cows per year", "year", "cow");
 
     let mut w = util::create_test_file("base_color.svg");
 
@@ -193,7 +196,7 @@ fn custom_dim() -> fmt::Result {
         .xtick_lines()
         .build();
 
-    let mut plotter = data.prep_with(canvas).plot("collatz", "x", "y");
+    let mut plotter = data.stage_with(canvas).plot("collatz", "x", "y");
 
     let mut w = util::create_test_file("custom_dim.svg");
 
@@ -220,7 +223,7 @@ fn dark() -> fmt::Result {
     data.line(formatm!("test {}", 1), x.clone().map(|x| [x, x.cos()]));
     data.line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
 
-    let mut plotter = data.build().prep().plot("cos per year", "year", "cows");
+    let mut plotter = data.build().stage().plot("cos per year", "year", "cows");
 
     let w = util::create_test_file("dark.svg");
 
@@ -236,7 +239,7 @@ fn custom_style() -> fmt::Result {
     s.line("cos", x.clone().map(|x| [x, x.cos()]));
     s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let mut p = s.build().prep().plot(
+    let mut p = s.build().stage().plot(
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
@@ -299,7 +302,7 @@ fn trig() -> fmt::Result {
         poloto::buffered_iter::buffered(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)),
     );
 
-    let mut plotter = s.build().prep().plot(
+    let mut plotter = s.build().stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

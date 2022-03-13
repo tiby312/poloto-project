@@ -75,7 +75,7 @@ fn test_chart() -> std::fmt::Result {
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 let s = poloto::data().scatter("", test).build();
-                                s.prep().plot(formatm!("test {}", i), "x", "y").render(a)
+                                s.stage().plot(formatm!("test {}", i), "x", "y").render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;
@@ -92,7 +92,7 @@ fn test_chart() -> std::fmt::Result {
                             poloto::disp(|a| {
                                 let s = poloto::data().scatter("", test).build();
 
-                                s.prep().plot(formatm!("test {}", i), "x", "y").render(a)
+                                s.stage().plot(formatm!("test {}", i), "x", "y").render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;
