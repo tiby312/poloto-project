@@ -403,36 +403,41 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
 
 pub mod bar {
     use super::*;
-    pub struct Blop<'a, D, K> {
-        ticks: &'a [(D, K)],
+    pub struct BarTickFmt<D> {
+        ticks: Vec<D>,
     }
 
-    impl<'a, D: Display, K> TickFormat for Blop<'a, D, K> {
+    impl<'a, D: Display> TickFormat for BarTickFmt<D> {
         type Num = i128;
         fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result {
             let j = &self.ticks[*val as usize];
-            write!(writer, "{}", j.0)
+            write!(writer, "{}", j)
         }
     }
 
-    pub fn gen_bar<'a, 'b, D: Display, X: PlotNum>(
-        data: &'b mut Data<'a, X, i128>,
-        vals: &'a [(D, X)],
-    ) -> (TickInfo<Vec<i128>>, Blop<'a, D, X>) {
-        data.bars("", vals.iter().enumerate().map(|(i, x)| (x.1, i as i128)))
-            .ymarker(-1)
-            .ymarker(vals.len() as i128)
-            .xtick_lines();
+    pub fn gen_bar<D: Display, X: PlotNum>(
+        data: &mut Data<X, i128>,
+        vals: impl IntoIterator<Item = (D, X)>,
+    ) -> (TickInfo<Vec<i128>>, BarTickFmt<D>) {
+        let (names, vals): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
-        let ticks = (0..vals.len()).map(|x| x as i128).collect();
+        let vals_len = vals.len();
+        data.bars(
+            "",
+            vals.into_iter().enumerate().map(|(i, x)| (x, i as i128)),
+        )
+        .ymarker(-1)
+        .ymarker(vals_len as i128)
+        .xtick_lines();
 
-        let b = Blop { ticks: vals };
+        let ticks = (0..vals_len).map(|x| x as i128).collect();
+
         (
             TickInfo {
                 ticks,
                 dash_size: None,
             },
-            b,
+            BarTickFmt { ticks: names },
         )
     }
 }
@@ -624,7 +629,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
 
     ///
     /// use [`gen_bar`] instead.
-    /// 
+    ///
     fn bars<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,

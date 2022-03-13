@@ -1,10 +1,10 @@
 use poloto::prelude::*;
 fn main() {
     let mut data = poloto::data();
-    
+
     let (ytick, ytick_fmt) = poloto::bar::gen_bar(
         &mut data,
-        &[
+        [
             ("potato", 5),
             ("chicken", 3),
             ("pizza", 23),
