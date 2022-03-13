@@ -70,10 +70,13 @@ impl TickFormat for IntegerTickFmt {
 impl HasDefaultTicks for i128 {
     type Fmt = IntegerTickFmt;
     type IntoIter = Vec<i128>;
-    fn generate(bound: &crate::Bound<i128>) -> (TickInfo<Vec<i128>>, IntegerTickFmt) {
+    fn generate(
+        bound: &crate::Bound<i128>,
+        canvas: &crate::CanvasBound,
+    ) -> (TickInfo<Vec<i128>>, IntegerTickFmt) {
         let range = [bound.min, bound.max];
-        let ideal_num_steps = bound.ideal_num_steps;
-        let dash = bound.dash_info;
+        let ideal_num_steps = canvas.ideal_num_steps;
+        let dash = canvas.dash_info;
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
@@ -85,7 +88,7 @@ impl HasDefaultTicks for i128 {
             tick_layout.normalized_step,
         ));
 
-        let axis = bound.axis;
+        let axis = canvas.axis;
 
         (
             TickInfo { ticks, dash_size },

@@ -17,12 +17,17 @@ fn main() {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
 
+    data.ymarker(0);
+
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    data.ymarker(0).xtick_lines().ytick_lines().with_dim(dim);
-
-    let mut plotter = data.build().plot("collatz", "x", "y");
+    let canvas = poloto::gen_canvas()
+        .xtick_lines()
+        .ytick_lines()
+        .with_dim(dim)
+        .build();
+    let mut plotter = data.build().plot_with_canvas(canvas, "collatz", "x", "y");
 
     let hh = poloto::simple_theme::determine_height_from_width(plotter.get_dim(), 800.0);
 

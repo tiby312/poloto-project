@@ -14,9 +14,11 @@ fn main() {
 
     let data = data.xmarker(0).build();
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx());
+    let canvas = poloto::gen_canvas().build();
+    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx(), canvas.boundx());
 
-    let mut pp = data.plot_with(
+    let mut pp = data.plot_with_canvas_ext(
+        canvas,
         xtick,
         ytick,
         poloto::plot_fmt("Stuff", "Hour", "Number of rides", xtick_fmt, ytick_fmt),

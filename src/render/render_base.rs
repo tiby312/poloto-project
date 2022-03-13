@@ -139,7 +139,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("y2", yaspect_offset + height - paddingy * 0.95)
             })?;
 
-            if extra.xtick_lines {
+            if extra.canvas.xtick_lines {
                 writer.single("line", |d| {
                     d.attr("class", "poloto_tick_line")?;
                     d.attr("stroke", "black")?;
@@ -192,7 +192,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("y2", yaspect_offset + yy)
             })?;
 
-            if extra.ytick_lines {
+            if extra.canvas.ytick_lines {
                 writer.single("line", |d| {
                     d.attr("class", "poloto_tick_line")?;
                     d.attr("stroke", "black")?;

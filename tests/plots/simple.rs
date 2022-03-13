@@ -16,9 +16,11 @@ fn heart() -> fmt::Result {
     data.line_fill_raw("heart", range.map(heart));
     data.xmarker(-20.0).xmarker(20.0);
     data.ymarker(-20.0).ymarker(20.0);
-    data.preserve_aspect();
 
-    let mut plotter = data.build().plot("Heart Graph", "x", "y");
+    let canvas = poloto::gen_canvas().preserve_aspect().build();
+    let mut plotter = data
+        .build()
+        .plot_with_canvas(canvas, "Heart Graph", "x", "y");
 
     let w = util::create_test_file("heart.svg");
 
@@ -184,11 +186,14 @@ fn custom_dim() -> fmt::Result {
         data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
     }
     data.ymarker(0);
-    data.with_dim([2000.0, 1000.0]);
-    data.ytick_lines();
-    data.xtick_lines();
 
-    let mut plotter = data.build().plot("collatz", "x", "y");
+    let canvas = poloto::gen_canvas()
+        .with_dim([2000.0, 1000.0])
+        .ytick_lines()
+        .xtick_lines()
+        .build();
+
+    let mut plotter = data.build().plot_with_canvas(canvas, "collatz", "x", "y");
 
     let mut w = util::create_test_file("custom_dim.svg");
 

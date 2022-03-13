@@ -79,7 +79,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                     })
                 };
 
-                let precision = extra.precision;
+                let precision = extra.canvas.precision;
                 render(
                     &mut writer,
                     it,
@@ -90,7 +90,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                         colori,
                         legendy1,
                         precision,
-                        bar_width: extra.bar_width,
+                        bar_width: extra.canvas.bar_width,
                     },
                 )?;
             }
