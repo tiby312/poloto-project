@@ -28,18 +28,6 @@ pub trait PlotNum: PartialOrd + Copy {
 }
 
 ///
-/// Used by [`crate::Bound`]
-///
-#[derive(Debug, Copy, Clone)]
-pub struct DashInfo {
-    //The ideal dash size in the drawing area
-    pub ideal_dash_size: f64,
-
-    //The total drawing area
-    pub max: f64,
-}
-
-///
 /// Information on the properties of all the interval ticks for one dimension.
 ///
 #[derive(Debug, Clone)]

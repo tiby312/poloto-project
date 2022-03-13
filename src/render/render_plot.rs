@@ -87,7 +87,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                     &mut writer,
                     it,
                     PlotRenderInfo {
-                        canvas: canvas,
+                        canvas,
                         p_type,
                         name_exists,
                         colori,
