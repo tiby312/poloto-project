@@ -73,7 +73,7 @@ impl HasDefaultTicks for f64 {
     type Fmt = FloatTickFmt;
     type IntoIter = Vec<f64>;
     fn generate(
-        bound: &crate::Bound<f64>,
+        bound: &crate::DataBound<f64>,
         canvas: &crate::CanvasBound,
     ) -> (TickInfo<Vec<f64>>, FloatTickFmt) {
         let range = [bound.min, bound.max];

@@ -71,7 +71,7 @@ impl HasDefaultTicks for i128 {
     type Fmt = IntegerTickFmt;
     type IntoIter = Vec<i128>;
     fn generate(
-        bound: &crate::Bound<i128>,
+        bound: &crate::DataBound<i128>,
         canvas: &crate::CanvasBound,
     ) -> (TickInfo<Vec<i128>>, IntegerTickFmt) {
         let range = [bound.min, bound.max];
