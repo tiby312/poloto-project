@@ -1,6 +1,5 @@
 use super::*;
 
-
 #[test]
 fn custom_colors_html() -> fmt::Result {
     let mut s = poloto::data();

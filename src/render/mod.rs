@@ -50,6 +50,7 @@ pub enum PlotType {
     Histo,
     LineFill,
     LineFillRaw,
+    Bars,
 }
 
 #[derive(Copy, Clone, Debug)]

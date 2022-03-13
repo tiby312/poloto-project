@@ -308,6 +308,42 @@ fn render<W: fmt::Write>(
                 d.path(|path| render::line_fill(path, it, height - paddingy, false, num_fmt))
             })?;
         }
+        PlotType::Bars => {
+            if name_exists {
+                writer.single("rect", |d| {
+                    d.attr(
+                        "class",
+                        format_args!(
+                            "poloto_histo poloto_legend_icon poloto{}fill poloto{}legend",
+                            colori, colori
+                        ),
+                    )?;
+                    d.attr("x", legendx1)?;
+                    d.attr("y", legendy1 - padding / 30.0)?;
+                    d.attr("width", padding / 3.0)?;
+                    d.attr("height", padding / 20.0)?;
+                    d.attr("rx", padding / 30.0)?;
+                    d.attr("ry", padding / 30.0)
+                })?;
+            }
+
+            writer
+                .elem("g", |d| {
+                    d.attr("class", format_args!("poloto_histo poloto{}fill", colori))
+                })?
+                .build(|writer| {
+                    let bar_width = 20.0;
+                    for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
+                        writer.single("rect", |d| {
+                            d.attr("x", num_fmt.fmt(padding))?;
+                            d.attr("y", num_fmt.fmt(y - bar_width / 2.0))?;
+                            d.attr("width", x - padding)?;
+                            d.attr("height", bar_width)
+                        })?;
+                    }
+                    Ok(())
+                })?;
+        }
     }
     Ok(())
 }

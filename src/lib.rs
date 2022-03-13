@@ -401,28 +401,36 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
     Data::default()
 }
 
-
-pub mod bar{
+pub mod bar {
     use super::*;
-    pub struct Blop<'a,D>{
-        ticks:&'a [D]
+    pub struct Blop<'a, D> {
+        ticks: &'a [D],
     }
 
-    impl<'a,D:Display> TickFormat for Blop<'a,D>{
-        type Num=i128;
-        fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result { 
-            let j=&self.ticks[*val as usize];
-            write!(writer,"{}",j)
+    impl<'a, D: Display> TickFormat for Blop<'a, D> {
+        type Num = i128;
+        fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result {
+            let j = &self.ticks[*val as usize];
+            write!(writer, "{}", j)
         }
     }
 
-    pub fn gen_bar<'a, D:Display>(bound:&Bound<i128>,vals:&'a [D])->(TickInfo<Vec<i128>>,Blop<'a,D>){
-        assert!(vals.len()>0);
-        assert_eq!(bound.max-bound.min,(vals.len()-1) as i128);
-        let ticks=(0..vals.len()).map(|x|x as i128).collect();
+    pub fn gen_bar<'a, D: Display>(
+        _bound: &Bound<i128>,
+        vals: &'a [D],
+    ) -> (TickInfo<Vec<i128>>, Blop<'a, D>) {
+        //assert!(vals.len()>0);
+        //assert_eq!(bound.max-bound.min,(vals.len()-1) as i128);
+        let ticks = (0..vals.len()).map(|x| x as i128).collect();
 
-        let b=Blop{ticks:vals};
-        (TickInfo{ticks,dash_size:None},b)
+        let b = Blop { ticks: vals };
+        (
+            TickInfo {
+                ticks,
+                dash_size: None,
+            },
+            b,
+        )
     }
 }
 
@@ -607,6 +615,20 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
             name,
             PlotMetaType::Plot(PlotType::Histo),
+        )));
+        self
+    }
+
+    pub fn bars<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    where
+        I: PlotIter + 'a,
+        I::Item1: Plottable<Item = (X, Y)>,
+        I::Item2: Plottable<Item = (X, Y)>,
+    {
+        self.plots.push(Box::new(PlotStruct::new(
+            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
+            name,
+            PlotMetaType::Plot(PlotType::Bars),
         )));
         self
     }
