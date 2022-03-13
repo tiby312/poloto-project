@@ -23,8 +23,7 @@ fn marathon() -> fmt::Result {
     let canvas = poloto::canvas().build();
     let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(), canvas.boundy());
 
-    let mut plotter = data.plot_with_ticks_and_canvas(
-        canvas,
+    let mut plotter = data.prep_with(canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(
@@ -76,8 +75,7 @@ fn years() -> fmt::Result {
 
     let (yticks, ytick_fmt) = poloto::ticks_from_default(data.boundy(), canvas.boundy());
 
-    let mut plotter = data.plot_with_ticks_and_canvas(
-        canvas,
+    let mut plotter = data.prep_with(canvas).plot_with(
         xticks,
         yticks,
         poloto::plot_fmt("title", "xname", "yname", xtick_fmt, ytick_fmt),

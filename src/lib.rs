@@ -184,6 +184,11 @@ pub struct DataResult<'a, X: 'a, Y: 'a> {
     boundy: DataBound<Y>,
 }
 
+pub struct Prep<'a, X: 'a, Y: 'a> {
+    res: DataResult<'a, X, Y>,
+    canvas: Canvas,
+}
+
 ///
 /// Start plotting.
 ///

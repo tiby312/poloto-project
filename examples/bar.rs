@@ -18,8 +18,7 @@ fn main() {
 
     let (xtick, xtick_fmt) = data.default_ticks_x(&canvas);
 
-    let mut plt = data.plot_with_ticks_and_canvas(
-        canvas,
+    let mut plt = data.prep_with(canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

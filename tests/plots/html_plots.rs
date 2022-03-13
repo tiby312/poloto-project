@@ -10,6 +10,7 @@ fn custom_colors_html() -> fmt::Result {
 
     let mut s = s
         .build()
+        .prep()
         .plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
     let mut w = util::create_test_file("custom_colors.html");
@@ -124,7 +125,10 @@ body {
     s.histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
     s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
 
-    let mut s = s.build().plot("Demo: Hovering and shadows", "x", "y");
+    let mut s = s
+        .build()
+        .prep()
+        .plot("Demo: Hovering and shadows", "x", "y");
 
     let mut w = util::create_test_file("hover_shadow.html");
 

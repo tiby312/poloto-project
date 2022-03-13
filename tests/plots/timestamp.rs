@@ -25,7 +25,9 @@ fn days() -> fmt::Result {
         .ymarker(0)
         .build();
 
-    let mut s = s.plot("Number of Wikipedia Articles", "Day", "Number of Articles");
+    let mut s = s
+        .prep()
+        .plot("Number of Wikipedia Articles", "Day", "Number of Articles");
 
     let mut w = util::create_test_file("days.svg");
 
@@ -57,8 +59,7 @@ fn minutes_local_time() -> fmt::Result {
     let (xtick, xtick_fmt) = unixtime_ticks(s.boundx(), canvas.boundx(), time_zone);
     let (ytick, ytick_fmt) = s.default_ticks_y(&canvas);
 
-    let mut s = s.plot_with_ticks_and_canvas(
-        canvas,
+    let mut s = s.prep_with(canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(
@@ -99,7 +100,7 @@ fn months() -> fmt::Result {
         .ymarker(0)
         .build();
 
-    let mut s = s.plot(
+    let mut s = s.prep().plot(
         "Number of Wikipedia Articles",
         "duration",
         "Number of Articles",
@@ -145,8 +146,7 @@ fn seconds() -> fmt::Result {
 
     let (ytick, ytick_fmt) = data.default_ticks_y(&canvas);
 
-    let mut plotter = data.plot_with_ticks_and_canvas(
-        canvas,
+    let mut plotter = data.prep_with(canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

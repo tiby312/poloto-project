@@ -237,6 +237,24 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         Y::generate(self.boundy(), canvas.boundy())
     }
 
+    pub fn prep(self) -> Prep<'a, X, Y> {
+        Prep {
+            res: self,
+            canvas: crate::canvas().build(),
+        }
+    }
+
+    pub fn prep_with(self, canvas: Canvas) -> Prep<'a, X, Y> {
+        Prep { res: self, canvas }
+    }
+}
+
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Prep<'a, X, Y> {
+    ///
+    /// Automatically create a tick distribution using the default
+    /// tick generators tied to a [`PlotNum`].
+    ///
+
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -251,53 +269,19 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
     {
-        let canvas = crate::canvas().build();
-        self.plot_with_canvas(canvas, title, xname, yname)
-    }
-
-    ///
-    /// Automatically create a tick distribution using the default
-    /// tick generators tied to a [`PlotNum`].
-    ///
-    pub fn plot_with_canvas(
-        self,
-        canvas: Canvas,
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-    ) -> Plotter<impl Disp + 'a>
-    where
-        X: HasDefaultTicks,
-        Y: HasDefaultTicks,
-    {
-        let (x, xt) = self.default_ticks_x(&canvas);
-        let (y, yt) = self.default_ticks_y(&canvas);
+        let (x, xt) = self.res.default_ticks_x(&self.canvas);
+        let (y, yt) = self.res.default_ticks_y(&self.canvas);
 
         let p = plot_fmt(title, xname, yname, xt, yt);
-        self.plot_with_ticks_and_canvas(canvas, x, y, p)
+        self.plot_with(x, y, p)
     }
 
-    pub fn plot_with_ticks<XI: 'a, YI: 'a, PF: 'a>(
-        self,
-        xtick: TickInfo<XI>,
-        ytick: TickInfo<YI>,
-        plot_fmt: PF,
-    ) -> Plotter<impl Disp + 'a>
-    where
-        XI: IntoIterator<Item = X>,
-        YI: IntoIterator<Item = Y>,
-        PF: BaseFmt<X = X, Y = Y>,
-    {
-        let canvas = crate::canvas().build();
-        self.plot_with_ticks_and_canvas(canvas, xtick, ytick, plot_fmt)
-    }
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`DataResult::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with_ticks_and_canvas<XI: 'a, YI: 'a, PF: 'a>(
+    pub fn plot_with<XI: 'a, YI: 'a, PF: 'a>(
         self,
-        canvas: Canvas,
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
         plot_fmt: PF,
@@ -333,14 +317,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
             }
         }
 
-        self.plot_with_all(
-            canvas,
-            PlotAllStruct {
-                fmt: plot_fmt,
-                xtick,
-                ytick,
-            },
-        )
+        self.plot_with_all(PlotAllStruct {
+            fmt: plot_fmt,
+            xtick,
+            ytick,
+        })
     }
 
     ///
@@ -348,7 +329,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     ///
     fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
         self,
-        canvas: Canvas,
         p: PF,
     ) -> Plotter<impl Disp + 'a> {
         struct Foo2<'a, X, Y> {
@@ -414,11 +394,13 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
         let pp = InnerPlotter {
             all: Combine {
                 a: p,
-                b: Foo2 { plots: self.plots },
+                b: Foo2 {
+                    plots: self.res.plots,
+                },
             },
-            boundx: self.boundx,
-            boundy: self.boundy,
-            canvas,
+            boundx: self.res.boundx,
+            boundy: self.res.boundy,
+            canvas: self.canvas,
         };
 
         let dim = pp.canvas.get_dim();
