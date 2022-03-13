@@ -403,6 +403,7 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
 
 pub mod bar {
     use super::*;
+    use std::convert::TryFrom;
     pub struct BarTickFmt<D> {
         ticks: Vec<D>,
     }
@@ -410,7 +411,7 @@ pub mod bar {
     impl<'a, D: Display> TickFormat for BarTickFmt<D> {
         type Num = i128;
         fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result {
-            let j = &self.ticks[*val as usize];
+            let j = &self.ticks[usize::try_from(*val).unwrap()];
             write!(writer, "{}", j)
         }
     }
@@ -424,13 +425,15 @@ pub mod bar {
         let vals_len = vals.len();
         data.bars(
             "",
-            vals.into_iter().enumerate().map(|(i, x)| (x, i as i128)),
+            vals.into_iter()
+                .enumerate()
+                .map(|(i, x)| (x, i128::try_from(i).unwrap())),
         )
         .ymarker(-1)
-        .ymarker(vals_len as i128)
+        .ymarker(i128::try_from(vals_len).unwrap())
         .xtick_lines();
 
-        let ticks = (0..vals_len).map(|x| x as i128).collect();
+        let ticks = (0..vals_len).map(|x| i128::try_from(x).unwrap()).collect();
 
         (
             TickInfo {
