@@ -2,11 +2,13 @@ use crate::*;
 mod render_base;
 mod render_plot;
 
+/*
 pub struct Extra<X, Y> {
     pub canvas: Canvas,
     pub boundx: DataBound<X>,
     pub boundy: DataBound<Y>,
 }
+*/
 
 ///
 /// Main render function.
@@ -14,7 +16,9 @@ pub struct Extra<X, Y> {
 pub fn render<P: BaseAndPlotsFmt>(
     mut writer: impl fmt::Write,
     all: P,
-    extra: &Extra<P::X, P::Y>,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
+    canvas: Canvas,
 ) -> fmt::Result {
     let (base_fmt, plot_fmt) = all.gen();
 
@@ -27,8 +31,8 @@ pub fn render<P: BaseAndPlotsFmt>(
         })?;
     }
 
-    render::render_plot::render_plot(&mut writer, extra, plot_fmt)?;
-    render::render_base::render_base(&mut writer, extra, base_fmt)
+    render::render_plot::render_plot(&mut writer, &boundx, &boundy, &canvas, plot_fmt)?;
+    render::render_base::render_base(&mut writer, &boundx, &boundy, &canvas, base_fmt)
 }
 
 pub trait BaseAndPlotsFmt {

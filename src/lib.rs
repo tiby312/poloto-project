@@ -368,12 +368,14 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
 
         struct InnerPlotter<PF: BaseAndPlotsFmt> {
             all: PF,
-            extra: Extra<PF::X, PF::Y>,
+            boundx: DataBound<PF::X>,
+            boundy: DataBound<PF::Y>,
+            canvas: Canvas,
         }
 
         impl<PF: BaseAndPlotsFmt> Disp for InnerPlotter<PF> {
             fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
-                render::render(&mut writer, self.all, &self.extra)
+                render::render(&mut writer, self.all, self.boundx, self.boundy, self.canvas)
             }
         }
 
@@ -382,14 +384,12 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
                 a: p,
                 b: Foo2 { plots: self.plots },
             },
-            extra: Extra {
-                canvas,
-                boundx: self.boundx,
-                boundy: self.boundy,
-            },
+            boundx: self.boundx,
+            boundy: self.boundy,
+            canvas,
         };
 
-        let dim = pp.extra.canvas.get_dim();
+        let dim = pp.canvas.get_dim();
         Plotter {
             inner: Some(pp),
             dim,

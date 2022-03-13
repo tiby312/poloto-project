@@ -2,7 +2,9 @@ use super::*;
 
 pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    extra: &Extra<X, Y>,
+    boundx: &DataBound<X>,
+    boundy: &DataBound<Y>,
+    canvas: &Canvas,
     base: impl BaseFmtAndTicks<X = X, Y = Y>,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
@@ -15,13 +17,13 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
         xaspect_offset,
         yaspect_offset,
         ..
-    } = extra.canvas;
+    } = canvas;
 
-    let scalex = extra.canvas.boundx.max;
-    let scaley = extra.canvas.boundy.max;
+    let scalex = canvas.boundx.max;
+    let scaley = canvas.boundy.max;
 
-    let boundx = [extra.boundx.min, extra.boundx.max];
-    let boundy = [extra.boundy.min, extra.boundy.max];
+    let boundx = [boundx.min, boundx.max];
+    let boundy = [boundy.min, boundy.max];
 
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
@@ -140,7 +142,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("y2", yaspect_offset + height - paddingy * 0.95)
             })?;
 
-            if extra.canvas.xtick_lines {
+            if canvas.xtick_lines {
                 writer.single("line", |d| {
                     d.attr("class", "poloto_tick_line")?;
                     d.attr("stroke", "black")?;
@@ -193,7 +195,7 @@ pub(crate) fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("y2", yaspect_offset + yy)
             })?;
 
-            if extra.canvas.ytick_lines {
+            if canvas.ytick_lines {
                 writer.single("line", |d| {
                     d.attr("class", "poloto_tick_line")?;
                     d.attr("stroke", "black")?;
