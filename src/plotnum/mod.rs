@@ -143,7 +143,7 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
 use std::fmt;
 
 ///
-/// Used by [`crate::DataResult::plot_with`]
+/// Used by [`crate::DataResult::plot_with_ticks`]
 ///
 pub trait BaseFmt {
     type X: PlotNum;

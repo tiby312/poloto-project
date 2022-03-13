@@ -12,7 +12,7 @@
 //! Pipeline:
 //! * Collect plots ([`data`] function)
 //! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
-//! * Create tick distributions. (This step can be done automatically using [`DataResult::plot`] instead of [`DataResult::plot_with`])
+//! * Create tick distributions. (This step can be done automatically using [`DataResult::plot`])
 //! * Collect title/xname/yname
 //! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
@@ -928,8 +928,8 @@ pub trait Disp {
 }
 
 ///
-/// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
-///
+/// Created by [`DataResult::plot`] 
+/// 
 pub struct Plotter<A: Disp> {
     inner: Option<A>,
     dim: [f64; 2],
