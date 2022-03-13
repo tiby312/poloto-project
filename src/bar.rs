@@ -1,5 +1,3 @@
-
-
 use super::*;
 use std::convert::TryFrom;
 pub struct BarTickFmt<D> {
