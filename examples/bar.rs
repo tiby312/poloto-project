@@ -5,10 +5,10 @@ fn main() {
     let (ytick, ytick_fmt) = poloto::bar::gen_bar(
         &mut data,
         [
-            ("potato", 5),
-            ("chicken", 3),
-            ("pizza", 23),
-            ("avocado", 53),
+            (05, "potato"),
+            (03, "chicken"),
+            (23, "pizza"),
+            (53, "avocado"),
         ],
     );
 

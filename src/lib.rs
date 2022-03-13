@@ -418,9 +418,9 @@ pub mod bar {
 
     pub fn gen_bar<D: Display, X: PlotNum>(
         data: &mut Data<X, i128>,
-        vals: impl IntoIterator<Item = (D, X)>,
+        vals: impl IntoIterator<Item = (X, D)>,
     ) -> (TickInfo<Vec<i128>>, BarTickFmt<D>) {
-        let (names, vals): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
+        let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
         let vals_len = vals.len();
         data.bars(
