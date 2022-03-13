@@ -11,7 +11,7 @@
 //!
 //! Pipeline:
 //! * Collect plots ([`data`] function)
-//! * Compute min/max by calling [`Data::build()`].
+//! * Compute min/max by calling [`DataBuilder::build()`].
 //! * Link the data with canvas options by calling [`Data::stage_with()`] or use default canvas with [`Data::stage()`]
 //! * Create tick distributions. (This step can be done automatically using [`Stager::plot()`])
 //! * Collect title/xname/yname using [`Stager::plot()`] or [`Stager::plot_with()`]
@@ -180,7 +180,7 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::I
 }
 
 ///
-/// Created by [`Data::build`]
+/// Created by [`DataBuilder::build`]
 ///
 pub struct Data<'a, X: 'a, Y: 'a> {
     plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
@@ -189,7 +189,7 @@ pub struct Data<'a, X: 'a, Y: 'a> {
 }
 
 ///
-///
+/// Created by [`Data::stage()`] or [`Data::stage_with`].
 ///
 pub struct Stager<'a, X: 'a, Y: 'a> {
     res: Data<'a, X, Y>,
@@ -206,8 +206,18 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> DataBuilder<'a, X, Y> {
 ///
 /// Build a [`Canvas`]
 ///
-pub fn canvas() -> canvas::CanvasBuilder {
-    canvas::CanvasBuilder::default()
+pub fn canvas() -> CanvasBuilder {
+    CanvasBuilder::default()
+}
+
+pub struct CanvasBuilder {
+    num_css_classes: Option<usize>,
+    preserve_aspect: bool,
+    dim: Option<[f64; 2]>,
+    xtick_lines: bool,
+    ytick_lines: bool,
+    precision: usize,
+    bar_width: f64,
 }
 
 use plotnum::PlotIter;

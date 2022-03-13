@@ -1,15 +1,5 @@
 use super::*;
 
-pub struct CanvasBuilder {
-    num_css_classes: Option<usize>,
-    preserve_aspect: bool,
-    dim: Option<[f64; 2]>,
-    xtick_lines: bool,
-    ytick_lines: bool,
-    precision: usize,
-    bar_width: f64,
-}
-
 impl Default for CanvasBuilder {
     fn default() -> Self {
         CanvasBuilder {
