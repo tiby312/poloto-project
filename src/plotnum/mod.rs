@@ -2,10 +2,10 @@
 //! Contains the [`PlotNum`] trait and their supporting structs.
 //!
 
-//pub mod ext;
+use super::*;
 
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
-/// See [`crate::plottable::crop::Croppable`]
+/// See [`plottable::crop::Croppable`]
 ///
 pub trait DiscNum: PlotNum {
     /// Create a hole value.
@@ -42,12 +42,12 @@ pub struct TickInfo<I: IntoIterator> {
 ///
 /// Trait to allow a plotnum to have a default tick distribution.
 ///
-/// Used by [`crate::DataResult::plot`]
+/// Used by [`Stager::plot`]
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
     type IntoIter: IntoIterator<Item = Self>;
-    fn generate(bound: crate::Bound<Self>) -> (TickInfo<Self::IntoIter>, Self::Fmt);
+    fn generate(bound: Bound<Self>) -> (TickInfo<Self::IntoIter>, Self::Fmt);
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -128,7 +128,7 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
 use std::fmt;
 
 ///
-/// Used by [`crate::DataResult::plot_with_ticks`]
+/// Used by [`Stager::plot_with`]
 ///
 pub trait BaseFmt {
     type X: PlotNum;

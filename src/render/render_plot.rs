@@ -1,6 +1,6 @@
 use super::*;
 
-pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
+pub fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     boundx: &DataBound<X>,
     boundy: &DataBound<Y>,

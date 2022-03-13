@@ -13,7 +13,7 @@ fn heart() -> fmt::Result {
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
     let mut data = poloto::data();
-    data.line_fill_raw("heart", range.map(heart));
+    data.line_fill_raw("", range.map(heart));
     data.xmarker(-20.0).xmarker(20.0);
     data.ymarker(-20.0).ymarker(20.0);
 

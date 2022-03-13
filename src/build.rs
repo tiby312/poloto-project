@@ -1,8 +1,8 @@
 use super::*;
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for DataBuilder<'a, X, Y> {
     fn default() -> Self {
-        Data {
+        DataBuilder {
             plots: vec![],
             xmarkers: vec![],
             ymarkers: vec![],
@@ -10,7 +10,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
     pub fn xmarker(&mut self, a: X) -> &mut Self {
         self.xmarkers.push(a);
         self
@@ -151,25 +151,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self
     }
 
-    ///
-    /// use [`gen_bar`] instead.
-    ///
-    pub(crate) fn bars<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Bars),
-        )));
-        self
-    }
-
     pub fn move_into(&mut self) -> Self {
-        let mut val = Data {
+        let mut val = DataBuilder {
             plots: vec![],
             xmarkers: vec![],
             ymarkers: vec![],
@@ -189,7 +172,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     /// plotter.build();
     /// ```
     ///
-    pub fn build(&mut self) -> DataResult<'a, X, Y> {
+    pub fn build(&mut self) -> Data<'a, X, Y> {
         let mut val = self.move_into();
 
         let (boundx, boundy) = util::find_bounds(
@@ -207,7 +190,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             max: boundy[1],
         };
 
-        DataResult {
+        Data {
             plots: val.plots,
             boundx,
             boundy,
@@ -215,7 +198,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
     pub fn data_boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
@@ -277,7 +260,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Stager<'a, X, Y> {
 
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
-    /// Unlike [`DataResult::plot`] User must supply own tick distribution.
+    /// Unlike [`Stager::plot`] User must supply own tick distribution.
     ///
     pub fn plot_with<XI: 'a, YI: 'a, PF: 'a>(
         self,

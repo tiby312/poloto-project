@@ -12,14 +12,33 @@ impl<'a, D: Display> TickFormat for BarTickFmt<D> {
     }
 }
 
+fn bars<'a, 'b, X: PlotNum, Y: PlotNum, I>(
+    data: &'b mut DataBuilder<'a, X, Y>,
+    name: impl Display + 'a,
+    plots: I,
+) -> &'b mut DataBuilder<'a, X, Y>
+where
+    I: PlotIter + 'a,
+    I::Item1: Plottable<Item = (X, Y)>,
+    I::Item2: Plottable<Item = (X, Y)>,
+{
+    data.plots.push(Box::new(PlotStruct::new(
+        plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
+        name,
+        PlotMetaType::Plot(PlotType::Bars),
+    )));
+    data
+}
+
 pub fn gen_bar<D: Display, X: PlotNum>(
-    data: &mut Data<X, i128>,
+    data: &mut DataBuilder<X, i128>,
     vals: impl IntoIterator<Item = (X, D)>,
 ) -> (TickInfo<Vec<i128>>, BarTickFmt<D>) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
     let vals_len = vals.len();
-    data.bars(
+    bars(
+        data,
         "",
         vals.into_iter()
             .enumerate()

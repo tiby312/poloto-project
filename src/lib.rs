@@ -11,10 +11,11 @@
 //!
 //! Pipeline:
 //! * Collect plots ([`data`] function)
-//! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
-//! * Create tick distributions. (This step can be done automatically using [`DataResult::plot`])
-//! * Collect title/xname/yname
-//! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
+//! * Compute min/max by calling [`Data::build()`].
+//! * Link the data with canvas options by calling [`Data::stage_with()`] or use default canvas with [`Data::stage()`]
+//! * Create tick distributions. (This step can be done automatically using [`Stager::plot()`])
+//! * Collect title/xname/yname using [`Stager::plot()`] or [`Stager::plot_with()`]
+//! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
 //!
@@ -181,24 +182,30 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::I
 ///
 /// Created by [`Data::build`]
 ///
-pub struct DataResult<'a, X: 'a, Y: 'a> {
+pub struct Data<'a, X: 'a, Y: 'a> {
     plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
     boundx: DataBound<X>,
     boundy: DataBound<Y>,
 }
 
+///
+///
+///
 pub struct Stager<'a, X: 'a, Y: 'a> {
-    res: DataResult<'a, X, Y>,
+    res: Data<'a, X, Y>,
     canvas: Canvas,
 }
 
 ///
 /// Start plotting.
 ///
-pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
-    Data::default()
+pub fn data<'a, X: PlotNum, Y: PlotNum>() -> DataBuilder<'a, X, Y> {
+    DataBuilder::default()
 }
 
+///
+/// Build a [`Canvas`]
+///
 pub fn canvas() -> canvas::CanvasBuilder {
     canvas::CanvasBuilder::default()
 }
@@ -208,7 +215,7 @@ use plotnum::PlotIter;
 ///
 /// Plot collector.
 ///
-pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
+pub struct DataBuilder<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
     xmarkers: Vec<X>,
     ymarkers: Vec<Y>,
@@ -222,7 +229,7 @@ pub trait Disp {
 }
 
 ///
-/// Created by [`DataResult::plot`]
+/// Created by [`Stager::plot`]
 ///
 pub struct Plotter<A: Disp> {
     inner: Option<A>,

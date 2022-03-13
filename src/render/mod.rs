@@ -2,14 +2,6 @@ use crate::*;
 mod render_base;
 mod render_plot;
 
-/*
-pub struct Extra<X, Y> {
-    pub canvas: Canvas,
-    pub boundx: DataBound<X>,
-    pub boundy: DataBound<Y>,
-}
-*/
-
 ///
 /// Main render function.
 ///

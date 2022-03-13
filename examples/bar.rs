@@ -6,7 +6,7 @@ fn main() {
         &mut data,
         [
             (20, "potato"),
-            (10, "broccoli"),
+            (14, "broccoli"),
             (53, "pizza"),
             (30, "avocado"),
         ],
