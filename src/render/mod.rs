@@ -10,6 +10,7 @@ pub struct Extra<X, Y> {
     pub xtick_lines: bool,
     pub ytick_lines: bool,
     pub precision: usize,
+    pub bar_width: f64,
 }
 
 ///

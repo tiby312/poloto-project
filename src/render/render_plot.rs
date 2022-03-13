@@ -90,6 +90,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                         colori,
                         legendy1,
                         precision,
+                        bar_width: extra.bar_width,
                     },
                 )?;
             }
@@ -130,6 +131,7 @@ struct PlotRenderInfo<'a> {
     colori: usize,
     legendy1: f64,
     precision: usize,
+    bar_width: f64,
 }
 
 fn render<W: fmt::Write>(
@@ -144,6 +146,7 @@ fn render<W: fmt::Write>(
         colori,
         legendy1,
         precision,
+        bar_width,
     } = info;
 
     let Canvas {
@@ -332,7 +335,6 @@ fn render<W: fmt::Write>(
                     d.attr("class", format_args!("poloto_histo poloto{}fill", colori))
                 })?
                 .build(|writer| {
-                    let bar_width = 20.0;
                     for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                         writer.single("rect", |d| {
                             d.attr("x", num_fmt.fmt(padding))?;

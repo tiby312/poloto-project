@@ -161,7 +161,9 @@ pub struct DataResult<'a, X: 'a, Y: 'a> {
     xtick_lines: bool,
     ytick_lines: bool,
     precision: usize,
+    bar_width: f64,
 }
+
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
     pub fn boundx(&self) -> &Bound<X> {
         &self.boundx
@@ -316,6 +318,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
                 boundy: self.boundy,
                 xtick_lines: self.xtick_lines,
                 ytick_lines: self.ytick_lines,
+                bar_width: self.bar_width,
             },
         };
 
@@ -450,6 +453,7 @@ use plotnum::PlotIter;
 ///
 /// Plot collector.
 ///
+//TODO be composed of Extra.
 pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
     xmarkers: Vec<X>,
@@ -460,6 +464,7 @@ pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
     xtick_lines: bool,
     ytick_lines: bool,
     precision: usize,
+    bar_width: f64,
 }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
     fn default() -> Self {
@@ -473,14 +478,12 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
             xtick_lines: false,
             ytick_lines: false,
             precision: 2,
+            bar_width: 20.0,
         }
     }
 }
+
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
-    pub fn with_dim(&mut self, dim: [f64; 2]) -> &mut Self {
-        self.dim = Some(dim);
-        self
-    }
     pub fn xmarker(&mut self, a: X) -> &mut Self {
         self.xmarkers.push(a);
         self
@@ -488,15 +491,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
 
     pub fn ymarker(&mut self, a: Y) -> &mut Self {
         self.ymarkers.push(a);
-        self
-    }
-
-    pub fn xtick_lines(&mut self) -> &mut Self {
-        self.xtick_lines = true;
-        self
-    }
-    pub fn ytick_lines(&mut self) -> &mut Self {
-        self.ytick_lines = true;
         self
     }
 
@@ -647,32 +641,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self
     }
 
-    ///
-    /// Preserve the aspect ratio by drawing a smaller graph in the same area.
-    ///
-    pub fn preserve_aspect(&mut self) -> &mut Self {
-        self.preserve_aspect = true;
-        self
-    }
-
-    ///
-    /// The number of distinct css classes. If there are more plots than
-    /// classes, then they will wrap around. The default value is 8.
-    ///
-    /// A value of None, means it will never wrap around.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line("", &data);
-    /// plotter.num_css_class(Some(30));
-    /// ```
-    ///
-    pub fn num_css_class(&mut self, a: Option<usize>) -> &mut Self {
-        self.num_css_classes = a;
-        self
-    }
-
     pub fn move_into(&mut self) -> Self {
         let mut val = Data {
             plots: vec![],
@@ -684,23 +652,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             xtick_lines: false,
             ytick_lines: false,
             precision: 0,
+            bar_width: 0.0,
         };
 
         std::mem::swap(&mut val, self);
         val
-    }
-
-    ///
-    /// Specify the number of decimal places of each plot value in the SVG output itself.
-    /// Defaults to a precision of 2 (2 decimal places).
-    ///
-    /// For most usecases, you don't need a high precision. However, if you plan on blowing
-    /// up the svg output significantly or zooming in a bunch, then you might want better
-    /// precision.
-    ///
-    pub fn with_precision(&mut self, precision: usize) -> &mut Self {
-        self.precision = precision;
-        self
     }
 
     ///
@@ -760,7 +716,66 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
             boundy,
             xtick_lines: val.xtick_lines,
             ytick_lines: val.ytick_lines,
+            bar_width: val.bar_width,
         }
+    }
+}
+
+/// Render options.
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
+    pub fn with_dim(&mut self, dim: [f64; 2]) -> &mut Self {
+        self.dim = Some(dim);
+        self
+    }
+    pub fn xtick_lines(&mut self) -> &mut Self {
+        self.xtick_lines = true;
+        self
+    }
+    pub fn ytick_lines(&mut self) -> &mut Self {
+        self.ytick_lines = true;
+        self
+    }
+    ///
+    /// The number of distinct css classes. If there are more plots than
+    /// classes, then they will wrap around. The default value is 8.
+    ///
+    /// A value of None, means it will never wrap around.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut plotter = poloto::data();
+    /// plotter.line("", &data);
+    /// plotter.num_css_class(Some(30));
+    /// ```
+    ///
+    pub fn num_css_class(&mut self, a: Option<usize>) -> &mut Self {
+        self.num_css_classes = a;
+        self
+    }
+
+    ///
+    /// Specify the number of decimal places of each plot value in the SVG output itself.
+    /// Defaults to a precision of 2 (2 decimal places).
+    ///
+    /// For most usecases, you don't need a high precision. However, if you plan on blowing
+    /// up the svg output significantly or zooming in a bunch, then you might want better
+    /// precision.
+    ///
+    pub fn with_precision(&mut self, precision: usize) -> &mut Self {
+        self.precision = precision;
+        self
+    }
+    ///
+    /// Preserve the aspect ratio by drawing a smaller graph in the same area.
+    ///
+    pub fn preserve_aspect(&mut self) -> &mut Self {
+        self.preserve_aspect = true;
+        self
+    }
+
+    pub fn bar_width(&mut self, val: f64) -> &mut Self {
+        self.bar_width = val;
+        self
     }
 }
 
