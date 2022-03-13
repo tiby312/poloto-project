@@ -1,17 +1,20 @@
 use poloto::prelude::*;
 fn main() {
-    let data = poloto::data()
-        .bars("", [[5, 0], [4, 1], [6, 2], [10, 3]])
-        .xmarker(0)
-        .ymarker(-1)
-        .ymarker(4)
-        .xtick_lines()
-        .build();
+    let mut data = poloto::data();
+    
+    let (ytick, ytick_fmt) = poloto::bar::gen_bar(
+        &mut data,
+        &[
+            ("potato", 5),
+            ("chicken", 3),
+            ("pizza", 23),
+            ("avocado", 53),
+        ],
+    );
+
+    let data = data.xmarker(0).build();
 
     let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx());
-
-    let (ytick, ytick_fmt) =
-        poloto::bar::gen_bar(data.boundy(), &["potato", "chicken", "pizza", "avocado"]);
 
     let mut pp = data.plot_with(
         xtick,

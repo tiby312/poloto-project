@@ -403,24 +403,27 @@ pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
 
 pub mod bar {
     use super::*;
-    pub struct Blop<'a, D> {
-        ticks: &'a [D],
+    pub struct Blop<'a, D, K> {
+        ticks: &'a [(D, K)],
     }
 
-    impl<'a, D: Display> TickFormat for Blop<'a, D> {
+    impl<'a, D: Display, K> TickFormat for Blop<'a, D, K> {
         type Num = i128;
         fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result {
             let j = &self.ticks[*val as usize];
-            write!(writer, "{}", j)
+            write!(writer, "{}", j.0)
         }
     }
 
-    pub fn gen_bar<'a, D: Display>(
-        _bound: &Bound<i128>,
-        vals: &'a [D],
-    ) -> (TickInfo<Vec<i128>>, Blop<'a, D>) {
-        //assert!(vals.len()>0);
-        //assert_eq!(bound.max-bound.min,(vals.len()-1) as i128);
+    pub fn gen_bar<'a, 'b, D: Display, X: PlotNum>(
+        data: &'b mut Data<'a, X, i128>,
+        vals: &'a [(D, X)],
+    ) -> (TickInfo<Vec<i128>>, Blop<'a, D, X>) {
+        data.bars("", vals.iter().enumerate().map(|(i, x)| (x.1, i as i128)))
+            .ymarker(-1)
+            .ymarker(vals.len() as i128)
+            .xtick_lines();
+
         let ticks = (0..vals.len()).map(|x| x as i128).collect();
 
         let b = Blop { ticks: vals };
@@ -619,7 +622,10 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         self
     }
 
-    pub fn bars<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
+    ///
+    /// use [`gen_bar`] instead.
+    /// 
+    fn bars<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
     where
         I: PlotIter + 'a,
         I::Item1: Plottable<Item = (X, Y)>,
