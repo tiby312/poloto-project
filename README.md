@@ -40,11 +40,10 @@ fn main() {
     data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
     data.ymarker(0.0);
 
-    let mut plotter = data.build().plot("gaussian", "x", "y");
+    let mut plotter = data.build().stage().plot("gaussian", "x", "y");
 
     print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
-
 ```
 ## Output
 
@@ -69,30 +68,37 @@ fn main() {
         .fuse()
     };
 
-    let mut data = poloto::data();
-    for i in 1000..1006 {
-        data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
-    }
+    let data = {
+        let mut d = poloto::data();
+        for i in 1000..1006 {
+            d.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+        }
+        d.ymarker(0).build()
+    };
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    data.ymarker(0).xtick_lines().ytick_lines().with_dim(dim);
+    let canvas = poloto::canvas()
+        .xtick_lines()
+        .ytick_lines()
+        .with_dim(dim)
+        .build();
 
-    let mut plotter = data.build().plot("collatz", "x", "y");
+    let mut plotter = data.stage_with(canvas).plot("collatz", "x", "y");
 
-    let hh = poloto::simple_theme::determine_height_from_width(plotter.get_dim(), 800.0);
+    use poloto::simple_theme;
+    let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
 
     print!(
         "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a, [800.0, hh], dim)),
+        poloto::disp(|a| poloto::simple_theme::write_header(a, [simple_theme::DIM[0], hh], dim)),
         poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
         ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
         poloto::disp(|a| plotter.render(a)),
         poloto::simple_theme::SVG_END
     )
 }
-
 ```
 ## Output
 
@@ -143,7 +149,7 @@ fn main() {
         .ymarker(0.0)
         .build();
 
-    let mut plotter = data.plot(
+    let mut plotter = data.stage().plot(
         "Long Jump world record progression",
         "Date",
         "Mark (in meters)",
@@ -151,7 +157,6 @@ fn main() {
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }
-
 ```
 
 ## Output
@@ -173,10 +178,12 @@ fn main() {
         .histogram("", (0..).zip(trend.into_iter()))
         .build();
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
+    let canvas = poloto::canvas().build();
 
-    let mut plotter = data.plot_with(
+    let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(&canvas));
+
+    let mut pp = data.stage_with(canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(
@@ -188,9 +195,8 @@ fn main() {
         ),
     );
 
-    print!("{}", poloto::disp(|w| plotter.simple_theme(w)));
+    print!("{}", poloto::disp(|w| pp.simple_theme(w)));
 }
-
 ```
 
 ## Output

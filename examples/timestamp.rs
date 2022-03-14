@@ -37,7 +37,7 @@ fn main() {
         .ymarker(0.0)
         .build();
 
-    let mut plotter = data.plot(
+    let mut plotter = data.stage().plot(
         "Long Jump world record progression",
         "Date",
         "Mark (in meters)",

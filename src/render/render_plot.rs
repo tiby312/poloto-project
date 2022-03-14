@@ -1,8 +1,10 @@
 use super::*;
 
-pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
+pub fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    extra: &Extra<X, Y>,
+    boundx: &DataBound<X>,
+    boundy: &DataBound<Y>,
+    canvas: &Canvas,
     plots_all: impl AllPlotFmt<Item2 = (X, Y)>,
 ) -> std::fmt::Result {
     let Canvas {
@@ -12,15 +14,16 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
         paddingy,
         xaspect_offset,
         yaspect_offset,
-        scalex,
-        scaley,
         spacing,
         num_css_classes,
         ..
-    } = extra.canvas;
+    } = canvas;
 
-    let boundx = [extra.boundx.min, extra.boundx.max];
-    let boundy = [extra.boundy.min, extra.boundy.max];
+    let scalex = canvas.boundx.max;
+    let scaley = canvas.boundy.max;
+
+    let boundx = [boundx.min, boundx.max];
+    let boundy = [boundy.min, boundy.max];
 
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
@@ -28,7 +31,7 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
     let mut writer = tagger::new(writer);
 
     let mut color_iter = {
-        let max = if let Some(nn) = num_css_classes {
+        let max = if let Some(nn) = *num_css_classes {
             nn
         } else {
             usize::MAX
@@ -79,18 +82,18 @@ pub(crate) fn render_plot<X: PlotNum, Y: PlotNum>(
                     })
                 };
 
-                let precision = extra.precision;
+                let precision = canvas.precision;
                 render(
                     &mut writer,
                     it,
                     PlotRenderInfo {
-                        canvas: &extra.canvas,
+                        canvas,
                         p_type,
                         name_exists,
                         colori,
                         legendy1,
                         precision,
-                        bar_width: extra.bar_width,
+                        bar_width: canvas.bar_width,
                     },
                 )?;
             }

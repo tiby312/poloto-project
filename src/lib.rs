@@ -11,10 +11,11 @@
 //!
 //! Pipeline:
 //! * Collect plots ([`data`] function)
-//! * Compute min/max (call [`Data::build`] and generate a [`DataResult`]).
-//! * Create tick distributions. (This step can be done automatically using [`DataResult::plot`] instead of [`DataResult::plot_with`])
-//! * Collect title/xname/yname
-//! * Write everything to svg. [`Plotter::render`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
+//! * Compute min/max by calling [`DataBuilder::build()`].
+//! * Link the data with canvas options by calling [`Data::stage_with()`] or use default canvas with [`Data::stage()`]
+//! * Create tick distributions. (This step can be done automatically using [`Stager::plot()`])
+//! * Collect title/xname/yname using [`Stager::plot()`] or [`Stager::plot_with()`]
+//! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
 //!
@@ -31,7 +32,7 @@
 //! Alternatively you can use the [`ticks_from_iter`] function that just takes an iterator of ticks and returns a [`TickInfo`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
-//! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
+//! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/steps.rs)
 
 #[cfg(doctest)]
 mod test_readme {
@@ -52,13 +53,14 @@ pub use tagger::upgrade_write;
 pub mod plottable;
 use plottable::Plottable;
 
-mod render;
-pub mod util;
-
+pub mod bar;
 pub mod bounded_iter;
 pub mod buffered_iter;
-
+mod build;
+mod canvas;
 pub mod plotnum;
+mod render;
+pub mod util;
 use plotnum::*;
 pub mod num;
 pub mod simple_theme;
@@ -130,203 +132,236 @@ impl<'a, X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)> + 'a, F: Display> Plo
 }
 
 ///
+/// Building block to make ticks.
+///
 /// Created once the min and max bounds of all the plots has been computed.
 /// Contains in it all the information typically needed to make a [`TickInfo`].
 ///
+/// Used by [`ticks_from_default`]
+///
+pub struct Bound<'a, X: PlotNum> {
+    pub data: &'a DataBound<X>,
+    pub canvas: &'a CanvasBound,
+}
+
+///
+/// Tick relevant information of [`Data`]
 ///
 #[derive(Debug, Clone)]
-pub struct Bound<X> {
+pub struct DataBound<X> {
     pub min: X,
     pub max: X,
+}
+
+///
+/// Tick relevant information of [`Canvas`]
+///
+pub struct CanvasBound {
     pub ideal_num_steps: u32,
-    pub dash_info: DashInfo,
+    pub ideal_dash_size: f64,
+    pub max: f64,
     pub axis: Axis,
 }
 
 ///
-/// Create a tick distribution from the default tick generator for the plotnum type.
+/// Contains graphical information for a svg graph.
 ///
-pub fn ticks_from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X::IntoIter>, X::Fmt) {
-    X::generate(bound)
-}
-
+/// Built from [`canvas()`]
 ///
-/// Created by [`Data::build`]
-///
-pub struct DataResult<'a, X: 'a, Y: 'a> {
-    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
-    canvas: render::Canvas,
-    boundx: Bound<X>,
-    boundy: Bound<Y>,
+pub struct Canvas {
+    boundx: CanvasBound,
+    boundy: CanvasBound,
+    width: f64,
+    height: f64,
+    padding: f64,
+    paddingy: f64,
+    xaspect_offset: f64,
+    yaspect_offset: f64,
+    spacing: f64,
+    legendx1: f64,
+    num_css_classes: Option<usize>,
     xtick_lines: bool,
     ytick_lines: bool,
     precision: usize,
     bar_width: f64,
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataResult<'a, X, Y> {
-    pub fn boundx(&self) -> &Bound<X> {
-        &self.boundx
+///
+/// Create a tick distribution from the default tick generator for the plotnum type.
+///
+pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::IntoIter>, X::Fmt) {
+    X::generate(bound)
+}
+
+///
+/// Created by [`DataBuilder::build`]
+///
+pub struct Data<'a, X: 'a, Y: 'a> {
+    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
+    boundx: DataBound<X>,
+    boundy: DataBound<Y>,
+}
+
+///
+/// Created by [`Data::stage()`] or [`Data::stage_with`].
+///
+pub struct Stager<'a, X: 'a, Y: 'a> {
+    res: Data<'a, X, Y>,
+    canvas: Canvas,
+}
+
+///
+/// Start plotting.
+///
+pub fn data<'a, X: PlotNum, Y: PlotNum>() -> DataBuilder<'a, X, Y> {
+    DataBuilder::default()
+}
+
+///
+/// Build a [`Canvas`]
+///
+pub fn canvas() -> CanvasBuilder {
+    CanvasBuilder::default()
+}
+
+///
+/// Build a [`Canvas`]
+///
+/// Created by [`canvas()`]
+///
+pub struct CanvasBuilder {
+    num_css_classes: Option<usize>,
+    preserve_aspect: bool,
+    dim: Option<[f64; 2]>,
+    xtick_lines: bool,
+    ytick_lines: bool,
+    precision: usize,
+    bar_width: f64,
+}
+
+use plotnum::PlotIter;
+
+///
+/// Plot collector.
+///
+pub struct DataBuilder<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
+    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
+    xmarkers: Vec<X>,
+    ymarkers: Vec<Y>,
+}
+
+///
+/// One-time function to write to a `fmt::Write`.
+///
+pub trait Disp {
+    fn disp<T: fmt::Write>(self, writer: T) -> fmt::Result;
+}
+
+///
+/// Created by [`Stager::plot`]
+///
+pub struct Plotter<A: Disp> {
+    inner: Option<A>,
+    dim: [f64; 2],
+}
+impl<A: Disp> Plotter<A> {
+    pub fn get_dim(&self) -> [f64; 2] {
+        self.dim
     }
-    pub fn boundy(&self) -> &Bound<Y> {
-        &self.boundy
+
+    ///
+    /// Use the plot iterators to write out the graph elements.
+    /// Does not add a svg tag, or any styling elements.
+    /// Use this if you want to embed a svg into your html.
+    /// You will just have to add your own svg sag and then supply styling.
+    ///
+    /// Panics if the render fails.
+    ///
+    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
+    /// this function will mutable borrow the Plotter and leave it with empty data.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let mut s = poloto::data();
+    /// s.line("", &data);
+    /// let mut plotter=s.build().stage().plot("title","x","y");
+    ///
+    /// let mut k=String::new();
+    /// plotter.render(&mut k);
+    /// ```
+
+    pub fn render<T: std::fmt::Write>(&mut self, writer: T) -> fmt::Result {
+        self.inner.take().unwrap().disp(writer)
     }
+}
 
-    ///
-    /// Automatically create a tick distribution using the default
-    /// tick generators tied to a [`PlotNum`].
-    ///
-    pub fn plot(
-        self,
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-    ) -> Plotter<impl Disp + 'a>
-    where
-        X: HasDefaultTicks,
-        Y: HasDefaultTicks,
-    {
-        let (x, xt) = ticks_from_default(&self.boundx);
-        let (y, yt) = ticks_from_default(&self.boundy);
-
-        let p = plot_fmt(title, xname, yname, xt, yt);
-        self.plot_with(x, y, p)
+/// Shorthand for `disp_const(move |w|write!(w,...))`
+/// Similar to `std::format_args!()` except has a more flexible lifetime.
+#[macro_export]
+macro_rules! formatm {
+    ($($arg:tt)*) => {
+        $crate::disp_const(move |w| write!(w,$($arg)*))
     }
+}
 
-    ///
-    /// Move to final stage in pipeline collecting the title/xname/yname.
-    /// Unlike [`DataResult::plot`] User must supply own tick distribution.
-    ///
-    pub fn plot_with<XI: 'a, YI: 'a, PF: 'a>(
-        self,
-        xtick: TickInfo<XI>,
-        ytick: TickInfo<YI>,
-        plot_fmt: PF,
-    ) -> Plotter<impl Disp + 'a>
-    where
-        XI: IntoIterator<Item = X>,
-        YI: IntoIterator<Item = Y>,
-        PF: BaseFmt<X = X, Y = Y>,
-    {
-        ///
-        /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotFmtAll`] trait.
-        ///
-        struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt> {
-            xtick: TickInfo<XI>,
-            ytick: TickInfo<YI>,
-            fmt: PF,
-        }
+///
+/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
+///
+pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
+    a: F,
+) -> util::DisplayableClosureOnce<F> {
+    util::DisplayableClosureOnce::new(a)
+}
 
-        impl<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt<X = XI::Item, Y = YI::Item>>
-            BaseFmtAndTicks for PlotAllStruct<XI, YI, PF>
-        where
-            XI::Item: PlotNum,
-            YI::Item: PlotNum,
-        {
-            type X = PF::X;
-            type Y = PF::Y;
-            type Fmt = PF;
-            type XI = XI;
-            type YI = YI;
+///
+/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
+///
+pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
+    a: F,
+) -> util::DisplayableClosureMut<F> {
+    util::DisplayableClosureMut::new(a)
+}
 
-            fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>) {
-                (self.fmt, self.xtick, self.ytick)
-            }
-        }
+///
+/// Convert a closure to a object that implements Display
+///
+pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
+    util::DisplayableClosure::new(a)
+}
 
-        self.plot_with_all(PlotAllStruct {
-            fmt: plot_fmt,
-            xtick,
-            ytick,
-        })
-    }
+///
+/// Create a [`plotnum::TickInfo`] from a step iterator.
+///
+///
+pub fn ticks_from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(
+    ticks: I,
+) -> (TickInfo<I>, TickIterFmt<X>) {
+    (
+        TickInfo {
+            ticks,
+            dash_size: None,
+        },
+        TickIterFmt { _p: PhantomData },
+    )
+}
 
-    ///
-    /// Create a plotter directly from a [`BaseFmtAndTicks`]
-    ///
-    fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
-        self,
-        p: PF,
-    ) -> Plotter<impl Disp + 'a> {
-        struct Foo2<'a, X, Y> {
-            plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
-        }
+#[deprecated(note = "Use TickIterFmt instead.")]
+pub type StepFmt<T> = TickIterFmt<T>;
 
-        struct One<'a, X, Y> {
-            one: Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>,
-        }
-        impl<'a, X, Y> OnePlotFmt for One<'a, X, Y> {
-            type It = Box<dyn Iterator<Item = Self::Item> + 'a>;
-            type Item = (X, Y);
-            fn plot_type(&mut self) -> PlotMetaType {
-                self.one.plot_type()
-            }
-
-            fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-                self.one.write_name(writer)
-            }
-
-            fn get_iter(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
-                self.one.iter_second()
-            }
-        }
-
-        impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
-            type Item2 = (X, Y);
-            type It = Box<dyn Iterator<Item = One<'a, X, Y>> + 'a>;
-            type InnerIt = One<'a, X, Y>;
-            fn iter(self) -> Self::It {
-                Box::new(self.plots.into_iter().map(|one| One { one }))
-            }
-        }
-
-        struct Combine<A: BaseFmtAndTicks, B: AllPlotFmt> {
-            pub a: A,
-            pub b: B,
-        }
-
-        impl<A: BaseFmtAndTicks, B: AllPlotFmt<Item2 = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
-            type X = A::X;
-            type Y = A::Y;
-            type A = A;
-            type B = B;
-            fn gen(self) -> (Self::A, Self::B) {
-                (self.a, self.b)
-            }
-        }
-
-        struct InnerPlotter<PF: BaseAndPlotsFmt> {
-            all: PF,
-            extra: Extra<PF::X, PF::Y>,
-        }
-
-        impl<PF: BaseAndPlotsFmt> Disp for InnerPlotter<PF> {
-            fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
-                render::render(&mut writer, self.all, &self.extra)
-            }
-        }
-
-        let pp = InnerPlotter {
-            all: Combine {
-                a: p,
-                b: Foo2 { plots: self.plots },
-            },
-            extra: Extra {
-                precision: self.precision,
-                canvas: self.canvas,
-                boundx: self.boundx,
-                boundy: self.boundy,
-                xtick_lines: self.xtick_lines,
-                ytick_lines: self.ytick_lines,
-                bar_width: self.bar_width,
-            },
-        };
-
-        let dim = pp.extra.canvas.get_dim();
-        Plotter {
-            inner: Some(pp),
-            dim,
-        }
+///
+/// Used by [`ticks_from_iter`]
+///
+pub struct TickIterFmt<T> {
+    _p: PhantomData<T>,
+}
+impl<J: PlotNum + Display> TickFormat for TickIterFmt<J> {
+    type Num = J;
+    fn write_tick(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        val: &Self::Num,
+    ) -> std::fmt::Result {
+        write!(writer, "{}", val)
     }
 }
 
@@ -394,519 +429,5 @@ where
         yname,
         tickx,
         ticky,
-    }
-}
-
-///
-/// Start plotting.
-///
-pub fn data<'a, X: PlotNum, Y: PlotNum>() -> Data<'a, X, Y> {
-    Data::default()
-}
-
-pub mod bar {
-    use super::*;
-    use std::convert::TryFrom;
-    pub struct BarTickFmt<D> {
-        ticks: Vec<D>,
-    }
-
-    impl<'a, D: Display> TickFormat for BarTickFmt<D> {
-        type Num = i128;
-        fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result {
-            let j = &self.ticks[usize::try_from(*val).unwrap()];
-            write!(writer, "{}", j)
-        }
-    }
-
-    pub fn gen_bar<D: Display, X: PlotNum>(
-        data: &mut Data<X, i128>,
-        vals: impl IntoIterator<Item = (X, D)>,
-    ) -> (TickInfo<Vec<i128>>, BarTickFmt<D>) {
-        let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
-
-        let vals_len = vals.len();
-        data.bars(
-            "",
-            vals.into_iter()
-                .enumerate()
-                .map(|(i, x)| (x, i128::try_from(i).unwrap())),
-        )
-        .ymarker(-1)
-        .ymarker(i128::try_from(vals_len).unwrap())
-        .xtick_lines();
-
-        let ticks = (0..vals_len).map(|x| i128::try_from(x).unwrap()).collect();
-
-        (
-            TickInfo {
-                ticks,
-                dash_size: None,
-            },
-            BarTickFmt { ticks: names },
-        )
-    }
-}
-
-use plotnum::PlotIter;
-
-///
-/// Plot collector.
-///
-//TODO be composed of Extra.
-pub struct Data<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
-    xmarkers: Vec<X>,
-    ymarkers: Vec<Y>,
-    num_css_classes: Option<usize>,
-    preserve_aspect: bool,
-    dim: Option<[f64; 2]>,
-    xtick_lines: bool,
-    ytick_lines: bool,
-    precision: usize,
-    bar_width: f64,
-}
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for Data<'a, X, Y> {
-    fn default() -> Self {
-        Data {
-            plots: vec![],
-            xmarkers: vec![],
-            ymarkers: vec![],
-            num_css_classes: Some(8),
-            preserve_aspect: false,
-            dim: None,
-            xtick_lines: false,
-            ytick_lines: false,
-            precision: 2,
-            bar_width: 20.0,
-        }
-    }
-}
-
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
-    pub fn xmarker(&mut self, a: X) -> &mut Self {
-        self.xmarkers.push(a);
-        self
-    }
-
-    pub fn ymarker(&mut self, a: Y) -> &mut Self {
-        self.ymarkers.push(a);
-        self
-    }
-
-    ///
-    /// Write some text in the legend. This doesnt increment the plot number.
-    ///
-    /// ```
-    /// let mut plotter = poloto::data::<f64,f64>();
-    /// plotter.text("This is a note");
-    /// ```
-    pub fn text(&mut self, name: impl Display + 'a) -> &mut Self {
-        self.plots.push(Box::new(PlotStruct::new(
-            std::iter::empty(),
-            name,
-            PlotMetaType::Text,
-        )));
-        self
-    }
-
-    /// Create a line from plots using a SVG path element.
-    /// The path element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line("", &data);
-    /// ```
-    pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Line),
-        )));
-        self
-    }
-
-    /// Create a line from plots that will be filled underneath using a SVG path element.
-    /// The path element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line_fill("", &data);
-    /// ```
-    pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::LineFill),
-        )));
-        self
-    }
-
-    /// Create a line from plots that will be filled using a SVG path element.
-    /// The first and last points will be connected and then filled in.
-    /// The path element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line_fill_raw("", &data);
-    /// ```
-    pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::LineFillRaw),
-        )));
-        self
-    }
-
-    /// Create a scatter plot from plots, using a SVG path with lines with zero length.
-    /// Each point can be sized using the stroke width.
-    /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
-    /// with the latter class overriding the former.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.scatter("", &data);
-    /// ```
-    pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Scatter),
-        )));
-        self
-    }
-
-    /// Create a histogram from plots using SVG rect elements.
-    /// Each bar's left side will line up with a point.
-    /// Each rect element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.histogram("", &data);
-    /// ```
-    pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Histo),
-        )));
-        self
-    }
-
-    ///
-    /// use [`gen_bar`] instead.
-    ///
-    fn bars<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Bars),
-        )));
-        self
-    }
-
-    pub fn move_into(&mut self) -> Self {
-        let mut val = Data {
-            plots: vec![],
-            xmarkers: vec![],
-            ymarkers: vec![],
-            num_css_classes: None,
-            preserve_aspect: false,
-            dim: None,
-            xtick_lines: false,
-            ytick_lines: false,
-            precision: 0,
-            bar_width: 0.0,
-        };
-
-        std::mem::swap(&mut val, self);
-        val
-    }
-
-    ///
-    /// Compute min/max bounds and prepare for next stage in pipeline.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line("", &data);
-    /// plotter.build();
-    /// ```
-    ///
-    pub fn build(&mut self) -> DataResult<'a, X, Y> {
-        let mut val = self.move_into();
-
-        let (boundx, boundy) = util::find_bounds(
-            val.plots.iter_mut().flat_map(|x| x.iter_first()),
-            val.xmarkers.clone(),
-            val.ymarkers.clone(),
-        );
-
-        let canvas = render::Canvas::with_options(
-            boundx,
-            boundy,
-            val.dim,
-            val.preserve_aspect,
-            val.num_css_classes,
-        );
-
-        let ideal_dash_size = canvas.ideal_dash_size;
-        let boundx = Bound {
-            min: boundx[0],
-            max: boundx[1],
-            ideal_num_steps: canvas.ideal_num_xsteps,
-            dash_info: DashInfo {
-                ideal_dash_size,
-                max: canvas.scalex,
-            },
-            axis: Axis::X,
-        };
-        let boundy = Bound {
-            min: boundy[0],
-            max: boundy[1],
-            ideal_num_steps: canvas.ideal_num_ysteps,
-            dash_info: DashInfo {
-                ideal_dash_size,
-                max: canvas.scaley,
-            },
-            axis: Axis::Y,
-        };
-
-        DataResult {
-            precision: val.precision,
-            plots: val.plots,
-            canvas,
-            boundx,
-            boundy,
-            xtick_lines: val.xtick_lines,
-            ytick_lines: val.ytick_lines,
-            bar_width: val.bar_width,
-        }
-    }
-}
-
-/// Render options.
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
-    pub fn with_dim(&mut self, dim: [f64; 2]) -> &mut Self {
-        self.dim = Some(dim);
-        self
-    }
-    pub fn xtick_lines(&mut self) -> &mut Self {
-        self.xtick_lines = true;
-        self
-    }
-    pub fn ytick_lines(&mut self) -> &mut Self {
-        self.ytick_lines = true;
-        self
-    }
-    ///
-    /// The number of distinct css classes. If there are more plots than
-    /// classes, then they will wrap around. The default value is 8.
-    ///
-    /// A value of None, means it will never wrap around.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line("", &data);
-    /// plotter.num_css_class(Some(30));
-    /// ```
-    ///
-    pub fn num_css_class(&mut self, a: Option<usize>) -> &mut Self {
-        self.num_css_classes = a;
-        self
-    }
-
-    ///
-    /// Specify the number of decimal places of each plot value in the SVG output itself.
-    /// Defaults to a precision of 2 (2 decimal places).
-    ///
-    /// For most usecases, you don't need a high precision. However, if you plan on blowing
-    /// up the svg output significantly or zooming in a bunch, then you might want better
-    /// precision.
-    ///
-    pub fn with_precision(&mut self, precision: usize) -> &mut Self {
-        self.precision = precision;
-        self
-    }
-    ///
-    /// Preserve the aspect ratio by drawing a smaller graph in the same area.
-    ///
-    pub fn preserve_aspect(&mut self) -> &mut Self {
-        self.preserve_aspect = true;
-        self
-    }
-
-    pub fn bar_width(&mut self, val: f64) -> &mut Self {
-        self.bar_width = val;
-        self
-    }
-}
-
-///
-/// One-time function to write to a `fmt::Write`.
-///
-pub trait Disp {
-    fn disp<T: fmt::Write>(self, writer: T) -> fmt::Result;
-}
-
-///
-/// Created by [`DataResult::plot`] or [`DataResult::plot_with`]
-///
-pub struct Plotter<A: Disp> {
-    inner: Option<A>,
-    dim: [f64; 2],
-}
-impl<A: Disp> Plotter<A> {
-    pub fn get_dim(&self) -> [f64; 2] {
-        self.dim
-    }
-
-    ///
-    /// Use the plot iterators to write out the graph elements.
-    /// Does not add a svg tag, or any styling elements.
-    /// Use this if you want to embed a svg into your html.
-    /// You will just have to add your own svg sag and then supply styling.
-    ///
-    /// Panics if the render fails.
-    ///
-    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
-    /// this function will mutable borrow the Plotter and leave it with empty data.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut s = poloto::data();
-    /// s.line("", &data);
-    /// let mut plotter=s.build().plot("title","x","y");
-    ///
-    /// let mut k=String::new();
-    /// plotter.render(&mut k);
-    /// ```
-
-    pub fn render<T: std::fmt::Write>(&mut self, writer: T) -> fmt::Result {
-        self.inner.take().unwrap().disp(writer)
-    }
-}
-
-/// Shorthand for `disp_const(move |w|write!(w,...))`
-/// Similar to `std::format_args!()` except has a more flexible lifetime.
-#[macro_export]
-macro_rules! formatm {
-    ($($arg:tt)*) => {
-        $crate::disp_const(move |w| write!(w,$($arg)*))
-    }
-}
-
-///
-/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
-///
-pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
-    a: F,
-) -> util::DisplayableClosureOnce<F> {
-    util::DisplayableClosureOnce::new(a)
-}
-
-///
-/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
-///
-pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
-    a: F,
-) -> util::DisplayableClosureMut<F> {
-    util::DisplayableClosureMut::new(a)
-}
-
-///
-/// Convert a closure to a object that implements Display
-///
-pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
-    util::DisplayableClosure::new(a)
-}
-
-///
-/// Create a [`plotnum::TickInfo`] from a step iterator.
-///
-#[deprecated(note = "Use ticks_from_iter() instead.")]
-pub fn steps<X: PlotNum + Display, I: Iterator<Item = X>>(
-    _bound: &Bound<X>,
-    ticks: I,
-) -> (TickInfo<I>, TickIterFmt<X>) {
-    (
-        TickInfo {
-            ticks,
-            dash_size: None,
-        },
-        TickIterFmt { _p: PhantomData },
-    )
-}
-
-///
-/// Create a [`plotnum::TickInfo`] from a step iterator.
-///
-///
-pub fn ticks_from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(
-    ticks: I,
-) -> (TickInfo<I>, TickIterFmt<X>) {
-    (
-        TickInfo {
-            ticks,
-            dash_size: None,
-        },
-        TickIterFmt { _p: PhantomData },
-    )
-}
-
-#[deprecated(note = "Use TickIterFmt instead.")]
-pub type StepFmt<T> = TickIterFmt<T>;
-
-///
-/// Used by [`ticks_from_iter`]
-///
-pub struct TickIterFmt<T> {
-    _p: PhantomData<T>,
-}
-impl<J: PlotNum + Display> TickFormat for TickIterFmt<J> {
-    type Num = J;
-    fn write_tick(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
-        write!(writer, "{}", val)
     }
 }

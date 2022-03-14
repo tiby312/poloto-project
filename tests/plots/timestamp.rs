@@ -25,7 +25,9 @@ fn days() -> fmt::Result {
         .ymarker(0)
         .build();
 
-    let mut s = s.plot("Number of Wikipedia Articles", "Day", "Number of Articles");
+    let mut s = s
+        .stage()
+        .plot("Number of Wikipedia Articles", "Day", "Number of Articles");
 
     let mut w = util::create_test_file("days.svg");
 
@@ -53,10 +55,11 @@ fn minutes_local_time() -> fmt::Result {
         .ymarker(0)
         .build();
 
-    let (xtick, xtick_fmt) = unixtime_ticks(s.boundx(), time_zone);
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(s.boundy());
+    let canvas = poloto::canvas().build();
+    let (xtick, xtick_fmt) = unixtime_ticks(s.boundx(&canvas), time_zone);
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(s.boundy(&canvas));
 
-    let mut s = s.plot_with(
+    let mut s = s.stage_with(canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(
@@ -97,7 +100,7 @@ fn months() -> fmt::Result {
         .ymarker(0)
         .build();
 
-    let mut s = s.plot(
+    let mut s = s.stage().plot(
         "Number of Wikipedia Articles",
         "duration",
         "Number of Articles",
@@ -129,9 +132,10 @@ fn seconds() -> fmt::Result {
         .ymarker(0)
         .build();
 
-    let (xmin, xmax) = (data.boundx().min, data.boundx().max);
+    let (xmin, xmax) = (data.data_boundx().min, data.data_boundx().max);
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx());
+    let canvas = poloto::canvas().build();
+    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx(&canvas));
 
     let xtick_step = xtick_fmt.step();
 
@@ -140,9 +144,9 @@ fn seconds() -> fmt::Result {
     // if the steps were years, for example.
     assert!(xtick_step.is_seconds());
 
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy());
+    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(&canvas));
 
-    let mut plotter = data.plot_with(
+    let mut plotter = data.stage_with(canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

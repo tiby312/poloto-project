@@ -144,22 +144,22 @@ impl std::fmt::Display for StepUnit {
 impl HasDefaultTicks for UnixTime {
     type Fmt = UnixTimeTickFmt<Utc>;
     type IntoIter = Vec<UnixTime>;
-    fn generate(bound: &crate::Bound<UnixTime>) -> (TickInfo<Vec<UnixTime>>, UnixTimeTickFmt<Utc>) {
+    fn generate(bound: crate::Bound<Self>) -> (TickInfo<Vec<UnixTime>>, UnixTimeTickFmt<Utc>) {
         unixtime_ticks(bound, &Utc)
     }
 }
 
 pub fn unixtime_ticks<T: TimeZone + Display>(
-    bound: &crate::Bound<UnixTime>,
+    bound: crate::Bound<UnixTime>,
     timezone: &T,
 ) -> (TickInfo<Vec<UnixTime>>, UnixTimeTickFmt<T>)
 where
     T::Offset: Display,
 {
-    let range = [bound.min, bound.max];
+    let range = [bound.data.min, bound.data.max];
 
     assert!(range[0] <= range[1]);
-    let ideal_num_steps = bound.ideal_num_steps;
+    let ideal_num_steps = bound.canvas.ideal_num_steps;
 
     let ideal_num_steps = ideal_num_steps.max(2);
 
@@ -188,7 +188,7 @@ where
 
     assert!(ticks.len() >= 2);
 
-    let axis = bound.axis;
+    let axis = bound.canvas.axis;
     let start = ticks[0];
     (
         TickInfo {

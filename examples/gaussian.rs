@@ -22,7 +22,7 @@ fn main() {
     data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
     data.ymarker(0.0);
 
-    let mut plotter = data.build().plot("gaussian", "x", "y");
+    let mut plotter = data.build().stage().plot("gaussian", "x", "y");
 
     print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
