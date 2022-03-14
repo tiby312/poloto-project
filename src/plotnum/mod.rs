@@ -246,3 +246,18 @@ mod map {
         }
     }
 }
+
+pub trait OnePlotFmt {
+    type Item;
+    type It: Iterator<Item = Self::Item>;
+    fn get_iter(&mut self) -> Self::It;
+    fn plot_type(&mut self) -> PlotMetaType;
+    fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
+}
+
+pub trait AllPlotFmt {
+    type Item;
+    type InnerIt: OnePlotFmt<Item = Self::Item>;
+    type It: Iterator<Item = Self::InnerIt>;
+    fn iter(self) -> Self::It;
+}

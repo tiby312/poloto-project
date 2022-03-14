@@ -18,7 +18,7 @@ fn main() {
 
     let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx(&canvas));
 
-    let mut plt = data.stage_with(canvas).plot_with(
+    let mut plt = data.stage_with(&canvas).plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

@@ -5,7 +5,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     boundx: &DataBound<X>,
     boundy: &DataBound<Y>,
     canvas: &Canvas,
-    plots_all: impl AllPlotFmt<Item2 = (X, Y)>,
+    plots_all: impl AllPlotFmt<Item = (X, Y)>,
 ) -> std::fmt::Result {
     let Canvas {
         width,

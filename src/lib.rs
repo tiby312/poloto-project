@@ -170,7 +170,6 @@ pub struct CanvasBound {
 ///
 /// Built from [`canvas()`]
 ///
-#[derive(Clone)]
 pub struct Canvas {
     boundx: CanvasBound,
     boundy: CanvasBound,
@@ -199,18 +198,20 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::I
 ///
 /// Created by [`DataBuilder::build`]
 ///
-pub struct Data<X, Y, P: AllPlotFmt<Item2 = (X, Y)>> {
+pub struct Data<X, Y, P: AllPlotFmt<Item = (X, Y)>> {
     plots: P,
     boundx: DataBound<X>,
     boundy: DataBound<Y>,
 }
 
+use std::borrow::Borrow;
+
 ///
 /// Created by [`Data::stage()`] or [`Data::stage_with`].
 ///
-pub struct Stager<X, Y, P: AllPlotFmt<Item2 = (X, Y)>> {
+pub struct Stager<X, Y, P: AllPlotFmt<Item = (X, Y)>, K: Borrow<Canvas>> {
     res: Data<X, Y, P>,
-    canvas: Canvas,
+    canvas: K,
 }
 
 ///

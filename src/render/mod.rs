@@ -10,7 +10,7 @@ pub fn render<P: BaseAndPlotsFmt>(
     all: P,
     boundx: DataBound<P::X>,
     boundy: DataBound<P::Y>,
-    canvas: Canvas,
+    canvas: impl Borrow<Canvas>,
 ) -> fmt::Result {
     let (base_fmt, plot_fmt) = all.gen();
 
@@ -23,15 +23,16 @@ pub fn render<P: BaseAndPlotsFmt>(
         })?;
     }
 
-    render::render_plot::render_plot(&mut writer, &boundx, &boundy, &canvas, plot_fmt)?;
-    render::render_base::render_base(&mut writer, &boundx, &boundy, &canvas, base_fmt)
+    let canvas = canvas.borrow();
+    render::render_plot::render_plot(&mut writer, &boundx, &boundy, canvas, plot_fmt)?;
+    render::render_base::render_base(&mut writer, &boundx, &boundy, canvas, base_fmt)
 }
 
 pub trait BaseAndPlotsFmt {
     type X: PlotNum;
     type Y: PlotNum;
     type A: BaseFmtAndTicks<X = Self::X, Y = Self::Y>;
-    type B: AllPlotFmt<Item2 = (Self::X, Self::Y)>;
+    type B: AllPlotFmt<Item = (Self::X, Self::Y)>;
     fn gen(self) -> (Self::A, Self::B);
 }
 
@@ -49,21 +50,6 @@ pub enum PlotType {
 pub enum PlotMetaType {
     Plot(PlotType),
     Text,
-}
-
-pub trait OnePlotFmt {
-    type Item;
-    type It: Iterator<Item = Self::Item>;
-    fn get_iter(&mut self) -> Self::It;
-    fn plot_type(&mut self) -> PlotMetaType;
-    fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
-}
-
-pub trait AllPlotFmt {
-    type Item2;
-    type InnerIt: OnePlotFmt<Item = Self::Item2>;
-    type It: Iterator<Item = Self::InnerIt>;
-    fn iter(self) -> Self::It;
 }
 
 ///

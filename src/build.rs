@@ -172,7 +172,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
     /// plotter.build();
     /// ```
     ///
-    pub fn build(&mut self) -> Data<X, Y, impl AllPlotFmt<Item2 = (X, Y)> + 'a> {
+    pub fn build(&mut self) -> Data<X, Y, impl AllPlotFmt<Item = (X, Y)> + 'a> {
         let mut val = self.move_into();
 
         let (boundx, boundy) = util::find_bounds(
@@ -198,7 +198,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Data<X, Y, P> {
+impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item = (X, Y)>> Data<X, Y, P> {
     pub fn data_boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
@@ -219,14 +219,14 @@ impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Data<X, Y, P> {
         }
     }
 
-    pub fn stage(self) -> Stager<X, Y, P> {
+    pub fn stage(self) -> Stager<X, Y, P, Canvas> {
         Stager {
             res: self,
             canvas: crate::canvas().build(),
         }
     }
 
-    pub fn stage_with(self, canvas: Canvas) -> Stager<X, Y, P> {
+    pub fn stage_with<K: Borrow<Canvas>>(self, canvas: K) -> Stager<X, Y, P, K> {
         Stager { res: self, canvas }
     }
 }
@@ -255,7 +255,7 @@ impl<'a, X, Y> OnePlotFmt for One<'a, X, Y> {
 }
 
 impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
-    type Item2 = (X, Y);
+    type Item = (X, Y);
     type It = Box<dyn Iterator<Item = One<'a, X, Y>> + 'a>;
     type InnerIt = One<'a, X, Y>;
     fn iter(self) -> Self::It {
@@ -263,7 +263,7 @@ impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Stager<X, Y, P> {
+impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item = (X, Y)>, K: Borrow<Canvas>> Stager<X, Y, P, K> {
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -283,8 +283,8 @@ impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Stager<X, Y, P> {
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
     {
-        let (x, xt) = ticks_from_default(self.res.boundx(&self.canvas));
-        let (y, yt) = ticks_from_default(self.res.boundy(&self.canvas));
+        let (x, xt) = ticks_from_default(self.res.boundx(self.canvas.borrow()));
+        let (y, yt) = ticks_from_default(self.res.boundy(self.canvas.borrow()));
 
         let p = plot_fmt(title, xname, yname, xt, yt);
         self.plot_with(x, y, p)
@@ -347,7 +347,7 @@ impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Stager<X, Y, P> {
             pub b: B,
         }
 
-        impl<A: BaseFmtAndTicks, B: AllPlotFmt<Item2 = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
+        impl<A: BaseFmtAndTicks, B: AllPlotFmt<Item = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
             type X = A::X;
             type Y = A::Y;
             type A = A;
@@ -357,14 +357,14 @@ impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Stager<X, Y, P> {
             }
         }
 
-        struct InnerPlotter<PF: BaseAndPlotsFmt> {
+        struct InnerPlotter<PF: BaseAndPlotsFmt, K: Borrow<Canvas>> {
             all: PF,
             boundx: DataBound<PF::X>,
             boundy: DataBound<PF::Y>,
-            canvas: Canvas,
+            canvas: K,
         }
 
-        impl<PF: BaseAndPlotsFmt> Disp for InnerPlotter<PF> {
+        impl<PF: BaseAndPlotsFmt, K: Borrow<Canvas>> Disp for InnerPlotter<PF, K> {
             fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
                 render::render(&mut writer, self.all, self.boundx, self.boundy, self.canvas)
             }
@@ -380,7 +380,7 @@ impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Stager<X, Y, P> {
             canvas: self.canvas,
         };
 
-        let dim = pp.canvas.get_dim();
+        let dim = pp.canvas.borrow().get_dim();
         Plotter {
             inner: Some(pp),
             dim,
