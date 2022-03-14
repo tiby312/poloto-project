@@ -16,7 +16,7 @@ pub trait DiscNum: PlotNum {
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
 ///
-pub trait PlotNum: PartialOrd + Copy {
+pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool {
         false

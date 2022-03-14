@@ -139,6 +139,7 @@ impl<'a, X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)> + 'a, F: Display> Plo
 ///
 /// Used by [`ticks_from_default`]
 ///
+#[derive(Debug, Clone)]
 pub struct Bound<'a, X: PlotNum> {
     pub data: &'a DataBound<X>,
     pub canvas: &'a CanvasBound,
@@ -156,6 +157,7 @@ pub struct DataBound<X> {
 ///
 /// Tick relevant information of [`Canvas`]
 ///
+#[derive(Debug, Clone)]
 pub struct CanvasBound {
     pub ideal_num_steps: u32,
     pub ideal_dash_size: f64,
@@ -168,6 +170,7 @@ pub struct CanvasBound {
 ///
 /// Built from [`canvas()`]
 ///
+#[derive(Clone)]
 pub struct Canvas {
     boundx: CanvasBound,
     boundy: CanvasBound,
