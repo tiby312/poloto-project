@@ -199,8 +199,8 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::I
 ///
 /// Created by [`DataBuilder::build`]
 ///
-pub struct Data<'a, X: 'a, Y: 'a> {
-    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
+pub struct Data<X, Y, P: AllPlotFmt<Item2 = (X, Y)>> {
+    plots: P,
     boundx: DataBound<X>,
     boundy: DataBound<Y>,
 }
@@ -208,8 +208,8 @@ pub struct Data<'a, X: 'a, Y: 'a> {
 ///
 /// Created by [`Data::stage()`] or [`Data::stage_with`].
 ///
-pub struct Stager<'a, X: 'a, Y: 'a> {
-    res: Data<'a, X, Y>,
+pub struct Stager<X, Y, P: AllPlotFmt<Item2 = (X, Y)>> {
+    res: Data<X, Y, P>,
     canvas: Canvas,
 }
 

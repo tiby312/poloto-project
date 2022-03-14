@@ -172,7 +172,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
     /// plotter.build();
     /// ```
     ///
-    pub fn build(&mut self) -> Data<'a, X, Y> {
+    pub fn build(&mut self) -> Data<X, Y, impl AllPlotFmt<Item2 = (X, Y)> + 'a> {
         let mut val = self.move_into();
 
         let (boundx, boundy) = util::find_bounds(
@@ -191,14 +191,14 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
         };
 
         Data {
-            plots: val.plots,
+            plots: Foo2 { plots: val.plots },
             boundx,
             boundy,
         }
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
+impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Data<X, Y, P> {
     pub fn data_boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
@@ -219,19 +219,51 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Data<'a, X, Y> {
         }
     }
 
-    pub fn stage(self) -> Stager<'a, X, Y> {
+    pub fn stage(self) -> Stager<X, Y, P> {
         Stager {
             res: self,
             canvas: crate::canvas().build(),
         }
     }
 
-    pub fn stage_with(self, canvas: Canvas) -> Stager<'a, X, Y> {
+    pub fn stage_with(self, canvas: Canvas) -> Stager<X, Y, P> {
         Stager { res: self, canvas }
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Stager<'a, X, Y> {
+struct Foo2<'a, X, Y> {
+    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
+}
+
+struct One<'a, X, Y> {
+    one: Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>,
+}
+impl<'a, X, Y> OnePlotFmt for One<'a, X, Y> {
+    type It = Box<dyn Iterator<Item = Self::Item> + 'a>;
+    type Item = (X, Y);
+    fn plot_type(&mut self) -> PlotMetaType {
+        self.one.plot_type()
+    }
+
+    fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        self.one.write_name(writer)
+    }
+
+    fn get_iter(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
+        self.one.iter_second()
+    }
+}
+
+impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
+    type Item2 = (X, Y);
+    type It = Box<dyn Iterator<Item = One<'a, X, Y>> + 'a>;
+    type InnerIt = One<'a, X, Y>;
+    fn iter(self) -> Self::It {
+        Box::new(self.plots.into_iter().map(|one| One { one }))
+    }
+}
+
+impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item2 = (X, Y)>> Stager<X, Y, P> {
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -243,10 +275,10 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Stager<'a, X, Y> {
     ///
     pub fn plot(
         self,
-        title: impl Display + 'a,
-        xname: impl Display + 'a,
-        yname: impl Display + 'a,
-    ) -> Plotter<impl Disp + 'a>
+        title: impl Display,
+        xname: impl Display,
+        yname: impl Display,
+    ) -> Plotter<impl Disp>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -262,12 +294,12 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Stager<'a, X, Y> {
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`Stager::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<XI: 'a, YI: 'a, PF: 'a>(
+    pub fn plot_with<XI, YI, PF>(
         self,
         xtick: TickInfo<XI>,
         ytick: TickInfo<YI>,
         plot_fmt: PF,
-    ) -> Plotter<impl Disp + 'a>
+    ) -> Plotter<impl Disp>
     where
         XI: IntoIterator<Item = X>,
         YI: IntoIterator<Item = Y>,
@@ -309,42 +341,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Stager<'a, X, Y> {
     ///
     /// Create a plotter directly from a [`BaseFmtAndTicks`]
     ///
-    fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y> + 'a>(
-        self,
-        p: PF,
-    ) -> Plotter<impl Disp + 'a> {
-        struct Foo2<'a, X, Y> {
-            plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
-        }
-
-        struct One<'a, X, Y> {
-            one: Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>,
-        }
-        impl<'a, X, Y> OnePlotFmt for One<'a, X, Y> {
-            type It = Box<dyn Iterator<Item = Self::Item> + 'a>;
-            type Item = (X, Y);
-            fn plot_type(&mut self) -> PlotMetaType {
-                self.one.plot_type()
-            }
-
-            fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-                self.one.write_name(writer)
-            }
-
-            fn get_iter(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
-                self.one.iter_second()
-            }
-        }
-
-        impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
-            type Item2 = (X, Y);
-            type It = Box<dyn Iterator<Item = One<'a, X, Y>> + 'a>;
-            type InnerIt = One<'a, X, Y>;
-            fn iter(self) -> Self::It {
-                Box::new(self.plots.into_iter().map(|one| One { one }))
-            }
-        }
-
+    fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y>>(self, p: PF) -> Plotter<impl Disp> {
         struct Combine<A: BaseFmtAndTicks, B: AllPlotFmt> {
             pub a: A,
             pub b: B,
@@ -376,9 +373,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Stager<'a, X, Y> {
         let pp = InnerPlotter {
             all: Combine {
                 a: p,
-                b: Foo2 {
-                    plots: self.res.plots,
-                },
+                b: self.res.plots,
             },
             boundx: self.res.boundx,
             boundy: self.res.boundy,
