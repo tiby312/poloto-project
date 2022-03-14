@@ -33,13 +33,6 @@ impl CanvasBuilder {
     ///
     /// A value of None, means it will never wrap around.
     ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line("", &data);
-    /// plotter.num_css_class(Some(30));
-    /// ```
-    ///
     pub fn num_css_class(&mut self, a: Option<usize>) -> &mut Self {
         self.num_css_classes = a;
         self

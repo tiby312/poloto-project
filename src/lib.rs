@@ -32,7 +32,7 @@
 //! Alternatively you can use the [`ticks_from_iter`] function that just takes an iterator of ticks and returns a [`TickInfo`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
-//! at least one of the axis, typically the x axis. [See marathon example](https://github.com/tiby312/poloto/blob/master/examples/marathon.rs)
+//! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/steps.rs)
 
 #[cfg(doctest)]
 mod test_readme {
@@ -57,7 +57,7 @@ pub mod bar;
 pub mod bounded_iter;
 pub mod buffered_iter;
 mod build;
-pub mod canvas;
+mod canvas;
 pub mod plotnum;
 mod render;
 pub mod util;
@@ -132,9 +132,20 @@ impl<'a, X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)> + 'a, F: Display> Plo
 }
 
 ///
+/// Building block to make ticks.
+///
 /// Created once the min and max bounds of all the plots has been computed.
 /// Contains in it all the information typically needed to make a [`TickInfo`].
 ///
+/// Used by [`ticks_from_default`]
+///
+pub struct Bound<'a, X: PlotNum> {
+    pub data: &'a DataBound<X>,
+    pub canvas: &'a CanvasBound,
+}
+
+///
+/// Tick relevant information of [`Data`]
 ///
 #[derive(Debug, Clone)]
 pub struct DataBound<X> {
@@ -142,6 +153,9 @@ pub struct DataBound<X> {
     pub max: X,
 }
 
+///
+/// Tick relevant information of [`Canvas`]
+///
 pub struct CanvasBound {
     pub ideal_num_steps: u32,
     pub ideal_dash_size: f64,
@@ -149,6 +163,11 @@ pub struct CanvasBound {
     pub axis: Axis,
 }
 
+///
+/// Contains graphical information for a svg graph.
+///
+/// Built from [`canvas()`]
+///
 pub struct Canvas {
     boundx: CanvasBound,
     boundy: CanvasBound,
@@ -165,11 +184,6 @@ pub struct Canvas {
     ytick_lines: bool,
     precision: usize,
     bar_width: f64,
-}
-
-pub struct Bound<'a, X: PlotNum> {
-    pub data: &'a DataBound<X>,
-    pub canvas: &'a CanvasBound,
 }
 
 ///
@@ -210,6 +224,11 @@ pub fn canvas() -> CanvasBuilder {
     CanvasBuilder::default()
 }
 
+///
+/// Build a [`Canvas`]
+///
+/// Created by [`canvas()`]
+///
 pub struct CanvasBuilder {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
@@ -265,7 +284,7 @@ impl<A: Disp> Plotter<A> {
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let mut s = poloto::data();
     /// s.line("", &data);
-    /// let mut plotter=s.build().plot("title","x","y");
+    /// let mut plotter=s.build().stage().plot("title","x","y");
     ///
     /// let mut k=String::new();
     /// plotter.render(&mut k);
