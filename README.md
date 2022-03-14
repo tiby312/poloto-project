@@ -68,13 +68,11 @@ fn main() {
         .fuse()
     };
 
-    let data = {
-        let mut d = poloto::data();
-        for i in 1000..1006 {
-            d.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
-        }
-        d.ymarker(0).build()
-    };
+    let mut data = poloto::data();
+    for i in 1000..1006 {
+        data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+    }
+    let data = data.ymarker(0).build();
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
