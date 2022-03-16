@@ -1,3 +1,6 @@
+//!
+//! Tools to create tick distributions.
+//!
 use super::*;
 
 ///
