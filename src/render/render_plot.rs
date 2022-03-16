@@ -43,7 +43,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     let mut f = crate::build::Flopp::new(plots_all);
 
     for i in 0.. {
-        let mut ppp = if let Some(ppp) = f.next() {
+        let mut ppp = if let Some(ppp) = f.next_plot() {
             ppp
         } else {
             break;

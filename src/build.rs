@@ -1,15 +1,5 @@
 use super::*;
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for DataBuilder<'a, X, Y> {
-    fn default() -> Self {
-        DataBuilder {
-            plots: vec![],
-            xmarkers: vec![],
-            ymarkers: vec![],
-        }
-    }
-}
-
 pub fn data_dyn<F: Flop>() -> DataDyn<F> {
     DataDyn::new()
 }
@@ -18,6 +8,11 @@ pub struct DataDyn<F: Flop> {
     bound_counter: usize,
     plot_counter: usize,
     flop: Vec<F>,
+}
+impl<F: Flop> Default for DataDyn<F> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 impl<F: Flop> DataDyn<F> {
     pub fn new() -> Self {
@@ -119,7 +114,7 @@ pub trait Flop {
     {
         let ii = std::iter::from_fn(|| self.next_bound());
 
-        let (boundx, boundy) = util::find_bounds(ii, vec![], vec![]);
+        let (boundx, boundy) = util::find_bounds(ii);
 
         let boundx = DataBound {
             min: boundx[0],
@@ -145,7 +140,7 @@ impl<A: Flop> Flopp<A> {
     pub fn new(flop: A) -> Self {
         Flopp { flop }
     }
-    pub fn next(&mut self) -> Option<FlopIterator<A>> {
+    pub fn next_plot(&mut self) -> Option<FlopIterator<A>> {
         if let Some(typ) = self.flop.next_typ() {
             Some(FlopIterator {
                 typ,
@@ -170,12 +165,8 @@ impl<'b, A: Flop> FlopIterator<'b, A> {
     }
     pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = (A::X, A::Y)> + 'a {
         std::iter::from_fn(|| {
-            if let Some(a) = self.flop.next_plot() {
-                if let PlotSesh::Some(a) = a {
-                    Some(a)
-                } else {
-                    None
-                }
+            if let Some(PlotSesh::Some(a)) = self.flop.next_plot() {
+                Some(a)
             } else {
                 None
             }
@@ -247,17 +238,19 @@ impl<F: Flop> Flop for XMarker<F> {
     fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
         if let Some(a) = self.store.take() {
             Some(a)
-        } else {
-            if let Some(val) = self.val.take() {
-                if let Some((x, y)) = self.foo.next_bound() {
+        } else if let Some(val) = self.val.take() {
+            if let Some((x, y)) = self.foo.next_bound() {
+                if !y.is_hole() {
                     self.store = Some((x, y));
                     Some((val, y))
                 } else {
-                    None
+                    Some((x, y))
                 }
             } else {
-                self.foo.next_bound()
+                None
             }
+        } else {
+            self.foo.next_bound()
         }
     }
 
@@ -285,17 +278,19 @@ impl<F: Flop> Flop for YMarker<F> {
     fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
         if let Some(a) = self.store.take() {
             Some(a)
-        } else {
-            if let Some(val) = self.val.take() {
-                if let Some((x, y)) = self.foo.next_bound() {
+        } else if let Some(val) = self.val.take() {
+            if let Some((x, y)) = self.foo.next_bound() {
+                if !x.is_hole() {
                     self.store = Some((x, y));
                     Some((x, val))
                 } else {
-                    None
+                    Some((x, y))
                 }
             } else {
-                self.foo.next_bound()
+                None
             }
+        } else {
+            self.foo.next_bound()
         }
     }
 
@@ -361,13 +356,11 @@ where
         if let Some(bb) = self.buffer2.as_mut() {
             if let Some(k) = bb.next() {
                 Some(PlotSesh::Some(k.make_plot()))
+            } else if !self.hit_end {
+                self.hit_end = true;
+                Some(PlotSesh::None)
             } else {
-                if !self.hit_end {
-                    self.hit_end = true;
-                    Some(PlotSesh::None)
-                } else {
-                    None
-                }
+                None
             }
         } else {
             None
@@ -400,11 +393,7 @@ impl<A: Flop, B: Flop<X = A::X, Y = A::Y>> Flop for Chain<A, B> {
         if let Some(a) = self.a.next_bound() {
             Some(a)
         } else {
-            if let Some(b) = self.b.next_bound() {
-                Some(b)
-            } else {
-                None
-            }
+            self.b.next_bound()
         }
     }
 
@@ -412,11 +401,7 @@ impl<A: Flop, B: Flop<X = A::X, Y = A::Y>> Flop for Chain<A, B> {
         if let Some(a) = self.a.next_plot() {
             Some(a)
         } else {
-            if let Some(b) = self.b.next_plot() {
-                Some(b)
-            } else {
-                None
-            }
+            self.b.next_plot()
         }
     }
 
@@ -432,11 +417,7 @@ impl<A: Flop, B: Flop<X = A::X, Y = A::Y>> Flop for Chain<A, B> {
             Some(a)
         } else {
             self.started = true;
-            if let Some(b) = self.b.next_typ() {
-                Some(b)
-            } else {
-                None
-            }
+            self.b.next_typ()
         }
     }
 }
@@ -665,38 +646,6 @@ impl<X: PlotNum, Y: PlotNum, P: Flop<X = X, Y = Y>> Data<X, Y, P> {
 
     pub fn stage_with<K: Borrow<Canvas>>(self, canvas: K) -> Stager<X, Y, P, K> {
         Stager { res: self, canvas }
-    }
-}
-
-struct Foo2<'a, X, Y> {
-    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
-}
-
-struct One<'a, X, Y> {
-    one: Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>,
-}
-impl<'a, X, Y> OnePlotFmt for One<'a, X, Y> {
-    type It = Box<dyn Iterator<Item = Self::Item> + 'a>;
-    type Item = (X, Y);
-    fn plot_type(&mut self) -> PlotMetaType {
-        self.one.plot_type()
-    }
-
-    fn fmt(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        self.one.write_name(writer)
-    }
-
-    fn get_iter(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
-        self.one.iter_second()
-    }
-}
-
-impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
-    type Item = (X, Y);
-    type It = Box<dyn Iterator<Item = One<'a, X, Y>> + 'a>;
-    type InnerIt = One<'a, X, Y>;
-    fn iter(self) -> Self::It {
-        Box::new(self.plots.into_iter().map(|one| One { one }))
     }
 }
 

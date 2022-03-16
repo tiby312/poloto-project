@@ -86,52 +86,6 @@ const HEIGHT: f64 = 500.0;
 
 use render::*;
 
-trait PlotTrait<'a> {
-    type Item;
-    fn plot_type(&self) -> PlotMetaType;
-    fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result;
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = Self::Item>;
-    fn iter_second(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a>;
-}
-
-struct PlotStruct<I: PlotIter, F: Display> {
-    ptype: PlotMetaType,
-    iter: Option<I>,
-    it1: Option<I::It1>,
-    func: F,
-}
-
-impl<I: PlotIter, F: Display> PlotStruct<I, F> {
-    fn new(iter: I, func: F, ptype: PlotMetaType) -> Self {
-        PlotStruct {
-            iter: Some(iter),
-            it1: None,
-            func,
-            ptype,
-        }
-    }
-}
-
-impl<'a, X, Y, D: PlotIter<Item1 = (X, Y), Item2 = (X, Y)> + 'a, F: Display> PlotTrait<'a>
-    for PlotStruct<D, F>
-{
-    type Item = (X, Y);
-    fn plot_type(&self) -> PlotMetaType {
-        self.ptype
-    }
-    fn write_name(&self, a: &mut dyn fmt::Write) -> fmt::Result {
-        write!(a, "{}", self.func)
-    }
-    fn iter_first(&mut self) -> &mut dyn Iterator<Item = Self::Item> {
-        self.it1 = Some(self.iter.as_mut().unwrap().first());
-        self.it1.as_mut().unwrap()
-    }
-
-    fn iter_second(&mut self) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
-        Box::new(self.iter.take().unwrap().second(self.it1.take().unwrap()))
-    }
-}
-
 ///
 /// Building block to make ticks.
 ///
@@ -218,13 +172,6 @@ pub struct Stager<X, Y, P: Flop<X = X, Y = Y>, K: Borrow<Canvas>> {
 }
 
 ///
-/// Start plotting.
-///
-pub fn data<'a, X: PlotNum, Y: PlotNum>() -> DataBuilder<'a, X, Y> {
-    DataBuilder::default()
-}
-
-///
 /// Build a [`Canvas`]
 ///
 pub fn canvas() -> CanvasBuilder {
@@ -247,15 +194,6 @@ pub struct CanvasBuilder {
 }
 
 use plotnum::PlotIter;
-
-///
-/// Plot collector.
-///
-pub struct DataBuilder<'a, X: PlotNum + 'a, Y: PlotNum + 'a> {
-    plots: Vec<Box<dyn PlotTrait<'a, Item = (X, Y)> + 'a>>,
-    xmarkers: Vec<X>,
-    ymarkers: Vec<Y>,
-}
 
 ///
 /// One-time function to write to a `fmt::Write`.
