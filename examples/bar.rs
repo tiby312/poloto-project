@@ -10,7 +10,7 @@ fn main() {
         ],
     );
 
-    let data = bar.collect_with_markers(Some(1), ybound);
+    let data = bar.collect_with_markers(Some(0), ybound);
 
     let canvas = poloto::render::canvas().xtick_lines().build();
 
