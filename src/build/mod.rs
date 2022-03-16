@@ -134,6 +134,17 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
     }
 }
 
+///
+/// Create a boxed RenderablePlotIterator.
+///
+/// This should be used as a last resort after trying [`chain`](RenderablePlotIteratorExt::chain) and [`plots_dyn`].
+///
+pub fn box_plot<'a, X: PlotNum, Y: PlotNum>(
+    a: impl RenderablePlotIterator<X = X, Y = Y> + 'a,
+) -> Box<dyn RenderablePlotIterator<X = X, Y = Y> + 'a> {
+    Box::new(a)
+}
+
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
     for Box<dyn RenderablePlotIterator<X = X, Y = Y> + 'a>
 {
