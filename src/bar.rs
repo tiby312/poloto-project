@@ -19,7 +19,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
 ) -> (
-    impl Flop<X=X, Y=i128>,
+    impl Flop<X = X, Y = i128>,
     TickInfo<Vec<i128>>,
     BarTickFmt<D>,
 ) {

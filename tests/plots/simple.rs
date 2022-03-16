@@ -12,8 +12,11 @@ fn heart() -> fmt::Result {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-
-    let l1=poloto::build::line_fill_raw("", range.map(heart)).xmarker(-20.0).xmarker(20.0).ymarker(-20.0).ymarker(20.0);
+    let l1 = poloto::build::line_fill_raw("", range.map(heart))
+        .xmarker(-20.0)
+        .xmarker(20.0)
+        .ymarker(-20.0)
+        .ymarker(20.0);
 
     let canvas = poloto::canvas().preserve_aspect().build();
     let mut plotter = l1
@@ -30,13 +33,15 @@ fn heart() -> fmt::Result {
 fn large_scatter() -> fmt::Result {
     let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
 
+    let l1 = poloto::build::scatter("a", x.clone().map(|x| (x, x.cos())));
 
+    let l2 = poloto::build::line("b", x.clone().map(|x| (x, x.sin())));
 
-    let l1=poloto::build::scatter("a", x.clone().map(|x| (x, x.cos())));
-
-    let l2=poloto::build::line("b", x.clone().map(|x| (x, x.sin())));
-
-    let mut plotter = l1.chain(l2).collect().stage().plot("cows per year", "year", "cows");
+    let mut plotter = l1
+        .chain(l2)
+        .collect()
+        .stage()
+        .plot("cows per year", "year", "cows");
 
     let mut w = util::create_test_file("large_scatter.svg");
 
@@ -55,14 +60,15 @@ fn large_scatter() -> fmt::Result {
 fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let s=poloto::build::line_fill(
-            "tan(x)",
-            x.clone()
-                .map(|x| [x, x.tan()])
-                .crop_above(10.0)
-                .crop_below(0.0)
-                .crop_left(2.0),
-        ).collect();
+    let s = poloto::build::line_fill(
+        "tan(x)",
+        x.clone()
+            .map(|x| [x, x.tan()])
+            .crop_above(10.0)
+            .crop_below(0.0)
+            .crop_left(2.0),
+    )
+    .collect();
 
     let boundx = s.data_boundx().clone();
 
@@ -92,24 +98,21 @@ fn long_label() -> fmt::Result {
         .fuse()
     };
 
-
-
-    let l1=poloto::build::text("⚠️ Here is an example note using the text() function. ⚠️");
-    let l2=poloto::build::line(
+    let data = poloto::build::line(
         poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1000),
         (0..).zip(collatz(1000)),
-    );
-    let l3=poloto::build::line(
+    )
+    .chain(poloto::build::line(
         poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1001),
         (0..).zip(collatz(1001)),
-    );
-    let l4=poloto::build::text(" 🍆 Here is another note using the text() function.🍎");
-    let l5=poloto::build::line(
+    ))
+    .text(" 🍆 Here is a note using the text() function.🍎")
+    .chain(poloto::build::line(
         poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
         (0..).zip(collatz(1002)),
-    );
-
-    let data=l1.chain(l2).chain(l3).chain(l4).chain(l5).ymarker(0).collect();
+    ))
+    .ymarker(0)
+    .collect();
 
     let mut plotter = data.stage().plot("collatz", "x", "y");
 
@@ -134,9 +137,9 @@ fn long_label() -> fmt::Result {
 fn magnitude() -> fmt::Result {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let p = poloto::data().scatter("", &data).build();
+    let data = poloto::build::scatter("", &data).collect();
 
-    let mut p = p.stage().plot("cows per year", "year", "cow");
+    let mut p = data.stage().plot("cows per year", "year", "cow");
 
     let w = util::create_test_file("magnitude.svg");
 
@@ -147,7 +150,7 @@ fn magnitude() -> fmt::Result {
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let data = poloto::data().scatter("", points).build();
+    let data = poloto::build::scatter("", points).collect();
 
     let mut plotter = data.stage().plot("cows per year", "year", "cow");
 
@@ -179,11 +182,14 @@ fn custom_dim() -> fmt::Result {
     };
 
     let data = {
-        let mut d = poloto::data();
+        let mut d = poloto::build::data_dyn();
         for i in 1000..1006 {
-            d.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+            d.add(poloto::build::line(
+                poloto::formatm!("c({})", i),
+                (0..).zip(collatz(i)),
+            ));
         }
-        d.ymarker(0).build()
+        d.ymarker(0).collect()
     };
 
     let canvas = poloto::canvas()
@@ -215,11 +221,14 @@ fn custom_dim() -> fmt::Result {
 fn dark() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let mut data = poloto::data();
-    data.line(formatm!("test {}", 1), x.clone().map(|x| [x, x.cos()]));
-    data.line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]));
+    let data = poloto::build::line(formatm!("test {}", 1), x.clone().map(|x| [x, x.cos()]))
+        .chain(poloto::build::line(
+            formatm!("test {}", 2),
+            x.clone().map(|x| [x, x.sin()]),
+        ))
+        .collect();
 
-    let mut plotter = data.build().stage().plot("cos per year", "year", "cows");
+    let mut plotter = data.stage().plot("cos per year", "year", "cows");
 
     let w = util::create_test_file("dark.svg");
 
@@ -230,12 +239,10 @@ fn dark() -> fmt::Result {
 fn custom_style() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let mut s = poloto::data();
+    let l1 = poloto::build::line("cos", x.clone().map(|x| [x, x.cos()]));
+    let l2 = poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    s.line("cos", x.clone().map(|x| [x, x.cos()]));
-    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
-
-    let mut p = s.build().stage().plot(
+    let mut p = l1.chain(l2).collect().stage().plot(
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
@@ -271,9 +278,8 @@ fn custom_style() -> fmt::Result {
 fn trig() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let mut s = poloto::data();
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    s.line(
+    let l1 = poloto::build::line(
         "tan(x)",
         poloto::buffered_iter::buffered(
             x.clone()
@@ -284,7 +290,7 @@ fn trig() -> fmt::Result {
         ),
     );
 
-    s.line(
+    let l2 = poloto::build::line(
         "sin(2x)",
         poloto::bounded_iter::from_rect(
             [0.0, 10.0],
@@ -293,12 +299,12 @@ fn trig() -> fmt::Result {
         ),
     );
 
-    s.line(
+    let l3 = poloto::build::line(
         "2*cos(x)",
         poloto::buffered_iter::buffered(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)),
     );
 
-    let mut plotter = s.build().stage().plot(
+    let mut plotter = l1.chain(l2).chain(l3).collect().stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

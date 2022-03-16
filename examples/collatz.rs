@@ -21,7 +21,7 @@ fn main() {
             (0..).zip(collatz(i)),
         ));
     }
-    let data=data.ymarker(0);
+    let data = data.ymarker(0);
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
@@ -32,9 +32,7 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let mut plotter = data.collect()
-        .stage_with(&canvas)
-        .plot("collatz", "x", "y");
+    let mut plotter = data.collect().stage_with(&canvas).plot("collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);

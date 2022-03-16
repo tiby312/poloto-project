@@ -7,7 +7,7 @@ use poloto::num::timestamp::{unixtime_ticks, UnixTime};
 fn days() -> fmt::Result {
     let timezone = &chrono::Utc;
 
-    let data = [
+    let data: &[(UnixTime, _)] = &[
         (timezone.ymd(2020, 1, 30).into(), 3144000),
         (timezone.ymd(2020, 1, 31).into(), 3518000),
         (timezone.ymd(2020, 2, 01).into(), 3835000),
@@ -20,10 +20,7 @@ fn days() -> fmt::Result {
         (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let s = poloto::data::<UnixTime, _>()
-        .line("", data)
-        .ymarker(0)
-        .build();
+    let s = poloto::build::line("", data).ymarker(0).collect();
 
     let mut s = s
         .stage()
@@ -42,7 +39,7 @@ fn minutes_local_time() -> fmt::Result {
     let day2 = time_zone.ymd(2020, 1, 31);
     use chrono::TimeZone;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
-    let data = [
+    let data: &[(UnixTime, _)] = &[
         (day1.and_hms(23, 30, 59).into(), 3144000),
         (day2.and_hms(01, 02, 00).into(), 3518000),
         (day2.and_hms(01, 05, 01).into(), 3835000),
@@ -50,10 +47,7 @@ fn minutes_local_time() -> fmt::Result {
         (day2.and_hms(01, 50, 01).into(), 4133000),
     ];
 
-    let s = poloto::data::<UnixTime, _>()
-        .line("", &data)
-        .ymarker(0)
-        .build();
+    let s = poloto::build::line("", data).ymarker(0).collect();
 
     let canvas = poloto::canvas().build();
     let (xtick, xtick_fmt) = unixtime_ticks(s.boundx(&canvas), time_zone);
@@ -81,7 +75,7 @@ fn months() -> fmt::Result {
     let timezone = &chrono::Utc;
     use chrono::TimeZone;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
-    let data = [
+    let data: &[(UnixTime, _)] = &[
         (timezone.ymd(2020, 08, 01).into(), 8144000),
         (timezone.ymd(2020, 09, 30).into(), 3144000),
         (timezone.ymd(2020, 10, 04).into(), 3518000),
@@ -95,10 +89,7 @@ fn months() -> fmt::Result {
         (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
-    let s = poloto::data::<UnixTime, _>()
-        .line("", &data)
-        .ymarker(0)
-        .build();
+    let s = poloto::build::line("", data).ymarker(0).collect();
 
     let mut s = s.stage().plot(
         "Number of Wikipedia Articles",
@@ -119,7 +110,7 @@ fn seconds() -> fmt::Result {
 
     let date = timezone.ymd(2020, 1, 30);
 
-    let data = [
+    let data: &[(UnixTime, _)] = &[
         (date.and_hms(1, 1, 59).into(), 3144000),
         (date.and_hms(1, 2, 00).into(), 3518000),
         (date.and_hms(1, 2, 30).into(), 3835000),
@@ -127,10 +118,7 @@ fn seconds() -> fmt::Result {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let data = poloto::data::<UnixTime, _>()
-        .line("", &data)
-        .ymarker(0)
-        .build();
+    let data = poloto::build::line("", data).ymarker(0).collect();
 
     let (xmin, xmax) = (data.data_boundx().min, data.data_boundx().max);
 
