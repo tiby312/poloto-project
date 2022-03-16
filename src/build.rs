@@ -86,6 +86,12 @@ pub trait Flop {
     }
 
 
+    fn xmarker(self,val:Self::X)->XMarker<Self> where Self:Sized{
+        XMarker { val: Some(val), foo: self, store: None }
+    }
+    fn ymarker(self,val:Self::Y)->YMarker<Self> where Self:Sized{
+        YMarker { val: Some(val), foo: self, store: None }
+    }
     fn collect(mut self) -> Data<Self::X, Self::Y, Self> where Self:Sized{
         let ii = std::iter::from_fn(|| self.next_bound());
 
@@ -126,6 +132,7 @@ impl<A: Flop> Flopp<A> {
         }
     }
 }
+
 
 pub struct FlopIterator<'a, A: Flop> {
     typ: PlotMetaType,
@@ -210,6 +217,86 @@ where
     I::Item2: Plottable<Item = (X, Y)>,
 {
     OneP::new(PlotMetaType::Plot(PlotType::Line), name, it)
+}
+
+
+
+pub struct XMarker<F:Flop>{
+    val:Option<F::X>,
+    foo:F,
+    store:Option<(F::X,F::Y)>
+}
+impl<F:Flop> Flop for XMarker<F>{
+    type X=F::X;
+    type Y=F::Y;
+    fn next_bound(&mut self) -> Option<(Self::X,Self::Y)> {
+        if let Some(a)=self.store.take(){
+            Some(a)
+        }else{
+            if let Some(val)=self.val.take(){
+                if let Some((x,y))=self.foo.next_bound(){
+                    self.store=Some((x,y));
+                    Some((val,y))
+                }else{
+                    None
+                }
+            }else{
+                self.foo.next_bound()
+            }
+        }
+    }
+
+    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X,Self::Y)>> {
+        self.foo.next_plot()
+    }
+
+    fn next_name<W: fmt::Write>(&mut self, w: W) -> Option<fmt::Result> {
+        self.foo.next_name(w)
+    }
+
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        self.foo.next_typ()
+    }
+}
+
+
+
+pub struct YMarker<F:Flop>{
+    val:Option<F::Y>,
+    foo:F,
+    store:Option<(F::X,F::Y)>
+}
+impl<F:Flop> Flop for YMarker<F>{
+    type X=F::X;
+    type Y=F::Y;
+    fn next_bound(&mut self) -> Option<(Self::X,Self::Y)> {
+        if let Some(a)=self.store.take(){
+            Some(a)
+        }else{
+            if let Some(val)=self.val.take(){
+                if let Some((x,y))=self.foo.next_bound(){
+                    self.store=Some((x,y));
+                    Some((x,val))
+                }else{
+                    None
+                }
+            }else{
+                self.foo.next_bound()
+            }
+        }
+    }
+
+    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X,Self::Y)>> {
+        self.foo.next_plot()
+    }
+
+    fn next_name<W: fmt::Write>(&mut self, w: W) -> Option<fmt::Result> {
+        self.foo.next_name(w)
+    }
+
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        self.foo.next_typ()
+    }
 }
 
 pub struct OneP<I: PlotIter, D: Display> {

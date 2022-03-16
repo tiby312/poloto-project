@@ -10,7 +10,7 @@ fn main() {
         ],
     );
 
-    let data = bars.collect();
+    let data = bars.xmarker(0).collect();
     
     let canvas = poloto::canvas().xtick_lines().build();
 

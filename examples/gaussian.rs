@@ -19,17 +19,9 @@ fn main() {
     let l2 = poloto::build::line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = poloto::build::line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    let mut plotter = l1.chain(l2).chain(l3).collect()
+    let mut plotter = l1.chain(l2).chain(l3).ymarker(0.0).collect()
         .stage()
         .plot("gaussian", "x", "y");
-
-    /*
-    data.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
-    data.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
-    data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
-    data.ymarker(0.0);
-    */
-    //let mut plotter = data.build().stage().plot("gaussian", "x", "y");
 
     print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }

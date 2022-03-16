@@ -21,6 +21,7 @@ fn main() {
             (0..).zip(collatz(i)),
         ));
     }
+    let data=data.ymarker(0);
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
