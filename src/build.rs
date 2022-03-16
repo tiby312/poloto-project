@@ -62,6 +62,15 @@ impl<F: Flop> Flop for DataDyn<F> {
     }
 }
 
+
+///
+/// Renderer will first call next_bound() until exhausted in order to find min/max bounds.
+/// 
+/// Then renderer will call next_typ() to determine  if there is a plot
+///     if next_typ() returned Some(), then it will then call next_name()
+///       and expect there to be a name. Then it will call next_plot continuously
+///         untill exausted.
+/// 
 pub trait Flop {
     type X: PlotNum;
     type Y: PlotNum;
