@@ -5,14 +5,13 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let data = poloto::data()
-        .histogram("", (0..).zip(trend.into_iter()))
-        .build();
+    let it = (0..).zip(trend.into_iter());
+    let data = poloto::build::histogram("", it).collect();
 
-    let canvas = poloto::canvas().build();
+    let canvas = poloto::render::canvas().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(&canvas));
+    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.boundy(&canvas));
 
     let mut pp = data.stage_with(canvas).plot_with(
         xtick,

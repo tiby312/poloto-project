@@ -1,3 +1,5 @@
+use poloto::prelude::*;
+
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
@@ -12,22 +14,26 @@ fn main() {
         .fuse()
     };
 
-    let mut data = poloto::data();
+    let mut data = poloto::build::plots_dyn();
     for i in 1000..1006 {
-        data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+        data.add(poloto::build::line(
+            poloto::formatm!("c({})", i),
+            (0..).zip(collatz(i)),
+        ));
     }
-    let data = data.ymarker(0).build();
-
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    let canvas = poloto::canvas()
+    let canvas = poloto::render::canvas()
         .xtick_lines()
         .ytick_lines()
         .with_dim(dim)
         .build();
 
-    let mut plotter = data.stage_with(&canvas).plot("collatz", "x", "y");
+    let mut plotter = data
+        .collect_with_markers(None, Some(0))
+        .stage_with(&canvas)
+        .plot("collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);

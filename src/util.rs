@@ -179,8 +179,8 @@ impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
 
 pub(crate) fn find_bounds<X: PlotNum, Y: PlotNum>(
     it: impl IntoIterator<Item = (X, Y)>,
-    xmarkers: Vec<X>,
-    ymarkers: Vec<Y>,
+    xmarkers: impl IntoIterator<Item = X>,
+    ymarkers: impl IntoIterator<Item = Y>,
 ) -> ([X; 2], [Y; 2]) {
     let mut ii = it.into_iter().filter(|(x, y)| !x.is_hole() && !y.is_hole());
 

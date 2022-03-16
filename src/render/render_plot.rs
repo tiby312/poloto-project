@@ -1,11 +1,13 @@
 use super::*;
 
+use crate::build::*;
+
 pub fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    boundx: &DataBound<X>,
-    boundy: &DataBound<Y>,
+    boundx: &ticks::DataBound<X>,
+    boundy: &ticks::DataBound<Y>,
     canvas: &Canvas,
-    plots_all: impl AllPlotFmt<Item = (X, Y)>,
+    plots_all: impl RenderablePlotIterator<X = X, Y = Y>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -40,8 +42,18 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
         (0..max).cycle()
     };
 
-    for (i, mut ppp) in plots_all.iter().enumerate() {
+    let mut f = crate::build::RenderablePlotIter::new(plots_all);
+
+    for i in 0.. {
+        let mut ppp = if let Some(ppp) = f.next_plot() {
+            ppp
+        } else {
+            break;
+        };
+
         let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
+
+        let typ = ppp.typ();
 
         let name_exists = writer
             .elem("text", |d| {
@@ -51,7 +63,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
             })?
             .build(|d| {
                 let mut wc = util::WriteCounter::new(d.writer_safe());
-                ppp.fmt(&mut wc)?;
+                ppp.name(&mut wc)?;
                 //p.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
@@ -59,7 +71,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
         let aa = minx.scale([minx, maxx], scalex);
         let bb = miny.scale([miny, maxy], scaley);
 
-        match ppp.plot_type() {
+        match typ {
             PlotMetaType::Text => {
                 // don't need to render any legend or plots
             }
@@ -74,7 +86,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
                     let maxx_ii = scalex;
                     let maxy_ii = scaley;
 
-                    ppp.get_iter().map(move |(x, y)| {
+                    ppp.plots().map(move |(x, y)| {
                         [
                             basex_ii + x.scale(rangex_ii, maxx_ii),
                             basey_ii - y.scale(rangey_ii, maxy_ii),

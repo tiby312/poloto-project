@@ -33,17 +33,20 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let mut data = poloto::data();
+    let l1 = poloto::build::line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
+    let l2 = poloto::build::line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
+    let l3 = poloto::build::line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    data.line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
-    data.line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
-    data.line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
-    data.ymarker(0.0);
-
-    let mut plotter = data.build().stage().plot("gaussian", "x", "y");
+    let mut plotter = l1
+        .chain(l2)
+        .chain(l3)
+        .collect_with_markers(None, Some(0.0))
+        .stage()
+        .plot("gaussian", "x", "y");
 
     print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
+
 ```
 ## Output
 
@@ -54,6 +57,8 @@ fn main() {
 ## Collatz Example
 
 ```rust
+use poloto::prelude::*;
+
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
@@ -68,22 +73,26 @@ fn main() {
         .fuse()
     };
 
-    let mut data = poloto::data();
+    let mut data = poloto::build::plots_dyn();
     for i in 1000..1006 {
-        data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+        data.add(poloto::build::line(
+            poloto::formatm!("c({})", i),
+            (0..).zip(collatz(i)),
+        ));
     }
-    let data = data.ymarker(0).build();
-
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    let canvas = poloto::canvas()
+    let canvas = poloto::render::canvas()
         .xtick_lines()
         .ytick_lines()
         .with_dim(dim)
         .build();
 
-    let mut plotter = data.stage_with(canvas).plot("collatz", "x", "y");
+    let mut plotter = data
+        .collect_with_markers(None, Some(0))
+        .stage_with(&canvas)
+        .plot("collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
@@ -97,6 +106,7 @@ fn main() {
         poloto::simple_theme::SVG_END
     )
 }
+
 ```
 ## Output
 
@@ -139,13 +149,10 @@ fn main() {
 
     let data = data.map(|(x, y)| {
         let d = timezone.from_utc_date(&chrono::NaiveDate::parse_from_str(y, "%d %B %Y").unwrap());
-        (d.into(), x)
+        (UnixTime::from(d), x)
     });
 
-    let data = poloto::data::<UnixTime, _>()
-        .line("foo", data)
-        .ymarker(0.0)
-        .build();
+    let data = poloto::build::line("foo", data).collect_with_markers(None, Some(0.0));
 
     let mut plotter = data.stage().plot(
         "Long Jump world record progression",
@@ -155,6 +162,7 @@ fn main() {
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }
+
 ```
 
 ## Output
@@ -162,7 +170,7 @@ fn main() {
 <img src="./target/assets/timestamp.svg" alt="demo">
 
 
-## Step Example
+## Custom Ticks Example
 
 ```rust
 use poloto::prelude::*;
@@ -172,14 +180,13 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let data = poloto::data()
-        .histogram("", (0..).zip(trend.into_iter()))
-        .build();
+    let it = (0..).zip(trend.into_iter());
+    let data = poloto::build::histogram("", it).collect();
 
-    let canvas = poloto::canvas().build();
+    let canvas = poloto::render::canvas().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(&canvas));
+    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.boundy(&canvas));
 
     let mut pp = data.stage_with(canvas).plot_with(
         xtick,
@@ -195,11 +202,12 @@ fn main() {
 
     print!("{}", poloto::disp(|w| pp.simple_theme(w)));
 }
+
 ```
 
 ## Output
 
-<img src="./target/assets/steps.svg" alt="demo">
+<img src="./target/assets/custom_ticks.svg" alt="demo">
 
 
 ## Escape protection

@@ -1,9 +1,7 @@
 use poloto::prelude::*;
 fn main() {
-    let mut data = poloto::data();
-
-    let (ytick, ytick_fmt) = poloto::bar::gen_bar(
-        &mut data,
+    let (bar, ybound, ytick, ytick_fmt) = poloto::build::bar::gen_bar(
+        "",
         [
             (20, "potato"),
             (14, "broccoli"),
@@ -12,11 +10,11 @@ fn main() {
         ],
     );
 
-    let data = data.xmarker(0).build();
+    let data = bar.collect_with_markers(Some(0), ybound);
 
-    let canvas = poloto::canvas().xtick_lines().build();
+    let canvas = poloto::render::canvas().xtick_lines().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx(&canvas));
+    let (xtick, xtick_fmt) = poloto::ticks::from_default(data.boundx(&canvas));
 
     let mut plt = data.stage_with(&canvas).plot_with(
         xtick,
