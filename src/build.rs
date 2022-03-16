@@ -62,11 +62,10 @@ impl<F: Flop> Flop for DataDyn<F> {
     }
 }
 
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Flop for Box<dyn Flop<X = X, Y = Y> + 'a> {
+    type X = X;
 
-impl<'a,X:PlotNum+'a,Y:PlotNum+'a> Flop for Box<dyn Flop<X=X,Y=Y>+'a>{
-    type X=X;
-
-    type Y=Y;
+    type Y = Y;
 
     fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
         self.as_mut().next_bound()
@@ -83,16 +82,15 @@ impl<'a,X:PlotNum+'a,Y:PlotNum+'a> Flop for Box<dyn Flop<X=X,Y=Y>+'a>{
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         self.as_mut().next_typ()
     }
-
 }
 ///
 /// Renderer will first call next_bound() until exhausted in order to find min/max bounds.
-/// 
+///
 /// Then renderer will call next_typ() to determine  if there is a plot
 ///     if next_typ() returned Some(), then it will then call next_name()
 ///       and expect there to be a name. Then it will call next_plot continuously
 ///         untill exausted.
-/// 
+///
 pub trait Flop {
     type X: PlotNum;
     type Y: PlotNum;
@@ -112,40 +110,20 @@ pub trait Flop {
         }
     }
 
-    fn text<D: Display>(self, name: D) -> Chain<Self, OneP<std::iter::Empty<(Self::X, Self::Y)>, D>>
+    fn collect(self) -> Data<Self::X, Self::Y, Self>
     where
         Self: Sized,
     {
-        self.chain(OneP::new(PlotMetaType::Text, name, std::iter::empty()))
+        self.collect_with(None,None)
     }
 
-    fn xmarker(self, val: Self::X) -> XMarker<Self>
-    where
-        Self: Sized,
-    {
-        XMarker {
-            val: Some(val),
-            foo: self,
-            store: None,
-        }
-    }
-    fn ymarker(self, val: Self::Y) -> YMarker<Self>
-    where
-        Self: Sized,
-    {
-        YMarker {
-            val: Some(val),
-            foo: self,
-            store: None,
-        }
-    }
-    fn collect(mut self) -> Data<Self::X, Self::Y, Self>
+    fn collect_with(mut self,xmarker:impl IntoIterator<Item=Self::X>,ymarker:impl IntoIterator<Item=Self::Y>) -> Data<Self::X, Self::Y, Self>
     where
         Self: Sized,
     {
         let ii = std::iter::from_fn(|| self.next_bound());
 
-        let (boundx, boundy) = util::find_bounds(ii);
+        let (boundx, boundy) = util::find_bounds(ii,xmarker,ymarker);
 
         let boundx = DataBound {
             min: boundx[0],
@@ -163,6 +141,7 @@ pub trait Flop {
         }
     }
 }
+
 
 pub struct Flopp<A: Flop> {
     flop: A,
@@ -208,6 +187,10 @@ impl<'b, A: Flop> FlopIterator<'b, A> {
 pub enum PlotSesh<T> {
     Some(T),
     None,
+}
+
+pub fn text<X: PlotNum, Y: PlotNum, D: Display>(name: D) -> OneP<std::iter::Empty<(X, Y)>, D> {
+    OneP::new(PlotMetaType::Text, name, std::iter::empty())
 }
 
 pub fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> OneP<I, D>
@@ -256,86 +239,6 @@ where
     I::Item2: Plottable<Item = (X, Y)>,
 {
     OneP::new(PlotMetaType::Plot(PlotType::Line), name, it)
-}
-
-pub struct XMarker<F: Flop> {
-    val: Option<F::X>,
-    foo: F,
-    store: Option<(F::X, F::Y)>,
-}
-impl<F: Flop> Flop for XMarker<F> {
-    type X = F::X;
-    type Y = F::Y;
-    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
-        if let Some(a) = self.store.take() {
-            Some(a)
-        } else if let Some(val) = self.val.take() {
-            if let Some((x, y)) = self.foo.next_bound() {
-                if !y.is_hole() {
-                    self.store = Some((x, y));
-                    Some((val, y))
-                } else {
-                    Some((x, y))
-                }
-            } else {
-                None
-            }
-        } else {
-            self.foo.next_bound()
-        }
-    }
-
-    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>> {
-        self.foo.next_plot()
-    }
-
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        self.foo.next_name(w)
-    }
-
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        self.foo.next_typ()
-    }
-}
-
-pub struct YMarker<F: Flop> {
-    val: Option<F::Y>,
-    foo: F,
-    store: Option<(F::X, F::Y)>,
-}
-impl<F: Flop> Flop for YMarker<F> {
-    type X = F::X;
-    type Y = F::Y;
-    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
-        if let Some(a) = self.store.take() {
-            Some(a)
-        } else if let Some(val) = self.val.take() {
-            if let Some((x, y)) = self.foo.next_bound() {
-                if !x.is_hole() {
-                    self.store = Some((x, y));
-                    Some((x, val))
-                } else {
-                    Some((x, y))
-                }
-            } else {
-                None
-            }
-        } else {
-            self.foo.next_bound()
-        }
-    }
-
-    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>> {
-        self.foo.next_plot()
-    }
-
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        self.foo.next_name(w)
-    }
-
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        self.foo.next_typ()
-    }
 }
 
 pub struct OneP<I: PlotIter, D: Display> {
