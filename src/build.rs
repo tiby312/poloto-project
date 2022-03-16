@@ -57,12 +57,34 @@ impl<F: Flop> Flop for DataDyn<F> {
         a
     }
 
-    fn next_name<W: fmt::Write>(&mut self, write: W) -> Option<fmt::Result> {
+    fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.flop[self.plot_counter].next_name(write)
     }
 }
 
 
+impl<'a,X:PlotNum+'a,Y:PlotNum+'a> Flop for Box<dyn Flop<X=X,Y=Y>+'a>{
+    type X=X;
+
+    type Y=Y;
+
+    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
+        self.as_mut().next_bound()
+    }
+
+    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>> {
+        self.as_mut().next_plot()
+    }
+
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
+        self.as_mut().next_name(w)
+    }
+
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        self.next_typ()
+    }
+    
+}
 ///
 /// Renderer will first call next_bound() until exhausted in order to find min/max bounds.
 /// 
@@ -76,7 +98,7 @@ pub trait Flop {
     type Y: PlotNum;
     fn next_bound(&mut self) -> Option<(Self::X, Self::Y)>;
     fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>>;
-    fn next_name<W: fmt::Write>(&mut self, w: W) -> Option<fmt::Result>;
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
     fn next_typ(&mut self) -> Option<PlotMetaType>;
 
     fn chain<B: Flop>(self, b: B) -> Chain<Self, B>
@@ -169,7 +191,7 @@ impl<'b, A: Flop> FlopIterator<'b, A> {
     pub fn typ(&mut self) -> PlotMetaType {
         self.typ
     }
-    pub fn name<F: fmt::Write>(&mut self, write: F) -> fmt::Result {
+    pub fn name(&mut self, write: &mut dyn fmt::Write) -> fmt::Result {
         self.flop.next_name(write).unwrap()
     }
     pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = (A::X, A::Y)> + 'a {
@@ -267,7 +289,7 @@ impl<F: Flop> Flop for XMarker<F> {
         self.foo.next_plot()
     }
 
-    fn next_name<W: fmt::Write>(&mut self, w: W) -> Option<fmt::Result> {
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.foo.next_name(w)
     }
 
@@ -307,7 +329,7 @@ impl<F: Flop> Flop for YMarker<F> {
         self.foo.next_plot()
     }
 
-    fn next_name<W: fmt::Write>(&mut self, w: W) -> Option<fmt::Result> {
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.foo.next_name(w)
     }
 
@@ -376,7 +398,7 @@ where
         }
     }
 
-    fn next_name<W: fmt::Write>(&mut self, mut writer: W) -> Option<fmt::Result> {
+    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
         Some(write!(writer, "{}", self.name))
     }
 
@@ -414,7 +436,7 @@ impl<A: Flop, B: Flop<X = A::X, Y = A::Y>> Flop for Chain<A, B> {
         }
     }
 
-    fn next_name<W: fmt::Write>(&mut self, mut writer: W) -> Option<fmt::Result> {
+    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
         if !self.started {
             self.a.next_name(&mut writer)
         } else {
