@@ -81,9 +81,9 @@ impl<'a,X:PlotNum+'a,Y:PlotNum+'a> Flop for Box<dyn Flop<X=X,Y=Y>+'a>{
     }
 
     fn next_typ(&mut self) -> Option<PlotMetaType> {
-        self.next_typ()
+        self.as_mut().next_typ()
     }
-    
+
 }
 ///
 /// Renderer will first call next_bound() until exhausted in order to find min/max bounds.
@@ -398,7 +398,7 @@ where
         }
     }
 
-    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
+    fn next_name(&mut self, writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
         Some(write!(writer, "{}", self.name))
     }
 
