@@ -200,7 +200,10 @@ pub fn text<X: PlotNum, Y: PlotNum, D: Display>(
     SinglePlot::new(PlotMetaType::Text, name, std::iter::empty())
 }
 
-pub fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> SinglePlot<I, D>
+pub(crate) fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
+    name: D,
+    it: I,
+) -> SinglePlot<I, D>
 where
     I::Item1: Plottable<Item = (X, Y)>,
     I::Item2: Plottable<Item = (X, Y)>,
