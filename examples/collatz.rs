@@ -14,7 +14,7 @@ fn main() {
         .fuse()
     };
 
-    let mut data = poloto::build::data_dyn();
+    let mut data = poloto::build::plots_dyn();
     for i in 1000..1006 {
         data.add(poloto::build::line(
             poloto::formatm!("c({})", i),

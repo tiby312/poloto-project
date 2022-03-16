@@ -1,22 +1,94 @@
+//!
+//! Tools for assembling plots
+//!
+//!
 use super::*;
 
-pub fn data_dyn<F: RenderablePlots>() -> DataDyn<F> {
-    DataDyn::new()
+pub mod bar;
+pub mod bounded_iter;
+pub mod buffered_iter;
+pub mod crop;
+pub mod unwrapper;
+
+use unwrapper::Unwrapper;
+
+///
+/// Determine how to interpret the plot's point data when rendering.
+///
+#[derive(Copy, Clone, Debug)]
+pub enum PlotType {
+    Scatter,
+    Line,
+    Histo,
+    LineFill,
+    LineFillRaw,
+    Bars,
 }
 
-pub struct DataDyn<F: RenderablePlots> {
+///
+/// Determine if this is a plot or just text.
+///
+#[derive(Copy, Clone, Debug)]
+pub enum PlotMetaType {
+    Plot(PlotType),
+    Text,
+}
+
+///
+/// Iterator that is accepted by plot functions like `line`,`scatter`, etc.
+/// The second function will only get called after
+/// the first iterator has been fully consumed.
+///
+pub trait PlotIter {
+    type Item1;
+    type Item2;
+    type It1: Iterator<Item = Self::Item1>;
+    type It2: Iterator<Item = Self::Item2>;
+
+    /// Return an iterator that will be used to find min max bounds.
+    fn first(&mut self) -> Self::It1;
+
+    /// Return an iterator that returns the same data as before in order to scale the plots.
+    fn second(self, last: Self::It1) -> Self::It2;
+}
+
+impl<I: IntoIterator + Clone> PlotIter for I {
+    type Item1 = I::Item;
+    type Item2 = I::Item;
+    type It1 = I::IntoIter;
+    type It2 = I::IntoIter;
+
+    fn first(&mut self) -> Self::It1 {
+        self.clone().into_iter()
+    }
+    fn second(self, _last: Self::It1) -> Self::It2 {
+        self.into_iter()
+    }
+}
+
+///
+/// Create a [`PlotsDyn`]
+///
+pub fn plots_dyn<F: RenderablePlotIterator>() -> PlotsDyn<F> {
+    PlotsDyn::new()
+}
+
+///
+/// Allows a user to collect plots inside of a loop instead of chaining plots together.
+///
+pub struct PlotsDyn<F: RenderablePlotIterator> {
     bound_counter: usize,
     plot_counter: usize,
     flop: Vec<F>,
 }
-impl<F: RenderablePlots> Default for DataDyn<F> {
+impl<F: RenderablePlotIterator> Default for PlotsDyn<F> {
     fn default() -> Self {
         Self::new()
     }
 }
-impl<F: RenderablePlots> DataDyn<F> {
+impl<F: RenderablePlotIterator> PlotsDyn<F> {
     pub fn new() -> Self {
-        DataDyn {
+        PlotsDyn {
             bound_counter: 0,
             plot_counter: 0,
             flop: vec![],
@@ -28,15 +100,15 @@ impl<F: RenderablePlots> DataDyn<F> {
     }
 }
 
-impl<F: RenderablePlots> RenderablePlots for DataDyn<F> {
+impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
     type X = F::X;
     type Y = F::Y;
-    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
+    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
         loop {
             if self.bound_counter >= self.flop.len() {
                 return None;
             }
-            if let Some(a) = self.flop[self.bound_counter].next_bound() {
+            if let Some(a) = self.flop[self.bound_counter].next_bound_point() {
                 return Some(a);
             }
             self.bound_counter += 1;
@@ -49,35 +121,35 @@ impl<F: RenderablePlots> RenderablePlots for DataDyn<F> {
             self.flop[self.plot_counter].next_typ()
         }
     }
-    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>> {
-        let a = self.flop[self.plot_counter].next_plot();
-        if let Some(PlotSesh::None) = a {
+    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
+        let a = self.flop[self.plot_counter].next_plot_point();
+        if let PlotSesh::None = a {
             self.plot_counter += 1;
         }
         a
     }
 
-    fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
+    fn next_name(&mut self, write: &mut dyn fmt::Write) -> fmt::Result {
         self.flop[self.plot_counter].next_name(write)
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlots
-    for Box<dyn RenderablePlots<X = X, Y = Y> + 'a>
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
+    for Box<dyn RenderablePlotIterator<X = X, Y = Y> + 'a>
 {
     type X = X;
 
     type Y = Y;
 
-    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
-        self.as_mut().next_bound()
+    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+        self.as_mut().next_bound_point()
     }
 
-    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>> {
-        self.as_mut().next_plot()
+    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
+        self.as_mut().next_plot_point()
     }
 
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result {
         self.as_mut().next_name(w)
     }
 
@@ -85,23 +157,12 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlots
         self.as_mut().next_typ()
     }
 }
-///
-/// Renderer will first call next_bound() until exhausted in order to find min/max bounds.
-///
-/// Then renderer will call next_typ() to determine  if there is a plot
-///     if next_typ() returned Some(), then it will then call next_name()
-///       and expect there to be a name. Then it will call next_plot continuously
-///         untill exausted.
-///
-pub trait RenderablePlots {
-    type X: PlotNum;
-    type Y: PlotNum;
-    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)>;
-    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>>;
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
-    fn next_typ(&mut self) -> Option<PlotMetaType>;
 
-    fn chain<B: RenderablePlots>(self, b: B) -> Chain<Self, B>
+///
+/// Helper functions to assemble and prepare plots.
+///
+pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
+    fn chain<B: RenderablePlotIterator>(self, b: B) -> Chain<Self, B>
     where
         Self: Sized,
     {
@@ -112,6 +173,9 @@ pub trait RenderablePlots {
         }
     }
 
+    ///
+    /// Compute min/max bounds and prepare for next stage in pipeline.
+    ///
     fn collect(self) -> Data<Self::X, Self::Y, Self>
     where
         Self: Sized,
@@ -119,6 +183,9 @@ pub trait RenderablePlots {
         self.collect_with(None, None)
     }
 
+    ///
+    /// Similar to `collect` except additionally specify marker values that the viewport must fit.
+    ///
     fn collect_with(
         mut self,
         xmarker: impl IntoIterator<Item = Self::X>,
@@ -127,7 +194,7 @@ pub trait RenderablePlots {
     where
         Self: Sized,
     {
-        let ii = std::iter::from_fn(|| self.next_bound());
+        let ii = std::iter::from_fn(|| self.next_bound_point());
 
         let (boundx, boundy) = util::find_bounds(ii, xmarker, ymarker);
 
@@ -147,11 +214,30 @@ pub trait RenderablePlots {
         }
     }
 }
+impl<I: RenderablePlotIterator> RenderablePlotIteratorExt for I {}
 
-pub(crate) struct RenderablePlotIter<A: RenderablePlots> {
+/// Iterator over all plots that have been assembled by the user.
+/// This trait is used by the poloto renderer to iterate over and render all the plots.
+///
+/// Renderer will first call `next_bound()` until exhausted in order to find min/max bounds.
+///
+/// Then renderer will call `next_typ()` to determine  if there is a plot.
+/// If next_typ() returned Some(), then it will then call next_name()
+/// Then it will call next_plot continuously until it returns None.
+///
+pub trait RenderablePlotIterator {
+    type X: PlotNum;
+    type Y: PlotNum;
+    fn next_typ(&mut self) -> Option<PlotMetaType>;
+    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)>;
+    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)>;
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result;
+}
+
+pub(crate) struct RenderablePlotIter<A: RenderablePlotIterator> {
     flop: A,
 }
-impl<A: RenderablePlots> RenderablePlotIter<A> {
+impl<A: RenderablePlotIterator> RenderablePlotIter<A> {
     pub fn new(flop: A) -> Self {
         RenderablePlotIter { flop }
     }
@@ -167,20 +253,20 @@ impl<A: RenderablePlots> RenderablePlotIter<A> {
     }
 }
 
-pub(crate) struct SinglePlotAccessor<'a, A: RenderablePlots> {
+pub(crate) struct SinglePlotAccessor<'a, A: RenderablePlotIterator> {
     typ: PlotMetaType,
     flop: &'a mut A,
 }
-impl<'b, A: RenderablePlots> SinglePlotAccessor<'b, A> {
+impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
     pub fn typ(&mut self) -> PlotMetaType {
         self.typ
     }
     pub fn name(&mut self, write: &mut dyn fmt::Write) -> fmt::Result {
-        self.flop.next_name(write).unwrap()
+        self.flop.next_name(write)
     }
     pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = (A::X, A::Y)> + 'a {
         std::iter::from_fn(|| {
-            if let Some(PlotSesh::Some(a)) = self.flop.next_plot() {
+            if let PlotSesh::Some(a) = self.flop.next_plot_point() {
                 Some(a)
             } else {
                 None
@@ -189,11 +275,18 @@ impl<'b, A: RenderablePlots> SinglePlotAccessor<'b, A> {
     }
 }
 
+///
+/// Used to distinguish between one plot's points being rendered, vs all plot's points being rendered.
+///
 pub enum PlotSesh<T> {
     Some(T),
     None,
+    Finished,
 }
 
+///
+/// Write some text in the legend. This doesnt increment the plot number.
+///
 pub fn text<X: PlotNum, Y: PlotNum, D: Display>(
     name: D,
 ) -> SinglePlot<std::iter::Empty<(X, Y)>, D> {
@@ -205,63 +298,80 @@ pub(crate) fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     it: I,
 ) -> SinglePlot<I, D>
 where
-    I::Item1: Plottable<Item = (X, Y)>,
-    I::Item2: Plottable<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
 {
     SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), name, it)
 }
 
+/// Create a histogram from plots using SVG rect elements.
+/// Each bar's left side will line up with a point.
+/// Each rect element belongs to the `.poloto[N]fill` css class.
 pub fn histogram<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     name: D,
     it: I,
 ) -> SinglePlot<I, D>
 where
-    I::Item1: Plottable<Item = (X, Y)>,
-    I::Item2: Plottable<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
 {
     SinglePlot::new(PlotMetaType::Plot(PlotType::Histo), name, it)
 }
 
+/// Create a scatter plot from plots, using a SVG path with lines with zero length.
+/// Each point can be sized using the stroke width.
+/// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
+/// with the latter class overriding the former.
 pub fn scatter<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> SinglePlot<I, D>
 where
-    I::Item1: Plottable<Item = (X, Y)>,
-    I::Item2: Plottable<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
 {
     SinglePlot::new(PlotMetaType::Plot(PlotType::Scatter), name, it)
 }
 
+/// Create a line from plots that will be filled underneath using a SVG path element.
+/// The path element belongs to the `.poloto[N]fill` css class.
 pub fn line_fill<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     name: D,
     it: I,
 ) -> SinglePlot<I, D>
 where
-    I::Item1: Plottable<Item = (X, Y)>,
-    I::Item2: Plottable<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
 {
     SinglePlot::new(PlotMetaType::Plot(PlotType::LineFill), name, it)
 }
 
+/// Create a line from plots that will be filled using a SVG path element.
+/// The first and last points will be connected and then filled in.
+/// The path element belongs to the `.poloto[N]fill` css class.
 pub fn line_fill_raw<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     name: D,
     it: I,
 ) -> SinglePlot<I, D>
 where
-    I::Item1: Plottable<Item = (X, Y)>,
-    I::Item2: Plottable<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
 {
     SinglePlot::new(PlotMetaType::Plot(PlotType::LineFillRaw), name, it)
 }
 
+/// Create a line from plots using a SVG path element.
+/// The path element belongs to the `.poloto[N]fill` css class.    
 pub fn line<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> SinglePlot<I, D>
 where
-    I::Item1: Plottable<Item = (X, Y)>,
-    I::Item2: Plottable<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
 {
     SinglePlot::new(PlotMetaType::Plot(PlotType::Line), name, it)
 }
 
+///
+/// Represents a single plot.
+///
 pub struct SinglePlot<I: PlotIter, D: Display> {
-    buffer1: Option<I::It1>, //todo replace two options with one enum
+    buffer1: Option<I::It1>,
     buffer2: Option<I::It2>,
     plots: Option<I>,
     name: D,
@@ -271,8 +381,8 @@ pub struct SinglePlot<I: PlotIter, D: Display> {
 }
 impl<I: PlotIter, D: Display> SinglePlot<I, D>
 where
-    I::Item1: Plottable,
-    I::Item2: Plottable,
+    I::Item1: Unwrapper,
+    I::Item2: Unwrapper,
 {
     fn new(typ: PlotMetaType, name: D, plots: I) -> Self {
         SinglePlot {
@@ -286,42 +396,42 @@ where
         }
     }
 }
-impl<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display> RenderablePlots for SinglePlot<I, D>
+impl<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display> RenderablePlotIterator for SinglePlot<I, D>
 where
-    I::Item1: Plottable<Item = (X, Y)>,
-    I::Item2: Plottable<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
 {
     type X = X;
     type Y = Y;
-    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
+    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
         if self.buffer1.is_none() {
             self.buffer1 = Some(self.plots.as_mut().unwrap().first());
         }
 
-        self.buffer1.as_mut().unwrap().next().map(|x| x.make_plot())
+        self.buffer1.as_mut().unwrap().next().map(|x| x.unwrap())
     }
 
-    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>> {
+    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
         if let Some(d) = self.buffer1.take() {
             self.buffer2 = Some(self.plots.take().unwrap().second(d));
         }
 
         if let Some(bb) = self.buffer2.as_mut() {
             if let Some(k) = bb.next() {
-                Some(PlotSesh::Some(k.make_plot()))
+                PlotSesh::Some(k.unwrap())
             } else if !self.hit_end {
                 self.hit_end = true;
-                Some(PlotSesh::None)
+                PlotSesh::None
             } else {
-                None
+                PlotSesh::Finished
             }
         } else {
-            None
+            PlotSesh::Finished
         }
     }
 
-    fn next_name(&mut self, writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        Some(write!(writer, "{}", self.name))
+    fn next_name(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        write!(writer, "{}", self.name)
     }
 
     fn next_typ(&mut self) -> Option<PlotMetaType> {
@@ -334,31 +444,36 @@ where
     }
 }
 
+///
+/// Chain two plots together.
+///
 pub struct Chain<A, B> {
     a: A,
     b: B,
     started: bool,
 }
-impl<A: RenderablePlots, B: RenderablePlots<X = A::X, Y = A::Y>> RenderablePlots for Chain<A, B> {
+impl<A: RenderablePlotIterator, B: RenderablePlotIterator<X = A::X, Y = A::Y>>
+    RenderablePlotIterator for Chain<A, B>
+{
     type X = A::X;
     type Y = A::Y;
-    fn next_bound(&mut self) -> Option<(Self::X, Self::Y)> {
-        if let Some(a) = self.a.next_bound() {
+    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+        if let Some(a) = self.a.next_bound_point() {
             Some(a)
         } else {
-            self.b.next_bound()
+            self.b.next_bound_point()
         }
     }
 
-    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X, Self::Y)>> {
-        if let Some(a) = self.a.next_plot() {
-            Some(a)
-        } else {
-            self.b.next_plot()
+    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
+        match self.a.next_plot_point() {
+            PlotSesh::Some(a) => PlotSesh::Some(a),
+            PlotSesh::None => PlotSesh::None,
+            PlotSesh::Finished => self.b.next_plot_point(),
         }
     }
 
-    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
+    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> fmt::Result {
         if !self.started {
             self.a.next_name(&mut writer)
         } else {
@@ -375,201 +490,7 @@ impl<A: RenderablePlots, B: RenderablePlots<X = A::X, Y = A::Y>> RenderablePlots
     }
 }
 
-/*
-
-
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
-    pub fn xmarker(&mut self, a: X) -> &mut Self {
-        self.xmarkers.push(a);
-        self
-    }
-
-    pub fn ymarker(&mut self, a: Y) -> &mut Self {
-        self.ymarkers.push(a);
-        self
-    }
-
-    ///
-    /// Write some text in the legend. This doesnt increment the plot number.
-    ///
-    /// ```
-    /// let mut plotter = poloto::data::<f64,f64>();
-    /// plotter.text("This is a note");
-    /// ```
-    pub fn text(&mut self, name: impl Display + 'a) -> &mut Self {
-        self.plots.push(Box::new(PlotStruct::new(
-            std::iter::empty(),
-            name,
-            PlotMetaType::Text,
-        )));
-        self
-    }
-
-    /// Create a line from plots using a SVG path element.
-    /// The path element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line("", &data);
-    /// ```
-    pub fn line<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Line),
-        )));
-        self
-    }
-
-    /// Create a line from plots that will be filled underneath using a SVG path element.
-    /// The path element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line_fill("", &data);
-    /// ```
-    pub fn line_fill<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::LineFill),
-        )));
-        self
-    }
-
-    /// Create a line from plots that will be filled using a SVG path element.
-    /// The first and last points will be connected and then filled in.
-    /// The path element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line_fill_raw("", &data);
-    /// ```
-    pub fn line_fill_raw<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::LineFillRaw),
-        )));
-        self
-    }
-
-    /// Create a scatter plot from plots, using a SVG path with lines with zero length.
-    /// Each point can be sized using the stroke width.
-    /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
-    /// with the latter class overriding the former.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.scatter("", &data);
-    /// ```
-    pub fn scatter<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Scatter),
-        )));
-        self
-    }
-
-    /// Create a histogram from plots using SVG rect elements.
-    /// Each bar's left side will line up with a point.
-    /// Each rect element belongs to the `.poloto[N]fill` css class.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.histogram("", &data);
-    /// ```
-    pub fn histogram<I>(&mut self, name: impl Display + 'a, plots: I) -> &mut Self
-    where
-        I: PlotIter + 'a,
-        I::Item1: Plottable<Item = (X, Y)>,
-        I::Item2: Plottable<Item = (X, Y)>,
-    {
-        self.plots.push(Box::new(PlotStruct::new(
-            plots.map_plot(|x| x.make_plot(), |x| x.make_plot()),
-            name,
-            PlotMetaType::Plot(PlotType::Histo),
-        )));
-        self
-    }
-
-    pub fn move_into(&mut self) -> Self {
-        let mut val = DataBuilder {
-            plots: vec![],
-            xmarkers: vec![],
-            ymarkers: vec![],
-        };
-
-        std::mem::swap(&mut val, self);
-        val
-    }
-
-    /*
-    ///
-    /// Compute min/max bounds and prepare for next stage in pipeline.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut plotter = poloto::data();
-    /// plotter.line("", &data);
-    /// plotter.build();
-    /// ```
-    ///
-    pub fn build(&mut self) -> Data<X, Y, impl AllPlotFmt<Item = (X, Y)> + 'a> {
-        let mut val = self.move_into();
-
-        let (boundx, boundy) = util::find_bounds(
-            val.plots.iter_mut().flat_map(|x| x.iter_first()),
-            val.xmarkers.clone(),
-            val.ymarkers.clone(),
-        );
-
-        let boundx = DataBound {
-            min: boundx[0],
-            max: boundx[1],
-        };
-        let boundy = DataBound {
-            min: boundy[0],
-            max: boundy[1],
-        };
-
-        Data {
-            plots: Foo2 { plots: val.plots },
-            boundx,
-            boundy,
-        }
-    }
-    */
-}
-*/
-
-impl<X: PlotNum, Y: PlotNum, P: RenderablePlots<X = X, Y = Y>> Data<X, Y, P> {
+impl<X: PlotNum, Y: PlotNum, P: RenderablePlotIterator<X = X, Y = Y>> Data<X, Y, P> {
     pub fn data_boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
@@ -602,7 +523,7 @@ impl<X: PlotNum, Y: PlotNum, P: RenderablePlots<X = X, Y = Y>> Data<X, Y, P> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, P: RenderablePlots<X = X, Y = Y>, K: Borrow<Canvas>>
+impl<X: PlotNum, Y: PlotNum, P: RenderablePlotIterator<X = X, Y = Y>, K: Borrow<Canvas>>
     Stager<X, Y, P, K>
 {
     ///
@@ -683,12 +604,14 @@ impl<X: PlotNum, Y: PlotNum, P: RenderablePlots<X = X, Y = Y>, K: Borrow<Canvas>
     /// Create a plotter directly from a [`BaseFmtAndTicks`]
     ///
     fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y>>(self, p: PF) -> Plotter<impl Disp> {
-        struct Combine<A: BaseFmtAndTicks, B: RenderablePlots> {
+        struct Combine<A: BaseFmtAndTicks, B: RenderablePlotIterator> {
             pub a: A,
             pub b: B,
         }
 
-        impl<A: BaseFmtAndTicks, B: RenderablePlots<X = A::X, Y = A::Y>> BaseAndPlotsFmt for Combine<A, B> {
+        impl<A: BaseFmtAndTicks, B: RenderablePlotIterator<X = A::X, Y = A::Y>> BaseAndPlotsFmt
+            for Combine<A, B>
+        {
             type X = A::X;
             type Y = A::Y;
             type A = A;

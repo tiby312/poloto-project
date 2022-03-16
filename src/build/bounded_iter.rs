@@ -31,8 +31,8 @@ pub fn from_iter<X: PlotNum, Y: PlotNum, I1: Iterator, I2: Iterator>(
     iter2: I2,
 ) -> KnownBounds<I1, I2>
 where
-    I1::Item: Plottable<Item = (X, Y)>,
-    I2::Item: Plottable<Item = (X, Y)>,
+    I1::Item: Unwrapper<Item = (X, Y)>,
+    I2::Item: Unwrapper<Item = (X, Y)>,
 {
     KnownBounds {
         iter1: Some(iter1),
@@ -46,7 +46,7 @@ pub fn from_rect<X: PlotNum, Y: PlotNum, I: Iterator>(
     iter: I,
 ) -> KnownBounds<std::vec::IntoIter<(X, Y)>, I>
 where
-    I::Item: Plottable<Item = (X, Y)>,
+    I::Item: Unwrapper<Item = (X, Y)>,
 {
     let min = (x[0], y[0]);
     let max = (x[1], y[1]);

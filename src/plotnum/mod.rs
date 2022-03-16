@@ -5,7 +5,7 @@
 use super::*;
 
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
-/// See [`plottable::crop::Croppable`]
+/// See [`crate::build::crop::Croppable`]
 ///
 pub trait DiscNum: PlotNum {
     /// Create a hole value.
@@ -141,108 +141,4 @@ pub trait BaseFmt {
     fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
     fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result;
     fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result;
-}
-
-///
-/// Iterator that is accepted by poloto.
-/// The second function will only get called after
-/// the first iterator has been fully consumed.
-///
-pub trait PlotIter {
-    type Item1;
-    type Item2;
-    type It1: Iterator<Item = Self::Item1>;
-    type It2: Iterator<Item = Self::Item2>;
-
-    /// Return an iterator that will be used to find min max bounds.
-    fn first(&mut self) -> Self::It1;
-
-    /// Return an iterator that returns the same data as before in order to scale the plots.
-    fn second(self, last: Self::It1) -> Self::It2;
-}
-
-impl<I: IntoIterator + Clone> PlotIter for I {
-    type Item1 = I::Item;
-    type Item2 = I::Item;
-    type It1 = I::IntoIter;
-    type It2 = I::IntoIter;
-
-    fn first(&mut self) -> Self::It1 {
-        self.clone().into_iter()
-    }
-    fn second(self, _last: Self::It1) -> Self::It2 {
-        self.into_iter()
-    }
-}
-
-pub(super) trait PlotIterExt: PlotIter {
-    fn map_plot<B1, B2, F1: FnMut(Self::Item1) -> B1, F2: FnMut(Self::Item2) -> B2>(
-        self,
-        func1: F1,
-        func2: F2,
-    ) -> Map<Self, F1, F2>
-    where
-        Self: Sized,
-    {
-        Map {
-            iter: self,
-            func1: Some(func1),
-            func2,
-        }
-    }
-}
-impl<I: PlotIter> PlotIterExt for I {}
-
-pub(super) struct Map<I, F1, F2> {
-    pub iter: I,
-    func1: Option<F1>,
-    func2: F2,
-}
-
-impl<B1, B2, I: PlotIter, F1: FnMut(I::Item1) -> B1, F2: FnMut(I::Item2) -> B2> PlotIter
-    for Map<I, F1, F2>
-{
-    type Item1 = B1;
-    type Item2 = B2;
-    type It1 = map::Map<I::It1, F1>;
-    type It2 = map::Map<I::It2, F2>;
-
-    fn first(&mut self) -> Self::It1 {
-        map::Map::new(self.iter.first(), self.func1.take().unwrap())
-    }
-    fn second(self, last: Self::It1) -> Self::It2 {
-        map::Map::new(self.iter.second(last.iter), self.func2)
-    }
-}
-
-mod map {
-    /// Like std::iter::map but you can access the original iterator.
-
-    pub struct Map<I, F> {
-        pub iter: I,
-        f: F,
-    }
-
-    impl<I, F> Map<I, F> {
-        pub fn new(iter: I, f: F) -> Map<I, F> {
-            Map { iter, f }
-        }
-    }
-
-    impl<B, I: Iterator, F> Iterator for Map<I, F>
-    where
-        F: FnMut(I::Item) -> B,
-    {
-        type Item = B;
-
-        #[inline]
-        fn next(&mut self) -> Option<B> {
-            self.iter.next().map(&mut self.f)
-        }
-
-        #[inline]
-        fn size_hint(&self) -> (usize, Option<usize>) {
-            self.iter.size_hint()
-        }
-    }
 }

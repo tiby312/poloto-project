@@ -1,11 +1,13 @@
 use super::*;
 
+use crate::build::*;
+
 pub fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     boundx: &DataBound<X>,
     boundy: &DataBound<Y>,
     canvas: &Canvas,
-    plots_all: impl RenderablePlots<X = X, Y = Y>,
+    plots_all: impl RenderablePlotIterator<X = X, Y = Y>,
 ) -> std::fmt::Result {
     let Canvas {
         width,

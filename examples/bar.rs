@@ -1,6 +1,6 @@
 use poloto::prelude::*;
 fn main() {
-    let (bars, ytick, ytick_fmt) = poloto::bar::gen_bar(
+    let (bar, ybound, ytick, ytick_fmt) = poloto::build::bar::gen_bar(
         "",
         [
             (20, "potato"),
@@ -10,7 +10,7 @@ fn main() {
         ],
     );
 
-    let data = bars.collect_with(Some(0), None);
+    let data = bar.collect_with(Some(1), ybound);
 
     let canvas = poloto::canvas().xtick_lines().build();
 

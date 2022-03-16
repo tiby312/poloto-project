@@ -180,7 +180,7 @@ fn custom_dim() -> fmt::Result {
     };
 
     let data = {
-        let mut d = poloto::build::data_dyn();
+        let mut d = poloto::build::plots_dyn();
         for i in 1000..1006 {
             d.add(poloto::build::line(
                 poloto::formatm!("c({})", i),
@@ -279,7 +279,7 @@ fn trig() -> fmt::Result {
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
     let l1 = poloto::build::line(
         "tan(x)",
-        poloto::buffered_iter::buffered(
+        poloto::build::buffered_iter::buffered(
             x.clone()
                 .map(|x| [x, x.tan()])
                 .crop_above(10.0)
@@ -290,7 +290,7 @@ fn trig() -> fmt::Result {
 
     let l2 = poloto::build::line(
         "sin(2x)",
-        poloto::bounded_iter::from_rect(
+        poloto::build::bounded_iter::from_rect(
             [0.0, 10.0],
             [0.0, 10.0],
             x.clone().map(|x| [x, (2.0 * x).sin()]),
@@ -299,7 +299,9 @@ fn trig() -> fmt::Result {
 
     let l3 = poloto::build::line(
         "2*cos(x)",
-        poloto::buffered_iter::buffered(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)),
+        poloto::build::buffered_iter::buffered(
+            x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
+        ),
     );
 
     let mut plotter = l1.chain(l2).chain(l3).collect().stage().plot(

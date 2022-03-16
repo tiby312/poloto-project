@@ -10,8 +10,8 @@
 //!
 //!
 //! Pipeline:
-//! * Collect plots ([`data`] function)
-//! * Compute min/max by calling [`DataBuilder::build()`].
+//! * Collect plots using functions in [`build`] module
+//! * Compute min/max by calling [`build::RenderablePlotIteratorExt::collect()`].
 //! * Link the data with canvas options by calling [`Data::stage_with()`] or use default canvas with [`Data::stage()`]
 //! * Create tick distributions. (This step can be done automatically using [`Stager::plot()`])
 //! * Collect title/xname/yname using [`Stager::plot()`] or [`Stager::plot_with()`]
@@ -50,12 +50,6 @@ use std::fmt;
 
 pub use tagger::upgrade_write;
 
-pub mod plottable;
-use plottable::Plottable;
-
-pub mod bar;
-pub mod bounded_iter;
-pub mod buffered_iter;
 pub mod build;
 mod canvas;
 pub mod plotnum;
@@ -69,10 +63,10 @@ pub mod simple_theme;
 /// The poloto prelude.
 ///
 pub mod prelude {
-    pub use super::build::RenderablePlots;
+    pub use super::build::crop::Croppable;
+    pub use super::build::RenderablePlotIteratorExt;
     pub use super::formatm;
     pub use super::plotnum::TickFormatExt;
-    pub use super::plottable::crop::Croppable;
     pub use super::simple_theme::SimpleTheme;
 }
 
@@ -143,7 +137,7 @@ pub struct Canvas {
     bar_width: f64,
 }
 
-use build::RenderablePlots;
+use build::RenderablePlotIterator;
 
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
@@ -153,9 +147,9 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::I
 }
 
 ///
-/// Created by [`DataBuilder::build`]
+/// Created by [`build::RenderablePlotIteratorExt::collect`]
 ///
-pub struct Data<X, Y, P: RenderablePlots<X = X, Y = Y>> {
+pub struct Data<X, Y, P: RenderablePlotIterator<X = X, Y = Y>> {
     boundx: DataBound<X>,
     boundy: DataBound<Y>,
     plots: P,
@@ -166,7 +160,7 @@ use std::borrow::Borrow;
 ///
 /// Created by [`Data::stage()`] or [`Data::stage_with`].
 ///
-pub struct Stager<X, Y, P: RenderablePlots<X = X, Y = Y>, K: Borrow<Canvas>> {
+pub struct Stager<X, Y, P: RenderablePlotIterator<X = X, Y = Y>, K: Borrow<Canvas>> {
     res: Data<X, Y, P>,
     canvas: K,
 }
@@ -192,8 +186,6 @@ pub struct CanvasBuilder {
     precision: usize,
     bar_width: f64,
 }
-
-use plotnum::PlotIter;
 
 ///
 /// One-time function to write to a `fmt::Write`.

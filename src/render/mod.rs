@@ -32,24 +32,8 @@ pub trait BaseAndPlotsFmt {
     type X: PlotNum;
     type Y: PlotNum;
     type A: BaseFmtAndTicks<X = Self::X, Y = Self::Y>;
-    type B: RenderablePlots<X = Self::X, Y = Self::Y>;
+    type B: RenderablePlotIterator<X = Self::X, Y = Self::Y>;
     fn gen(self) -> (Self::A, Self::B);
-}
-
-#[derive(Copy, Clone, Debug)]
-pub enum PlotType {
-    Scatter,
-    Line,
-    Histo,
-    LineFill,
-    LineFillRaw,
-    Bars,
-}
-
-#[derive(Copy, Clone, Debug)]
-pub enum PlotMetaType {
-    Plot(PlotType),
-    Text,
 }
 
 ///

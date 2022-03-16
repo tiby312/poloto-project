@@ -19,7 +19,8 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
 ) -> (
-    impl RenderablePlots<X = X, Y = i128>,
+    impl RenderablePlotIterator<X = X, Y = i128>,
+    [i128; 2],
     TickInfo<Vec<i128>>,
     BarTickFmt<D>,
 ) {
@@ -34,13 +35,11 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
             .map(|(i, x)| (x, i128::try_from(i).unwrap())),
     );
 
-    //.ymarker(-1)
-    //.ymarker(i128::try_from(vals_len).unwrap());
-
     let ticks = (0..vals_len).map(|x| i128::try_from(x).unwrap()).collect();
 
     (
         bars,
+        [-1, i128::try_from(vals_len).unwrap()],
         TickInfo {
             ticks,
             dash_size: None,
