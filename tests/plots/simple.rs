@@ -13,10 +13,10 @@ fn heart() -> fmt::Result {
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
     let l1 = poloto::build::line_fill_raw("", range.map(heart));
-    
+
     let canvas = poloto::canvas().preserve_aspect().build();
     let mut plotter = l1
-        .collect_with([-20.0,20.0],[-20.0,20.0])
+        .collect_with([-20.0, 20.0], [-20.0, 20.0])
         .stage_with(canvas)
         .plot("Heart Graph", "x", "y");
 
@@ -110,7 +110,7 @@ fn long_label() -> fmt::Result {
             poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
             (0..).zip(collatz(1002)),
         ))
-        .collect_with(None,Some(0));
+        .collect_with(None, Some(0));
 
     let mut plotter = data.stage().plot("collatz", "x", "y");
 
@@ -187,7 +187,7 @@ fn custom_dim() -> fmt::Result {
                 (0..).zip(collatz(i)),
             ));
         }
-        d.collect_with(None,Some(0))
+        d.collect_with(None, Some(0))
     };
 
     let canvas = poloto::canvas()

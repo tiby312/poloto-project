@@ -20,7 +20,7 @@ fn days() -> fmt::Result {
         (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let s = poloto::build::line("", data).collect_with(None,Some(0));
+    let s = poloto::build::line("", data).collect_with(None, Some(0));
 
     let mut s = s
         .stage()
@@ -47,7 +47,7 @@ fn minutes_local_time() -> fmt::Result {
         (day2.and_hms(01, 50, 01).into(), 4133000),
     ];
 
-    let s = poloto::build::line("", data).collect_with(None,Some(0));
+    let s = poloto::build::line("", data).collect_with(None, Some(0));
 
     let canvas = poloto::canvas().build();
     let (xtick, xtick_fmt) = unixtime_ticks(s.boundx(&canvas), time_zone);
@@ -89,7 +89,7 @@ fn months() -> fmt::Result {
         (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
-    let s = poloto::build::line("", data).collect_with(None,Some(0));
+    let s = poloto::build::line("", data).collect_with(None, Some(0));
 
     let mut s = s.stage().plot(
         "Number of Wikipedia Articles",
@@ -118,7 +118,7 @@ fn seconds() -> fmt::Result {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let data = poloto::build::line("", data).collect_with(None,Some(0));
+    let data = poloto::build::line("", data).collect_with(None, Some(0));
 
     let (xmin, xmax) = (data.data_boundx().min, data.data_boundx().max);
 

@@ -69,7 +69,7 @@ pub mod simple_theme;
 /// The poloto prelude.
 ///
 pub mod prelude {
-    pub use super::build::Flop;
+    pub use super::build::RenderablePlots;
     pub use super::formatm;
     pub use super::plotnum::TickFormatExt;
     pub use super::plottable::crop::Croppable;
@@ -143,7 +143,7 @@ pub struct Canvas {
     bar_width: f64,
 }
 
-use build::Flop;
+use build::RenderablePlots;
 
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
@@ -155,7 +155,7 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::I
 ///
 /// Created by [`DataBuilder::build`]
 ///
-pub struct Data<X, Y, P: Flop<X = X, Y = Y>> {
+pub struct Data<X, Y, P: RenderablePlots<X = X, Y = Y>> {
     boundx: DataBound<X>,
     boundy: DataBound<Y>,
     plots: P,
@@ -166,7 +166,7 @@ use std::borrow::Borrow;
 ///
 /// Created by [`Data::stage()`] or [`Data::stage_with`].
 ///
-pub struct Stager<X, Y, P: Flop<X = X, Y = Y>, K: Borrow<Canvas>> {
+pub struct Stager<X, Y, P: RenderablePlots<X = X, Y = Y>, K: Borrow<Canvas>> {
     res: Data<X, Y, P>,
     canvas: K,
 }
