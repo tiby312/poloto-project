@@ -10,10 +10,8 @@ fn main() {
         ],
     );
 
-    let data = poloto::build::build(bars);
-
-    //let data = data.xmarker(0).build();
-
+    let data = bars.collect();
+    
     let canvas = poloto::canvas().xtick_lines().build();
 
     let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx(&canvas));

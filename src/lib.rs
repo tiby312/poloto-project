@@ -201,7 +201,7 @@ pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::I
 ///
 /// Created by [`DataBuilder::build`]
 ///
-pub struct Data<X, Y, P: Flop<Item = (X, Y)>> {
+pub struct Data<X, Y, P: Flop<X=X,Y=Y>> {
     boundx: DataBound<X>,
     boundy: DataBound<Y>,
     plots: P,
@@ -212,7 +212,7 @@ use std::borrow::Borrow;
 ///
 /// Created by [`Data::stage()`] or [`Data::stage_with`].
 ///
-pub struct Stager<X, Y, P: Flop<Item = (X, Y)>, K: Borrow<Canvas>> {
+pub struct Stager<X, Y, P: Flop<X=X,Y=Y>, K: Borrow<Canvas>> {
     res: Data<X, Y, P>,
     canvas: K,
 }

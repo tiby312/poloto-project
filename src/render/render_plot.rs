@@ -5,7 +5,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     boundx: &DataBound<X>,
     boundy: &DataBound<Y>,
     canvas: &Canvas,
-    plots_all: impl Flop<Item = (X, Y)>,
+    plots_all: impl Flop<X=X,Y=Y>,
 ) -> std::fmt::Result {
     let Canvas {
         width,

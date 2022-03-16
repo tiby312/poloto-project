@@ -10,26 +10,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for DataBuilder<'a, X, Y> {
     }
 }
 
-pub fn build<X: PlotNum, Y: PlotNum, A: Flop<Item = (X, Y)>>(mut plots: A) -> Data<X, Y, A> {
-    let ii = std::iter::from_fn(|| plots.next_bound());
-
-    let (boundx, boundy) = util::find_bounds(ii, vec![], vec![]);
-
-    let boundx = DataBound {
-        min: boundx[0],
-        max: boundx[1],
-    };
-    let boundy = DataBound {
-        min: boundy[0],
-        max: boundy[1],
-    };
-
-    Data {
-        boundx,
-        boundy,
-        plots,
-    }
-}
 
 pub fn data_dyn<F: Flop>() -> DataDyn<F> {
     DataDyn::new()
@@ -55,8 +35,9 @@ impl<F: Flop> DataDyn<F> {
 }
 
 impl<F: Flop> Flop for DataDyn<F> {
-    type Item = F::Item;
-    fn next_bound(&mut self) -> Option<Self::Item> {
+    type X=F::X;
+    type Y=F::Y;
+    fn next_bound(&mut self) -> Option<(Self::X,Self::Y)> {
         loop {
             if self.bound_counter >= self.flop.len() {
                 return None;
@@ -74,7 +55,7 @@ impl<F: Flop> Flop for DataDyn<F> {
             self.flop[self.plot_counter].next_typ()
         }
     }
-    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>> {
+    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X,Self::Y)>> {
         let a = self.flop[self.plot_counter].next_plot();
         if let Some(PlotSesh::None) = a {
             self.plot_counter += 1;
@@ -85,12 +66,15 @@ impl<F: Flop> Flop for DataDyn<F> {
     fn next_name<W: fmt::Write>(&mut self, write: W) -> Option<fmt::Result> {
         self.flop[self.plot_counter].next_name(write)
     }
+
+
 }
 
 pub trait Flop {
-    type Item;
-    fn next_bound(&mut self) -> Option<Self::Item>;
-    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>>;
+    type X:PlotNum;
+    type Y:PlotNum;
+    fn next_bound(&mut self) -> Option<(Self::X,Self::Y)>;
+    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X,Self::Y)>>;
     fn next_name<W: fmt::Write>(&mut self, w: W) -> Option<fmt::Result>;
     fn next_typ(&mut self) -> Option<PlotMetaType>;
 
@@ -99,6 +83,28 @@ pub trait Flop {
         Self: Sized,
     {
         Chain { a: self, b }
+    }
+
+
+    fn collect(mut self) -> Data<Self::X, Self::Y, Self> where Self:Sized{
+        let ii = std::iter::from_fn(|| self.next_bound());
+
+        let (boundx, boundy) = util::find_bounds(ii, vec![], vec![]);
+
+        let boundx = DataBound {
+            min: boundx[0],
+            max: boundx[1],
+        };
+        let boundy = DataBound {
+            min: boundy[0],
+            max: boundy[1],
+        };
+
+        Data {
+            boundx,
+            boundy,
+            plots:self,
+        }
     }
 }
 
@@ -132,7 +138,7 @@ impl<'b, A: Flop> FlopIterator<'b, A> {
     pub fn name<F: fmt::Write>(&mut self, write: F) -> fmt::Result {
         self.flop.next_name(write).unwrap()
     }
-    pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = A::Item> + 'a {
+    pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = (A::X,A::Y)> + 'a {
         std::iter::from_fn(|| {
             if let Some(a) = self.flop.next_plot() {
                 if let PlotSesh::Some(a) = a {
@@ -232,13 +238,14 @@ where
         }
     }
 }
-impl<I: PlotIter, D: Display> Flop for OneP<I, D>
+impl<X:PlotNum,Y:PlotNum,I: PlotIter, D: Display> Flop for OneP<I, D>
 where
-    I::Item1: Plottable,
-    I::Item2: Plottable<Item = <I::Item1 as Plottable>::Item>,
+    I::Item1: Plottable<Item=(X,Y)>,
+    I::Item2: Plottable<Item=(X,Y)>,
 {
-    type Item = <I::Item1 as Plottable>::Item;
-    fn next_bound(&mut self) -> Option<Self::Item> {
+    type X = X;
+    type Y=Y;
+    fn next_bound(&mut self) -> Option<(Self::X,Self::Y)> {
         if self.buffer1.is_none() {
             self.buffer1 = Some(self.plots.as_mut().unwrap().first());
         }
@@ -246,7 +253,7 @@ where
         self.buffer1.as_mut().unwrap().next().map(|x| x.make_plot())
     }
 
-    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>> {
+    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X,Self::Y)>> {
         if let Some(d) = self.buffer1.take() {
             self.buffer2 = Some(self.plots.take().unwrap().second(d));
         }
@@ -285,9 +292,10 @@ pub struct Chain<A, B> {
     a: A,
     b: B,
 }
-impl<A: Flop, B: Flop<Item = A::Item>> Flop for Chain<A, B> {
-    type Item = A::Item;
-    fn next_bound(&mut self) -> Option<Self::Item> {
+impl<A: Flop, B: Flop<X = A::X,Y=A::Y>> Flop for Chain<A, B> {
+    type X = A::X;
+    type Y=A::Y;
+    fn next_bound(&mut self) -> Option<(Self::X,Self::Y)> {
         if let Some(a) = self.a.next_bound() {
             Some(a)
         } else {
@@ -299,7 +307,7 @@ impl<A: Flop, B: Flop<Item = A::Item>> Flop for Chain<A, B> {
         }
     }
 
-    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>> {
+    fn next_plot(&mut self) -> Option<PlotSesh<(Self::X,Self::Y)>> {
         if let Some(a) = self.a.next_plot() {
             Some(a)
         } else {
@@ -529,7 +537,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
 }
 */
 
-impl<X: PlotNum, Y: PlotNum, P: Flop<Item = (X, Y)>> Data<X, Y, P> {
+impl<X: PlotNum, Y: PlotNum, P: Flop<X=X,Y=Y>> Data<X, Y, P> {
     pub fn data_boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
@@ -594,7 +602,7 @@ impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, P: Flop<Item = (X, Y)>, K: Borrow<Canvas>> Stager<X, Y, P, K> {
+impl<X: PlotNum, Y: PlotNum, P: Flop<X=X,Y=Y>, K: Borrow<Canvas>> Stager<X, Y, P, K> {
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -678,7 +686,7 @@ impl<X: PlotNum, Y: PlotNum, P: Flop<Item = (X, Y)>, K: Borrow<Canvas>> Stager<X
             pub b: B,
         }
 
-        impl<A: BaseFmtAndTicks, B: Flop<Item = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
+        impl<A: BaseFmtAndTicks, B: Flop<X=A::X, Y=A::Y>> BaseAndPlotsFmt for Combine<A, B> {
             type X = A::X;
             type Y = A::Y;
             type A = A;

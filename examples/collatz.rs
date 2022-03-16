@@ -1,3 +1,5 @@
+use poloto::prelude::*;
+
 // PIPE me to a file!
 fn main() {
     let collatz = |mut a: i128| {
@@ -29,7 +31,7 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let mut plotter = poloto::build::build(data)
+    let mut plotter = data.collect()
         .stage_with(&canvas)
         .plot("collatz", "x", "y");
 

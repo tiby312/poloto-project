@@ -29,10 +29,10 @@ fn main() {
 
     let data = data.map(|(x, y)| {
         let d = timezone.from_utc_date(&chrono::NaiveDate::parse_from_str(y, "%d %B %Y").unwrap());
-        (d.into(), x)
+        (UnixTime::from(d), x)
     });
 
-    let data = poloto::build::build::<UnixTime, _, _>(poloto::build::line("foo", data));
+    let data = poloto::build::line("foo", data).collect();
 
     let mut plotter = data.stage().plot(
         "Long Jump world record progression",
