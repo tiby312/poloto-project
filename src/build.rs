@@ -10,6 +10,334 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Default for DataBuilder<'a, X, Y> {
     }
 }
 
+pub fn build<X: PlotNum, Y: PlotNum, A: Flop<Item = (X, Y)>>(mut plots: A) -> Data<X, Y, A> {
+    let ii = std::iter::from_fn(|| plots.next_bound());
+
+    let (boundx, boundy) = util::find_bounds(ii, vec![], vec![]);
+
+    let boundx = DataBound {
+        min: boundx[0],
+        max: boundx[1],
+    };
+    let boundy = DataBound {
+        min: boundy[0],
+        max: boundy[1],
+    };
+
+    Data {
+        boundx,
+        boundy,
+        plots,
+    }
+}
+
+pub fn data_dyn<F: Flop>() -> DataDyn<F> {
+    DataDyn::new()
+}
+
+pub struct DataDyn<F: Flop> {
+    bound_counter: usize,
+    plot_counter: usize,
+    flop: Vec<F>,
+}
+impl<F: Flop> DataDyn<F> {
+    pub fn new() -> Self {
+        DataDyn {
+            bound_counter: 0,
+            plot_counter: 0,
+            flop: vec![],
+        }
+    }
+    pub fn add(&mut self, a: F) -> &mut Self {
+        self.flop.push(a);
+        self
+    }
+}
+
+impl<F: Flop> Flop for DataDyn<F> {
+    type Item = F::Item;
+    fn next_bound(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.bound_counter >= self.flop.len() {
+                return None;
+            }
+            if let Some(a) = self.flop[self.bound_counter].next_bound() {
+                return Some(a);
+            }
+            self.bound_counter += 1;
+        }
+    }
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        if self.plot_counter >= self.flop.len() {
+            None
+        } else {
+            self.flop[self.plot_counter].next_typ()
+        }
+    }
+    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>> {
+        let a = self.flop[self.plot_counter].next_plot();
+        if let Some(PlotSesh::None) = a {
+            self.plot_counter += 1;
+        }
+        a
+    }
+
+    fn next_name<W: fmt::Write>(&mut self, write: W) -> Option<fmt::Result> {
+        self.flop[self.plot_counter].next_name(write)
+    }
+}
+
+pub trait Flop {
+    type Item;
+    fn next_bound(&mut self) -> Option<Self::Item>;
+    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>>;
+    fn next_name<W: fmt::Write>(&mut self, w: W) -> Option<fmt::Result>;
+    fn next_typ(&mut self) -> Option<PlotMetaType>;
+
+    fn chain<B: Flop>(self, b: B) -> Chain<Self, B>
+    where
+        Self: Sized,
+    {
+        Chain { a: self, b }
+    }
+}
+
+pub struct Flopp<A: Flop> {
+    flop: A,
+}
+impl<A: Flop> Flopp<A> {
+    pub fn new(flop: A) -> Self {
+        Flopp { flop }
+    }
+    pub fn next(&mut self) -> Option<FlopIterator<A>> {
+        if let Some(typ) = self.flop.next_typ() {
+            Some(FlopIterator {
+                typ,
+                flop: &mut self.flop,
+            })
+        } else {
+            None
+        }
+    }
+}
+
+pub struct FlopIterator<'a, A: Flop> {
+    typ: PlotMetaType,
+    flop: &'a mut A,
+}
+impl<'b, A: Flop> FlopIterator<'b, A> {
+    pub fn typ(&mut self) -> PlotMetaType {
+        self.typ
+    }
+    pub fn name<F: fmt::Write>(&mut self, write: F) -> fmt::Result {
+        self.flop.next_name(write).unwrap()
+    }
+    pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = A::Item> + 'a {
+        std::iter::from_fn(|| {
+            if let Some(a) = self.flop.next_plot() {
+                if let PlotSesh::Some(a) = a {
+                    Some(a)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+    }
+}
+
+pub enum PlotSesh<T> {
+    Some(T),
+    None,
+}
+
+pub fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> OneP<I, D>
+where
+    I::Item1: Plottable<Item = (X, Y)>,
+    I::Item2: Plottable<Item = (X, Y)>,
+{
+    OneP::new(PlotMetaType::Plot(PlotType::Bars), name, it)
+}
+
+pub fn text<X: PlotNum, Y: PlotNum, P: Plottable<Item = (X, Y)>, D: Display>(
+    name: D,
+) -> OneP<std::iter::Empty<P>, D> {
+    OneP::new(PlotMetaType::Text, name, std::iter::empty())
+}
+
+pub fn histogram<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> OneP<I, D>
+where
+    I::Item1: Plottable<Item = (X, Y)>,
+    I::Item2: Plottable<Item = (X, Y)>,
+{
+    OneP::new(PlotMetaType::Plot(PlotType::Histo), name, it)
+}
+
+pub fn scatter<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> OneP<I, D>
+where
+    I::Item1: Plottable<Item = (X, Y)>,
+    I::Item2: Plottable<Item = (X, Y)>,
+{
+    OneP::new(PlotMetaType::Plot(PlotType::Scatter), name, it)
+}
+
+pub fn line_fill<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> OneP<I, D>
+where
+    I::Item1: Plottable<Item = (X, Y)>,
+    I::Item2: Plottable<Item = (X, Y)>,
+{
+    OneP::new(PlotMetaType::Plot(PlotType::LineFill), name, it)
+}
+
+pub fn line_fill_raw<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> OneP<I, D>
+where
+    I::Item1: Plottable<Item = (X, Y)>,
+    I::Item2: Plottable<Item = (X, Y)>,
+{
+    OneP::new(PlotMetaType::Plot(PlotType::LineFillRaw), name, it)
+}
+
+pub fn line<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> OneP<I, D>
+where
+    I::Item1: Plottable<Item = (X, Y)>,
+    I::Item2: Plottable<Item = (X, Y)>,
+{
+    OneP::new(PlotMetaType::Plot(PlotType::Line), name, it)
+}
+
+pub struct OneP<I: PlotIter, D: Display> {
+    buffer1: Option<I::It1>, //todo replace two options with one enum
+    buffer2: Option<I::It2>,
+    plots: Option<I>,
+    name: D,
+    typ: PlotMetaType,
+    hit_end: bool,
+    started: bool,
+}
+impl<I: PlotIter, D: Display> OneP<I, D>
+where
+    I::Item1: Plottable,
+    I::Item2: Plottable,
+{
+    fn new(typ: PlotMetaType, name: D, plots: I) -> Self {
+        OneP {
+            buffer1: None,
+            buffer2: None,
+            plots: Some(plots),
+            name,
+            typ,
+            hit_end: false,
+            started: false,
+        }
+    }
+}
+impl<I: PlotIter, D: Display> Flop for OneP<I, D>
+where
+    I::Item1: Plottable,
+    I::Item2: Plottable<Item = <I::Item1 as Plottable>::Item>,
+{
+    type Item = <I::Item1 as Plottable>::Item;
+    fn next_bound(&mut self) -> Option<Self::Item> {
+        if self.buffer1.is_none() {
+            self.buffer1 = Some(self.plots.as_mut().unwrap().first());
+        }
+
+        self.buffer1.as_mut().unwrap().next().map(|x| x.make_plot())
+    }
+
+    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>> {
+        if let Some(d) = self.buffer1.take() {
+            self.buffer2 = Some(self.plots.take().unwrap().second(d));
+        }
+
+        if let Some(bb) = self.buffer2.as_mut() {
+            if let Some(k) = bb.next() {
+                Some(PlotSesh::Some(k.make_plot()))
+            } else {
+                if !self.hit_end {
+                    self.hit_end = true;
+                    Some(PlotSesh::None)
+                } else {
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    }
+
+    fn next_name<W: fmt::Write>(&mut self, mut writer: W) -> Option<fmt::Result> {
+        Some(write!(writer, "{}", self.name))
+    }
+
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        if !self.started {
+            self.started = true;
+            Some(self.typ)
+        } else {
+            None
+        }
+    }
+}
+
+pub struct Chain<A, B> {
+    a: A,
+    b: B,
+}
+impl<A: Flop, B: Flop<Item = A::Item>> Flop for Chain<A, B> {
+    type Item = A::Item;
+    fn next_bound(&mut self) -> Option<Self::Item> {
+        if let Some(a) = self.a.next_bound() {
+            Some(a)
+        } else {
+            if let Some(b) = self.b.next_bound() {
+                Some(b)
+            } else {
+                None
+            }
+        }
+    }
+
+    fn next_plot(&mut self) -> Option<PlotSesh<Self::Item>> {
+        if let Some(a) = self.a.next_plot() {
+            Some(a)
+        } else {
+            if let Some(b) = self.b.next_plot() {
+                Some(b)
+            } else {
+                None
+            }
+        }
+    }
+
+    fn next_name<W: fmt::Write>(&mut self, mut writer: W) -> Option<fmt::Result> {
+        if let Some(a) = self.a.next_name(&mut writer) {
+            Some(a)
+        } else {
+            if let Some(b) = self.b.next_name(&mut writer) {
+                Some(b)
+            } else {
+                None
+            }
+        }
+    }
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        if let Some(a) = self.a.next_typ() {
+            Some(a)
+        } else {
+            if let Some(b) = self.b.next_typ() {
+                Some(b)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+/*
+
+
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
     pub fn xmarker(&mut self, a: X) -> &mut Self {
         self.xmarkers.push(a);
@@ -162,6 +490,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
         val
     }
 
+    /*
     ///
     /// Compute min/max bounds and prepare for next stage in pipeline.
     ///
@@ -196,9 +525,11 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> DataBuilder<'a, X, Y> {
             boundy,
         }
     }
+    */
 }
+*/
 
-impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item = (X, Y)>> Data<X, Y, P> {
+impl<X: PlotNum, Y: PlotNum, P: Flop<Item = (X, Y)>> Data<X, Y, P> {
     pub fn data_boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
@@ -263,7 +594,7 @@ impl<'a, X: 'a, Y: 'a> AllPlotFmt for Foo2<'a, X, Y> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item = (X, Y)>, K: Borrow<Canvas>> Stager<X, Y, P, K> {
+impl<X: PlotNum, Y: PlotNum, P: Flop<Item = (X, Y)>, K: Borrow<Canvas>> Stager<X, Y, P, K> {
     ///
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
@@ -342,12 +673,12 @@ impl<X: PlotNum, Y: PlotNum, P: AllPlotFmt<Item = (X, Y)>, K: Borrow<Canvas>> St
     /// Create a plotter directly from a [`BaseFmtAndTicks`]
     ///
     fn plot_with_all<PF: BaseFmtAndTicks<X = X, Y = Y>>(self, p: PF) -> Plotter<impl Disp> {
-        struct Combine<A: BaseFmtAndTicks, B: AllPlotFmt> {
+        struct Combine<A: BaseFmtAndTicks, B: Flop> {
             pub a: A,
             pub b: B,
         }
 
-        impl<A: BaseFmtAndTicks, B: AllPlotFmt<Item = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
+        impl<A: BaseFmtAndTicks, B: Flop<Item = (A::X, A::Y)>> BaseAndPlotsFmt for Combine<A, B> {
             type X = A::X;
             type Y = A::Y;
             type A = A;

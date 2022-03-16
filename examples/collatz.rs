@@ -12,11 +12,13 @@ fn main() {
         .fuse()
     };
 
-    let mut data = poloto::data();
+    let mut data = poloto::build::data_dyn();
     for i in 1000..1006 {
-        data.line(poloto::formatm!("c({})", i), (0..).zip(collatz(i)));
+        data.add(poloto::build::line(
+            poloto::formatm!("c({})", i),
+            (0..).zip(collatz(i)),
+        ));
     }
-    let data = data.ymarker(0).build();
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
@@ -27,7 +29,9 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let mut plotter = data.stage_with(&canvas).plot("collatz", "x", "y");
+    let mut plotter = poloto::build::build(data)
+        .stage_with(&canvas)
+        .plot("collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);

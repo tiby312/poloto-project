@@ -32,10 +32,7 @@ fn main() {
         (d.into(), x)
     });
 
-    let data = poloto::data::<UnixTime, _>()
-        .line("foo", data)
-        .ymarker(0.0)
-        .build();
+    let data = poloto::build::build::<UnixTime, _, _>(poloto::build::line("foo", data));
 
     let mut plotter = data.stage().plot(
         "Long Jump world record progression",

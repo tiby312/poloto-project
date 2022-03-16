@@ -1,6 +1,6 @@
 set -ex
 
-cargo test
+#cargo test
 cargo run --example collatz > target/assets/collatz.svg
 cargo run --example gaussian > target/assets/gaussian.svg
 cargo run --example steps > target/assets/steps.svg

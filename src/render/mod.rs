@@ -32,7 +32,7 @@ pub trait BaseAndPlotsFmt {
     type X: PlotNum;
     type Y: PlotNum;
     type A: BaseFmtAndTicks<X = Self::X, Y = Self::Y>;
-    type B: AllPlotFmt<Item = (Self::X, Self::Y)>;
+    type B: Flop<Item = (Self::X, Self::Y)>;
     fn gen(self) -> (Self::A, Self::B);
 }
 
