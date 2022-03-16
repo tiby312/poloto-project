@@ -12,14 +12,12 @@ fn heart() -> fmt::Result {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let mut data = poloto::data();
-    data.line_fill_raw("", range.map(heart));
-    data.xmarker(-20.0).xmarker(20.0);
-    data.ymarker(-20.0).ymarker(20.0);
+
+    let l1=poloto::build::line_fill_raw("", range.map(heart)).xmarker(-20.0).xmarker(20.0).ymarker(-20.0).ymarker(20.0);
 
     let canvas = poloto::canvas().preserve_aspect().build();
-    let mut plotter = data
-        .build()
+    let mut plotter = l1
+        .collect()
         .stage_with(canvas)
         .plot("Heart Graph", "x", "y");
 
@@ -32,13 +30,13 @@ fn heart() -> fmt::Result {
 fn large_scatter() -> fmt::Result {
     let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
 
-    let mut s = poloto::data();
 
-    s.scatter("a", x.clone().map(|x| (x, x.cos())));
 
-    s.line("b", x.clone().map(|x| (x, x.sin())));
+    let l1=poloto::build::scatter("a", x.clone().map(|x| (x, x.cos())));
 
-    let mut plotter = s.build().stage().plot("cows per year", "year", "cows");
+    let l2=poloto::build::line("b", x.clone().map(|x| (x, x.sin())));
+
+    let mut plotter = l1.chain(l2).collect().stage().plot("cows per year", "year", "cows");
 
     let mut w = util::create_test_file("large_scatter.svg");
 
@@ -57,16 +55,14 @@ fn large_scatter() -> fmt::Result {
 fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let s = poloto::data()
-        .line_fill(
+    let s=poloto::build::line_fill(
             "tan(x)",
             x.clone()
                 .map(|x| [x, x.tan()])
                 .crop_above(10.0)
                 .crop_below(0.0)
                 .crop_left(2.0),
-        )
-        .build();
+        ).collect();
 
     let boundx = s.data_boundx().clone();
 
@@ -96,26 +92,26 @@ fn long_label() -> fmt::Result {
         .fuse()
     };
 
-    let mut data = poloto::data();
 
-    data.text("⚠️ Here is an example note using the text() function. ⚠️");
-    data.line(
+
+    let l1=poloto::build::text("⚠️ Here is an example note using the text() function. ⚠️");
+    let l2=poloto::build::line(
         poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1000),
         (0..).zip(collatz(1000)),
     );
-    data.line(
+    let l3=poloto::build::line(
         poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1001),
         (0..).zip(collatz(1001)),
     );
-    data.text(" 🍆 Here is another note using the text() function.🍎");
-    data.line(
+    let l4=poloto::build::text(" 🍆 Here is another note using the text() function.🍎");
+    let l5=poloto::build::line(
         poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
         (0..).zip(collatz(1002)),
     );
 
-    data.ymarker(0);
+    let data=l1.chain(l2).chain(l3).chain(l4).chain(l5).ymarker(0).collect();
 
-    let mut plotter = data.build().stage().plot("collatz", "x", "y");
+    let mut plotter = data.stage().plot("collatz", "x", "y");
 
     let mut w = util::create_test_file("long_label.svg");
 

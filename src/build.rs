@@ -173,7 +173,7 @@ where
     OneP::new(PlotMetaType::Plot(PlotType::Bars), name, it)
 }
 
-pub fn text<X: PlotNum, Y: PlotNum, P: Plottable<Item = (X, Y)>, D: Display>(
+pub fn text<P: Plottable, D: Display>(
     name: D,
 ) -> OneP<std::iter::Empty<P>, D> {
     OneP::new(PlotMetaType::Text, name, std::iter::empty())

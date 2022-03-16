@@ -2,14 +2,13 @@ use super::*;
 
 #[test]
 fn custom_colors_html() -> fmt::Result {
-    let mut s = poloto::data();
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    s.line("cos", x.clone().map(|x| [x, x.cos()]));
-    s.histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
+    let l1=poloto::build::line("cos", x.clone().map(|x| [x, x.cos()]));
+    let l2=poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     let mut s =
-        s.build()
+        l1.chain(l2).collect()
             .stage()
             .plot("Demo: you can use CSS patterns if you embed SVG!", "x", "y");
 
@@ -120,13 +119,12 @@ body {
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let mut s = poloto::data();
-    s.line("cos", x.clone().map(|x| [x, x.cos()]));
-    s.histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
-    s.scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
 
-    let mut s = s
-        .build()
+    let l1=poloto::build::line("cos", x.clone().map(|x| [x, x.cos()]));
+    let l2=poloto::build::histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.]));
+    let l3=poloto::build::scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]));
+
+    let mut s = l1.chain(l2).chain(l3).collect()
         .stage()
         .plot("Demo: Hovering and shadows", "x", "y");
 
