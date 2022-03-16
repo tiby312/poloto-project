@@ -16,7 +16,7 @@ fn heart() -> fmt::Result {
 
     let canvas = poloto::render::canvas().preserve_aspect().build();
     let mut plotter = l1
-        .collect_with([-20.0, 20.0], [-20.0, 20.0])
+        .collect_with_markers([-20.0, 20.0], [-20.0, 20.0])
         .stage_with(canvas)
         .plot("Heart Graph", "x", "y");
 
@@ -110,7 +110,7 @@ fn long_label() -> fmt::Result {
             poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
             (0..).zip(collatz(1002)),
         ))
-        .collect_with(None, Some(0));
+        .collect_with_markers(None, Some(0));
 
     let mut plotter = data.stage().plot("collatz", "x", "y");
 
@@ -187,7 +187,7 @@ fn custom_dim() -> fmt::Result {
                 (0..).zip(collatz(i)),
             ));
         }
-        d.collect_with(None, Some(0))
+        d.collect_with_markers(None, Some(0))
     };
 
     let canvas = poloto::render::canvas()
@@ -336,7 +336,7 @@ fn no_plots_only_marker() -> fmt::Result {
         poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
     >();
 
-    let mut plotter = l.collect_with(None, Some(5)).stage().plot(
+    let mut plotter = l.collect_with_markers(None, Some(5)).stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -350,7 +350,7 @@ fn no_plots_only_marker() -> fmt::Result {
 fn one_empty_plot() -> fmt::Result {
     let l = poloto::build::scatter("hay", std::iter::empty::<(i128, i128)>());
 
-    let mut plotter = l.collect_with(None, Some(5)).stage().plot(
+    let mut plotter = l.collect_with_markers(None, Some(5)).stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

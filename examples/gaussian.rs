@@ -22,7 +22,7 @@ fn main() {
     let mut plotter = l1
         .chain(l2)
         .chain(l3)
-        .collect_with(None, Some(0.0))
+        .collect_with_markers(None, Some(0.0))
         .stage()
         .plot("gaussian", "x", "y");
 

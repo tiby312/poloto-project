@@ -31,7 +31,7 @@ fn main() {
         .build();
 
     let mut plotter = data
-        .collect_with(None, Some(0))
+        .collect_with_markers(None, Some(0))
         .stage_with(&canvas)
         .plot("collatz", "x", "y");
 

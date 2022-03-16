@@ -40,7 +40,7 @@ fn main() {
     let mut plotter = l1
         .chain(l2)
         .chain(l3)
-        .collect_with(None, Some(0.0))
+        .collect_with_markers(None, Some(0.0))
         .stage()
         .plot("gaussian", "x", "y");
 
@@ -90,7 +90,7 @@ fn main() {
         .build();
 
     let mut plotter = data
-        .collect_with(None, Some(0))
+        .collect_with_markers(None, Some(0))
         .stage_with(&canvas)
         .plot("collatz", "x", "y");
 
@@ -152,7 +152,7 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let data = poloto::build::line("foo", data).collect_with(None, Some(0.0));
+    let data = poloto::build::line("foo", data).collect_with_markers(None, Some(0.0));
 
     let mut plotter = data.stage().plot(
         "Long Jump world record progression",
