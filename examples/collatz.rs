@@ -24,7 +24,7 @@ fn main() {
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    let canvas = poloto::canvas()
+    let canvas = poloto::render::canvas()
         .xtick_lines()
         .ytick_lines()
         .with_dim(dim)

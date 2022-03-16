@@ -14,7 +14,7 @@ fn heart() -> fmt::Result {
 
     let l1 = poloto::build::line_fill_raw("", range.map(heart));
 
-    let canvas = poloto::canvas().preserve_aspect().build();
+    let canvas = poloto::render::canvas().preserve_aspect().build();
     let mut plotter = l1
         .collect_with([-20.0, 20.0], [-20.0, 20.0])
         .stage_with(canvas)
@@ -190,7 +190,7 @@ fn custom_dim() -> fmt::Result {
         d.collect_with(None, Some(0))
     };
 
-    let canvas = poloto::canvas()
+    let canvas = poloto::render::canvas()
         .with_dim([2000.0, 1000.0])
         .ytick_lines()
         .xtick_lines()
@@ -311,5 +311,51 @@ fn trig() -> fmt::Result {
     );
 
     let w = util::create_test_file("trig.svg");
+    plotter.simple_theme(w)
+}
+
+#[test]
+fn no_plots() -> fmt::Result {
+    let l = poloto::build::plots_dyn::<
+        poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
+    >();
+
+    let mut plotter = l.collect().stage().plot(
+        "Some Trigonometry Plots 🥳",
+        formatm!("This is the {} label", 'x'),
+        "This is the y label",
+    );
+
+    let w = util::create_test_file("no_plots.svg");
+    plotter.simple_theme(w)
+}
+
+#[test]
+fn no_plots_only_marker() -> fmt::Result {
+    let l = poloto::build::plots_dyn::<
+        poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
+    >();
+
+    let mut plotter = l.collect_with(None, Some(5)).stage().plot(
+        "Some Trigonometry Plots 🥳",
+        formatm!("This is the {} label", 'x'),
+        "This is the y label",
+    );
+
+    let w = util::create_test_file("no_plots_only_makrer.svg");
+    plotter.simple_theme(w)
+}
+
+#[test]
+fn one_empty_plot() -> fmt::Result {
+    let l = poloto::build::scatter("hay", std::iter::empty::<(i128, i128)>());
+
+    let mut plotter = l.collect_with(None, Some(5)).stage().plot(
+        "Some Trigonometry Plots 🥳",
+        formatm!("This is the {} label", 'x'),
+        "This is the y label",
+    );
+
+    let w = util::create_test_file("one_empty_plot.svg");
     plotter.simple_theme(w)
 }

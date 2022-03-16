@@ -12,9 +12,9 @@ fn main() {
 
     let data = bar.collect_with(Some(1), ybound);
 
-    let canvas = poloto::canvas().xtick_lines().build();
+    let canvas = poloto::render::canvas().xtick_lines().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_default(data.boundx(&canvas));
+    let (xtick, xtick_fmt) = poloto::ticks::from_default(data.boundx(&canvas));
 
     let mut plt = data.stage_with(&canvas).plot_with(
         xtick,

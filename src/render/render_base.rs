@@ -1,9 +1,9 @@
 use super::*;
 
-pub fn render_base<X: PlotNum, Y: PlotNum>(
+pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    boundx: &DataBound<X>,
-    boundy: &DataBound<Y>,
+    boundx: &ticks::DataBound<X>,
+    boundy: &ticks::DataBound<Y>,
     canvas: &Canvas,
     base: impl BaseFmtAndTicks<X = X, Y = Y>,
 ) -> std::fmt::Result {

@@ -4,8 +4,8 @@ use crate::build::*;
 
 pub fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
-    boundx: &DataBound<X>,
-    boundy: &DataBound<Y>,
+    boundx: &ticks::DataBound<X>,
+    boundy: &ticks::DataBound<Y>,
     canvas: &Canvas,
     plots_all: impl RenderablePlotIterator<X = X, Y = Y>,
 ) -> std::fmt::Result {

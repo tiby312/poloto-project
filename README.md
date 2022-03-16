@@ -73,7 +73,7 @@ fn main() {
         .fuse()
     };
 
-    let mut data = poloto::build::data_dyn();
+    let mut data = poloto::build::plots_dyn();
     for i in 1000..1006 {
         data.add(poloto::build::line(
             poloto::formatm!("c({})", i),
@@ -83,7 +83,7 @@ fn main() {
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    let canvas = poloto::canvas()
+    let canvas = poloto::render::canvas()
         .xtick_lines()
         .ytick_lines()
         .with_dim(dim)
@@ -170,7 +170,7 @@ fn main() {
 <img src="./target/assets/timestamp.svg" alt="demo">
 
 
-## Step Example
+## Custom Ticks Example
 
 ```rust
 use poloto::prelude::*;
@@ -183,10 +183,10 @@ fn main() {
     let it = (0..).zip(trend.into_iter());
     let data = poloto::build::histogram("", it).collect();
 
-    let canvas = poloto::canvas().build();
+    let canvas = poloto::render::canvas().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks_from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks_from_default(data.boundy(&canvas));
+    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.boundy(&canvas));
 
     let mut pp = data.stage_with(canvas).plot_with(
         xtick,
@@ -207,7 +207,7 @@ fn main() {
 
 ## Output
 
-<img src="./target/assets/steps.svg" alt="demo">
+<img src="./target/assets/custom_ticks.svg" alt="demo">
 
 
 ## Escape protection

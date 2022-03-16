@@ -47,7 +47,7 @@ pub struct TickInfo<I: IntoIterator> {
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
     type IntoIter: IntoIterator<Item = Self>;
-    fn generate(bound: Bound<Self>) -> (TickInfo<Self::IntoIter>, Self::Fmt);
+    fn generate(bound: ticks::Bound<Self>) -> (TickInfo<Self::IntoIter>, Self::Fmt);
 }
 
 #[derive(Debug, Copy, Clone)]

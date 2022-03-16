@@ -29,7 +29,7 @@
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickInfo`].
-//! Alternatively you can use the [`ticks_from_iter`] function that just takes an iterator of ticks and returns a [`TickInfo`].
+//! Alternatively you can use the [`ticks::from_iter`] function that just takes an iterator of ticks and returns a [`TickInfo`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/steps.rs)
@@ -51,9 +51,9 @@ use std::fmt;
 pub use tagger::upgrade_write;
 
 pub mod build;
-mod canvas;
 pub mod plotnum;
-mod render;
+pub mod render;
+pub mod ticks;
 pub mod util;
 use plotnum::*;
 pub mod num;
@@ -80,157 +80,9 @@ const HEIGHT: f64 = 500.0;
 
 use render::*;
 
-///
-/// Building block to make ticks.
-///
-/// Created once the min and max bounds of all the plots has been computed.
-/// Contains in it all the information typically needed to make a [`TickInfo`].
-///
-/// Used by [`ticks_from_default`]
-///
-#[derive(Debug, Clone)]
-pub struct Bound<'a, X: PlotNum> {
-    pub data: &'a DataBound<X>,
-    pub canvas: &'a CanvasBound,
-}
-
-///
-/// Tick relevant information of [`Data`]
-///
-#[derive(Debug, Clone)]
-pub struct DataBound<X> {
-    pub min: X,
-    pub max: X,
-}
-
-///
-/// Tick relevant information of [`Canvas`]
-///
-#[derive(Debug, Clone)]
-pub struct CanvasBound {
-    pub ideal_num_steps: u32,
-    pub ideal_dash_size: f64,
-    pub max: f64,
-    pub axis: Axis,
-}
-
-///
-/// Contains graphical information for a svg graph.
-///
-/// Built from [`canvas()`]
-///
-pub struct Canvas {
-    boundx: CanvasBound,
-    boundy: CanvasBound,
-    width: f64,
-    height: f64,
-    padding: f64,
-    paddingy: f64,
-    xaspect_offset: f64,
-    yaspect_offset: f64,
-    spacing: f64,
-    legendx1: f64,
-    num_css_classes: Option<usize>,
-    xtick_lines: bool,
-    ytick_lines: bool,
-    precision: usize,
-    bar_width: f64,
-}
-
 use build::RenderablePlotIterator;
 
-///
-/// Create a tick distribution from the default tick generator for the plotnum type.
-///
-pub fn ticks_from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::IntoIter>, X::Fmt) {
-    X::generate(bound)
-}
-
-///
-/// Created by [`build::RenderablePlotIteratorExt::collect`]
-///
-pub struct Data<X, Y, P: RenderablePlotIterator<X = X, Y = Y>> {
-    boundx: DataBound<X>,
-    boundy: DataBound<Y>,
-    plots: P,
-}
-
 use std::borrow::Borrow;
-
-///
-/// Created by [`Data::stage()`] or [`Data::stage_with`].
-///
-pub struct Stager<X, Y, P: RenderablePlotIterator<X = X, Y = Y>, K: Borrow<Canvas>> {
-    res: Data<X, Y, P>,
-    canvas: K,
-}
-
-///
-/// Build a [`Canvas`]
-///
-pub fn canvas() -> CanvasBuilder {
-    CanvasBuilder::default()
-}
-
-///
-/// Build a [`Canvas`]
-///
-/// Created by [`canvas()`]
-///
-pub struct CanvasBuilder {
-    num_css_classes: Option<usize>,
-    preserve_aspect: bool,
-    dim: Option<[f64; 2]>,
-    xtick_lines: bool,
-    ytick_lines: bool,
-    precision: usize,
-    bar_width: f64,
-}
-
-///
-/// One-time function to write to a `fmt::Write`.
-///
-pub trait Disp {
-    fn disp<T: fmt::Write>(self, writer: T) -> fmt::Result;
-}
-
-///
-/// Created by [`Stager::plot`]
-///
-pub struct Plotter<A: Disp> {
-    inner: Option<A>,
-    dim: [f64; 2],
-}
-impl<A: Disp> Plotter<A> {
-    pub fn get_dim(&self) -> [f64; 2] {
-        self.dim
-    }
-
-    ///
-    /// Use the plot iterators to write out the graph elements.
-    /// Does not add a svg tag, or any styling elements.
-    /// Use this if you want to embed a svg into your html.
-    /// You will just have to add your own svg sag and then supply styling.
-    ///
-    /// Panics if the render fails.
-    ///
-    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
-    /// this function will mutable borrow the Plotter and leave it with empty data.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut s = poloto::data();
-    /// s.line("", &data);
-    /// let mut plotter=s.build().stage().plot("title","x","y");
-    ///
-    /// let mut k=String::new();
-    /// plotter.render(&mut k);
-    /// ```
-
-    pub fn render<T: std::fmt::Write>(&mut self, writer: T) -> fmt::Result {
-        self.inner.take().unwrap().disp(writer)
-    }
-}
 
 /// Shorthand for `disp_const(move |w|write!(w,...))`
 /// Similar to `std::format_args!()` except has a more flexible lifetime.
@@ -264,42 +116,6 @@ pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
 ///
 pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
     util::DisplayableClosure::new(a)
-}
-
-///
-/// Create a [`plotnum::TickInfo`] from a step iterator.
-///
-///
-pub fn ticks_from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(
-    ticks: I,
-) -> (TickInfo<I>, TickIterFmt<X>) {
-    (
-        TickInfo {
-            ticks,
-            dash_size: None,
-        },
-        TickIterFmt { _p: PhantomData },
-    )
-}
-
-#[deprecated(note = "Use TickIterFmt instead.")]
-pub type StepFmt<T> = TickIterFmt<T>;
-
-///
-/// Used by [`ticks_from_iter`]
-///
-pub struct TickIterFmt<T> {
-    _p: PhantomData<T>,
-}
-impl<J: PlotNum + Display> TickFormat for TickIterFmt<J> {
-    type Num = J;
-    fn write_tick(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
-        write!(writer, "{}", val)
-    }
 }
 
 ///
