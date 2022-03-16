@@ -64,11 +64,12 @@ fn line_fill_fmt() -> fmt::Result {
             .crop_below(0.0)
             .crop_left(2.0),
     )
-    .collect();
+    .collect()
+    .stage();
 
-    let boundx = s.data_boundx().clone();
+    let boundx = s.bounds().0.data.clone();
 
-    let mut plotter = s.stage().plot(
+    let mut plotter = s.plot(
         formatm!("from {} to {}", boundx.min, boundx.max),
         formatm!("This is the {} label", 'x'),
         "This is the y label",

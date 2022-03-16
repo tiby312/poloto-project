@@ -15,15 +15,16 @@ fn marathon() -> fmt::Result {
 
     // Have there be a tick every hour
 
-    let data = poloto::build::line("hay", &heart_rate).collect_with_markers(None, Some(0));
+    let data = poloto::build::line("hay", &heart_rate)
+        .collect_with_markers(None, Some(0))
+        .stage();
 
     let (xtick, xtick_fmt) =
         poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
 
-    let canvas = poloto::render::canvas().build();
-    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.boundy(&canvas));
+    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.bounds().1);
 
-    let mut plotter = data.stage_with(canvas).plot_with(
+    let mut plotter = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(
@@ -67,15 +68,15 @@ fn years() -> fmt::Result {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let data = poloto::build::histogram("foo", data).collect_with_markers(None, Some(0));
+    let data = poloto::build::histogram("foo", data)
+        .collect_with_markers(None, Some(0))
+        .stage();
 
     let (xticks, xtick_fmt) = poloto::ticks::from_iter((2010..).step_by(2));
 
-    let canvas = poloto::render::canvas().build();
+    let (yticks, ytick_fmt) = poloto::ticks::from_default(data.bounds().1);
 
-    let (yticks, ytick_fmt) = poloto::ticks::from_default(data.boundy(&canvas));
-
-    let mut plotter = data.stage_with(canvas).plot_with(
+    let mut plotter = data.plot_with(
         xticks,
         yticks,
         poloto::plot_fmt("title", "xname", "yname", xtick_fmt, ytick_fmt),

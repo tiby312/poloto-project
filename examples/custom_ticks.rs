@@ -6,14 +6,18 @@ fn main() {
     ];
 
     let it = (0..).zip(trend.into_iter());
-    let data = poloto::build::histogram("", it).collect();
 
     let canvas = poloto::render::canvas().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.boundy(&canvas));
+    let data = poloto::build::histogram("", it)
+        .collect()
+        .stage_with(canvas);
 
-    let mut pp = data.stage_with(canvas).plot_with(
+    let (_, by) = data.bounds();
+    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks::from_default(by);
+
+    let mut pp = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

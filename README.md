@@ -40,7 +40,7 @@ fn main() {
     let mut plotter = l1
         .chain(l2)
         .chain(l3)
-        .collect_with_markers(None, Some(0.0))
+        .collect_with_markers([], [0.0])
         .stage()
         .plot("gaussian", "x", "y");
 
@@ -90,7 +90,7 @@ fn main() {
         .build();
 
     let mut plotter = data
-        .collect_with_markers(None, Some(0))
+        .collect_with_markers([], [0])
         .stage_with(&canvas)
         .plot("collatz", "x", "y");
 
@@ -152,7 +152,7 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let data = poloto::build::line("foo", data).collect_with_markers(None, Some(0.0));
+    let data = poloto::build::line("foo", data).collect_with_markers([], [0.0]);
 
     let mut plotter = data.stage().plot(
         "Long Jump world record progression",
@@ -181,14 +181,18 @@ fn main() {
     ];
 
     let it = (0..).zip(trend.into_iter());
-    let data = poloto::build::histogram("", it).collect();
 
     let canvas = poloto::render::canvas().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.boundy(&canvas));
+    let data = poloto::build::histogram("", it)
+        .collect()
+        .stage_with(canvas);
 
-    let mut pp = data.stage_with(canvas).plot_with(
+    let (_, by) = data.bounds();
+    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
+    let (ytick, ytick_fmt) = poloto::ticks::from_default(by);
+
+    let mut pp = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(

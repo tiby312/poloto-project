@@ -12,9 +12,9 @@ use super::*;
 /// Used by [`ticks::from_default`]
 ///
 #[derive(Debug, Clone)]
-pub struct Bound<'a, X: PlotNum> {
-    pub data: &'a ticks::DataBound<X>,
-    pub canvas: &'a CanvasBound,
+pub struct Bound<X> {
+    pub data: ticks::DataBound<X>,
+    pub canvas: CanvasBound,
 }
 
 ///
@@ -40,7 +40,7 @@ pub struct CanvasBound {
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (TickInfo<X::IntoIter>, X::Fmt) {
+pub fn from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X::IntoIter>, X::Fmt) {
     X::generate(bound)
 }
 

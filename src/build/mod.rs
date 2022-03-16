@@ -187,7 +187,7 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
     ///
     /// Compute min/max bounds and prepare for next stage in pipeline.
     ///
-    fn collect(self) -> Data<Self::X, Self::Y, Self>
+    fn collect(self) -> Data<Self>
     where
         Self: Sized,
     {
@@ -201,7 +201,7 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
         mut self,
         xmarker: impl IntoIterator<Item = Self::X>,
         ymarker: impl IntoIterator<Item = Self::Y>,
-    ) -> Data<Self::X, Self::Y, Self>
+    ) -> Data<Self>
     where
         Self: Sized,
     {
@@ -218,11 +218,7 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
             max: boundy[1],
         };
 
-        Data {
-            boundx,
-            boundy,
-            plots: self,
-        }
+        Data::new(boundx, boundy, self)
     }
 }
 impl<I: RenderablePlotIterator> RenderablePlotIteratorExt for I {}

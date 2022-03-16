@@ -145,14 +145,14 @@ impl HasDefaultTicks for UnixTime {
     type Fmt = UnixTimeTickFmt<Utc>;
     type IntoIter = Vec<UnixTime>;
     fn generate(
-        bound: crate::ticks::Bound<Self>,
+        bound: &crate::ticks::Bound<Self>,
     ) -> (TickInfo<Vec<UnixTime>>, UnixTimeTickFmt<Utc>) {
         unixtime_ticks(bound, &Utc)
     }
 }
 
 pub fn unixtime_ticks<T: TimeZone + Display>(
-    bound: crate::ticks::Bound<UnixTime>,
+    bound: &crate::ticks::Bound<UnixTime>,
     timezone: &T,
 ) -> (TickInfo<Vec<UnixTime>>, UnixTimeTickFmt<T>)
 where

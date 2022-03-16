@@ -10,13 +10,13 @@ fn main() {
         ],
     );
 
-    let data = bar.collect_with_markers(Some(0), ybound);
-
     let canvas = poloto::render::canvas().xtick_lines().build();
 
-    let (xtick, xtick_fmt) = poloto::ticks::from_default(data.boundx(&canvas));
+    let data = bar.collect_with_markers([0], ybound).stage_with(&canvas);
 
-    let mut plt = data.stage_with(&canvas).plot_with(
+    let (xtick, xtick_fmt) = poloto::ticks::from_default(data.bounds().0);
+
+    let mut plt = data.plot_with(
         xtick,
         ytick,
         poloto::plot_fmt(
