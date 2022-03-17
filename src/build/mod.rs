@@ -137,6 +137,9 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
         }
     }
     fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+        if self.plot_counter==self.flop.len(){
+            return PlotResult::Finished;
+        }
         let a = self.flop[self.plot_counter].next_plot_point();
         if let PlotResult::None = a {
             self.plot_counter += 1;
