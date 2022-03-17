@@ -14,12 +14,11 @@ fn main() {
         .fuse()
     };
 
-    let mut v = vec![];
-    for i in 1000..1006 {
-        let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
-        v.push(l);
-    }
-    let data = poloto::build::plots_dyn(v);
+    let data = poloto::build::plots_dyn(
+        (1000..1006)
+            .map(|i| poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i))))
+            .collect(),
+    );
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
