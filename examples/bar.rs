@@ -10,7 +10,9 @@ fn main() {
         ],
     );
 
-    let canvas = poloto::render::canvas().xtick_lines().build();
+    let canvas = poloto::render::canvas()
+        .with_tick_lines(true, false)
+        .build();
 
     let data = bar.collect_with([0], ybound).stage_with(&canvas);
 

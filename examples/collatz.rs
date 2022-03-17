@@ -25,8 +25,7 @@ fn main() {
     let dim = [1300.0, 600.0];
 
     let canvas = poloto::render::canvas()
-        .xtick_lines()
-        .ytick_lines()
+        .with_tick_lines(true, true)
         .with_dim(dim)
         .build();
 

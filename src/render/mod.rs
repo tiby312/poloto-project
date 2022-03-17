@@ -252,14 +252,13 @@ impl CanvasBuilder {
         self.dim = Some(dim);
         self
     }
-    pub fn xtick_lines(&mut self) -> &mut Self {
-        self.xtick_lines = true;
+
+    pub fn with_tick_lines(&mut self, a: bool, b: bool) -> &mut Self {
+        self.xtick_lines = a;
+        self.ytick_lines = b;
         self
     }
-    pub fn ytick_lines(&mut self) -> &mut Self {
-        self.ytick_lines = true;
-        self
-    }
+
     ///
     /// The number of distinct css classes. If there are more plots than
     /// classes, then they will wrap around. The default value is 8.

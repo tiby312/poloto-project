@@ -193,8 +193,7 @@ fn custom_dim() -> fmt::Result {
 
     let canvas = poloto::render::canvas()
         .with_dim([2000.0, 1000.0])
-        .ytick_lines()
-        .xtick_lines()
+        .with_tick_lines(true, true)
         .build();
 
     let mut plotter = data.stage_with(canvas).plot("collatz", "x", "y");
