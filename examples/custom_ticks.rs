@@ -8,7 +8,7 @@ fn main() {
     let it = (0..).zip(trend.into_iter());
 
     let data = poloto::build::histogram("", it)
-        .collect_with([24], [])
+        .build_with([24], [])
         .stage();
 
     let (_, by) = data.bounds();

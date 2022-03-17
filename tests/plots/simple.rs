@@ -16,7 +16,7 @@ fn heart() -> fmt::Result {
 
     let canvas = poloto::render::canvas().preserve_aspect().build();
     let mut plotter = l1
-        .collect_with([-20.0, 20.0], [-20.0, 20.0])
+        .build_with([-20.0, 20.0], [-20.0, 20.0])
         .stage_with(canvas)
         .plot("Heart Graph", "x", "y");
 
@@ -95,23 +95,24 @@ fn long_label() -> fmt::Result {
         .fuse()
     };
 
-    let data = poloto::build::text("Some notes here")
-        .chain(poloto::build::line(
-            poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1000),
+    let plots = plots!(
+        poloto::build::text("Some notes here"),
+        poloto::build::line(
+            formatm!("c({}) The quick brown fox jumps over the lazy dog", 1000),
             (0..).zip(collatz(1000)),
-        ))
-        .chain(poloto::build::line(
-            poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1001),
+        ),
+        poloto::build::line(
+            formatm!("c({}) The quick brown fox jumps over the lazy dog", 1001),
             (0..).zip(collatz(1001)),
-        ))
-        .chain(poloto::build::text(
-            " 🍆 Here is a note using the text() function.🍎",
-        ))
-        .chain(poloto::build::line(
-            poloto::formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
+        ),
+        poloto::build::text(" 🍆 Here is a note using the text() function.🍎",),
+        poloto::build::line(
+            formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
             (0..).zip(collatz(1002)),
-        ))
-        .collect_with(None, Some(0));
+        )
+    );
+
+    let data = plots.build_with(None, Some(0));
 
     let mut plotter = data.stage().plot("collatz", "x", "y");
 
@@ -183,12 +184,10 @@ fn custom_dim() -> fmt::Result {
     let data = {
         let mut d = poloto::build::plots_dyn();
         for i in 1000..1006 {
-            d.add(poloto::build::line(
-                poloto::formatm!("c({})", i),
-                (0..).zip(collatz(i)),
-            ));
+            let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
+            d.add(l);
         }
-        d.collect_with(None, Some(0))
+        d.build_with(None, Some(0))
     };
 
     let canvas = poloto::render::canvas()
@@ -219,12 +218,11 @@ fn custom_dim() -> fmt::Result {
 fn dark() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let data = poloto::build::line(formatm!("test {}", 1), x.clone().map(|x| [x, x.cos()]))
-        .chain(poloto::build::line(
-            formatm!("test {}", 2),
-            x.clone().map(|x| [x, x.sin()]),
-        ))
-        .collect();
+    let plots = plots!(
+        poloto::build::line(formatm!("test {}", 1), x.clone().map(|x| [x, x.cos()])),
+        poloto::build::line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]),)
+    );
+    let data = plots.collect();
 
     let mut plotter = data.stage().plot("cos per year", "year", "cows");
 
@@ -237,10 +235,12 @@ fn dark() -> fmt::Result {
 fn custom_style() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let l1 = poloto::build::line("cos", x.clone().map(|x| [x, x.cos()]));
-    let l2 = poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
+    let plots = plots!(
+        poloto::build::line("cos", x.clone().map(|x| [x, x.cos()])),
+        poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]))
+    );
 
-    let mut p = l1.chain(l2).collect().stage().plot(
+    let mut p = plots.collect().stage().plot(
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
@@ -277,34 +277,34 @@ fn trig() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    let l1 = poloto::build::line(
-        "tan(x)",
-        poloto::build::buffered_iter::buffered(
-            x.clone()
-                .map(|x| [x, x.tan()])
-                .crop_above(10.0)
-                .crop_below(-10.0)
-                .crop_left(2.0),
+    let data = plots!(
+        poloto::build::line(
+            "tan(x)",
+            poloto::build::buffered_iter::buffered(
+                x.clone()
+                    .map(|x| [x, x.tan()])
+                    .crop_above(10.0)
+                    .crop_below(-10.0)
+                    .crop_left(2.0),
+            ),
         ),
+        poloto::build::line(
+            "sin(2x)",
+            poloto::build::bounded_iter::from_rect(
+                [0.0, 10.0],
+                [0.0, 10.0],
+                x.clone().map(|x| [x, (2.0 * x).sin()]),
+            ),
+        ),
+        poloto::build::line(
+            "2*cos(x)",
+            poloto::build::buffered_iter::buffered(
+                x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
+            ),
+        )
     );
 
-    let l2 = poloto::build::line(
-        "sin(2x)",
-        poloto::build::bounded_iter::from_rect(
-            [0.0, 10.0],
-            [0.0, 10.0],
-            x.clone().map(|x| [x, (2.0 * x).sin()]),
-        ),
-    );
-
-    let l3 = poloto::build::line(
-        "2*cos(x)",
-        poloto::build::buffered_iter::buffered(
-            x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-        ),
-    );
-
-    let mut plotter = l1.chain(l2).chain(l3).collect().stage().plot(
+    let mut plotter = data.collect().stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -336,7 +336,7 @@ fn no_plots_only_marker() -> fmt::Result {
         poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
     >();
 
-    let mut plotter = l.collect_with(None, Some(5)).stage().plot(
+    let mut plotter = l.build_with(None, Some(5)).stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -350,7 +350,7 @@ fn no_plots_only_marker() -> fmt::Result {
 fn one_empty_plot() -> fmt::Result {
     let l = poloto::build::scatter("hay", std::iter::empty::<(i128, i128)>());
 
-    let mut plotter = l.collect_with(None, Some(5)).stage().plot(
+    let mut plotter = l.build_with(None, Some(5)).stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

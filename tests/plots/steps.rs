@@ -16,7 +16,7 @@ fn marathon() -> fmt::Result {
     // Have there be a tick every hour
 
     let data = poloto::build::line("hay", &heart_rate)
-        .collect_with(None, Some(0))
+        .build_with(None, Some(0))
         .stage();
 
     let (xtick, xtick_fmt) =
@@ -69,7 +69,7 @@ fn years() -> fmt::Result {
     ];
 
     let data = poloto::build::histogram("foo", data)
-        .collect_with(None, Some(0))
+        .build_with(None, Some(0))
         .stage();
 
     let (xticks, xtick_fmt) = poloto::ticks::from_iter((2010..).step_by(2));

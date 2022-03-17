@@ -38,7 +38,7 @@ fn main() {
     let l3 = poloto::build::line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
     let mut plotter = plots!(l1, l2, l3)
-        .collect_with([], [0.0])
+        .build_with([], [0.0])
         .stage()
         .plot("gaussian", "x", "y");
 
@@ -85,7 +85,7 @@ fn main() {
         .build();
 
     let mut plotter = data
-        .collect_with([], [0])
+        .build_with([], [0])
         .stage_with(&canvas)
         .plot("collatz", "x", "y");
 
@@ -147,7 +147,7 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let data = poloto::build::line("", data).collect_with([], [0.0]);
+    let data = poloto::build::line("", data).build_with([], [0.0]);
 
     let mut plotter = data.stage().plot(
         "Long Jump world record progression",
@@ -178,7 +178,7 @@ fn main() {
     let it = (0..).zip(trend.into_iter());
 
     let data = poloto::build::histogram("", it)
-        .collect_with([24], [])
+        .build_with([24], [])
         .stage();
 
     let (_, by) = data.bounds();

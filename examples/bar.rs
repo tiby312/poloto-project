@@ -14,7 +14,7 @@ fn main() {
         .with_tick_lines(true, false)
         .build();
 
-    let data = bar.collect_with([0], ybound).stage_with(&canvas);
+    let data = bar.build_with([0], ybound).stage_with(&canvas);
 
     let (xtick, xtick_fmt) = poloto::ticks::from_default(data.bounds().0);
 
