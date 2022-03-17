@@ -606,7 +606,7 @@ impl<P: RenderablePlotIterator> Data<P> {
 }
 
 ///
-/// Created by [`build::RenderablePlotIteratorExt::collect`]
+/// Created by [`build::RenderablePlotIteratorExt::build`]
 ///
 pub struct Data<P: RenderablePlotIterator> {
     boundx: ticks::DataBound<P::X>,

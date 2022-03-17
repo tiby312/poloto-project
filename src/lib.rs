@@ -11,7 +11,7 @@
 //!
 //! Pipeline:
 //! * Collect plots using functions in [`build`] module
-//! * Compute min/max by calling [`collect()`](build::RenderablePlotIteratorExt::collect()).
+//! * Compute min/max by calling [`build()`](build::RenderablePlotIteratorExt::build()).
 //! * Link the data with canvas options by calling [`Data::stage_with()`] or use default canvas with [`Data::stage()`]
 //! * Create tick distributions. (This step can be done automatically using [`Stager::plot()`])
 //! * Collect title/xname/yname using [`Stager::plot()`] or [`Stager::plot_with()`]
