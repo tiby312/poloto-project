@@ -19,9 +19,7 @@ fn main() {
     let l2 = poloto::build::line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = poloto::build::line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    let mut plotter = l1
-        .chain(l2)
-        .chain(l3)
+    let mut plotter = plots!(l1, l2, l3)
         .collect_with([], [0.0])
         .stage()
         .plot("gaussian", "x", "y");

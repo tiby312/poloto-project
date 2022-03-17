@@ -67,6 +67,7 @@ pub mod prelude {
     pub use super::build::RenderablePlotIteratorExt;
     pub use super::formatm;
     pub use super::plotnum::TickFormatExt;
+    pub use super::plots;
     pub use super::simple_theme::SimpleTheme;
 }
 
@@ -91,6 +92,22 @@ macro_rules! formatm {
     ($($arg:tt)*) => {
         $crate::disp_const(move |w| write!(w,$($arg)*))
     }
+}
+
+///
+/// Macro to chain multiple plots together instead of caling [`chain`](build::RenderablePlotIteratorExt::chain) repeatedly.
+///
+#[macro_export]
+macro_rules! plots {
+    ( $a:expr,$( $x:expr ),* ) => {
+        {
+            let mut a=$a;
+            $(
+                let a=a.chain($x);
+            )*
+            a
+        }
+    };
 }
 
 ///
