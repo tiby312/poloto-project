@@ -33,9 +33,10 @@ fn main() {
     let g2 = gaussian(0.5, 0.0);
     let g3 = gaussian(0.3, 0.0);
 
-    let l1 = poloto::build::line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
-    let l2 = poloto::build::line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
-    let l3 = poloto::build::line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+    use poloto::build::line;
+    let l1 = line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
+    let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
+    let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
     let mut plotter = plots!(l1, l2, l3)
         .build_with([], [0.0])
@@ -44,7 +45,6 @@ fn main() {
 
     print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }
-
 ```
 ## Output
 
