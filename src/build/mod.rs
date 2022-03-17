@@ -187,7 +187,7 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
     ///
     /// Compute min/max bounds and prepare for next stage in pipeline.
     ///
-    fn collect(self) -> Data<Self>
+    fn build(self) -> Data<Self>
     where
         Self: Sized,
     {
@@ -195,7 +195,7 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
     }
 
     ///
-    /// Similar to `collect` except additionally specify marker values that the viewport must fit.
+    /// Similar to `build` except additionally specify marker values that the viewport must fit.
     ///
     fn build_with(
         mut self,
