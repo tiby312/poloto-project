@@ -14,9 +14,10 @@ fn main() {
         .fuse()
     };
 
+    use poloto::build::line;
     let data = poloto::build::plots_dyn(
         (1000..1006)
-            .map(|i| poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i))))
+            .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
             .collect(),
     );
 
