@@ -175,14 +175,12 @@ fn custom_dim() -> fmt::Result {
         .fuse()
     };
 
-    let data = {
-        let mut d = poloto::build::plots_dyn();
-        for i in 1000..1006 {
-            let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
-            d.add(l);
-        }
-        d.build().build_with([], [0])
-    };
+    let mut v = vec![];
+    for i in 1000..1006 {
+        let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
+        v.push(l);
+    }
+    let data = poloto::build::plots_dyn(v).build_with([], [0]);
 
     let canvas = poloto::render::canvas()
         .with_dim([2000.0, 1000.0])
@@ -310,11 +308,10 @@ fn trig() -> fmt::Result {
 
 #[test]
 fn no_plots() -> fmt::Result {
-    let mut l = poloto::build::plots_dyn::<
-        poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
-    >();
+    let v: Vec<poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>> = vec![];
+    let l = poloto::build::plots_dyn(v);
 
-    let mut plotter = l.build().build().stage().plot(
+    let mut plotter = l.build().stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -326,11 +323,11 @@ fn no_plots() -> fmt::Result {
 
 #[test]
 fn no_plots_only_marker() -> fmt::Result {
-    let mut l = poloto::build::plots_dyn::<
-        poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
-    >();
+    let v: Vec<poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>> = vec![];
 
-    let mut plotter = l.build().build_with(None, Some(5)).stage().plot(
+    let l = poloto::build::plots_dyn(v);
+
+    let mut plotter = l.build_with(None, Some(5)).stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

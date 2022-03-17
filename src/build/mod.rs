@@ -69,40 +69,11 @@ impl<I: IntoIterator + Clone> PlotIter for I {
 ///
 /// Create a [`PlotsDyn`]
 ///
-pub fn plots_dyn<F: RenderablePlotIterator>() -> PlotsDynBuilder<F> {
-    PlotsDynBuilder::new()
-}
-
-pub struct PlotsDynBuilder<F: RenderablePlotIterator> {
-    inner: Vec<F>,
-}
-impl<F: RenderablePlotIterator> Default for PlotsDynBuilder<F> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-impl<F: RenderablePlotIterator> PlotsDynBuilder<F> {
-    pub fn new() -> Self {
-        PlotsDynBuilder { inner: vec![] }
-    }
-    pub fn add(&mut self, a: F) -> &mut Self {
-        self.inner.push(a);
-        self
-    }
-    pub fn move_into(&mut self) -> PlotsDynBuilder<F> {
-        let mut flop = vec![];
-        std::mem::swap(&mut flop, &mut self.inner);
-
-        PlotsDynBuilder { inner: flop }
-    }
-
-    pub fn build(&mut self) -> PlotsDyn<F> {
-        let a = self.move_into();
-        PlotsDyn {
-            bound_counter: 0,
-            plot_counter: 0,
-            flop: a.inner,
-        }
+pub fn plots_dyn<F: RenderablePlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
+    PlotsDyn {
+        flop: vec,
+        bound_counter: 0,
+        plot_counter: 0,
     }
 }
 
