@@ -69,8 +69,41 @@ impl<I: IntoIterator + Clone> PlotIter for I {
 ///
 /// Create a [`PlotsDyn`]
 ///
-pub fn plots_dyn<F: RenderablePlotIterator>() -> PlotsDyn<F> {
-    PlotsDyn::new()
+pub fn plots_dyn<F: RenderablePlotIterator>() -> PlotsDynBuilder<F> {
+    PlotsDynBuilder::new()
+}
+
+pub struct PlotsDynBuilder<F: RenderablePlotIterator> {
+    inner: Vec<F>,
+}
+impl<F: RenderablePlotIterator> Default for PlotsDynBuilder<F> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl<F: RenderablePlotIterator> PlotsDynBuilder<F> {
+    pub fn new() -> Self {
+        PlotsDynBuilder { inner: vec![] }
+    }
+    pub fn add(&mut self, a: F) -> &mut Self {
+        self.inner.push(a);
+        self
+    }
+    pub fn move_into(&mut self) -> PlotsDynBuilder<F> {
+        let mut flop = vec![];
+        std::mem::swap(&mut flop, &mut self.inner);
+
+        PlotsDynBuilder { inner: flop }
+    }
+
+    pub fn build(&mut self) -> PlotsDyn<F> {
+        let a = self.move_into();
+        PlotsDyn {
+            bound_counter: 0,
+            plot_counter: 0,
+            flop: a.inner,
+        }
+    }
 }
 
 ///
@@ -80,24 +113,6 @@ pub struct PlotsDyn<F: RenderablePlotIterator> {
     bound_counter: usize,
     plot_counter: usize,
     flop: Vec<F>,
-}
-impl<F: RenderablePlotIterator> Default for PlotsDyn<F> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-impl<F: RenderablePlotIterator> PlotsDyn<F> {
-    pub fn new() -> Self {
-        PlotsDyn {
-            bound_counter: 0,
-            plot_counter: 0,
-            flop: vec![],
-        }
-    }
-    pub fn add(&mut self, a: F) -> &mut Self {
-        self.flop.push(a);
-        self
-    }
 }
 
 impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
@@ -121,9 +136,9 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
             self.flop[self.plot_counter].next_typ()
         }
     }
-    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
         let a = self.flop[self.plot_counter].next_plot_point();
-        if let PlotSesh::None = a {
+        if let PlotResult::None = a {
             self.plot_counter += 1;
         }
         a
@@ -156,7 +171,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
         self.as_mut().next_bound_point()
     }
 
-    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
         self.as_mut().next_plot_point()
     }
 
@@ -237,7 +252,7 @@ pub trait RenderablePlotIterator {
     type Y: PlotNum;
     fn next_typ(&mut self) -> Option<PlotMetaType>;
     fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)>;
-    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)>;
+    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)>;
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result;
 }
 
@@ -273,7 +288,7 @@ impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
     }
     pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = (A::X, A::Y)> + 'a {
         std::iter::from_fn(|| {
-            if let PlotSesh::Some(a) = self.flop.next_plot_point() {
+            if let PlotResult::Some(a) = self.flop.next_plot_point() {
                 Some(a)
             } else {
                 None
@@ -285,7 +300,7 @@ impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
 ///
 /// Used to distinguish between one plot's points being rendered, vs all plot's points being rendered.
 ///
-pub enum PlotSesh<T> {
+pub enum PlotResult<T> {
     Some(T),
     None,
     Finished,
@@ -418,22 +433,22 @@ where
         self.buffer1.as_mut().unwrap().next().map(|x| x.unwrap())
     }
 
-    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
         if let Some(d) = self.buffer1.take() {
             self.buffer2 = Some(self.plots.take().unwrap().second(d));
         }
 
         if let Some(bb) = self.buffer2.as_mut() {
             if let Some(k) = bb.next() {
-                PlotSesh::Some(k.unwrap())
+                PlotResult::Some(k.unwrap())
             } else if !self.hit_end {
                 self.hit_end = true;
-                PlotSesh::None
+                PlotResult::None
             } else {
-                PlotSesh::Finished
+                PlotResult::Finished
             }
         } else {
-            PlotSesh::Finished
+            PlotResult::Finished
         }
     }
 
@@ -472,11 +487,11 @@ impl<A: RenderablePlotIterator, B: RenderablePlotIterator<X = A::X, Y = A::Y>>
         }
     }
 
-    fn next_plot_point(&mut self) -> PlotSesh<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
         match self.a.next_plot_point() {
-            PlotSesh::Some(a) => PlotSesh::Some(a),
-            PlotSesh::None => PlotSesh::None,
-            PlotSesh::Finished => self.b.next_plot_point(),
+            PlotResult::Some(a) => PlotResult::Some(a),
+            PlotResult::None => PlotResult::None,
+            PlotResult::Finished => self.b.next_plot_point(),
         }
     }
 

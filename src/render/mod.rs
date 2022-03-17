@@ -253,9 +253,9 @@ impl CanvasBuilder {
         self
     }
 
-    pub fn with_tick_lines(&mut self, a: bool, b: bool) -> &mut Self {
-        self.xtick_lines = a;
-        self.ytick_lines = b;
+    pub fn with_tick_lines(&mut self, a: [bool; 2]) -> &mut Self {
+        self.xtick_lines = a[0];
+        self.ytick_lines = a[1];
         self
     }
 

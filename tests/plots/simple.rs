@@ -181,12 +181,12 @@ fn custom_dim() -> fmt::Result {
             let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
             d.add(l);
         }
-        d.build_with(None, Some(0))
+        d.build().build_with([], [0])
     };
 
     let canvas = poloto::render::canvas()
         .with_dim([2000.0, 1000.0])
-        .with_tick_lines(true, true)
+        .with_tick_lines([true, true])
         .build();
 
     let mut plotter = data.stage_with(canvas).plot("collatz", "x", "y");
@@ -310,11 +310,11 @@ fn trig() -> fmt::Result {
 
 #[test]
 fn no_plots() -> fmt::Result {
-    let l = poloto::build::plots_dyn::<
+    let mut l = poloto::build::plots_dyn::<
         poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
     >();
 
-    let mut plotter = l.build().stage().plot(
+    let mut plotter = l.build().build().stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -326,11 +326,11 @@ fn no_plots() -> fmt::Result {
 
 #[test]
 fn no_plots_only_marker() -> fmt::Result {
-    let l = poloto::build::plots_dyn::<
+    let mut l = poloto::build::plots_dyn::<
         poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
     >();
 
-    let mut plotter = l.build_with(None, Some(5)).stage().plot(
+    let mut plotter = l.build().build_with(None, Some(5)).stage().plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

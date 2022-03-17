@@ -11,7 +11,7 @@ fn main() {
     );
 
     let canvas = poloto::render::canvas()
-        .with_tick_lines(true, false)
+        .with_tick_lines([true, false])
         .build();
 
     let data = bar.build_with([0], ybound).stage_with(&canvas);

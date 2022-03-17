@@ -19,11 +19,13 @@ fn main() {
         let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
         data.add(l);
     }
+    let data = data.build();
+
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
     let canvas = poloto::render::canvas()
-        .with_tick_lines(true, true)
+        .with_tick_lines([true, true])
         .with_dim(dim)
         .build();
 
