@@ -16,10 +16,8 @@ fn main() {
 
     let mut data = poloto::build::plots_dyn();
     for i in 1000..1006 {
-        data.add(poloto::build::line(
-            poloto::formatm!("c({})", i),
-            (0..).zip(collatz(i)),
-        ));
+        let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
+        data.add(l);
     }
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
