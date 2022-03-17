@@ -27,7 +27,7 @@ fn main() {
         move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let range = (0..200).map(|x| (x as f64 / 200.0) * 10.0 - 5.0);
+    let range = poloto::range_iter([-5.0, 5.0], 200);
 
     let g1 = gaussian(1.0, 0.0);
     let g2 = gaussian(0.5, 0.0);

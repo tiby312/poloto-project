@@ -201,3 +201,16 @@ where
         ticky,
     }
 }
+
+///
+/// Iterate over the specified range over num iterations.
+///
+pub fn range_iter(
+    range: [f64; 2],
+    num: usize,
+) -> impl ExactSizeIterator<Item = f64> + Clone + Send + Sync + std::iter::FusedIterator {
+    let [min, max] = range;
+    let diff = max - min;
+    let divf = num as f64;
+    (0..num).map(move |x| min + (x as f64 / divf) * diff)
+}
