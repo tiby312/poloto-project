@@ -147,17 +147,17 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let data = poloto::build::line("", data).build_with([], [0.0]);
-
-    let mut plotter = data.stage().plot(
-        "Long Jump world record progression",
-        "Date",
-        "Mark (in meters)",
-    );
+    let mut plotter = poloto::build::line("", data)
+        .build_with([], [0.0])
+        .stage()
+        .plot(
+            "Long Jump world record progression",
+            "Date",
+            "Mark (in meters)",
+        );
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }
-
 ```
 
 ## Output
