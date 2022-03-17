@@ -191,13 +191,13 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
     where
         Self: Sized,
     {
-        self.collect_with_markers(None, None)
+        self.collect_with(None, None)
     }
 
     ///
     /// Similar to `collect` except additionally specify marker values that the viewport must fit.
     ///
-    fn collect_with_markers(
+    fn collect_with(
         mut self,
         xmarker: impl IntoIterator<Item = Self::X>,
         ymarker: impl IntoIterator<Item = Self::Y>,

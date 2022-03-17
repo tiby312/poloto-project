@@ -12,7 +12,7 @@ fn main() {
 
     let canvas = poloto::render::canvas().xtick_lines().build();
 
-    let data = bar.collect_with_markers([0], ybound).stage_with(&canvas);
+    let data = bar.collect_with([0], ybound).stage_with(&canvas);
 
     let (xtick, xtick_fmt) = poloto::ticks::from_default(data.bounds().0);
 

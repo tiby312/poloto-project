@@ -32,7 +32,7 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let data = poloto::build::line("foo", data).collect_with_markers([], [0.0]);
+    let data = poloto::build::line("foo", data).collect_with([], [0.0]);
 
     let mut plotter = data.stage().plot(
         "Long Jump world record progression",

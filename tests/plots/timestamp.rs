@@ -20,7 +20,7 @@ fn days() -> fmt::Result {
         (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let s = poloto::build::line("", data).collect_with_markers(None, Some(0));
+    let s = poloto::build::line("", data).collect_with(None, Some(0));
 
     let mut s = s
         .stage()
@@ -48,7 +48,7 @@ fn minutes_local_time() -> fmt::Result {
     ];
 
     let s = poloto::build::line("", data)
-        .collect_with_markers(None, Some(0))
+        .collect_with(None, Some(0))
         .stage();
 
     let (bx, by) = s.bounds();
@@ -91,7 +91,7 @@ fn months() -> fmt::Result {
         (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
-    let s = poloto::build::line("", data).collect_with_markers(None, Some(0));
+    let s = poloto::build::line("", data).collect_with(None, Some(0));
 
     let mut s = s.stage().plot(
         "Number of Wikipedia Articles",
@@ -121,7 +121,7 @@ fn seconds() -> fmt::Result {
     ];
 
     let data = poloto::build::line("", data)
-        .collect_with_markers(None, Some(0))
+        .collect_with(None, Some(0))
         .stage();
 
     let (bx, by) = data.bounds();
