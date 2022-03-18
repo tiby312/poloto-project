@@ -110,17 +110,15 @@ impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Bo
         let (mut plot_fmt, xtick_info, ytick_info) = self.base.gen();
 
         // reduce code bloat
-        let ticks: &mut dyn Iterator<Item = P::X> = &mut xtick_info.ticks.into_iter();
         let xtick_info = TickInfoIt {
             dash_size: xtick_info.dash_size,
-            ticks,
+            ticks: &mut xtick_info.ticks.into_iter() as &mut dyn Iterator<Item = P::X>,
         };
 
         // reduce code bloat
-        let ticks: &mut dyn Iterator<Item = P::Y> = &mut ytick_info.ticks.into_iter();
         let ytick_info = TickInfoIt {
             dash_size: ytick_info.dash_size,
-            ticks,
+            ticks: &mut ytick_info.ticks.into_iter() as &mut dyn Iterator<Item = P::Y>,
         };
 
         render::render_base::render_base(
