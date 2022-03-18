@@ -122,9 +122,12 @@ struct MyPathBuilder<'a, 'b, T: fmt::Write, K> {
     path: &'a mut tagger::PathBuilder<'b, T>,
 }
 impl<T: fmt::Write, K: NumFmt> MyPathBuilder<'_, '_, T, K> {
+    #[inline(always)]
     pub fn put(&mut self, a: tagger::PathCommand<f64>) -> fmt::Result {
         self.path.put(a.map(|x| self.num_fmt.fmt(x)))
     }
+    
+    #[inline(always)]
     pub fn put_z(&mut self) -> fmt::Result {
         self.path.put(tagger::PathCommand::Z(""))
     }

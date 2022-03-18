@@ -89,6 +89,8 @@ pub struct PlotsDyn<F: RenderablePlotIterator> {
 impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
     type X = F::X;
     type Y = F::Y;
+
+    #[inline(always)]
     fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
         loop {
             if self.bound_counter >= self.flop.len() {
@@ -100,6 +102,8 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
             self.bound_counter += 1;
         }
     }
+
+    #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         if self.plot_counter >= self.flop.len() {
             None
@@ -107,6 +111,8 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
             self.flop[self.plot_counter].next_typ()
         }
     }
+
+    #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
         if self.plot_counter >= self.flop.len() {
             return PlotResult::Finished;
@@ -118,6 +124,7 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
         a
     }
 
+    #[inline(always)]
     fn next_name(&mut self, write: &mut dyn fmt::Write) -> fmt::Result {
         self.flop[self.plot_counter].next_name(write)
     }
@@ -234,9 +241,11 @@ pub(crate) struct RenderablePlotIter<A: RenderablePlotIterator> {
     flop: A,
 }
 impl<A: RenderablePlotIterator> RenderablePlotIter<A> {
+    #[inline(always)]
     pub fn new(flop: A) -> Self {
         RenderablePlotIter { flop }
     }
+    #[inline(always)]
     pub fn next_plot(&mut self) -> Option<SinglePlotAccessor<A>> {
         if let Some(typ) = self.flop.next_typ() {
             Some(SinglePlotAccessor {
@@ -254,12 +263,17 @@ pub(crate) struct SinglePlotAccessor<'a, A: RenderablePlotIterator> {
     flop: &'a mut A,
 }
 impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
+    #[inline(always)]
     pub fn typ(&mut self) -> PlotMetaType {
         self.typ
     }
+
+    #[inline(always)]
     pub fn name(&mut self, write: &mut dyn fmt::Write) -> fmt::Result {
         self.flop.next_name(write)
     }
+
+    #[inline(always)]
     pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = (A::X, A::Y)> + 'a {
         std::iter::from_fn(|| {
             if let PlotResult::Some(a) = self.flop.next_plot_point() {
@@ -380,6 +394,8 @@ where
     I::Item1: Unwrapper,
     I::Item2: Unwrapper,
 {
+
+    #[inline(always)]
     fn new(typ: PlotMetaType, name: D, plots: I) -> Self {
         SinglePlot {
             buffer1: None,
@@ -399,6 +415,8 @@ where
 {
     type X = X;
     type Y = Y;
+
+    #[inline(always)]
     fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
         if self.buffer1.is_none() {
             self.buffer1 = Some(self.plots.as_mut().unwrap().first());
@@ -407,6 +425,7 @@ where
         self.buffer1.as_mut().unwrap().next().map(|x| x.unwrap())
     }
 
+    #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
         if let Some(d) = self.buffer1.take() {
             self.buffer2 = Some(self.plots.take().unwrap().second(d));
@@ -426,10 +445,12 @@ where
         }
     }
 
+    #[inline(always)]
     fn next_name(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.name)
     }
 
+    #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         if !self.started {
             self.started = true;
@@ -453,6 +474,8 @@ impl<A: RenderablePlotIterator, B: RenderablePlotIterator<X = A::X, Y = A::Y>>
 {
     type X = A::X;
     type Y = A::Y;
+
+    #[inline(always)]
     fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
         if let Some(a) = self.a.next_bound_point() {
             Some(a)
@@ -461,6 +484,7 @@ impl<A: RenderablePlotIterator, B: RenderablePlotIterator<X = A::X, Y = A::Y>>
         }
     }
 
+    #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
         match self.a.next_plot_point() {
             PlotResult::Some(a) => PlotResult::Some(a),
@@ -469,6 +493,7 @@ impl<A: RenderablePlotIterator, B: RenderablePlotIterator<X = A::X, Y = A::Y>>
         }
     }
 
+    #[inline(always)]
     fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> fmt::Result {
         if !self.started {
             self.a.next_name(&mut writer)
@@ -476,6 +501,8 @@ impl<A: RenderablePlotIterator, B: RenderablePlotIterator<X = A::X, Y = A::Y>>
             self.b.next_name(&mut writer)
         }
     }
+
+    #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         if let Some(a) = self.a.next_typ() {
             Some(a)
