@@ -110,10 +110,10 @@ impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Bo
         let (mut plot_fmt, mut xtick_info, mut ytick_info) = self.base.gen();
 
         // reduce code bloat
-        let xtick_info = &mut xtick_info as &mut dyn ticks::TickInfoInt<Item = P::X>;
+        let xtick_info = &mut xtick_info as &mut dyn ticks::TickGen<Item = P::X>;
 
         // reduce code bloat
-        let ytick_info = &mut ytick_info as &mut dyn ticks::TickInfoInt<Item = P::Y>;
+        let ytick_info = &mut ytick_info as &mut dyn ticks::TickGen<Item = P::Y>;
 
         render::render_base::render_base(
             &mut writer,
@@ -143,8 +143,8 @@ pub(crate) trait BaseFmtAndTicks {
     type X: PlotNum;
     type Y: PlotNum;
     type Fmt: BaseFmt<X = Self::X, Y = Self::Y>;
-    type XI: TickInfoInt<Item = Self::X>;
-    type YI: TickInfoInt<Item = Self::Y>;
+    type XI: TickGen<Item = Self::X>;
+    type YI: TickGen<Item = Self::Y>;
     fn gen(self) -> (Self::Fmt, Self::XI, Self::YI);
 }
 
@@ -521,21 +521,21 @@ impl<P: RenderablePlotIterator, K: Borrow<Canvas>> Stager<P, K> {
     ///
     pub fn plot_with<XI, YI, PF>(self, xtick: XI, ytick: YI, plot_fmt: PF) -> Plotter<impl Disp>
     where
-        XI: TickInfoInt<Item = P::X>,
-        YI: TickInfoInt<Item = P::Y>,
+        XI: TickGen<Item = P::X>,
+        YI: TickGen<Item = P::Y>,
         PF: BaseFmt<X = P::X, Y = P::Y>,
     {
         ///
         /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotFmtAll`] trait.
         ///
-        struct PlotAllStruct<XI: TickInfoInt, YI: TickInfoInt, PF: BaseFmt> {
+        struct PlotAllStruct<XI: TickGen, YI: TickGen, PF: BaseFmt> {
             xtick: XI,
             ytick: YI,
             fmt: PF,
         }
 
-        impl<XI: TickInfoInt, YI: TickInfoInt, PF: BaseFmt<X = XI::Item, Y = YI::Item>>
-            BaseFmtAndTicks for PlotAllStruct<XI, YI, PF>
+        impl<XI: TickGen, YI: TickGen, PF: BaseFmt<X = XI::Item, Y = YI::Item>> BaseFmtAndTicks
+            for PlotAllStruct<XI, YI, PF>
         where
             XI::Item: PlotNum,
             YI::Item: PlotNum,

@@ -3,7 +3,7 @@
 //!
 use super::*;
 use std::convert::TryFrom;
-pub struct BarTickFmt<D> {
+struct BarTickFmt<D> {
     ticks: Vec<D>,
 }
 
@@ -21,8 +21,8 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
 ) -> (
     impl RenderablePlotIterator<X = X, Y = i128>,
     [i128; 2],
-    TickInfo<std::vec::IntoIter<i128>>,
-    BarTickFmt<D>,
+    impl TickGen<Item = i128>,
+    impl TickFormat<Num = i128>,
 ) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
@@ -35,13 +35,13 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
             .map(|(i, x)| (x, i128::try_from(i).unwrap())),
     );
 
-    let ticks: Vec<_> = (0..vals_len).map(|x| i128::try_from(x).unwrap()).collect();
+    let ticks = (0..vals_len).map(|x| i128::try_from(x).unwrap());
 
     (
         bars,
         [-1, i128::try_from(vals_len).unwrap()],
         TickInfo {
-            ticks: ticks.into_iter(),
+            ticks,
             dash_size: None,
         },
         BarTickFmt { ticks: names },

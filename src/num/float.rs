@@ -71,8 +71,8 @@ impl TickFormat for FloatTickFmt {
 
 impl HasDefaultTicks for f64 {
     type Fmt = FloatTickFmt;
-    type Iter = std::vec::IntoIter<f64>;
-    fn generate(bound: &crate::ticks::Bound<f64>) -> (TickInfo<Self::Iter>, FloatTickFmt) {
+    type Gen = TickInfo<std::vec::IntoIter<f64>>;
+    fn generate(bound: &crate::ticks::Bound<f64>) -> (Self::Gen, Self::Fmt) {
         let range = [bound.data.min, bound.data.max];
         let ideal_num_steps = bound.canvas.ideal_num_steps;
 

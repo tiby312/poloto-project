@@ -5,8 +5,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt<X = X, Y = Y>,
-    xtick_info: &mut dyn ticks::TickInfoInt<Item = X>,
-    ytick_info: &mut dyn ticks::TickInfoInt<Item = Y>,
+    xtick_info: &mut dyn ticks::TickGen<Item = X>,
+    ytick_info: &mut dyn ticks::TickGen<Item = Y>,
     canvas: &Canvas,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);

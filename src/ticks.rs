@@ -49,7 +49,7 @@ pub struct TickInfo<I: Iterator> {
     pub dash_size: Option<f64>,
 }
 
-impl<I: Iterator> TickInfoInt for TickInfo<I> {
+impl<I: Iterator> TickGen for TickInfo<I> {
     type Item = I::Item;
     fn dash_size(&self) -> Option<f64> {
         self.dash_size
@@ -62,12 +62,12 @@ impl<I: Iterator> TickInfoInt for TickInfo<I> {
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (TickInfo<X::Iter>, X::Fmt) {
+pub fn from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (X::Gen, X::Fmt) {
     X::generate(bound)
 }
 
 ///
-/// Create a [`plotnum::TickInfo`] from a step iterator.
+/// Create a [`TickGen`] and a [`TickFormat`] from a step iterator.
 ///
 ///
 pub fn from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(ticks: I) -> (I, TickIterFmt<X>) {
@@ -94,13 +94,13 @@ impl<J: PlotNum + Display> TickFormat for TickIterFmt<J> {
 ///
 /// Trait that draws the physical ticks instead of writing the text for each one ([`TickFormat`])
 ///
-pub trait TickInfoInt {
+pub trait TickGen {
     type Item;
     fn dash_size(&self) -> Option<f64>;
     fn next_tick(&mut self) -> Option<Self::Item>;
 }
 
-impl<I: Iterator> TickInfoInt for I {
+impl<I: Iterator> TickGen for I {
     type Item = I::Item;
     fn dash_size(&self) -> Option<f64> {
         None
@@ -117,8 +117,8 @@ impl<I: Iterator> TickInfoInt for I {
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
-    type Iter: Iterator<Item = Self>;
-    fn generate(bound: &ticks::Bound<Self>) -> (TickInfo<Self::Iter>, Self::Fmt);
+    type Gen: TickGen<Item = Self>;
+    fn generate(bound: &ticks::Bound<Self>) -> (Self::Gen, Self::Fmt);
 }
 
 #[derive(Debug, Copy, Clone)]
