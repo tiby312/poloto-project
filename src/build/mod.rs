@@ -287,16 +287,25 @@ impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
     }
 
     #[inline(always)]
-    pub fn plots<'a>(&'a mut self) -> impl Iterator<Item = (A::X, A::Y)> + 'a {
-        std::iter::from_fn(|| {
-            if let PlotResult::Some(a) = self.flop.next_plot_point() {
-                Some(a)
-            } else {
-                None
-            }
-        })
+    pub fn plots<'a>(&'a mut self) -> PlotIt<'a,'b,A> {
+        PlotIt{inner:self}
     }
 }
+
+pub struct PlotIt<'a,'b,A:RenderablePlotIterator>{
+    inner :&'a mut SinglePlotAccessor<'b,A>
+}
+impl<'a,'b,A:RenderablePlotIterator> Iterator for PlotIt<'a,'b,A>{
+    type Item=(A::X,A::Y);
+    fn next(&mut self)->Option<Self::Item>{
+        if let PlotResult::Some(a) = self.inner.flop.next_plot_point() {
+            Some(a)
+        } else {
+            None
+        }
+    }
+}
+
 
 ///
 /// Used to distinguish between one plot's points being rendered, vs all plot's points being rendered.

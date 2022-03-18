@@ -1,7 +1,7 @@
 use poloto::prelude::*;
 fn main() {
     // hourly trend over one day.
-    let trend: [i128; 24] = [
+    let trend = vec![
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
