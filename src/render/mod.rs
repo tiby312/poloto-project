@@ -59,74 +59,85 @@ impl<A: Disp> Plotter<A> {
     }
 }
 
-///
-/// Main render function.
-///
-pub(crate) fn render<P: BaseAndPlotsFmt>(
-    mut writer: impl fmt::Write,
-    all: P,
-    boundx: ticks::DataBound<P::X>,
-    boundy: ticks::DataBound<P::Y>,
-    canvas: impl Borrow<Canvas>,
-) -> fmt::Result {
-    let (base_fmt, mut plot_fmt) = all.gen();
+struct Renderer<
+    PF: BaseFmtAndTicks,
+    P: RenderablePlotIterator<X = PF::X, Y = PF::Y>,
+    K: Borrow<Canvas>,
+> {
+    base: PF,
+    plots: P,
+    boundx: ticks::DataBound<PF::X>,
+    boundy: ticks::DataBound<PF::Y>,
+    canvas: K,
+}
 
-    //render background
-    {
-        let mut writer = tagger::new(&mut writer);
-        writer.single("circle", |d| {
-            d.attr("r", "1e5")?;
-            d.attr("class", "poloto_background")
-        })?;
+impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>> Disp
+    for Renderer<PF, P, K>
+{
+    fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
+        self.render(&mut writer)
     }
+}
 
-    let canvas = canvas.borrow();
+impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>>
+    Renderer<PF, P, K>
+{
+    fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
+        //render background
+        {
+            let mut writer = tagger::new(&mut writer);
+            writer.single("circle", |d| {
+                d.attr("r", "1e5")?;
+                d.attr("class", "poloto_background")
+            })?;
+        }
 
-    //
-    // Using `cargo bloat` determined that these lines reduces alot of code bloat.
-    //
-    let plot_fmt = plot_fmt.as_mut_dyn();
+        let canvas = self.canvas.borrow();
 
-    render::render_plot::render_plot(&mut writer, &boundx, &boundy, canvas, plot_fmt)?;
+        //
+        // Using `cargo bloat` determined that these lines reduces alot of code bloat.
+        //
+        let plot_fmt = self.plots.as_mut_dyn();
 
-    let (mut plot_fmt, xtick_info, ytick_info) = base_fmt.gen();
+        render::render_plot::render_plot(
+            &mut writer,
+            &self.boundx,
+            &self.boundy,
+            canvas,
+            plot_fmt,
+        )?;
 
-    // reduce code bloat
-    let ticks: &mut dyn Iterator<Item = P::X> = &mut xtick_info.ticks.into_iter();
-    let xtick_info = TickInfoIt {
-        dash_size: xtick_info.dash_size,
-        ticks,
-    };
+        let (mut plot_fmt, xtick_info, ytick_info) = self.base.gen();
 
-    // reduce code bloat
-    let ticks: &mut dyn Iterator<Item = P::Y> = &mut ytick_info.ticks.into_iter();
-    let ytick_info = TickInfoIt {
-        dash_size: ytick_info.dash_size,
-        ticks,
-    };
+        // reduce code bloat
+        let ticks: &mut dyn Iterator<Item = P::X> = &mut xtick_info.ticks.into_iter();
+        let xtick_info = TickInfoIt {
+            dash_size: xtick_info.dash_size,
+            ticks,
+        };
 
-    render::render_base::render_base(
-        &mut writer,
-        &boundx,
-        &boundy,
-        &mut plot_fmt,
-        xtick_info,
-        ytick_info,
-        canvas,
-    )
+        // reduce code bloat
+        let ticks: &mut dyn Iterator<Item = P::Y> = &mut ytick_info.ticks.into_iter();
+        let ytick_info = TickInfoIt {
+            dash_size: ytick_info.dash_size,
+            ticks,
+        };
+
+        render::render_base::render_base(
+            &mut writer,
+            &self.boundx,
+            &self.boundy,
+            &mut plot_fmt,
+            xtick_info,
+            ytick_info,
+            canvas,
+        )
+    }
 }
 
 pub struct TickInfoIt<I: Iterator> {
     dash_size: Option<f64>,
     ticks: I,
-}
-
-pub(crate) trait BaseAndPlotsFmt {
-    type X: PlotNum;
-    type Y: PlotNum;
-    type A: BaseFmtAndTicks<X = Self::X, Y = Self::Y>;
-    type B: RenderablePlotIterator<X = Self::X, Y = Self::Y>;
-    fn gen(self) -> (Self::A, Self::B);
 }
 
 ///
@@ -500,11 +511,6 @@ impl<P: RenderablePlotIterator, K: Borrow<Canvas>> Stager<P, K> {
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
-
-    ///
-    /// Automatically create a tick distribution using the default
-    /// tick generators tied to a [`PlotNum`].
-    ///
     pub fn plot(
         self,
         title: impl Display,
@@ -574,41 +580,9 @@ impl<P: RenderablePlotIterator, K: Borrow<Canvas>> Stager<P, K> {
     /// Create a plotter directly from a [`BaseFmtAndTicks`]
     ///
     fn plot_with_all<PF: BaseFmtAndTicks<X = P::X, Y = P::Y>>(self, p: PF) -> Plotter<impl Disp> {
-        struct Combine<A: BaseFmtAndTicks, B: RenderablePlotIterator> {
-            pub a: A,
-            pub b: B,
-        }
-
-        impl<A: BaseFmtAndTicks, B: RenderablePlotIterator<X = A::X, Y = A::Y>> BaseAndPlotsFmt
-            for Combine<A, B>
-        {
-            type X = A::X;
-            type Y = A::Y;
-            type A = A;
-            type B = B;
-            fn gen(self) -> (Self::A, Self::B) {
-                (self.a, self.b)
-            }
-        }
-
-        struct InnerPlotter<PF: BaseAndPlotsFmt, K: Borrow<Canvas>> {
-            all: PF,
-            boundx: ticks::DataBound<PF::X>,
-            boundy: ticks::DataBound<PF::Y>,
-            canvas: K,
-        }
-
-        impl<PF: BaseAndPlotsFmt, K: Borrow<Canvas>> Disp for InnerPlotter<PF, K> {
-            fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
-                render::render(&mut writer, self.all, self.boundx, self.boundy, self.canvas)
-            }
-        }
-
-        let pp = InnerPlotter {
-            all: Combine {
-                a: p,
-                b: self.plots,
-            },
+        let pp = Renderer {
+            base: p,
+            plots: self.plots,
             boundx: self.boundx.data,
             boundy: self.boundy.data,
             canvas: self.canvas,
