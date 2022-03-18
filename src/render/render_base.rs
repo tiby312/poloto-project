@@ -4,8 +4,10 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
+    plot_fmt: &mut dyn BaseFmt<X = X, Y = Y>,
+    xtick_info: TickInfoIt<impl Iterator<Item = X>>,
+    ytick_info: TickInfoIt<impl Iterator<Item = Y>>,
     canvas: &Canvas,
-    base: impl BaseFmtAndTicks<X = X, Y = Y>,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 
@@ -27,8 +29,6 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
     let [minx, maxx] = boundx;
     let [miny, maxy] = boundy;
-
-    let (mut plot_fmt, xtick_info, ytick_info) = base.gen();
 
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;

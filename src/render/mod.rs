@@ -1,6 +1,8 @@
 //!
 //! Tools to render plots
 //!
+use build::RenderablePlotIteratorExt;
+
 use crate::*;
 mod render_base;
 mod render_plot;
@@ -67,7 +69,7 @@ pub(crate) fn render<P: BaseAndPlotsFmt>(
     boundy: ticks::DataBound<P::Y>,
     canvas: impl Borrow<Canvas>,
 ) -> fmt::Result {
-    let (base_fmt, plot_fmt) = all.gen();
+    let (base_fmt, mut plot_fmt) = all.gen();
 
     //render background
     {
@@ -79,8 +81,44 @@ pub(crate) fn render<P: BaseAndPlotsFmt>(
     }
 
     let canvas = canvas.borrow();
+
+    //
+    // Using `cargo bloat` determined that these lines reduces alot of code bloat.
+    //
+    let plot_fmt = plot_fmt.as_mut_dyn();
+
     render::render_plot::render_plot(&mut writer, &boundx, &boundy, canvas, plot_fmt)?;
-    render::render_base::render_base(&mut writer, &boundx, &boundy, canvas, base_fmt)
+
+    let (mut plot_fmt, xtick_info, ytick_info) = base_fmt.gen();
+
+    // reduce code bloat
+    let ticks: &mut dyn Iterator<Item = P::X> = &mut xtick_info.ticks.into_iter();
+    let xtick_info = TickInfoIt {
+        dash_size: xtick_info.dash_size,
+        ticks,
+    };
+
+    // reduce code bloat
+    let ticks: &mut dyn Iterator<Item = P::Y> = &mut ytick_info.ticks.into_iter();
+    let ytick_info = TickInfoIt {
+        dash_size: ytick_info.dash_size,
+        ticks,
+    };
+
+    render::render_base::render_base(
+        &mut writer,
+        &boundx,
+        &boundy,
+        &mut plot_fmt,
+        xtick_info,
+        ytick_info,
+        canvas,
+    )
+}
+
+pub struct TickInfoIt<I: Iterator> {
+    dash_size: Option<f64>,
+    ticks: I,
 }
 
 pub(crate) trait BaseAndPlotsFmt {

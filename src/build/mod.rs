@@ -135,11 +135,35 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
 ///
 /// This should be used as a last resort after trying [`chain`](RenderablePlotIteratorExt::chain) and [`plots_dyn`].
 ///
-#[deprecated(note="use into_boxed() instead.")]
+#[deprecated(note = "use into_boxed() instead.")]
 pub fn box_plot<'a, X: PlotNum, Y: PlotNum>(
     a: impl RenderablePlotIterator<X = X, Y = Y> + 'a,
 ) -> Box<dyn RenderablePlotIterator<X = X, Y = Y> + 'a> {
     Box::new(a)
+}
+
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
+    for &'a mut dyn RenderablePlotIterator<X = X, Y = Y>
+{
+    type X = X;
+
+    type Y = Y;
+
+    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+        (*self).next_bound_point()
+    }
+
+    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+        (*self).next_plot_point()
+    }
+
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result {
+        (*self).next_name(w)
+    }
+
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        (*self).next_typ()
+    }
 }
 
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
@@ -191,6 +215,13 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
         Self: Sized + 'a,
     {
         Box::new(self)
+    }
+
+    fn as_mut_dyn(&mut self) -> &mut dyn RenderablePlotIterator<X = Self::X, Y = Self::Y>
+    where
+        Self: Sized,
+    {
+        self
     }
 
     ///
@@ -287,17 +318,17 @@ impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
     }
 
     #[inline(always)]
-    pub fn plots<'a>(&'a mut self) -> PlotIt<'a,'b,A> {
-        PlotIt{inner:self}
+    pub fn plots<'a>(&'a mut self) -> PlotIt<'a, 'b, A> {
+        PlotIt { inner: self }
     }
 }
 
-pub struct PlotIt<'a,'b,A:RenderablePlotIterator>{
-    inner :&'a mut SinglePlotAccessor<'b,A>
+pub struct PlotIt<'a, 'b, A: RenderablePlotIterator> {
+    inner: &'a mut SinglePlotAccessor<'b, A>,
 }
-impl<'a,'b,A:RenderablePlotIterator> Iterator for PlotIt<'a,'b,A>{
-    type Item=(A::X,A::Y);
-    fn next(&mut self)->Option<Self::Item>{
+impl<'a, 'b, A: RenderablePlotIterator> Iterator for PlotIt<'a, 'b, A> {
+    type Item = (A::X, A::Y);
+    fn next(&mut self) -> Option<Self::Item> {
         if let PlotResult::Some(a) = self.inner.flop.next_plot_point() {
             Some(a)
         } else {
@@ -305,7 +336,6 @@ impl<'a,'b,A:RenderablePlotIterator> Iterator for PlotIt<'a,'b,A>{
         }
     }
 }
-
 
 ///
 /// Used to distinguish between one plot's points being rendered, vs all plot's points being rendered.
