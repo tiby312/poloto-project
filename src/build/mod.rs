@@ -394,7 +394,6 @@ where
     I::Item1: Unwrapper,
     I::Item2: Unwrapper,
 {
-
     #[inline(always)]
     fn new(typ: PlotMetaType, name: D, plots: I) -> Self {
         SinglePlot {

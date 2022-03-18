@@ -126,7 +126,7 @@ impl<T: fmt::Write, K: NumFmt> MyPathBuilder<'_, '_, T, K> {
     pub fn put(&mut self, a: tagger::PathCommand<f64>) -> fmt::Result {
         self.path.put(a.map(|x| self.num_fmt.fmt(x)))
     }
-    
+
     #[inline(always)]
     pub fn put_z(&mut self) -> fmt::Result {
         self.path.put(tagger::PathCommand::Z(""))

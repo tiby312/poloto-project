@@ -29,6 +29,10 @@ fn trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp> {
             poloto::build::buffered_iter::buffered(
                 x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
             ),
+        ),
+        poloto::build::line(
+            "2*cos(x)",
+            x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
         )
     );
 
@@ -69,6 +73,10 @@ fn boxed_trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp
             poloto::build::buffered_iter::buffered(
                 x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
             ),
+        )),
+        poloto::build::box_plot(poloto::build::line(
+            "2*cos(x)",
+            x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
         )),
     ];
 
