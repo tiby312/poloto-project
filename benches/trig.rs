@@ -50,7 +50,7 @@ fn boxed_trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
     let data = vec![
-        poloto::build::box_plot(poloto::build::line(
+        poloto::build::line(
             "tan(x)",
             poloto::build::buffered_iter::buffered(
                 x.clone()
@@ -59,25 +59,29 @@ fn boxed_trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp
                     .crop_below(-10.0)
                     .crop_left(2.0),
             ),
-        )),
-        poloto::build::box_plot(poloto::build::line(
+        )
+        .into_boxed(),
+        poloto::build::line(
             "sin(2x)",
             poloto::build::bounded_iter::from_rect(
                 [0.0, 10.0],
                 [0.0, 10.0],
                 x.clone().map(|x| [x, (2.0 * x).sin()]),
             ),
-        )),
-        poloto::build::box_plot(poloto::build::line(
+        )
+        .into_boxed(),
+        poloto::build::line(
             "2*cos(x)",
             poloto::build::buffered_iter::buffered(
                 x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
             ),
-        )),
-        poloto::build::box_plot(poloto::build::line(
+        )
+        .into_boxed(),
+        poloto::build::line(
             "2*cos(x)",
             x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-        )),
+        )
+        .into_boxed(),
     ];
 
     let plotter = poloto::build::plots_dyn(data).build().stage().plot(

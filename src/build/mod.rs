@@ -135,6 +135,7 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
 ///
 /// This should be used as a last resort after trying [`chain`](RenderablePlotIteratorExt::chain) and [`plots_dyn`].
 ///
+#[deprecated(note="use into_boxed() instead.")]
 pub fn box_plot<'a, X: PlotNum, Y: PlotNum>(
     a: impl RenderablePlotIterator<X = X, Y = Y> + 'a,
 ) -> Box<dyn RenderablePlotIterator<X = X, Y = Y> + 'a> {
@@ -178,6 +179,18 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
             b,
             started: false,
         }
+    }
+
+    ///
+    /// Create a boxed RenderablePlotIterator.
+    ///
+    /// This should be used as a last resort after trying [`chain`](RenderablePlotIteratorExt::chain) and [`plots_dyn`].
+    ///
+    fn into_boxed<'a>(self) -> Box<dyn RenderablePlotIterator<X = Self::X, Y = Self::Y> + 'a>
+    where
+        Self: Sized + 'a,
+    {
+        Box::new(self)
     }
 
     ///
