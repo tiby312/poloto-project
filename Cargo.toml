@@ -28,8 +28,14 @@ doctest = false
 
 [dev-dependencies]
 chrono = {version="0.4", default-features=false, features=["std"]}
+criterion = "0.3"
 
 [package.metadata.docs.rs]
 # This sets the default target to `x86_64-unknown-linux-gnu`
 # and only builds that target
 targets = ["x86_64-unknown-linux-gnu"]
+
+
+[[bench]]
+name = "trig"
+harness = false
