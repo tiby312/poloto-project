@@ -2,8 +2,6 @@
 //! Contains the [`PlotNum`] trait and their supporting structs.
 //!
 
-use super::*;
-
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
 /// See [`crate::build::crop::Croppable`]
 ///
@@ -25,104 +23,6 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
     fn scale(&self, range: [Self; 2], max: f64) -> f64;
 
     fn unit_range(offset: Option<Self>) -> [Self; 2];
-}
-
-///
-/// Information on the properties of all the interval ticks for one dimension.
-///
-#[derive(Debug, Clone)]
-pub struct TickInfo<I: IntoIterator> {
-    /// List of the position of each tick to be displayed.
-    /// This must have a length of as least 2.
-    pub ticks: I,
-
-    pub dash_size: Option<f64>,
-}
-
-///
-/// Trait to allow a plotnum to have a default tick distribution.
-///
-/// Used by [`Stager::plot`]
-///
-pub trait HasDefaultTicks: PlotNum {
-    type Fmt: TickFormat<Num = Self>;
-    type IntoIter: IntoIterator<Item = Self>;
-    fn generate(bound: &ticks::Bound<Self>) -> (TickInfo<Self::IntoIter>, Self::Fmt);
-}
-
-#[derive(Debug, Copy, Clone)]
-pub enum Axis {
-    X,
-    Y,
-}
-
-pub trait TickFormatExt: TickFormat {
-    fn with_tick_fmt<F>(self, func: F) -> TickFmt<Self, F>
-    where
-        Self: Sized,
-        F: Fn(&mut dyn std::fmt::Write, &Self::Num) -> std::fmt::Result,
-    {
-        TickFmt { inner: self, func }
-    }
-
-    fn with_where_fmt<F>(self, func: F) -> WhereFmt<Self, F>
-    where
-        Self: Sized,
-        F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result,
-    {
-        WhereFmt { inner: self, func }
-    }
-}
-
-impl<T: TickFormat> TickFormatExt for T {}
-
-///
-/// Formatter for a tick.
-///
-pub trait TickFormat {
-    type Num: PlotNum;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
-    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        Ok(())
-    }
-}
-
-///
-/// Used by [`TickFormatExt::with_where_fmt`]
-///
-pub struct WhereFmt<T, F> {
-    inner: T,
-    func: F,
-}
-impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result> TickFormat
-    for WhereFmt<T, F>
-{
-    type Num = T::Num;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-        self.inner.write_tick(a, val)
-    }
-    fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        (self.func)(a)
-    }
-}
-
-///
-/// Used by [`TickFormatExt::with_tick_fmt`]
-///
-pub struct TickFmt<T, F> {
-    inner: T,
-    func: F,
-}
-impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result> TickFormat
-    for TickFmt<T, F>
-{
-    type Num = T::Num;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-        (self.func)(a, val)
-    }
-    fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        self.inner.write_where(a)
-    }
 }
 
 use std::fmt;

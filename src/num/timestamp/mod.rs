@@ -143,10 +143,8 @@ impl std::fmt::Display for StepUnit {
 
 impl HasDefaultTicks for UnixTime {
     type Fmt = UnixTimeTickFmt<Utc>;
-    type IntoIter = Vec<UnixTime>;
-    fn generate(
-        bound: &crate::ticks::Bound<Self>,
-    ) -> (TickInfo<Vec<UnixTime>>, UnixTimeTickFmt<Utc>) {
+    type Iter = std::vec::IntoIter<UnixTime>;
+    fn generate(bound: &crate::ticks::Bound<Self>) -> (TickInfo<Self::Iter>, UnixTimeTickFmt<Utc>) {
         unixtime_ticks(bound, &Utc)
     }
 }
@@ -154,7 +152,7 @@ impl HasDefaultTicks for UnixTime {
 pub fn unixtime_ticks<T: TimeZone + Display>(
     bound: &crate::ticks::Bound<UnixTime>,
     timezone: &T,
-) -> (TickInfo<Vec<UnixTime>>, UnixTimeTickFmt<T>)
+) -> (TickInfo<std::vec::IntoIter<UnixTime>>, UnixTimeTickFmt<T>)
 where
     T::Offset: Display,
 {
@@ -194,7 +192,7 @@ where
     let start = ticks[0];
     (
         TickInfo {
-            ticks,
+            ticks: ticks.into_iter(),
             dash_size: None,
         },
         UnixTimeTickFmt {

@@ -66,13 +66,15 @@ pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::RenderablePlotIteratorExt;
     pub use super::formatm;
-    pub use super::plotnum::TickFormatExt;
     pub use super::plots;
     pub use super::simple_theme::SimpleTheme;
+    pub use super::ticks::TickFormatExt;
 }
 
 use fmt::Display;
 use std::marker::PhantomData;
+
+use ticks::*;
 
 ///The width of the svg tag.
 const WIDTH: f64 = 800.0;

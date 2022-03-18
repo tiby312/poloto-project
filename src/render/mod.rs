@@ -107,19 +107,13 @@ impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Bo
             plot_fmt,
         )?;
 
-        let (mut plot_fmt, xtick_info, ytick_info) = self.base.gen();
+        let (mut plot_fmt, mut xtick_info, mut ytick_info) = self.base.gen();
 
         // reduce code bloat
-        let xtick_info = TickInfoIt {
-            dash_size: xtick_info.dash_size,
-            ticks: &mut xtick_info.ticks.into_iter() as &mut dyn Iterator<Item = P::X>,
-        };
+        let xtick_info = &mut xtick_info as &mut dyn ticks::TickInfoInt<Item = P::X>;
 
         // reduce code bloat
-        let ytick_info = TickInfoIt {
-            dash_size: ytick_info.dash_size,
-            ticks: &mut ytick_info.ticks.into_iter() as &mut dyn Iterator<Item = P::Y>,
-        };
+        let ytick_info = &mut ytick_info as &mut dyn ticks::TickInfoInt<Item = P::Y>;
 
         render::render_base::render_base(
             &mut writer,
@@ -131,11 +125,6 @@ impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Bo
             canvas,
         )
     }
-}
-
-pub struct TickInfoIt<I: Iterator> {
-    dash_size: Option<f64>,
-    ticks: I,
 }
 
 ///
@@ -154,9 +143,9 @@ pub(crate) trait BaseFmtAndTicks {
     type X: PlotNum;
     type Y: PlotNum;
     type Fmt: BaseFmt<X = Self::X, Y = Self::Y>;
-    type XI: IntoIterator<Item = Self::X>;
-    type YI: IntoIterator<Item = Self::Y>;
-    fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>);
+    type XI: TickInfoInt<Item = Self::X>;
+    type YI: TickInfoInt<Item = Self::Y>;
+    fn gen(self) -> (Self::Fmt, Self::XI, Self::YI);
 }
 
 trait NumFmt {
@@ -530,27 +519,22 @@ impl<P: RenderablePlotIterator, K: Borrow<Canvas>> Stager<P, K> {
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`Stager::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<XI, YI, PF>(
-        self,
-        xtick: TickInfo<XI>,
-        ytick: TickInfo<YI>,
-        plot_fmt: PF,
-    ) -> Plotter<impl Disp>
+    pub fn plot_with<XI, YI, PF>(self, xtick: XI, ytick: YI, plot_fmt: PF) -> Plotter<impl Disp>
     where
-        XI: IntoIterator<Item = P::X>,
-        YI: IntoIterator<Item = P::Y>,
+        XI: TickInfoInt<Item = P::X>,
+        YI: TickInfoInt<Item = P::Y>,
         PF: BaseFmt<X = P::X, Y = P::Y>,
     {
         ///
         /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotFmtAll`] trait.
         ///
-        struct PlotAllStruct<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt> {
-            xtick: TickInfo<XI>,
-            ytick: TickInfo<YI>,
+        struct PlotAllStruct<XI: TickInfoInt, YI: TickInfoInt, PF: BaseFmt> {
+            xtick: XI,
+            ytick: YI,
             fmt: PF,
         }
 
-        impl<XI: IntoIterator, YI: IntoIterator, PF: BaseFmt<X = XI::Item, Y = YI::Item>>
+        impl<XI: TickInfoInt, YI: TickInfoInt, PF: BaseFmt<X = XI::Item, Y = YI::Item>>
             BaseFmtAndTicks for PlotAllStruct<XI, YI, PF>
         where
             XI::Item: PlotNum,
@@ -562,7 +546,7 @@ impl<P: RenderablePlotIterator, K: Borrow<Canvas>> Stager<P, K> {
             type XI = XI;
             type YI = YI;
 
-            fn gen(self) -> (Self::Fmt, TickInfo<Self::XI>, TickInfo<Self::YI>) {
+            fn gen(self) -> (Self::Fmt, Self::XI, Self::YI) {
                 (self.fmt, self.xtick, self.ytick)
             }
         }

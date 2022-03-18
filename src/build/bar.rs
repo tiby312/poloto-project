@@ -21,7 +21,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
 ) -> (
     impl RenderablePlotIterator<X = X, Y = i128>,
     [i128; 2],
-    TickInfo<Vec<i128>>,
+    TickInfo<std::vec::IntoIter<i128>>,
     BarTickFmt<D>,
 ) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
@@ -35,13 +35,13 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
             .map(|(i, x)| (x, i128::try_from(i).unwrap())),
     );
 
-    let ticks = (0..vals_len).map(|x| i128::try_from(x).unwrap()).collect();
+    let ticks: Vec<_> = (0..vals_len).map(|x| i128::try_from(x).unwrap()).collect();
 
     (
         bars,
         [-1, i128::try_from(vals_len).unwrap()],
         TickInfo {
-            ticks,
+            ticks: ticks.into_iter(),
             dash_size: None,
         },
         BarTickFmt { ticks: names },

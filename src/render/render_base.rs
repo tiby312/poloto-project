@@ -5,8 +5,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt<X = X, Y = Y>,
-    xtick_info: TickInfoIt<impl Iterator<Item = X>>,
-    ytick_info: TickInfoIt<impl Iterator<Item = Y>>,
+    xtick_info: &mut dyn ticks::TickInfoInt<Item = X>,
+    ytick_info: &mut dyn ticks::TickInfoInt<Item = Y>,
     canvas: &Canvas,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
@@ -61,18 +61,16 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         })?
         .build(|w| plot_fmt.write_yname(&mut w.writer_safe()))?;
 
-    let xdash_size = xtick_info.dash_size;
-    let ydash_size = ytick_info.dash_size;
+    let xdash_size = xtick_info.dash_size();
+    let ydash_size = ytick_info.dash_size();
 
     use tagger::PathCommand::*;
 
-    let mut xticks = xtick_info
-        .ticks
+    let mut xticks = std::iter::from_fn(|| xtick_info.next_tick())
         .into_iter()
         .skip_while(|&x| x < boundx[0])
         .take_while(|&x| x <= boundx[1]);
-    let mut yticks = ytick_info
-        .ticks
+    let mut yticks = std::iter::from_fn(|| ytick_info.next_tick())
         .into_iter()
         .skip_while(|&x| x < boundy[0])
         .take_while(|&x| x <= boundy[1]);
