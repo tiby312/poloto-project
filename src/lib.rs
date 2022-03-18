@@ -11,10 +11,10 @@
 //!
 //! Pipeline:
 //! * Collect plots using functions in [`build`] module
-//! * Compute min/max by calling [`build()`](build::PlotIteratorExt::build()).
-//! * Link the data with canvas options by calling [`Data::stage_with()`] or use default canvas with [`Data::stage()`]
-//! * Create tick distributions. (This step can be done automatically using [`Stager::plot()`])
-//! * Collect title/xname/yname using [`Stager::plot()`] or [`Stager::plot_with()`]
+//! * Create a canvas using [`render`] module.
+//! * Compute min/max by calling [`render::Canvas::build()`].
+//! * Create tick distributions. (This step can be done automatically using [`Data::plot()`])
+//! * Collect title/xname/yname using [`Data::plot()`] or [`Data::plot_with()`]
 //! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:

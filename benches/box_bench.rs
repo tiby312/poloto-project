@@ -1,7 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use poloto::prelude::*;
 
-fn trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp> {
+fn trig<'a>(
+    canvas: &'a poloto::render::Canvas,
+    steps: usize,
+) -> poloto::render::Plotter<impl poloto::render::Disp + 'a> {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
@@ -36,7 +39,7 @@ fn trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp> {
         )
     );
 
-    let plotter = data.build().stage().plot(
+    let plotter = canvas.build(data).plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -45,7 +48,10 @@ fn trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp> {
     plotter
 }
 
-fn boxed_trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp> {
+fn boxed_trig<'a>(
+    canvas: &'a poloto::render::Canvas,
+    steps: usize,
+) -> poloto::render::Plotter<impl poloto::render::Disp + 'a> {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
@@ -84,7 +90,7 @@ fn boxed_trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp
         .into_boxed(),
     ];
 
-    let plotter = poloto::build::plots_dyn(data).build().stage().plot(
+    let plotter = canvas.build(poloto::build::plots_dyn(data)).plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -95,9 +101,12 @@ fn boxed_trig(steps: usize) -> poloto::render::Plotter<impl poloto::render::Disp
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let num = 3_000;
-    c.bench_function("trig", |b| b.iter(|| black_box(trig(black_box(num)))));
+    let canvas = poloto::render::canvas();
+    c.bench_function("trig", |b| {
+        b.iter(|| black_box(trig(&canvas, black_box(num))))
+    });
     c.bench_function("boxed trig", |b| {
-        b.iter(|| black_box(boxed_trig(black_box(num))))
+        b.iter(|| black_box(boxed_trig(&canvas, black_box(num))))
     });
 }
 

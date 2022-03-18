@@ -28,7 +28,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
 use std::fmt;
 
 ///
-/// Used by [`crate::Stager::plot_with`]
+/// Used by [`crate::render::Data::plot_with`]
 ///
 pub trait BaseFmt {
     type X: PlotNum;

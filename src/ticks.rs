@@ -12,9 +12,9 @@ use super::*;
 /// Used by [`ticks::from_default`]
 ///
 #[derive(Debug, Clone)]
-pub struct Bound<X> {
-    pub data: ticks::DataBound<X>,
-    pub canvas: CanvasBound,
+pub struct Bound<'a, X> {
+    pub data: &'a ticks::DataBound<X>,
+    pub canvas: &'a CanvasBound,
 }
 
 ///
@@ -29,7 +29,7 @@ pub struct DataBound<X> {
 ///
 /// Tick relevant information of [`Canvas`]
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct CanvasBound {
     pub ideal_num_steps: u32,
     pub ideal_dash_size: f64,
@@ -62,7 +62,7 @@ impl<I: Iterator> TickGen for TickInfo<I> {
 ///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn from_default<X: HasDefaultTicks>(bound: &Bound<X>) -> (X::Gen, X::Fmt) {
+pub fn from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (X::Gen, X::Fmt) {
     X::generate(bound)
 }
 
@@ -113,12 +113,12 @@ impl<I: Iterator> TickGen for I {
 ///
 /// Trait to allow a plotnum to have a default tick distribution.
 ///
-/// Used by [`Stager::plot`]
+/// Used by [`Data::plot`]
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
     type Gen: TickGen<Item = Self>;
-    fn generate(bound: &ticks::Bound<Self>) -> (Self::Gen, Self::Fmt);
+    fn generate(bound: ticks::Bound<Self>) -> (Self::Gen, Self::Fmt);
 }
 
 #[derive(Debug, Copy, Clone)]

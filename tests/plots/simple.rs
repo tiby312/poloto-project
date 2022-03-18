@@ -12,10 +12,14 @@ fn heart() -> fmt::Result {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let canvas = poloto::render::canvas().preserve_aspect().build();
-    let mut plotter = poloto::build::line_fill_raw("", range.map(heart))
-        .build_with([-20.0, 20.0], [-20.0, 20.0])
-        .stage_with(canvas)
+    let canvas = poloto::render::canvas_builder().preserve_aspect().build();
+
+    let mut plotter = canvas
+        .build_with(
+            poloto::build::line_fill_raw("", range.map(heart)),
+            [-20.0, 20.0],
+            [-20.0, 20.0],
+        )
         .plot("Heart Graph", "x", "y");
 
     let w = util::create_test_file("heart.svg");
@@ -31,7 +35,9 @@ fn large_scatter() -> fmt::Result {
         poloto::build::scatter("a", x.clone().map(|x| (x, x.cos()))),
         poloto::build::line("b", x.clone().map(|x| (x, x.sin())))
     );
-    let mut plotter = plots.build().stage().plot("cows per year", "year", "cows");
+
+    let canvas = poloto::render::canvas();
+    let mut plotter = canvas.build(plots).plot("cows per year", "year", "cows");
 
     let mut w = util::create_test_file("large_scatter.svg");
 
@@ -50,16 +56,15 @@ fn large_scatter() -> fmt::Result {
 fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let s = poloto::build::line_fill(
+    let canvas = poloto::render::canvas();
+    let s = canvas.build(poloto::build::line_fill(
         "tan(x)",
         x.clone()
             .map(|x| [x, x.tan()])
             .crop_above(10.0)
             .crop_below(0.0)
             .crop_left(2.0),
-    )
-    .build()
-    .stage();
+    ));
 
     let boundx = s.bounds().0.data.clone();
 
@@ -106,9 +111,10 @@ fn long_label() -> fmt::Result {
         )
     );
 
-    let data = plots.build_with(None, Some(0));
+    let canvas = poloto::render::canvas();
+    let data = canvas.build_with(plots, None, Some(0));
 
-    let mut plotter = data.stage().plot("collatz", "x", "y");
+    let mut plotter = data.plot("collatz", "x", "y");
 
     let mut w = util::create_test_file("long_label.svg");
 
@@ -131,9 +137,11 @@ fn long_label() -> fmt::Result {
 fn magnitude() -> fmt::Result {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let data = poloto::build::scatter("", &data).build();
+    let canvas = poloto::render::canvas();
 
-    let mut p = data.stage().plot("cows per year", "year", "cow");
+    let data = canvas.build(poloto::build::scatter("", &data));
+
+    let mut p = data.plot("cows per year", "year", "cow");
 
     let w = util::create_test_file("magnitude.svg");
 
@@ -144,9 +152,11 @@ fn magnitude() -> fmt::Result {
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let data = poloto::build::scatter("", points).build();
+    let canvas = poloto::render::canvas();
 
-    let mut plotter = data.stage().plot("cows per year", "year", "cow");
+    let data = canvas.build(poloto::build::scatter("", points));
+
+    let mut plotter = data.plot("cows per year", "year", "cow");
 
     let mut w = util::create_test_file("base_color.svg");
 
@@ -180,14 +190,15 @@ fn custom_dim() -> fmt::Result {
         let l = poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i)));
         v.push(l);
     }
-    let data = poloto::build::plots_dyn(v).build_with([], [0]);
 
-    let canvas = poloto::render::canvas()
+    let canvas = poloto::render::canvas_builder()
         .with_dim([2000.0, 1000.0])
         .with_tick_lines([true, true])
         .build();
 
-    let mut plotter = data.stage_with(canvas).plot("collatz", "x", "y");
+    let data = canvas.build_with(poloto::build::plots_dyn(v), [], [0]);
+
+    let mut plotter = data.plot("collatz", "x", "y");
 
     let mut w = util::create_test_file("custom_dim.svg");
 
@@ -214,9 +225,12 @@ fn dark() -> fmt::Result {
         poloto::build::line(formatm!("test {}", 1), x.clone().map(|x| [x, x.cos()])),
         poloto::build::line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]),)
     );
-    let data = plots.build();
 
-    let mut plotter = data.stage().plot("cos per year", "year", "cows");
+    let canvas = poloto::render::canvas();
+
+    let data = canvas.build(plots);
+
+    let mut plotter = data.plot("cos per year", "year", "cows");
 
     let w = util::create_test_file("dark.svg");
 
@@ -232,7 +246,9 @@ fn custom_style() -> fmt::Result {
         poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]))
     );
 
-    let mut p = plots.build().stage().plot(
+    let canvas = poloto::render::canvas();
+
+    let mut p = canvas.build(plots).plot(
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
@@ -296,7 +312,9 @@ fn trig() -> fmt::Result {
         )
     );
 
-    let mut plotter = data.build().stage().plot(
+    let canvas = poloto::render::canvas();
+
+    let mut plotter = canvas.build(data).plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -311,7 +329,9 @@ fn no_plots() -> fmt::Result {
     let v: Vec<poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>> = vec![];
     let l = poloto::build::plots_dyn(v);
 
-    let mut plotter = l.build().stage().plot(
+    let canvas = poloto::render::canvas();
+
+    let mut plotter = canvas.build(l).plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -327,7 +347,9 @@ fn no_plots_only_marker() -> fmt::Result {
 
     let l = poloto::build::plots_dyn(v);
 
-    let mut plotter = l.build_with(None, Some(5)).stage().plot(
+    let canvas = poloto::render::canvas();
+
+    let mut plotter = canvas.build_with(l, None, Some(5)).plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
@@ -341,7 +363,9 @@ fn no_plots_only_marker() -> fmt::Result {
 fn one_empty_plot() -> fmt::Result {
     let l = poloto::build::scatter("hay", std::iter::empty::<(i128, i128)>());
 
-    let mut plotter = l.build_with(None, Some(5)).stage().plot(
+    let canvas = poloto::render::canvas();
+
+    let mut plotter = canvas.build_with(l, None, Some(5)).plot(
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",

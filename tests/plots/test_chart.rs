@@ -61,12 +61,15 @@ fn test_chart() -> std::fmt::Result {
 
     let mut e = tagger::new(w);
 
+    let canvas = poloto::render::canvas();
+
     e.elem("html", |e| e.attr("style", "background-color:#262626"))?
         .build(|e| {
             e.elem("div", |d| d.attr("style", "display:flex;flex-wrap:wrap;"))?
                 .build(|e| {
                     for (i, &test) in generate_test().iter().enumerate() {
                         use std::fmt::Write;
+
                         write!(
                             e.writer_escapable(),
                             "{}<style>{}{}</style>{}{}",
@@ -74,8 +77,8 @@ fn test_chart() -> std::fmt::Result {
                             poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                let s = poloto::build::scatter("", test).build();
-                                s.stage().plot(formatm!("test {}", i), "x", "y").render(a)
+                                let s = canvas.build(poloto::build::scatter("", test));
+                                s.plot(formatm!("test {}", i), "x", "y").render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;
@@ -90,9 +93,9 @@ fn test_chart() -> std::fmt::Result {
                             poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                let s = poloto::build::scatter("", test).build();
+                                let s = canvas.build(poloto::build::scatter("", test));
 
-                                s.stage().plot(formatm!("test {}", i), "x", "y").render(a)
+                                s.plot(formatm!("test {}", i), "x", "y").render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;

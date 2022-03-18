@@ -15,9 +15,9 @@ fn marathon() -> fmt::Result {
 
     // Have there be a tick every hour
 
-    let data = poloto::build::line("hay", &heart_rate)
-        .build_with(None, Some(0))
-        .stage();
+    let canvas = poloto::render::canvas();
+
+    let data = canvas.build_with(poloto::build::line("hay", &heart_rate), None, Some(0));
 
     let (xtick, xtick_fmt) =
         poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
@@ -68,9 +68,9 @@ fn years() -> fmt::Result {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let data = poloto::build::histogram("foo", data)
-        .build_with(None, Some(0))
-        .stage();
+    let canvas = poloto::render::canvas();
+
+    let data = canvas.build_with(poloto::build::histogram("foo", data), None, Some(0));
 
     let (xticks, xtick_fmt) = poloto::ticks::from_iter((2010..).step_by(2));
 

@@ -15,7 +15,7 @@ pub trait Disp {
 }
 
 ///
-/// Created by [`Stager::plot`]
+/// Created by [`Data::plot`]
 ///
 pub struct Plotter<A: Disp> {
     inner: Option<A>,
@@ -59,11 +59,7 @@ impl<A: Disp> Plotter<A> {
     }
 }
 
-struct Renderer<
-    PF: BaseFmtAndTicks,
-    P: PlotIterator<X = PF::X, Y = PF::Y>,
-    K: Borrow<Canvas>,
-> {
+struct Renderer<PF: BaseFmtAndTicks, P: PlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>> {
     base: PF,
     plots: P,
     boundx: ticks::DataBound<PF::X>,
@@ -438,11 +434,35 @@ pub struct Canvas {
     bar_width: f64,
 }
 impl Canvas {
-    fn boundx(&self) -> ticks::CanvasBound {
-        self.boundx.clone()
+    pub fn build<P: PlotIterator>(&self, plots: P) -> Data<&Canvas, P> {
+        self.build_with(plots, [], [])
     }
-    fn boundy(&self) -> ticks::CanvasBound {
-        self.boundy.clone()
+
+    pub fn build_with<P: PlotIterator>(
+        &self,
+        mut plots: P,
+        xmarkers: impl IntoIterator<Item = P::X>,
+        ymarkers: impl IntoIterator<Item = P::Y>,
+    ) -> Data<&Canvas, P> {
+        let ii = std::iter::from_fn(|| plots.next_bound_point());
+
+        let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
+
+        let boundx = ticks::DataBound {
+            min: boundx[0],
+            max: boundx[1],
+        };
+        let boundy = ticks::DataBound {
+            min: boundy[0],
+            max: boundy[1],
+        };
+
+        Data {
+            boundx,
+            boundy,
+            plots,
+            canvas: self,
+        }
     }
 
     pub fn get_dim(&self) -> [f64; 2] {
@@ -453,45 +473,26 @@ impl Canvas {
 ///
 /// Build a [`Canvas`]
 ///
-pub fn canvas() -> CanvasBuilder {
+pub fn canvas() -> Canvas {
+    CanvasBuilder::default().build()
+}
+
+pub fn canvas_builder() -> CanvasBuilder {
     CanvasBuilder::default()
 }
 
-///
-/// Created by [`Data::stage()`] or [`Data::stage_with`].
-///
-pub struct Stager<P: PlotIterator, K: Borrow<Canvas>> {
-    boundx: ticks::Bound<P::X>,
-    boundy: ticks::Bound<P::Y>,
-    plots: P,
-    canvas: K,
-}
-
-impl<P: PlotIterator, K: Borrow<Canvas>> Stager<P, K> {
-    fn new(
-        plots: P,
-        boundx: ticks::DataBound<P::X>,
-        boundy: ticks::DataBound<P::Y>,
-        canvas: K,
-    ) -> Self {
-        let boundx = ticks::Bound {
-            data: boundx,
-            canvas: canvas.borrow().boundx(),
-        };
-        let boundy = ticks::Bound {
-            data: boundy,
-            canvas: canvas.borrow().boundy(),
-        };
-        Stager {
-            canvas,
-            plots,
-            boundx,
-            boundy,
-        }
-    }
-
-    pub fn bounds(&self) -> (&ticks::Bound<P::X>, &ticks::Bound<P::Y>) {
-        (&self.boundx, &self.boundy)
+impl<K: Borrow<Canvas>, P: PlotIterator> Data<K, P> {
+    pub fn bounds(&self) -> (ticks::Bound<P::X>, ticks::Bound<P::Y>) {
+        (
+            Bound {
+                data: &self.boundx,
+                canvas: &self.canvas.borrow().boundx,
+            },
+            Bound {
+                data: &self.boundy,
+                canvas: &self.canvas.borrow().boundy,
+            },
+        )
     }
 
     ///
@@ -508,8 +509,9 @@ impl<P: PlotIterator, K: Borrow<Canvas>> Stager<P, K> {
         P::X: HasDefaultTicks,
         P::Y: HasDefaultTicks,
     {
-        let (x, xt) = ticks::from_default(&self.boundx);
-        let (y, yt) = ticks::from_default(&self.boundy);
+        let (bx, by) = self.bounds();
+        let (x, xt) = ticks::from_default(bx);
+        let (y, yt) = ticks::from_default(by);
 
         let p = plot_fmt(title, xname, yname, xt, yt);
         self.plot_with(x, y, p)
@@ -517,7 +519,7 @@ impl<P: PlotIterator, K: Borrow<Canvas>> Stager<P, K> {
 
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
-    /// Unlike [`Stager::plot`] User must supply own tick distribution.
+    /// Unlike [`Data::plot`] User must supply own tick distribution.
     ///
     pub fn plot_with<XI, YI, PF>(self, xtick: XI, ytick: YI, plot_fmt: PF) -> Plotter<impl Disp>
     where
@@ -565,8 +567,8 @@ impl<P: PlotIterator, K: Borrow<Canvas>> Stager<P, K> {
         let pp = Renderer {
             base: p,
             plots: self.plots,
-            boundx: self.boundx.data,
-            boundy: self.boundy.data,
+            boundx: self.boundx,
+            boundy: self.boundy,
             canvas: self.canvas,
         };
 
@@ -575,37 +577,11 @@ impl<P: PlotIterator, K: Borrow<Canvas>> Stager<P, K> {
     }
 }
 
-impl<P: PlotIterator> Data<P> {
-    pub fn stage(self) -> Stager<P, Canvas> {
-        Stager::new(
-            self.plots,
-            self.boundx,
-            self.boundy,
-            crate::canvas().build(),
-        )
-    }
-
-    pub fn stage_with<K: Borrow<Canvas>>(self, canvas: K) -> Stager<P, K> {
-        Stager::new(self.plots, self.boundx, self.boundy, canvas)
-    }
-
-    pub(crate) fn new(
-        boundx: ticks::DataBound<P::X>,
-        boundy: ticks::DataBound<P::Y>,
-        plots: P,
-    ) -> Self {
-        Data {
-            boundx,
-            boundy,
-            plots,
-        }
-    }
-}
-
 ///
-/// Created by [`build::PlotIteratorExt::build`]
+/// Created by [`Canvas::build`]
 ///
-pub struct Data<P: PlotIterator> {
+pub struct Data<K: Borrow<Canvas>, P: PlotIterator> {
+    canvas: K,
     boundx: ticks::DataBound<P::X>,
     boundy: ticks::DataBound<P::Y>,
     plots: P,

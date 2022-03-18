@@ -142,9 +142,7 @@ pub fn box_plot<'a, X: PlotNum, Y: PlotNum>(
     Box::new(a)
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator
-    for &'a mut dyn PlotIterator<X = X, Y = Y>
-{
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for &'a mut dyn PlotIterator<X = X, Y = Y> {
     type X = X;
 
     type Y = Y;
@@ -222,43 +220,6 @@ pub trait PlotIteratorExt: PlotIterator {
         Self: Sized,
     {
         self
-    }
-
-    ///
-    /// Compute min/max bounds and prepare for next stage in pipeline.
-    ///
-    fn build(self) -> Data<Self>
-    where
-        Self: Sized,
-    {
-        self.build_with(None, None)
-    }
-
-    ///
-    /// Similar to `build` except additionally specify marker values that the viewport must fit.
-    ///
-    fn build_with(
-        mut self,
-        xmarker: impl IntoIterator<Item = Self::X>,
-        ymarker: impl IntoIterator<Item = Self::Y>,
-    ) -> Data<Self>
-    where
-        Self: Sized,
-    {
-        let ii = std::iter::from_fn(|| self.next_bound_point());
-
-        let (boundx, boundy) = util::find_bounds(ii, xmarker, ymarker);
-
-        let boundx = ticks::DataBound {
-            min: boundx[0],
-            max: boundx[1],
-        };
-        let boundy = ticks::DataBound {
-            min: boundy[0],
-            max: boundy[1],
-        };
-
-        Data::new(boundx, boundy, self)
     }
 }
 impl<I: PlotIterator> PlotIteratorExt for I {}
@@ -520,9 +481,7 @@ pub struct Chain<A, B> {
     b: B,
     started: bool,
 }
-impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>>
-    PlotIterator for Chain<A, B>
-{
+impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> PlotIterator for Chain<A, B> {
     type X = A::X;
     type Y = A::Y;
 

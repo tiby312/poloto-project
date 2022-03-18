@@ -144,13 +144,13 @@ impl std::fmt::Display for StepUnit {
 impl HasDefaultTicks for UnixTime {
     type Fmt = UnixTimeTickFmt<Utc>;
     type Gen = TickInfo<std::vec::IntoIter<UnixTime>>;
-    fn generate(bound: &crate::ticks::Bound<Self>) -> (Self::Gen, Self::Fmt) {
+    fn generate(bound: crate::ticks::Bound<Self>) -> (Self::Gen, Self::Fmt) {
         unixtime_ticks(bound, &Utc)
     }
 }
 
 pub fn unixtime_ticks<T: TimeZone + Display>(
-    bound: &crate::ticks::Bound<UnixTime>,
+    bound: crate::ticks::Bound<UnixTime>,
     timezone: &T,
 ) -> (TickInfo<std::vec::IntoIter<UnixTime>>, UnixTimeTickFmt<T>)
 where

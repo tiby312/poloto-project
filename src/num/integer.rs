@@ -70,7 +70,7 @@ impl TickFormat for IntegerTickFmt {
 impl HasDefaultTicks for i128 {
     type Fmt = IntegerTickFmt;
     type Gen = TickInfo<std::vec::IntoIter<i128>>;
-    fn generate(bound: &crate::ticks::Bound<i128>) -> (Self::Gen, Self::Fmt) {
+    fn generate(bound: crate::ticks::Bound<i128>) -> (Self::Gen, Self::Fmt) {
         let range = [bound.data.min, bound.data.max];
         let ideal_num_steps = bound.canvas.ideal_num_steps;
 
