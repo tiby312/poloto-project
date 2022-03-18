@@ -38,9 +38,9 @@ fn main() {
     let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    let mut plotter = plots!(l1, l2, l3)
-        .build_with([], [0.0])
-        .stage()
+    let canvas = poloto::render::canvas();
+    let mut plotter = canvas
+        .build_with(plots!(l1, l2, l3), [], [0.0])
         .plot("gaussian", "x", "y");
 
     print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
@@ -71,24 +71,22 @@ fn main() {
         .fuse()
     };
 
+    use poloto::build::line;
     let data = poloto::build::plots_dyn(
         (1000..1006)
-            .map(|i| poloto::build::line(formatm!("c({})", i), (0..).zip(collatz(i))))
+            .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
             .collect(),
     );
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    let canvas = poloto::render::canvas()
+    let canvas = poloto::render::canvas_builder()
         .with_tick_lines([true, true])
         .with_dim(dim)
         .build();
 
-    let mut plotter = data
-        .build_with([], [0])
-        .stage_with(&canvas)
-        .plot("collatz", "x", "y");
+    let mut plotter = canvas.build_with(data, [], [0]).plot("collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
@@ -147,9 +145,9 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let mut plotter = poloto::build::line("", data)
-        .build_with([], [0.0])
-        .stage()
+    let canvas = poloto::render::canvas();
+    let mut plotter = canvas
+        .build_with(poloto::build::line("", data), [], [0.0])
         .plot(
             "Long Jump world record progression",
             "Date",
@@ -177,9 +175,8 @@ fn main() {
 
     let it = (0..).zip(trend.into_iter());
 
-    let data = poloto::build::histogram("", it)
-        .build_with([24], [])
-        .stage();
+    let canvas = poloto::render::canvas();
+    let data = canvas.build_with(poloto::build::histogram("", it), [24], []);
 
     let (_, by) = data.bounds();
     let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
@@ -199,7 +196,6 @@ fn main() {
 
     print!("{}", poloto::disp(|w| pp.simple_theme(w)));
 }
-
 ```
 
 ## Output

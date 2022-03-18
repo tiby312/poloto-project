@@ -47,8 +47,8 @@ impl<A: Disp> Plotter<A> {
     /// ```
     /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let mut s = poloto::build::line("",data);
-    /// let mut plotter=s.build().stage().plot("title","x","y");
+    /// let canvas=poloto::render::canvas();
+    /// let mut plotter=canvas.build(poloto::build::line("",data)).plot("title","x","y");
     ///
     /// let mut k=String::new();
     /// plotter.render(&mut k);
