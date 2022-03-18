@@ -69,7 +69,7 @@ impl<I: IntoIterator + Clone> PlotIter for I {
 ///
 /// Create a [`PlotsDyn`]
 ///
-pub fn plots_dyn<F: RenderablePlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
+pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
     PlotsDyn {
         flop: vec,
         bound_counter: 0,
@@ -80,13 +80,13 @@ pub fn plots_dyn<F: RenderablePlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
 ///
 /// Allows a user to collect plots inside of a loop instead of chaining plots together.
 ///
-pub struct PlotsDyn<F: RenderablePlotIterator> {
+pub struct PlotsDyn<F: PlotIterator> {
     bound_counter: usize,
     plot_counter: usize,
     flop: Vec<F>,
 }
 
-impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
+impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     type X = F::X;
     type Y = F::Y;
 
@@ -131,19 +131,19 @@ impl<F: RenderablePlotIterator> RenderablePlotIterator for PlotsDyn<F> {
 }
 
 ///
-/// Create a boxed RenderablePlotIterator.
+/// Create a boxed PlotIterator.
 ///
-/// This should be used as a last resort after trying [`chain`](RenderablePlotIteratorExt::chain) and [`plots_dyn`].
+/// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
 ///
 #[deprecated(note = "use into_boxed() instead.")]
 pub fn box_plot<'a, X: PlotNum, Y: PlotNum>(
-    a: impl RenderablePlotIterator<X = X, Y = Y> + 'a,
-) -> Box<dyn RenderablePlotIterator<X = X, Y = Y> + 'a> {
+    a: impl PlotIterator<X = X, Y = Y> + 'a,
+) -> Box<dyn PlotIterator<X = X, Y = Y> + 'a> {
     Box::new(a)
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
-    for &'a mut dyn RenderablePlotIterator<X = X, Y = Y>
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator
+    for &'a mut dyn PlotIterator<X = X, Y = Y>
 {
     type X = X;
 
@@ -166,8 +166,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
-    for Box<dyn RenderablePlotIterator<X = X, Y = Y> + 'a>
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator
+    for Box<dyn PlotIterator<X = X, Y = Y> + 'a>
 {
     type X = X;
 
@@ -193,8 +193,8 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> RenderablePlotIterator
 ///
 /// Helper functions to assemble and prepare plots.
 ///
-pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
-    fn chain<B: RenderablePlotIterator>(self, b: B) -> Chain<Self, B>
+pub trait PlotIteratorExt: PlotIterator {
+    fn chain<B: PlotIterator>(self, b: B) -> Chain<Self, B>
     where
         Self: Sized,
     {
@@ -206,18 +206,18 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
     }
 
     ///
-    /// Create a boxed RenderablePlotIterator.
+    /// Create a boxed PlotIterator.
     ///
-    /// This should be used as a last resort after trying [`chain`](RenderablePlotIteratorExt::chain) and [`plots_dyn`].
+    /// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
     ///
-    fn into_boxed<'a>(self) -> Box<dyn RenderablePlotIterator<X = Self::X, Y = Self::Y> + 'a>
+    fn into_boxed<'a>(self) -> Box<dyn PlotIterator<X = Self::X, Y = Self::Y> + 'a>
     where
         Self: Sized + 'a,
     {
         Box::new(self)
     }
 
-    fn as_mut_dyn(&mut self) -> &mut dyn RenderablePlotIterator<X = Self::X, Y = Self::Y>
+    fn as_mut_dyn(&mut self) -> &mut dyn PlotIterator<X = Self::X, Y = Self::Y>
     where
         Self: Sized,
     {
@@ -261,7 +261,7 @@ pub trait RenderablePlotIteratorExt: RenderablePlotIterator {
         Data::new(boundx, boundy, self)
     }
 }
-impl<I: RenderablePlotIterator> RenderablePlotIteratorExt for I {}
+impl<I: PlotIterator> PlotIteratorExt for I {}
 
 /// Iterator over all plots that have been assembled by the user.
 /// This trait is used by the poloto renderer to iterate over and render all the plots.
@@ -272,7 +272,7 @@ impl<I: RenderablePlotIterator> RenderablePlotIteratorExt for I {}
 /// If next_typ() returned Some(), then it will then call next_name()
 /// Then it will call next_plot continuously until it returns None.
 ///
-pub trait RenderablePlotIterator {
+pub trait PlotIterator {
     type X: PlotNum;
     type Y: PlotNum;
     fn next_typ(&mut self) -> Option<PlotMetaType>;
@@ -281,10 +281,10 @@ pub trait RenderablePlotIterator {
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result;
 }
 
-pub(crate) struct RenderablePlotIter<A: RenderablePlotIterator> {
+pub(crate) struct RenderablePlotIter<A: PlotIterator> {
     flop: A,
 }
-impl<A: RenderablePlotIterator> RenderablePlotIter<A> {
+impl<A: PlotIterator> RenderablePlotIter<A> {
     #[inline(always)]
     pub fn new(flop: A) -> Self {
         RenderablePlotIter { flop }
@@ -302,11 +302,11 @@ impl<A: RenderablePlotIterator> RenderablePlotIter<A> {
     }
 }
 
-pub(crate) struct SinglePlotAccessor<'a, A: RenderablePlotIterator> {
+pub(crate) struct SinglePlotAccessor<'a, A: PlotIterator> {
     typ: PlotMetaType,
     flop: &'a mut A,
 }
-impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
+impl<'b, A: PlotIterator> SinglePlotAccessor<'b, A> {
     #[inline(always)]
     pub fn typ(&mut self) -> PlotMetaType {
         self.typ
@@ -323,10 +323,10 @@ impl<'b, A: RenderablePlotIterator> SinglePlotAccessor<'b, A> {
     }
 }
 
-pub struct PlotIt<'a, 'b, A: RenderablePlotIterator> {
+pub struct PlotIt<'a, 'b, A: PlotIterator> {
     inner: &'a mut SinglePlotAccessor<'b, A>,
 }
-impl<'a, 'b, A: RenderablePlotIterator> Iterator for PlotIt<'a, 'b, A> {
+impl<'a, 'b, A: PlotIterator> Iterator for PlotIt<'a, 'b, A> {
     type Item = (A::X, A::Y);
     fn next(&mut self) -> Option<Self::Item> {
         if let PlotResult::Some(a) = self.inner.flop.next_plot_point() {
@@ -459,7 +459,7 @@ where
         }
     }
 }
-impl<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display> RenderablePlotIterator for SinglePlot<I, D>
+impl<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display> PlotIterator for SinglePlot<I, D>
 where
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
@@ -520,8 +520,8 @@ pub struct Chain<A, B> {
     b: B,
     started: bool,
 }
-impl<A: RenderablePlotIterator, B: RenderablePlotIterator<X = A::X, Y = A::Y>>
-    RenderablePlotIterator for Chain<A, B>
+impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>>
+    PlotIterator for Chain<A, B>
 {
     type X = A::X;
     type Y = A::Y;

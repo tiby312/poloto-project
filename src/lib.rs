@@ -11,7 +11,7 @@
 //!
 //! Pipeline:
 //! * Collect plots using functions in [`build`] module
-//! * Compute min/max by calling [`build()`](build::RenderablePlotIteratorExt::build()).
+//! * Compute min/max by calling [`build()`](build::PlotIteratorExt::build()).
 //! * Link the data with canvas options by calling [`Data::stage_with()`] or use default canvas with [`Data::stage()`]
 //! * Create tick distributions. (This step can be done automatically using [`Stager::plot()`])
 //! * Collect title/xname/yname using [`Stager::plot()`] or [`Stager::plot_with()`]
@@ -64,7 +64,7 @@ pub mod simple_theme;
 ///
 pub mod prelude {
     pub use super::build::crop::Croppable;
-    pub use super::build::RenderablePlotIteratorExt;
+    pub use super::build::PlotIteratorExt;
     pub use super::formatm;
     pub use super::plots;
     pub use super::simple_theme::SimpleTheme;
@@ -83,7 +83,7 @@ const HEIGHT: f64 = 500.0;
 
 use render::*;
 
-use build::RenderablePlotIterator;
+use build::PlotIterator;
 
 use std::borrow::Borrow;
 
@@ -97,7 +97,7 @@ macro_rules! formatm {
 }
 
 ///
-/// Macro to chain multiple plots together instead of caling [`chain`](build::RenderablePlotIteratorExt::chain) repeatedly.
+/// Macro to chain multiple plots together instead of caling [`chain`](build::PlotIteratorExt::chain) repeatedly.
 ///
 #[macro_export]
 macro_rules! plots {

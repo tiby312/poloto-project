@@ -1,7 +1,7 @@
 //!
 //! Tools to render plots
 //!
-use build::RenderablePlotIteratorExt;
+use build::PlotIteratorExt;
 
 use crate::*;
 mod render_base;
@@ -61,7 +61,7 @@ impl<A: Disp> Plotter<A> {
 
 struct Renderer<
     PF: BaseFmtAndTicks,
-    P: RenderablePlotIterator<X = PF::X, Y = PF::Y>,
+    P: PlotIterator<X = PF::X, Y = PF::Y>,
     K: Borrow<Canvas>,
 > {
     base: PF,
@@ -71,7 +71,7 @@ struct Renderer<
     canvas: K,
 }
 
-impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>> Disp
+impl<PF: BaseFmtAndTicks, P: PlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>> Disp
     for Renderer<PF, P, K>
 {
     fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
@@ -79,7 +79,7 @@ impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Bo
     }
 }
 
-impl<PF: BaseFmtAndTicks, P: RenderablePlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>>
+impl<PF: BaseFmtAndTicks, P: PlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>>
     Renderer<PF, P, K>
 {
     fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
@@ -460,14 +460,14 @@ pub fn canvas() -> CanvasBuilder {
 ///
 /// Created by [`Data::stage()`] or [`Data::stage_with`].
 ///
-pub struct Stager<P: RenderablePlotIterator, K: Borrow<Canvas>> {
+pub struct Stager<P: PlotIterator, K: Borrow<Canvas>> {
     boundx: ticks::Bound<P::X>,
     boundy: ticks::Bound<P::Y>,
     plots: P,
     canvas: K,
 }
 
-impl<P: RenderablePlotIterator, K: Borrow<Canvas>> Stager<P, K> {
+impl<P: PlotIterator, K: Borrow<Canvas>> Stager<P, K> {
     fn new(
         plots: P,
         boundx: ticks::DataBound<P::X>,
@@ -575,7 +575,7 @@ impl<P: RenderablePlotIterator, K: Borrow<Canvas>> Stager<P, K> {
     }
 }
 
-impl<P: RenderablePlotIterator> Data<P> {
+impl<P: PlotIterator> Data<P> {
     pub fn stage(self) -> Stager<P, Canvas> {
         Stager::new(
             self.plots,
@@ -603,9 +603,9 @@ impl<P: RenderablePlotIterator> Data<P> {
 }
 
 ///
-/// Created by [`build::RenderablePlotIteratorExt::build`]
+/// Created by [`build::PlotIteratorExt::build`]
 ///
-pub struct Data<P: RenderablePlotIterator> {
+pub struct Data<P: PlotIterator> {
     boundx: ticks::DataBound<P::X>,
     boundy: ticks::DataBound<P::Y>,
     plots: P,
