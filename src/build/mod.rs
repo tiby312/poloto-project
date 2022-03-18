@@ -323,7 +323,7 @@ impl<'b, A: PlotIterator> SinglePlotAccessor<'b, A> {
     }
 }
 
-pub struct PlotIt<'a, 'b, A: PlotIterator> {
+pub(crate) struct PlotIt<'a, 'b, A: PlotIterator> {
     inner: &'a mut SinglePlotAccessor<'b, A>,
 }
 impl<'a, 'b, A: PlotIterator> Iterator for PlotIt<'a, 'b, A> {
