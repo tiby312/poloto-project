@@ -8,7 +8,7 @@ repository = "https://github.com/tiby312/poloto"
 description = "Simple 2D plotting library that outputs SVG and can be styled using CSS"
 keywords = ["svg", "css","plot","chart","plotting"]
 readme = "README.md"
-include = ["src/**/*", "LICENSE-MIT", "README.md"]
+include = ["src/**/*","benches" "LICENSE-MIT", "README.md"]
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
