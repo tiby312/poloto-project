@@ -87,11 +87,10 @@ pub struct PlotsDyn<F: PlotIterator> {
 }
 
 impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
-    type X = F::X;
-    type Y = F::Y;
+    type Item = F::Item;
 
     #[inline(always)]
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+    fn next_bound_point(&mut self) -> Option<Self::Item> {
         loop {
             if self.bound_counter >= self.flop.len() {
                 return None;
@@ -113,7 +112,7 @@ impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     }
 
     #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
         if self.plot_counter >= self.flop.len() {
             return PlotResult::Finished;
         }
@@ -137,21 +136,19 @@ impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
 ///
 #[deprecated(note = "use into_boxed() instead.")]
 pub fn box_plot<'a, X: PlotNum, Y: PlotNum>(
-    a: impl PlotIterator<X = X, Y = Y> + 'a,
-) -> Box<dyn PlotIterator<X = X, Y = Y> + 'a> {
+    a: impl PlotIterator<Item = (X, Y)> + 'a,
+) -> Box<dyn PlotIterator<Item = (X, Y)> + 'a> {
     Box::new(a)
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for &'a mut dyn PlotIterator<X = X, Y = Y> {
-    type X = X;
+impl<'a, X: 'a> PlotIterator for &'a mut dyn PlotIterator<Item = X> {
+    type Item = X;
 
-    type Y = Y;
-
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+    fn next_bound_point(&mut self) -> Option<Self::Item> {
         (*self).next_bound_point()
     }
 
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
         (*self).next_plot_point()
     }
 
@@ -164,18 +161,14 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for &'a mut dyn PlotIter
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator
-    for Box<dyn PlotIterator<X = X, Y = Y> + 'a>
-{
-    type X = X;
+impl<'a, X: 'a> PlotIterator for Box<dyn PlotIterator<Item = X> + 'a> {
+    type Item = X;
 
-    type Y = Y;
-
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+    fn next_bound_point(&mut self) -> Option<Self::Item> {
         self.as_mut().next_bound_point()
     }
 
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
         self.as_mut().next_plot_point()
     }
 
@@ -192,7 +185,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator
 /// Helper functions to assemble and prepare plots.
 ///
 pub trait PlotIteratorExt: PlotIterator {
-    fn chain<B: PlotIterator<X = Self::X, Y = Self::Y>>(self, b: B) -> Chain<Self, B>
+    fn chain<B: PlotIterator<Item = Self::Item>>(self, b: B) -> Chain<Self, B>
     where
         Self: Sized,
     {
@@ -208,14 +201,14 @@ pub trait PlotIteratorExt: PlotIterator {
     ///
     /// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
     ///
-    fn into_boxed<'a>(self) -> Box<dyn PlotIterator<X = Self::X, Y = Self::Y> + 'a>
+    fn into_boxed<'a>(self) -> Box<dyn PlotIterator<Item = Self::Item> + 'a>
     where
         Self: Sized + 'a,
     {
         Box::new(self)
     }
 
-    fn as_mut_dyn(&mut self) -> &mut dyn PlotIterator<X = Self::X, Y = Self::Y>
+    fn as_mut_dyn(&mut self) -> &mut dyn PlotIterator<Item = Self::Item>
     where
         Self: Sized,
     {
@@ -234,11 +227,10 @@ impl<I: PlotIterator> PlotIteratorExt for I {}
 /// Then it will call next_plot continuously until it returns None.
 ///
 pub trait PlotIterator {
-    type X: PlotNum;
-    type Y: PlotNum;
+    type Item;
     fn next_typ(&mut self) -> Option<PlotMetaType>;
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)>;
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)>;
+    fn next_bound_point(&mut self) -> Option<Self::Item>;
+    fn next_plot_point(&mut self) -> PlotResult<Self::Item>;
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result;
 }
 
@@ -288,7 +280,7 @@ pub(crate) struct PlotIt<'a, 'b, A: PlotIterator> {
     inner: &'a mut SinglePlotAccessor<'b, A>,
 }
 impl<'a, 'b, A: PlotIterator> Iterator for PlotIt<'a, 'b, A> {
-    type Item = (A::X, A::Y);
+    type Item = A::Item;
     fn next(&mut self) -> Option<Self::Item> {
         if let PlotResult::Some(a) = self.inner.flop.next_plot_point() {
             Some(a)
@@ -420,16 +412,15 @@ where
         }
     }
 }
-impl<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display> PlotIterator for SinglePlot<I, D>
+impl<X, I: PlotIter, D: Display> PlotIterator for SinglePlot<I, D>
 where
-    I::Item1: Unwrapper<Item = (X, Y)>,
-    I::Item2: Unwrapper<Item = (X, Y)>,
+    I::Item1: Unwrapper<Item = X>,
+    I::Item2: Unwrapper<Item = X>,
 {
-    type X = X;
-    type Y = Y;
+    type Item = X;
 
     #[inline(always)]
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+    fn next_bound_point(&mut self) -> Option<Self::Item> {
         if self.buffer1.is_none() {
             self.buffer1 = Some(self.plots.as_mut().unwrap().first());
         }
@@ -438,7 +429,7 @@ where
     }
 
     #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
         if let Some(d) = self.buffer1.take() {
             self.buffer2 = Some(self.plots.take().unwrap().second(d));
         }
@@ -481,12 +472,11 @@ pub struct Chain<A, B> {
     b: B,
     started: bool,
 }
-impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> PlotIterator for Chain<A, B> {
-    type X = A::X;
-    type Y = A::Y;
+impl<A: PlotIterator, B: PlotIterator<Item = A::Item>> PlotIterator for Chain<A, B> {
+    type Item = A::Item;
 
     #[inline(always)]
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
+    fn next_bound_point(&mut self) -> Option<Self::Item> {
         if let Some(a) = self.a.next_bound_point() {
             Some(a)
         } else {
@@ -495,7 +485,7 @@ impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> PlotIterator for Chai
     }
 
     #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
         match self.a.next_plot_point() {
             PlotResult::Some(a) => PlotResult::Some(a),
             PlotResult::None => PlotResult::None,

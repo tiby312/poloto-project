@@ -19,7 +19,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
 ) -> (
-    impl PlotIterator<X = X, Y = i128>,
+    impl PlotIterator<Item = (X, i128)>,
     [i128; 2],
     impl TickGen<Item = i128>,
     impl TickFormat<Num = i128>,
