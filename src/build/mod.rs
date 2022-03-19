@@ -192,7 +192,7 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator
 /// Helper functions to assemble and prepare plots.
 ///
 pub trait PlotIteratorExt: PlotIterator {
-    fn chain<B: PlotIterator>(self, b: B) -> Chain<Self, B>
+    fn chain<B: PlotIterator<X = Self::X, Y = Self::Y>>(self, b: B) -> Chain<Self, B>
     where
         Self: Sized,
     {
