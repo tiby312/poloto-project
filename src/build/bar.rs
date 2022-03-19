@@ -5,6 +5,7 @@ use super::*;
 use std::convert::TryFrom;
 struct BarTickFmt<D> {
     ticks: Vec<D>,
+    steps: std::vec::IntoIter<i128>,
 }
 
 impl<'a, D: Display> TickFormat for BarTickFmt<D> {
@@ -12,6 +13,12 @@ impl<'a, D: Display> TickFormat for BarTickFmt<D> {
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result {
         let j = &self.ticks[usize::try_from(*val).unwrap()];
         write!(writer, "{}", j)
+    }
+    fn dash_size(&self) -> Option<f64> {
+        None
+    }
+    fn next_tick(&mut self) -> Option<Self::Num> {
+        self.steps.next()
     }
 }
 
@@ -21,7 +28,6 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
 ) -> (
     impl PlotIterator<Item = (X, i128)>,
     [i128; 2],
-    impl TickGen<Item = i128>,
     impl TickFormat<Num = i128>,
 ) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
@@ -35,15 +41,17 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
             .map(|(i, x)| (x, i128::try_from(i).unwrap())),
     );
 
-    let ticks = (0..vals_len).map(|x| i128::try_from(x).unwrap());
+    let ticks = (0..vals_len)
+        .map(|x| i128::try_from(x).unwrap())
+        .collect::<Vec<_>>()
+        .into_iter();
 
     (
         bars,
         [-1, i128::try_from(vals_len).unwrap()],
-        TickInfo {
-            ticks,
-            dash_size: None,
+        BarTickFmt {
+            steps: ticks,
+            ticks: names,
         },
-        BarTickFmt { ticks: names },
     )
 }

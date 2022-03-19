@@ -354,14 +354,6 @@ pub struct Canvas {
     bar_width: f64,
 }
 
-struct RenderOptions<P: PlotIterator<Item = (A::X, A::Y)>, A: BaseFmt, X, Y> {
-    plots: P,
-    base: A,
-    xtick: X,
-    ytick: Y,
-    boundx: ticks::DataBound<A::X>,
-    boundy: ticks::DataBound<A::Y>,
-}
 impl Canvas {
     pub fn build<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>>(
         &self,
@@ -404,12 +396,10 @@ impl Canvas {
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         mut writer: &mut dyn fmt::Write,
-        mut data: RenderOptions<
-            impl PlotIterator<Item = (X, Y)>,
-            impl BaseFmt<X = X, Y = Y>,
-            impl TickGen<Item = X>,
-            impl TickGen<Item = Y>,
-        >,
+        mut plots: impl PlotIterator<Item = (X, Y)>,
+        mut base: impl BaseFmt<X = X, Y = Y>,
+        boundx: DataBound<X>,
+        boundy: DataBound<Y>,
     ) -> fmt::Result {
         //render background
         {
@@ -423,25 +413,11 @@ impl Canvas {
         //
         // Using `cargo bloat` determined that these lines reduces alot of code bloat.
         //
-        let plot_fmt = data.plots.as_mut_dyn();
+        let plot_fmt = plots.as_mut_dyn();
 
-        render::render_plot::render_plot(&mut writer, &data.boundx, &data.boundy, self, plot_fmt)?;
+        render::render_plot::render_plot(&mut writer, &boundx, &boundy, self, plot_fmt)?;
 
-        // reduce code bloat
-        let xtick_info = &mut data.xtick as &mut dyn ticks::TickGen<Item = X>;
-
-        // reduce code bloat
-        let ytick_info = &mut data.ytick as &mut dyn ticks::TickGen<Item = Y>;
-
-        render::render_base::render_base(
-            &mut writer,
-            &data.boundx,
-            &data.boundy,
-            &mut data.base,
-            xtick_info,
-            ytick_info,
-            self,
-        )
+        render::render_base::render_base(&mut writer, &boundx, &boundy, &mut base, self)
     }
 }
 ///
@@ -494,37 +470,24 @@ impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> 
         Y: HasDefaultTicks,
     {
         let (bx, by) = self.bounds();
-        let (x, xt) = ticks::from_default(bx);
-        let (y, yt) = ticks::from_default(by);
+        let xt = ticks::from_default(bx);
+        let yt = ticks::from_default(by);
 
         let p = plot_fmt(title, xname, yname, xt, yt);
-        self.plot_with(x, y, p)
+        self.plot_with(p)
     }
 
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`Data::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<XI, YI, PF>(self, xtick: XI, ytick: YI, plot_fmt: PF) -> Plotter<impl Disp>
-    where
-        XI: TickGen<Item = X>,
-        YI: TickGen<Item = Y>,
-        PF: BaseFmt<X = X, Y = Y>,
-    {
+    pub fn plot_with(self, plot_fmt: impl BaseFmt<X = X, Y = Y>) -> Plotter<impl Disp> {
         let dim = self.canvas.borrow().get_dim();
         Plotter {
             inner: Some(Disper::new(move |w| {
-                self.canvas.borrow().render(
-                    w,
-                    RenderOptions {
-                        base: plot_fmt,
-                        plots: self.plots,
-                        xtick,
-                        ytick,
-                        boundx: self.boundx,
-                        boundy: self.boundy,
-                    },
-                )
+                self.canvas
+                    .borrow()
+                    .render(w, self.plots, plot_fmt, self.boundx, self.boundy)
             })),
             dim,
         }

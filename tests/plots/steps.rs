@@ -19,22 +19,17 @@ fn marathon() -> fmt::Result {
 
     let data = canvas.build_with(poloto::build::line("hay", &heart_rate), None, Some(0));
 
-    let (xtick, xtick_fmt) =
-        poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
+    let xtick_fmt = poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
 
-    let (ytick, ytick_fmt) = poloto::ticks::from_default(data.bounds().1);
+    let ytick_fmt = poloto::ticks::from_default(data.bounds().1);
 
-    let mut plotter = data.plot_with(
-        xtick,
-        ytick,
-        poloto::plot_fmt(
-            "collatz",
-            "x",
-            "y",
-            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v / hr)),
-            ytick_fmt,
-        ),
-    );
+    let mut plotter = data.plot_with(poloto::plot_fmt(
+        "collatz",
+        "x",
+        "y",
+        xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v / hr)),
+        ytick_fmt,
+    ));
 
     let mut w = util::create_test_file("marathon.svg");
 
@@ -72,15 +67,13 @@ fn years() -> fmt::Result {
 
     let data = canvas.build_with(poloto::build::histogram("foo", data), None, Some(0));
 
-    let (xticks, xtick_fmt) = poloto::ticks::from_iter((2010..).step_by(2));
+    let xtick_fmt = poloto::ticks::from_iter((2010..).step_by(2));
 
-    let (yticks, ytick_fmt) = poloto::ticks::from_default(data.bounds().1);
+    let ytick_fmt = poloto::ticks::from_default(data.bounds().1);
 
-    let mut plotter = data.plot_with(
-        xticks,
-        yticks,
-        poloto::plot_fmt("title", "xname", "yname", xtick_fmt, ytick_fmt),
-    );
+    let mut plotter = data.plot_with(poloto::plot_fmt(
+        "title", "xname", "yname", xtick_fmt, ytick_fmt,
+    ));
 
     let mut w = util::create_test_file("years.svg");
 

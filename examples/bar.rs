@@ -1,6 +1,6 @@
 use poloto::prelude::*;
 fn main() {
-    let (bar, ybound, ytick, ytick_fmt) = poloto::build::bar::gen_bar(
+    let (bar, ybound, ytick_fmt) = poloto::build::bar::gen_bar(
         "",
         [
             (20, "potato"),
@@ -16,19 +16,15 @@ fn main() {
 
     let data = canvas.build_with(bar, [0], ybound);
 
-    let (xtick, xtick_fmt) = poloto::ticks::from_default(data.bounds().0);
+    let xtick_fmt = poloto::ticks::from_default(data.bounds().0);
 
-    let mut plt = data.plot_with(
-        xtick,
-        ytick,
-        poloto::plot_fmt(
-            "Comparison of Food Tastiness",
-            "Tastiness",
-            "Foods",
-            xtick_fmt,
-            ytick_fmt,
-        ),
-    );
+    let mut plt = data.plot_with(poloto::plot_fmt(
+        "Comparison of Food Tastiness",
+        "Tastiness",
+        "Foods",
+        xtick_fmt,
+        ytick_fmt,
+    ));
 
     print!("{}", poloto::disp(|w| plt.simple_theme(w)));
 }

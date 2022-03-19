@@ -72,7 +72,6 @@ pub mod prelude {
 }
 
 use fmt::Display;
-use std::marker::PhantomData;
 
 use ticks::*;
 
@@ -193,6 +192,22 @@ where
         }
         fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
             self.ticky.write_where(writer)
+        }
+
+        fn next_xtick(&mut self) -> Option<Self::X> {
+            self.tickx.next_tick()
+        }
+
+        fn next_ytick(&mut self) -> Option<Self::Y> {
+            self.ticky.next_tick()
+        }
+
+        fn xdash_size(&self) -> Option<f64> {
+            self.tickx.dash_size()
+        }
+
+        fn ydash_size(&self) -> Option<f64> {
+            self.ticky.dash_size()
         }
     }
 

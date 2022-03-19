@@ -11,6 +11,8 @@ impl DiscNum for f64 {
 }
 
 pub struct FloatTickFmt {
+    ticks: std::vec::IntoIter<f64>,
+    dash_size: f64,
     step: f64,
     offset: Option<f64>,
     axis: crate::Axis,
@@ -30,6 +32,12 @@ impl FloatTickFmt {
 impl TickFormat for FloatTickFmt {
     type Num = f64;
 
+    fn next_tick(&mut self) -> Option<Self::Num> {
+        self.ticks.next()
+    }
+    fn dash_size(&self) -> Option<f64> {
+        Some(self.dash_size)
+    }
     fn write_tick(
         &mut self,
         writer: &mut dyn std::fmt::Write,
@@ -71,8 +79,7 @@ impl TickFormat for FloatTickFmt {
 
 impl HasDefaultTicks for f64 {
     type Fmt = FloatTickFmt;
-    type Gen = TickInfo<std::vec::IntoIter<f64>>;
-    fn generate(bound: crate::ticks::Bound<f64>) -> (Self::Gen, Self::Fmt) {
+    fn generate(bound: crate::ticks::Bound<f64>) -> Self::Fmt {
         let range = [bound.data.min, bound.data.max];
         let ideal_num_steps = bound.canvas.ideal_num_steps;
 
@@ -80,24 +87,21 @@ impl HasDefaultTicks for f64 {
 
         let (offset, ticks) = tick_layout.generate();
 
-        let dash_size = Some(compute_best_dash_1_2_5(
+        let dash_size = compute_best_dash_1_2_5(
             tick_layout.step.scale(range, bound.canvas.max),
             bound.canvas.ideal_dash_size,
             tick_layout.normalized_step,
-        ));
+        );
 
         let axis = bound.canvas.axis;
-        (
-            TickInfo {
-                ticks: ticks.into_iter(),
-                dash_size,
-            },
-            FloatTickFmt {
-                offset,
-                axis,
-                step: tick_layout.step,
-            },
-        )
+
+        FloatTickFmt {
+            ticks: ticks.into_iter(),
+            dash_size,
+            offset,
+            axis,
+            step: tick_layout.step,
+        }
     }
 }
 

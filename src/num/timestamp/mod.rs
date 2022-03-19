@@ -40,6 +40,7 @@ pub struct UnixTimeTickFmt<T: TimeZone> {
     timezone: T,
     start: UnixTime,
     axis: Axis,
+    ticks: std::vec::IntoIter<UnixTime>,
 }
 impl<T: TimeZone> UnixTimeTickFmt<T> {
     pub fn step(&self) -> StepUnit {
@@ -61,6 +62,12 @@ where
 {
     type Num = UnixTime;
 
+    fn next_tick(&mut self) -> Option<Self::Num> {
+        self.ticks.next()
+    }
+    fn dash_size(&self) -> Option<f64> {
+        None
+    }
     fn write_tick(
         &mut self,
         writer: &mut dyn std::fmt::Write,
@@ -143,8 +150,7 @@ impl std::fmt::Display for StepUnit {
 
 impl HasDefaultTicks for UnixTime {
     type Fmt = UnixTimeTickFmt<Utc>;
-    type Gen = TickInfo<std::vec::IntoIter<UnixTime>>;
-    fn generate(bound: crate::ticks::Bound<Self>) -> (Self::Gen, Self::Fmt) {
+    fn generate(bound: crate::ticks::Bound<Self>) -> Self::Fmt {
         unixtime_ticks(bound, &Utc)
     }
 }
@@ -152,7 +158,7 @@ impl HasDefaultTicks for UnixTime {
 pub fn unixtime_ticks<T: TimeZone + Display>(
     bound: crate::ticks::Bound<UnixTime>,
     timezone: &T,
-) -> (TickInfo<std::vec::IntoIter<UnixTime>>, UnixTimeTickFmt<T>)
+) -> UnixTimeTickFmt<T>
 where
     T::Offset: Display,
 {
@@ -190,18 +196,14 @@ where
 
     let axis = bound.canvas.axis;
     let start = ticks[0];
-    (
-        TickInfo {
-            ticks: ticks.into_iter(),
-            dash_size: None,
-        },
-        UnixTimeTickFmt {
-            timezone: timezone.clone(),
-            step: ret.unit_data,
-            axis,
-            start,
-        },
-    )
+
+    UnixTimeTickFmt {
+        ticks: ticks.into_iter(),
+        timezone: timezone.clone(),
+        step: ret.unit_data,
+        axis,
+        start,
+    }
 }
 
 impl PlotNum for UnixTime {

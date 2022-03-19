@@ -41,4 +41,9 @@ pub trait BaseFmt {
     fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
     fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result;
     fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result;
+
+    fn next_xtick(&mut self) -> Option<Self::X>;
+    fn next_ytick(&mut self) -> Option<Self::Y>;
+    fn xdash_size(&self) -> Option<f64>;
+    fn ydash_size(&self) -> Option<f64>;
 }

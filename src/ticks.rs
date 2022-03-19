@@ -38,31 +38,9 @@ pub struct CanvasBound {
 }
 
 ///
-/// Information on the properties of all the interval ticks for one dimension.
-///
-#[derive(Debug, Clone)]
-pub struct TickInfo<I: Iterator> {
-    /// List of the position of each tick to be displayed.
-    /// This must have a length of as least 2.
-    pub ticks: I,
-
-    pub dash_size: Option<f64>,
-}
-
-impl<I: Iterator> TickGen for TickInfo<I> {
-    type Item = I::Item;
-    fn dash_size(&self) -> Option<f64> {
-        self.dash_size
-    }
-    fn next_tick(&mut self) -> Option<Self::Item> {
-        self.ticks.next()
-    }
-}
-
-///
 /// Create a tick distribution from the default tick generator for the plotnum type.
 ///
-pub fn from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (X::Gen, X::Fmt) {
+pub fn from_default<X: HasDefaultTicks>(bound: Bound<X>) -> X::Fmt {
     X::generate(bound)
 }
 
@@ -70,18 +48,27 @@ pub fn from_default<X: HasDefaultTicks>(bound: Bound<X>) -> (X::Gen, X::Fmt) {
 /// Create a [`TickGen`] and a [`TickFormat`] from a step iterator.
 ///
 ///
-pub fn from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(ticks: I) -> (I, TickIterFmt<X>) {
-    (ticks, TickIterFmt { _p: PhantomData })
+pub fn from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(ticks: I) -> TickIterFmt<I> {
+    TickIterFmt { ticks }
 }
 
 ///
 /// Used by [`ticks::from_iter`]
 ///
-pub struct TickIterFmt<T> {
-    _p: PhantomData<T>,
+pub struct TickIterFmt<I: Iterator> {
+    ticks: I,
 }
-impl<J: PlotNum + Display> TickFormat for TickIterFmt<J> {
-    type Num = J;
+impl<I: Iterator> TickFormat for TickIterFmt<I>
+where
+    I::Item: PlotNum + Display,
+{
+    type Num = I::Item;
+    fn dash_size(&self) -> Option<f64> {
+        None
+    }
+    fn next_tick(&mut self) -> Option<Self::Num> {
+        self.ticks.next()
+    }
     fn write_tick(
         &mut self,
         writer: &mut dyn std::fmt::Write,
@@ -92,33 +79,13 @@ impl<J: PlotNum + Display> TickFormat for TickIterFmt<J> {
 }
 
 ///
-/// Trait that draws the physical ticks instead of writing the text for each one ([`TickFormat`])
-///
-pub trait TickGen {
-    type Item;
-    fn dash_size(&self) -> Option<f64>;
-    fn next_tick(&mut self) -> Option<Self::Item>;
-}
-
-impl<I: Iterator> TickGen for I {
-    type Item = I::Item;
-    fn dash_size(&self) -> Option<f64> {
-        None
-    }
-    fn next_tick(&mut self) -> Option<Self::Item> {
-        self.next()
-    }
-}
-
-///
 /// Trait to allow a plotnum to have a default tick distribution.
 ///
 /// Used by [`Data::plot`]
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
-    type Gen: TickGen<Item = Self>;
-    fn generate(bound: ticks::Bound<Self>) -> (Self::Gen, Self::Fmt);
+    fn generate(bound: ticks::Bound<Self>) -> Self::Fmt;
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -152,6 +119,8 @@ impl<T: TickFormat> TickFormatExt for T {}
 ///
 pub trait TickFormat {
     type Num: PlotNum;
+    fn dash_size(&self) -> Option<f64>;
+    fn next_tick(&mut self) -> Option<Self::Num>;
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
     fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
@@ -175,6 +144,12 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result> TickFor
     fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
         (self.func)(a)
     }
+    fn dash_size(&self) -> Option<f64> {
+        self.inner.dash_size()
+    }
+    fn next_tick(&mut self) -> Option<Self::Num> {
+        self.inner.next_tick()
+    }
 }
 
 ///
@@ -193,5 +168,11 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
     }
     fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
         self.inner.write_where(a)
+    }
+    fn dash_size(&self) -> Option<f64> {
+        self.inner.dash_size()
+    }
+    fn next_tick(&mut self) -> Option<Self::Num> {
+        self.inner.next_tick()
     }
 }

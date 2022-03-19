@@ -5,8 +5,6 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt<X = X, Y = Y>,
-    xtick_info: &mut dyn ticks::TickGen<Item = X>,
-    ytick_info: &mut dyn ticks::TickGen<Item = Y>,
     canvas: &Canvas,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
@@ -61,21 +59,17 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         })?
         .build(|w| plot_fmt.write_yname(&mut w.writer_safe()))?;
 
-    let xdash_size = xtick_info.dash_size();
-    let ydash_size = ytick_info.dash_size();
+    let xdash_size = plot_fmt.xdash_size();
+    let ydash_size = plot_fmt.ydash_size();
 
     use tagger::PathCommand::*;
 
-    let mut xticks = std::iter::from_fn(|| xtick_info.next_tick())
+    let mut xticks = std::iter::from_fn(|| plot_fmt.next_xtick())
         .into_iter()
         .skip_while(|&x| x < boundx[0])
         .take_while(|&x| x <= boundx[1]);
-    let mut yticks = std::iter::from_fn(|| ytick_info.next_tick())
-        .into_iter()
-        .skip_while(|&x| x < boundy[0])
-        .take_while(|&x| x <= boundy[1]);
 
-    let mut xticks = {
+    let xticks = {
         let a = xticks
             .next()
             .expect("There must be atleast two ticks for each axis");
@@ -85,7 +79,15 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         vec![a, b].into_iter().chain(xticks)
     };
 
-    let mut yticks = {
+    //TODO get rid of collecting ticks upfront.
+    let mut xticks = xticks.collect::<Vec<_>>().into_iter();
+
+    let mut yticks = std::iter::from_fn(|| plot_fmt.next_ytick())
+        .into_iter()
+        .skip_while(|&x| x < boundy[0])
+        .take_while(|&x| x <= boundy[1]);
+
+    let yticks = {
         let a = yticks
             .next()
             .expect("There must be atleast two ticks for each axis");
@@ -94,6 +96,9 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             .expect("There must be atleast two ticks for each axis");
         vec![a, b].into_iter().chain(yticks)
     };
+
+    //TODO get rid of collecting ticks upfront.
+    let mut yticks = yticks.collect::<Vec<_>>().into_iter();
 
     let first_tickx = xticks.next().unwrap();
 

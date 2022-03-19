@@ -10,6 +10,8 @@ fn round_up_to_nearest_multiple(val: i128, multiple: i128) -> i128 {
 }
 
 pub struct IntegerTickFmt {
+    ticks: std::vec::IntoIter<i128>,
+    dash_size: f64,
     step: i128,
     offset: Option<i128>,
     axis: crate::Axis,
@@ -27,6 +29,13 @@ impl IntegerTickFmt {
 }
 impl TickFormat for IntegerTickFmt {
     type Num = i128;
+
+    fn next_tick(&mut self) -> Option<Self::Num> {
+        self.ticks.next()
+    }
+    fn dash_size(&self) -> Option<f64> {
+        Some(self.dash_size)
+    }
 
     fn write_tick(
         &mut self,
@@ -69,8 +78,7 @@ impl TickFormat for IntegerTickFmt {
 
 impl HasDefaultTicks for i128 {
     type Fmt = IntegerTickFmt;
-    type Gen = TickInfo<std::vec::IntoIter<i128>>;
-    fn generate(bound: crate::ticks::Bound<i128>) -> (Self::Gen, Self::Fmt) {
+    fn generate(bound: crate::ticks::Bound<i128>) -> Self::Fmt {
         let range = [bound.data.min, bound.data.max];
         let ideal_num_steps = bound.canvas.ideal_num_steps;
 
@@ -78,25 +86,21 @@ impl HasDefaultTicks for i128 {
 
         let (offset, ticks) = tick_layout.generate();
 
-        let dash_size = Some(compute_best_dash_1_2_5(
+        let dash_size = compute_best_dash_1_2_5(
             tick_layout.step.scale(range, bound.canvas.max),
             bound.canvas.ideal_dash_size,
             tick_layout.normalized_step,
-        ));
+        );
 
         let axis = bound.canvas.axis;
 
-        (
-            TickInfo {
-                ticks: ticks.into_iter(),
-                dash_size,
-            },
-            IntegerTickFmt {
-                step: tick_layout.step,
-                offset,
-                axis,
-            },
-        )
+        IntegerTickFmt {
+            ticks: ticks.into_iter(),
+            dash_size,
+            step: tick_layout.step,
+            offset,
+            axis,
+        }
     }
 }
 

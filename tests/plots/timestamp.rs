@@ -52,20 +52,16 @@ fn minutes_local_time() -> fmt::Result {
     let s = canvas.build_with(poloto::build::line("", data), None, Some(0));
 
     let (bx, by) = s.bounds();
-    let (xtick, xtick_fmt) = unixtime_ticks(bx, time_zone);
-    let (ytick, ytick_fmt) = poloto::ticks::from_default(by);
+    let xtick_fmt = unixtime_ticks(bx, time_zone);
+    let ytick_fmt = poloto::ticks::from_default(by);
 
-    let mut s = s.plot_with(
-        xtick,
-        ytick,
-        poloto::plot_fmt(
-            "Number of Wikipedia Articles",
-            "time",
-            "Number of Articles",
-            xtick_fmt,
-            ytick_fmt,
-        ),
-    );
+    let mut s = s.plot_with(poloto::plot_fmt(
+        "Number of Wikipedia Articles",
+        "time",
+        "Number of Articles",
+        xtick_fmt,
+        ytick_fmt,
+    ));
 
     let w = util::create_test_file("minutes_local_time.svg");
 
@@ -129,7 +125,7 @@ fn seconds() -> fmt::Result {
     let (bx, by) = data.bounds();
     let (xmin, xmax) = (bx.data.min, bx.data.max);
 
-    let (xtick, xtick_fmt) = poloto::ticks::from_default(bx);
+    let xtick_fmt = poloto::ticks::from_default(bx);
 
     let xtick_step = xtick_fmt.step();
 
@@ -138,25 +134,20 @@ fn seconds() -> fmt::Result {
     // if the steps were years, for example.
     assert!(xtick_step.is_seconds());
 
-    let (ytick, ytick_fmt) = poloto::ticks::from_default(by);
+    let ytick_fmt = poloto::ticks::from_default(by);
 
-    let mut plotter = data.plot_with(
-        xtick,
-        ytick,
-        poloto::plot_fmt(
-            "Number of Wikipedia Articles",
-            formatm!(
-                "{} to {} in {}",
-                xmin.datetime(timezone).format("%H:%M:%S"),
-                xmax.datetime(timezone).format("%H:%M:%S"),
-                xtick_step
-            ),
-            "Number of Articles",
-            xtick_fmt
-                .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
-            ytick_fmt,
+    let mut plotter = data.plot_with(poloto::plot_fmt(
+        "Number of Wikipedia Articles",
+        formatm!(
+            "{} to {} in {}",
+            xmin.datetime(timezone).format("%H:%M:%S"),
+            xmax.datetime(timezone).format("%H:%M:%S"),
+            xtick_step
         ),
-    );
+        "Number of Articles",
+        xtick_fmt.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
+        ytick_fmt,
+    ));
 
     let w = util::create_test_file("seconds.svg");
 

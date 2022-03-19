@@ -5,7 +5,6 @@ use super::*;
 use crate::util;
 use crate::DiscNum;
 use crate::PlotNum;
-use crate::TickInfo;
 use core::fmt;
 
 pub mod float;
