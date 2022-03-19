@@ -14,7 +14,7 @@ fn main() {
     let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let mut pp = data.plot_with(poloto::plot_fmt(
+    let pp = data.plot_with(poloto::plot_fmt(
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",

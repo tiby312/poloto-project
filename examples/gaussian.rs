@@ -21,7 +21,7 @@ fn main() {
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
     let canvas = poloto::render::canvas();
-    let mut plotter = canvas
+    let plotter = canvas
         .build_with(plots!(l1, l2, l3), [], [0.0])
         .plot("gaussian", "x", "y");
 

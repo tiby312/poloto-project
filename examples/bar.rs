@@ -18,7 +18,7 @@ fn main() {
 
     let xtick_fmt = poloto::ticks::from_default(data.bounds().0);
 
-    let mut plt = data.plot_with(poloto::plot_fmt(
+    let plt = data.plot_with(poloto::plot_fmt(
         "Comparison of Food Tastiness",
         "Tastiness",
         "Foods",

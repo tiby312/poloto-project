@@ -470,7 +470,7 @@ impl<P: PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> Plotte
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, mut writer: T) -> fmt::Result {
+    pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
         self.canvas.borrow().render(
             &mut writer,
             &mut self.plots,

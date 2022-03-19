@@ -39,7 +39,7 @@ fn main() {
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
     let canvas = poloto::render::canvas();
-    let mut plotter = canvas
+    let plotter = canvas
         .build_with(plots!(l1, l2, l3), [], [0.0])
         .plot("gaussian", "x", "y");
 
@@ -86,7 +86,7 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let mut plotter = canvas.build_with(data, [], [0]).plot("collatz", "x", "y");
+    let plotter = canvas.build_with(data, [], [0]).plot("collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
@@ -146,7 +146,7 @@ fn main() {
     });
 
     let canvas = poloto::render::canvas();
-    let mut plotter = canvas
+    let plotter = canvas
         .build_with(poloto::build::line("", data), [], [0.0])
         .plot(
             "Long Jump world record progression",
@@ -182,7 +182,7 @@ fn main() {
     let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let mut pp = data.plot_with(poloto::plot_fmt(
+    let pp = data.plot_with(poloto::plot_fmt(
         "Number of rides at theme park hourly",
         "Hour",
         "Number of rides",

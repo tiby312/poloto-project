@@ -33,7 +33,7 @@ fn main() {
     });
 
     let canvas = poloto::render::canvas();
-    let mut plotter = canvas
+    let plotter = canvas
         .build_with(poloto::build::line("", data), [], [0.0])
         .plot(
             "Long Jump world record progression",
