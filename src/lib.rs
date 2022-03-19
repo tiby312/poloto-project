@@ -28,8 +28,8 @@
 //! the ticks that were selected via its automatic methods using [`TickFormatExt::with_tick_fmt`].
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
-//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickInfo`].
-//! Alternatively you can use the [`ticks::from_iter`] function that just takes an iterator of ticks and returns a [`TickInfo`].
+//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickFormat`].
+//! Alternatively you can use the [`ticks::from_iter`] function that just takes an iterator of ticks and returns a [`TickFormat`].
 //! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/steps.rs)

@@ -7,7 +7,7 @@ use super::*;
 /// Building block to make ticks.
 ///
 /// Created once the min and max bounds of all the plots has been computed.
-/// Contains in it all the information typically needed to make a [`TickInfo`].
+/// Contains in it all the information typically needed to make a [`TickFormat`].
 ///
 /// Used by [`ticks::from_default`]
 ///
@@ -45,7 +45,7 @@ pub fn from_default<X: HasDefaultTicks>(bound: Bound<X>) -> X::Fmt {
 }
 
 ///
-/// Create a [`TickGen`] and a [`TickFormat`] from a step iterator.
+/// Create a [`TickFormat`] from a step iterator.
 ///
 ///
 pub fn from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(ticks: I) -> TickIterFmt<I> {

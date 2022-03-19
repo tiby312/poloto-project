@@ -179,20 +179,16 @@ fn main() {
     let data = canvas.build_with(poloto::build::histogram("", it), [24], []);
 
     let (_, by) = data.bounds();
-    let (xtick, xtick_fmt) = poloto::ticks::from_iter((0..).step_by(6));
-    let (ytick, ytick_fmt) = poloto::ticks::from_default(by);
+    let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
+    let ytick_fmt = poloto::ticks::from_default(by);
 
-    let mut pp = data.plot_with(
-        xtick,
-        ytick,
-        poloto::plot_fmt(
-            "Number of rides at theme park hourly",
-            "Hour",
-            "Number of rides",
-            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v)),
-            ytick_fmt,
-        ),
-    );
+    let mut pp = data.plot_with(poloto::plot_fmt(
+        "Number of rides at theme park hourly",
+        "Hour",
+        "Number of rides",
+        xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v)),
+        ytick_fmt,
+    ));
 
     print!("{}", poloto::disp(|w| pp.simple_theme(w)));
 }
