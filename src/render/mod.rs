@@ -11,7 +11,20 @@ mod render_plot;
 /// One-time function to write to a `fmt::Write`.
 ///
 pub trait Disp {
-    fn disp<T: fmt::Write>(self, writer: T) -> fmt::Result;
+    fn disp(self, writer: &mut dyn fmt::Write) -> fmt::Result;
+}
+struct Disper<F> {
+    func: F,
+}
+impl<F: FnOnce(&mut dyn fmt::Write) -> fmt::Result> Disper<F> {
+    fn new(func: F) -> Disper<F> {
+        Disper { func }
+    }
+}
+impl<F: FnOnce(&mut dyn fmt::Write) -> fmt::Result> Disp for Disper<F> {
+    fn disp(self, w: &mut dyn fmt::Write) -> fmt::Result {
+        (self.func)(w)
+    }
 }
 
 ///
@@ -22,13 +35,6 @@ pub struct Plotter<A: Disp> {
     dim: [f64; 2],
 }
 impl<A: Disp> Plotter<A> {
-    pub(crate) fn new(a: A, dim: [f64; 2]) -> Self {
-        Plotter {
-            inner: Some(a),
-            dim,
-        }
-    }
-
     pub fn get_dim(&self) -> [f64; 2] {
         self.dim
     }
@@ -45,7 +51,6 @@ impl<A: Disp> Plotter<A> {
     /// this function will mutable borrow the Plotter and leave it with empty data.
     ///
     /// ```
-    /// use poloto::prelude::*;
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
     /// let canvas=poloto::render::canvas();
     /// let mut plotter=canvas.build(poloto::build::line("",data)).plot("title","x","y");
@@ -53,95 +58,9 @@ impl<A: Disp> Plotter<A> {
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
-
-    pub fn render<T: std::fmt::Write>(&mut self, writer: T) -> fmt::Result {
-        self.inner.take().unwrap().disp(writer)
+    pub fn render<T: std::fmt::Write>(&mut self, mut writer: T) -> fmt::Result {
+        self.inner.take().unwrap().disp(&mut writer)
     }
-}
-
-struct Renderer<PF: BaseFmtAndTicks, P: PlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>> {
-    base: PF,
-    plots: P,
-    boundx: ticks::DataBound<PF::X>,
-    boundy: ticks::DataBound<PF::Y>,
-    canvas: K,
-}
-
-impl<PF: BaseFmtAndTicks, P: PlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>> Disp
-    for Renderer<PF, P, K>
-{
-    fn disp<T: std::fmt::Write>(self, mut writer: T) -> fmt::Result {
-        self.render(&mut writer)
-    }
-}
-
-impl<PF: BaseFmtAndTicks, P: PlotIterator<X = PF::X, Y = PF::Y>, K: Borrow<Canvas>>
-    Renderer<PF, P, K>
-{
-    fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
-        //render background
-        {
-            let mut writer = tagger::new(&mut writer);
-            writer.single("circle", |d| {
-                d.attr("r", "1e5")?;
-                d.attr("class", "poloto_background")
-            })?;
-        }
-
-        let canvas = self.canvas.borrow();
-
-        //
-        // Using `cargo bloat` determined that these lines reduces alot of code bloat.
-        //
-        let plot_fmt = self.plots.as_mut_dyn();
-
-        render::render_plot::render_plot(
-            &mut writer,
-            &self.boundx,
-            &self.boundy,
-            canvas,
-            plot_fmt,
-        )?;
-
-        let (mut plot_fmt, mut xtick_info, mut ytick_info) = self.base.gen();
-
-        // reduce code bloat
-        let xtick_info = &mut xtick_info as &mut dyn ticks::TickGen<Item = P::X>;
-
-        // reduce code bloat
-        let ytick_info = &mut ytick_info as &mut dyn ticks::TickGen<Item = P::Y>;
-
-        render::render_base::render_base(
-            &mut writer,
-            &self.boundx,
-            &self.boundy,
-            &mut plot_fmt,
-            xtick_info,
-            ytick_info,
-            canvas,
-        )
-    }
-}
-
-///
-/// Trait that captures all user defined plot formatting. This includes:
-///
-/// * The distribution of ticks on each axis,
-///
-/// * The formatting of:
-///     * title
-///     * xname
-///     * yname
-///     * xticks
-///     * yticks
-///
-pub(crate) trait BaseFmtAndTicks {
-    type X: PlotNum;
-    type Y: PlotNum;
-    type Fmt: BaseFmt<X = Self::X, Y = Self::Y>;
-    type XI: TickGen<Item = Self::X>;
-    type YI: TickGen<Item = Self::Y>;
-    fn gen(self) -> (Self::Fmt, Self::XI, Self::YI);
 }
 
 trait NumFmt {
@@ -433,6 +352,15 @@ pub struct Canvas {
     precision: usize,
     bar_width: f64,
 }
+
+struct RenderOptions<P: PlotIterator, A, X, Y> {
+    plots: P,
+    base: A,
+    xtick: X,
+    ytick: Y,
+    boundx: ticks::DataBound<P::X>,
+    boundy: ticks::DataBound<P::Y>,
+}
 impl Canvas {
     pub fn build<P: PlotIterator>(&self, plots: P) -> Data<&Canvas, P> {
         self.build_with(plots, [], [])
@@ -468,8 +396,50 @@ impl Canvas {
     pub fn get_dim(&self) -> [f64; 2] {
         [self.width, self.height]
     }
-}
 
+    fn render<X: PlotNum, Y: PlotNum>(
+        &self,
+        mut writer: &mut dyn fmt::Write,
+        mut data: RenderOptions<
+            impl PlotIterator<X = X, Y = Y>,
+            impl BaseFmt<X = X, Y = Y>,
+            impl TickGen<Item = X>,
+            impl TickGen<Item = Y>,
+        >,
+    ) -> fmt::Result {
+        //render background
+        {
+            let mut writer = tagger::new(&mut writer);
+            writer.single("circle", |d| {
+                d.attr("r", "1e5")?;
+                d.attr("class", "poloto_background")
+            })?;
+        }
+
+        //
+        // Using `cargo bloat` determined that these lines reduces alot of code bloat.
+        //
+        let plot_fmt = data.plots.as_mut_dyn();
+
+        render::render_plot::render_plot(&mut writer, &data.boundx, &data.boundy, self, plot_fmt)?;
+
+        // reduce code bloat
+        let xtick_info = &mut data.xtick as &mut dyn ticks::TickGen<Item = X>;
+
+        // reduce code bloat
+        let ytick_info = &mut data.ytick as &mut dyn ticks::TickGen<Item = Y>;
+
+        render::render_base::render_base(
+            &mut writer,
+            &data.boundx,
+            &data.boundy,
+            &mut data.base,
+            xtick_info,
+            ytick_info,
+            self,
+        )
+    }
+}
 ///
 /// Build a [`Canvas`]
 ///
@@ -479,6 +449,16 @@ pub fn canvas() -> Canvas {
 
 pub fn canvas_builder() -> CanvasBuilder {
     CanvasBuilder::default()
+}
+
+///
+/// Created by [`Canvas::build`]
+///
+pub struct Data<K: Borrow<Canvas>, P: PlotIterator> {
+    canvas: K,
+    boundx: ticks::DataBound<P::X>,
+    boundy: ticks::DataBound<P::Y>,
+    plots: P,
 }
 
 impl<K: Borrow<Canvas>, P: PlotIterator> Data<K, P> {
@@ -527,62 +507,22 @@ impl<K: Borrow<Canvas>, P: PlotIterator> Data<K, P> {
         YI: TickGen<Item = P::Y>,
         PF: BaseFmt<X = P::X, Y = P::Y>,
     {
-        ///
-        /// Wrap tick iterators and a [`PlotFmt`] behind the [`PlotFmtAll`] trait.
-        ///
-        struct PlotAllStruct<XI: TickGen, YI: TickGen, PF: BaseFmt> {
-            xtick: XI,
-            ytick: YI,
-            fmt: PF,
+        let dim = self.canvas.borrow().get_dim();
+        Plotter {
+            inner: Some(Disper::new(move |w| {
+                self.canvas.borrow().render(
+                    w,
+                    RenderOptions {
+                        base: plot_fmt,
+                        plots: self.plots,
+                        xtick,
+                        ytick,
+                        boundx: self.boundx,
+                        boundy: self.boundy,
+                    },
+                )
+            })),
+            dim,
         }
-
-        impl<XI: TickGen, YI: TickGen, PF: BaseFmt<X = XI::Item, Y = YI::Item>> BaseFmtAndTicks
-            for PlotAllStruct<XI, YI, PF>
-        where
-            XI::Item: PlotNum,
-            YI::Item: PlotNum,
-        {
-            type X = PF::X;
-            type Y = PF::Y;
-            type Fmt = PF;
-            type XI = XI;
-            type YI = YI;
-
-            fn gen(self) -> (Self::Fmt, Self::XI, Self::YI) {
-                (self.fmt, self.xtick, self.ytick)
-            }
-        }
-
-        self.plot_with_all(PlotAllStruct {
-            fmt: plot_fmt,
-            xtick,
-            ytick,
-        })
     }
-
-    ///
-    /// Create a plotter directly from a [`BaseFmtAndTicks`]
-    ///
-    fn plot_with_all<PF: BaseFmtAndTicks<X = P::X, Y = P::Y>>(self, p: PF) -> Plotter<impl Disp> {
-        let pp = Renderer {
-            base: p,
-            plots: self.plots,
-            boundx: self.boundx,
-            boundy: self.boundy,
-            canvas: self.canvas,
-        };
-
-        let dim = pp.canvas.borrow().get_dim();
-        Plotter::new(pp, dim)
-    }
-}
-
-///
-/// Created by [`Canvas::build`]
-///
-pub struct Data<K: Borrow<Canvas>, P: PlotIterator> {
-    canvas: K,
-    boundx: ticks::DataBound<P::X>,
-    boundy: ticks::DataBound<P::Y>,
-    plots: P,
 }
