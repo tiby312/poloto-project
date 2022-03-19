@@ -103,6 +103,7 @@ macro_rules! formatm {
 macro_rules! plots {
     ( $a:expr,$( $x:expr ),* ) => {
         {
+            use $crate::build::PlotIteratorExt;
             let mut a=$a;
             $(
                 let a=a.chain($x);
