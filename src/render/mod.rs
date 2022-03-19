@@ -366,7 +366,7 @@ impl Canvas {
     pub fn build<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>>(
         &self,
         plots: P,
-    ) -> Data<X, Y, &Canvas, P> {
+    ) -> Data<X, Y, P, &Canvas> {
         self.build_with(plots, [], [])
     }
 
@@ -375,7 +375,7 @@ impl Canvas {
         mut plots: P,
         xmarkers: impl IntoIterator<Item = X>,
         ymarkers: impl IntoIterator<Item = Y>,
-    ) -> Data<X, Y, &Canvas, P> {
+    ) -> Data<X, Y, P, &Canvas> {
         let ii = std::iter::from_fn(|| plots.next_bound_point());
 
         let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
@@ -458,14 +458,14 @@ pub fn canvas_builder() -> CanvasBuilder {
 ///
 /// Created by [`Canvas::build`]
 ///
-pub struct Data<X: PlotNum, Y: PlotNum, K: Borrow<Canvas>, P: PlotIterator> {
+pub struct Data<X: PlotNum, Y: PlotNum, P: PlotIterator, K: Borrow<Canvas>> {
     canvas: K,
     boundx: ticks::DataBound<X>,
     boundy: ticks::DataBound<Y>,
     plots: P,
 }
 
-impl<X: PlotNum, Y: PlotNum, K: Borrow<Canvas>, P: PlotIterator<Item = (X, Y)>> Data<X, Y, K, P> {
+impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> Data<X, Y, P, K> {
     pub fn bounds(&self) -> (ticks::Bound<X>, ticks::Bound<Y>) {
         (
             Bound {
