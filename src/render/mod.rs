@@ -8,62 +8,6 @@ use crate::*;
 mod render_base;
 mod render_plot;
 
-///
-/// One-time function to write to a `fmt::Write`.
-///
-pub trait Disp {
-    fn disp(self, writer: &mut dyn fmt::Write) -> fmt::Result;
-}
-struct Disper<F> {
-    func: F,
-}
-impl<F: FnOnce(&mut dyn fmt::Write) -> fmt::Result> Disper<F> {
-    fn new(func: F) -> Disper<F> {
-        Disper { func }
-    }
-}
-impl<F: FnOnce(&mut dyn fmt::Write) -> fmt::Result> Disp for Disper<F> {
-    fn disp(self, w: &mut dyn fmt::Write) -> fmt::Result {
-        (self.func)(w)
-    }
-}
-
-///
-/// Created by [`Data::plot`]
-///
-pub struct Plotter<A: Disp> {
-    inner: Option<A>,
-    dim: [f64; 2],
-}
-impl<A: Disp> Plotter<A> {
-    pub fn get_dim(&self) -> [f64; 2] {
-        self.dim
-    }
-
-    ///
-    /// Use the plot iterators to write out the graph elements.
-    /// Does not add a svg tag, or any styling elements.
-    /// Use this if you want to embed a svg into your html.
-    /// You will just have to add your own svg sag and then supply styling.
-    ///
-    /// Panics if the render fails.
-    ///
-    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
-    /// this function will mutable borrow the Plotter and leave it with empty data.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let canvas=poloto::render::canvas();
-    /// let mut plotter=canvas.build(poloto::build::line("",data)).plot("title","x","y");
-    ///
-    /// let mut k=String::new();
-    /// plotter.render(&mut k);
-    /// ```
-    pub fn render<T: std::fmt::Write>(&mut self, mut writer: T) -> fmt::Result {
-        self.inner.take().unwrap().disp(&mut writer)
-    }
-}
-
 trait NumFmt {
     type K: Display;
     fn fmt(&self, a: f64) -> Self::K;
@@ -396,10 +340,10 @@ impl Canvas {
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         mut writer: &mut dyn fmt::Write,
-        mut plots: impl PlotIterator<Item = (X, Y)>,
-        mut base: impl BaseFmt<X = X, Y = Y>,
-        boundx: DataBound<X>,
-        boundy: DataBound<Y>,
+        plots: &mut impl PlotIterator<Item = (X, Y)>,
+        base: &mut impl BaseFmt<X = X, Y = Y>,
+        boundx: &DataBound<X>,
+        boundy: &DataBound<Y>,
     ) -> fmt::Result {
         //render background
         {
@@ -415,9 +359,9 @@ impl Canvas {
         //
         let plot_fmt = plots.as_mut_dyn();
 
-        render::render_plot::render_plot(&mut writer, &boundx, &boundy, self, plot_fmt)?;
+        render::render_plot::render_plot(&mut writer, boundx, boundy, self, plot_fmt)?;
 
-        render::render_base::render_base(&mut writer, &boundx, &boundy, &mut base, self)
+        render::render_base::render_base(&mut writer, boundx, boundy, base, self)
     }
 }
 ///
@@ -459,12 +403,12 @@ impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> 
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
-    pub fn plot(
+    pub fn plot<A: Display, B: Display, C: Display>(
         self,
-        title: impl Display,
-        xname: impl Display,
-        yname: impl Display,
-    ) -> Plotter<impl Disp>
+        title: A,
+        xname: B,
+        yname: C,
+    ) -> Plotter<P, K, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>
     where
         X: HasDefaultTicks,
         Y: HasDefaultTicks,
@@ -481,15 +425,118 @@ impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> 
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`Data::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with(self, plot_fmt: impl BaseFmt<X = X, Y = Y>) -> Plotter<impl Disp> {
-        let dim = self.canvas.borrow().get_dim();
+    pub fn plot_with<A: BaseFmt<X = X, Y = Y>>(self, plot_fmt: A) -> Plotter<P, K, A> {
         Plotter {
-            inner: Some(Disper::new(move |w| {
-                self.canvas
-                    .borrow()
-                    .render(w, self.plots, plot_fmt, self.boundx, self.boundy)
-            })),
-            dim,
+            plots: self.plots,
+            base: plot_fmt,
+            boundx: self.boundx,
+            boundy: self.boundy,
+            canvas: self.canvas,
         }
+    }
+}
+
+///
+/// Created by [`Data::plot`]
+///
+pub struct Plotter<P: PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> {
+    canvas: K,
+    boundx: DataBound<B::X>,
+    boundy: DataBound<B::Y>,
+    plots: P,
+    base: B,
+}
+impl<P: PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
+    pub fn get_dim(&self) -> [f64; 2] {
+        self.canvas.borrow().get_dim()
+    }
+
+    ///
+    /// Use the plot iterators to write out the graph elements.
+    /// Does not add a svg tag, or any styling elements.
+    /// Use this if you want to embed a svg into your html.
+    /// You will just have to add your own svg sag and then supply styling.
+    ///
+    /// Panics if the render fails.
+    ///
+    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
+    /// this function will mutable borrow the Plotter and leave it with empty data.
+    ///
+    /// ```
+    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    /// let canvas=poloto::render::canvas();
+    /// let mut plotter=canvas.build(poloto::build::line("",data)).plot("title","x","y");
+    ///
+    /// let mut k=String::new();
+    /// plotter.render(&mut k);
+    /// ```
+    pub fn render<T: std::fmt::Write>(&mut self, mut writer: T) -> fmt::Result {
+        self.canvas.borrow().render(
+            &mut writer,
+            &mut self.plots,
+            &mut self.base,
+            &self.boundx,
+            &self.boundy,
+        )
+    }
+}
+
+///
+/// A simple plot formatter that is composed of
+/// display objects as TickFormats.
+///
+pub struct SimplePlotFormatter<A, B, C, D, E> {
+    pub(crate) title: A,
+    pub(crate) xname: B,
+    pub(crate) yname: C,
+    pub(crate) tickx: D,
+    pub(crate) ticky: E,
+}
+impl<A, B, C, D, E> BaseFmt for SimplePlotFormatter<A, B, C, D, E>
+where
+    A: Display,
+    B: Display,
+    C: Display,
+    D: TickFormat,
+    E: TickFormat,
+{
+    type X = D::Num;
+    type Y = E::Num;
+    fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        write!(writer, "{}", self.title)
+    }
+    fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        write!(writer, "{}", self.xname)
+    }
+    fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        write!(writer, "{}", self.yname)
+    }
+    fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
+        self.tickx.write_tick(writer, val)
+    }
+    fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
+        self.ticky.write_tick(writer, val)
+    }
+    fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        self.tickx.write_where(writer)
+    }
+    fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+        self.ticky.write_where(writer)
+    }
+
+    fn next_xtick(&mut self) -> Option<Self::X> {
+        self.tickx.next_tick()
+    }
+
+    fn next_ytick(&mut self) -> Option<Self::Y> {
+        self.ticky.next_tick()
+    }
+
+    fn xdash_size(&self) -> Option<f64> {
+        self.tickx.dash_size()
+    }
+
+    fn ydash_size(&self) -> Option<f64> {
+        self.ticky.dash_size()
     }
 }

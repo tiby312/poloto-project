@@ -138,89 +138,6 @@ pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::Disp
 }
 
 ///
-/// Create a plot formatter that implements [`plotnum::BaseFmt`]
-///
-pub fn plot_fmt<D, E>(
-    title: impl Display,
-    xname: impl Display,
-    yname: impl Display,
-    tickx: D,
-    ticky: E,
-) -> impl BaseFmt<X = D::Num, Y = E::Num>
-where
-    D: TickFormat,
-    E: TickFormat,
-{
-    ///
-    /// A simple plot formatter that is composed of
-    /// display objects as TickFormats.
-    ///
-    struct SimplePlotFormatter<A, B, C, D, E> {
-        title: A,
-        xname: B,
-        yname: C,
-        tickx: D,
-        ticky: E,
-    }
-    impl<A, B, C, D, E> BaseFmt for SimplePlotFormatter<A, B, C, D, E>
-    where
-        A: Display,
-        B: Display,
-        C: Display,
-        D: TickFormat,
-        E: TickFormat,
-    {
-        type X = D::Num;
-        type Y = E::Num;
-        fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-            write!(writer, "{}", self.title)
-        }
-        fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-            write!(writer, "{}", self.xname)
-        }
-        fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-            write!(writer, "{}", self.yname)
-        }
-        fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
-            self.tickx.write_tick(writer, val)
-        }
-        fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
-            self.ticky.write_tick(writer, val)
-        }
-        fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-            self.tickx.write_where(writer)
-        }
-        fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-            self.ticky.write_where(writer)
-        }
-
-        fn next_xtick(&mut self) -> Option<Self::X> {
-            self.tickx.next_tick()
-        }
-
-        fn next_ytick(&mut self) -> Option<Self::Y> {
-            self.ticky.next_tick()
-        }
-
-        fn xdash_size(&self) -> Option<f64> {
-            self.tickx.dash_size()
-        }
-
-        fn ydash_size(&self) -> Option<f64> {
-            self.ticky.dash_size()
-        }
-    }
-
-    SimplePlotFormatter {
-        title,
-        xname,
-        yname,
-        tickx,
-        ticky,
-    }
-}
-
-///
 /// Iterate over the specified range over num iterations.
 ///
 pub fn range_iter(
@@ -231,4 +148,27 @@ pub fn range_iter(
     let diff = max - min;
     let divf = num as f64;
     (0..num).map(move |x| min + (x as f64 / divf) * diff)
+}
+
+///
+/// Create a plot formatter that implements [`plotnum::BaseFmt`]
+///
+pub fn plot_fmt<A: Display, B: Display, C: Display, D, E>(
+    title: A,
+    xname: B,
+    yname: C,
+    tickx: D,
+    ticky: E,
+) -> SimplePlotFormatter<A, B, C, D, E>
+where
+    D: TickFormat,
+    E: TickFormat,
+{
+    SimplePlotFormatter {
+        title,
+        xname,
+        yname,
+        tickx,
+        ticky,
+    }
 }

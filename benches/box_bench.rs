@@ -4,7 +4,11 @@ use poloto::prelude::*;
 fn trig<'a>(
     canvas: &'a poloto::render::Canvas,
     steps: usize,
-) -> poloto::render::Plotter<impl poloto::render::Disp + 'a> {
+) -> poloto::render::Plotter<
+    impl poloto::build::PlotIterator<Item = (f64, f64)> + 'a,
+    &'a poloto::render::Canvas,
+    impl poloto::plotnum::BaseFmt<X = f64, Y = f64>,
+> {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
@@ -51,7 +55,11 @@ fn trig<'a>(
 fn boxed_trig<'a>(
     canvas: &'a poloto::render::Canvas,
     steps: usize,
-) -> poloto::render::Plotter<impl poloto::render::Disp + 'a> {
+) -> poloto::render::Plotter<
+    impl poloto::build::PlotIterator<Item = (f64, f64)> + 'a,
+    &'a poloto::render::Canvas,
+    impl poloto::plotnum::BaseFmt<X = f64, Y = f64>,
+> {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
