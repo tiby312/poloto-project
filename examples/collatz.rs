@@ -19,7 +19,8 @@ fn main() {
         (1000..1006)
             .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
             .collect(),
-    );
+    )
+    .markers([], [0]);
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
@@ -29,7 +30,7 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let plotter = poloto::simple_fmt!(canvas, data.markers([], [0]), "collatz", "x", "y");
+    let plotter = simple_fmt!(canvas, data, "collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);

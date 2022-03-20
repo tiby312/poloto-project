@@ -22,7 +22,7 @@ fn main() {
 
     let data = plots!(l1, l2, l3).markers([], [0.0]);
 
-    let plotter = poloto::simple_fmt!(data, "gaussian", "x", "y");
+    let p = simple_fmt!(data, "gaussian", "x", "y");
 
-    print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
+    print!("{}", poloto::disp(|w| p.simple_theme(w)));
 }

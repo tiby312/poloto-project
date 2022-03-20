@@ -32,7 +32,7 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let plotter = poloto::simple_fmt!(
+    let plotter = simple_fmt!(
         poloto::build::line("", data).markers([], [0.0]),
         "Long Jump world record progression",
         "Date",

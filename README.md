@@ -38,12 +38,11 @@ fn main() {
     let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    let canvas = poloto::render::canvas();
-    let plotter = canvas
-        .build_with(plots!(l1, l2, l3), [], [0.0])
-        .plot("gaussian", "x", "y");
+    let data = plots!(l1, l2, l3).markers([], [0.0]);
 
-    print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
+    let p = simple_fmt!(data, "gaussian", "x", "y");
+
+    print!("{}", poloto::disp(|w| p.simple_theme(w)));
 }
 ```
 ## Output
@@ -76,7 +75,8 @@ fn main() {
         (1000..1006)
             .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
             .collect(),
-    );
+    )
+    .markers([], [0]);
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
@@ -86,7 +86,7 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let plotter = canvas.build_with(data, [], [0]).plot("collatz", "x", "y");
+    let plotter = simple_fmt!(canvas, data, "collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
@@ -100,6 +100,7 @@ fn main() {
         poloto::simple_theme::SVG_END
     )
 }
+
 ```
 ## Output
 
@@ -145,18 +146,12 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let canvas = poloto::render::canvas();
-
-    let data = canvas.build_with(poloto::build::line("", data), [], [0.0]);
-
-    let fmt = poloto::default_fmt(
+    let plotter = simple_fmt!(
+        poloto::build::line("", data).markers([], [0.0]),
         "Long Jump world record progression",
         "Date",
-        "Mark (in meters)",
-        data.bounds(),
+        "Mark (in meters)"
     );
-
-    let plotter = data.plot_with(fmt);
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }
@@ -180,7 +175,7 @@ fn main() {
     let it = (0..).zip(trend.into_iter());
 
     let canvas = poloto::render::canvas();
-    let data = canvas.build_with(poloto::build::histogram("", it), [24], []);
+    let data = canvas.build(poloto::build::histogram("", it).markers([24], []));
 
     let (_, by) = data.bounds();
     let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));

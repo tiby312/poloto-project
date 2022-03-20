@@ -67,6 +67,7 @@ pub mod prelude {
     pub use super::build::PlotIteratorExt;
     pub use super::formatm;
     pub use super::plots;
+    pub use super::simple_fmt;
     pub use super::simple_theme::SimpleTheme;
     pub use super::ticks::TickFormatExt;
 }

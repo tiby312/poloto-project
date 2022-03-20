@@ -524,9 +524,7 @@ impl<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> 
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let canvas=poloto::render::canvas();
-    /// let mut plotter=canvas.build(poloto::build::line("",data)).plot("title","x","y");
-    ///
+    /// let plotter=poloto::simple_fmt!(poloto::build::line("",data),"title","x","y");
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
