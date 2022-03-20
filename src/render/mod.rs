@@ -299,10 +299,11 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn build_moved<P: build::PlotIteratorAndMarkers>(
-        self,
-        plots: P,
-    ) -> Data<P::Iter, Canvas>  where P::X:PlotNum,P::Y:PlotNum{
+    pub fn build_moved<P: build::PlotIteratorAndMarkers>(self, plots: P) -> Data<P::Iter, Canvas>
+    where
+        P::X: PlotNum,
+        P::Y: PlotNum,
+    {
         let Data {
             boundx,
             boundy,
@@ -316,12 +317,46 @@ impl Canvas {
             plots,
         }
     }
-    pub fn build<P: build::PlotIteratorAndMarkers>(
-        &self,
-        plots: P,
-    ) -> Data<P::Iter, &Canvas> where P::X:PlotNum,P::Y:PlotNum{
+
+    pub fn build<P: build::PlotIteratorAndMarkers>(&self, plots: P) -> Data<P::Iter, &Canvas>
+    where
+        P::X: PlotNum,
+        P::Y: PlotNum,
+    {
         let (mut plots, xmarkers, ymarkers) = plots.unpack();
 
+        let ii = std::iter::from_fn(|| plots.next_bound_point());
+
+        let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
+
+        let boundx = ticks::DataBound {
+            min: boundx[0],
+            max: boundx[1],
+        };
+        let boundy = ticks::DataBound {
+            min: boundy[0],
+            max: boundy[1],
+        };
+
+        Data {
+            boundx,
+            boundy,
+            plots,
+            canvas: self,
+        }
+    }
+
+    #[deprecated(note = "Use regular build() in conjunction with markers().")]
+    pub fn build_with<P: PlotIterator>(
+        &self,
+        mut plots: P,
+        xmarkers: impl IntoIterator<Item = P::X>,
+        ymarkers: impl IntoIterator<Item = P::Y>,
+    ) -> Data<P, &Canvas>
+    where
+        P::X: PlotNum,
+        P::Y: PlotNum,
+    {
         let ii = std::iter::from_fn(|| plots.next_bound_point());
 
         let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
@@ -414,7 +449,9 @@ impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
-    #[deprecated(note="Due to clippy link of this functionb being too complex, replace with a macro. Use simple_fmt!() instead.")]
+    #[deprecated(
+        note = "Due to clippy link of this function being too complex, replace with a macro. Use simple_fmt!() instead."
+    )]
     pub fn plot<A: Display, B: Display, C: Display>(
         self,
         title: A,
@@ -468,7 +505,6 @@ pub struct Plotter<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>
     plots: P,
     base: B,
 }
-
 
 impl<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
     pub fn get_dim(&self) -> [f64; 2] {

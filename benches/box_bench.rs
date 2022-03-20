@@ -50,7 +50,7 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    let data = vec![
+    let data = plots!(
         poloto::build::line(
             "tan(x)",
             poloto::build::buffered_iter::buffered(
@@ -82,14 +82,14 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             "2*cos(x)",
             x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
         )
-        .into_boxed(),
-    ];
+        .into_boxed()
+    );
 
-    poloto::simple_fmt!(poloto::build::plots_dyn(data), "box trig", "x", "y").simple_theme(writer)
+    poloto::simple_fmt!(data, "box trig", "x", "y").simple_theme(writer)
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    let num = 30_000;
+    let num = 5_000;
     c.bench_function("trig", |b| {
         b.iter(|| {
             let mut s = EmptyWriter;
