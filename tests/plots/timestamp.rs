@@ -20,7 +20,7 @@ fn days() -> fmt::Result {
         (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let s = poloto::simple_plot!(
+    let s = poloto::simple_fmt!(
         poloto::build::line("", data).markers(None, Some(0)),
         "Number of Wikipedia Articles",
         "Day",
@@ -88,7 +88,7 @@ fn months() -> fmt::Result {
         (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
-    let s = poloto::simple_plot!(
+    let s = poloto::simple_fmt!(
         poloto::build::line("", data).markers([], [0]),
         "Number of Wikipedia Articles",
         "duration",

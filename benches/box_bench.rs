@@ -43,7 +43,7 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
         )
     );
 
-    poloto::simple_plot!(data, "trig", "x", "y").simple_theme(writer)
+    poloto::simple_fmt!(data, "trig", "x", "y").simple_theme(writer)
 }
 
 fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
@@ -85,7 +85,7 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
         .into_boxed(),
     ];
 
-    poloto::simple_plot!(poloto::build::plots_dyn(data), "box trig", "x", "y").simple_theme(writer)
+    poloto::simple_fmt!(poloto::build::plots_dyn(data), "box trig", "x", "y").simple_theme(writer)
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {

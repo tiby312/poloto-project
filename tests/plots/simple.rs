@@ -14,7 +14,7 @@ fn heart() -> fmt::Result {
 
     let canvas = poloto::render::canvas_builder().preserve_aspect().build();
 
-    let plotter = poloto::simple_plot!(
+    let plotter = poloto::simple_fmt!(
         canvas,
         poloto::build::line_fill_raw("", range.map(heart)).markers([-20.0, 20.0], [-20.0, 20.0]),
         "Heart Graph",
@@ -36,7 +36,7 @@ fn large_scatter() -> fmt::Result {
         poloto::build::line("b", x.clone().map(|x| (x, x.sin())))
     );
 
-    let plotter = poloto::simple_plot!(plots, "cows per year", "year", "cows");
+    let plotter = poloto::simple_fmt!(plots, "cows per year", "year", "cows");
     let mut w = util::create_test_file("large_scatter.svg");
 
     write!(
@@ -113,7 +113,7 @@ fn long_label() -> fmt::Result {
         )
     );
 
-    let plotter = poloto::simple_plot!(plots.markers([], [0]), "collatz", "x", "y");
+    let plotter = poloto::simple_fmt!(plots.markers([], [0]), "collatz", "x", "y");
 
     let mut w = util::create_test_file("long_label.svg");
 
@@ -136,7 +136,7 @@ fn long_label() -> fmt::Result {
 fn magnitude() -> fmt::Result {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let p = poloto::simple_plot!(
+    let p = poloto::simple_fmt!(
         poloto::build::scatter("", &data),
         "cows per year",
         "year",
@@ -152,7 +152,7 @@ fn magnitude() -> fmt::Result {
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let plotter = poloto::simple_plot!(
+    let plotter = poloto::simple_fmt!(
         poloto::build::scatter("", points),
         "cows per year",
         "year",
@@ -197,7 +197,7 @@ fn custom_dim() -> fmt::Result {
         .with_tick_lines([true, true])
         .build();
 
-    let plotter = poloto::simple_plot!(
+    let plotter = poloto::simple_fmt!(
         canvas,
         poloto::build::plots_dyn(v).markers([], [0]),
         "collatz",
@@ -231,7 +231,7 @@ fn dark() -> fmt::Result {
         poloto::build::line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]),)
     );
 
-    let plotter = poloto::simple_plot!(plots, "cos per year", "year", "cows");
+    let plotter = poloto::simple_fmt!(plots, "cos per year", "year", "cows");
 
     let w = util::create_test_file("dark.svg");
 
@@ -247,7 +247,7 @@ fn custom_style() -> fmt::Result {
         poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]))
     );
 
-    let p = poloto::simple_plot!(
+    let p = poloto::simple_fmt!(
         plots,
         "Demo: you can change the style of the svg file itself!",
         "x",
@@ -312,7 +312,7 @@ fn trig() -> fmt::Result {
         )
     );
 
-    let plotter = poloto::simple_plot!(
+    let plotter = poloto::simple_fmt!(
         data,
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
@@ -327,7 +327,7 @@ fn trig() -> fmt::Result {
 fn no_plots() -> fmt::Result {
     let v: Vec<poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>> = vec![];
 
-    let plotter = poloto::simple_plot!(
+    let plotter = poloto::simple_fmt!(
         poloto::build::plots_dyn(v),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
@@ -342,7 +342,7 @@ fn no_plots() -> fmt::Result {
 fn no_plots_only_marker() -> fmt::Result {
     let v: Vec<poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>> = vec![];
 
-    let plotter = poloto::simple_plot!(
+    let plotter = poloto::simple_fmt!(
         poloto::build::plots_dyn(v).markers([], [5]),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
@@ -357,7 +357,7 @@ fn no_plots_only_marker() -> fmt::Result {
 fn one_empty_plot() -> fmt::Result {
     let l = poloto::build::scatter("hay", std::iter::empty::<(i128, i128)>());
 
-    let plotter = poloto::simple_plot!(
+    let plotter = poloto::simple_fmt!(
         l.markers([], [5]),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),

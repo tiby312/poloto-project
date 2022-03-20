@@ -458,7 +458,7 @@ impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
-    #[deprecated(note = "use simple_plot instead")]
+    #[deprecated(note = "use simple_fmt macro instead")]
     pub fn plot<A: Display, B: Display, C: Display>(
         self,
         title: A,

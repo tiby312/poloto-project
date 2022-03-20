@@ -113,7 +113,7 @@ macro_rules! plots {
 }
 
 #[macro_export]
-macro_rules! simple_plot {
+macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
         let canvas = poloto::render::canvas();
         let data = canvas.build_moved($data);
