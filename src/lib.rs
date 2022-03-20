@@ -112,6 +112,42 @@ macro_rules! plots {
     };
 }
 
+#[macro_export]
+macro_rules! simple_plot {
+    ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
+        let canvas = poloto::render::canvas();
+        let data = canvas.build_moved($data);
+
+        let (bx, by) = data.bounds();
+        let xt = $crate::ticks::from_default(bx);
+        let yt = $crate::ticks::from_default(by);
+
+        let p = $crate::plot_fmt($title, $xname, $yname, xt, yt);
+        data.plot_with(p)
+    }};
+    ($canvas:expr,$data:expr,$title:expr,$xname:expr,$yname:expr) => {{
+        let data = $canvas.build($data);
+        let (bx, by) = data.bounds();
+        let xt = $crate::ticks::from_default(bx);
+        let yt = $crate::ticks::from_default(by);
+
+        let p = $crate::plot_fmt($title, $xname, $yname, xt, yt);
+        data.plot_with(p)
+    }};
+}
+
+#[macro_export]
+macro_rules! simple_plot_data {
+    ($title:expr,$xname:expr,$yname:expr,$data:expr) => {{
+        let (bx, by) = $data.bounds();
+        let xt = $crate::ticks::from_default(bx);
+        let yt = $crate::ticks::from_default(by);
+
+        let p = $crate::plot_fmt($title, $xname, $yname, xt, yt);
+        $data.plot_with(p)
+    }};
+}
+
 ///
 /// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
 ///

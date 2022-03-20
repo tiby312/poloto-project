@@ -20,10 +20,9 @@ fn main() {
     let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
 
-    let canvas = poloto::render::canvas();
-    let plotter = canvas
-        .build_with(plots!(l1, l2, l3), [], [0.0])
-        .plot("gaussian", "x", "y");
+    let data = plots!(l1, l2, l3).markers([], [0.0]);
+
+    let plotter = poloto::simple_plot!(data, "gaussian", "x", "y");
 
     print!("{}", poloto::disp(|a| plotter.simple_theme(a)));
 }

@@ -130,8 +130,8 @@ pub trait SimpleTheme {
     fn simple_theme_dark<T: fmt::Write>(self, a: T) -> std::fmt::Result;
 }
 
-impl<P: PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> SimpleTheme
-    for Plotter<P, K, B>
+impl<P: build::PlotIteratorAndMarkers<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt>
+    SimpleTheme for Plotter<P, K, B>
 {
     fn simple_theme<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
         let dim = self.get_dim();

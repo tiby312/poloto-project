@@ -7,7 +7,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     canvas: &Canvas,
-    plots_all: impl PlotIterator<Item = (X, Y)>,
+    plots_all: &mut impl build::PlotIteratorAndMarkers<X = X, Y = Y>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
