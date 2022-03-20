@@ -102,7 +102,7 @@ fn boxed_trig(
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    let num = 3_000;
+    let num = 30_000;
     let canvas = poloto::render::canvas();
     c.bench_function("trig", |b| {
         b.iter(|| {
