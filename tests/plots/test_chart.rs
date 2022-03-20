@@ -77,8 +77,14 @@ fn test_chart() -> std::fmt::Result {
                             poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                let s = canvas.build(poloto::build::scatter("", test));
-                                s.plot(formatm!("test {}", i), "x", "y").render(a)
+                                let s = poloto::simple_fmt!(
+                                    canvas,
+                                    poloto::build::scatter("", test),
+                                    formatm!("test {}", i),
+                                    "x",
+                                    "y"
+                                );
+                                s.render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;
@@ -93,9 +99,14 @@ fn test_chart() -> std::fmt::Result {
                             poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
-                                let s = canvas.build(poloto::build::scatter("", test));
-
-                                s.plot(formatm!("test {}", i), "x", "y").render(a)
+                                let s = poloto::simple_fmt!(
+                                    canvas,
+                                    poloto::build::scatter("", test),
+                                    formatm!("test {}", i),
+                                    "x",
+                                    "y"
+                                );
+                                s.render(a)
                             }),
                             poloto::simple_theme::SVG_END
                         )?;

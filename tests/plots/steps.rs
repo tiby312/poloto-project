@@ -17,7 +17,7 @@ fn marathon() -> fmt::Result {
 
     let canvas = poloto::render::canvas();
 
-    let data = canvas.build_with(poloto::build::line("hay", &heart_rate), None, Some(0));
+    let data = canvas.build(poloto::build::line("hay", &heart_rate).markers(None, Some(0)));
 
     let xtick_fmt = poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
 
@@ -65,7 +65,7 @@ fn years() -> fmt::Result {
 
     let canvas = poloto::render::canvas();
 
-    let data = canvas.build_with(poloto::build::histogram("foo", data), None, Some(0));
+    let data = canvas.build(poloto::build::histogram("foo", data).markers(None, Some(0)));
 
     let xtick_fmt = poloto::ticks::from_iter((2010..).step_by(2));
 

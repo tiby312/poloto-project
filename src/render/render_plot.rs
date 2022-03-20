@@ -7,7 +7,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     canvas: &Canvas,
-    plots_all: impl PlotIterator<Item = (X, Y)>,
+    mut plots_all: impl build::PlotIterator<X = X, Y = Y>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -42,7 +42,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
         (0..max).cycle()
     };
 
-    let mut f = crate::build::RenderablePlotIter::new(plots_all);
+    let mut f = crate::build::RenderablePlotIter::new(&mut plots_all);
 
     for i in 0.. {
         let mut ppp = if let Some(ppp) = f.next_plot() {

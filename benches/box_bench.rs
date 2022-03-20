@@ -1,11 +1,14 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use poloto::prelude::*;
 
-fn trig(
-    writer: impl std::fmt::Write,
-    canvas: &poloto::render::Canvas,
-    steps: usize,
-) -> std::fmt::Result {
+struct EmptyWriter;
+impl std::fmt::Write for EmptyWriter {
+    fn write_str(&mut self, a: &str) -> std::fmt::Result {
+        black_box(a);
+        Ok(black_box(()))
+    }
+}
+fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
@@ -40,20 +43,10 @@ fn trig(
         )
     );
 
-    let plotter = canvas.build(data).plot(
-        "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-    );
-
-    plotter.simple_theme(writer)
+    poloto::simple_fmt!(data, "trig", "x", "y").simple_theme(writer)
 }
 
-fn boxed_trig(
-    writer: impl std::fmt::Write,
-    canvas: &poloto::render::Canvas,
-    steps: usize,
-) -> std::fmt::Result {
+fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
@@ -92,29 +85,22 @@ fn boxed_trig(
         .into_boxed(),
     ];
 
-    let plotter = canvas.build(poloto::build::plots_dyn(data)).plot(
-        "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-    );
-
-    plotter.simple_theme(writer)
+    poloto::simple_fmt!(poloto::build::plots_dyn(data), "box trig", "x", "y").simple_theme(writer)
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let num = 30_000;
-    let canvas = poloto::render::canvas();
     c.bench_function("trig", |b| {
         b.iter(|| {
-            let mut s = String::new();
-            trig(&mut s, &canvas, black_box(num)).unwrap();
+            let mut s = EmptyWriter;
+            trig(&mut s, black_box(num)).unwrap();
             black_box(s);
         })
     });
     c.bench_function("boxed trig", |b| {
         b.iter(|| {
-            let mut s = String::new();
-            boxed_trig(&mut s, &canvas, black_box(num)).unwrap();
+            let mut s = EmptyWriter;
+            boxed_trig(&mut s, black_box(num)).unwrap();
             black_box(s);
         })
     });

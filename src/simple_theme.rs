@@ -130,7 +130,7 @@ pub trait SimpleTheme {
     fn simple_theme_dark<T: fmt::Write>(self, a: T) -> std::fmt::Result;
 }
 
-impl<P: PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> SimpleTheme
+impl<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> SimpleTheme
     for Plotter<P, K, B>
 {
     fn simple_theme<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
@@ -167,3 +167,6 @@ pub fn determine_height_from_width(viewport: [f64; 2], width: f64) -> f64 {
     let [xx, yy] = viewport;
     width * (yy / xx)
 }
+
+
+

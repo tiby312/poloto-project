@@ -2,8 +2,6 @@
 //! Tools to render plots
 //!
 
-use build::PlotIteratorExt;
-
 use crate::*;
 mod render_base;
 mod render_plot;
@@ -280,6 +278,8 @@ impl CanvasBuilder {
 ///
 /// Built from [`canvas()`]
 ///
+///
+#[derive(Clone)]
 pub struct Canvas {
     boundx: ticks::CanvasBound,
     boundy: ticks::CanvasBound,
@@ -299,19 +299,29 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn build<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>>(
+    pub fn build_moved<P: build::PlotIteratorAndMarkers>(
+        self,
+        plots: P,
+    ) -> Data<P::Iter, Canvas>  where P::X:PlotNum,P::Y:PlotNum{
+        let Data {
+            boundx,
+            boundy,
+            plots,
+            ..
+        } = self.build(plots);
+        Data {
+            canvas: self,
+            boundx,
+            boundy,
+            plots,
+        }
+    }
+    pub fn build<P: build::PlotIteratorAndMarkers>(
         &self,
         plots: P,
-    ) -> Data<X, Y, P, &Canvas> {
-        self.build_with(plots, [], [])
-    }
+    ) -> Data<P::Iter, &Canvas> where P::X:PlotNum,P::Y:PlotNum{
+        let (mut plots, xmarkers, ymarkers) = plots.unpack();
 
-    pub fn build_with<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>>(
-        &self,
-        mut plots: P,
-        xmarkers: impl IntoIterator<Item = X>,
-        ymarkers: impl IntoIterator<Item = Y>,
-    ) -> Data<X, Y, P, &Canvas> {
         let ii = std::iter::from_fn(|| plots.next_bound_point());
 
         let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
@@ -340,7 +350,7 @@ impl Canvas {
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         mut writer: &mut dyn fmt::Write,
-        plots: &mut impl PlotIterator<Item = (X, Y)>,
+        plots: &mut impl build::PlotIterator<X = X, Y = Y>,
         base: &mut impl BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
@@ -353,6 +363,7 @@ impl Canvas {
                 d.attr("class", "poloto_background")
             })?;
         }
+        use crate::build::PlotIteratorExt;
 
         //
         // Using `cargo bloat` determined that these lines reduces alot of code bloat.
@@ -378,15 +389,15 @@ pub fn canvas_builder() -> CanvasBuilder {
 ///
 /// Created by [`Canvas::build`]
 ///
-pub struct Data<X: PlotNum, Y: PlotNum, P: PlotIterator, K: Borrow<Canvas>> {
+pub struct Data<P: build::PlotIterator, K: Borrow<Canvas>> {
     canvas: K,
-    boundx: ticks::DataBound<X>,
-    boundy: ticks::DataBound<Y>,
+    boundx: ticks::DataBound<P::X>,
+    boundy: ticks::DataBound<P::Y>,
     plots: P,
 }
 
-impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> Data<X, Y, P, K> {
-    pub fn bounds(&self) -> (ticks::Bound<X>, ticks::Bound<Y>) {
+impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
+    pub fn bounds(&self) -> (ticks::Bound<P::X>, ticks::Bound<P::Y>) {
         (
             Bound {
                 data: &self.boundx,
@@ -403,15 +414,26 @@ impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> 
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
+    #[deprecated(note="Due to clippy link of this functionb being too complex, replace with a macro. Use simple_fmt!() instead.")]
     pub fn plot<A: Display, B: Display, C: Display>(
         self,
         title: A,
         xname: B,
         yname: C,
-    ) -> Plotter<P, K, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>
+    ) -> Plotter<
+        P,
+        K,
+        SimplePlotFormatter<
+            A,
+            B,
+            C,
+            <P::X as HasDefaultTicks>::Fmt,
+            <P::Y as HasDefaultTicks>::Fmt,
+        >,
+    >
     where
-        X: HasDefaultTicks,
-        Y: HasDefaultTicks,
+        P::X: HasDefaultTicks,
+        P::Y: HasDefaultTicks,
     {
         let (bx, by) = self.bounds();
         let xt = ticks::from_default(bx);
@@ -425,7 +447,7 @@ impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> 
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`Data::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<A: BaseFmt<X = X, Y = Y>>(self, plot_fmt: A) -> Plotter<P, K, A> {
+    pub fn plot_with<A: BaseFmt<X = P::X, Y = P::Y>>(self, plot_fmt: A) -> Plotter<P, K, A> {
         Plotter {
             plots: self.plots,
             base: plot_fmt,
@@ -439,14 +461,16 @@ impl<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> 
 ///
 /// Created by [`Data::plot`]
 ///
-pub struct Plotter<P: PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> {
+pub struct Plotter<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> {
     canvas: K,
     boundx: DataBound<B::X>,
     boundy: DataBound<B::Y>,
     plots: P,
     base: B,
 }
-impl<P: PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
+
+
+impl<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
     pub fn get_dim(&self) -> [f64; 2] {
         self.canvas.borrow().get_dim()
     }

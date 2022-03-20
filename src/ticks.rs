@@ -29,7 +29,7 @@ pub struct DataBound<X> {
 ///
 /// Tick relevant information of [`Canvas`]
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CanvasBound {
     pub ideal_num_steps: u32,
     pub ideal_dash_size: f64,
