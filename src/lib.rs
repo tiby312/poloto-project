@@ -113,6 +113,28 @@ macro_rules! plots {
     };
 }
 
+///
+/// Create plots without having to manually create the ticks
+/// for each axis.
+///
+/// ### No canvas argument.
+/// ```
+/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+/// let plotter=poloto::simple_fmt!(poloto::build::line("",data),"title","x","y");
+/// let mut k=String::new();
+/// plotter.render(&mut k);
+/// ```
+///
+/// ### With canvas argument.
+/// ```
+/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+/// let canvas=poloto::render::canvas();
+/// let plotter=poloto::simple_fmt!(canvas,poloto::build::line("",data),"title","x","y");
+/// let mut k=String::new();
+/// plotter.render(&mut k);
+/// ```
+
+///
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
