@@ -39,6 +39,7 @@ pub struct UnixTimeTickFmt<T: TimeZone> {
     step: StepUnit,
     timezone: T,
     start: UnixTime,
+    footnote: Option<char>,
     axis: Axis,
     ticks: std::vec::IntoIter<UnixTime>,
 }
@@ -73,28 +74,41 @@ where
         writer: &mut dyn std::fmt::Write,
         val: &Self::Num,
     ) -> std::fmt::Result {
-        write!(writer, "{}", val.dynamic_format(&self.timezone, &self.step))
+        if let Some(footnote) = self.footnote.take() {
+            write!(
+                writer,
+                "{}{}",
+                val.dynamic_format(&self.timezone, &self.step),
+                footnote
+            )
+        } else {
+            write!(writer, "{}", val.dynamic_format(&self.timezone, &self.step))
+        }
     }
 
-    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        match self.axis {
-            Axis::X => {
-                write!(
-                    writer,
-                    "X: {} in {}",
-                    self.start.dynamic_where_format(&self.timezone, &self.step),
-                    self.step
-                )
-            }
-            Axis::Y => {
-                write!(
-                    writer,
-                    "Y: {} in {}",
-                    self.start.dynamic_where_format(&self.timezone, &self.step),
-                    self.step
-                )
-            }
-        }
+    fn write_where(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        mut req: ticks::IndexRequester,
+    ) -> std::fmt::Result {
+        let index = req.request();
+
+        let footnote = match index {
+            0 => '¹',
+            1 => '²',
+            _ => unreachable!("There is a maximum of only two axis!"),
+        };
+
+        let val = self.start.datetime(&self.timezone);
+        write!(
+            writer,
+            "{}{} in {}",
+            val, //self.start.dynamic_where_format(&self.timezone, &self.step),
+            footnote,
+            self.step,
+        )?;
+        self.footnote = Some(footnote);
+        Ok(())
     }
 }
 
@@ -201,6 +215,7 @@ where
         ticks: ticks.into_iter(),
         timezone: timezone.clone(),
         step: ret.unit_data,
+        footnote: None,
         axis,
         start,
     }

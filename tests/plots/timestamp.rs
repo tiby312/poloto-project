@@ -24,7 +24,7 @@ fn days() -> fmt::Result {
 
     let s = canvas.build_with(poloto::build::line("", data), None, Some(0));
 
-    let mut s = s.plot("Number of Wikipedia Articles", "Day", "Number of Articles");
+    let s = s.plot("Number of Wikipedia Articles", "Day", "Number of Articles");
 
     let mut w = util::create_test_file("days.svg");
 
@@ -55,7 +55,7 @@ fn minutes_local_time() -> fmt::Result {
     let xtick_fmt = unixtime_ticks(bx, time_zone);
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let mut s = s.plot_with(poloto::plot_fmt(
+    let s = s.plot_with(poloto::plot_fmt(
         "Number of Wikipedia Articles",
         "time",
         "Number of Articles",
@@ -91,7 +91,7 @@ fn months() -> fmt::Result {
 
     let s = canvas.build_with(poloto::build::line("", data), None, Some(0));
 
-    let mut s = s.plot(
+    let s = s.plot(
         "Number of Wikipedia Articles",
         "duration",
         "Number of Articles",
@@ -136,7 +136,7 @@ fn seconds() -> fmt::Result {
 
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let mut plotter = data.plot_with(poloto::plot_fmt(
+    let plotter = data.plot_with(poloto::plot_fmt(
         "Number of Wikipedia Articles",
         formatm!(
             "{} to {} in {}",
@@ -145,7 +145,9 @@ fn seconds() -> fmt::Result {
             xtick_step
         ),
         "Number of Articles",
-        xtick_fmt.with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S"))),
+        xtick_fmt
+            .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+            .with_where_fmt(|_| Ok(())),
         ytick_fmt,
     ));
 

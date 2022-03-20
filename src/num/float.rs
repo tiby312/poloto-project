@@ -60,7 +60,11 @@ impl TickFormat for FloatTickFmt {
 
         util::write_interval_float(writer, val, Some(self.step))
     }
-    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
+    fn write_where(
+        &mut self,
+        writer: &mut dyn std::fmt::Write,
+        _req: ticks::IndexRequester,
+    ) -> std::fmt::Result {
         if let Some(offset) = self.offset {
             match self.axis {
                 Axis::X => {

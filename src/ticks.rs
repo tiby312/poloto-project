@@ -114,6 +114,24 @@ pub trait TickFormatExt: TickFormat {
 
 impl<T: TickFormat> TickFormatExt for T {}
 
+
+///
+/// Useful for numbering footnotes. If one axis uses the number one as a footnote,
+/// The second access should use the number two as a footnote.
+/// 
+pub struct IndexRequester<'a> {
+    counter: &'a mut usize,
+}
+impl<'a> IndexRequester<'a> {
+    pub fn new(counter: &'a mut usize) -> Self {
+        IndexRequester { counter }
+    }
+    pub fn request(&mut self) -> usize {
+        let val = *self.counter;
+        *self.counter += 1;
+        val
+    }
+}
 ///
 /// Formatter for a tick.
 ///
@@ -122,7 +140,11 @@ pub trait TickFormat {
     fn dash_size(&self) -> Option<f64>;
     fn next_tick(&mut self) -> Option<Self::Num>;
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
-    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+    fn write_where(
+        &mut self,
+        _: &mut dyn std::fmt::Write,
+        _req: IndexRequester,
+    ) -> std::fmt::Result {
         Ok(())
     }
 }
@@ -141,7 +163,11 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result> TickFor
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
         self.inner.write_tick(a, val)
     }
-    fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
+    fn write_where(
+        &mut self,
+        a: &mut dyn std::fmt::Write,
+        _req: IndexRequester,
+    ) -> std::fmt::Result {
         (self.func)(a)
     }
     fn dash_size(&self) -> Option<f64> {
@@ -166,8 +192,12 @@ impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
         (self.func)(a, val)
     }
-    fn write_where(&mut self, a: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        self.inner.write_where(a)
+    fn write_where(
+        &mut self,
+        a: &mut dyn std::fmt::Write,
+        ind: IndexRequester,
+    ) -> std::fmt::Result {
+        self.inner.write_where(a, ind)
     }
     fn dash_size(&self) -> Option<f64> {
         self.inner.dash_size()

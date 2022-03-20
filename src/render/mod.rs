@@ -517,11 +517,19 @@ where
     fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
         self.ticky.write_tick(writer, val)
     }
-    fn write_xwher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        self.tickx.write_where(writer)
+    fn write_xwher(
+        &mut self,
+        writer: &mut dyn fmt::Write,
+        ind: ticks::IndexRequester,
+    ) -> fmt::Result {
+        self.tickx.write_where(writer, ind)
     }
-    fn write_ywher(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        self.ticky.write_where(writer)
+    fn write_ywher(
+        &mut self,
+        writer: &mut dyn fmt::Write,
+        ind: ticks::IndexRequester,
+    ) -> fmt::Result {
+        self.ticky.write_where(writer, ind)
     }
 
     fn next_xtick(&mut self) -> Option<Self::X> {

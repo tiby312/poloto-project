@@ -120,56 +120,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         (distance_to_firsty, distancey_min_to_max)
     };
 
-    {
-        //step num is assured to be atleast 1.
-        writer
-            .elem("text", |d| {
-                d.attr("class", "poloto_tick_labels poloto_text")?;
-                d.attr("dominant-baseline", "middle")?;
-                d.attr("text-anchor", "start")?;
-                d.attr("x", width * 0.55)?;
-                d.attr("y", paddingy * 0.7)
-            })?
-            .build(|d| plot_fmt.write_xwher(&mut d.writer_safe()))?;
-
-        //Draw interva`l x text
-        for val in std::iter::once(first_tickx).chain(xticks) {
-            let xx = (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
-
-            writer.single("line", |d| {
-                d.attr("class", "poloto_axis_lines")?;
-                d.attr("stroke", "black")?;
-                d.attr("x1", xaspect_offset + xx)?;
-                d.attr("x2", xaspect_offset + xx)?;
-                d.attr("y1", yaspect_offset + height - paddingy)?;
-                d.attr("y2", yaspect_offset + height - paddingy * 0.95)
-            })?;
-
-            if canvas.xtick_lines {
-                writer.single("line", |d| {
-                    d.attr("class", "poloto_tick_line")?;
-                    d.attr("stroke", "black")?;
-                    d.attr("x1", xaspect_offset + xx)?;
-                    d.attr("x2", xaspect_offset + xx)?;
-                    d.attr("y1", yaspect_offset + height - paddingy)?;
-                    d.attr(
-                        "y2",
-                        yaspect_offset + height - paddingy - distancey_min_to_max,
-                    )
-                })?;
-            }
-
-            writer
-                .elem("text", |d| {
-                    d.attr("class", "poloto_tick_labels poloto_text")?;
-                    d.attr("dominant-baseline", "start")?;
-                    d.attr("text-anchor", "middle")?;
-                    d.attr("x", xaspect_offset + xx)?;
-                    d.attr("y", yaspect_offset + height - paddingy + texty_padding)
-                })?
-                .build(|w| plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
-        }
-    }
+    let mut index_counter = 0;
 
     {
         //step num is assured to be atleast 1.
@@ -181,7 +132,12 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 d.attr("x", padding)?;
                 d.attr("y", paddingy * 0.7)
             })?
-            .build(|w| plot_fmt.write_ywher(&mut w.writer_safe()))?;
+            .build(|w| {
+                plot_fmt.write_ywher(
+                    &mut w.writer_safe(),
+                    IndexRequester::new(&mut index_counter),
+                )
+            })?;
 
         //Draw interval y text
         for val in std::iter::once(first_ticky).chain(yticks) {
@@ -221,6 +177,61 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         }
     }
 
+    {
+        //step num is assured to be atleast 1.
+        writer
+            .elem("text", |d| {
+                d.attr("class", "poloto_tick_labels poloto_text")?;
+                d.attr("dominant-baseline", "middle")?;
+                d.attr("text-anchor", "start")?;
+                d.attr("x", width * 0.55)?;
+                d.attr("y", paddingy * 0.7)
+            })?
+            .build(|d| {
+                plot_fmt.write_xwher(
+                    &mut d.writer_safe(),
+                    IndexRequester::new(&mut index_counter),
+                )
+            })?;
+
+        //Draw interva`l x text
+        for val in std::iter::once(first_tickx).chain(xticks) {
+            let xx = (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
+
+            writer.single("line", |d| {
+                d.attr("class", "poloto_axis_lines")?;
+                d.attr("stroke", "black")?;
+                d.attr("x1", xaspect_offset + xx)?;
+                d.attr("x2", xaspect_offset + xx)?;
+                d.attr("y1", yaspect_offset + height - paddingy)?;
+                d.attr("y2", yaspect_offset + height - paddingy * 0.95)
+            })?;
+
+            if canvas.xtick_lines {
+                writer.single("line", |d| {
+                    d.attr("class", "poloto_tick_line")?;
+                    d.attr("stroke", "black")?;
+                    d.attr("x1", xaspect_offset + xx)?;
+                    d.attr("x2", xaspect_offset + xx)?;
+                    d.attr("y1", yaspect_offset + height - paddingy)?;
+                    d.attr(
+                        "y2",
+                        yaspect_offset + height - paddingy - distancey_min_to_max,
+                    )
+                })?;
+            }
+
+            writer
+                .elem("text", |d| {
+                    d.attr("class", "poloto_tick_labels poloto_text")?;
+                    d.attr("dominant-baseline", "start")?;
+                    d.attr("text-anchor", "middle")?;
+                    d.attr("x", xaspect_offset + xx)?;
+                    d.attr("y", yaspect_offset + height - paddingy + texty_padding)
+                })?
+                .build(|w| plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
+        }
+    }
     writer.single("path", |d| {
         d.attr("stroke", "black")?;
         d.attr("fill", "none")?;
