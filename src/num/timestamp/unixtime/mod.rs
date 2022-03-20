@@ -173,6 +173,7 @@ impl UnixTime {
         }
     }
 
+    #[deprecated(note = "We instead just print the unix time with all its resolution.")]
     pub fn dynamic_where_format<'a, T: TimeZone + 'a>(
         &'a self,
         timezone: &'a T,

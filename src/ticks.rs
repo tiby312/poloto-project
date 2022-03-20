@@ -114,11 +114,10 @@ pub trait TickFormatExt: TickFormat {
 
 impl<T: TickFormat> TickFormatExt for T {}
 
-
 ///
 /// Useful for numbering footnotes. If one axis uses the number one as a footnote,
 /// The second access should use the number two as a footnote.
-/// 
+///
 pub struct IndexRequester<'a> {
     counter: &'a mut usize,
 }

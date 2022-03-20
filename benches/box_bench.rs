@@ -1,14 +1,11 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use poloto::prelude::*;
 
-fn trig<'a>(
-    canvas: &'a poloto::render::Canvas,
+fn trig(
+    writer: impl std::fmt::Write,
+    canvas: &poloto::render::Canvas,
     steps: usize,
-) -> poloto::render::Plotter<
-    impl poloto::build::PlotIterator<Item = (f64, f64)> + 'a,
-    &'a poloto::render::Canvas,
-    impl poloto::plotnum::BaseFmt<X = f64, Y = f64>,
-> {
+) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
@@ -49,17 +46,14 @@ fn trig<'a>(
         "This is the y label",
     );
 
-    plotter
+    plotter.simple_theme(writer)
 }
 
-fn boxed_trig<'a>(
-    canvas: &'a poloto::render::Canvas,
+fn boxed_trig(
+    writer: impl std::fmt::Write,
+    canvas: &poloto::render::Canvas,
     steps: usize,
-) -> poloto::render::Plotter<
-    impl poloto::build::PlotIterator<Item = (f64, f64)> + 'a,
-    &'a poloto::render::Canvas,
-    impl poloto::plotnum::BaseFmt<X = f64, Y = f64>,
-> {
+) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     // Using poloto::Croppable, we can filter out plots and still have discontinuity.
@@ -104,17 +98,25 @@ fn boxed_trig<'a>(
         "This is the y label",
     );
 
-    plotter
+    plotter.simple_theme(writer)
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let num = 3_000;
     let canvas = poloto::render::canvas();
     c.bench_function("trig", |b| {
-        b.iter(|| black_box(trig(&canvas, black_box(num))))
+        b.iter(|| {
+            let mut s = String::new();
+            trig(&mut s, &canvas, black_box(num)).unwrap();
+            black_box(s);
+        })
     });
     c.bench_function("boxed trig", |b| {
-        b.iter(|| black_box(boxed_trig(&canvas, black_box(num))))
+        b.iter(|| {
+            let mut s = String::new();
+            boxed_trig(&mut s, &canvas, black_box(num)).unwrap();
+            black_box(s);
+        })
     });
 }
 

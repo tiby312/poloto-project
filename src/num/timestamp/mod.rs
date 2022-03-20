@@ -100,13 +100,7 @@ where
         };
 
         let val = self.start.datetime(&self.timezone);
-        write!(
-            writer,
-            "{}{} in {}",
-            val, //self.start.dynamic_where_format(&self.timezone, &self.step),
-            footnote,
-            self.step,
-        )?;
+        write!(writer, "{}{} in {}", footnote, val, self.step,)?;
         self.footnote = Some(footnote);
         Ok(())
     }
