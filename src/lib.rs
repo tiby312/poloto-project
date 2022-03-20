@@ -172,21 +172,3 @@ where
         ticky,
     }
 }
-
-///
-/// Create a plot formatter that implements [`plotnum::BaseFmt`]
-///
-pub fn default_fmt<A: Display, B: Display, C: Display, X: HasDefaultTicks, Y: HasDefaultTicks>(
-    title: A,
-    xname: B,
-    yname: C,
-    bounds: (Bound<X>, Bound<Y>),
-) -> SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt> {
-    SimplePlotFormatter {
-        title,
-        xname,
-        yname,
-        tickx: X::generate(bounds.0),
-        ticky: Y::generate(bounds.1),
-    }
-}
