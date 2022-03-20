@@ -299,10 +299,10 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn build_moved<X: PlotNum, Y: PlotNum, P: build::PlotIteratorAndMarkers<X = X, Y = Y>>(
+    pub fn build_moved<P: build::PlotIteratorAndMarkers>(
         self,
         plots: P,
-    ) -> Data<P::Iter, Canvas> {
+    ) -> Data<P::Iter, Canvas>  where P::X:PlotNum,P::Y:PlotNum{
         let Data {
             boundx,
             boundy,
@@ -316,10 +316,10 @@ impl Canvas {
             plots,
         }
     }
-    pub fn build<X: PlotNum, Y: PlotNum, P: build::PlotIteratorAndMarkers<X = X, Y = Y>>(
+    pub fn build<P: build::PlotIteratorAndMarkers>(
         &self,
         plots: P,
-    ) -> Data<P::Iter, &Canvas> {
+    ) -> Data<P::Iter, &Canvas> where P::X:PlotNum,P::Y:PlotNum{
         let (mut plots, xmarkers, ymarkers) = plots.unpack();
 
         let ii = std::iter::from_fn(|| plots.next_bound_point());
@@ -342,50 +342,6 @@ impl Canvas {
             canvas: self,
         }
     }
-
-    /*
-    pub fn build_with_moved<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>>(
-        self,
-        plots: P,
-        xmarkers: impl IntoIterator<Item = X>,
-        ymarkers: impl IntoIterator<Item = Y>,
-    ) -> Data<X, Y, P, Canvas> {
-        let d = self.build_with(plots, xmarkers, ymarkers);
-
-        Data {
-            boundx: d.boundx,
-            boundy: d.boundy,
-            plots: d.plots,
-            canvas: self,
-        }
-    }
-    pub fn build_with<X: PlotNum, Y: PlotNum, P: PlotIterator<Item = (X, Y)>>(
-        &self,
-        mut plots: P,
-        xmarkers: impl IntoIterator<Item = X>,
-        ymarkers: impl IntoIterator<Item = Y>,
-    ) -> Data<X, Y, P, &Canvas> {
-        let ii = std::iter::from_fn(|| plots.next_bound_point());
-
-        let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
-
-        let boundx = ticks::DataBound {
-            min: boundx[0],
-            max: boundx[1],
-        };
-        let boundy = ticks::DataBound {
-            min: boundy[0],
-            max: boundy[1],
-        };
-
-        Data {
-            boundx,
-            boundy,
-            plots,
-            canvas: self,
-        }
-    }
-    */
 
     pub fn get_dim(&self) -> [f64; 2] {
         [self.width, self.height]
@@ -458,7 +414,6 @@ impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
     /// Automatically create a tick distribution using the default
     /// tick generators tied to a [`PlotNum`].
     ///
-    #[deprecated(note = "use simple_fmt macro instead")]
     pub fn plot<A: Display, B: Display, C: Display>(
         self,
         title: A,
@@ -512,6 +467,8 @@ pub struct Plotter<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>
     plots: P,
     base: B,
 }
+
+
 impl<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
     pub fn get_dim(&self) -> [f64; 2] {
         self.canvas.borrow().get_dim()

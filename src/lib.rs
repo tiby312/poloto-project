@@ -115,7 +115,7 @@ macro_rules! plots {
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let canvas = poloto::render::canvas();
+        let canvas = poloto::render::canvas_builder().build();
         let data = canvas.build_moved($data);
         let (bx, by) = data.bounds();
         let xt = $crate::ticks::from_default(bx);
