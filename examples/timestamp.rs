@@ -33,13 +33,17 @@ fn main() {
     });
 
     let canvas = poloto::render::canvas();
-    let plotter = canvas
-        .build_with(poloto::build::line("", data), [], [0.0])
-        .plot(
-            "Long Jump world record progression",
-            "Date",
-            "Mark (in meters)",
-        );
+
+    let data = canvas.build_with(poloto::build::line("", data), [], [0.0]);
+
+    let fmt = poloto::default_fmt(
+        "Long Jump world record progression",
+        "Date",
+        "Mark (in meters)",
+        data.bounds(),
+    );
+
+    let plotter = data.plot_with(fmt);
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }
