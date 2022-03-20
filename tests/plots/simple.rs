@@ -66,12 +66,15 @@ fn line_fill_fmt() -> fmt::Result {
 
     let boundx = s.bounds().0.data.clone();
 
-    let plotter = poloto::simple_plot_data!(
+    let fmt = poloto::plot_fmt(
         formatm!("from {} to {}", boundx.min, boundx.max),
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        s
+        poloto::ticks::from_default(s.bounds().0),
+        poloto::ticks::from_default(s.bounds().1),
     );
+
+    let plotter = s.plot_with(fmt);
 
     let w = util::create_test_file("line_fill_fmt.svg");
 

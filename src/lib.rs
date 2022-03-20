@@ -136,18 +136,6 @@ macro_rules! simple_plot {
     }};
 }
 
-#[macro_export]
-macro_rules! simple_plot_data {
-    ($title:expr,$xname:expr,$yname:expr,$data:expr) => {{
-        let (bx, by) = $data.bounds();
-        let xt = $crate::ticks::from_default(bx);
-        let yt = $crate::ticks::from_default(by);
-
-        let p = $crate::plot_fmt($title, $xname, $yname, xt, yt);
-        $data.plot_with(p)
-    }};
-}
-
 ///
 /// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
 ///
