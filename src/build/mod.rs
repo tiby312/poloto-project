@@ -187,34 +187,20 @@ impl<'a, X: 'a, Y: 'a> PlotIterator for Box<dyn PlotIterator<X = X, Y = Y> + 'a>
 pub trait PlotIteratorAndMarkers {
     type X;
     type Y;
-    fn next_xmarker(&mut self) -> Option<Self::X>;
-    fn next_ymarker(&mut self) -> Option<Self::Y>;
-    fn next_typ(&mut self) -> Option<PlotMetaType>;
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)>;
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)>;
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result;
+    type Iter: PlotIterator<X = Self::X, Y = Self::Y>;
+    type XI: Iterator<Item = Self::X>;
+    type YI: Iterator<Item = Self::Y>;
+    fn unpack(self) -> (Self::Iter, Self::XI, Self::YI);
 }
 
 impl<X: PlotNum, Y: PlotNum, I: PlotIterator<X = X, Y = Y>> PlotIteratorAndMarkers for I {
     type X = X;
     type Y = Y;
-    fn next_xmarker(&mut self) -> Option<Self::X> {
-        None
-    }
-    fn next_ymarker(&mut self) -> Option<Self::Y> {
-        None
-    }
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        I::next_typ(self)
-    }
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
-        I::next_bound_point(self)
-    }
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
-        I::next_plot_point(self)
-    }
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result {
-        I::next_name(self, w)
+    type Iter = Self;
+    type XI = std::iter::Empty<X>;
+    type YI = std::iter::Empty<Y>;
+    fn unpack(self) -> (Self::Iter, Self::XI, Self::YI) {
+        (self, std::iter::empty(), std::iter::empty())
     }
 }
 
@@ -224,37 +210,16 @@ pub struct MarkersStruct<I: PlotIterator<X = XI::Item, Y = YI::Item>, XI: Iterat
     ymarkers: YI,
 }
 
-/*
-pub fn markers<XI:IntoIterator,YI:IntoIterator,P:PlotIterator<X=XI::Item,Y=YI::Item>>(plots:P,xmarkers:XI,ymarkers:YI)->MarkersStruct<P,XI::IntoIter,YI::IntoIter>{
-    MarkersStruct{
-        plots,
-        xmarkers:xmarkers.into_iter(),
-        ymarkers:ymarkers.into_iter()
-    }
-}
-*/
 impl<I: PlotIterator<X = XI::Item, Y = YI::Item>, XI: Iterator, YI: Iterator> PlotIteratorAndMarkers
     for MarkersStruct<I, XI, YI>
 {
-    type X = XI::Item;
-    type Y = YI::Item;
-    fn next_xmarker(&mut self) -> Option<Self::X> {
-        self.xmarkers.next()
-    }
-    fn next_ymarker(&mut self) -> Option<Self::Y> {
-        self.ymarkers.next()
-    }
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        self.plots.next_typ()
-    }
-    fn next_bound_point(&mut self) -> Option<(Self::X, Self::Y)> {
-        self.plots.next_bound_point()
-    }
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
-        self.plots.next_plot_point()
-    }
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result {
-        self.plots.next_name(w)
+    type X = I::X;
+    type Y = I::Y;
+    type Iter = I;
+    type XI = XI;
+    type YI = YI;
+    fn unpack(self) -> (Self::Iter, Self::XI, Self::YI) {
+        (self.plots, self.xmarkers, self.ymarkers)
     }
 }
 
@@ -328,10 +293,10 @@ pub trait PlotIterator {
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result;
 }
 
-pub(crate) struct RenderablePlotIter<'a, A: PlotIteratorAndMarkers> {
+pub(crate) struct RenderablePlotIter<'a, A: PlotIterator> {
     flop: &'a mut A,
 }
-impl<'a, A: PlotIteratorAndMarkers> RenderablePlotIter<'a, A> {
+impl<'a, A: PlotIterator> RenderablePlotIter<'a, A> {
     #[inline(always)]
     pub fn new(flop: &'a mut A) -> Self {
         RenderablePlotIter { flop }
@@ -349,11 +314,11 @@ impl<'a, A: PlotIteratorAndMarkers> RenderablePlotIter<'a, A> {
     }
 }
 
-pub(crate) struct SinglePlotAccessor<'a, A: PlotIteratorAndMarkers> {
+pub(crate) struct SinglePlotAccessor<'a, A: PlotIterator> {
     typ: PlotMetaType,
     flop: &'a mut A,
 }
-impl<'b, A: PlotIteratorAndMarkers> SinglePlotAccessor<'b, A> {
+impl<'b, A: PlotIterator> SinglePlotAccessor<'b, A> {
     #[inline(always)]
     pub fn typ(&mut self) -> PlotMetaType {
         self.typ
@@ -370,10 +335,10 @@ impl<'b, A: PlotIteratorAndMarkers> SinglePlotAccessor<'b, A> {
     }
 }
 
-pub(crate) struct PlotIt<'a, 'b, A: PlotIteratorAndMarkers> {
+pub(crate) struct PlotIt<'a, 'b, A: PlotIterator> {
     inner: &'a mut SinglePlotAccessor<'b, A>,
 }
-impl<'a, 'b, A: PlotIteratorAndMarkers> Iterator for PlotIt<'a, 'b, A> {
+impl<'a, 'b, A: PlotIterator> Iterator for PlotIt<'a, 'b, A> {
     type Item = (A::X, A::Y);
     fn next(&mut self) -> Option<Self::Item> {
         if let PlotResult::Some(a) = self.inner.flop.next_plot_point() {
