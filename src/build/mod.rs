@@ -257,6 +257,9 @@ pub trait PlotIteratorExt: PlotIterator {
         self
     }
 
+    ///
+    /// Specify x and y values that must fit into the viewport.
+    ///
     fn markers<XI: IntoIterator<Item = Self::X>, YI: IntoIterator<Item = Self::Y>>(
         self,
         xmarkers: XI,
@@ -270,6 +273,23 @@ pub trait PlotIteratorExt: PlotIterator {
             xmarkers: xmarkers.into_iter(),
             ymarkers: ymarkers.into_iter(),
         }
+    }
+}
+
+///
+/// Specify x and y values that must fit into the viewport.
+///
+/// Also consider [`PlotIteratorExt::markers()`]
+///
+pub fn markers<P: PlotIterator, XI: IntoIterator<Item = P::X>, YI: IntoIterator<Item = P::Y>>(
+    plots: P,
+    x: XI,
+    y: YI,
+) -> MarkersStruct<P, XI::IntoIter, YI::IntoIter> {
+    MarkersStruct {
+        plots,
+        xmarkers: x.into_iter(),
+        ymarkers: y.into_iter(),
     }
 }
 
