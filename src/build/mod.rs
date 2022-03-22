@@ -72,8 +72,7 @@ impl<I: IntoIterator + Clone> PlotIter for I {
 pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
     PlotsDyn {
         flop: vec,
-        bound_counter: 0,
-        plot_counter: 0,
+        counter: 0,
     }
 }
 
@@ -81,8 +80,7 @@ pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
 /// Allows a user to collect plots inside of a loop instead of chaining plots together.
 ///
 pub struct PlotsDyn<F: PlotIterator> {
-    bound_counter: usize,
-    plot_counter: usize,
+    counter: usize,
     flop: Vec<F>,
 }
 
@@ -92,40 +90,41 @@ impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     #[inline(always)]
     fn next_bound_point(&mut self) -> Option<Self::Item> {
         loop {
-            if self.bound_counter >= self.flop.len() {
+            if self.counter >= self.flop.len() {
+                self.counter = 0;
                 return None;
             }
-            if let Some(a) = self.flop[self.bound_counter].next_bound_point() {
+            if let Some(a) = self.flop[self.counter].next_bound_point() {
                 return Some(a);
             }
-            self.bound_counter += 1;
+            self.counter += 1;
         }
     }
 
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
-        if self.plot_counter >= self.flop.len() {
+        if self.counter >= self.flop.len() {
             None
         } else {
-            self.flop[self.plot_counter].next_typ()
+            self.flop[self.counter].next_typ()
         }
     }
 
     #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
-        if self.plot_counter >= self.flop.len() {
+        if self.counter >= self.flop.len() {
             return PlotResult::Finished;
         }
-        let a = self.flop[self.plot_counter].next_plot_point();
+        let a = self.flop[self.counter].next_plot_point();
         if let PlotResult::None = a {
-            self.plot_counter += 1;
+            self.counter += 1;
         }
         a
     }
 
     #[inline(always)]
     fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        self.flop[self.plot_counter].next_name(write)
+        self.flop[self.counter].next_name(write)
     }
 }
 
@@ -227,11 +226,7 @@ pub trait PlotIteratorExt: PlotIterator {
     where
         Self: Sized,
     {
-        Chain {
-            a: self,
-            b,
-            started: false,
-        }
+        Chain { a: self, b }
     }
 
     ///
@@ -421,7 +416,7 @@ where
     SinglePlot::new(PlotMetaType::Plot(PlotType::Line), name, it)
 }
 
-pub enum SinglePlotInner<I: PlotIter> {
+enum SinglePlotInner<I: PlotIter> {
     Ready(I),
     First(I, I::It1),
     Second(I::It2),
@@ -535,7 +530,6 @@ where
 pub struct Chain<A, B> {
     a: A,
     b: B,
-    started: bool,
 }
 impl<A: PlotIterator, B: PlotIterator<Item = A::Item>> PlotIterator for Chain<A, B> {
     type Item = A::Item;
@@ -572,7 +566,6 @@ impl<A: PlotIterator, B: PlotIterator<Item = A::Item>> PlotIterator for Chain<A,
         if let Some(a) = self.a.next_typ() {
             Some(a)
         } else {
-            self.started = true;
             self.b.next_typ()
         }
     }
