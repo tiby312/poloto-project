@@ -299,7 +299,10 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn build_moved<P: build::PlotIteratorAndMarkers>(self, plots: P) -> Data<P::Iter, Canvas>
+    pub fn build_moved<P: build::PlotIteratorAndMarkers>(
+        self,
+        plots: P,
+    ) -> Data<P::X, P::Y, P::Iter, Canvas>
     where
         P::X: PlotNum,
         P::Y: PlotNum,
@@ -318,7 +321,10 @@ impl Canvas {
         }
     }
 
-    pub fn build<P: build::PlotIteratorAndMarkers>(&self, plots: P) -> Data<P::Iter, &Canvas>
+    pub fn build<P: build::PlotIteratorAndMarkers>(
+        &self,
+        plots: P,
+    ) -> Data<P::X, P::Y, P::Iter, &Canvas>
     where
         P::X: PlotNum,
         P::Y: PlotNum,
@@ -347,15 +353,15 @@ impl Canvas {
     }
 
     #[deprecated(note = "Use regular build() in conjunction with markers().")]
-    pub fn build_with<P: PlotIterator>(
+    pub fn build_with<X, Y, P: PlotIterator<Item = (X, Y)>>(
         &self,
         mut plots: P,
-        xmarkers: impl IntoIterator<Item = P::X>,
-        ymarkers: impl IntoIterator<Item = P::Y>,
-    ) -> Data<P, &Canvas>
+        xmarkers: impl IntoIterator<Item = X>,
+        ymarkers: impl IntoIterator<Item = Y>,
+    ) -> Data<X, Y, P, &Canvas>
     where
-        P::X: PlotNum,
-        P::Y: PlotNum,
+        X: PlotNum,
+        Y: PlotNum,
     {
         let ii = std::iter::from_fn(|| plots.next_bound_point());
 
@@ -385,7 +391,7 @@ impl Canvas {
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         mut writer: &mut dyn fmt::Write,
-        plots: &mut impl build::PlotIterator<X = X, Y = Y>,
+        plots: &mut impl build::PlotIterator<Item = (X, Y)>,
         base: &mut impl BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
@@ -424,15 +430,15 @@ pub fn canvas_builder() -> CanvasBuilder {
 ///
 /// Created by [`Canvas::build`]
 ///
-pub struct Data<P: build::PlotIterator, K: Borrow<Canvas>> {
+pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> {
     canvas: K,
-    boundx: ticks::DataBound<P::X>,
-    boundy: ticks::DataBound<P::Y>,
+    boundx: ticks::DataBound<X>,
+    boundy: ticks::DataBound<Y>,
     plots: P,
 }
 
-impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
-    pub fn bounds(&self) -> (ticks::Bound<P::X>, ticks::Bound<P::Y>) {
+impl<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> Data<X, Y, P, K> {
+    pub fn bounds(&self) -> (ticks::Bound<X>, ticks::Bound<Y>) {
         (
             Bound {
                 data: &self.boundx,
@@ -457,20 +463,10 @@ impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
         title: A,
         xname: B,
         yname: C,
-    ) -> Plotter<
-        P,
-        K,
-        SimplePlotFormatter<
-            A,
-            B,
-            C,
-            <P::X as HasDefaultTicks>::Fmt,
-            <P::Y as HasDefaultTicks>::Fmt,
-        >,
-    >
+    ) -> Plotter<P, K, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>
     where
-        P::X: HasDefaultTicks,
-        P::Y: HasDefaultTicks,
+        X: HasDefaultTicks,
+        Y: HasDefaultTicks,
     {
         let (bx, by) = self.bounds();
         let xt = ticks::from_default(bx);
@@ -484,7 +480,7 @@ impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
     /// Move to final stage in pipeline collecting the title/xname/yname.
     /// Unlike [`Data::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<A: BaseFmt<X = P::X, Y = P::Y>>(self, plot_fmt: A) -> Plotter<P, K, A> {
+    pub fn plot_with<A: BaseFmt<X = X, Y = Y>>(self, plot_fmt: A) -> Plotter<P, K, A> {
         Plotter {
             plots: self.plots,
             base: plot_fmt,
@@ -498,7 +494,7 @@ impl<P: build::PlotIterator, K: Borrow<Canvas>> Data<P, K> {
 ///
 /// Created by [`Data::plot`]
 ///
-pub struct Plotter<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> {
+pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> {
     canvas: K,
     boundx: DataBound<B::X>,
     boundy: DataBound<B::Y>,
@@ -506,7 +502,7 @@ pub struct Plotter<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>
     base: B,
 }
 
-impl<P: build::PlotIterator<X = B::X, Y = B::Y>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
+impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
     pub fn get_dim(&self) -> [f64; 2] {
         self.canvas.borrow().get_dim()
     }

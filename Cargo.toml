@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "10.2.2"
+version = "10.3.0"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2018"
 license = "MIT"
