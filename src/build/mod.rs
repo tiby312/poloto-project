@@ -435,16 +435,20 @@ impl<I: PlotIter> SinglePlotInner<I> {
             false
         }
     }
-    
+    fn take(&mut self) -> SinglePlotInner<I> {
+        let mut k = SinglePlotInner::Done;
+        std::mem::swap(&mut k, self);
+        k
+    }
 }
 
 ///
 /// Represents a single plot.
 ///
 pub struct SinglePlot<I: PlotIter, D: Display> {
-    inner: Option<SinglePlotInner<I>>,
+    inner: SinglePlotInner<I>,
     name: D,
-    typ: PlotMetaType
+    typ: PlotMetaType,
 }
 impl<I: PlotIter, D: Display> SinglePlot<I, D>
 where
@@ -454,9 +458,9 @@ where
     #[inline(always)]
     fn new(typ: PlotMetaType, name: D, plots: I) -> Self {
         SinglePlot {
-            inner: Some(SinglePlotInner::Ready(plots)),
+            inner: SinglePlotInner::Ready(plots),
             name,
-            typ
+            typ,
         }
     }
 }
@@ -469,16 +473,16 @@ where
 
     #[inline(always)]
     fn next_bound_point(&mut self) -> Option<Self::Item> {
-        if let SinglePlotInner::Ready(_) = self.inner.as_ref().unwrap() {
-            if let SinglePlotInner::Ready(mut a) = self.inner.take().unwrap() {
+        if let SinglePlotInner::Ready(_) = &self.inner {
+            if let SinglePlotInner::Ready(mut a) = self.inner.take() {
                 let b = a.first();
-                self.inner = Some(SinglePlotInner::First(a, b));
+                self.inner = SinglePlotInner::First(a, b);
             } else {
                 unreachable!();
             }
         }
 
-        if let SinglePlotInner::First(_, a) = &mut self.inner.as_mut().unwrap() {
+        if let SinglePlotInner::First(_, a) = &mut self.inner {
             a.next().map(|x| x.unwrap())
         } else {
             panic!("next_bound_point called too late!")
@@ -487,16 +491,16 @@ where
 
     #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
-        if let SinglePlotInner::Second(a) = self.inner.as_mut().unwrap() {
+        if let SinglePlotInner::Second(a) = &mut self.inner {
             if let Some(k) = a.next() {
                 PlotResult::Some(k.unwrap())
-            } else if !self.inner.as_ref().unwrap().is_done() {
-                self.inner = Some(SinglePlotInner::Done);
+            } else if !self.inner.is_done() {
+                self.inner = SinglePlotInner::Done;
                 PlotResult::None
             } else {
                 unreachable!();
             }
-        } else if let SinglePlotInner::Done = self.inner.as_ref().unwrap() {
+        } else if let SinglePlotInner::Done = &self.inner {
             PlotResult::Finished
         } else {
             unreachable!();
@@ -510,9 +514,9 @@ where
 
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
-        if let SinglePlotInner::First(..) = self.inner.as_ref().unwrap() {
-            if let SinglePlotInner::First(a, b) = self.inner.take().unwrap() {
-                self.inner = Some(SinglePlotInner::Second(a.second(b)));
+        if let SinglePlotInner::First(..) = &self.inner {
+            if let SinglePlotInner::First(a, b) = self.inner.take() {
+                self.inner = SinglePlotInner::Second(a.second(b));
                 Some(self.typ)
             } else {
                 unreachable!();
