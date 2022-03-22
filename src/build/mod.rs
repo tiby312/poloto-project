@@ -581,7 +581,7 @@ impl<X, Y, I: PlotIterator<Item = (X, Y)>> Markerable for I {
 ///
 /// Specify x and y values that must fit into the viewport.
 ///
-/// Also consider [`PlotIteratorExt::markers()`]
+/// Also consider [`build::Markerable::markers()`]
 ///
 pub fn markers<
     X,
