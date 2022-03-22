@@ -124,7 +124,7 @@ impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     }
 
     #[inline(always)]
-    fn next_name(&mut self, write: &mut dyn fmt::Write) -> fmt::Result {
+    fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.flop[self.plot_counter].next_name(write)
     }
 }
@@ -151,7 +151,7 @@ impl<'a, X: 'a> PlotIterator for &'a mut dyn PlotIterator<Item = X> {
         (*self).next_plot_point()
     }
 
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result {
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
         (*self).next_name(w)
     }
 
@@ -171,7 +171,7 @@ impl<'a, X: 'a> PlotIterator for Box<dyn PlotIterator<Item = X> + 'a> {
         self.as_mut().next_plot_point()
     }
 
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result {
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.as_mut().next_name(w)
     }
 
@@ -270,7 +270,7 @@ pub trait PlotIterator {
     fn next_typ(&mut self) -> Option<PlotMetaType>;
     fn next_bound_point(&mut self) -> Option<Self::Item>;
     fn next_plot_point(&mut self) -> PlotResult<Self::Item>;
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> fmt::Result;
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
 }
 
 pub(crate) struct RenderablePlotIter<'a, A: PlotIterator> {
@@ -305,7 +305,7 @@ impl<'b, A: PlotIterator> SinglePlotAccessor<'b, A> {
     }
 
     #[inline(always)]
-    pub fn name(&mut self, write: &mut dyn fmt::Write) -> fmt::Result {
+    pub fn name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.flop.next_name(write)
     }
 
@@ -429,11 +429,7 @@ pub enum SinglePlotInner<I: PlotIter> {
 }
 impl<I: PlotIter> SinglePlotInner<I> {
     fn is_done(&self) -> bool {
-        if let SinglePlotInner::Done = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, SinglePlotInner::Done)
     }
     fn take(&mut self) -> SinglePlotInner<I> {
         let mut k = SinglePlotInner::Done;
@@ -473,7 +469,7 @@ where
 
     #[inline(always)]
     fn next_bound_point(&mut self) -> Option<Self::Item> {
-        if let SinglePlotInner::Ready(_) = &self.inner {
+        if matches!(&self.inner, SinglePlotInner::Ready(..)) {
             if let SinglePlotInner::Ready(mut a) = self.inner.take() {
                 let b = a.first();
                 self.inner = SinglePlotInner::First(a, b);
@@ -491,30 +487,36 @@ where
 
     #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
-        if let SinglePlotInner::Second(a) = &mut self.inner {
-            if let Some(k) = a.next() {
-                PlotResult::Some(k.unwrap())
-            } else if !self.inner.is_done() {
-                self.inner = SinglePlotInner::Done;
-                PlotResult::None
-            } else {
-                unreachable!();
+        match &mut self.inner {
+            SinglePlotInner::Second(a) => {
+                if let Some(k) = a.next() {
+                    PlotResult::Some(k.unwrap())
+                } else if !self.inner.is_done() {
+                    self.inner = SinglePlotInner::Done;
+                    PlotResult::None
+                } else {
+                    unreachable!();
+                }
             }
-        } else if let SinglePlotInner::Done = &self.inner {
-            PlotResult::Finished
-        } else {
-            unreachable!();
+            SinglePlotInner::Done => PlotResult::Finished,
+            _ => {
+                unreachable!()
+            }
         }
     }
 
     #[inline(always)]
-    fn next_name(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.name)
+    fn next_name(&mut self, writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
+        if matches!(&self.inner, SinglePlotInner::Second(..)) {
+            Some(write!(writer, "{}", self.name))
+        } else {
+            None
+        }
     }
 
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
-        if let SinglePlotInner::First(..) = &self.inner {
+        if matches!(&self.inner, SinglePlotInner::First(..)) {
             if let SinglePlotInner::First(a, b) = self.inner.take() {
                 self.inner = SinglePlotInner::Second(a.second(b));
                 Some(self.typ)
@@ -557,9 +559,9 @@ impl<A: PlotIterator, B: PlotIterator<Item = A::Item>> PlotIterator for Chain<A,
     }
 
     #[inline(always)]
-    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> fmt::Result {
-        if !self.started {
-            self.a.next_name(&mut writer)
+    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
+        if let Some(a) = self.a.next_name(&mut writer) {
+            Some(a)
         } else {
             self.b.next_name(&mut writer)
         }

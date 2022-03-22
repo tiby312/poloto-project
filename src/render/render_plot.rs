@@ -63,7 +63,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
             })?
             .build(|d| {
                 let mut wc = util::WriteCounter::new(d.writer_safe());
-                ppp.name(&mut wc)?;
+                ppp.name(&mut wc).unwrap()?;
                 //p.write_name(&mut wc)?;
                 Ok(wc.get_counter() != 0)
             })?;
@@ -73,6 +73,8 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
 
         match typ {
             PlotMetaType::Text => {
+                assert_eq!(ppp.plots().count(), 0);
+
                 // don't need to render any legend or plots
             }
             PlotMetaType::Plot(p_type) => {
