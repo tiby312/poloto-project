@@ -505,7 +505,7 @@ impl<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Renderable> Data<X, Y, P, K
     /// tick generators tied to a [`PlotNum`].
     ///
     #[deprecated(
-        note = "Due to clippy link of this function being too complex, replace with a macro. Use simple_fmt!() instead."
+        note = "Due to clippy lint of this function being too complex, replace with a macro. Use simple_fmt!() instead."
     )]
     pub fn plot<A: Display, B: Display, C: Display>(
         self,
