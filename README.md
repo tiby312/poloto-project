@@ -176,20 +176,23 @@ fn main() {
 
     let it = (0..).zip(trend.into_iter());
 
-    let opt = poloto::render::render_opt();
-    let data = poloto::data(poloto::build::histogram("", it).markers([24], []), opt);
+    let data = poloto::data(poloto::build::histogram("", it).markers([24], []));
 
-    let (_, by) = data.bounds();
+    let opt = poloto::render::render_opt();
+    let (_, by) = data.bounds(&opt);
     let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let pp = data.plot_with(poloto::plot_fmt(
-        "Number of rides at theme park hourly",
-        "Hour",
-        "Number of rides",
-        xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v)),
-        ytick_fmt,
-    ));
+    let pp = data.plot_with(
+        opt,
+        poloto::plot_fmt(
+            "Number of rides at theme park hourly",
+            "Hour",
+            "Number of rides",
+            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v)),
+            ytick_fmt,
+        ),
+    );
 
     print!("{}", poloto::disp(|w| pp.simple_theme(w)));
 }

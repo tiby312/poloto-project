@@ -299,62 +299,6 @@ pub struct RenderOptions {
 }
 
 impl RenderOptions {
-    #[deprecated(note = "use Data::new() instead.")]
-    pub fn build_moved<P: build::marker::PlotIteratorAndMarkers>(
-        self,
-        plots: P,
-    ) -> Data<P::X, P::Y, P::Iter, RenderOptions>
-    where
-        P::X: PlotNum,
-        P::Y: PlotNum,
-    {
-        Data::new(plots, self)
-    }
-
-    #[deprecated(note = "use Data::new() instead.")]
-    pub fn build<P: build::marker::PlotIteratorAndMarkers>(
-        &self,
-        plots: P,
-    ) -> Data<P::X, P::Y, P::Iter, &RenderOptions>
-    where
-        P::X: PlotNum,
-        P::Y: PlotNum,
-    {
-        Data::new(plots, self)
-    }
-
-    #[deprecated(note = "Use regular build() in conjunction with markers().")]
-    pub fn build_with<X, Y, P: PlotIterator<Item = (X, Y)>>(
-        &self,
-        mut plots: P,
-        xmarkers: impl IntoIterator<Item = X>,
-        ymarkers: impl IntoIterator<Item = Y>,
-    ) -> Data<X, Y, P, &RenderOptions>
-    where
-        X: PlotNum,
-        Y: PlotNum,
-    {
-        let ii = std::iter::from_fn(|| plots.next_bound_point());
-
-        let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
-
-        let boundx = ticks::DataBound {
-            min: boundx[0],
-            max: boundx[1],
-        };
-        let boundy = ticks::DataBound {
-            min: boundy[0],
-            max: boundy[1],
-        };
-
-        Data {
-            boundx,
-            boundy,
-            plots,
-            canvas: self,
-        }
-    }
-
     pub fn get_dim(&self) -> [f64; 2] {
         [self.width, self.height]
     }
@@ -448,20 +392,16 @@ pub fn canvas_builder() -> RenderOptionsBuilder {
 ///
 /// Linke some plots with a way to render them.
 ///
-pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Renderable> {
-    canvas: K,
+pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>> {
     boundx: ticks::DataBound<X>,
     boundy: ticks::DataBound<Y>,
     plots: P,
 }
 
-impl<X: PlotNum, Y: PlotNum, P: build::PlotIterator<Item = (X, Y)>, K: Renderable>
-    Data<X, Y, P, K>
-{
+impl<X: PlotNum, Y: PlotNum, P: build::PlotIterator<Item = (X, Y)>> Data<X, Y, P> {
     pub fn new<P1: build::marker::PlotIteratorAndMarkers<Iter = P, X = X, Y = Y>>(
         plots: P1,
-        render: K,
-    ) -> Data<X, Y, P, K> {
+    ) -> Data<X, Y, P> {
         let (mut plots, xmarkers, ymarkers) = plots.unpack();
 
         let ii = std::iter::from_fn(|| plots.next_bound_point());
@@ -481,12 +421,14 @@ impl<X: PlotNum, Y: PlotNum, P: build::PlotIterator<Item = (X, Y)>, K: Renderabl
             boundx,
             boundy,
             plots,
-            canvas: render,
         }
     }
 
-    pub fn bounds(&self) -> (ticks::Bound<X>, ticks::Bound<Y>) {
-        let (cx, cy) = self.canvas.bounds();
+    pub fn bounds<'a, K: Renderable + 'a>(
+        &'a self,
+        canvas: &'a K,
+    ) -> (ticks::Bound<'a, X>, ticks::Bound<'a, Y>) {
+        let (cx, cy) = canvas.bounds();
 
         (
             Bound {
@@ -501,47 +443,25 @@ impl<X: PlotNum, Y: PlotNum, P: build::PlotIterator<Item = (X, Y)>, K: Renderabl
     }
 
     ///
-    /// Automatically create a tick distribution using the default
-    /// tick generators tied to a [`PlotNum`].
-    ///
-    #[deprecated(
-        note = "Due to clippy lint of this function being too complex, replace with a macro. Use simple_fmt!() instead."
-    )]
-    pub fn plot<A: Display, B: Display, C: Display>(
-        self,
-        title: A,
-        xname: B,
-        yname: C,
-    ) -> Plotter<P, K, SimplePlotFormatter<A, B, C, X::Fmt, Y::Fmt>>
-    where
-        X: HasDefaultTicks,
-        Y: HasDefaultTicks,
-    {
-        let (bx, by) = self.bounds();
-        let xt = ticks::from_default(bx);
-        let yt = ticks::from_default(by);
-
-        let p = plot_fmt(title, xname, yname, xt, yt);
-        self.plot_with(p)
-    }
-
-    ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
-    /// Unlike [`Data::plot`] User must supply own tick distribution.
     ///
-    pub fn plot_with<A: BaseFmt<X = X, Y = Y>>(self, plot_fmt: A) -> Plotter<P, K, A> {
+    pub fn plot_with<A: BaseFmt<X = X, Y = Y>, K: Renderable>(
+        self,
+        canvas: K,
+        plot_fmt: A,
+    ) -> Plotter<P, K, A> {
         Plotter {
             plots: self.plots,
             base: plot_fmt,
             boundx: self.boundx,
             boundy: self.boundy,
-            canvas: self.canvas,
+            canvas,
         }
     }
 }
 
 ///
-/// Created by [`Data::plot`]
+/// Created by [`Data::plot_with`]
 ///
 pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> {
     canvas: K,

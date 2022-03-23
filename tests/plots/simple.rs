@@ -56,30 +56,27 @@ fn large_scatter() -> fmt::Result {
 fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let canvas = poloto::render::render_opt();
-    let s = poloto::data(
-        poloto::build::line_fill(
-            "tan(x)",
-            x.clone()
-                .map(|x| [x, x.tan()])
-                .crop_above(10.0)
-                .crop_below(0.0)
-                .crop_left(2.0),
-        ),
-        canvas,
-    );
+    let opt = poloto::render::render_opt();
+    let s = poloto::data(poloto::build::line_fill(
+        "tan(x)",
+        x.clone()
+            .map(|x| [x, x.tan()])
+            .crop_above(10.0)
+            .crop_below(0.0)
+            .crop_left(2.0),
+    ));
 
-    let boundx = s.bounds().0.data.clone();
+    let boundx = s.bounds(&opt).0.data.clone();
 
     let fmt = poloto::plot_fmt(
         formatm!("from {} to {}", boundx.min, boundx.max),
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        poloto::ticks::from_default(s.bounds().0),
-        poloto::ticks::from_default(s.bounds().1),
+        poloto::ticks::from_default(s.bounds(&opt).0),
+        poloto::ticks::from_default(s.bounds(&opt).1),
     );
 
-    let plotter = s.plot_with(fmt);
+    let plotter = s.plot_with(&opt, fmt);
 
     let w = util::create_test_file("line_fill_fmt.svg");
 

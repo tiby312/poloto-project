@@ -78,7 +78,7 @@ fn test_chart() -> std::fmt::Result {
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 let s = poloto::simple_fmt!(
-                                    opt,
+                                    &opt,
                                     poloto::build::scatter("", test),
                                     formatm!("test {}", i),
                                     "x",
@@ -100,7 +100,7 @@ fn test_chart() -> std::fmt::Result {
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 let s = poloto::simple_fmt!(
-                                    opt,
+                                    &opt,
                                     poloto::build::scatter("", test),
                                     formatm!("test {}", i),
                                     "x",

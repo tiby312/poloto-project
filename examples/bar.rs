@@ -14,17 +14,20 @@ fn main() {
         .with_tick_lines([true, false])
         .build();
 
-    let data = poloto::data(bar.markers([0], ybound), opt);
+    let data = poloto::data(bar.markers([0], ybound));
 
-    let xtick_fmt = poloto::ticks::from_default(data.bounds().0);
+    let xtick_fmt = poloto::ticks::from_default(data.bounds(&opt).0);
 
-    let plt = data.plot_with(poloto::plot_fmt(
-        "Comparison of Food Tastiness",
-        "Tastiness",
-        "Foods",
-        xtick_fmt,
-        ytick_fmt,
-    ));
+    let plt = data.plot_with(
+        opt,
+        poloto::plot_fmt(
+            "Comparison of Food Tastiness",
+            "Tastiness",
+            "Foods",
+            xtick_fmt,
+            ytick_fmt,
+        ),
+    );
 
     print!("{}", poloto::disp(|w| plt.simple_theme(w)));
 }

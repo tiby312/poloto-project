@@ -48,21 +48,24 @@ fn minutes_local_time() -> fmt::Result {
         (day2.and_hms(01, 50, 01).into(), 4133000),
     ];
 
+    let s = poloto::data(poloto::build::line("", data).markers(None, Some(0)));
+
     let opt = poloto::render::render_opt();
 
-    let s = poloto::data(poloto::build::line("", data).markers(None, Some(0)), opt);
-
-    let (bx, by) = s.bounds();
+    let (bx, by) = s.bounds(&opt);
     let xtick_fmt = unixtime_ticks(bx, time_zone);
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let s = s.plot_with(poloto::plot_fmt(
-        "Number of Wikipedia Articles",
-        "time",
-        "Number of Articles",
-        xtick_fmt,
-        ytick_fmt,
-    ));
+    let s = s.plot_with(
+        &opt,
+        poloto::plot_fmt(
+            "Number of Wikipedia Articles",
+            "time",
+            "Number of Articles",
+            xtick_fmt,
+            ytick_fmt,
+        ),
+    );
 
     let w = util::create_test_file("minutes_local_time.svg");
 
@@ -117,11 +120,11 @@ fn seconds() -> fmt::Result {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let canvas = poloto::render::render_opt();
+    let data = poloto::data(poloto::build::line("", data).markers(None, Some(0)));
 
-    let data = poloto::data(poloto::build::line("", data).markers(None, Some(0)), canvas);
+    let opt = poloto::render::render_opt();
 
-    let (bx, by) = data.bounds();
+    let (bx, by) = data.bounds(&opt);
     let (xmin, xmax) = (bx.data.min, bx.data.max);
 
     let xtick_fmt = poloto::ticks::from_default(bx);
@@ -135,20 +138,23 @@ fn seconds() -> fmt::Result {
 
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let plotter = data.plot_with(poloto::plot_fmt(
-        "Number of Wikipedia Articles",
-        formatm!(
-            "{} to {} in {}",
-            xmin.datetime(timezone).format("%H:%M:%S"),
-            xmax.datetime(timezone).format("%H:%M:%S"),
-            xtick_step
+    let plotter = data.plot_with(
+        &opt,
+        poloto::plot_fmt(
+            "Number of Wikipedia Articles",
+            formatm!(
+                "{} to {} in {}",
+                xmin.datetime(timezone).format("%H:%M:%S"),
+                xmax.datetime(timezone).format("%H:%M:%S"),
+                xtick_step
+            ),
+            "Number of Articles",
+            xtick_fmt
+                .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+                .with_where_fmt(|_| Ok(())),
+            ytick_fmt,
         ),
-        "Number of Articles",
-        xtick_fmt
-            .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
-            .with_where_fmt(|_| Ok(())),
-        ytick_fmt,
-    ));
+    );
 
     let w = util::create_test_file("seconds.svg");
 

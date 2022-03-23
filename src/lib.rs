@@ -12,9 +12,9 @@
 //! Pipeline:
 //! * Collect plots using functions in [`build`] module
 //! * Create a RenderOptions using [`render`] module.
-//! * Compute min/max by calling [`render::RenderOptions::build()`].
-//! * Create tick distributions. (This step can be done automatically using [`Data::plot()`])
-//! * Collect title/xname/yname using [`Data::plot()`] or [`Data::plot_with()`]
+//! * Compute min/max by calling [`data()`].
+//! * Create tick distributions. (This step can be done automatically using [`simple_fmt!`])
+//! * Collect title/xname/yname using [`Data::plot_with()`] (done automatically using [`simple_fmt!`])
 //! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
@@ -84,8 +84,6 @@ const HEIGHT: f64 = 500.0;
 
 use render::*;
 
-use build::PlotIterator;
-
 /// Shorthand for `disp_const(move |w|write!(w,...))`
 /// Similar to `std::format_args!()` except has a more flexible lifetime.
 #[macro_export]
@@ -136,34 +134,32 @@ macro_rules! plots {
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
+        let data = $crate::render::Data::new($data);
         let canvas = $crate::render::render_opt_builder().build();
-        let data = $crate::render::Data::new($data, canvas);
-        let (bx, by) = data.bounds();
+        let (bx, by) = data.bounds(&canvas);
         let xt = $crate::ticks::from_default(bx);
         let yt = $crate::ticks::from_default(by);
-        data.plot_with($crate::plot_fmt($title, $xname, $yname, xt, yt))
+        data.plot_with(canvas, $crate::plot_fmt($title, $xname, $yname, xt, yt))
     }};
     ($canvas:expr,$data:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let data = $crate::render::Data::new($data, &$canvas);
-        let (bx, by) = data.bounds();
+        let canvas = $canvas;
+        let data = $crate::render::Data::new($data);
+        let (bx, by) = data.bounds(&canvas);
         let xt = $crate::ticks::from_default(bx);
         let yt = $crate::ticks::from_default(by);
-        data.plot_with($crate::plot_fmt($title, $xname, $yname, xt, yt))
+        data.plot_with(canvas, $crate::plot_fmt($title, $xname, $yname, xt, yt))
     }};
 }
 
 ///
 /// Construct a [`Data`].
 ///
-pub fn data<P: build::marker::PlotIteratorAndMarkers, K: Renderable>(
-    plots: P,
-    render: K,
-) -> Data<P::X, P::Y, P::Iter, K>
+pub fn data<P: build::marker::PlotIteratorAndMarkers>(plots: P) -> Data<P::X, P::Y, P::Iter>
 where
     P::X: PlotNum,
     P::Y: PlotNum,
 {
-    render::Data::new(plots, render)
+    render::Data::new(plots)
 }
 
 ///
