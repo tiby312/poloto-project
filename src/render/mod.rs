@@ -118,7 +118,7 @@ fn line<T: std::fmt::Write>(
 ///
 /// Build a [`RenderOptions`]
 ///
-/// Created by [`RenderOptions()`]
+/// Created by [`render_opt_builder()`]
 ///
 pub struct RenderOptionsBuilder {
     num_css_classes: Option<usize>,
@@ -299,7 +299,7 @@ pub struct RenderOptions {
 }
 
 impl RenderOptions {
-    pub fn build_moved<P: build::PlotIteratorAndMarkers>(
+    pub fn build_moved<P: build::marker::PlotIteratorAndMarkers>(
         self,
         plots: P,
     ) -> Data<P::X, P::Y, P::Iter, RenderOptions>
@@ -321,7 +321,7 @@ impl RenderOptions {
         }
     }
 
-    pub fn build<P: build::PlotIteratorAndMarkers>(
+    pub fn build<P: build::marker::PlotIteratorAndMarkers>(
         &self,
         plots: P,
     ) -> Data<P::X, P::Y, P::Iter, &RenderOptions>
@@ -451,13 +451,16 @@ pub trait Renderable {
 }
 
 ///
-/// Build a [`RenderOption`]
+/// Build a [`RenderOptions`]
 ///
 #[deprecated(note = "Renamed Canvas to RenderOptions. Use render_opt() instead.")]
 pub fn canvas() -> RenderOptions {
     RenderOptionsBuilder::default().build()
 }
 
+///
+/// Build a [`RenderOptions`]
+///
 pub fn render_opt() -> RenderOptions {
     RenderOptionsBuilder::default().build()
 }

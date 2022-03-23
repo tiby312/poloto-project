@@ -10,6 +10,13 @@ pub mod buffered_iter;
 pub mod crop;
 pub mod unwrapper;
 
+pub mod marker;
+pub use marker::markers;
+
+pub mod plot_iter_impl;
+pub use plot_iter_impl::plots_dyn;
+use plot_iter_impl::{Chain, SinglePlot};
+
 use unwrapper::Unwrapper;
 
 ///
@@ -67,68 +74,6 @@ impl<I: IntoIterator + Clone> PlotIter for I {
 }
 
 ///
-/// Create a [`PlotsDyn`]
-///
-pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
-    PlotsDyn {
-        flop: vec,
-        counter: 0,
-    }
-}
-
-///
-/// Allows a user to collect plots inside of a loop instead of chaining plots together.
-///
-pub struct PlotsDyn<F: PlotIterator> {
-    counter: usize,
-    flop: Vec<F>,
-}
-
-impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
-    type Item = F::Item;
-
-    #[inline(always)]
-    fn next_bound_point(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.counter >= self.flop.len() {
-                self.counter = 0;
-                return None;
-            }
-            if let Some(a) = self.flop[self.counter].next_bound_point() {
-                return Some(a);
-            }
-            self.counter += 1;
-        }
-    }
-
-    #[inline(always)]
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        if self.counter >= self.flop.len() {
-            None
-        } else {
-            self.flop[self.counter].next_typ()
-        }
-    }
-
-    #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
-        if self.counter >= self.flop.len() {
-            return PlotResult::Finished;
-        }
-        let a = self.flop[self.counter].next_plot_point();
-        if let PlotResult::None = a {
-            self.counter += 1;
-        }
-        a
-    }
-
-    #[inline(always)]
-    fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        self.flop[self.counter].next_name(write)
-    }
-}
-
-///
 /// Create a boxed PlotIterator.
 ///
 /// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
@@ -179,45 +124,6 @@ impl<'a, X: 'a> PlotIterator for Box<dyn PlotIterator<Item = X> + 'a> {
     }
 }
 
-pub trait PlotIteratorAndMarkers {
-    type X;
-    type Y;
-    type Iter: PlotIterator<Item = (Self::X, Self::Y)>;
-    type XI: Iterator<Item = Self::X>;
-    type YI: Iterator<Item = Self::Y>;
-    fn unpack(self) -> (Self::Iter, Self::XI, Self::YI);
-}
-
-impl<X: PlotNum, Y: PlotNum, I: PlotIterator<Item = (X, Y)>> PlotIteratorAndMarkers for I {
-    type X = X;
-    type Y = Y;
-    type Iter = Self;
-    type XI = std::iter::Empty<X>;
-    type YI = std::iter::Empty<Y>;
-    fn unpack(self) -> (Self::Iter, Self::XI, Self::YI) {
-        (self, std::iter::empty(), std::iter::empty())
-    }
-}
-
-pub struct MarkersStruct<I: PlotIterator<Item = (XI::Item, YI::Item)>, XI: Iterator, YI: Iterator> {
-    plots: I,
-    xmarkers: XI,
-    ymarkers: YI,
-}
-
-impl<I: PlotIterator<Item = (XI::Item, YI::Item)>, XI: Iterator, YI: Iterator>
-    PlotIteratorAndMarkers for MarkersStruct<I, XI, YI>
-{
-    type X = XI::Item;
-    type Y = YI::Item;
-    type Iter = I;
-    type XI = XI;
-    type YI = YI;
-    fn unpack(self) -> (Self::Iter, Self::XI, Self::YI) {
-        (self.plots, self.xmarkers, self.ymarkers)
-    }
-}
-
 ///
 /// Helper functions to assemble and prepare plots.
 ///
@@ -226,7 +132,7 @@ pub trait PlotIteratorExt: PlotIterator {
     where
         Self: Sized,
     {
-        Chain { a: self, b }
+        Chain::new(self, b)
     }
 
     ///
@@ -430,192 +336,5 @@ impl<I: PlotIter> SinglePlotInner<I> {
         let mut k = SinglePlotInner::Done;
         std::mem::swap(&mut k, self);
         k
-    }
-}
-
-///
-/// Represents a single plot.
-///
-pub struct SinglePlot<I: PlotIter, D: Display> {
-    inner: SinglePlotInner<I>,
-    name: D,
-    typ: PlotMetaType,
-}
-impl<I: PlotIter, D: Display> SinglePlot<I, D>
-where
-    I::Item1: Unwrapper,
-    I::Item2: Unwrapper,
-{
-    #[inline(always)]
-    fn new(typ: PlotMetaType, name: D, plots: I) -> Self {
-        SinglePlot {
-            inner: SinglePlotInner::Ready(plots),
-            name,
-            typ,
-        }
-    }
-}
-impl<X, I: PlotIter, D: Display> PlotIterator for SinglePlot<I, D>
-where
-    I::Item1: Unwrapper<Item = X>,
-    I::Item2: Unwrapper<Item = X>,
-{
-    type Item = X;
-
-    #[inline(always)]
-    fn next_bound_point(&mut self) -> Option<Self::Item> {
-        if matches!(&self.inner, SinglePlotInner::Ready(..)) {
-            if let SinglePlotInner::Ready(mut a) = self.inner.take() {
-                let b = a.first();
-                self.inner = SinglePlotInner::First(a, b);
-            } else {
-                unreachable!();
-            }
-        }
-
-        if let SinglePlotInner::First(_, a) = &mut self.inner {
-            a.next().map(|x| x.unwrap())
-        } else {
-            panic!("next_bound_point called too late!")
-        }
-    }
-
-    #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
-        match &mut self.inner {
-            SinglePlotInner::Second(a) => {
-                if let Some(k) = a.next() {
-                    PlotResult::Some(k.unwrap())
-                } else if !self.inner.is_done() {
-                    self.inner = SinglePlotInner::Done;
-                    PlotResult::None
-                } else {
-                    unreachable!();
-                }
-            }
-            SinglePlotInner::Done => PlotResult::Finished,
-            _ => {
-                unreachable!()
-            }
-        }
-    }
-
-    #[inline(always)]
-    fn next_name(&mut self, writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        if matches!(&self.inner, SinglePlotInner::Second(..)) {
-            Some(write!(writer, "{}", self.name))
-        } else {
-            None
-        }
-    }
-
-    #[inline(always)]
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        if matches!(&self.inner, SinglePlotInner::First(..)) {
-            if let SinglePlotInner::First(a, b) = self.inner.take() {
-                self.inner = SinglePlotInner::Second(a.second(b));
-                Some(self.typ)
-            } else {
-                unreachable!();
-            }
-        } else {
-            None
-        }
-    }
-}
-
-///
-/// Chain two plots together.
-///
-pub struct Chain<A, B> {
-    a: A,
-    b: B,
-}
-impl<A: PlotIterator, B: PlotIterator<Item = A::Item>> PlotIterator for Chain<A, B> {
-    type Item = A::Item;
-
-    #[inline(always)]
-    fn next_bound_point(&mut self) -> Option<Self::Item> {
-        if let Some(a) = self.a.next_bound_point() {
-            Some(a)
-        } else {
-            self.b.next_bound_point()
-        }
-    }
-
-    #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
-        match self.a.next_plot_point() {
-            PlotResult::Some(a) => PlotResult::Some(a),
-            PlotResult::None => PlotResult::None,
-            PlotResult::Finished => self.b.next_plot_point(),
-        }
-    }
-
-    #[inline(always)]
-    fn next_name(&mut self, mut writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        if let Some(a) = self.a.next_name(&mut writer) {
-            Some(a)
-        } else {
-            self.b.next_name(&mut writer)
-        }
-    }
-
-    #[inline(always)]
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        if let Some(a) = self.a.next_typ() {
-            Some(a)
-        } else {
-            self.b.next_typ()
-        }
-    }
-}
-
-pub trait Markerable: PlotIterator<Item = (Self::X, Self::Y)> {
-    type X;
-    type Y;
-    ///
-    /// Specify x and y values that must fit into the viewport.
-    ///
-    fn markers<XI: IntoIterator<Item = Self::X>, YI: IntoIterator<Item = Self::Y>>(
-        self,
-        xmarkers: XI,
-        ymarkers: YI,
-    ) -> MarkersStruct<Self, XI::IntoIter, YI::IntoIter>
-    where
-        Self: Sized,
-    {
-        MarkersStruct {
-            plots: self,
-            xmarkers: xmarkers.into_iter(),
-            ymarkers: ymarkers.into_iter(),
-        }
-    }
-}
-impl<X, Y, I: PlotIterator<Item = (X, Y)>> Markerable for I {
-    type X = X;
-    type Y = Y;
-}
-
-///
-/// Specify x and y values that must fit into the viewport.
-///
-/// Also consider [`build::Markerable::markers()`]
-///
-pub fn markers<
-    X,
-    Y,
-    P: PlotIterator<Item = (X, Y)>,
-    XI: IntoIterator<Item = X>,
-    YI: IntoIterator<Item = Y>,
->(
-    plots: P,
-    x: XI,
-    y: YI,
-) -> MarkersStruct<P, XI::IntoIter, YI::IntoIter> {
-    MarkersStruct {
-        plots,
-        xmarkers: x.into_iter(),
-        ymarkers: y.into_iter(),
     }
 }

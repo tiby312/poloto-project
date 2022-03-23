@@ -11,8 +11,8 @@
 //!
 //! Pipeline:
 //! * Collect plots using functions in [`build`] module
-//! * Create a canvas using [`render`] module.
-//! * Compute min/max by calling [`render::Canvas::build()`].
+//! * Create a RenderOptions using [`render`] module.
+//! * Compute min/max by calling [`render::RenderOptions::build()`].
 //! * Create tick distributions. (This step can be done automatically using [`Data::plot()`])
 //! * Collect title/xname/yname using [`Data::plot()`] or [`Data::plot_with()`]
 //! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
@@ -64,7 +64,7 @@ pub mod simple_theme;
 ///
 pub mod prelude {
     pub use super::build::crop::Croppable;
-    pub use super::build::Markerable;
+    pub use super::build::marker::Markerable;
     pub use super::build::PlotIteratorExt;
     pub use super::formatm;
     pub use super::plots;

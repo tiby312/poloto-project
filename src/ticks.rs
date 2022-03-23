@@ -27,7 +27,7 @@ pub struct DataBound<X> {
 }
 
 ///
-/// Tick relevant information of [`RenderOption`]
+/// Tick relevant information of [`RenderOptions`]
 ///
 #[derive(Debug, Clone)]
 pub struct RenderOptionsBound {

@@ -327,7 +327,9 @@ fn trig() -> fmt::Result {
 
 #[test]
 fn no_plots() -> fmt::Result {
-    let v: Vec<poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>> = vec![];
+    let v: Vec<
+        poloto::build::plot_iter_impl::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
+    > = vec![];
 
     let plotter = poloto::simple_fmt!(
         poloto::build::plots_dyn(v),
@@ -342,7 +344,9 @@ fn no_plots() -> fmt::Result {
 
 #[test]
 fn no_plots_only_marker() -> fmt::Result {
-    let v: Vec<poloto::build::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>> = vec![];
+    let v: Vec<
+        poloto::build::plot_iter_impl::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
+    > = vec![];
 
     let plotter = poloto::simple_fmt!(
         poloto::build::plots_dyn(v).markers([], [5]),
