@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "10.5.1"
+version = "10.5.2"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -20,7 +20,7 @@ members = [ "poloto_bench"]
 [features]
 default = ["timestamp"]
 timestamp = ["chrono"]
-
+timestamp_full = ["chrono","chrono/std"]
 
 [dependencies]
 tagger = "4.3"

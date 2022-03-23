@@ -100,6 +100,7 @@ fn months() -> fmt::Result {
     s.simple_theme(w)
 }
 
+#[cfg(feature = "timestamp_full")]
 #[test]
 fn seconds() -> fmt::Result {
     use chrono::TimeZone;
