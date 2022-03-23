@@ -10,7 +10,7 @@ use super::*;
 pub const SVG_HEADER: &str = r##"<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"##;
 
 ///
-/// The default svg dimentions for simple theme.
+/// The default svg dimensions for simple theme.
 ///
 pub const DIM: [f64; 2] = [800.0, 500.0];
 
