@@ -404,14 +404,8 @@ impl Canvas {
                 d.attr("class", "poloto_background")
             })?;
         }
-        use crate::build::PlotIteratorExt;
 
-        //
-        // Using `cargo bloat` determined that these lines reduces alot of code bloat.
-        //
-        let plot_fmt = plots.as_mut_dyn();
-
-        render::render_plot::render_plot(&mut writer, boundx, boundy, self, plot_fmt)?;
+        render::render_plot::render_plot(&mut writer, boundx, boundy, self, plots)?;
 
         render::render_base::render_base(&mut writer, boundx, boundy, base, self)
     }

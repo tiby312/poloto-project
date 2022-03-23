@@ -7,7 +7,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     canvas: &Canvas,
-    mut plots_all: impl build::PlotIterator<Item = (X, Y)>,
+    plots_all: &mut impl build::PlotIterator<Item = (X, Y)>,
 ) -> std::fmt::Result {
     let Canvas {
         width,
@@ -42,7 +42,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
         (0..max).cycle()
     };
 
-    let mut f = crate::build::RenderablePlotIter::new(&mut plots_all);
+    let mut f = crate::build::RenderablePlotIter::new(plots_all);
 
     for i in 0.. {
         let mut ppp = if let Some(ppp) = f.next_plot() {
@@ -80,7 +80,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
             PlotMetaType::Plot(p_type) => {
                 let colori = color_iter.next().unwrap();
 
-                let it = {
+                let mut it = {
                     let basex_ii = xaspect_offset + padding - aa;
                     let basey_ii = yaspect_offset + height - paddingy + bb;
                     let rangex_ii = [minx, maxx];
@@ -95,6 +95,12 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
                         ]
                     })
                 };
+
+                //
+                // Using `cargo bloat` determined that these lines reduces alot of code bloat.
+                // in debug builds.
+                //
+                let it: &mut dyn Iterator<Item = [f64; 2]> = &mut it;
 
                 let precision = canvas.precision;
                 render(
