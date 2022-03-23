@@ -16,7 +16,9 @@ fn main() {
 
     let data = poloto::data(bar.markers([0], ybound));
 
-    let xtick_fmt = poloto::ticks::from_default(data.bounds(&opt).0);
+    let (bx, _) = poloto::ticks::bounds(&data, &opt);
+
+    let xtick_fmt = poloto::ticks::from_default(bx);
 
     let plt = data.plot_with(
         opt,

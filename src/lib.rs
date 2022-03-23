@@ -134,20 +134,20 @@ macro_rules! plots {
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let data = $crate::render::Data::new($data);
-        let canvas = $crate::render::render_opt_builder().build();
-        let (bx, by) = data.bounds(&canvas);
+        let data = $crate::data($data);
+        let opt = $crate::render::render_opt_builder().build();
+        let (bx, by) = $crate::ticks::bounds(&data, &opt);
         let xt = $crate::ticks::from_default(bx);
         let yt = $crate::ticks::from_default(by);
-        data.plot_with(canvas, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+        data.plot_with(opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
     }};
-    ($canvas:expr,$data:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let canvas = $canvas;
-        let data = $crate::render::Data::new($data);
-        let (bx, by) = data.bounds(&canvas);
+    ($opt:expr,$data:expr,$title:expr,$xname:expr,$yname:expr) => {{
+        let opt = $opt;
+        let data = $crate::data($data);
+        let (bx, by) = $crate::ticks::bounds(&data, &opt);
         let xt = $crate::ticks::from_default(bx);
         let yt = $crate::ticks::from_default(by);
-        data.plot_with(canvas, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+        data.plot_with(opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
     }};
 }
 

@@ -66,14 +66,15 @@ fn line_fill_fmt() -> fmt::Result {
             .crop_left(2.0),
     ));
 
-    let boundx = s.bounds(&opt).0.data.clone();
+    let (bx, by) = poloto::ticks::bounds(&s, &opt);
+    let boundx = bx.data.clone();
 
     let fmt = poloto::plot_fmt(
         formatm!("from {} to {}", boundx.min, boundx.max),
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        poloto::ticks::from_default(s.bounds(&opt).0),
-        poloto::ticks::from_default(s.bounds(&opt).1),
+        poloto::ticks::from_default(bx),
+        poloto::ticks::from_default(by),
     );
 
     let plotter = s.plot_with(&opt, fmt);

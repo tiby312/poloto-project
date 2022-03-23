@@ -21,7 +21,9 @@ fn marathon() -> fmt::Result {
 
     let xtick_fmt = poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
 
-    let ytick_fmt = poloto::ticks::from_default(data.bounds(&opt).1);
+    let (_, by) = poloto::ticks::bounds(&data, &opt);
+
+    let ytick_fmt = poloto::ticks::from_default(by);
 
     let plotter = data.plot_with(
         &opt,
@@ -72,7 +74,9 @@ fn years() -> fmt::Result {
 
     let opt = poloto::render::render_opt();
 
-    let ytick_fmt = poloto::ticks::from_default(data.bounds(&opt).1);
+    let (_, by) = poloto::ticks::bounds(&data, &opt);
+
+    let ytick_fmt = poloto::ticks::from_default(by);
 
     let plotter = data.plot_with(
         &opt,

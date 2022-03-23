@@ -398,10 +398,14 @@ pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>> {
     plots: P,
 }
 
-impl<X: PlotNum, Y: PlotNum, P: build::PlotIterator<Item = (X, Y)>> Data<X, Y, P> {
+impl<X, Y, P: build::PlotIterator<Item = (X, Y)>> Data<X, Y, P> {
     pub fn new<P1: build::marker::PlotIteratorAndMarkers<Iter = P, X = X, Y = Y>>(
         plots: P1,
-    ) -> Data<X, Y, P> {
+    ) -> Data<X, Y, P>
+    where
+        X: PlotNum,
+        Y: PlotNum,
+    {
         let (mut plots, xmarkers, ymarkers) = plots.unpack();
 
         let ii = std::iter::from_fn(|| plots.next_bound_point());
@@ -424,22 +428,8 @@ impl<X: PlotNum, Y: PlotNum, P: build::PlotIterator<Item = (X, Y)>> Data<X, Y, P
         }
     }
 
-    pub fn bounds<'a, K: Renderable + 'a>(
-        &'a self,
-        canvas: &'a K,
-    ) -> (ticks::Bound<'a, X>, ticks::Bound<'a, Y>) {
-        let (cx, cy) = canvas.bounds();
-
-        (
-            Bound {
-                data: &self.boundx,
-                canvas: cx,
-            },
-            Bound {
-                data: &self.boundy,
-                canvas: cy,
-            },
-        )
+    pub fn bounds(&self) -> (&ticks::DataBound<X>, &ticks::DataBound<Y>) {
+        (&self.boundx, &self.boundy)
     }
 
     ///

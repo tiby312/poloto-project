@@ -179,7 +179,7 @@ fn main() {
     let data = poloto::data(poloto::build::histogram("", it).markers([24], []));
 
     let opt = poloto::render::render_opt();
-    let (_, by) = data.bounds(&opt);
+    let (_, by) = poloto::ticks::bounds(&data, &opt);
     let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
     let ytick_fmt = poloto::ticks::from_default(by);
 

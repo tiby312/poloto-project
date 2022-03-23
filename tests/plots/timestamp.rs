@@ -52,7 +52,8 @@ fn minutes_local_time() -> fmt::Result {
 
     let opt = poloto::render::render_opt();
 
-    let (bx, by) = s.bounds(&opt);
+    let (bx, by) = poloto::ticks::bounds(&s, &opt);
+
     let xtick_fmt = unixtime_ticks(bx, time_zone);
     let ytick_fmt = poloto::ticks::from_default(by);
 
@@ -124,7 +125,8 @@ fn seconds() -> fmt::Result {
 
     let opt = poloto::render::render_opt();
 
-    let (bx, by) = data.bounds(&opt);
+    let (bx, by) = poloto::ticks::bounds(&data, &opt);
+
     let (xmin, xmax) = (bx.data.min, bx.data.max);
 
     let xtick_fmt = poloto::ticks::from_default(bx);

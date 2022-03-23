@@ -27,6 +27,27 @@ pub struct DataBound<X> {
 }
 
 ///
+/// Construct x and y tick data to be fed into a tick generator.
+///
+pub fn bounds<'a, X, Y, P: crate::build::PlotIterator<Item = (X, Y)>, K: Renderable>(
+    data: &'a Data<X, Y, P>,
+    render: &'a K,
+) -> (Bound<'a, X>, Bound<'a, Y>) {
+    let (dx, dy) = data.bounds();
+    let (cx, cy) = render.bounds();
+    (
+        Bound {
+            data: dx,
+            canvas: cx,
+        },
+        Bound {
+            data: dy,
+            canvas: cy,
+        },
+    )
+}
+
+///
 /// Tick relevant information of [`RenderOptions`]
 ///
 #[derive(Debug, Clone)]
