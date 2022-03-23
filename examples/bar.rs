@@ -10,11 +10,11 @@ fn main() {
         ],
     );
 
-    let canvas = poloto::render::canvas_builder()
+    let opt = poloto::render::render_opt_builder()
         .with_tick_lines([true, false])
         .build();
 
-    let data = canvas.build(bar.markers([0], ybound));
+    let data = opt.build(bar.markers([0], ybound));
 
     let xtick_fmt = poloto::ticks::from_default(data.bounds().0);
 

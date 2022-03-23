@@ -130,7 +130,7 @@ pub trait SimpleTheme {
     fn simple_theme_dark<T: fmt::Write>(self, a: T) -> std::fmt::Result;
 }
 
-impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> SimpleTheme
+impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> SimpleTheme
     for Plotter<P, K, B>
 {
     fn simple_theme<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {

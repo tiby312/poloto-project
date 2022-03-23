@@ -28,12 +28,12 @@ fn main() {
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
-    let canvas = poloto::render::canvas_builder()
+    let opt = poloto::render::render_opt_builder()
         .with_tick_lines([true, true])
         .with_dim(dim)
         .build();
 
-    let plotter = simple_fmt!(canvas, data, "collatz", "x", "y");
+    let plotter = simple_fmt!(opt, data, "collatz", "x", "y");
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);

@@ -14,7 +14,7 @@ use super::*;
 #[derive(Debug, Clone)]
 pub struct Bound<'a, X> {
     pub data: &'a ticks::DataBound<X>,
-    pub canvas: &'a CanvasBound,
+    pub canvas: &'a RenderOptionsBound,
 }
 
 ///
@@ -27,10 +27,10 @@ pub struct DataBound<X> {
 }
 
 ///
-/// Tick relevant information of [`Canvas`]
+/// Tick relevant information of [`RenderOption`]
 ///
 #[derive(Debug, Clone)]
-pub struct CanvasBound {
+pub struct RenderOptionsBound {
     pub ideal_num_steps: u32,
     pub ideal_dash_size: f64,
     pub max: f64,

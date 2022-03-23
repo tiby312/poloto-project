@@ -61,7 +61,7 @@ fn test_chart() -> std::fmt::Result {
 
     let mut e = tagger::new(w);
 
-    let canvas = poloto::render::canvas();
+    let opt = poloto::render::render_opt();
 
     e.elem("html", |e| e.attr("style", "background-color:#262626"))?
         .build(|e| {
@@ -78,7 +78,7 @@ fn test_chart() -> std::fmt::Result {
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 let s = poloto::simple_fmt!(
-                                    canvas,
+                                    opt,
                                     poloto::build::scatter("", test),
                                     formatm!("test {}", i),
                                     "x",
@@ -100,7 +100,7 @@ fn test_chart() -> std::fmt::Result {
                             ".poloto_scatter{stroke-width:20}",
                             poloto::disp(|a| {
                                 let s = poloto::simple_fmt!(
-                                    canvas,
+                                    opt,
                                     poloto::build::scatter("", test),
                                     formatm!("test {}", i),
                                     "x",

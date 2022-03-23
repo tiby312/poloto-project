@@ -12,7 +12,9 @@ fn heart() -> fmt::Result {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let canvas = poloto::render::canvas_builder().preserve_aspect().build();
+    let canvas = poloto::render::render_opt_builder()
+        .preserve_aspect()
+        .build();
 
     let plotter = poloto::simple_fmt!(
         canvas,
@@ -54,7 +56,7 @@ fn large_scatter() -> fmt::Result {
 fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let canvas = poloto::render::canvas();
+    let canvas = poloto::render::render_opt();
     let s = canvas.build(poloto::build::line_fill(
         "tan(x)",
         x.clone()
@@ -192,7 +194,7 @@ fn custom_dim() -> fmt::Result {
         v.push(l);
     }
 
-    let canvas = poloto::render::canvas_builder()
+    let canvas = poloto::render::render_opt_builder()
         .with_dim([2000.0, 1000.0])
         .with_tick_lines([true, true])
         .build();

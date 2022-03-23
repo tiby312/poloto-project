@@ -5,11 +5,11 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt<X = X, Y = Y>,
-    canvas: &Canvas,
+    canvas: &RenderOptions,
 ) -> std::fmt::Result {
     let mut writer = tagger::new(writer);
 
-    let Canvas {
+    let RenderOptions {
         width,
         height,
         padding,

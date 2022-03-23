@@ -6,10 +6,10 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     writer: impl std::fmt::Write,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
-    canvas: &Canvas,
+    canvas: &RenderOptions,
     plots_all: &mut impl build::PlotIterator<Item = (X, Y)>,
 ) -> std::fmt::Result {
-    let Canvas {
+    let RenderOptions {
         width,
         height,
         padding,
@@ -148,7 +148,7 @@ impl NumFmt for Roundf64 {
 }
 
 struct PlotRenderInfo<'a> {
-    canvas: &'a Canvas,
+    canvas: &'a RenderOptions,
     p_type: PlotType,
     name_exists: bool,
     colori: usize,
@@ -172,7 +172,7 @@ fn render<W: fmt::Write>(
         bar_width,
     } = info;
 
-    let Canvas {
+    let RenderOptions {
         height,
         padding,
         paddingy,

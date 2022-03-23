@@ -48,9 +48,9 @@ fn minutes_local_time() -> fmt::Result {
         (day2.and_hms(01, 50, 01).into(), 4133000),
     ];
 
-    let canvas = poloto::render::canvas();
+    let opt = poloto::render::render_opt();
 
-    let s = canvas.build(poloto::build::line("", data).markers(None, Some(0)));
+    let s = opt.build(poloto::build::line("", data).markers(None, Some(0)));
 
     let (bx, by) = s.bounds();
     let xtick_fmt = unixtime_ticks(bx, time_zone);
@@ -116,7 +116,7 @@ fn seconds() -> fmt::Result {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let canvas = poloto::render::canvas();
+    let canvas = poloto::render::render_opt();
 
     let data = canvas.build(poloto::build::line("", data).markers(None, Some(0)));
 

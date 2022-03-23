@@ -86,8 +86,6 @@ use render::*;
 
 use build::PlotIterator;
 
-use std::borrow::Borrow;
-
 /// Shorthand for `disp_const(move |w|write!(w,...))`
 /// Similar to `std::format_args!()` except has a more flexible lifetime.
 #[macro_export]
@@ -138,7 +136,7 @@ macro_rules! plots {
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let canvas = $crate::render::canvas_builder().build();
+        let canvas = $crate::render::render_opt_builder().build();
         let data = canvas.build_moved($data);
         let (bx, by) = data.bounds();
         let xt = $crate::ticks::from_default(bx);

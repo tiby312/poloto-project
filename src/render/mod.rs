@@ -116,11 +116,11 @@ fn line<T: std::fmt::Write>(
 }
 
 ///
-/// Build a [`Canvas`]
+/// Build a [`RenderOptions`]
 ///
-/// Created by [`canvas()`]
+/// Created by [`RenderOptions()`]
 ///
-pub struct CanvasBuilder {
+pub struct RenderOptionsBuilder {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
     dim: Option<[f64; 2]>,
@@ -130,9 +130,9 @@ pub struct CanvasBuilder {
     bar_width: f64,
 }
 
-impl Default for CanvasBuilder {
+impl Default for RenderOptionsBuilder {
     fn default() -> Self {
-        CanvasBuilder {
+        RenderOptionsBuilder {
             num_css_classes: Some(8),
             preserve_aspect: false,
             dim: None,
@@ -144,7 +144,7 @@ impl Default for CanvasBuilder {
     }
 }
 
-impl CanvasBuilder {
+impl RenderOptionsBuilder {
     pub fn with_dim(&mut self, dim: [f64; 2]) -> &mut Self {
         self.dim = Some(dim);
         self
@@ -192,7 +192,7 @@ impl CanvasBuilder {
         self
     }
 
-    pub fn build(&mut self) -> Canvas {
+    pub fn build(&mut self) -> RenderOptions {
         let (width, height) = if let Some([x, y]) = self.dim {
             (x, y)
         } else {
@@ -242,14 +242,14 @@ impl CanvasBuilder {
         let spacing = padding / 3.0;
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
-        Canvas {
-            boundx: ticks::CanvasBound {
+        RenderOptions {
+            boundx: ticks::RenderOptionsBound {
                 ideal_num_steps: ideal_num_xsteps,
                 ideal_dash_size,
                 max: scalex,
                 axis: Axis::X,
             },
-            boundy: ticks::CanvasBound {
+            boundy: ticks::RenderOptionsBound {
                 ideal_num_steps: ideal_num_ysteps,
                 ideal_dash_size,
                 max: scaley,
@@ -280,9 +280,9 @@ impl CanvasBuilder {
 ///
 ///
 #[derive(Clone)]
-pub struct Canvas {
-    boundx: ticks::CanvasBound,
-    boundy: ticks::CanvasBound,
+pub struct RenderOptions {
+    boundx: ticks::RenderOptionsBound,
+    boundy: ticks::RenderOptionsBound,
     width: f64,
     height: f64,
     padding: f64,
@@ -298,11 +298,11 @@ pub struct Canvas {
     bar_width: f64,
 }
 
-impl Canvas {
+impl RenderOptions {
     pub fn build_moved<P: build::PlotIteratorAndMarkers>(
         self,
         plots: P,
-    ) -> Data<P::X, P::Y, P::Iter, Canvas>
+    ) -> Data<P::X, P::Y, P::Iter, RenderOptions>
     where
         P::X: PlotNum,
         P::Y: PlotNum,
@@ -324,7 +324,7 @@ impl Canvas {
     pub fn build<P: build::PlotIteratorAndMarkers>(
         &self,
         plots: P,
-    ) -> Data<P::X, P::Y, P::Iter, &Canvas>
+    ) -> Data<P::X, P::Y, P::Iter, &RenderOptions>
     where
         P::X: PlotNum,
         P::Y: PlotNum,
@@ -358,7 +358,7 @@ impl Canvas {
         mut plots: P,
         xmarkers: impl IntoIterator<Item = X>,
         ymarkers: impl IntoIterator<Item = Y>,
-    ) -> Data<X, Y, P, &Canvas>
+    ) -> Data<X, Y, P, &RenderOptions>
     where
         X: PlotNum,
         Y: PlotNum,
@@ -387,12 +387,39 @@ impl Canvas {
     pub fn get_dim(&self) -> [f64; 2] {
         [self.width, self.height]
     }
+}
 
+impl<T: Renderable> Renderable for &T {
+    fn get_dim(&self) -> [f64; 2] {
+        (*self).get_dim()
+    }
+    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
+        (*self).bounds()
+    }
+    fn render<X: PlotNum, Y: PlotNum>(
+        &self,
+        writer: &mut dyn fmt::Write,
+        plots: &mut impl build::PlotIterator<Item = (X, Y)>,
+        base: &mut dyn BaseFmt<X = X, Y = Y>,
+        boundx: &DataBound<X>,
+        boundy: &DataBound<Y>,
+    ) -> fmt::Result {
+        (*self).render(writer, plots, base, boundx, boundy)
+    }
+}
+
+impl Renderable for RenderOptions {
+    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
+        (&self.boundx, &self.boundy)
+    }
+    fn get_dim(&self) -> [f64; 2] {
+        [self.width, self.height]
+    }
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         mut writer: &mut dyn fmt::Write,
         plots: &mut impl build::PlotIterator<Item = (X, Y)>,
-        base: &mut impl BaseFmt<X = X, Y = Y>,
+        base: &mut dyn BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
     ) -> fmt::Result {
@@ -410,37 +437,62 @@ impl Canvas {
         render::render_base::render_base(&mut writer, boundx, boundy, base, self)
     }
 }
-///
-/// Build a [`Canvas`]
-///
-pub fn canvas() -> Canvas {
-    CanvasBuilder::default().build()
+pub trait Renderable {
+    fn get_dim(&self) -> [f64; 2];
+    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound);
+    fn render<X: PlotNum, Y: PlotNum>(
+        &self,
+        writer: &mut dyn fmt::Write,
+        plots: &mut impl build::PlotIterator<Item = (X, Y)>,
+        base: &mut dyn BaseFmt<X = X, Y = Y>,
+        boundx: &DataBound<X>,
+        boundy: &DataBound<Y>,
+    ) -> fmt::Result;
 }
 
-pub fn canvas_builder() -> CanvasBuilder {
-    CanvasBuilder::default()
+///
+/// Build a [`RenderOption`]
+///
+#[deprecated(note = "Renamed Canvas to RenderOptions. Use render_opt() instead.")]
+pub fn canvas() -> RenderOptions {
+    RenderOptionsBuilder::default().build()
+}
+
+pub fn render_opt() -> RenderOptions {
+    RenderOptionsBuilder::default().build()
+}
+
+pub fn render_opt_builder() -> RenderOptionsBuilder {
+    RenderOptionsBuilder::default()
+}
+
+#[deprecated(note = "Renamed Canvas to RenderOptions. Use render_opt_builder() instead.")]
+pub fn canvas_builder() -> RenderOptionsBuilder {
+    RenderOptionsBuilder::default()
 }
 
 ///
-/// Created by [`Canvas::build`]
+/// Created by [`RenderOptions::build`]
 ///
-pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> {
+pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Renderable> {
     canvas: K,
     boundx: ticks::DataBound<X>,
     boundy: ticks::DataBound<Y>,
     plots: P,
 }
 
-impl<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> Data<X, Y, P, K> {
+impl<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Renderable> Data<X, Y, P, K> {
     pub fn bounds(&self) -> (ticks::Bound<X>, ticks::Bound<Y>) {
+        let (cx, cy) = self.canvas.bounds();
+
         (
             Bound {
                 data: &self.boundx,
-                canvas: &self.canvas.borrow().boundx,
+                canvas: cx,
             },
             Bound {
                 data: &self.boundy,
-                canvas: &self.canvas.borrow().boundy,
+                canvas: cy,
             },
         )
     }
@@ -488,7 +540,7 @@ impl<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Borrow<Canvas>> Data<X, Y, 
 ///
 /// Created by [`Data::plot`]
 ///
-pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> {
+pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> {
     canvas: K,
     boundx: DataBound<B::X>,
     boundy: DataBound<B::Y>,
@@ -496,9 +548,9 @@ pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas
     base: B,
 }
 
-impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt> Plotter<P, K, B> {
+impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> Plotter<P, K, B> {
     pub fn get_dim(&self) -> [f64; 2] {
-        self.canvas.borrow().get_dim()
+        self.canvas.get_dim()
     }
 
     ///
@@ -519,7 +571,7 @@ impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Borrow<Canvas>, B: BaseFmt>
     /// plotter.render(&mut k);
     /// ```
     pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
-        self.canvas.borrow().render(
+        self.canvas.render(
             &mut writer,
             &mut self.plots,
             &mut self.base,
