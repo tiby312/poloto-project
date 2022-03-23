@@ -77,7 +77,7 @@ fn line_fill_fmt() -> fmt::Result {
         poloto::ticks::from_default(by),
     );
 
-    let plotter = s.plot_with(&opt, fmt);
+    let plotter = poloto::plot_with(s, &opt, fmt);
 
     let w = util::create_test_file("line_fill_fmt.svg");
 

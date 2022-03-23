@@ -57,7 +57,8 @@ fn minutes_local_time() -> fmt::Result {
     let xtick_fmt = unixtime_ticks(bx, time_zone);
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let s = s.plot_with(
+    let s = poloto::plot_with(
+        s,
         &opt,
         poloto::plot_fmt(
             "Number of Wikipedia Articles",
@@ -140,7 +141,8 @@ fn seconds() -> fmt::Result {
 
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let plotter = data.plot_with(
+    let plotter = poloto::plot_with(
+        data,
         &opt,
         poloto::plot_fmt(
             "Number of Wikipedia Articles",

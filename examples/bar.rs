@@ -20,7 +20,8 @@ fn main() {
 
     let xtick_fmt = poloto::ticks::from_default(bx);
 
-    let plt = data.plot_with(
+    let plt = poloto::plot_with(
+        data,
         opt,
         poloto::plot_fmt(
             "Comparison of Food Tastiness",

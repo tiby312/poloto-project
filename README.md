@@ -183,7 +183,8 @@ fn main() {
     let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let pp = data.plot_with(
+    let pp = poloto::plot_with(
+        data,
         opt,
         poloto::plot_fmt(
             "Number of rides at theme park hourly",

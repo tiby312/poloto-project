@@ -25,7 +25,8 @@ fn marathon() -> fmt::Result {
 
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let plotter = data.plot_with(
+    let plotter = poloto::plot_with(
+        data,
         &opt,
         poloto::plot_fmt(
             "collatz",
@@ -78,7 +79,8 @@ fn years() -> fmt::Result {
 
     let ytick_fmt = poloto::ticks::from_default(by);
 
-    let plotter = data.plot_with(
+    let plotter = poloto::plot_with(
+        data,
         &opt,
         poloto::plot_fmt("title", "xname", "yname", xtick_fmt, ytick_fmt),
     );

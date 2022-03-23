@@ -139,7 +139,7 @@ macro_rules! simple_fmt {
         let (bx, by) = $crate::ticks::bounds(&data, &opt);
         let xt = $crate::ticks::from_default(bx);
         let yt = $crate::ticks::from_default(by);
-        data.plot_with(opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
     }};
     ($opt:expr,$data:expr,$title:expr,$xname:expr,$yname:expr) => {{
         let opt = $opt;
@@ -147,9 +147,11 @@ macro_rules! simple_fmt {
         let (bx, by) = $crate::ticks::bounds(&data, &opt);
         let xt = $crate::ticks::from_default(bx);
         let yt = $crate::ticks::from_default(by);
-        data.plot_with(opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
     }};
 }
+
+pub use render::plot_with;
 
 ///
 /// Construct a [`Data`].

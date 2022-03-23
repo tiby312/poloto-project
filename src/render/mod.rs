@@ -435,6 +435,7 @@ impl<X, Y, P: build::PlotIterator<Item = (X, Y)>> Data<X, Y, P> {
     ///
     /// Move to final stage in pipeline collecting the title/xname/yname.
     ///
+    #[deprecated(note = "Use poloto::plot_with()")]
     pub fn plot_with<A: BaseFmt<X = X, Y = Y>, K: Renderable>(
         self,
         canvas: K,
@@ -447,6 +448,20 @@ impl<X, Y, P: build::PlotIterator<Item = (X, Y)>> Data<X, Y, P> {
             boundy: self.boundy,
             canvas,
         }
+    }
+}
+
+pub fn plot_with<P: crate::build::PlotIterator<Item = (A::X, A::Y)>, K: Renderable, A: BaseFmt>(
+    data: Data<A::X, A::Y, P>,
+    canvas: K,
+    base: A,
+) -> Plotter<P, K, A> {
+    Plotter {
+        plots: data.plots,
+        base,
+        boundx: data.boundx,
+        boundy: data.boundy,
+        canvas,
     }
 }
 
