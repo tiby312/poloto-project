@@ -50,7 +50,7 @@ fn minutes_local_time() -> fmt::Result {
 
     let opt = poloto::render::render_opt();
 
-    let s = opt.build(poloto::build::line("", data).markers(None, Some(0)));
+    let s = poloto::data(poloto::build::line("", data).markers(None, Some(0)), opt);
 
     let (bx, by) = s.bounds();
     let xtick_fmt = unixtime_ticks(bx, time_zone);
@@ -119,7 +119,7 @@ fn seconds() -> fmt::Result {
 
     let canvas = poloto::render::render_opt();
 
-    let data = canvas.build(poloto::build::line("", data).markers(None, Some(0)));
+    let data = poloto::data(poloto::build::line("", data).markers(None, Some(0)), canvas);
 
     let (bx, by) = data.bounds();
     let (xmin, xmax) = (bx.data.min, bx.data.max);

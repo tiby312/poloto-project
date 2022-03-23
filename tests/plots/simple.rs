@@ -57,14 +57,17 @@ fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
     let canvas = poloto::render::render_opt();
-    let s = canvas.build(poloto::build::line_fill(
-        "tan(x)",
-        x.clone()
-            .map(|x| [x, x.tan()])
-            .crop_above(10.0)
-            .crop_below(0.0)
-            .crop_left(2.0),
-    ));
+    let s = poloto::data(
+        poloto::build::line_fill(
+            "tan(x)",
+            x.clone()
+                .map(|x| [x, x.tan()])
+                .crop_above(10.0)
+                .crop_below(0.0)
+                .crop_left(2.0),
+        ),
+        canvas,
+    );
 
     let boundx = s.bounds().0.data.clone();
 

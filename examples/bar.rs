@@ -14,7 +14,7 @@ fn main() {
         .with_tick_lines([true, false])
         .build();
 
-    let data = opt.build(bar.markers([0], ybound));
+    let data = poloto::data(bar.markers([0], ybound), opt);
 
     let xtick_fmt = poloto::ticks::from_default(data.bounds().0);
 

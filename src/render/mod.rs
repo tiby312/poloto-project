@@ -299,6 +299,7 @@ pub struct RenderOptions {
 }
 
 impl RenderOptions {
+    #[deprecated(note = "use Data::new() instead.")]
     pub fn build_moved<P: build::marker::PlotIteratorAndMarkers>(
         self,
         plots: P,
@@ -307,20 +308,10 @@ impl RenderOptions {
         P::X: PlotNum,
         P::Y: PlotNum,
     {
-        let Data {
-            boundx,
-            boundy,
-            plots,
-            ..
-        } = self.build(plots);
-        Data {
-            canvas: self,
-            boundx,
-            boundy,
-            plots,
-        }
+        Data::new(plots, self)
     }
 
+    #[deprecated(note = "use Data::new() instead.")]
     pub fn build<P: build::marker::PlotIteratorAndMarkers>(
         &self,
         plots: P,
@@ -329,27 +320,7 @@ impl RenderOptions {
         P::X: PlotNum,
         P::Y: PlotNum,
     {
-        let (mut plots, xmarkers, ymarkers) = plots.unpack();
-
-        let ii = std::iter::from_fn(|| plots.next_bound_point());
-
-        let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
-
-        let boundx = ticks::DataBound {
-            min: boundx[0],
-            max: boundx[1],
-        };
-        let boundy = ticks::DataBound {
-            min: boundy[0],
-            max: boundy[1],
-        };
-
-        Data {
-            boundx,
-            boundy,
-            plots,
-            canvas: self,
-        }
+        Data::new(plots, self)
     }
 
     #[deprecated(note = "Use regular build() in conjunction with markers().")]
@@ -475,7 +446,7 @@ pub fn canvas_builder() -> RenderOptionsBuilder {
 }
 
 ///
-/// Created by [`RenderOptions::build`]
+/// Linke some plots with a way to render them.
 ///
 pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Renderable> {
     canvas: K,
@@ -484,7 +455,36 @@ pub struct Data<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Renderable> {
     plots: P,
 }
 
-impl<X, Y, P: build::PlotIterator<Item = (X, Y)>, K: Renderable> Data<X, Y, P, K> {
+impl<X: PlotNum, Y: PlotNum, P: build::PlotIterator<Item = (X, Y)>, K: Renderable>
+    Data<X, Y, P, K>
+{
+    pub fn new<P1: build::marker::PlotIteratorAndMarkers<Iter = P, X = X, Y = Y>>(
+        plots: P1,
+        render: K,
+    ) -> Data<X, Y, P, K> {
+        let (mut plots, xmarkers, ymarkers) = plots.unpack();
+
+        let ii = std::iter::from_fn(|| plots.next_bound_point());
+
+        let (boundx, boundy) = util::find_bounds(ii, xmarkers, ymarkers);
+
+        let boundx = ticks::DataBound {
+            min: boundx[0],
+            max: boundx[1],
+        };
+        let boundy = ticks::DataBound {
+            min: boundy[0],
+            max: boundy[1],
+        };
+
+        Data {
+            boundx,
+            boundy,
+            plots,
+            canvas: render,
+        }
+    }
+
     pub fn bounds(&self) -> (ticks::Bound<X>, ticks::Bound<Y>) {
         let (cx, cy) = self.canvas.bounds();
 
