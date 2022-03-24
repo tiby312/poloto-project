@@ -65,6 +65,7 @@ pub mod simple_theme;
 pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::marker::Markerable;
+    pub use super::build::PlotIteratorAndMarkers;
     pub use super::build::PlotIteratorExt;
     pub use super::formatm;
     pub use super::plots;
@@ -156,7 +157,7 @@ pub use render::plot_with;
 ///
 /// Construct a [`Data`].
 ///
-pub fn data<P: build::marker::PlotIteratorAndMarkers>(plots: P) -> Data<P::X, P::Y, P::Iter>
+pub fn data<P: build::PlotIteratorAndMarkers>(plots: P) -> Data<P>
 where
     P::X: PlotNum,
     P::Y: PlotNum,

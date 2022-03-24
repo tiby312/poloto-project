@@ -22,12 +22,13 @@ impl<'a, D: Display> TickFormat for BarTickFmt<D> {
     }
 }
 
+use crate::build::marker::Markerable;
+use crate::build::PlotIteratorAndMarkers;
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
 ) -> (
-    impl PlotIterator<Item = (X, i128)>,
-    [i128; 2],
+    impl PlotIteratorAndMarkers<X = X, Y = i128>,
     impl TickFormat<Num = i128>,
 ) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
@@ -47,8 +48,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
         .into_iter();
 
     (
-        bars,
-        [-1, i128::try_from(vals_len).unwrap()],
+        bars.markers([], [-1, i128::try_from(vals_len).unwrap()]),
         BarTickFmt {
             steps: ticks,
             ticks: names,
