@@ -85,20 +85,6 @@ pub fn box_plot<'a, X>(
     Box::new(a)
 }
 
-///
-/// Helper functions to assemble and prepare plots.
-///
-pub trait PlotIteratorExt: PlotIterator {
-    fn chain<B: PlotIterator<Item = Self::Item>>(self, b: B) -> Chain<Self, B>
-    where
-        Self: Sized,
-    {
-        Chain::new(self, b)
-    }
-}
-
-impl<I: PlotIterator> PlotIteratorExt for I {}
-
 /// Iterator over all plots that have been assembled by the user.
 /// This trait is used by the poloto renderer to iterate over and render all the plots.
 ///
@@ -162,6 +148,7 @@ pub(crate) struct PlotIt<'a, 'b, A: PlotIterator> {
 }
 impl<'a, 'b, A: PlotIterator> Iterator for PlotIt<'a, 'b, A> {
     type Item = A::Item;
+    #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
         if let PlotResult::Some(a) = self.inner.flop.next_plot_point() {
             Some(a)
@@ -266,6 +253,13 @@ where
 use marker::Area;
 use marker::Markerable;
 pub trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Self::Y)> {
+    fn chain<B: PlotIterator<Item = Self::Item>>(self, b: B) -> Chain<Self, B>
+    where
+        Self: Sized,
+    {
+        Chain::new(self, b)
+    }
+
     ///
     /// Create a boxed PlotIterator.
     ///
@@ -307,23 +301,20 @@ impl<'a, X: 'a> PlotIterator for &'a mut dyn PlotIterator<Item = X> {
         (*self).next_typ()
     }
 }
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Markerable for &'a mut dyn Markerable<X = X, Y = Y> {
-    type X = X;
-    type Y = Y;
-    fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
-        (*self).increase_area(area);
-    }
-}
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Markerable for Box<dyn Markerable<X = X, Y = Y> + 'a> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Markerable
+    for Box<dyn PlotIteratorAndMarkers<Item = (X, Y), X = X, Y = Y> + 'a>
+{
     type X = X;
     type Y = Y;
     fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
         self.as_mut().increase_area(area);
     }
 }
-impl<'a, X: 'a> PlotIterator for Box<dyn PlotIterator<Item = X> + 'a> {
-    type Item = X;
+impl<'a, X: 'a, Y: 'a> PlotIterator
+    for Box<dyn PlotIteratorAndMarkers<Item = (X, Y), X = X, Y = Y> + 'a>
+{
+    type Item = (X, Y);
 
     fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
         self.as_mut().next_plot_point()

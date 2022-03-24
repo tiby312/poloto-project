@@ -109,6 +109,7 @@ impl HasDefaultTicks for i128 {
 }
 
 impl PlotNum for i128 {
+    #[inline(always)]
     fn scale(&self, range: [i128; 2], max: f64) -> f64 {
         let val = *self;
         let diff = (range[1] - range[0]) as f64;
@@ -117,7 +118,7 @@ impl PlotNum for i128 {
 
         val as f64 * scale
     }
-
+    #[inline(always)]
     fn unit_range(offset: Option<i128>) -> [i128; 2] {
         if let Some(o) = offset {
             [o - 1, o + 1]

@@ -9,6 +9,8 @@ impl<X: PlotNum, Y: PlotNum> Area<X, Y> {
     pub(crate) fn new() -> Area<X, Y> {
         Area { x: None, y: None }
     }
+
+    #[inline(always)]
     pub fn grow(&mut self, x: Option<X>, y: Option<Y>) {
         if let Some(x) = x {
             if !x.is_hole() {
@@ -117,12 +119,15 @@ pub struct Marker<P, XI, YI> {
 
 impl<P: PlotIterator, XI, YI> PlotIterator for Marker<P, XI, YI> {
     type Item = P::Item;
+    #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         self.plots.next_typ()
     }
+    #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
         self.plots.next_plot_point()
     }
+    #[inline(always)]
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.plots.next_name(w)
     }

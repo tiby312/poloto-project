@@ -18,9 +18,11 @@ enum SinglePlotInner<I: PlotIter> {
     Done,
 }
 impl<I: PlotIter> SinglePlotInner<I> {
+    #[inline(always)]
     fn is_done(&self) -> bool {
         matches!(self, SinglePlotInner::Done)
     }
+    #[inline(always)]
     fn take(&mut self) -> SinglePlotInner<I> {
         let mut k = SinglePlotInner::Done;
         std::mem::swap(&mut k, self);
@@ -135,6 +137,7 @@ impl<A: PlotIterator, B: PlotIterator<Item = A::Item>> Chain<A, B> {
 impl<A: Markerable, B: Markerable<X = A::X, Y = A::Y>> Markerable for Chain<A, B> {
     type X = A::X;
     type Y = A::Y;
+
     fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
         self.a.increase_area(area);
         self.b.increase_area(area);

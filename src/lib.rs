@@ -66,7 +66,6 @@ pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::marker::Markerable;
     pub use super::build::PlotIteratorAndMarkers;
-    pub use super::build::PlotIteratorExt;
     pub use super::formatm;
     pub use super::plots;
     pub use super::simple_fmt;
@@ -101,7 +100,7 @@ macro_rules! formatm {
 macro_rules! plots {
     ( $a:expr,$( $x:expr ),* ) => {
         {
-            use $crate::build::PlotIteratorExt;
+            use $crate::build::PlotIteratorAndMarkers;
             let mut a=$a;
             $(
                 let a=a.chain($x);

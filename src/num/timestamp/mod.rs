@@ -216,6 +216,7 @@ where
 }
 
 impl PlotNum for UnixTime {
+    #[inline(always)]
     fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;
@@ -225,6 +226,7 @@ impl PlotNum for UnixTime {
         let scale = max / diff;
         val.0 as f64 * scale
     }
+    #[inline(always)]
     fn unit_range(offset: Option<UnixTime>) -> [UnixTime; 2] {
         if let Some(o) = offset {
             [o, UnixTime(o.0 + 1)]

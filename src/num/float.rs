@@ -110,15 +110,18 @@ impl HasDefaultTicks for f64 {
 }
 
 impl PlotNum for f64 {
+    #[inline(always)]
     fn is_hole(&self) -> bool {
         self.is_nan()
     }
+    #[inline(always)]
     fn scale(&self, range: [f64; 2], max: f64) -> f64 {
         let val = *self;
         let diff = range[1] - range[0];
         let scale = max / diff;
         val * scale
     }
+    #[inline(always)]
     fn unit_range(offset: Option<f64>) -> [f64; 2] {
         if let Some(o) = offset {
             [o - 1.0, o + 1.0]
