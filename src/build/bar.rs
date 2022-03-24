@@ -22,7 +22,7 @@ impl<'a, D: Display> TickFormat for BarTickFmt<D> {
     }
 }
 
-use crate::build::marker::Markerable;
+use crate::build::marker::MarkerableExt;
 use crate::build::PlotIteratorAndMarkers;
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,

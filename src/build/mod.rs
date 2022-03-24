@@ -101,6 +101,16 @@ pub trait PlotIterator {
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
 }
 
+pub trait PlotIteratorExt: PlotIterator {
+    fn chain<B: PlotIterator<Item = Self::Item>>(self, b: B) -> Chain<Self, B>
+    where
+        Self: Sized,
+    {
+        Chain::new(self, b)
+    }
+}
+impl<I: PlotIterator> PlotIteratorExt for I {}
+
 pub(crate) struct RenderablePlotIter<'a, A: PlotIterator> {
     flop: &'a mut A,
 }
@@ -252,16 +262,9 @@ where
 
 use marker::Area;
 use marker::Markerable;
-pub trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Self::Y)> {
-    fn chain<B: PlotIterator<Item = Self::Item>>(self, b: B) -> Chain<Self, B>
-    where
-        Self: Sized,
-    {
-        Chain::new(self, b)
-    }
+pub trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Self::Y)> {}
 
-    ///
-    /// Create a boxed PlotIterator.
+pub trait PlotIteratorAndMarkersExt: PlotIteratorAndMarkers {
     ///
     /// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
     ///
@@ -283,6 +286,7 @@ pub trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Sel
         self
     }
 }
+impl<I: PlotIteratorAndMarkers> PlotIteratorAndMarkersExt for I {}
 
 impl<I: Markerable + PlotIterator<Item = (Self::X, Self::Y)>> PlotIteratorAndMarkers for I {}
 

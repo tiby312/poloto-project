@@ -81,12 +81,7 @@ impl<X: PlotNum, Y: PlotNum> Area<X, Y> {
     }
 }
 
-pub trait Markerable {
-    type X: PlotNum;
-    type Y: PlotNum;
-
-    fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>);
-
+pub trait MarkerableExt: Markerable {
     fn markers<XI: IntoIterator<Item = Self::X>, YI: IntoIterator<Item = Self::Y>>(
         self,
         x: XI,
@@ -101,6 +96,14 @@ pub trait Markerable {
             y: y.into_iter(),
         }
     }
+}
+impl<I: Markerable> MarkerableExt for I {}
+
+pub trait Markerable {
+    type X: PlotNum;
+    type Y: PlotNum;
+
+    fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>);
 }
 
 pub fn markers<P: Markerable<X = XI::Item, Y = YI::Item>, XI: IntoIterator, YI: IntoIterator>(
