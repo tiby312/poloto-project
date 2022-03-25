@@ -221,3 +221,9 @@ impl TickLayout {
         best
     }
 }
+
+impl HasZero for f64 {
+    fn zero() -> f64 {
+        0.0
+    }
+}

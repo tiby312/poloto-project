@@ -21,7 +21,7 @@ fn main() {
             .collect(),
     );
 
-    let data = plots!(data, poloto::build::markers(None, Some(0)));
+    let data = plots!(data, poloto::build::origin());
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];

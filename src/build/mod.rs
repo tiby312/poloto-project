@@ -343,10 +343,19 @@ impl<'a, X: 'a, Y: 'a> PlotIterator
     }
 }
 
+pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
+) -> plot_iter_impl::Marker<std::option::IntoIter<X>, std::option::IntoIter<Y>> {
+    markers(Some(X::zero()), Some(Y::zero()))
+}
+
 pub fn markers<XI: IntoIterator, YI: IntoIterator>(
     x: XI,
     y: YI,
-) -> plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter> {
+) -> plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter>
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
     plot_iter_impl::Marker::new(x, y)
 }
 

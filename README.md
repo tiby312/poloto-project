@@ -37,7 +37,7 @@ fn main() {
     let l1 = line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
-    let m = poloto::build::markers([], [0.0]);
+    let m = poloto::build::origin();
     let data = plots!(l1, l2, l3, m);
 
     let p = simple_fmt!(data, "gaussian", "x", "y");
@@ -77,7 +77,7 @@ fn main() {
             .collect(),
     );
 
-    let data = plots!(data, poloto::build::markers(None, Some(0)));
+    let data = plots!(data, poloto::build::origin());
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];

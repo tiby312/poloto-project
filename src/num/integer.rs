@@ -216,3 +216,9 @@ impl TickLayout {
         best
     }
 }
+
+impl HasZero for i128 {
+    fn zero() -> i128 {
+        0
+    }
+}

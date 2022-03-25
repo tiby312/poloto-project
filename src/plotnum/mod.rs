@@ -56,3 +56,7 @@ pub trait BaseFmt {
     fn xdash_size(&self) -> Option<f64>;
     fn ydash_size(&self) -> Option<f64>;
 }
+
+pub trait HasZero {
+    fn zero() -> Self;
+}
