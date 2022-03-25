@@ -87,24 +87,6 @@ pub const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto{\
     .poloto7fill{fill:chocolate;}";
 
 ///
-/// Allow passing Option<f64> or f64 to [`write_header`]
-///
-pub trait IntoOpt: Copy {
-    fn create(self) -> Option<f64>;
-}
-impl IntoOpt for Option<f64> {
-    fn create(self) -> Option<f64> {
-        self
-    }
-}
-
-impl IntoOpt for f64 {
-    fn create(self) -> Option<f64> {
-        Some(self)
-    }
-}
-
-///
 /// Write the svg header with the specified width and viewport.
 ///
 pub fn write_header<T: std::fmt::Write>(

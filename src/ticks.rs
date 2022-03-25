@@ -143,9 +143,11 @@ pub struct IndexRequester<'a> {
     counter: &'a mut usize,
 }
 impl<'a> IndexRequester<'a> {
+    #[inline(always)]
     pub fn new(counter: &'a mut usize) -> Self {
         IndexRequester { counter }
     }
+    #[inline(always)]
     pub fn request(&mut self) -> usize {
         let val = *self.counter;
         *self.counter += 1;

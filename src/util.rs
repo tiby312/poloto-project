@@ -112,11 +112,13 @@ use std::cell::RefCell;
 pub struct DisplayableClosure<F>(pub F);
 
 impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
+    #[inline(always)]
     pub fn new(a: F) -> Self {
         DisplayableClosure(a)
     }
 }
 impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
+    #[inline(always)]
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         (self.0)(formatter)
     }
@@ -128,11 +130,13 @@ impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClos
 pub struct DisplayableClosureOnce<F>(pub RefCell<Option<F>>);
 
 impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureOnce<F> {
+    #[inline(always)]
     pub fn new(a: F) -> Self {
         DisplayableClosureOnce(RefCell::new(Some(a)))
     }
 }
 impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureOnce<F> {
+    #[inline(always)]
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         if let Some(f) = (self.0.borrow_mut()).take() {
             (f)(formatter)
@@ -148,11 +152,13 @@ impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for Displayable
 pub struct DisplayableClosureMut<F>(pub RefCell<F>);
 
 impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureMut<F> {
+    #[inline(always)]
     pub fn new(a: F) -> Self {
         DisplayableClosureMut(RefCell::new(a))
     }
 }
 impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureMut<F> {
+    #[inline(always)]
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         (self.0.borrow_mut())(formatter)
     }
@@ -163,14 +169,17 @@ pub(crate) struct WriteCounter<T> {
     writer: T,
 }
 impl<T: std::fmt::Write> WriteCounter<T> {
+    #[inline(always)]
     pub fn new(writer: T) -> WriteCounter<T> {
         WriteCounter { writer, counter: 0 }
     }
+    #[inline(always)]
     pub fn get_counter(&self) -> usize {
         self.counter
     }
 }
 impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
+    #[inline(always)]
     fn write_str(&mut self, s: &str) -> std::fmt::Result {
         self.counter += s.len();
         self.writer.write_str(s)
