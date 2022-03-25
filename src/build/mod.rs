@@ -11,10 +11,8 @@ pub mod crop;
 pub mod unwrapper;
 
 pub mod marker;
-pub use marker::markers;
 
 pub mod plot_iter_impl;
-pub use plot_iter_impl::plots_dyn;
 use plot_iter_impl::{Chain, SinglePlot};
 
 use unwrapper::Unwrapper;
@@ -285,6 +283,18 @@ pub trait PlotIteratorAndMarkersExt: PlotIteratorAndMarkers {
     {
         self
     }
+
+    #[deprecated(note = "use build::markers() and chain()")]
+    fn markers<XI: IntoIterator<Item = Self::X>, YI: IntoIterator<Item = Self::Y>>(
+        self,
+        x: XI,
+        y: YI,
+    ) -> Chain<Self, plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter>>
+    where
+        Self: Sized,
+    {
+        self.chain(markers(x, y))
+    }
 }
 impl<I: PlotIteratorAndMarkers> PlotIteratorAndMarkersExt for I {}
 
@@ -331,4 +341,18 @@ impl<'a, X: 'a, Y: 'a> PlotIterator
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         self.as_mut().next_typ()
     }
+}
+
+pub fn markers<XI: IntoIterator, YI: IntoIterator>(
+    x: XI,
+    y: YI,
+) -> plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter> {
+    plot_iter_impl::Marker::new(x, y)
+}
+
+///
+/// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
+///
+pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
+    plot_iter_impl::PlotsDyn::new(vec)
 }

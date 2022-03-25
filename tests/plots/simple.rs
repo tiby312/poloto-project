@@ -18,7 +18,10 @@ fn heart() -> fmt::Result {
 
     let plotter = poloto::simple_fmt!(
         canvas,
-        poloto::build::line_fill_raw("", range.map(heart)).markers([-20.0, 20.0], [-20.0, 20.0]),
+        plots!(
+            poloto::build::line_fill_raw("", range.map(heart)),
+            poloto::build::markers([-20.0, 20.0], [-20.0, 20.0])
+        ),
         "Heart Graph",
         "x",
         "y"
@@ -109,6 +112,7 @@ fn long_label() -> fmt::Result {
             formatm!("c({}) The quick brown fox jumps over the lazy dog", 1001),
             (0..).zip(collatz(1001)),
         ),
+        poloto::build::markers([], [0]),
         poloto::build::text(" 🍆 Here is a note using the text() function.🍎",),
         poloto::build::line(
             formatm!("c({}) The quick brown fox jumps over the lazy dog", 1002),
@@ -116,7 +120,7 @@ fn long_label() -> fmt::Result {
         )
     );
 
-    let plotter = poloto::simple_fmt!(plots.markers([], [0]), "collatz", "x", "y");
+    let plotter = poloto::simple_fmt!(plots, "collatz", "x", "y");
 
     let mut w = util::create_test_file("long_label.svg");
 
@@ -202,7 +206,7 @@ fn custom_dim() -> fmt::Result {
 
     let plotter = poloto::simple_fmt!(
         canvas,
-        poloto::build::plots_dyn(v).markers([], [0]),
+        poloto::build::markers([], [0]).chain(poloto::build::plots_dyn(v)),
         "collatz",
         "x",
         "y"
@@ -350,7 +354,7 @@ fn no_plots_only_marker() -> fmt::Result {
     > = vec![];
 
     let plotter = poloto::simple_fmt!(
-        poloto::build::plots_dyn(v).markers([], [5]),
+        poloto::build::plots_dyn(v).chain(poloto::build::markers([], [5])),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label"
@@ -365,7 +369,7 @@ fn one_empty_plot() -> fmt::Result {
     let l = poloto::build::scatter("hay", std::iter::empty::<(i128, i128)>());
 
     let plotter = poloto::simple_fmt!(
-        l.markers([], [5]),
+        poloto::build::markers([], [5]).chain(l),
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label"

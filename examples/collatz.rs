@@ -15,15 +15,13 @@ fn main() {
     };
 
     use poloto::build::line;
-    let data = poloto::build::markers(
-        poloto::build::plots_dyn(
-            (1000..1006)
-                .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
-                .collect(),
-        ),
-        None,
-        Some(0),
+    let data = poloto::build::plots_dyn(
+        (1000..1006)
+            .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
+            .collect(),
     );
+
+    let data = plots!(data, poloto::build::markers(None, Some(0)));
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];

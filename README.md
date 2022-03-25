@@ -37,8 +37,8 @@ fn main() {
     let l1 = line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
-
-    let data = plots!(l1, l2, l3).markers([], [0.0]);
+    let m = poloto::build::markers([], [0.0]);
+    let data = plots!(l1, l2, l3, m);
 
     let p = simple_fmt!(data, "gaussian", "x", "y");
 
@@ -71,15 +71,13 @@ fn main() {
     };
 
     use poloto::build::line;
-    let data = poloto::build::markers(
-        poloto::build::plots_dyn(
-            (1000..1006)
-                .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
-                .collect(),
-        ),
-        None,
-        Some(0),
+    let data = poloto::build::plots_dyn(
+        (1000..1006)
+            .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
+            .collect(),
     );
+
+    let data = plots!(data, poloto::build::markers(None, Some(0)));
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
@@ -148,8 +146,9 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
+    let m = poloto::build::markers([], [0.0]);
     let plotter = simple_fmt!(
-        poloto::build::line("", data).markers([], [0.0]),
+        m.chain(poloto::build::line("", data)),
         "Long Jump world record progression",
         "Date",
         "Mark (in meters)"
@@ -176,7 +175,10 @@ fn main() {
 
     let it = (0..).zip(trend.into_iter());
 
-    let data = poloto::data(poloto::build::histogram("", it).markers([24], []));
+    let data = poloto::data(plots!(
+        poloto::build::histogram("", it),
+        poloto::build::markers([24], [])
+    ));
 
     let opt = poloto::render::render_opt();
     let (_, by) = poloto::ticks::bounds(&data, &opt);

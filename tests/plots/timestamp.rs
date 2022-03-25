@@ -21,7 +21,10 @@ fn days() -> fmt::Result {
     ];
 
     let s = poloto::simple_fmt!(
-        poloto::build::line("", data).markers(None, Some(0)),
+        plots!(
+            poloto::build::line("", data),
+            poloto::build::markers(None, Some(0))
+        ),
         "Number of Wikipedia Articles",
         "Day",
         "Number of Articles"
@@ -48,7 +51,10 @@ fn minutes_local_time() -> fmt::Result {
         (day2.and_hms(01, 50, 01).into(), 4133000),
     ];
 
-    let s = poloto::data(poloto::build::line("", data).markers(None, Some(0)));
+    let s = poloto::data(plots!(
+        poloto::build::line("", data),
+        poloto::build::markers(None, Some(0))
+    ));
 
     let opt = poloto::render::render_opt();
 
@@ -94,7 +100,10 @@ fn months() -> fmt::Result {
     ];
 
     let s = poloto::simple_fmt!(
-        poloto::build::line("", data).markers([], [0]),
+        plots!(
+            poloto::build::line("", data),
+            poloto::build::markers([], [0])
+        ),
         "Number of Wikipedia Articles",
         "duration",
         "Number of Articles"
@@ -122,7 +131,10 @@ fn seconds() -> fmt::Result {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let data = poloto::data(poloto::build::line("", data).markers(None, Some(0)));
+    let data = poloto::data(plots!(
+        poloto::build::line("", data),
+        poloto::build::markers(None, Some(0))
+    ));
 
     let opt = poloto::render::render_opt();
 

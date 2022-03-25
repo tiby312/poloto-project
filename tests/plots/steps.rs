@@ -17,7 +17,12 @@ fn marathon() -> fmt::Result {
 
     let opt = poloto::render::render_opt();
 
-    let data = poloto::data(poloto::build::line("hay", &heart_rate).markers(None, Some(0)));
+    let p = plots!(
+        poloto::build::line("hay", &heart_rate),
+        poloto::build::markers(None, Some(0))
+    );
+
+    let data = poloto::data(p);
 
     let xtick_fmt = poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
 
@@ -69,7 +74,10 @@ fn years() -> fmt::Result {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let data = poloto::data(poloto::build::histogram("foo", data).markers(None, Some(0)));
+    let data = poloto::data(plots!(
+        poloto::build::histogram("foo", data),
+        poloto::build::markers(None, Some(0))
+    ));
 
     let xtick_fmt = poloto::ticks::from_iter((2010..).step_by(2));
 

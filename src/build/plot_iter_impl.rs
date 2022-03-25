@@ -2,15 +2,6 @@ use super::*;
 
 use super::marker::Area;
 use super::marker::Markerable;
-///
-/// Create a [`PlotsDyn`]
-///
-pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> PlotsDyn<F> {
-    PlotsDyn {
-        flop: vec,
-        counter: 0,
-    }
-}
 
 enum SinglePlotInner<I: PlotIter> {
     Ready(I),
@@ -191,7 +182,14 @@ pub struct PlotsDyn<F> {
     counter: usize,
     flop: Vec<F>,
 }
-
+impl<F: PlotIterator> PlotsDyn<F> {
+    pub fn new(vec: Vec<F>) -> Self {
+        PlotsDyn {
+            counter: 0,
+            flop: vec,
+        }
+    }
+}
 impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     type Item = F::Item;
 
@@ -219,5 +217,51 @@ impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     #[inline(always)]
     fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
         self.flop[self.counter].next_name(write)
+    }
+}
+
+pub struct Marker<XI, YI> {
+    x: XI,
+    y: YI,
+}
+
+impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
+    pub fn new(x: impl IntoIterator<IntoIter = XI>, y: impl IntoIterator<IntoIter = YI>) -> Self {
+        Marker {
+            x: x.into_iter(),
+            y: y.into_iter(),
+        }
+    }
+}
+impl<XI: Iterator, YI: Iterator> PlotIterator for Marker<XI, YI> {
+    type Item = (XI::Item, YI::Item);
+    #[inline(always)]
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        None
+    }
+    #[inline(always)]
+    fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
+        PlotResult::Finished
+    }
+    #[inline(always)]
+    fn next_name(&mut self, _: &mut dyn fmt::Write) -> Option<fmt::Result> {
+        None
+    }
+}
+
+impl<XI: Iterator, YI: Iterator> Markerable for Marker<XI, YI>
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
+    type X = XI::Item;
+    type Y = YI::Item;
+    fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
+        for a in &mut self.x {
+            area.grow(Some(a), None);
+        }
+        for a in &mut self.y {
+            area.grow(None, Some(a));
+        }
     }
 }

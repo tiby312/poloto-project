@@ -64,7 +64,6 @@ pub mod simple_theme;
 ///
 pub mod prelude {
     pub use super::build::crop::Croppable;
-    pub use super::build::marker::MarkerableExt;
     pub use super::build::PlotIteratorAndMarkersExt;
     pub use super::build::PlotIteratorExt;
     pub use super::formatm;
@@ -117,38 +116,42 @@ macro_rules! plots {
 #[macro_export]
 macro_rules! simple_bar {
     ($data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let (bar, ytick_fmt) = poloto::build::bar::gen_bar("", $data);
+        use $crate::prelude::*;
 
-        let opt = poloto::render::render_opt_builder()
+        let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
+
+        let opt = $crate::render::render_opt_builder()
             .with_tick_lines([true, false])
             .build();
 
-        let data = poloto::data(bar.markers($markers, []));
+        let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
 
-        let (bx, _) = poloto::ticks::bounds(&data, &opt);
+        let (bx, _) = $crate::ticks::bounds(&data, &opt);
 
-        let xtick_fmt = poloto::ticks::from_default(bx);
+        let xtick_fmt = $crate::ticks::from_default(bx);
 
-        poloto::plot_with(
+        $crate::plot_with(
             data,
             opt,
-            poloto::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
+            $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
         )
     }};
     ($opt:expr,$data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
+        use $crate::prelude::*;
+
         let opt = $opt;
-        let (bar, ytick_fmt) = poloto::build::bar::gen_bar("", $data);
+        let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
 
-        let data = poloto::data(bar.markers($markers, []));
+        let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
 
-        let (bx, _) = poloto::ticks::bounds(&data, &opt);
+        let (bx, _) = $crate::ticks::bounds(&data, &opt);
 
-        let xtick_fmt = poloto::ticks::from_default(bx);
+        let xtick_fmt = $crate::ticks::from_default(bx);
 
-        poloto::plot_with(
+        $crate::plot_with(
             data,
             opt,
-            poloto::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
+            $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
         )
     }};
 }
