@@ -217,6 +217,11 @@ where
 
 impl PlotNum for UnixTime {
     #[inline(always)]
+    fn is_hole(&self) -> bool {
+        false
+    }
+
+    #[inline(always)]
     fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;

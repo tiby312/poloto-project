@@ -16,10 +16,7 @@ pub trait DiscNum {
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
     /// Is this a hole value to inject discontinuty?
-    #[inline(always)]
-    fn is_hole(&self) -> bool {
-        false
-    }
+    fn is_hole(&self) -> bool;
 
     fn scale(&self, range: [Self; 2], max: f64) -> f64;
 

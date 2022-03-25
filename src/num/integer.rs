@@ -110,6 +110,11 @@ impl HasDefaultTicks for i128 {
 
 impl PlotNum for i128 {
     #[inline(always)]
+    fn is_hole(&self) -> bool {
+        false
+    }
+
+    #[inline(always)]
     fn scale(&self, range: [i128; 2], max: f64) -> f64 {
         let val = *self;
         let diff = (range[1] - range[0]) as f64;
