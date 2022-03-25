@@ -223,6 +223,7 @@ impl TickLayout {
 }
 
 impl HasZero for i128 {
+    #[inline(always)]
     fn zero() -> i128 {
         0
     }
