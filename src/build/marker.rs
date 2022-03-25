@@ -43,7 +43,7 @@ impl<X: PlotNum, Y: PlotNum> Area<X, Y> {
         }
     }
 
-    pub fn build(self) -> (DataBound<X>, DataBound<Y>) {
+    pub(crate) fn build(self) -> (DataBound<X>, DataBound<Y>) {
         let x = match self.x {
             None => X::unit_range(None),
             Some([min, max]) => {

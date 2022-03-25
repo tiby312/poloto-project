@@ -51,5 +51,5 @@ where
     let min = (x[0], y[0]);
     let max = (x[1], y[1]);
 
-    from_iter(vec![min, max].into_iter(),iter)
+    from_iter(vec![min, max].into_iter(), iter)
 }

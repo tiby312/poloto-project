@@ -5,7 +5,7 @@
 /// A disconnectable number. A number that can me marked as a hole to signify that there is a disconnect in plots.
 /// See [`crate::build::crop::Croppable`]
 ///
-pub trait DiscNum: PlotNum {
+pub trait DiscNum {
     /// Create a hole value.
     fn hole() -> Self;
 }
@@ -57,6 +57,9 @@ pub trait BaseFmt {
     fn ydash_size(&self) -> Option<f64>;
 }
 
+///
+/// Signify if a number has a zero value.
+///
 pub trait HasZero {
     fn zero() -> Self;
 }

@@ -9,6 +9,8 @@ pub mod bounded_iter;
 pub mod buffered_iter;
 pub mod crop;
 pub mod unwrapper;
+use marker::Area;
+use marker::Markerable;
 
 pub mod marker;
 
@@ -72,25 +74,8 @@ impl<I: IntoIterator + Clone> PlotIter for I {
 }
 
 ///
-/// Create a boxed PlotIterator.
-///
-/// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
-///
-#[deprecated(note = "use into_boxed() instead.")]
-pub fn box_plot<'a, X>(
-    a: impl PlotIterator<Item = X> + 'a,
-) -> Box<dyn PlotIterator<Item = X> + 'a> {
-    Box::new(a)
-}
-
 /// Iterator over all plots that have been assembled by the user.
 /// This trait is used by the poloto renderer to iterate over and render all the plots.
-///
-/// Renderer will first call `next_bound()` until exhausted in order to find min/max bounds.
-///
-/// Then renderer will call `next_typ()` to determine  if there is a plot.
-/// If next_typ() returned Some(), then it will then call next_name()
-/// Then it will call next_plot continuously until it returns None.
 ///
 pub trait PlotIterator {
     type Item;
@@ -99,7 +84,21 @@ pub trait PlotIterator {
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
 }
 
+///
+/// Allows the user to chain together PlotIterators.
+///
 pub trait PlotIteratorExt: PlotIterator {
+    /// Chain together PlotIterators.
+    ///
+    /// ```
+    /// use poloto::build::PlotIteratorExt;
+    /// let data1=[[5,2],[4,3]];
+    /// let data2=[[2,4],[2,2]];
+    /// let a=poloto::build::line("test1",&data1);
+    /// let b=poloto::build::scatter("test2",&data2);
+    /// a.chain(b);
+    /// ```
+    ///
     fn chain<B: PlotIterator<Item = Self::Item>>(self, b: B) -> Chain<Self, B>
     where
         Self: Sized,
@@ -258,8 +257,35 @@ where
     SinglePlot::new(PlotMetaType::Plot(PlotType::Line), name, it)
 }
 
-use marker::Area;
-use marker::Markerable;
+///
+/// Ensure that the origin point is within view.
+///
+pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
+) -> plot_iter_impl::Marker<std::option::IntoIter<X>, std::option::IntoIter<Y>> {
+    markers(Some(X::zero()), Some(Y::zero()))
+}
+
+///
+/// Ensure the list of marker values are within view.
+///
+pub fn markers<XI: IntoIterator, YI: IntoIterator>(
+    x: XI,
+    y: YI,
+) -> plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter>
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
+    plot_iter_impl::Marker::new(x, y)
+}
+
+///
+/// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
+///
+pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
+    plot_iter_impl::PlotsDyn::new(vec)
+}
+
 pub trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Self::Y)> {}
 
 pub trait PlotIteratorAndMarkersExt: PlotIteratorAndMarkers {
@@ -341,27 +367,4 @@ impl<'a, X: 'a, Y: 'a> PlotIterator
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         self.as_mut().next_typ()
     }
-}
-
-pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
-) -> plot_iter_impl::Marker<std::option::IntoIter<X>, std::option::IntoIter<Y>> {
-    markers(Some(X::zero()), Some(Y::zero()))
-}
-
-pub fn markers<XI: IntoIterator, YI: IntoIterator>(
-    x: XI,
-    y: YI,
-) -> plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter>
-where
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-{
-    plot_iter_impl::Marker::new(x, y)
-}
-
-///
-/// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
-///
-pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
-    plot_iter_impl::PlotsDyn::new(vec)
 }
