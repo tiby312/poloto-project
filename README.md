@@ -204,6 +204,34 @@ fn main() {
 <img src="./target/assets/custom_ticks.svg" alt="demo">
 
 
+## Bar example
+
+```rust
+use poloto::prelude::*;
+fn main() {
+    let data = [
+        (20, "potato"),
+        (14, "broccoli"),
+        (53, "pizza"),
+        (30, "avocado"),
+    ];
+
+    let plt = poloto::simple_bar!(
+        data,
+        [0],
+        "Comparison of Food Tastiness",
+        "Tastiness",
+        "Foods"
+    );
+
+    print!("{}", poloto::disp(|w| plt.simple_theme(w)));
+}
+```
+
+## Output
+<img src="./target/assets/bar.svg" alt="demo">
+
+
 ## Escape protection
 
 If a user tried to inject html through the title/xname/yname/tick format/ or plot names, the html escapes

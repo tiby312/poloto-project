@@ -112,6 +112,48 @@ macro_rules! plots {
 }
 
 ///
+/// Create a simple bar graph
+///
+#[macro_export]
+macro_rules! simple_bar {
+    ($data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
+        let (bar, ytick_fmt) = poloto::build::bar::gen_bar("", $data);
+
+        let opt = poloto::render::render_opt_builder()
+            .with_tick_lines([true, false])
+            .build();
+
+        let data = poloto::data(bar.markers($markers, []));
+
+        let (bx, _) = poloto::ticks::bounds(&data, &opt);
+
+        let xtick_fmt = poloto::ticks::from_default(bx);
+
+        poloto::plot_with(
+            data,
+            opt,
+            poloto::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
+        )
+    }};
+    ($opt:expr,$data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
+        let opt = $opt;
+        let (bar, ytick_fmt) = poloto::build::bar::gen_bar("", $data);
+
+        let data = poloto::data(bar.markers($markers, []));
+
+        let (bx, _) = poloto::ticks::bounds(&data, &opt);
+
+        let xtick_fmt = poloto::ticks::from_default(bx);
+
+        poloto::plot_with(
+            data,
+            opt,
+            poloto::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
+        )
+    }};
+}
+
+///
 /// Create plots without having to manually create the ticks
 /// for each axis.
 ///
