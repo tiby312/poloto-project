@@ -27,6 +27,8 @@ where
     I::Item: Unwrapper<Item = (X, Y)>,
 {
     type Item = (X, Y);
+
+    #[inline(always)]
     fn next(&mut self) -> Option<(X, Y)> {
         if let Some(g) = self.inner.next() {
             let (x, y) = g.unwrap();
