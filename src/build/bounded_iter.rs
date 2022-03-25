@@ -51,8 +51,5 @@ where
     let min = (x[0], y[0]);
     let max = (x[1], y[1]);
 
-    KnownBounds {
-        iter1: Some(vec![min, max].into_iter()),
-        iter2: iter,
-    }
+    from_iter(vec![min, max].into_iter(),iter)
 }
