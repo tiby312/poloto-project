@@ -68,8 +68,12 @@ pub mod prelude {
     pub use super::formatm;
     pub use super::plots;
     pub use super::quick_fmt;
+
     pub use super::quick_fmt_opt;
+
+    #[allow(deprecated)]
     pub use super::simple_fmt;
+
     pub use super::simple_theme::SimpleTheme;
     pub use super::ticks::TickFormatExt;
 }
@@ -181,6 +185,7 @@ macro_rules! simple_bar {
 /// plotter.render(&mut k);
 /// ```
 ///
+#[deprecated(note = "use quick_fmt() and quick_fmt_opt() instead.")]
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
@@ -201,6 +206,19 @@ macro_rules! simple_fmt {
     }};
 }
 
+///
+/// Create plots without having to manually create the ticks
+/// for each axis.
+///
+/// ### No canvas argument.
+/// ```
+/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+/// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
+/// let mut k=String::new();
+/// plotter.render(&mut k);
+/// ```
+/// ```
+///
 #[macro_export]
 macro_rules! quick_fmt {
     ($title:expr,$xname:expr,$yname:expr,$a:expr) => {{
@@ -212,6 +230,19 @@ macro_rules! quick_fmt {
         $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a,$($x),*)
     }};
 }
+
+///
+/// Create plots without having to manually create the ticks
+/// for each axis.
+///
+/// ```
+/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+/// let canvas=poloto::render::canvas();
+/// let plotter=poloto::quick_fmt_opt!(canvas,"title","x","y",poloto::build::line("",data));
+/// let mut k=String::new();
+/// plotter.render(&mut k);
+/// ```
+///
 #[macro_export]
 macro_rules! quick_fmt_opt {
     ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr) => {{
