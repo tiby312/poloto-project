@@ -210,7 +210,6 @@ macro_rules! simple_fmt {
 /// Create plots without having to manually create the ticks
 /// for each axis.
 ///
-/// ### No canvas argument.
 /// ```
 /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
 /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
