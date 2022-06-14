@@ -217,7 +217,6 @@ macro_rules! simple_fmt {
 /// let mut k=String::new();
 /// plotter.render(&mut k);
 /// ```
-/// ```
 ///
 #[macro_export]
 macro_rules! quick_fmt {
