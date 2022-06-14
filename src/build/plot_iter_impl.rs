@@ -3,18 +3,19 @@ use super::*;
 use super::marker::Area;
 use super::marker::Markerable;
 
-enum SinglePlotInner<I: PlotIter> {
+#[derive(Clone)]
+enum SinglePlotInner<I, J> {
     Ready(I),
-    Second(I::It2),
+    Second(J),
     Done,
 }
-impl<I: PlotIter> SinglePlotInner<I> {
+impl<I, J> SinglePlotInner<I, J> {
     #[inline(always)]
     fn is_done(&self) -> bool {
         matches!(self, SinglePlotInner::Done)
     }
     #[inline(always)]
-    fn take(&mut self) -> SinglePlotInner<I> {
+    fn take_(&mut self) -> SinglePlotInner<I, J> {
         let mut k = SinglePlotInner::Done;
         std::mem::swap(&mut k, self);
         k
@@ -24,13 +25,15 @@ impl<I: PlotIter> SinglePlotInner<I> {
 ///
 /// Represents a single plot.
 ///
-pub struct SinglePlot<I: PlotIter, D: Display> {
-    inner: SinglePlotInner<I>,
+#[derive(Clone)]
+pub struct SinglePlot<I, J, D: Display> {
+    inner: SinglePlotInner<I, J>,
     name: D,
     typ: PlotMetaType,
 }
-impl<I: PlotIter, D: Display> SinglePlot<I, D>
+impl<I, J, D: Display> SinglePlot<I, J, D>
 where
+    I: PlotIter<It2 = J>,
     I::Item1: Unwrapper,
     I::Item2: Unwrapper,
 {
@@ -44,16 +47,19 @@ where
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display> Markerable for SinglePlot<I, D>
+impl<X: PlotNum, Y: PlotNum, I, J: Iterator<Item = I::Item2>, D: Display> Markerable
+    for SinglePlot<I, J, D>
 where
+    I: PlotIter<It2 = J>,
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
 {
     type X = X;
     type Y = Y;
     fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
-        if let SinglePlotInner::Ready(mut a) = self.inner.take() {
+        if let SinglePlotInner::Ready(mut a) = self.inner.take_() {
             let mut i = a.first();
+
             for k in &mut i {
                 let (a, b) = k.unwrap();
                 area.grow(Some(a), Some(b));
@@ -66,8 +72,9 @@ where
     }
 }
 
-impl<X, I: PlotIter, D: Display> PlotIterator for SinglePlot<I, D>
+impl<X, I, J: Iterator<Item = I::Item2>, D: Display> PlotIterator for SinglePlot<I, J, D>
 where
+    I: PlotIter<It2 = J>,
     I::Item1: Unwrapper<Item = X>,
     I::Item2: Unwrapper<Item = X>,
 {
@@ -115,6 +122,7 @@ where
 ///
 /// Chain two plots together.
 ///
+#[derive(Clone)]
 pub struct Chain<A, B> {
     a: A,
     b: B,
@@ -178,6 +186,7 @@ impl<F: Markerable> Markerable for PlotsDyn<F> {
 ///
 /// Allows a user to collect plots inside of a loop instead of chaining plots together.
 ///
+#[derive(Clone)]
 pub struct PlotsDyn<F> {
     counter: usize,
     flop: Vec<F>,
@@ -220,13 +229,17 @@ impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     }
 }
 
+#[derive(Clone)]
 pub struct Marker<XI, YI> {
     x: XI,
     y: YI,
 }
 
 impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
-    pub fn new(x: impl IntoIterator<IntoIter = XI>, y: impl IntoIterator<IntoIter = YI>) -> Self {
+    pub fn new<XII: IntoIterator<IntoIter = XI>, YII: IntoIterator<IntoIter = YI>>(
+        x: XII,
+        y: YII,
+    ) -> Self {
         Marker {
             x: x.into_iter(),
             y: y.into_iter(),

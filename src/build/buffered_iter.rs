@@ -49,6 +49,7 @@ where
 ///
 /// Used by [`buffered`]
 ///
+#[derive(Clone)]
 pub struct VecBackedIter<I: Iterator> {
     iter: Option<I>,
 }

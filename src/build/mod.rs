@@ -174,19 +174,21 @@ pub enum PlotResult<T> {
     Finished,
 }
 
+type SinglePlotSimilar<X, D> = SinglePlot<X, X, D>;
+
 ///
 /// Write some text in the legend. This doesnt increment the plot number.
 ///
 pub fn text<X: PlotNum, Y: PlotNum, D: Display>(
     name: D,
-) -> SinglePlot<std::iter::Empty<(X, Y)>, D> {
+) -> SinglePlotSimilar<std::iter::Empty<(X, Y)>, D> {
     SinglePlot::new(PlotMetaType::Text, name, std::iter::empty())
 }
 
 pub(crate) fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     name: D,
     it: I,
-) -> SinglePlot<I, D>
+) -> SinglePlot<I, I::It2, D>
 where
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
@@ -200,7 +202,7 @@ where
 pub fn histogram<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     name: D,
     it: I,
-) -> SinglePlot<I, D>
+) -> SinglePlot<I, I::It2, D>
 where
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
@@ -212,7 +214,10 @@ where
 /// Each point can be sized using the stroke width.
 /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
 /// with the latter class overriding the former.
-pub fn scatter<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> SinglePlot<I, D>
+pub fn scatter<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
+    name: D,
+    it: I,
+) -> SinglePlot<I, I::It2, D>
 where
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
@@ -225,7 +230,7 @@ where
 pub fn line_fill<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     name: D,
     it: I,
-) -> SinglePlot<I, D>
+) -> SinglePlot<I, I::It2, D>
 where
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
@@ -239,7 +244,7 @@ where
 pub fn line_fill_raw<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
     name: D,
     it: I,
-) -> SinglePlot<I, D>
+) -> SinglePlot<I, I::It2, D>
 where
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
@@ -249,7 +254,10 @@ where
 
 /// Create a line from plots using a SVG path element.
 /// The path element belongs to the `.poloto[N]fill` css class.    
-pub fn line<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(name: D, it: I) -> SinglePlot<I, D>
+pub fn line<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
+    name: D,
+    it: I,
+) -> SinglePlot<I, I::It2, D>
 where
     I::Item1: Unwrapper<Item = (X, Y)>,
     I::Item2: Unwrapper<Item = (X, Y)>,
@@ -287,44 +295,6 @@ pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
 }
 
 trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Self::Y)> {}
-
-/*
-trait PlotIteratorAndMarkersExt: PlotIteratorAndMarkers {
-    ///
-    /// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
-    ///
-    fn into_boxed<'a>(
-        self,
-    ) -> Box<dyn PlotIteratorAndMarkers<X = Self::X, Y = Self::Y, Item = Self::Item> + 'a>
-    where
-        Self: Sized + 'a,
-    {
-        Box::new(self)
-    }
-
-    fn as_mut_dyn(
-        &mut self,
-    ) -> &mut dyn PlotIteratorAndMarkers<X = Self::X, Y = Self::Y, Item = Self::Item>
-    where
-        Self: Sized,
-    {
-        self
-    }
-
-    #[deprecated(note = "use build::markers() and chain()")]
-    fn markers<XI: IntoIterator<Item = Self::X>, YI: IntoIterator<Item = Self::Y>>(
-        self,
-        x: XI,
-        y: YI,
-    ) -> Chain<Self, plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter>>
-    where
-        Self: Sized,
-    {
-        self.chain(markers(x, y))
-    }
-}
-*/
-//impl<I: PlotIteratorAndMarkers> PlotIteratorAndMarkersExt for I {}
 
 impl<I: Markerable + PlotIterator<Item = (Self::X, Self::Y)>> PlotIteratorAndMarkers for I {}
 

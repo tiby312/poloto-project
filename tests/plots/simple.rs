@@ -325,7 +325,11 @@ fn trig() -> fmt::Result {
 #[test]
 fn no_plots() -> fmt::Result {
     let v: Vec<
-        poloto::build::plot_iter_impl::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
+        poloto::build::plot_iter_impl::SinglePlot<
+            std::iter::Empty<(i128, i128)>,
+            std::iter::Empty<(i128, i128)>,
+            &'static str,
+        >,
     > = vec![];
 
     let plotter = poloto::quick_fmt!(
@@ -342,7 +346,11 @@ fn no_plots() -> fmt::Result {
 #[test]
 fn no_plots_only_marker() -> fmt::Result {
     let v: Vec<
-        poloto::build::plot_iter_impl::SinglePlot<std::iter::Empty<(i128, i128)>, &'static str>,
+        poloto::build::plot_iter_impl::SinglePlot<
+            std::iter::Empty<(i128, i128)>,
+            std::iter::Empty<(i128, i128)>,
+            &'static str,
+        >,
     > = vec![];
 
     let plotter = poloto::quick_fmt!(
@@ -369,4 +377,81 @@ fn one_empty_plot() -> fmt::Result {
 
     let w = util::create_test_file("one_empty_plot.svg");
     plotter.simple_theme(w)
+}
+
+#[test]
+fn test_bounded_cloneable() {
+    let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
+
+    let l1 = poloto::build::scatter("", poloto::build::bounded_iter::from_iter(&data, &data));
+    let l2 = poloto::build::scatter("", &data);
+    let l = plots!(l1, l2);
+
+    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
+
+    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l,);
+
+    let mut s1 = String::new();
+    let mut s2 = String::new();
+
+    p1.render(&mut s1).unwrap();
+    p2.render(&mut s2).unwrap();
+
+    assert_eq!(s1, s2);
+}
+
+#[test]
+fn test_buffered_clonable() {
+    let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
+
+    let l1 = poloto::build::scatter("", poloto::build::buffered_iter::buffered(data));
+    let l2 = poloto::build::scatter("", &data);
+    let l = plots!(l1, l2);
+
+    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
+
+    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l,);
+
+    let mut s1 = String::new();
+    let mut s2 = String::new();
+
+    p1.render(&mut s1).unwrap();
+    p2.render(&mut s2).unwrap();
+
+    assert_eq!(s1, s2);
+}
+
+#[test]
+fn test_single_and_chain_and_dyn_cloneable() {
+    let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
+
+    let l1 = poloto::build::scatter("", &data);
+    let l2 = poloto::build::scatter("", &data);
+    let l = plots!(l1, l2);
+
+    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone(),);
+
+    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone(),);
+
+    let mut s1 = String::new();
+    let mut s2 = String::new();
+
+    p1.render(&mut s1).unwrap();
+    p2.render(&mut s2).unwrap();
+
+    assert_eq!(s1, s2);
+
+    let l3 = poloto::build::plots_dyn(vec![poloto::build::scatter("", &data)]);
+
+    let l = plots!(l, l3);
+
+    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
+
+    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l,);
+
+    let mut s1 = String::new();
+    let mut s2 = String::new();
+
+    p1.render(&mut s1).unwrap();
+    p2.render(&mut s2).unwrap();
 }

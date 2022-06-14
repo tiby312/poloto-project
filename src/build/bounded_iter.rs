@@ -9,6 +9,7 @@
 //!
 use super::*;
 
+#[derive(Clone)]
 pub struct KnownBounds<I1, I2> {
     iter1: Option<I1>,
     iter2: I2,
@@ -26,17 +27,17 @@ impl<I1: Iterator, I2: Iterator> PlotIter for KnownBounds<I1, I2> {
     }
 }
 
-pub fn from_iter<X: PlotNum, Y: PlotNum, I1: Iterator, I2: Iterator>(
+pub fn from_iter<X: PlotNum, Y: PlotNum, I1: IntoIterator, I2: IntoIterator>(
     iter1: I1,
     iter2: I2,
-) -> KnownBounds<I1, I2>
+) -> KnownBounds<I1::IntoIter, I2::IntoIter>
 where
     I1::Item: Unwrapper<Item = (X, Y)>,
     I2::Item: Unwrapper<Item = (X, Y)>,
 {
     KnownBounds {
-        iter1: Some(iter1),
-        iter2,
+        iter1: Some(iter1.into_iter()),
+        iter2: iter2.into_iter(),
     }
 }
 
