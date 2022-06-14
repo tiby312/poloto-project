@@ -126,7 +126,7 @@ body {
         "Demo: Hovering and shadows",
         "x",
         "y",
-        poloto::build::line("cos", x.zip_output(|x| x.cos())),
+        poloto::build::line("cos", x.zip_output(f64::cos)),
         poloto::build::histogram("sin-3", x.clone().step_by(3).zip_output(|x| x.sin() - 3.)),
         poloto::build::scatter("sin", x.clone().step_by(3).zip_output(|x| x.sin()))
     );

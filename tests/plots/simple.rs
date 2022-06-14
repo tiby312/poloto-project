@@ -38,8 +38,8 @@ fn large_scatter() -> fmt::Result {
         "cows per year",
         "year",
         "cows",
-        poloto::build::scatter("a", x.zip_output(|x| x.cos())),
-        poloto::build::line("b", x.zip_output(|x| x.sin()))
+        poloto::build::scatter("a", x.zip_output(f64::cos)),
+        poloto::build::line("b", x.zip_output(f64::sin))
     );
     let mut w = util::create_test_file("large_scatter.svg");
 
@@ -61,7 +61,7 @@ fn line_fill_fmt() -> fmt::Result {
     let opt = poloto::render::render_opt();
     let s = poloto::data(poloto::build::line_fill(
         "tan(x)",
-        x.zip_output(|x| x.tan())
+        x.zip_output(f64::tan)
             .crop_above(10.0)
             .crop_below(0.0)
             .crop_left(2.0),
@@ -236,8 +236,8 @@ fn dark() -> fmt::Result {
         "cos per year",
         "year",
         "cows",
-        poloto::build::line(formatm!("test {}", 1), x.zip_output(|x| x.cos())),
-        poloto::build::line(formatm!("test {}", 2), x.zip_output(|x| x.sin()))
+        poloto::build::line(formatm!("test {}", 1), x.zip_output(f64::cos)),
+        poloto::build::line(formatm!("test {}", 2), x.zip_output(f64::sin))
     );
 
     let w = util::create_test_file("dark.svg");
@@ -253,7 +253,7 @@ fn custom_style() -> fmt::Result {
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
-        poloto::build::line("cos", x.zip_output(|x| x.cos())),
+        poloto::build::line("cos", x.zip_output(f64::cos)),
         poloto::build::histogram("sin-10", x.clone().step_by(3).zip_output(|x| x.sin() - 10.))
     );
 
@@ -294,7 +294,7 @@ fn trig() -> fmt::Result {
         poloto::build::line(
             "tan(x)",
             poloto::build::buffered_iter::buffered(
-                x.zip_output(|x| x.tan())
+                x.zip_output(f64::tan)
                     .crop_above(10.0)
                     .crop_below(-10.0)
                     .crop_left(2.0),
@@ -425,9 +425,9 @@ fn test_single_and_chain_and_dyn_cloneable() {
     let l2 = poloto::build::scatter("", &data);
     let l = plots!(l1, l2);
 
-    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone(),);
+    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
 
-    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone(),);
+    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
 
     let mut s1 = String::new();
     let mut s2 = String::new();
