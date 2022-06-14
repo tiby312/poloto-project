@@ -63,14 +63,15 @@ where
     ///
     /// ```rust
     /// let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
-    /// poloto::build::scatter("a", x.clone().map(|x|[x,x.cos()])),
+    /// let _ = poloto::build::scatter("a", x.clone().map(|x|[x,x.cos()]));
     /// ```
     ///
     /// Shortened:
     ///
     /// ```rust
+    /// use poloto::prelude::OutputZip;
     /// let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
-    /// poloto::build::scatter("a", x.zip_output(|x|x.cos())),
+    /// let _ = poloto::build::scatter("a", x.zip_output(|x|x.cos()));
     /// ```
     fn zip_output<Y, F: Fn(Self::Item) -> Y>(&self, func: F) -> OutputZipper<Self, F> {
         OutputZipper {

@@ -472,7 +472,7 @@ impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> Plo
     ///
     /// ```
     /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let plotter=poloto::simple_fmt!(poloto::build::line("",data),"title","x","y");
+    /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
     /// let mut k=String::new();
     /// plotter.render(&mut k);
     /// ```
