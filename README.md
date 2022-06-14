@@ -37,13 +37,13 @@ fn main() {
     let l1 = line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
     let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
     let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
-    let m = poloto::build::origin();
-    let data = plots!(l1, l2, l3, m);
+    let og = poloto::build::origin();
 
-    let p = simple_fmt!(data, "gaussian", "x", "y");
+    let p = quick_fmt!("gaussian", "x", "y", l1, l2, l3, og);
 
     print!("{}", poloto::disp(|w| p.simple_theme(w)));
 }
+
 ```
 ## Output
 
@@ -71,13 +71,6 @@ fn main() {
     };
 
     use poloto::build::line;
-    let data = poloto::build::plots_dyn(
-        (1000..1006)
-            .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
-            .collect(),
-    );
-
-    let data = plots!(data, poloto::build::origin());
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
@@ -87,7 +80,18 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let plotter = simple_fmt!(opt, data, "collatz", "x", "y");
+    let plotter = quick_fmt_opt!(
+        opt,
+        "collatz",
+        "x",
+        "y",
+        poloto::build::plots_dyn(
+            (1000..1006)
+                .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
+                .collect(),
+        ),
+        poloto::build::origin()
+    );
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
@@ -146,12 +150,12 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let m = poloto::build::markers([], [0.0]);
-    let plotter = simple_fmt!(
-        m.chain(poloto::build::line("", data)),
+    let plotter = quick_fmt!(
         "Long Jump world record progression",
         "Date",
-        "Mark (in meters)"
+        "Mark (in meters)",
+        poloto::build::markers([], [0.0]),
+        poloto::build::line("", data)
     );
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));

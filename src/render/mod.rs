@@ -444,7 +444,7 @@ pub fn plot_with<
 }
 
 ///
-/// Created by [`Data::plot_with`]
+/// Created by [`plot_with`]
 ///
 pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> {
     canvas: K,

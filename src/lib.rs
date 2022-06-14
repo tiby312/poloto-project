@@ -14,7 +14,7 @@
 //! * Create a RenderOptions using [`render`] module.
 //! * Compute min/max by calling [`data()`].
 //! * Create tick distributions. (This step can be done automatically using [`simple_fmt!`])
-//! * Collect title/xname/yname using [`Data::plot_with()`] (done automatically using [`simple_fmt!`])
+//! * Collect title/xname/yname using [`plot_with()`] (done automatically using [`simple_fmt!`])
 //! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
@@ -114,17 +114,6 @@ macro_rules! plots {
     };
 }
 
-
-
-#[macro_export]
-macro_rules! quick_bar_opt {
-    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr) => {{
-        //TODO
-    }};
-    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
-        //TODO
-    }};
-}
 ///
 /// Create a simple bar graph
 ///
@@ -192,7 +181,6 @@ macro_rules! simple_bar {
 /// plotter.render(&mut k);
 /// ```
 ///
-#[deprecated(note = "use quick_fmt instead.")]
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
