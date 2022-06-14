@@ -7,10 +7,7 @@ fn main() {
 
     let it = (0..).zip(trend.into_iter());
 
-    let data = poloto::data(plots!(
-        poloto::build::histogram("", it),
-        poloto::build::markers([24], [])
-    ));
+    let data = poloto::data(plots!(it.histogram(""), poloto::build::markers([24], [])));
 
     let opt = poloto::render::render_opt();
     let (_, by) = poloto::ticks::bounds(&data, &opt);

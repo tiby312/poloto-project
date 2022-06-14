@@ -50,7 +50,7 @@ fn minutes_local_time() -> fmt::Result {
     ];
 
     let s = poloto::data(plots!(
-        poloto::build::line("", data),
+        data.iter().line(""),
         poloto::build::markers(None, Some(0))
     ));
 
@@ -101,7 +101,7 @@ fn months() -> fmt::Result {
         "Number of Wikipedia Articles",
         "duration",
         "Number of Articles",
-        poloto::build::line("", data),
+        data.iter().line(""),
         poloto::build::markers([], [0])
     );
 
@@ -128,7 +128,7 @@ fn seconds() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::line("", data),
+        data.iter().line(""),
         poloto::build::markers(None, Some(0))
     ));
 

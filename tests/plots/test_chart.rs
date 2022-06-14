@@ -82,7 +82,7 @@ fn test_chart() -> std::fmt::Result {
                                     formatm!("test {}", i),
                                     "x",
                                     "y",
-                                    poloto::build::scatter("", test),
+                                    test.iter().scatter(""),
                                 );
                                 s.render(a)
                             }),
@@ -104,7 +104,7 @@ fn test_chart() -> std::fmt::Result {
                                     formatm!("test {}", i),
                                     "x",
                                     "y",
-                                    poloto::build::scatter("", test),
+                                    test.iter().scatter(""),
                                 );
                                 s.render(a)
                             }),

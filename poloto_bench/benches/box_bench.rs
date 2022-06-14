@@ -15,34 +15,27 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
         "trig",
         "x",
         "y",
-        poloto::build::line(
-            "tan(x)",
-            poloto::build::buffered_iter::buffered(
-                x.clone()
-                    .map(|x| [x, x.tan()])
-                    .crop_above(10.0)
-                    .crop_below(-10.0)
-                    .crop_left(2.0),
-            ),
-        ),
-        poloto::build::line(
-            "sin(2x)",
-            poloto::build::bounded_iter::from_rect(
-                [0.0, 10.0],
-                [0.0, 10.0],
-                x.clone().map(|x| [x, (2.0 * x).sin()]),
-            ),
-        ),
-        poloto::build::line(
-            "2*cos(x)",
-            poloto::build::buffered_iter::buffered(
-                x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-            ),
-        ),
-        poloto::build::line(
-            "2*cos(x)",
+        poloto::build::buffered_iter::buffered(
+            x.zip_output(|x| x.tan())
+                .crop_above(10.0)
+                .crop_below(-10.0)
+                .crop_left(2.0),
+        )
+        .line("tan(x)"),
+        poloto::build::bounded_iter::from_rect(
+            [0.0, 10.0],
+            [0.0, 10.0],
+            x.clone().map(|x| [x, (2.0 * x).sin()]),
+        )
+        .line("sin(2x)"),
+        poloto::build::buffered_iter::buffered(
             x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
         )
+        .line("2*cos(x)"),
+        x.clone()
+            .map(|x| [x, 2.0 * x.cos()])
+            .crop_above(1.4)
+            .line("2*cos(x)")
     )
     .simple_theme(writer)
 }
@@ -54,34 +47,35 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
         "box trig",
         "x",
         "y",
-        poloto::build::BoxedPlot::new(poloto::build::line(
-            "tan(x)",
+        poloto::build::BoxedPlot::new(
             poloto::build::buffered_iter::buffered(
-                x.clone()
-                    .map(|x| [x, x.tan()])
+                x.zip_output(|x| x.tan())
                     .crop_above(10.0)
                     .crop_below(-10.0)
                     .crop_left(2.0),
-            ),
-        )),
-        poloto::build::BoxedPlot::new(poloto::build::line(
-            "sin(2x)",
+            )
+            .line("tan(x)"),
+        ),
+        poloto::build::BoxedPlot::new(
             poloto::build::bounded_iter::from_rect(
                 [0.0, 10.0],
                 [0.0, 10.0],
                 x.clone().map(|x| [x, (2.0 * x).sin()]),
-            ),
-        )),
-        poloto::build::BoxedPlot::new(poloto::build::line(
-            "2*cos(x)",
+            )
+            .line("sin(2x)"),
+        ),
+        poloto::build::BoxedPlot::new(
             poloto::build::buffered_iter::buffered(
                 x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-            ),
-        )),
-        poloto::build::BoxedPlot::new(poloto::build::line(
-            "2*cos(x)",
-            x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-        ))
+            )
+            .line("2*cos(x)"),
+        ),
+        poloto::build::BoxedPlot::new(
+            x.clone()
+                .map(|x| [x, 2.0 * x.cos()])
+                .crop_above(1.4)
+                .line("2*cos(x)"),
+        )
     )
     .simple_theme(writer)
 }

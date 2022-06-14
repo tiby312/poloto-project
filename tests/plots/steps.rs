@@ -18,7 +18,7 @@ fn marathon() -> fmt::Result {
     let opt = poloto::render::render_opt();
 
     let p = plots!(
-        poloto::build::line("hay", &heart_rate),
+        heart_rate.iter().line("hay"),
         poloto::build::markers(None, Some(0))
     );
 
@@ -75,7 +75,7 @@ fn years() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::histogram("foo", data),
+        data.iter().histogram("foo"),
         poloto::build::markers(None, Some(0))
     ));
 

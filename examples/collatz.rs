@@ -14,8 +14,6 @@ fn main() {
         .fuse()
     };
 
-    use poloto::build::line;
-
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
@@ -31,7 +29,10 @@ fn main() {
         "y",
         poloto::build::plots_dyn(
             (1000..1006)
-                .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
+                .map(|i| {
+                    let r = (0..).zip(collatz(i)).line(formatm!("c({})", i));
+                    r
+                })
                 .collect(),
         ),
         poloto::build::origin()

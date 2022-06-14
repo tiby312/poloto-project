@@ -65,12 +65,12 @@ pub mod simple_theme;
 pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::PlotIteratorExt;
+    pub use super::build::SinglePlotBuilder;
     pub use super::formatm;
     pub use super::output_zip::OutputZip;
     pub use super::plots;
     pub use super::quick_fmt;
     pub use super::quick_fmt_opt;
-
     #[allow(deprecated)]
     pub use super::simple_fmt;
 

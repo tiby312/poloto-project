@@ -4,8 +4,12 @@ use super::*;
 fn custom_colors_html() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let l1 = poloto::build::line("cos", x.zip_output(|x| x.cos()));
-    let l2 = poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
+    let l1 = x.zip_output(|x| x.cos()).line("cos");
+    let l2 = x
+        .clone()
+        .step_by(3)
+        .map(|x| [x, x.sin() - 10.])
+        .histogram("sin-10");
 
     let s = poloto::quick_fmt!(
         "Demo: you can use CSS patterns if you embed SVG!",
@@ -126,9 +130,12 @@ body {
         "Demo: Hovering and shadows",
         "x",
         "y",
-        poloto::build::line("cos", x.zip_output(f64::cos)),
-        poloto::build::histogram("sin-3", x.clone().step_by(3).zip_output(|x| x.sin() - 3.)),
-        poloto::build::scatter("sin", x.clone().step_by(3).zip_output(|x| x.sin()))
+        x.zip_output(f64::cos).line("cos"),
+        x.clone()
+            .step_by(3)
+            .zip_output(|x| x.sin() - 3.)
+            .histogram("sin-3"),
+        x.clone().step_by(3).zip_output(|x| x.sin()).scatter("sin")
     );
 
     let mut w = util::create_test_file("hover_shadow.html");

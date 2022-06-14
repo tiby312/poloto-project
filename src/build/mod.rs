@@ -176,6 +176,38 @@ pub enum PlotResult<T> {
 
 type SinglePlotSimilar<X, D> = SinglePlot<X, X, D>;
 
+pub trait SinglePlotBuilder<P1, P2> {
+    fn scatter<D: Display>(self, name: D) -> SinglePlot<P1, P2, D>;
+    fn line<D: Display>(self, name: D) -> SinglePlot<P1, P2, D>;
+    fn line_fill<D: Display>(self, name: D) -> SinglePlot<P1, P2, D>;
+    fn line_fill_raw<D: Display>(self, name: D) -> SinglePlot<P1, P2, D>;
+    fn histogram<D: Display>(self, name: D) -> SinglePlot<P1, P2, D>;
+}
+
+impl<X: PlotNum, Y: PlotNum, P: PlotIter> SinglePlotBuilder<P, P::It2> for P
+where
+    P::Item1: Unwrapper<Item = (X, Y)>,
+    P::Item2: Unwrapper<Item = (X, Y)>,
+{
+    fn scatter<D: Display>(self, name: D) -> SinglePlot<P, P::It2, D> {
+        scatter(name, self)
+    }
+    fn line<D: Display>(self, name: D) -> SinglePlot<P, P::It2, D> {
+        line(name, self)
+    }
+
+    fn line_fill<D: Display>(self, name: D) -> SinglePlot<P, P::It2, D> {
+        line_fill(name, self)
+    }
+
+    fn line_fill_raw<D: Display>(self, name: D) -> SinglePlot<P, P::It2, D> {
+        line_fill_raw(name, self)
+    }
+    fn histogram<D: Display>(self, name: D) -> SinglePlot<P, P::It2, D> {
+        histogram(name, self)
+    }
+}
+
 ///
 /// Write some text in the legend. This doesnt increment the plot number.
 ///
@@ -183,17 +215,6 @@ pub fn text<X: PlotNum, Y: PlotNum, D: Display>(
     name: D,
 ) -> SinglePlotSimilar<std::iter::Empty<(X, Y)>, D> {
     SinglePlot::new(PlotMetaType::Text, name, std::iter::empty())
-}
-
-pub(crate) fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
-    name: D,
-    it: I,
-) -> SinglePlot<I, I::It2, D>
-where
-    I::Item1: Unwrapper<Item = (X, Y)>,
-    I::Item2: Unwrapper<Item = (X, Y)>,
-{
-    SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), name, it)
 }
 
 /// Create a histogram from plots using SVG rect elements.
@@ -348,4 +369,15 @@ impl<'a, X: 'a, Y: 'a> PlotIterator for BoxedPlot<'a, X, Y> {
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         self.inner.as_mut().next_typ()
     }
+}
+
+pub(crate) fn bars<X: PlotNum, Y: PlotNum, I: PlotIter, D: Display>(
+    name: D,
+    it: I,
+) -> SinglePlot<I, I::It2, D>
+where
+    I::Item1: Unwrapper<Item = (X, Y)>,
+    I::Item2: Unwrapper<Item = (X, Y)>,
+{
+    SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), name, it)
 }

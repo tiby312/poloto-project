@@ -20,7 +20,7 @@ use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
-    let gaussian = |sigma: f64, mu: f64| {
+    let gauss = |sigma: f64, mu: f64| {
         use std::f64::consts::TAU;
         let s = sigma.powi(2);
         let k = (sigma * TAU).sqrt().recip();
@@ -29,17 +29,12 @@ fn main() {
 
     let range = poloto::range_iter([-5.0, 5.0], 200);
 
-    let g1 = gaussian(1.0, 0.0);
-    let g2 = gaussian(0.5, 0.0);
-    let g3 = gaussian(0.3, 0.0);
+    let l1 = range.zip_output(gauss(1.0, 0.0)).line("σ = 1.0");
+    let l2 = range.zip_output(gauss(0.5, 0.0)).line("σ = 0.5");
+    let l3 = range.zip_output(gauss(0.3, 0.0)).line("σ = 0.3");
+    let l4 = poloto::build::origin();
 
-    use poloto::build::line;
-    let l1 = line("σ = 1.0", range.zip_output(g1));
-    let l2 = line("σ = 0.5", range.zip_output(g2));
-    let l3 = line("σ = 0.3", range.zip_output(g3));
-    let og = poloto::build::origin();
-
-    let p = quick_fmt!("gaussian", "x", "y", l1, l2, l3, og);
+    let p = quick_fmt!("gaussian", "x", "y", l1, l2, l3, l4);
 
     print!("{}", poloto::disp(|w| p.simple_theme(w)));
 }
@@ -70,8 +65,6 @@ fn main() {
         .fuse()
     };
 
-    use poloto::build::line;
-
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
 
@@ -87,7 +80,10 @@ fn main() {
         "y",
         poloto::build::plots_dyn(
             (1000..1006)
-                .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
+                .map(|i| {
+                    let r = (0..).zip(collatz(i)).line(formatm!("c({})", i));
+                    r
+                })
                 .collect(),
         ),
         poloto::build::origin()
@@ -105,6 +101,7 @@ fn main() {
         poloto::simple_theme::SVG_END
     )
 }
+
 ```
 ## Output
 
@@ -155,11 +152,12 @@ fn main() {
         "Date",
         "Mark (in meters)",
         poloto::build::markers([], [0.0]),
-        poloto::build::line("", data)
+        data.line("")
     );
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
 }
+
 ```
 
 ## Output
@@ -179,10 +177,7 @@ fn main() {
 
     let it = (0..).zip(trend.into_iter());
 
-    let data = poloto::data(plots!(
-        poloto::build::histogram("", it),
-        poloto::build::markers([24], [])
-    ));
+    let data = poloto::data(plots!(it.histogram(""), poloto::build::markers([24], [])));
 
     let opt = poloto::render::render_opt();
     let (_, by) = poloto::ticks::bounds(&data, &opt);
@@ -203,6 +198,7 @@ fn main() {
 
     print!("{}", poloto::disp(|w| pp.simple_theme(w)));
 }
+
 ```
 
 ## Output
