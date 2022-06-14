@@ -66,9 +66,9 @@ pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::PlotIteratorExt;
     pub use super::formatm;
+    pub use super::output_zip::OutputZip;
     pub use super::plots;
     pub use super::quick_fmt;
-
     pub use super::quick_fmt_opt;
 
     #[allow(deprecated)]
@@ -88,6 +88,8 @@ const WIDTH: f64 = 800.0;
 const HEIGHT: f64 = 500.0;
 
 use render::*;
+
+pub mod output_zip;
 
 /// Shorthand for `disp_const(move |w|write!(w,...))`
 /// Similar to `std::format_args!()` except has a more flexible lifetime.

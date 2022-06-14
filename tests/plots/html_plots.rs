@@ -4,7 +4,7 @@ use super::*;
 fn custom_colors_html() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let l1 = poloto::build::line("cos", x.clone().map(|x| [x, x.cos()]));
+    let l1 = poloto::build::line("cos", x.zip_output(|x| x.cos()));
     let l2 = poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     let s = poloto::quick_fmt!(
@@ -126,9 +126,9 @@ body {
         "Demo: Hovering and shadows",
         "x",
         "y",
-        poloto::build::line("cos", x.clone().map(|x| [x, x.cos()])),
-        poloto::build::histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.])),
-        poloto::build::scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]))
+        poloto::build::line("cos", x.zip_output(|x| x.cos())),
+        poloto::build::histogram("sin-3", x.clone().step_by(3).zip_output(|x| x.sin() - 3.)),
+        poloto::build::scatter("sin", x.clone().step_by(3).zip_output(|x| x.sin()))
     );
 
     let mut w = util::create_test_file("hover_shadow.html");

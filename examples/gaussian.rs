@@ -16,9 +16,9 @@ fn main() {
     let g3 = gaussian(0.3, 0.0);
 
     use poloto::build::line;
-    let l1 = line("σ = 1.0", range.clone().map(|x| [x, g1(x)]));
-    let l2 = line("σ = 0.5", range.clone().map(|x| [x, g2(x)]));
-    let l3 = line("σ = 0.3", range.clone().map(|x| [x, g3(x)]));
+    let l1 = line("σ = 1.0", range.zip_output(|x| g1(x)));
+    let l2 = line("σ = 0.5", range.zip_output(|x| g2(x)));
+    let l3 = line("σ = 0.3", range.zip_output(|x| g3(x)));
     let og = poloto::build::origin();
 
     let p = quick_fmt!("gaussian", "x", "y", l1, l2, l3, og);

@@ -38,8 +38,8 @@ fn large_scatter() -> fmt::Result {
         "cows per year",
         "year",
         "cows",
-        poloto::build::scatter("a", x.clone().map(|x| (x, x.cos()))),
-        poloto::build::line("b", x.clone().map(|x| (x, x.sin())))
+        poloto::build::scatter("a", x.zip_output(|x| x.cos())),
+        poloto::build::line("b", x.zip_output(|x| x.sin()))
     );
     let mut w = util::create_test_file("large_scatter.svg");
 
@@ -61,8 +61,7 @@ fn line_fill_fmt() -> fmt::Result {
     let opt = poloto::render::render_opt();
     let s = poloto::data(poloto::build::line_fill(
         "tan(x)",
-        x.clone()
-            .map(|x| [x, x.tan()])
+        x.zip_output(|x| x.tan())
             .crop_above(10.0)
             .crop_below(0.0)
             .crop_left(2.0),
@@ -237,8 +236,8 @@ fn dark() -> fmt::Result {
         "cos per year",
         "year",
         "cows",
-        poloto::build::line(formatm!("test {}", 1), x.clone().map(|x| [x, x.cos()])),
-        poloto::build::line(formatm!("test {}", 2), x.clone().map(|x| [x, x.sin()]),)
+        poloto::build::line(formatm!("test {}", 1), x.zip_output(|x| x.cos())),
+        poloto::build::line(formatm!("test {}", 2), x.zip_output(|x| x.sin()))
     );
 
     let w = util::create_test_file("dark.svg");
@@ -254,8 +253,8 @@ fn custom_style() -> fmt::Result {
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
-        poloto::build::line("cos", x.clone().map(|x| [x, x.cos()])),
-        poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]))
+        poloto::build::line("cos", x.zip_output(|x| x.cos())),
+        poloto::build::histogram("sin-10", x.clone().step_by(3).zip_output(|x| x.sin() - 10.))
     );
 
     let mut w = util::create_test_file("custom_style.svg");
@@ -295,8 +294,7 @@ fn trig() -> fmt::Result {
         poloto::build::line(
             "tan(x)",
             poloto::build::buffered_iter::buffered(
-                x.clone()
-                    .map(|x| [x, x.tan()])
+                x.zip_output(|x| x.tan())
                     .crop_above(10.0)
                     .crop_below(-10.0)
                     .crop_left(2.0),
@@ -307,14 +305,12 @@ fn trig() -> fmt::Result {
             poloto::build::bounded_iter::from_rect(
                 [0.0, 10.0],
                 [0.0, 10.0],
-                x.clone().map(|x| [x, (2.0 * x).sin()]),
+                x.zip_output(|x| (2.0 * x).sin()),
             ),
         ),
         poloto::build::line(
             "2*cos(x)",
-            poloto::build::buffered_iter::buffered(
-                x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-            ),
+            poloto::build::buffered_iter::buffered(x.zip_output(|x| 2.0 * x.cos()).crop_above(1.4),),
         )
     );
 
