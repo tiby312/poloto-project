@@ -13,8 +13,8 @@
 //! * Collect plots using functions in [`build`] module
 //! * Create a RenderOptions using [`render`] module.
 //! * Compute min/max by calling [`data()`].
-//! * Create tick distributions. (This step can be done automatically using [`simple_fmt!`])
-//! * Collect title/xname/yname using [`plot_with()`] (done automatically using [`simple_fmt!`])
+//! * Create tick distributions. (This step can be done automatically using [`quick_fmt!`])
+//! * Collect title/xname/yname using [`plot_with()`] (done automatically using [`quick_fmt!`])
 //! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
 //!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
