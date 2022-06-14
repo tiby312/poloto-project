@@ -64,10 +64,11 @@ pub mod simple_theme;
 ///
 pub mod prelude {
     pub use super::build::crop::Croppable;
-    pub use super::build::PlotIteratorAndMarkersExt;
     pub use super::build::PlotIteratorExt;
     pub use super::formatm;
     pub use super::plots;
+    pub use super::quick_fmt;
+    pub use super::quick_fmt_opt;
     pub use super::simple_fmt;
     pub use super::simple_theme::SimpleTheme;
     pub use super::ticks::TickFormatExt;
@@ -98,6 +99,9 @@ macro_rules! formatm {
 ///
 #[macro_export]
 macro_rules! plots {
+    ($a:expr)=>{
+        $a
+    };
     ( $a:expr,$( $x:expr ),* ) => {
         {
             use $crate::build::PlotIteratorExt;
@@ -110,6 +114,17 @@ macro_rules! plots {
     };
 }
 
+
+
+#[macro_export]
+macro_rules! quick_bar_opt {
+    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr) => {{
+        //TODO
+    }};
+    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
+        //TODO
+    }};
+}
 ///
 /// Create a simple bar graph
 ///
@@ -177,6 +192,7 @@ macro_rules! simple_bar {
 /// plotter.render(&mut k);
 /// ```
 ///
+#[deprecated(note = "use quick_fmt instead.")]
 #[macro_export]
 macro_rules! simple_fmt {
     ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
@@ -197,12 +213,43 @@ macro_rules! simple_fmt {
     }};
 }
 
+#[macro_export]
+macro_rules! quick_fmt {
+    ($title:expr,$xname:expr,$yname:expr,$a:expr) => {{
+        let opt = $crate::render::render_opt_builder().build();
+        $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a)
+    }};
+    ($title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
+        let opt = $crate::render::render_opt_builder().build();
+        $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a,$($x),*)
+    }};
+}
+#[macro_export]
+macro_rules! quick_fmt_opt {
+    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr) => {{
+        let opt=$opt;
+        let data = $crate::data($crate::plots!($a));
+        let (bx, by) = $crate::ticks::bounds(&data, &opt);
+        let xt = $crate::ticks::from_default(bx);
+        let yt = $crate::ticks::from_default(by);
+        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+    }};
+    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
+        let opt=$opt;
+        let data = $crate::data($crate::plots!($a,$($x),*));
+        let (bx, by) = $crate::ticks::bounds(&data, &opt);
+        let xt = $crate::ticks::from_default(bx);
+        let yt = $crate::ticks::from_default(by);
+        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+    }};
+}
+
 pub use render::plot_with;
 
 ///
 /// Construct a [`Data`].
 ///
-pub fn data<P: build::PlotIteratorAndMarkers>(plots: P) -> Data<P>
+pub fn data<P: build::marker::Markerable>(plots: P) -> Data<P::X, P::Y, P>
 where
     P::X: PlotNum,
     P::Y: PlotNum,

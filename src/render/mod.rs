@@ -308,6 +308,7 @@ impl<T: Renderable> Renderable for &T {
     fn get_dim(&self) -> [f64; 2] {
         (*self).get_dim()
     }
+
     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
         (*self).bounds()
     }
@@ -354,6 +355,7 @@ impl Renderable for RenderOptions {
 }
 pub trait Renderable {
     fn get_dim(&self) -> [f64; 2];
+
     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound);
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
@@ -392,14 +394,19 @@ pub fn canvas_builder() -> RenderOptionsBuilder {
 ///
 /// Linke some plots with a way to render them.
 ///
-pub struct Data<P: build::PlotIteratorAndMarkers> {
-    boundx: ticks::DataBound<P::X>,
-    boundy: ticks::DataBound<P::Y>,
+pub struct Data<X, Y, P> {
+    boundx: ticks::DataBound<X>,
+    boundy: ticks::DataBound<Y>,
     plots: P,
 }
 
-impl<P: build::PlotIteratorAndMarkers> Data<P> {
-    pub fn new(mut plots: P) -> Data<P> {
+impl<X, Y, P> Data<X, Y, P> {
+    pub fn new(mut plots: P) -> Data<X, Y, P>
+    where
+        P: build::marker::Markerable<X = X, Y = Y>,
+        X: PlotNum,
+        Y: PlotNum,
+    {
         let mut area = build::marker::Area::new();
         plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
@@ -411,35 +418,19 @@ impl<P: build::PlotIteratorAndMarkers> Data<P> {
         }
     }
 
-    pub fn bounds(&self) -> (&ticks::DataBound<P::X>, &ticks::DataBound<P::Y>) {
+    pub fn bounds(&self) -> (&ticks::DataBound<X>, &ticks::DataBound<Y>) {
         (&self.boundx, &self.boundy)
-    }
-
-    ///
-    /// Move to final stage in pipeline collecting the title/xname/yname.
-    ///
-    #[deprecated(note = "Use poloto::plot_with()")]
-    pub fn plot_with<A: BaseFmt<X = P::X, Y = P::Y>, K: Renderable>(
-        self,
-        canvas: K,
-        plot_fmt: A,
-    ) -> Plotter<P, K, A> {
-        Plotter {
-            plots: self.plots,
-            base: plot_fmt,
-            boundx: self.boundx,
-            boundy: self.boundy,
-            canvas,
-        }
     }
 }
 
 pub fn plot_with<
-    P: build::PlotIteratorAndMarkers,
+    X,
+    Y,
+    P: build::PlotIterator<Item = (X, Y)>,
     K: Renderable,
-    A: BaseFmt<X = P::X, Y = P::Y>,
+    A: BaseFmt<X = X, Y = Y>,
 >(
-    data: Data<P>,
+    data: Data<X, Y, P>,
     canvas: K,
     base: A,
 ) -> Plotter<P, K, A> {

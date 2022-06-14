@@ -15,13 +15,6 @@ fn main() {
     };
 
     use poloto::build::line;
-    let data = poloto::build::plots_dyn(
-        (1000..1006)
-            .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
-            .collect(),
-    );
-
-    let data = plots!(data, poloto::build::origin());
 
     //Make the plotting area slightly larger.
     let dim = [1300.0, 600.0];
@@ -31,7 +24,18 @@ fn main() {
         .with_dim(dim)
         .build();
 
-    let plotter = simple_fmt!(opt, data, "collatz", "x", "y");
+    let plotter = quick_fmt_opt!(
+        opt,
+        "collatz",
+        "x",
+        "y",
+        poloto::build::plots_dyn(
+            (1000..1006)
+                .map(|i| line(formatm!("c({})", i), (0..).zip(collatz(i))))
+                .collect(),
+        ),
+        poloto::build::origin()
+    );
 
     use poloto::simple_theme;
     let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);

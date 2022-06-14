@@ -11,8 +11,10 @@ impl std::fmt::Write for EmptyWriter {
 fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
-    // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    let data = plots!(
+    poloto::quick_fmt!(
+        "trig",
+        "x",
+        "y",
         poloto::build::line(
             "tan(x)",
             poloto::build::buffered_iter::buffered(
@@ -41,17 +43,18 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             "2*cos(x)",
             x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
         )
-    );
-
-    poloto::simple_fmt!(data, "trig", "x", "y").simple_theme(writer)
+    )
+    .simple_theme(writer)
 }
 
 fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
-    // Using poloto::Croppable, we can filter out plots and still have discontinuity.
-    let data = plots!(
-        poloto::build::line(
+    poloto::quick_fmt!(
+        "box trig",
+        "x",
+        "y",
+        poloto::build::BoxedPlot::new(poloto::build::line(
             "tan(x)",
             poloto::build::buffered_iter::buffered(
                 x.clone()
@@ -60,32 +63,27 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
                     .crop_below(-10.0)
                     .crop_left(2.0),
             ),
-        )
-        .into_boxed(),
-        poloto::build::line(
+        )),
+        poloto::build::BoxedPlot::new(poloto::build::line(
             "sin(2x)",
             poloto::build::bounded_iter::from_rect(
                 [0.0, 10.0],
                 [0.0, 10.0],
                 x.clone().map(|x| [x, (2.0 * x).sin()]),
             ),
-        )
-        .into_boxed(),
-        poloto::build::line(
+        )),
+        poloto::build::BoxedPlot::new(poloto::build::line(
             "2*cos(x)",
             poloto::build::buffered_iter::buffered(
                 x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
             ),
-        )
-        .into_boxed(),
-        poloto::build::line(
+        )),
+        poloto::build::BoxedPlot::new(poloto::build::line(
             "2*cos(x)",
             x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4),
-        )
-        .into_boxed()
-    );
-
-    poloto::simple_fmt!(data, "box trig", "x", "y").simple_theme(writer)
+        ))
+    )
+    .simple_theme(writer)
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {

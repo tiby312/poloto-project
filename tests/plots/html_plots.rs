@@ -7,11 +7,12 @@ fn custom_colors_html() -> fmt::Result {
     let l1 = poloto::build::line("cos", x.clone().map(|x| [x, x.cos()]));
     let l2 = poloto::build::histogram("sin-10", x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let s = poloto::simple_fmt!(
-        plots!(l1, l2),
+    let s = poloto::quick_fmt!(
         "Demo: you can use CSS patterns if you embed SVG!",
         "x",
-        "y"
+        "y",
+        l1,
+        l2
     );
 
     let mut w = util::create_test_file("custom_colors.html");
@@ -121,13 +122,14 @@ body {
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let plots = plots!(
+    let s = poloto::quick_fmt!(
+        "Demo: Hovering and shadows",
+        "x",
+        "y",
         poloto::build::line("cos", x.clone().map(|x| [x, x.cos()])),
         poloto::build::histogram("sin-3", x.clone().step_by(3).map(|x| [x, x.sin() - 3.])),
         poloto::build::scatter("sin", x.clone().step_by(3).map(|x| [x, x.sin()]))
     );
-
-    let s = poloto::simple_fmt!(plots, "Demo: Hovering and shadows", "x", "y");
 
     let mut w = util::create_test_file("hover_shadow.html");
 

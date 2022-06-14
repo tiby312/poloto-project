@@ -286,9 +286,10 @@ pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
     plot_iter_impl::PlotsDyn::new(vec)
 }
 
-pub trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Self::Y)> {}
+trait PlotIteratorAndMarkers: Markerable + PlotIterator<Item = (Self::X, Self::Y)> {}
 
-pub trait PlotIteratorAndMarkersExt: PlotIteratorAndMarkers {
+/*
+trait PlotIteratorAndMarkersExt: PlotIteratorAndMarkers {
     ///
     /// This should be used as a last resort after trying [`chain`](PlotIteratorExt::chain) and [`plots_dyn`].
     ///
@@ -322,7 +323,8 @@ pub trait PlotIteratorAndMarkersExt: PlotIteratorAndMarkers {
         self.chain(markers(x, y))
     }
 }
-impl<I: PlotIteratorAndMarkers> PlotIteratorAndMarkersExt for I {}
+*/
+//impl<I: PlotIteratorAndMarkers> PlotIteratorAndMarkersExt for I {}
 
 impl<I: Markerable + PlotIterator<Item = (Self::X, Self::Y)>> PlotIteratorAndMarkers for I {}
 
@@ -342,29 +344,38 @@ impl<'a, X: 'a> PlotIterator for &'a mut dyn PlotIterator<Item = X> {
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Markerable
-    for Box<dyn PlotIteratorAndMarkers<Item = (X, Y), X = X, Y = Y> + 'a>
-{
+pub struct BoxedPlot<'a, X, Y> {
+    inner: Box<dyn PlotIteratorAndMarkers<X = X, Y = Y, Item = (X, Y)> + 'a>,
+}
+
+impl<'a, X, Y> BoxedPlot<'a, X, Y> {
+    pub fn new<A: Markerable<X = X, Y = Y> + PlotIterator<Item = (X, Y)> + 'a>(
+        a: A,
+    ) -> BoxedPlot<'a, X, Y> {
+        BoxedPlot { inner: Box::new(a) }
+    }
+}
+
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Markerable for BoxedPlot<'a, X, Y> {
     type X = X;
     type Y = Y;
     fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
-        self.as_mut().increase_area(area);
+        self.inner.as_mut().increase_area(area);
     }
 }
-impl<'a, X: 'a, Y: 'a> PlotIterator
-    for Box<dyn PlotIteratorAndMarkers<Item = (X, Y), X = X, Y = Y> + 'a>
-{
+
+impl<'a, X: 'a, Y: 'a> PlotIterator for BoxedPlot<'a, X, Y> {
     type Item = (X, Y);
 
     fn next_plot_point(&mut self) -> PlotResult<Self::Item> {
-        self.as_mut().next_plot_point()
+        self.inner.as_mut().next_plot_point()
     }
 
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        self.as_mut().next_name(w)
+        self.inner.as_mut().next_name(w)
     }
 
     fn next_typ(&mut self) -> Option<PlotMetaType> {
-        self.as_mut().next_typ()
+        self.inner.as_mut().next_typ()
     }
 }

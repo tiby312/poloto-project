@@ -20,14 +20,12 @@ fn days() -> fmt::Result {
         (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let s = poloto::simple_fmt!(
-        plots!(
-            poloto::build::line("", data),
-            poloto::build::markers(None, Some(0))
-        ),
+    let s = poloto::quick_fmt!(
         "Number of Wikipedia Articles",
         "Day",
-        "Number of Articles"
+        "Number of Articles",
+        poloto::build::line("", data),
+        poloto::build::markers(None, Some(0))
     );
 
     let mut w = util::create_test_file("days.svg");
@@ -99,14 +97,12 @@ fn months() -> fmt::Result {
         (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
-    let s = poloto::simple_fmt!(
-        plots!(
-            poloto::build::line("", data),
-            poloto::build::markers([], [0])
-        ),
+    let s = poloto::quick_fmt!(
         "Number of Wikipedia Articles",
         "duration",
-        "Number of Articles"
+        "Number of Articles",
+        poloto::build::line("", data),
+        poloto::build::markers([], [0])
     );
 
     let w = util::create_test_file("months.svg");
