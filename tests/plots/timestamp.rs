@@ -24,7 +24,7 @@ fn days() -> fmt::Result {
         "Number of Wikipedia Articles",
         "Day",
         "Number of Articles",
-        poloto::build::line("", data),
+        data.iter().line(""),
         poloto::build::markers(None, Some(0))
     );
 

@@ -367,7 +367,7 @@ fn test_bounded_cloneable() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
     let l1 = poloto::build::bounded_iter::from_iter(&data, &data).scatter("");
-    let l2 = data.scatter("");
+    let l2 = data.iter().scatter("");
     let l = plots!(l1, l2);
 
     let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
@@ -424,7 +424,7 @@ fn test_single_and_chain_and_dyn_cloneable() {
 
     assert_eq!(s1, s2);
 
-    let l3 = poloto::build::plots_dyn(vec![poloto::build::scatter("", &data)]);
+    let l3 = poloto::build::plots_dyn(vec![data.iter().scatter("")]);
 
     let l = plots!(l, l3);
 

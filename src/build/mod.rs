@@ -59,11 +59,11 @@ pub trait PlotIter {
     fn second(self, last: Self::It1) -> Self::It2;
 }
 
-impl<I: IntoIterator + Clone> PlotIter for I {
+impl<I: Iterator + Clone> PlotIter for I {
     type Item1 = I::Item;
     type Item2 = I::Item;
-    type It1 = I::IntoIter;
-    type It2 = I::IntoIter;
+    type It1 = I;
+    type It2 = I;
 
     fn first(&mut self) -> Self::It1 {
         self.clone().into_iter()

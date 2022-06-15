@@ -37,7 +37,7 @@ fn main() {
         "Date",
         "Mark (in meters)",
         poloto::build::markers([], [0.0]),
-        data.line("")
+        data.iter().line("")
     );
 
     print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
