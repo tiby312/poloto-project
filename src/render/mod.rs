@@ -392,7 +392,7 @@ pub fn canvas_builder() -> RenderOptionsBuilder {
 }
 
 ///
-/// Linke some plots with a way to render them.
+/// Link some plots with a way to render them.
 ///
 pub struct Data<X, Y, P> {
     boundx: ticks::DataBound<X>,

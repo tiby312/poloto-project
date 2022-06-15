@@ -66,10 +66,10 @@ impl<I: Iterator + Clone> PlotIter for I {
     type It2 = I;
 
     fn first(&mut self) -> Self::It1 {
-        self.clone().into_iter()
+        self.clone()
     }
     fn second(self, _last: Self::It1) -> Self::It2 {
-        self.into_iter()
+        self
     }
 }
 

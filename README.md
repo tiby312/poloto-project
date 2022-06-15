@@ -291,7 +291,7 @@ the plotter will clone the whole buffer. Instead pass a reference to the buffer.
 ## Can I change the styling of the plots?
 
 Yes! You can harness the power of CSS both in the svg, or outside
-in html with an embeded svg. Some things you can do:
+in html with an embedded svg. Some things you can do:
 
  * Change the color scheme to fit your html theme.
  * Highlight one plot, make it dashed, or add hover effect
