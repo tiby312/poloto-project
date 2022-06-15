@@ -30,8 +30,8 @@ fn main() {
         poloto::build::plots_dyn(
             (1000..1006)
                 .map(|i| {
-                    let r = (0..).zip(collatz(i)).line(formatm!("c({})", i));
-                    r
+                    let name = formatm!("c({})", i);
+                    (0..).zip(collatz(i)).line(name)
                 })
                 .collect(),
         ),
