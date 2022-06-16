@@ -2,7 +2,7 @@ use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
-    let gauss = |sigma: f64, mu: f64| {
+    let gau = |sigma: f64, mu: f64| {
         use std::f64::consts::TAU;
         let s = sigma.powi(2);
         let k = (sigma * TAU).sqrt().recip();
@@ -10,12 +10,12 @@ fn main() {
     };
 
     let r = poloto::range_iter([-5.0, 5.0], 200);
-    let l1 = r.zip_output(gauss(1.0, 0.)).buffered_plot().line("σ=1.0");
-    let l2 = r.zip_output(gauss(0.5, 0.)).buffered_plot().line("σ=0.5");
-    let l3 = r.zip_output(gauss(0.3, 0.)).buffered_plot().line("σ=0.3");
-    let l4 = poloto::build::origin();
+    let a = r.zip_output(gau(1.0, 0.)).buffered_plot().line("σ=1.0");
+    let b = r.zip_output(gau(0.5, 0.)).buffered_plot().line("σ=0.5");
+    let c = r.zip_output(gau(0.3, 0.)).buffered_plot().line("σ=0.3");
+    let d = poloto::build::origin();
 
-    let p = quick_fmt!("gaussian", "x", "y", l1, l2, l3, l4);
+    let p = quick_fmt!("gaussian", "x", "y", a, b, c, d);
 
     print!("{}", poloto::disp(|w| p.simple_theme(w)));
 }
