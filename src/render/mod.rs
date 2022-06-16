@@ -315,7 +315,7 @@ impl<T: Renderable> Renderable for &T {
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         writer: &mut dyn fmt::Write,
-        plots: &mut impl build::PlotIterator<Item = (X, Y)>,
+        plots: &mut impl build::PlotIterator<X, Y>,
         base: &mut dyn BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
@@ -334,7 +334,7 @@ impl Renderable for RenderOptions {
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         mut writer: &mut dyn fmt::Write,
-        plots: &mut impl build::PlotIterator<Item = (X, Y)>,
+        plots: &mut impl build::PlotIterator<X, Y>,
         base: &mut dyn BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
@@ -360,7 +360,7 @@ pub trait Renderable {
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
         writer: &mut dyn fmt::Write,
-        plots: &mut impl build::PlotIterator<Item = (X, Y)>,
+        plots: &mut impl build::PlotIterator<X, Y>,
         base: &mut dyn BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
@@ -403,7 +403,7 @@ pub struct Data<X, Y, P> {
 impl<X, Y, P> Data<X, Y, P> {
     pub fn new(mut plots: P) -> Data<X, Y, P>
     where
-        P: build::marker::Markerable<X = X, Y = Y>,
+        P: build::marker::Markerable<X, Y>,
         X: PlotNum,
         Y: PlotNum,
     {
@@ -423,13 +423,7 @@ impl<X, Y, P> Data<X, Y, P> {
     }
 }
 
-pub fn plot_with<
-    X,
-    Y,
-    P: build::PlotIterator<Item = (X, Y)>,
-    K: Renderable,
-    A: BaseFmt<X = X, Y = Y>,
->(
+pub fn plot_with<X, Y, P: build::PlotIterator<X, Y>, K: Renderable, A: BaseFmt<X = X, Y = Y>>(
     data: Data<X, Y, P>,
     canvas: K,
     base: A,
@@ -446,7 +440,7 @@ pub fn plot_with<
 ///
 /// Created by [`plot_with`]
 ///
-pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> {
+pub struct Plotter<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> {
     canvas: K,
     boundx: DataBound<B::X>,
     boundy: DataBound<B::Y>,
@@ -454,7 +448,7 @@ pub struct Plotter<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B
     base: B,
 }
 
-impl<P: build::PlotIterator<Item = (B::X, B::Y)>, K: Renderable, B: BaseFmt> Plotter<P, K, B> {
+impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> Plotter<P, K, B> {
     pub fn get_dim(&self) -> [f64; 2] {
         self.canvas.get_dim()
     }

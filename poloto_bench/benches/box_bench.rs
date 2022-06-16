@@ -23,7 +23,7 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             .line("tan(x)"),
         x.clone()
             .map(|x| [x, (2.0 * x).sin()])
-            .rect_bound_plot((0.0, 0.0), (10.0, 10.0))
+            .rect_bound_plot([0.0, 10.0], [0.0, 10.0])
             .line("sin(2x)"),
         x.clone()
             .map(|x| [x, 2.0 * x.cos()])
