@@ -4,10 +4,11 @@
 //!
 use super::*;
 
+use iter::PlotIter;
+
 pub mod bar;
-pub mod bounded_iter;
-pub mod buffered_iter;
 pub mod crop;
+pub mod iter;
 pub mod unwrapper;
 use marker::Area;
 use marker::Markerable;
@@ -39,38 +40,6 @@ pub enum PlotType {
 pub enum PlotMetaType {
     Plot(PlotType),
     Text,
-}
-
-///
-/// Iterator that is accepted by plot functions like `line`,`scatter`, etc.
-/// The second function will only get called after
-/// the first iterator has been fully consumed.
-///
-pub trait PlotIter {
-    type Item1;
-    type Item2;
-    type It1: Iterator<Item = Self::Item1>;
-    type It2: Iterator<Item = Self::Item2>;
-
-    /// Return an iterator that will be used to find min max bounds.
-    fn first(&mut self) -> Self::It1;
-
-    /// Return an iterator that returns the same data as before in order to scale the plots.
-    fn second(self, last: Self::It1) -> Self::It2;
-}
-
-impl<I: Iterator + Clone> PlotIter for I {
-    type Item1 = I::Item;
-    type Item2 = I::Item;
-    type It1 = I;
-    type It2 = I;
-
-    fn first(&mut self) -> Self::It1 {
-        self.clone()
-    }
-    fn second(self, _last: Self::It1) -> Self::It2 {
-        self
-    }
 }
 
 ///
@@ -174,8 +143,6 @@ pub enum PlotResult<T> {
     Finished,
 }
 
-type SinglePlotSimilar<X, D> = SinglePlot<X, X, D>;
-
 pub trait SinglePlotBuilder<P1, P2> {
     fn scatter<D: Display>(self, name: D) -> SinglePlot<P1, P2, D>;
     fn line<D: Display>(self, name: D) -> SinglePlot<P1, P2, D>;
@@ -208,13 +175,16 @@ where
     }
 }
 
+type ClonePlotSimilar<X, D> = SinglePlot<iter::ClonedIter<X>, X, D>;
+
 ///
 /// Write some text in the legend. This doesnt increment the plot number.
 ///
 pub fn text<X: PlotNum, Y: PlotNum, D: Display>(
     name: D,
-) -> SinglePlotSimilar<std::iter::Empty<(X, Y)>, D> {
-    SinglePlot::new(PlotMetaType::Text, name, std::iter::empty())
+) -> ClonePlotSimilar<std::iter::Empty<(X, Y)>, D> {
+    use iter::IterBuilder;
+    SinglePlot::new(PlotMetaType::Text, name, std::iter::empty().cloned_plot())
 }
 
 /// Create a histogram from plots using SVG rect elements.

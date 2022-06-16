@@ -9,11 +9,10 @@ fn main() {
         move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let range = poloto::range_iter([-5.0, 5.0], 200);
-
-    let l1 = range.zip_output(gauss(1.0, 0.)).line("σ = 1.0");
-    let l2 = range.zip_output(gauss(0.5, 0.)).line("σ = 0.5");
-    let l3 = range.zip_output(gauss(0.3, 0.)).line("σ = 0.3");
+    let r = poloto::range_iter([-5.0, 5.0], 200);
+    let l1 = r.zip_output(gauss(1.0, 0.)).buffered_plot().line("σ=1.0");
+    let l2 = r.zip_output(gauss(0.5, 0.)).buffered_plot().line("σ=0.5");
+    let l3 = r.zip_output(gauss(0.3, 0.)).buffered_plot().line("σ=0.3");
     let l4 = poloto::build::origin();
 
     let p = quick_fmt!("gaussian", "x", "y", l1, l2, l3, l4);

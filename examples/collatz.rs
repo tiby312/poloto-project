@@ -31,7 +31,7 @@ fn main() {
             (1000..1006)
                 .map(|i| {
                     let name = formatm!("c({})", i);
-                    (0..).zip(collatz(i)).line(name)
+                    (0..).zip(collatz(i)).buffered_plot().line(name)
                 })
                 .collect(),
         ),

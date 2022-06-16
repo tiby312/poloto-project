@@ -17,11 +17,11 @@ use super::PlotIter;
 ///
 /// Create a [`PlotIter`] from an iterator that does not implement `Clone`.
 ///
-pub fn buffered<I: IntoIterator>(it: I) -> VecBackedIter<I::IntoIter>
+pub fn buffered<I: Iterator>(it: I) -> VecBackedIter<I>
 where
     I::Item: Clone,
 {
-    VecBackedIter::new(it.into_iter())
+    VecBackedIter::new(it)
 }
 
 ///

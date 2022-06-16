@@ -64,6 +64,7 @@ pub mod simple_theme;
 ///
 pub mod prelude {
     pub use super::build::crop::Croppable;
+    pub use super::build::iter::IterBuilder;
     pub use super::build::PlotIteratorExt;
     pub use super::build::SinglePlotBuilder;
     pub use super::formatm;

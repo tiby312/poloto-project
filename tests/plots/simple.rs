@@ -1,3 +1,5 @@
+use poloto::build::iter::ClonedIter;
+
 use super::*;
 
 #[test]
@@ -21,7 +23,7 @@ fn heart() -> fmt::Result {
         "Heart Graph",
         "x",
         "y",
-        range.map(heart).line_fill_raw(""),
+        range.map(heart).buffered_plot().line_fill_raw(""),
         poloto::build::markers([-20.0, 20.0], [-20.0, 20.0])
     );
 
@@ -38,8 +40,8 @@ fn large_scatter() -> fmt::Result {
         "cows per year",
         "year",
         "cows",
-        x.zip_output(f64::cos).scatter("a"),
-        x.zip_output(f64::sin).line("b")
+        x.zip_output(f64::cos).buffered_plot().scatter("a"),
+        x.zip_output(f64::sin).buffered_plot().line("b")
     );
     let mut w = util::create_test_file("large_scatter.svg");
 
@@ -64,6 +66,7 @@ fn line_fill_fmt() -> fmt::Result {
             .crop_above(10.0)
             .crop_below(0.0)
             .crop_left(2.0)
+            .buffered_plot()
             .line_fill("tan(x)"),
     );
 
@@ -105,17 +108,17 @@ fn long_label() -> fmt::Result {
         "x",
         "y",
         poloto::build::text("Some notes here"),
-        (0..).zip(collatz(1000)).line(formatm!(
+        (0..).zip(collatz(1000)).buffered_plot().line(formatm!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1000
         )),
-        (0..).zip(collatz(1001)).line(formatm!(
+        (0..).zip(collatz(1001)).buffered_plot().line(formatm!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1001
         )),
         poloto::build::markers([], [0]),
         poloto::build::text(" 🍆 Here is a note using the text() function.🍎",),
-        (0..).zip(collatz(1002)).line(formatm!(
+        (0..).zip(collatz(1002)).buffered_plot().line(formatm!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1002
         ))
@@ -142,7 +145,12 @@ fn long_label() -> fmt::Result {
 fn magnitude() -> fmt::Result {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let p = poloto::quick_fmt!("cows per year", "year", "cow", data.iter().scatter(""),);
+    let p = poloto::quick_fmt!(
+        "cows per year",
+        "year",
+        "cow",
+        data.iter().cloned_plot().scatter(""),
+    );
 
     let w = util::create_test_file("magnitude.svg");
 
@@ -153,7 +161,12 @@ fn magnitude() -> fmt::Result {
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let plotter = poloto::quick_fmt!("cows per year", "year", "cow", points.iter().scatter(""),);
+    let plotter = poloto::quick_fmt!(
+        "cows per year",
+        "year",
+        "cow",
+        points.iter().cloned_plot().scatter(""),
+    );
 
     let mut w = util::create_test_file("base_color.svg");
 
@@ -184,7 +197,10 @@ fn custom_dim() -> fmt::Result {
 
     let mut v = vec![];
     for i in 1000..1006 {
-        let l = (0..).zip(collatz(i)).line(formatm!("c({})", i));
+        let l = (0..)
+            .zip(collatz(i))
+            .buffered_plot()
+            .line(formatm!("c({})", i));
         v.push(l);
     }
 
@@ -226,8 +242,12 @@ fn dark() -> fmt::Result {
         "cos per year",
         "year",
         "cows",
-        x.zip_output(f64::cos).line(formatm!("test {}", 1)),
-        x.zip_output(f64::sin).line(formatm!("test {}", 2))
+        x.zip_output(f64::cos)
+            .buffered_plot()
+            .line(formatm!("test {}", 1)),
+        x.zip_output(f64::sin)
+            .buffered_plot()
+            .line(formatm!("test {}", 2))
     );
 
     let w = util::create_test_file("dark.svg");
@@ -243,10 +263,11 @@ fn custom_style() -> fmt::Result {
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
-        x.zip_output(f64::cos).line("cos"),
+        x.zip_output(f64::cos).buffered_plot().line("cos"),
         x.clone()
             .step_by(3)
             .zip_output(|x| x.sin() - 10.)
+            .buffered_plot()
             .histogram("sin-10")
     );
 
@@ -284,20 +305,18 @@ fn trig() -> fmt::Result {
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        poloto::build::buffered_iter::buffered(
-            x.zip_output(f64::tan)
-                .crop_above(10.0)
-                .crop_below(-10.0)
-                .crop_left(2.0),
-        )
-        .line("tan(x"),
-        poloto::build::bounded_iter::from_rect(
-            [0.0, 10.0],
-            [0.0, 10.0],
-            x.zip_output(|x| (2.0 * x).sin()),
-        )
-        .line("sin(2x"),
-        poloto::build::buffered_iter::buffered(x.zip_output(|x| 2.0 * x.cos()).crop_above(1.4),)
+        x.zip_output(f64::tan)
+            .crop_above(10.0)
+            .crop_below(-10.0)
+            .crop_left(2.0)
+            .buffered_plot()
+            .line("tan(x"),
+        x.zip_output(|x| (2.0 * x).sin())
+            .rect_bound_plot([0.0, 0.0], [10.0, 10.0])
+            .line("sin(2x"),
+        x.zip_output(|x| 2.0 * x.cos())
+            .crop_above(1.4)
+            .buffered_plot()
             .line("2*cos(x")
     );
 
@@ -309,7 +328,7 @@ fn trig() -> fmt::Result {
 fn no_plots() -> fmt::Result {
     let v: Vec<
         poloto::build::plot_iter_impl::SinglePlot<
-            std::iter::Empty<(i128, i128)>,
+            ClonedIter<std::iter::Empty<(i128, i128)>>,
             std::iter::Empty<(i128, i128)>,
             &'static str,
         >,
@@ -330,7 +349,7 @@ fn no_plots() -> fmt::Result {
 fn no_plots_only_marker() -> fmt::Result {
     let v: Vec<
         poloto::build::plot_iter_impl::SinglePlot<
-            std::iter::Empty<(i128, i128)>,
+            ClonedIter<std::iter::Empty<(i128, i128)>>,
             std::iter::Empty<(i128, i128)>,
             &'static str,
         >,
@@ -354,7 +373,9 @@ fn one_empty_plot() -> fmt::Result {
         "Some Trigonometry Plots 🥳",
         formatm!("This is the {} label", 'x'),
         "This is the y label",
-        std::iter::empty::<(i128, i128)>().scatter("hay"),
+        std::iter::empty::<(i128, i128)>()
+            .cloned_plot()
+            .scatter("hay"),
         poloto::build::markers([], [5])
     );
 
@@ -366,8 +387,8 @@ fn one_empty_plot() -> fmt::Result {
 fn test_bounded_cloneable() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let l1 = poloto::build::bounded_iter::from_iter(&data, &data).scatter("");
-    let l2 = data.iter().scatter("");
+    let l1 = data.iter().custom_bound_plot(data.iter()).scatter("");
+    let l2 = data.iter().cloned_plot().scatter("");
     let l = plots!(l1, l2);
 
     let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
@@ -387,8 +408,8 @@ fn test_bounded_cloneable() {
 fn test_buffered_clonable() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let l1 = poloto::build::buffered_iter::buffered(data).scatter("");
-    let l2 = data.iter().scatter("");
+    let l1 = data.iter().buffered_plot().scatter("");
+    let l2 = data.iter().cloned_plot().scatter("");
     let l = plots!(l1, l2);
 
     let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
@@ -408,8 +429,8 @@ fn test_buffered_clonable() {
 fn test_single_and_chain_and_dyn_cloneable() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let l1 = data.iter().scatter("");
-    let l2 = data.iter().scatter("");
+    let l1 = data.iter().cloned_plot().scatter("");
+    let l2 = data.iter().cloned_plot().scatter("");
     let l = plots!(l1, l2);
 
     let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
@@ -424,7 +445,7 @@ fn test_single_and_chain_and_dyn_cloneable() {
 
     assert_eq!(s1, s2);
 
-    let l3 = poloto::build::plots_dyn(vec![data.iter().scatter("")]);
+    let l3 = poloto::build::plots_dyn(vec![data.iter().cloned_plot().scatter("")]);
 
     let l = plots!(l, l3);
 

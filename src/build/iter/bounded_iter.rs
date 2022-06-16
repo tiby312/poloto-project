@@ -27,30 +27,13 @@ impl<I1: Iterator, I2: Iterator> PlotIter for KnownBounds<I1, I2> {
     }
 }
 
-pub fn from_iter<X: PlotNum, Y: PlotNum, I1: IntoIterator, I2: IntoIterator>(
-    iter1: I1,
-    iter2: I2,
-) -> KnownBounds<I1::IntoIter, I2::IntoIter>
-where
-    I1::Item: Unwrapper<Item = (X, Y)>,
-    I2::Item: Unwrapper<Item = (X, Y)>,
-{
+pub fn from_iter<I1: Iterator, I2: Iterator>(iter1: I1, iter2: I2) -> KnownBounds<I1, I2> {
     KnownBounds {
-        iter1: Some(iter1.into_iter()),
-        iter2: iter2.into_iter(),
+        iter1: Some(iter1),
+        iter2,
     }
 }
 
-pub fn from_rect<X: PlotNum, Y: PlotNum, I: Iterator>(
-    x: [X; 2],
-    y: [Y; 2],
-    iter: I,
-) -> KnownBounds<std::vec::IntoIter<(X, Y)>, I>
-where
-    I::Item: Unwrapper<Item = (X, Y)>,
-{
-    let min = (x[0], y[0]);
-    let max = (x[1], y[1]);
-
+pub fn from_rect<X, I: Iterator>(min: X, max: X, iter: I) -> KnownBounds<std::vec::IntoIter<X>, I> {
     from_iter(vec![min, max].into_iter(), iter)
 }

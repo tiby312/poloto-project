@@ -33,11 +33,14 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
 
     let vals_len = vals.len();
 
+    use iter::IterBuilder;
+
     let bars = crate::build::bars(
         name,
         vals.into_iter()
             .enumerate()
-            .map(|(i, x)| (x, i128::try_from(i).unwrap())),
+            .map(|(i, x)| (x, i128::try_from(i).unwrap()))
+            .buffered_plot(),
     );
 
     let ticks = (0..vals_len)
