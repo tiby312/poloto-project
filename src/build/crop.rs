@@ -83,6 +83,8 @@ where
 ///
 ///
 pub trait Croppable<X: DiscNum, Y: DiscNum>: Sized {
+
+   
     fn crop_above(self, val: Y) -> Crop<X, Y, Self> {
         Crop {
             dir: Dir::Above,

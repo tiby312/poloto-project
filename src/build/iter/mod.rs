@@ -1,83 +1,90 @@
-pub mod bounded_iter;
-pub mod buffered_iter;
+use crate::plotnum::PlotNum;
 
-///
-/// Iterator that is accepted by plot functions like `line`,`scatter`, etc.
-/// The second function will only get called after
-/// the first iterator has been fully consumed.
-///
-pub trait PlotIter {
-    type Item1;
-    type Item2;
-    type It1: Iterator<Item = Self::Item1>;
-    type It2: Iterator<Item = Self::Item2>;
+use super::{unwrapper::Unwrapper, marker::Area};
 
-    /// Return an iterator that will be used to find min max bounds.
-    fn first(&mut self) -> Self::It1;
+//pub mod bounded_iter;
+//pub mod buffered_iter;
 
-    /// Return an iterator that returns the same data as before in order to scale the plots.
-    fn second(self, last: Self::It1) -> Self::It2;
+
+
+//handle must be called BEFORE the iterator is iterated on.
+pub trait PlotIter<X,Y>{
+    fn next(&mut self)->Option<(X,Y)>;
+    fn handle(&mut self,area:&mut Area<X,Y>);
+}
+
+
+#[derive(Clone)]
+pub struct UnwrapperIter<I>(pub I);
+impl<I:Iterator> Iterator for UnwrapperIter<I> where I::Item:Unwrapper{
+    type Item=<I::Item as Unwrapper>::Item;
+    fn next(&mut self)->Option<Self::Item>{
+        self.0.next().map(|x|x.unwrap())
+    }
+}
+
+pub trait IterBuilder<X:PlotNum,Y:PlotNum>:Iterator+Sized where Self::Item:Unwrapper<Item=(X,Y)>{
+    fn cloned_plot(self)->ClonedIter<UnwrapperIter<Self>>;
+    fn buffered_plot(self)->BufferedIter<UnwrapperIter<Self>,(X,Y)>;
+}
+
+impl<X:PlotNum,Y:PlotNum,I:Iterator> IterBuilder<X,Y> for I where I::Item:Unwrapper<Item=(X,Y)>{
+    fn cloned_plot(self)->ClonedIter<UnwrapperIter<Self>>{
+        ClonedIter(UnwrapperIter(self))
+    }
+    fn buffered_plot(self)->BufferedIter<UnwrapperIter<Self>,(X,Y)>{
+        BufferedIter(Floo::First(UnwrapperIter(self)))
+    }
 }
 
 #[derive(Clone)]
 pub struct ClonedIter<T>(pub T);
 
-impl<I: Iterator + Clone> PlotIter for ClonedIter<I> {
-    type Item1 = I::Item;
-    type Item2 = I::Item;
-    type It1 = I;
-    type It2 = I;
-
-    fn first(&mut self) -> Self::It1 {
-        self.0.clone()
+impl<X:PlotNum,Y:PlotNum,T:Iterator<Item=(X,Y)>+Clone> PlotIter<X,Y> for ClonedIter<T>{
+    fn next(&mut self)->Option<(X,Y)>{
+        self.0.next()
     }
-    fn second(self, _last: Self::It1) -> Self::It2 {
-        self.0
+    fn handle(&mut self,area:&mut Area<X,Y>){
+        for (x,y) in self.0.clone(){
+            area.grow(Some(x), Some(y));
+        }
     }
 }
 
-pub trait IterBuilder: Iterator + Sized {
-    fn buffered_plot(self) -> buffered_iter::VecBackedIter<Self>
-    where
-        Self::Item: Clone;
-    fn cloned_plot(self) -> ClonedIter<Self>
-    where
-        Self: Clone;
-    fn rect_bound_plot<X>(
-        self,
-        min: X,
-        max: X,
-    ) -> bounded_iter::KnownBounds<std::vec::IntoIter<X>, Self>;
-    fn custom_bound_plot<II: Iterator<Item = Self::Item>>(
-        self,
-        bound: II,
-    ) -> bounded_iter::KnownBounds<II, Self>;
+
+#[derive(Clone)]
+enum Floo<I:Iterator<Item=T>,T>{
+    First(I),
+    Next(std::vec::IntoIter<T>)
 }
 
-impl<I: Iterator> IterBuilder for I {
-    fn rect_bound_plot<X>(
-        self,
-        min: X,
-        max: X,
-    ) -> bounded_iter::KnownBounds<std::vec::IntoIter<X>, Self> {
-        bounded_iter::from_rect(min, max, self)
+
+#[derive(Clone)]
+pub struct BufferedIter<I:Iterator<Item=T>,T>(Floo<I,T>);
+impl<X:PlotNum,Y:PlotNum,T:Iterator<Item=(X,Y)>> PlotIter<X,Y> for BufferedIter<T,(X,Y)>{
+    fn next(&mut self)->Option<(X,Y)>{
+        if let Floo::Next(n)=&mut self.0{
+            n.next()
+        }else{
+            panic!("incorrect trait usage");
+        }
     }
-    fn custom_bound_plot<II: Iterator<Item = Self::Item>>(
-        self,
-        bound: II,
-    ) -> bounded_iter::KnownBounds<II, Self> {
-        bounded_iter::from_iter(bound, self)
-    }
-    fn buffered_plot(self) -> buffered_iter::VecBackedIter<Self>
-    where
-        Self::Item: Clone,
-    {
-        buffered_iter::buffered(self)
-    }
-    fn cloned_plot(self) -> ClonedIter<Self>
-    where
-        Self: Clone,
-    {
-        ClonedIter(self)
+    fn handle(&mut self,area:&mut Area<X,Y>){
+        if let Floo::First(a)=&mut self.0{
+            let mut vec=Vec::with_capacity(a.size_hint().0);
+            for (x,y) in a{
+                area.grow(Some(x), Some(y));
+                vec.push((x,y));
+            }
+            self.0=Floo::Next(vec.into_iter())
+
+        }else{
+            panic!("handle() called incorrectly")
+        }
     }
 }
+
+
+
+
+
