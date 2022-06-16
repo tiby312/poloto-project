@@ -10,7 +10,7 @@ fn main() {
     };
 
     let r = poloto::range_iter([-5.0, 5.0], 200);
-    let a = r.zip_output(gau(1.0, 0.)).crop_above(2.0).crop_below(2.0).buffered_plot().line("σ=1.0");
+    let a = r.zip_output(gau(1.0, 0.)).buffered_plot().line("σ=1.0");
     let b = r.zip_output(gau(0.5, 0.)).buffered_plot().line("σ=0.5");
     let c = r.zip_output(gau(0.3, 0.)).buffered_plot().line("σ=0.3");
     let d = poloto::build::origin();

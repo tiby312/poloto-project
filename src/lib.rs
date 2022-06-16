@@ -269,8 +269,7 @@ pub use render::plot_with;
 ///
 /// Construct a [`Data`].
 ///
-pub fn data<X:PlotNum,Y:PlotNum,P: build::marker::Markerable<X,Y>>(plots: P) -> Data<X,Y,P>
-{
+pub fn data<X: PlotNum, Y: PlotNum, P: build::marker::Markerable<X, Y>>(plots: P) -> Data<X, Y, P> {
     render::Data::new(plots)
 }
 

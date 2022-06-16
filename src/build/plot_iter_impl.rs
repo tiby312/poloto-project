@@ -3,70 +3,61 @@ use super::*;
 use super::marker::Area;
 use super::marker::Markerable;
 
-
 ///
 /// Represents a single plot.
 ///
 #[derive(Clone)]
 pub struct SinglePlot<I, D: Display> {
-    iter:I,
+    iter: I,
     name: D,
     typ: PlotMetaType,
-    done:bool
+    done: bool,
 }
-impl<I,D: Display> SinglePlot<I, D>
-{
+impl<I, D: Display> SinglePlot<I, D> {
     #[inline(always)]
     pub(crate) fn new(typ: PlotMetaType, name: D, iter: I) -> Self {
         SinglePlot {
             iter,
             name,
             typ,
-            done:false
+            done: false,
         }
     }
 }
 
-
-impl<X: PlotNum, Y: PlotNum, I:PlotIter<X,Y>, D: Display> Markerable<X,Y>
-    for SinglePlot<I,D>
-{
+impl<X: PlotNum, Y: PlotNum, I: PlotIter<X, Y>, D: Display> Markerable<X, Y> for SinglePlot<I, D> {
     fn increase_area(&mut self, area: &mut Area<X, Y>) {
         self.iter.handle(area);
     }
 }
 
-impl<X,Y, I:PlotIter<X,Y>, D: Display> PlotIterator<X,Y> for SinglePlot<I, D>
-{
+impl<X, Y, I: PlotIter<X, Y>, D: Display> PlotIterator<X, Y> for SinglePlot<I, D> {
     #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<(X,Y)> {
-        if let Some(a)=self.iter.next(){
+    fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
+        if let Some(a) = self.iter.next() {
             PlotResult::Some(a)
-        }else{
-            if !self.done{
-                self.done=true;
-                PlotResult::None
-                
-            }else{
-                PlotResult::Finished
-            }
+        } else if !self.done {
+            self.done = true;
+            PlotResult::None
+        } else {
+            PlotResult::Finished
         }
     }
 
     #[inline(always)]
     fn next_name(&mut self, writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        if !self.done{
+        if !self.done {
             Some(write!(writer, "{}", self.name))
-        }else{
+        } else {
             None
         }
     }
 
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
-        if !self.done{
+        if !self.done {
             Some(self.typ)
-        }else{
+        } else {
             None
         }
     }
@@ -86,18 +77,16 @@ impl<A, B> Chain<A, B> {
     }
 }
 
-impl<X,Y,A: Markerable<X,Y>, B: Markerable<X,Y>> Markerable<X,Y> for Chain<A, B> {
-   
+impl<X, Y, A: Markerable<X, Y>, B: Markerable<X, Y>> Markerable<X, Y> for Chain<A, B> {
     fn increase_area(&mut self, area: &mut Area<X, Y>) {
         self.a.increase_area(area);
         self.b.increase_area(area);
     }
 }
 
-impl<X,Y,A: PlotIterator<X,Y>, B: PlotIterator<X,Y>> PlotIterator<X,Y> for Chain<A, B> {
-    
+impl<X, Y, A: PlotIterator<X, Y>, B: PlotIterator<X, Y>> PlotIterator<X, Y> for Chain<A, B> {
     #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<(X,Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
         match self.a.next_plot_point() {
             PlotResult::Some(a) => PlotResult::Some(a),
             PlotResult::None => PlotResult::None,
@@ -124,8 +113,8 @@ impl<X,Y,A: PlotIterator<X,Y>, B: PlotIterator<X,Y>> PlotIterator<X,Y> for Chain
     }
 }
 
-impl<X,Y,F: Markerable<X,Y>> Markerable<X,Y> for PlotsDyn<F> {
-    fn increase_area(&mut self, area: &mut Area<X,Y>) {
+impl<X, Y, F: Markerable<X, Y>> Markerable<X, Y> for PlotsDyn<F> {
+    fn increase_area(&mut self, area: &mut Area<X, Y>) {
         for a in self.flop.iter_mut() {
             a.increase_area(area);
         }
@@ -147,8 +136,7 @@ impl<F> PlotsDyn<F> {
         }
     }
 }
-impl<X,Y,F: PlotIterator<X,Y>> PlotIterator<X,Y> for PlotsDyn<F> {
-    
+impl<X, Y, F: PlotIterator<X, Y>> PlotIterator<X, Y> for PlotsDyn<F> {
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         if self.counter >= self.flop.len() {
@@ -159,7 +147,7 @@ impl<X,Y,F: PlotIterator<X,Y>> PlotIterator<X,Y> for PlotsDyn<F> {
     }
 
     #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<(X,Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
         if self.counter >= self.flop.len() {
             return PlotResult::Finished;
         }
@@ -193,13 +181,13 @@ impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
         }
     }
 }
-impl<X,Y,XI: Iterator<Item=X>, YI: Iterator<Item=Y>> PlotIterator<X,Y> for Marker<XI, YI> {
+impl<X, Y, XI: Iterator<Item = X>, YI: Iterator<Item = Y>> PlotIterator<X, Y> for Marker<XI, YI> {
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         None
     }
     #[inline(always)]
-    fn next_plot_point(&mut self) -> PlotResult<(X,Y)> {
+    fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
         PlotResult::Finished
     }
     #[inline(always)]
@@ -208,7 +196,7 @@ impl<X,Y,XI: Iterator<Item=X>, YI: Iterator<Item=Y>> PlotIterator<X,Y> for Marke
     }
 }
 
-impl<XI: Iterator, YI: Iterator> Markerable<XI::Item,YI::Item> for Marker<XI, YI>
+impl<XI: Iterator, YI: Iterator> Markerable<XI::Item, YI::Item> for Marker<XI, YI>
 where
     XI::Item: PlotNum,
     YI::Item: PlotNum,

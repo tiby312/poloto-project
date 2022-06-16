@@ -26,15 +26,13 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
 ) -> (
-    impl PlotIterator<X, i128> + Markerable<X,i128>,
+    impl PlotIterator<X, i128> + Markerable<X, i128>,
     impl TickFormat<Num = i128>,
 ) {
-    use build::iter::IterBuilder;
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
     let vals_len = vals.len();
 
-   
     let bars = crate::build::bars(
         name,
         vals.into_iter()

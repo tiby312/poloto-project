@@ -312,7 +312,7 @@ fn trig() -> fmt::Result {
             .buffered_plot()
             .line("tan(x"),
         x.zip_output(|x| (2.0 * x).sin())
-            .rect_bound_plot([0.0, 0.0], [10.0, 10.0])
+            .rect_bound_plot([0.0, 10.0], [0.0, 10.0])
             .line("sin(2x"),
         x.zip_output(|x| 2.0 * x.cos())
             .crop_above(1.4)
@@ -329,7 +329,6 @@ fn no_plots() -> fmt::Result {
     let v: Vec<
         poloto::build::plot_iter_impl::SinglePlot<
             ClonedIter<std::iter::Empty<(i128, i128)>>,
-            std::iter::Empty<(i128, i128)>,
             &'static str,
         >,
     > = vec![];
@@ -350,7 +349,6 @@ fn no_plots_only_marker() -> fmt::Result {
     let v: Vec<
         poloto::build::plot_iter_impl::SinglePlot<
             ClonedIter<std::iter::Empty<(i128, i128)>>,
-            std::iter::Empty<(i128, i128)>,
             &'static str,
         >,
     > = vec![];
