@@ -370,24 +370,11 @@ pub trait Renderable {
 ///
 /// Build a [`RenderOptions`]
 ///
-#[deprecated(note = "Renamed Canvas to RenderOptions. Use render_opt() instead.")]
-pub fn canvas() -> RenderOptions {
-    RenderOptionsBuilder::default().build()
-}
-
-///
-/// Build a [`RenderOptions`]
-///
 pub fn render_opt() -> RenderOptions {
     RenderOptionsBuilder::default().build()
 }
 
 pub fn render_opt_builder() -> RenderOptionsBuilder {
-    RenderOptionsBuilder::default()
-}
-
-#[deprecated(note = "Renamed Canvas to RenderOptions. Use render_opt_builder() instead.")]
-pub fn canvas_builder() -> RenderOptionsBuilder {
     RenderOptionsBuilder::default()
 }
 

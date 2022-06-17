@@ -71,8 +71,6 @@ pub mod prelude {
     pub use super::plots;
     pub use super::quick_fmt;
     pub use super::quick_fmt_opt;
-    #[allow(deprecated)]
-    pub use super::simple_fmt;
 
     pub use super::simple_theme::SimpleTheme;
     pub use super::ticks::TickFormatExt;
@@ -163,48 +161,6 @@ macro_rules! simple_bar {
             opt,
             $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
         )
-    }};
-}
-
-///
-/// Create plots without having to manually create the ticks
-/// for each axis.
-///
-/// ### No canvas argument.
-/// ```
-/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-/// let plotter=poloto::simple_fmt!(poloto::build::line("",data),"title","x","y");
-/// let mut k=String::new();
-/// plotter.render(&mut k);
-/// ```
-///
-/// ### With canvas argument.
-/// ```
-/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-/// let canvas=poloto::render::canvas();
-/// let plotter=poloto::simple_fmt!(canvas,poloto::build::line("",data),"title","x","y");
-/// let mut k=String::new();
-/// plotter.render(&mut k);
-/// ```
-///
-#[deprecated(note = "use quick_fmt() and quick_fmt_opt() instead.")]
-#[macro_export]
-macro_rules! simple_fmt {
-    ($data:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let data = $crate::data($data);
-        let opt = $crate::render::render_opt_builder().build();
-        let (bx, by) = $crate::ticks::bounds(&data, &opt);
-        let xt = $crate::ticks::from_default(bx);
-        let yt = $crate::ticks::from_default(by);
-        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
-    }};
-    ($opt:expr,$data:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        let opt = $opt;
-        let data = $crate::data($data);
-        let (bx, by) = $crate::ticks::bounds(&data, &opt);
-        let xt = $crate::ticks::from_default(bx);
-        let yt = $crate::ticks::from_default(by);
-        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
     }};
 }
 

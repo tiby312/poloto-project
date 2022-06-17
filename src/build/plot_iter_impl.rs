@@ -7,16 +7,16 @@ use super::marker::Markerable;
 /// Represents a single plot.
 ///
 #[derive(Clone)]
-pub struct SinglePlot<X,Y,I:Iterator<Item=(X,Y)>, D: Display> {
+pub struct SinglePlot<X, Y, I: Iterator<Item = (X, Y)>, D: Display> {
     iter: I,
-    area:Area<X,Y>,
+    area: Area<X, Y>,
     name: D,
     typ: PlotMetaType,
     done: bool,
 }
-impl<X,Y,I:Iterator<Item=(X,Y)>, D: Display> SinglePlot<X,Y,I, D> {
+impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> SinglePlot<X, Y, I, D> {
     #[inline(always)]
-    pub(crate) fn new(typ: PlotMetaType, name: D, iter: I,area:Area<X,Y>) -> Self {
+    pub(crate) fn new(typ: PlotMetaType, name: D, iter: I, area: Area<X, Y>) -> Self {
         SinglePlot {
             iter,
             area,
@@ -27,13 +27,15 @@ impl<X,Y,I:Iterator<Item=(X,Y)>, D: Display> SinglePlot<X,Y,I, D> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, I: Iterator<Item=(X, Y)>, D: Display> Markerable<X, Y> for SinglePlot<X,Y,I, D> {
+impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> Markerable<X, Y>
+    for SinglePlot<X, Y, I, D>
+{
     fn increase_area(&mut self, area: &mut Area<X, Y>) {
         area.grow_area(&self.area);
     }
 }
 
-impl<X, Y, I: Iterator<Item=(X, Y)>, D: Display> PlotIterator<X, Y> for SinglePlot<X,Y,I, D> {
+impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> PlotIterator<X, Y> for SinglePlot<X, Y, I, D> {
     #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
         if let Some(a) = self.iter.next() {
