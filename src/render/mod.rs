@@ -276,9 +276,6 @@ impl RenderOptionsBuilder {
 ///
 /// Contains graphical information for a svg graph.
 ///
-/// Built from [`canvas()`]
-///
-///
 #[derive(Clone)]
 pub struct RenderOptions {
     boundx: ticks::RenderOptionsBound,

@@ -102,7 +102,6 @@ where
 ///
 /// Trait to allow a plotnum to have a default tick distribution.
 ///
-/// Used by [`simple_fmt!`]
 ///
 pub trait HasDefaultTicks: PlotNum {
     type Fmt: TickFormat<Num = Self>;
