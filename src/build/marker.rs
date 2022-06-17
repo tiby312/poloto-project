@@ -1,5 +1,7 @@
 use super::*;
 
+
+#[derive(Copy,Clone)]
 pub struct Area<X, Y> {
     x: Option<[X; 2]>,
     y: Option<[Y; 2]>,
@@ -8,6 +10,50 @@ pub struct Area<X, Y> {
 impl<X: PlotNum, Y: PlotNum> Area<X, Y> {
     pub(crate) fn new() -> Area<X, Y> {
         Area { x: None, y: None }
+    }
+
+    pub fn grow_area(&mut self,other:&Area<X,Y>){
+        
+        match (&mut self.x,&other.x){
+            (Some([a_min,a_max]),Some([b_min,b_max]))=>{
+                if *b_max>*a_max{
+                    *a_max=*b_max;
+                }
+                if *b_min<*a_min{
+                    *a_min=*b_min;
+                }
+            },
+            (Some(_),None)=>{
+                //do nothing
+            },
+            (None,Some(a))=>{
+                self.x=Some(*a);
+            },
+            (None,None)=>{
+                //do nothing
+            }
+        }
+
+        match (&mut self.y,&other.y){
+            (Some([a_min,a_max]),Some([b_min,b_max]))=>{
+                if *b_max>*a_max{
+                    *a_max=*b_max;
+                }
+                if *b_min<*a_min{
+                    *a_min=*b_min;
+                }
+            },
+            (Some(_),None)=>{
+                //do nothing
+            },
+            (None,Some(a))=>{
+                self.y=Some(*a);
+            },
+            (None,None)=>{
+                //do nothing
+            }
+        }
+
     }
 
     #[inline(always)]

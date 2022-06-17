@@ -66,7 +66,6 @@ pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::iter::IterBuilder;
     pub use super::build::PlotIteratorExt;
-    pub use super::build::SinglePlotBuilder;
     pub use super::formatm;
     pub use super::output_zip::OutputZip;
     pub use super::plots;

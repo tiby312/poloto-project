@@ -1,4 +1,3 @@
-use poloto::build::iter::ClonedIter;
 
 use super::*;
 
@@ -327,8 +326,8 @@ fn trig() -> fmt::Result {
 #[test]
 fn no_plots() -> fmt::Result {
     let v: Vec<
-        poloto::build::plot_iter_impl::SinglePlot<
-            ClonedIter<std::iter::Empty<(i128, i128)>>,
+        poloto::build::plot_iter_impl::SinglePlot<i128,i128,
+            std::iter::Empty<(i128, i128)>,
             &'static str,
         >,
     > = vec![];
@@ -347,8 +346,8 @@ fn no_plots() -> fmt::Result {
 #[test]
 fn no_plots_only_marker() -> fmt::Result {
     let v: Vec<
-        poloto::build::plot_iter_impl::SinglePlot<
-            ClonedIter<std::iter::Empty<(i128, i128)>>,
+        poloto::build::plot_iter_impl::SinglePlot<i128,i128,
+            std::iter::Empty<(i128, i128)>,
             &'static str,
         >,
     > = vec![];

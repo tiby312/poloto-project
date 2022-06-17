@@ -4,7 +4,6 @@
 //!
 use super::*;
 
-use iter::PlotIter;
 
 pub mod bar;
 pub mod crop;
@@ -152,93 +151,116 @@ pub enum PlotResult<T> {
     Finished,
 }
 
-pub trait SinglePlotBuilder<X, Y, P1> {
-    fn scatter<D: Display>(self, name: D) -> SinglePlot<P1, D>;
-    fn line<D: Display>(self, name: D) -> SinglePlot<P1, D>;
-    fn line_fill<D: Display>(self, name: D) -> SinglePlot<P1, D>;
-    fn line_fill_raw<D: Display>(self, name: D) -> SinglePlot<P1, D>;
-    fn histogram<D: Display>(self, name: D) -> SinglePlot<P1, D>;
+
+
+
+
+pub struct SinglePlotBuilder<X,Y,I:Iterator<Item=(X,Y)>>{
+    area:Area<X,Y>,
+    iter:I
 }
+impl<X:PlotNum,Y:PlotNum> SinglePlotBuilder<X,Y,std::vec::IntoIter<(X,Y)>>{
 
-impl<X: PlotNum, Y: PlotNum, P: PlotIter<X, Y>> SinglePlotBuilder<X, Y, P> for P {
-    fn scatter<D: Display>(self, name: D) -> SinglePlot<P, D> {
-        scatter(name, self)
-    }
-    fn line<D: Display>(self, name: D) -> SinglePlot<P, D> {
-        line(name, self)
-    }
-
-    fn line_fill<D: Display>(self, name: D) -> SinglePlot<P, D> {
-        line_fill(name, self)
-    }
-
-    fn line_fill_raw<D: Display>(self, name: D) -> SinglePlot<P, D> {
-        line_fill_raw(name, self)
-    }
-    fn histogram<D: Display>(self, name: D) -> SinglePlot<P, D> {
-        histogram(name, self)
+    pub fn new_buffered<I:Iterator<Item=(X,Y)>>(iter:I)->Self where X:Clone,Y:Clone{
+        let mut vec = Vec::with_capacity(iter.size_hint().0);
+        let mut area=Area::new();
+        for (x, y) in iter {
+            area.grow(Some(x), Some(y));
+            vec.push((x, y));
+        }
+        SinglePlotBuilder{
+            area,
+            iter:vec.into_iter()
+        }
     }
 }
+impl<X:PlotNum,Y:PlotNum,I:Iterator<Item=(X,Y)>> SinglePlotBuilder<X,Y,I>{
+    pub fn new_cloned(iter:I)->Self where I:Clone{
+        let mut area=Area::new();
+        for (x, y) in iter.clone() {
+            area.grow(Some(x), Some(y));
+        }
+        SinglePlotBuilder{
+            area,
+            iter
+        }
+    }
 
-use build::iter::IterBuilder;
 
-type EmptyIter<X, Y> =
-    build::iter::ClonedIter<build::iter::UnwrapperIter<std::iter::Empty<(X, Y)>>>;
+    pub fn new_rect_bound_plot(x:[X;2],y:[Y;2],iter:I)->Self{
+        let mut area=Area::new();
+        area.grow(Some(x[0]),Some(y[0]));
+        area.grow(Some(x[1]),Some(y[1]));
+        SinglePlotBuilder{
+            area,
+            iter
+        }
+    }
+
+    pub fn new_custom_bound_plot<J: Iterator<Item=(X,Y)>>(
+        bound: J,
+        iter:I,
+    ) -> Self
+    {
+        let mut area=Area::new();
+        for (x, y) in bound {
+            area.grow(Some(x), Some(y));
+        }
+        SinglePlotBuilder{
+            area,
+            iter
+        }
+    }
+
+    /// Create a scatter plot from plots, using a SVG path with lines with zero length.
+    /// Each point can be sized using the stroke width.
+    /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
+    /// with the latter class overriding the former.
+    pub fn scatter<D: Display>(self, name: D) -> SinglePlot<X,Y,I, D>{
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Scatter), name, self.iter,self.area)
+    }
+
+    /// Create a line from plots using a SVG path element.
+    /// The path element belongs to the `.poloto[N]fill` css class.    
+    pub fn line<D: Display>(self, name: D) -> SinglePlot<X,Y,I, D>{
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Line), name, self.iter,self.area)
+    }
+
+    /// Create a line from plots that will be filled underneath using a SVG path element.
+    /// The path element belongs to the `.poloto[N]fill` css class.
+    pub fn line_fill<D: Display>(self, name: D) -> SinglePlot<X,Y,I, D>{
+        SinglePlot::new(PlotMetaType::Plot(PlotType::LineFill), name, self.iter,self.area)
+    }
+
+    /// Create a line from plots that will be filled using a SVG path element.
+    /// The first and last points will be connected and then filled in.
+    /// The path element belongs to the `.poloto[N]fill` css class.
+    pub fn line_fill_raw<D: Display>(self, name: D) -> SinglePlot<X,Y,I, D>{
+        SinglePlot::new(PlotMetaType::Plot(PlotType::LineFillRaw), name, self.iter,self.area)
+    }
+
+    /// Create a histogram from plots using SVG rect elements.
+    /// Each bar's left side will line up with a point.
+    /// Each rect element belongs to the `.poloto[N]fill` css class.
+    pub fn histogram<D: Display>(self, name: D) -> SinglePlot<X,Y,I, D>{
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Histo), name, self.iter,self.area) 
+    }
+
+
+    pub(crate) fn bars<D:Display>(self,name:D)->SinglePlot<X,Y,I,D>{
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), name, self.iter,self.area)
+    }
+    
+}
+
+
 
 ///
 /// Write some text in the legend. This doesnt increment the plot number.
 ///
-pub fn text<X: PlotNum, Y: PlotNum, D: Display>(name: D) -> SinglePlot<EmptyIter<X, Y>, D> {
-    SinglePlot::new(PlotMetaType::Text, name, std::iter::empty().cloned_plot())
-}
-
-/// Create a histogram from plots using SVG rect elements.
-/// Each bar's left side will line up with a point.
-/// Each rect element belongs to the `.poloto[N]fill` css class.
-pub fn histogram<X: PlotNum, Y: PlotNum, I: PlotIter<X, Y>, D: Display>(
-    name: D,
-    it: I,
-) -> SinglePlot<I, D> {
-    SinglePlot::new(PlotMetaType::Plot(PlotType::Histo), name, it)
-}
-
-/// Create a scatter plot from plots, using a SVG path with lines with zero length.
-/// Each point can be sized using the stroke width.
-/// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
-/// with the latter class overriding the former.
-pub fn scatter<X: PlotNum, Y: PlotNum, I: PlotIter<X, Y>, D: Display>(
-    name: D,
-    it: I,
-) -> SinglePlot<I, D> {
-    SinglePlot::new(PlotMetaType::Plot(PlotType::Scatter), name, it)
-}
-
-/// Create a line from plots that will be filled underneath using a SVG path element.
-/// The path element belongs to the `.poloto[N]fill` css class.
-pub fn line_fill<X: PlotNum, Y: PlotNum, I: PlotIter<X, Y>, D: Display>(
-    name: D,
-    it: I,
-) -> SinglePlot<I, D> {
-    SinglePlot::new(PlotMetaType::Plot(PlotType::LineFill), name, it)
-}
-
-/// Create a line from plots that will be filled using a SVG path element.
-/// The first and last points will be connected and then filled in.
-/// The path element belongs to the `.poloto[N]fill` css class.
-pub fn line_fill_raw<X: PlotNum, Y: PlotNum, I: PlotIter<X, Y>, D: Display>(
-    name: D,
-    it: I,
-) -> SinglePlot<I, D> {
-    SinglePlot::new(PlotMetaType::Plot(PlotType::LineFillRaw), name, it)
-}
-
-/// Create a line from plots using a SVG path element.
-/// The path element belongs to the `.poloto[N]fill` css class.    
-pub fn line<X: PlotNum, Y: PlotNum, I: PlotIter<X, Y>, D: Display>(
-    name: D,
-    it: I,
-) -> SinglePlot<I, D> {
-    SinglePlot::new(PlotMetaType::Plot(PlotType::Line), name, it)
+pub fn text<X: PlotNum, Y: PlotNum, D: Display>(name: D) -> SinglePlot<X,Y,std::iter::Empty<(X, Y)>, D> {
+    let f=SinglePlotBuilder::new_cloned(std::iter::empty());
+    SinglePlot::new(PlotMetaType::Text, name,f.iter,f.area )
 }
 
 ///
@@ -316,11 +338,4 @@ impl<'a, X: 'a, Y: 'a> PlotIterator<X, Y> for BoxedPlot<'a, X, Y> {
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         self.inner.as_mut().next_typ()
     }
-}
-
-pub(crate) fn bars<X: PlotNum, Y: PlotNum, I: PlotIter<X, Y>, D: Display>(
-    name: D,
-    it: I,
-) -> SinglePlot<I, D> {
-    SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), name, it)
 }
