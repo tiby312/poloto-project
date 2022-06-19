@@ -215,6 +215,13 @@ where
     }
 }
 
+impl build::unwrapper::IntoPlotnum for &UnixTime {
+    type Into = UnixTime;
+    fn into(self) -> Self::Into {
+        *self
+    }
+}
+
 impl PlotNum for UnixTime {
     #[inline(always)]
     fn is_hole(&self) -> bool {

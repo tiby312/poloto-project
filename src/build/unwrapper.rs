@@ -29,36 +29,29 @@ impl<T: PlotNum> Unwrapper for &[T; 2] {
     }
 }
 
-pub struct RefVal<'a, A, B>(pub &'a A, pub B);
-
-impl<A: PlotNum, B: PlotNum> Unwrapper for RefVal<'_, A, B> {
-    type Item = (A, B);
-    fn unwrap(self) -> (A, B) {
-        let RefVal(a, b) = self;
-        (*a, b)
-    }
+pub trait IntoPlotnum: Copy {
+    type Into: PlotNum;
+    fn into(self) -> Self::Into;
 }
-
-pub struct ValRef<'a, A, B>(pub A, pub &'a B);
-
-impl<A: PlotNum, B: PlotNum> Unwrapper for ValRef<'_, A, B> {
-    type Item = (A, B);
-    fn unwrap(self) -> (A, B) {
-        let ValRef(a, b) = self;
-        (a, *b)
-    }
-}
-
-impl<A: PlotNum, B: PlotNum> Unwrapper for (A, B) {
-    type Item = (A, B);
-    fn unwrap(self) -> (A, B) {
+impl<P: PlotNum> IntoPlotnum for P {
+    type Into = P;
+    fn into(self) -> Self::Into {
         self
     }
 }
 
-impl<A: PlotNum, B: PlotNum> Unwrapper for &(A, B) {
-    type Item = (A, B);
-    fn unwrap(self) -> (A, B) {
-        *self
+impl<A: IntoPlotnum, B: IntoPlotnum> Unwrapper for (A, B) {
+    type Item = (A::Into, B::Into);
+    fn unwrap(self) -> (A::Into, B::Into) {
+        let (a, b) = self;
+        (a.into(), b.into())
+    }
+}
+
+impl<A: IntoPlotnum, B: IntoPlotnum> Unwrapper for &(A, B) {
+    type Item = (A::Into, B::Into);
+    fn unwrap(self) -> (A::Into, B::Into) {
+        let (a, b) = *self;
+        (a.into(), b.into())
     }
 }

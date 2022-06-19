@@ -109,6 +109,13 @@ impl HasDefaultTicks for f64 {
     }
 }
 
+impl build::unwrapper::IntoPlotnum for &f64 {
+    type Into = f64;
+    fn into(self) -> Self::Into {
+        *self
+    }
+}
+
 impl PlotNum for f64 {
     #[inline(always)]
     fn is_hole(&self) -> bool {

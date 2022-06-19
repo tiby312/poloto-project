@@ -108,6 +108,13 @@ impl HasDefaultTicks for i128 {
     }
 }
 
+impl build::unwrapper::IntoPlotnum for &i128 {
+    type Into = i128;
+    fn into(self) -> Self::Into {
+        *self
+    }
+}
+
 impl PlotNum for i128 {
     #[inline(always)]
     fn is_hole(&self) -> bool {
