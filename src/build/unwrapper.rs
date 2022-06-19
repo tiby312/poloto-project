@@ -29,29 +29,29 @@ impl<T: PlotNum> Unwrapper for &[T; 2] {
     }
 }
 
-pub trait IntoPlotnum: Copy {
+pub trait AsPlotnum {
     type Into: PlotNum;
-    fn into(self) -> Self::Into;
+    fn as_plotnum(&self) -> &Self::Into;
 }
-impl<P: PlotNum> IntoPlotnum for P {
+impl<P: PlotNum> AsPlotnum for P {
     type Into = P;
-    fn into(self) -> Self::Into {
+    fn as_plotnum(&self) -> &Self::Into {
         self
     }
 }
 
-impl<A: IntoPlotnum, B: IntoPlotnum> Unwrapper for (A, B) {
+impl<A: AsPlotnum, B: AsPlotnum> Unwrapper for (A, B) {
     type Item = (A::Into, B::Into);
     fn unwrap(self) -> (A::Into, B::Into) {
         let (a, b) = self;
-        (a.into(), b.into())
+        (*a.as_plotnum(), *b.as_plotnum())
     }
 }
 
-impl<A: IntoPlotnum, B: IntoPlotnum> Unwrapper for &(A, B) {
+impl<A: AsPlotnum, B: AsPlotnum> Unwrapper for &(A, B) {
     type Item = (A::Into, B::Into);
     fn unwrap(self) -> (A::Into, B::Into) {
-        let (a, b) = *self;
-        (a.into(), b.into())
+        let (a, b) = self;
+        (*a.as_plotnum(), *b.as_plotnum())
     }
 }
