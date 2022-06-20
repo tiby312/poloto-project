@@ -54,16 +54,16 @@ impl<X: PlotNum, Y: PlotNum> Area<X, Y> {
     }
 
     #[inline(always)]
-    pub fn grow(&mut self, x: Option<X>, y: Option<Y>) {
+    pub fn grow(&mut self, x: Option<&X>, y: Option<&Y>) {
         if let Some(x) = x {
             if !x.is_hole() {
                 match &mut self.x {
-                    None => self.x = Some([x, x]),
+                    None => self.x = Some([*x, *x]),
                     Some([min, max]) => {
-                        if x < *min {
-                            self.x = Some([x, *max]);
-                        } else if x > *max {
-                            self.x = Some([*min, x]);
+                        if *x < *min {
+                            self.x = Some([*x, *max]);
+                        } else if *x > *max {
+                            self.x = Some([*min, *x]);
                         }
                     }
                 }
@@ -73,12 +73,12 @@ impl<X: PlotNum, Y: PlotNum> Area<X, Y> {
         if let Some(y) = y {
             if !y.is_hole() {
                 match &mut self.y {
-                    None => self.y = Some([y, y]),
+                    None => self.y = Some([*y, *y]),
                     Some([min, max]) => {
-                        if y < *min {
-                            self.y = Some([y, *max]);
-                        } else if y > *max {
-                            self.y = Some([*min, y]);
+                        if *y < *min {
+                            self.y = Some([*y, *max]);
+                        } else if *y > *max {
+                            self.y = Some([*min, *y]);
                         }
                     }
                 }

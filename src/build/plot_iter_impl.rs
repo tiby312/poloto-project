@@ -207,10 +207,10 @@ where
 {
     fn increase_area(&mut self, area: &mut Area<XI::Item, YI::Item>) {
         for a in &mut self.x {
-            area.grow(Some(a), None);
+            area.grow(Some(&a), None);
         }
         for a in &mut self.y {
-            area.grow(None, Some(a));
+            area.grow(None, Some(&a));
         }
     }
 }

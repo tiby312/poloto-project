@@ -155,7 +155,7 @@ impl<X: PlotNum, Y: PlotNum> SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
         let mut vec = Vec::with_capacity(iter.size_hint().0);
         let mut area = Area::new();
         for (x, y) in iter {
-            area.grow(Some(x), Some(y));
+            area.grow(Some(&x), Some(&y));
             vec.push((x, y));
         }
         SinglePlotBuilder {
@@ -171,22 +171,22 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
     {
         let mut area = Area::new();
         for (x, y) in iter.clone() {
-            area.grow(Some(x), Some(y));
+            area.grow(Some(&x), Some(&y));
         }
         SinglePlotBuilder { area, iter }
     }
 
     pub fn new_rect_bound_plot(x: [X; 2], y: [Y; 2], iter: I) -> Self {
         let mut area = Area::new();
-        area.grow(Some(x[0]), Some(y[0]));
-        area.grow(Some(x[1]), Some(y[1]));
+        area.grow(Some(&x[0]), Some(&y[0]));
+        area.grow(Some(&x[1]), Some(&y[1]));
         SinglePlotBuilder { area, iter }
     }
 
     pub fn new_custom_bound_plot<J: Iterator<Item = (X, Y)>>(bound: J, iter: I) -> Self {
         let mut area = Area::new();
         for (x, y) in bound {
-            area.grow(Some(x), Some(y));
+            area.grow(Some(&x), Some(&y));
         }
         SinglePlotBuilder { area, iter }
     }
