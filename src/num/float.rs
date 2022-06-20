@@ -109,16 +109,16 @@ impl HasDefaultTicks for f64 {
     }
 }
 
-impl build::unwrapper::AsPlotnum for &f64 {
-    type Into = f64;
-    fn as_plotnum(&self) -> &Self::Into {
+impl plotnum::AsPlotnum for &f64 {
+    type Target = f64;
+    fn as_plotnum(&self) -> &Self::Target {
         self
     }
 }
 
-impl build::unwrapper::AsPlotnum for &mut f64 {
-    type Into = f64;
-    fn as_plotnum(&self) -> &Self::Into {
+impl plotnum::AsPlotnum for &mut f64 {
+    type Target = f64;
+    fn as_plotnum(&self) -> &Self::Target {
         self
     }
 }

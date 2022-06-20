@@ -29,28 +29,18 @@ impl<T: PlotNum> Unwrapper for &[T; 2] {
     }
 }
 
-pub trait AsPlotnum {
-    type Into: PlotNum;
-    fn as_plotnum(&self) -> &Self::Into;
-}
-impl<P: PlotNum> AsPlotnum for P {
-    type Into = P;
-    fn as_plotnum(&self) -> &Self::Into {
-        self
-    }
-}
 
 impl<A: AsPlotnum, B: AsPlotnum> Unwrapper for (A, B) {
-    type Item = (A::Into, B::Into);
-    fn unwrap(self) -> (A::Into, B::Into) {
+    type Item = (A::Target, B::Target);
+    fn unwrap(self) -> (A::Target, B::Target) {
         let (a, b) = self;
         (*a.as_plotnum(), *b.as_plotnum())
     }
 }
 
 impl<A: AsPlotnum, B: AsPlotnum> Unwrapper for &(A, B) {
-    type Item = (A::Into, B::Into);
-    fn unwrap(self) -> (A::Into, B::Into) {
+    type Item = (A::Target, B::Target);
+    fn unwrap(self) -> (A::Target, B::Target) {
         let (a, b) = self;
         (*a.as_plotnum(), *b.as_plotnum())
     }

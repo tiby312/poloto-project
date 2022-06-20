@@ -10,6 +10,18 @@ pub trait DiscNum {
     fn hole() -> Self;
 }
 
+pub trait AsPlotnum {
+    type Target: PlotNum;
+    fn as_plotnum(&self) -> &Self::Target;
+}
+impl<P: PlotNum> AsPlotnum for P {
+    type Target = P;
+    fn as_plotnum(&self) -> &Self::Target {
+        self
+    }
+}
+
+
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.

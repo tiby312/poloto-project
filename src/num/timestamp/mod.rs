@@ -215,16 +215,16 @@ where
     }
 }
 
-impl build::unwrapper::AsPlotnum for &UnixTime {
-    type Into = UnixTime;
-    fn as_plotnum(&self) -> &Self::Into {
+impl plotnum::AsPlotnum for &UnixTime {
+    type Target = UnixTime;
+    fn as_plotnum(&self) -> &Self::Target {
         self
     }
 }
 
-impl build::unwrapper::AsPlotnum for &mut UnixTime {
-    type Into = UnixTime;
-    fn as_plotnum(&self) -> &Self::Into {
+impl plotnum::AsPlotnum for &mut UnixTime {
+    type Target = UnixTime;
+    fn as_plotnum(&self) -> &Self::Target {
         self
     }
 }

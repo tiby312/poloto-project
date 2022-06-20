@@ -108,16 +108,16 @@ impl HasDefaultTicks for i128 {
     }
 }
 
-impl build::unwrapper::AsPlotnum for &i128 {
-    type Into = i128;
-    fn as_plotnum(&self) -> &Self::Into {
+impl plotnum::AsPlotnum for &i128 {
+    type Target = i128;
+    fn as_plotnum(&self) -> &Self::Target {
         self
     }
 }
 
-impl build::unwrapper::AsPlotnum for &mut i128 {
-    type Into = i128;
-    fn as_plotnum(&self) -> &Self::Into {
+impl plotnum::AsPlotnum for &mut i128 {
+    type Target = i128;
+    fn as_plotnum(&self) -> &Self::Target {
         self
     }
 }
