@@ -29,7 +29,6 @@ impl<T: PlotNum> Unwrapper for &[T; 2] {
     }
 }
 
-
 impl<A: AsPlotnum, B: AsPlotnum> Unwrapper for (A, B) {
     type Item = (A::Target, B::Target);
     fn unwrap(self) -> (A::Target, B::Target) {

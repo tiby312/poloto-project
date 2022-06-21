@@ -111,9 +111,31 @@ pub trait Croppable<X: DiscNum, Y: DiscNum>: Sized {
             inner: self,
         }
     }
+
+    fn crop_around_y(self, val: [Y; 2]) -> Crop<X, Y, Crop<X, Y, Self>>;
+
+    fn crop_around_x(self, val: [X; 2]) -> Crop<X, Y, Crop<X, Y, Self>>;
+
+    fn crop_around_area(self, val: [X; 2], val2: [Y; 2]) -> RectCrop<X, Y, Self>;
 }
 
-impl<X: DiscNum, Y: DiscNum, T: Iterator> Croppable<X, Y> for T where
-    T::Item: Unwrapper<Item = (X, Y)>
+type RectCrop<X, Y, I> = Crop<X, Y, Crop<X, Y, Crop<X, Y, Crop<X, Y, I>>>>;
+
+impl<X: DiscNum + PlotNum, Y: DiscNum + PlotNum, I: Iterator> Croppable<X, Y> for I
+where
+    I::Item: Unwrapper<Item = (X, Y)>,
 {
+    fn crop_around_y(self, val: [Y; 2]) -> Crop<X, Y, Crop<X, Y, Self>> {
+        let [a, b] = val;
+        self.crop_below(a).crop_above(b)
+    }
+
+    fn crop_around_x(self, val: [X; 2]) -> Crop<X, Y, Crop<X, Y, Self>> {
+        let [a, b] = val;
+        self.crop_left(a).crop_right(b)
+    }
+
+    fn crop_around_area(self, val: [X; 2], val2: [Y; 2]) -> RectCrop<X, Y, I> {
+        self.crop_around_x(val).crop_around_y(val2)
+    }
 }

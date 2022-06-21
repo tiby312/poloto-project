@@ -309,9 +309,10 @@ fn trig() -> fmt::Result {
             .crop_left(2.0)
             .buffered_plot()
             .line("tan(x"),
+        /*
         x.zip_output(|x| (2.0 * x).sin())
             .rect_bound_plot([0.0, 10.0], [0.0, 10.0])
-            .line("sin(2x"),
+            .line("sin(2x"),*/
         x.zip_output(|x| 2.0 * x.cos())
             .crop_above(1.4)
             .buffered_plot()
@@ -387,7 +388,7 @@ fn one_empty_plot() -> fmt::Result {
 fn test_bounded_cloneable() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let l1 = data.iter().custom_bound_plot(data.iter()).scatter("");
+    let l1 = data.iter().buffered_plot().scatter("");
     let l2 = data.iter().cloned_plot().scatter("");
     let l = plots!(l1, l2);
 

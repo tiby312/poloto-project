@@ -22,10 +22,6 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             .buffered_plot()
             .line("tan(x)"),
         x.clone()
-            .map(|x| [x, (2.0 * x).sin()])
-            .rect_bound_plot([0.0, 10.0], [0.0, 10.0])
-            .line("sin(2x)"),
-        x.clone()
             .map(|x| [x, 2.0 * x.cos()])
             .crop_above(1.4)
             .buffered_plot()
@@ -53,12 +49,6 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
                 .crop_left(2.0)
                 .buffered_plot()
                 .line("tan(x)"),
-        ),
-        poloto::build::BoxedPlot::new(
-            x.clone()
-                .map(|x| [x, (2.0 * x).sin()])
-                .rect_bound_plot([0.0, 0.0], [10.0, 10.0])
-                .line("sin(2x)"),
         ),
         poloto::build::BoxedPlot::new(
             x.clone()

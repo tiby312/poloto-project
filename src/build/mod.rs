@@ -2,6 +2,7 @@
 //! Tools for assembling plots
 //!
 //!
+
 use super::*;
 
 pub mod bar;
@@ -147,11 +148,7 @@ pub struct SinglePlotBuilder<X, Y, I: Iterator<Item = (X, Y)>> {
     iter: I,
 }
 impl<X: PlotNum, Y: PlotNum> SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>> {
-    pub fn new_buffered<I: Iterator<Item = (X, Y)>>(iter: I) -> Self
-    where
-        X: Clone,
-        Y: Clone,
-    {
+    pub fn new_buffered<I: Iterator<Item = (X, Y)>>(iter: I) -> Self {
         let mut vec = Vec::with_capacity(iter.size_hint().0);
         let mut area = Area::new();
         for (x, y) in iter {
@@ -164,6 +161,7 @@ impl<X: PlotNum, Y: PlotNum> SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
         }
     }
 }
+
 impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y, I> {
     pub fn new_cloned(iter: I) -> Self
     where
@@ -176,6 +174,7 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
         SinglePlotBuilder { area, iter }
     }
 
+    /*
     pub fn new_rect_bound_plot(x: [X; 2], y: [Y; 2], iter: I) -> Self {
         let mut area = Area::new();
         area.grow(Some(&x[0]), Some(&y[0]));
@@ -190,6 +189,7 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
         }
         SinglePlotBuilder { area, iter }
     }
+    */
 
     /// Create a scatter plot from plots, using a SVG path with lines with zero length.
     /// Each point can be sized using the stroke width.

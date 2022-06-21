@@ -42,6 +42,7 @@ where
         SinglePlotBuilder::new_buffered(UnwrapperIter(self))
     }
 
+    /*
     fn rect_bound_plot(self, x: [X; 2], y: [Y; 2]) -> SinglePlotBuilder<X, Y, UnwrapperIter<Self>> {
         SinglePlotBuilder::new_rect_bound_plot(x, y, UnwrapperIter(self))
     }
@@ -54,4 +55,5 @@ where
     {
         SinglePlotBuilder::new_custom_bound_plot(UnwrapperIter(bound), UnwrapperIter(self))
     }
+    */
 }

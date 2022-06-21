@@ -21,7 +21,6 @@ impl<P: PlotNum> AsPlotnum for P {
     }
 }
 
-
 ///
 /// A plottable number. In order to be able to plot a number, we need information on how
 /// to display it as well as the interval ticks.
