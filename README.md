@@ -10,7 +10,7 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 ### Usecases
 
-Poloto converts each plot into svg elements like circles. Because of this its not really suitable for plots with many many plots. For those you might want to use a library to lets you plot directly to a png/jpg image instead. You can certainly rasterize the generated svg image, but generating and display the svg wont be all that efficient if there are a ton of plots.
+Poloto converts each plot into svg elements like circles. Because of this its not really suitable for plots with many many plots. For those you might want to use a library to lets you plot directly to a png/jpg image instead. You can certainly rasterize the generated svg image, but generating and displaying the svg wont be all that efficient if there are a ton of plots.
 
 ### cloned_plot() vs buffered_plot()
 
