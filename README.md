@@ -19,9 +19,6 @@ the plots by those min/max bounds. There are two ways to do this. One is to just
 both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
 
 
-See overview at [docs.rs](https://docs.rs/poloto).
-
-
 ## Gaussian Example
 
 ```rust
