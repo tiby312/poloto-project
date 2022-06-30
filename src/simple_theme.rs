@@ -151,7 +151,7 @@ pub fn determine_height_from_width(viewport: [f64; 2], width: f64) -> f64 {
 }
 ///
 /// Generate custom css theme.
-/// 
+///
 pub struct CssStyleConfig {
     font_family: String,
     font_size_small: usize,
@@ -211,7 +211,7 @@ impl CssStyleConfig {
     /// Render the custom theme into a String.
     pub fn css_render(&self) -> String {
         format!(
-        ".poloto{{\
+            ".poloto{{\
         stroke-linecap:round;\
         stroke-linejoin:round;\
         font-family:{};\
@@ -241,27 +241,32 @@ impl CssStyleConfig {
         .poloto4fill{{fill:{};}}\
         .poloto5fill{{fill:{};}}\
         .poloto6fill{{fill:{};}}\
-        .poloto7fill{{fill:{};}}", 
-        self.font_family,
-        self.font_size_small,self.background,self.font_color,self.axis_color,
-        self.font_size_title,
-        self.font_size_axis_labels,
-        self.font_size_axis_labels,
-        self.color0,
-        self.color1,
-        self.color2,
-        self.color3,
-        self.color4,
-        self.color5,
-        self.color6,
-        self.color7,self.color0,
-        self.color1,
-        self.color2,
-        self.color3,
-        self.color4,
-        self.color5,
-        self.color6,
-        self.color7,)
+        .poloto7fill{{fill:{};}}",
+            self.font_family,
+            self.font_size_small,
+            self.background,
+            self.font_color,
+            self.axis_color,
+            self.font_size_title,
+            self.font_size_axis_labels,
+            self.font_size_axis_labels,
+            self.color0,
+            self.color1,
+            self.color2,
+            self.color3,
+            self.color4,
+            self.color5,
+            self.color6,
+            self.color7,
+            self.color0,
+            self.color1,
+            self.color2,
+            self.color3,
+            self.color4,
+            self.color5,
+            self.color6,
+            self.color7,
+        )
     }
     /// Customize the color of the first plot.
     pub fn set_color0(mut self, new_color: &str) -> CssStyleConfig {
@@ -323,5 +328,4 @@ impl CssStyleConfig {
         self.axis_color = axis_color.to_string();
         self
     }
-    
 }

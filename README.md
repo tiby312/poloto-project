@@ -17,7 +17,25 @@ Poloto converts each plot into svg elements like circles. Because of this its no
 poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
 the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
 both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
+poloto forces the user to choose every time which method to use. Some scenarios:
+```rust
+//BAD because the entire vec of data will be duplicated in memory!
+vec_of_data.into_iter().cloned_plot().scatter("")
 
+//GOOD because we are just cloning a iterator over references.
+vec_of_data.iter().cloned_plot().scatter("")
+
+//BAD because expensive_calc() will be called 2000 times instead of just 1000 times.
+(0..1000).zip_output(|x|x.expensive_calc()).cloned_plot().scatter("")
+
+//GOOD because expensive_calc() will be called only 1000 times.
+(0..1000).zip_output(|x|x.expensive_calc()).buffered_plot().scatter("")
+
+//GOOD because multiplying by 2 is fast operation that most likely
+//beats buffering all the plots.
+(0..1000).zip_output(|x|x*2).cloned_plot().scatter("")
+
+```
 
 ## Gaussian Example
 
