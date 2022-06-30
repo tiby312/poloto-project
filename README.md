@@ -25,6 +25,11 @@ vec_of_data.into_iter().cloned_plot().scatter("")
 //GOOD because we are just cloning a iterator over references.
 vec_of_data.iter().cloned_plot().scatter("")
 
+//BAD because more memory is used than necessary. We can just iterate over
+//the existing vec twice returning references instead of collecting the plots into
+//another vec. 
+vec_of_data.into_iter().buffered_plot().scatter("")
+
 //BAD because expensive_calc() will be called 2000 times instead of just 1000 times.
 (0..1000).zip_output(|x|x.expensive_calc()).cloned_plot().scatter("")
 
