@@ -8,7 +8,16 @@ Poloto graphs can be stylized using css either directly in the SVG, or from insi
 
 You can see it in action in this rust book [broccoli-book](https://tiby312.github.io/broccoli_report/)
 
-## Guide
+### Usecases
+
+Poloto converts each plot into svg elements like circles. Because of this its not really suitable for plots with many many plots. For those you might want to use a library to lets you plot directly to a png/jpg image instead. You can certainly rasterize the generated svg image, but generating and display the svg wont be all that efficient if there are a ton of plots.
+
+### cloned_plot() vs buffered_plot()
+
+poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
+the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
+both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
+
 
 See overview at [docs.rs](https://docs.rs/poloto).
 
