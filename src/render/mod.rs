@@ -484,7 +484,7 @@ impl Renderable for RenderOptions {
             })?;
         }
 
-        render::render_plot::render_plot(&mut writer, boundx, boundy, self, plots)?;
+        //render::render_plot::render_plot(&mut writer, boundx, boundy, self, plots)?;
 
         render::render_base::render_base(&mut writer, boundx, boundy, base, self)
     }
