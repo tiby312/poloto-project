@@ -475,16 +475,13 @@ impl Renderable for RenderOptions {
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
     ) -> fmt::Result {
-        //render background
-        {
-            let mut writer = tagger::new(&mut writer);
-            writer.single("circle", |d| {
-                d.attr("r", "1e5")?;
-                d.attr("class", "poloto_background")
-            })?;
-        }
+        let mut writer = hypermelon::ElemWrite::new(writer);
 
-        //render::render_plot::render_plot(&mut writer, boundx, boundy, self, plots)?;
+        writer.render(
+            hbuild::single("circle").with(attrs!(("r", "1s5"), ("class", "poloto_background"))),
+        )?;
+
+        render::render_plot::render_plot(&mut writer, boundx, boundy, self, plots)?;
 
         render::render_base::render_base(&mut writer, boundx, boundy, base, self)
     }

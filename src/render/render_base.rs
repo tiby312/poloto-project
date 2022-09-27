@@ -1,14 +1,12 @@
 use super::*;
 
 pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
-    writer: impl std::fmt::Write,
+    writer: &mut hypermelon::ElemWrite,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt<X = X, Y = Y>,
     canvas: &RenderOptions,
 ) -> std::fmt::Result {
-    let mut writer = tagger::new(writer);
-
     let RenderOptions {
         width,
         height,
@@ -31,38 +29,42 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
 
-    writer
-        .elem("text", |d| {
-            d.attr("class", "poloto_labels poloto_text poloto_title")?;
-            d.attr("x", width / 2.0)?;
-            d.attr("y", padding / 4.0)
-        })?
-        .build(|w| plot_fmt.write_title(&mut w.writer_safe()))?;
+    let text = hbuild::elem("text").with(attrs!(
+        ("class", "poloto_labels poloto_text poloto_title"),
+        ("x", width / 2.0),
+        ("y", padding / 4.0)
+    ));
 
-    writer
-        .elem("text", |d| {
-            d.attr("class", "poloto_labels poloto_text poloto_xname")?;
-            d.attr("x", width / 2.0)?;
-            d.attr("y", height - padding / 8.)
-        })?
-        .build(|w| plot_fmt.write_xname(&mut w.writer_safe()))?;
+    let title = hbuild::from_closure(|w| plot_fmt.write_title(&mut w.writer()));
 
-    writer
-        .elem("text", |d| {
-            d.attr("class", "poloto_labels poloto_text poloto_yname")?;
-            d.attr(
-                "transform",
-                format_args!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
-            )?;
-            d.attr("x", padding / 4.0)?;
-            d.attr("y", height / 2.0)
-        })?
-        .build(|w| plot_fmt.write_yname(&mut w.writer_safe()))?;
+    writer.render(text.append(title))?;
+
+    let text = hbuild::elem("text").with(attrs!(
+        ("class", "poloto_labels poloto_text poloto_xname"),
+        ("x", width / 2.0),
+        ("y", height - padding / 8.)
+    ));
+
+    let xname = hbuild::from_closure(|w| plot_fmt.write_xname(&mut w.writer()));
+
+    writer.render(text.append(xname))?;
+
+    let text = hbuild::elem("text").with(attrs!(
+        ("class", "poloto_labels poloto_text poloto_yname"),
+        (
+            "transform",
+            format_move!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
+        ),
+        ("x", padding / 4.0),
+        ("y", height / 2.0)
+    ));
+
+    let yname = hbuild::from_closure(|w| plot_fmt.write_yname(&mut w.writer()));
+
+    writer.render(text.append(yname))?;
 
     let xdash_size = plot_fmt.xdash_size();
     let ydash_size = plot_fmt.ydash_size();
-
-    use tagger::PathCommand::*;
 
     let mut xticks = std::iter::from_fn(|| plot_fmt.next_xtick())
         .into_iter()
@@ -123,21 +125,19 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let mut index_counter = 0;
 
     {
-        //step num is assured to be atleast 1.
-        writer
-            .elem("text", |d| {
-                d.attr("class", "poloto_tick_labels poloto_text")?;
-                d.attr("dominant-baseline", "middle")?;
-                d.attr("text-anchor", "start")?;
-                d.attr("x", padding)?;
-                d.attr("y", paddingy * 0.7)
-            })?
-            .build(|w| {
-                plot_fmt.write_ywher(
-                    &mut w.writer_safe(),
-                    IndexRequester::new(&mut index_counter),
-                )
-            })?;
+        let text = hbuild::elem("text").with(attrs!(
+            ("class", "poloto_tick_labels poloto_text"),
+            ("dominant-baseline", "middle"),
+            ("text-anchor", "start"),
+            ("x", padding),
+            ("y", paddingy * 0.7)
+        ));
+
+        let ywher = hbuild::from_closure(|w| {
+            plot_fmt.write_ywher(&mut w.writer(), IndexRequester::new(&mut index_counter))
+        });
+
+        writer.render(text.append(ywher))?;
 
         //Draw interval y text
         for val in std::iter::once(first_ticky).chain(yticks) {
@@ -145,144 +145,151 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 - (val.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
                 - paddingy;
 
-            writer.single("line", |d| {
-                d.attr("class", "poloto_axis_lines")?;
-                d.attr("stroke", "black")?;
-                d.attr("x1", xaspect_offset + padding)?;
-                d.attr("x2", xaspect_offset + padding * 0.96)?;
-                d.attr("y1", yaspect_offset + yy)?;
-                d.attr("y2", yaspect_offset + yy)
-            })?;
+            writer.render(hbuild::single("line").with(attrs!(
+                ("class", "poloto_axis_lines"),
+                ("stroke", "black"),
+                ("x1", xaspect_offset + padding),
+                ("x2", xaspect_offset + padding * 0.96),
+                ("y1", yaspect_offset + yy),
+                ("y2", yaspect_offset + yy)
+            )))?;
 
             if canvas.ytick_lines {
-                writer.single("line", |d| {
-                    d.attr("class", "poloto_tick_line")?;
-                    d.attr("stroke", "black")?;
-                    d.attr("x1", xaspect_offset + padding)?;
-                    d.attr("x2", padding + xaspect_offset + distancex_min_to_max)?;
-                    d.attr("y1", yaspect_offset + yy)?;
-                    d.attr("y2", yaspect_offset + yy)
-                })?;
+                writer.render(hbuild::single("line").with(attrs!(
+                    ("class", "poloto_tick_line"),
+                    ("stroke", "black"),
+                    ("x1", xaspect_offset + padding),
+                    ("x2", padding + xaspect_offset + distancex_min_to_max),
+                    ("y1", yaspect_offset + yy),
+                    ("y2", yaspect_offset + yy)
+                )))?;
             }
 
-            writer
-                .elem("text", |d| {
-                    d.attr("class", "poloto_tick_labels poloto_text")?;
-                    d.attr("dominant-baseline", "middle")?;
-                    d.attr("text-anchor", "end")?;
-                    d.attr("x", xaspect_offset + padding - textx_padding)?;
-                    d.attr("y", yaspect_offset + yy)
-                })?
-                .build(|w| plot_fmt.write_ytick(&mut w.writer_safe(), &val))?;
+            let text = hbuild::single("text").with(attrs!(
+                ("class", "poloto_tick_labels poloto_text"),
+                ("dominant-baseline", "middle"),
+                ("text-anchor", "end"),
+                ("x", xaspect_offset + padding - textx_padding),
+                ("y", yaspect_offset + yy)
+            ));
+
+            let ytick = hbuild::from_closure(|w| plot_fmt.write_ytick(&mut w.writer(), &val));
+
+            writer.render(text.append(ytick))?;
         }
     }
 
     {
-        //step num is assured to be atleast 1.
-        writer
-            .elem("text", |d| {
-                d.attr("class", "poloto_tick_labels poloto_text")?;
-                d.attr("dominant-baseline", "middle")?;
-                d.attr("text-anchor", "start")?;
-                d.attr("x", width * 0.55)?;
-                d.attr("y", paddingy * 0.7)
-            })?
-            .build(|d| {
-                plot_fmt.write_xwher(
-                    &mut d.writer_safe(),
-                    IndexRequester::new(&mut index_counter),
-                )
-            })?;
+        let text = hbuild::elem("text").with(attrs!(
+            ("class", "poloto_tick_labels poloto_text"),
+            ("dominant-baseline", "middle"),
+            ("text-anchor", "start"),
+            ("x", width * 0.55),
+            ("y", paddingy * 0.7)
+        ));
+
+        let xwher = hbuild::from_closure(|w| {
+            plot_fmt.write_xwher(&mut w.writer(), IndexRequester::new(&mut index_counter))
+        });
+
+        writer.render(text.append(xwher))?;
 
         //Draw interva`l x text
         for val in std::iter::once(first_tickx).chain(xticks) {
             let xx = (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
 
-            writer.single("line", |d| {
-                d.attr("class", "poloto_axis_lines")?;
-                d.attr("stroke", "black")?;
-                d.attr("x1", xaspect_offset + xx)?;
-                d.attr("x2", xaspect_offset + xx)?;
-                d.attr("y1", yaspect_offset + height - paddingy)?;
-                d.attr("y2", yaspect_offset + height - paddingy * 0.95)
-            })?;
+            writer.render(hbuild::single("line").with(attrs!(
+                ("class", "poloto_axis_lines"),
+                ("stroke", "black"),
+                ("x1", xaspect_offset + xx),
+                ("x2", xaspect_offset + xx),
+                ("y1", yaspect_offset + height - paddingy),
+                ("y2", yaspect_offset + height - paddingy * 0.95)
+            )))?;
 
             if canvas.xtick_lines {
-                writer.single("line", |d| {
-                    d.attr("class", "poloto_tick_line")?;
-                    d.attr("stroke", "black")?;
-                    d.attr("x1", xaspect_offset + xx)?;
-                    d.attr("x2", xaspect_offset + xx)?;
-                    d.attr("y1", yaspect_offset + height - paddingy)?;
-                    d.attr(
+                writer.render(hbuild::single("line").with(attrs!(
+                    ("class", "poloto_tick_line"),
+                    ("stroke", "black"),
+                    ("x1", xaspect_offset + xx),
+                    ("x2", xaspect_offset + xx),
+                    ("y1", yaspect_offset + height - paddingy),
+                    (
                         "y2",
                         yaspect_offset + height - paddingy - distancey_min_to_max,
                     )
-                })?;
+                )))?;
             }
 
-            writer
-                .elem("text", |d| {
-                    d.attr("class", "poloto_tick_labels poloto_text")?;
-                    d.attr("dominant-baseline", "start")?;
-                    d.attr("text-anchor", "middle")?;
-                    d.attr("x", xaspect_offset + xx)?;
-                    d.attr("y", yaspect_offset + height - paddingy + texty_padding)
-                })?
-                .build(|w| plot_fmt.write_xtick(&mut w.writer_safe(), &val))?;
+            let text = hbuild::elem("text").with(attrs!(
+                ("class", "poloto_tick_labels poloto_text"),
+                ("dominant-baseline", "start"),
+                ("text-anchor", "middle"),
+                ("x", xaspect_offset + xx),
+                ("y", yaspect_offset + height - paddingy + texty_padding)
+            ));
+
+            let xtick = hbuild::from_closure(|w| plot_fmt.write_xtick(&mut w.writer(), &val));
+
+            writer.render(text.append(xtick))?;
         }
     }
-    writer.single("path", |d| {
-        d.attr("stroke", "black")?;
-        d.attr("fill", "none")?;
-        d.attr("class", "poloto_axis_lines")?;
+
+    let xclosure = hbuild::attr_from_closure(|w| {
         if let Some(xdash_size) = xdash_size {
-            d.attr(
+            w.render((
                 "style",
-                format_args!(
+                format_move!(
                     "stroke-dasharray:{};stroke-dashoffset:{};",
                     xdash_size / 2.0,
                     -distance_to_firstx
                 ),
-            )?;
-        }
-        d.path(|p| {
-            p.put(M(
-                padding + xaspect_offset,
-                height - paddingy + yaspect_offset,
             ))?;
-            p.put(L(
+        }
+        Ok(())
+    });
+
+    use hbuild::PathCommand::*;
+    writer.render(hbuild::single("path").with(attrs!(
+        ("stroke", "black"),
+        ("fill", "none"),
+        ("class", "poloto_axis_lines"),
+        xclosure,
+        hbuild::path([
+            M(padding + xaspect_offset, height - paddingy + yaspect_offset,),
+            L(
                 padding + xaspect_offset + distancex_min_to_max,
                 height - paddingy + yaspect_offset,
-            ))
-        })
-    })?;
+            )
+        ])
+    )))?;
 
-    writer.single("path", |d| {
-        d.attr("stroke", "black")?;
-        d.attr("fill", "none")?;
-        d.attr("class", "poloto_axis_lines")?;
+    let yclosure = hbuild::attr_from_closure(|w| {
         if let Some(ydash_size) = ydash_size {
-            d.attr(
+            w.render((
                 "style",
-                format_args!(
+                format_move!(
                     "stroke-dasharray:{};stroke-dashoffset:{};",
                     ydash_size / 2.0,
                     -distance_to_firsty
                 ),
-            )?;
-        }
-        d.path(|p| {
-            p.put(M(
-                xaspect_offset + padding,
-                yaspect_offset + height - paddingy,
             ))?;
-            p.put(L(
+        }
+        Ok(())
+    });
+    writer.render(hbuild::single("path").with(attrs!(
+        ("stroke", "black"),
+        ("fill", "none"),
+        ("class", "poloto_axis_lines"),
+        yclosure,
+        hbuild::path([
+            M(xaspect_offset + padding, yaspect_offset + height - paddingy,),
+            L(
                 xaspect_offset + padding,
                 yaspect_offset + height - paddingy - distancey_min_to_max,
-            ))
-        })
-    })?;
+            )
+        ])
+    )))?;
 
     Ok(())
 }
