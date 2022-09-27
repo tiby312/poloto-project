@@ -59,6 +59,9 @@ use plotnum::*;
 pub mod num;
 pub mod simple_theme;
 
+use hypermelon::build as hbuild;
+use hypermelon::prelude::*;
+
 ///
 /// The poloto prelude.
 ///

@@ -11,6 +11,7 @@ trait NumFmt {
     fn fmt(&self, a: f64) -> Self::K;
 }
 
+#[deprecated]
 struct MyPathBuilder<'a, 'b, T: fmt::Write, K> {
     num_fmt: K,
     path: &'a mut tagger::PathBuilder<'b, T>,
@@ -27,6 +28,7 @@ impl<T: fmt::Write, K: NumFmt> MyPathBuilder<'_, '_, T, K> {
     }
 }
 
+#[deprecated]
 fn line_fill<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,
@@ -80,6 +82,143 @@ fn line_fill<T: std::fmt::Write>(
     Ok(())
 }
 
+//TODO use
+#[derive(Copy, Clone)]
+pub struct FloatFmt {
+    precision: usize,
+}
+impl FloatFmt {
+    pub fn new(precision: usize) -> Self {
+        FloatFmt { precision }
+    }
+    pub fn disp(&self, num: f64) -> impl Display {
+        let precision = self.precision;
+        disp_const(move |f| write!(f, "{:.*}", precision, num))
+    }
+}
+
+pub struct LineFill<I> {
+    it: I,
+    fmt: FloatFmt,
+    base_line: f64,
+    add_start_end_base: bool,
+}
+impl<I: Iterator<Item = [f64; 2]>> LineFill<I> {
+    pub fn new(it: I, fmt: FloatFmt, base_line: f64, add_start_end_base: bool) -> Self {
+        LineFill {
+            it,
+            fmt,
+            base_line,
+            add_start_end_base,
+        }
+    }
+}
+impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for LineFill<I> {
+    fn render(self, w: &mut hypermelon::AttrWrite) -> fmt::Result {
+        let LineFill {
+            mut it,
+            fmt,
+            base_line,
+            add_start_end_base,
+        } = self;
+
+        w.render(hypermelon::build::sink::path_ext(|w| {
+            let mut w = w.start();
+
+            if let Some([startx, starty]) = it.next() {
+                use hypermelon::build::PathCommand::*;
+
+                let mut last = [startx, starty];
+                let mut last_finite = None;
+                let mut first = true;
+                for [newx, newy] in it {
+                    match (
+                        newx.is_finite() && newy.is_finite(),
+                        last[0].is_finite() && last[1].is_finite(),
+                    ) {
+                        (true, true) => {
+                            if first {
+                                if add_start_end_base {
+                                    w.put(M(fmt.disp(last[0]), fmt.disp(base_line)))?;
+                                    w.put(L(fmt.disp(last[0]), fmt.disp(last[1])))?;
+                                } else {
+                                    w.put(M(fmt.disp(last[0]), fmt.disp(last[1])))?;
+                                }
+                                first = false;
+                            }
+                            last_finite = Some([newx, newy]);
+                            w.put(L(fmt.disp(newx), fmt.disp(newy)))?;
+                        }
+                        (true, false) => {
+                            w.put(M(fmt.disp(newx), fmt.disp(newy)))?;
+                        }
+                        (false, true) => {
+                            w.put(L(fmt.disp(last[0]), fmt.disp(base_line)))?;
+                        }
+                        _ => {}
+                    };
+                    last = [newx, newy];
+                }
+                if let Some([x, _]) = last_finite {
+                    if add_start_end_base {
+                        w.put(L(fmt.disp(x), fmt.disp(base_line)))?;
+                    }
+                    w.put(Z())?;
+                }
+            }
+
+            Ok(())
+        }))
+    }
+}
+
+pub struct Line<I> {
+    it: I,
+    fmt: FloatFmt,
+}
+impl<I: Iterator<Item = [f64; 2]>> Line<I> {
+    pub fn new(it: I, fmt: FloatFmt) -> Self {
+        Line { it, fmt }
+    }
+}
+impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for Line<I> {
+    fn render(self, w: &mut hypermelon::AttrWrite) -> fmt::Result {
+        let Line { mut it, fmt } = self;
+
+        w.render(hypermelon::build::sink::path_ext(|w| {
+            let mut w = w.start();
+
+            if let Some([startx, starty]) = it.next() {
+                use hypermelon::build::PathCommand::*;
+
+                let mut last = [startx, starty];
+                let mut first = true;
+                for [newx, newy] in it {
+                    match (
+                        newx.is_finite() && newy.is_finite(),
+                        last[0].is_finite() && last[1].is_finite(),
+                    ) {
+                        (true, true) => {
+                            if first {
+                                w.put(M(fmt.disp(last[0]), fmt.disp(last[1])))?;
+                                first = false;
+                            }
+                            w.put(L(fmt.disp(newx), fmt.disp(newy)))?;
+                        }
+                        (true, false) => {
+                            w.put(M(fmt.disp(newx), fmt.disp(newy)))?;
+                        }
+                        _ => {}
+                    };
+                    last = [newx, newy];
+                }
+            }
+            Ok(())
+        }))
+    }
+}
+
+#[deprecated]
 fn line<T: std::fmt::Write>(
     path: &mut tagger::PathBuilder<T>,
     mut it: impl Iterator<Item = [f64; 2]>,

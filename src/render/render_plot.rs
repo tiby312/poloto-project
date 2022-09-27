@@ -103,19 +103,19 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
                 let it: &mut dyn Iterator<Item = [f64; 2]> = &mut it;
 
                 let precision = canvas.precision;
-                render(
-                    &mut writer,
-                    it,
-                    PlotRenderInfo {
-                        canvas,
-                        p_type,
-                        name_exists,
-                        colori,
-                        legendy1,
-                        precision,
-                        bar_width: canvas.bar_width,
-                    },
-                )?;
+                // render(
+                //     &mut writer,
+                //     it,
+                //     PlotRenderInfo {
+                //         canvas,
+                //         p_type,
+                //         name_exists,
+                //         colori,
+                //         legendy1,
+                //         precision,
+                //         bar_width: canvas.bar_width,
+                //     },
+                // )?;
             }
         }
     }
@@ -157,8 +157,8 @@ struct PlotRenderInfo<'a> {
     bar_width: f64,
 }
 
-fn render<W: fmt::Write>(
-    writer: &mut tagger::ElemWriter<W>,
+fn render(
+    writer: &mut hypermelon::ElemWriter,
     it: impl Iterator<Item = [f64; 2]>,
     info: PlotRenderInfo,
 ) -> fmt::Result {
@@ -180,194 +180,204 @@ fn render<W: fmt::Write>(
         ..
     } = *canvas;
 
+    let ffmt = FloatFmt::new(precision);
     let num_fmt = Roundf64 { precision };
 
     match p_type {
         PlotType::Line => {
             if name_exists {
-                writer.single("line", |d| {
-                    d.attr(
+                hbuild::single("line").with(attrs!(
+                    (
                         "class",
-                        format_args!(
+                        format_move!(
                             "poloto_line poloto_legend_icon poloto{}stroke poloto{}legend",
-                            colori, colori
-                        ),
-                    )?;
-                    d.attr("stroke", "black")?;
-                    d.attr("x1", legendx1)?;
-                    d.attr("x2", legendx1 + padding / 3.0)?;
-                    d.attr("y1", legendy1)?;
-                    d.attr("y2", legendy1)
-                })?;
+                            colori,
+                            colori
+                        )
+                    ),
+                    ("stroke", "black"),
+                    ("x1", legendx1),
+                    ("x2", legendx1 + padding / 3.0),
+                    ("y1", legendy1),
+                    ("y2", legendy1)
+                )).render(writer)?;
             }
 
-            writer.single("path", |d| {
-                d.attr("class", format_args!("poloto_line poloto{}stroke", colori))?;
-                d.attr("fill", "none")?;
-                d.attr("stroke", "black")?;
-                d.path(|a| render::line(a, it, num_fmt))
-            })?;
+            hbuild::single("path").with(attrs!(
+                ("class", format_move!("poloto_line poloto{}stroke", colori)),
+                ("fill", "none"),
+                ("stroke", "black"),
+                Line::new(it, ffmt)
+            )).render(writer)?;
         }
         PlotType::Scatter => {
             if name_exists {
-                writer.single("line", |d| {
-                    d.attr(
+                hbuild::single("line").with(attrs!(
+                    (
                         "class",
-                        format_args!(
+                        format_move!(
                             "poloto_scatter poloto_legend_icon poloto{}stroke poloto{}legend",
                             colori, colori
                         ),
-                    )?;
-                    d.attr("stroke", "black")?;
-                    d.attr("x1", legendx1 + padding / 30.0)?;
-                    d.attr("x2", legendx1 + padding / 30.0)?;
-                    d.attr("y1", legendy1)?;
-                    d.attr("y2", legendy1)
-                })?;
+                    ),
+                    ("stroke", "black"),
+                    ("x1", legendx1 + padding / 30.0),
+                    ("x2", legendx1 + padding / 30.0),
+                    ("y1", legendy1),
+                    ("y2", legendy1)
+                )).render(writer)?;
             }
 
-            writer.single("path", |d| {
-                d.attr(
+            hbuild::single("path").with(attrs!(
+                (
                     "class",
-                    format_args!("poloto_scatter poloto{}stroke", colori),
-                )?;
-                d.path(|a| {
-                    use tagger::PathCommand::*;
+                    format_move!("poloto_scatter poloto{}stroke", colori),
+                ),
+                hbuild::sink::path_ext(|w| {
+                    w = w.start();
+                    use hypermelon::PathCommand::*;
                     for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                        a.put(M(num_fmt.fmt(x), num_fmt.fmt(y)))?;
+                        a.put(M(ffmt.disp(x), ffmt.disp(y)))?;
                         a.put(H_(0))?;
                     }
                     Ok(())
                 })
-            })?;
+            )).render(writer)?;
         }
         PlotType::Histo => {
             if name_exists {
-                writer.single("rect", |d| {
-                    d.attr(
+                hbuild::single("rect").with(attrs!(
+                    (
                         "class",
                         format_args!(
                             "poloto_histo poloto_legend_icon poloto{}fill poloto{}legend",
                             colori, colori
                         ),
-                    )?;
-                    d.attr("x", legendx1)?;
-                    d.attr("y", legendy1 - padding / 30.0)?;
-                    d.attr("width", padding / 3.0)?;
-                    d.attr("height", padding / 20.0)?;
-                    d.attr("rx", padding / 30.0)?;
-                    d.attr("ry", padding / 30.0)
-                })?;
+                    ),
+                    ("x", legendx1),
+                    ("y", legendy1 - padding / 30.0),
+                    ("width", padding / 3.0),
+                    ("height", padding / 20.0),
+                    ("rx", padding / 30.0),
+                    ("ry", padding / 30.0)
+                )).render(writer)?;
             }
 
-            writer
-                .elem("g", |d| {
-                    d.attr("class", format_args!("poloto_histo poloto{}fill", colori))
-                })?
-                .build(|writer| {
-                    let mut last = None;
-                    for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                        if let Some((lx, ly)) = last {
-                            writer.single("rect", |d| {
-                                d.attr("x", num_fmt.fmt(lx))?;
-                                d.attr("y", num_fmt.fmt(ly))?;
-                                d.attr("width", (padding * 0.02).max((x - lx) - (padding * 0.02)))?;
-                                d.attr("height", height - paddingy - ly)
-                            })?;
-                        }
-                        last = Some((x, y))
+            
+            let g=hbuild::elem("g").with(("class", format_args!("poloto_histo poloto{}fill", colori)));
+
+            let h=hbuild::from_closure(|w|{
+                let mut last = None;
+                for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
+                    if let Some((lx, ly)) = last {
+                        let rect=hbuild::single("rect").with(attrs!(
+                            ("x", num_fmt.fmt(lx)),
+                            ("y", num_fmt.fmt(ly)),
+                            ("width", (padding * 0.02).max((x - lx) - (padding * 0.02))),
+                            ("height", height - paddingy - ly)
+                        ));
+                        w.render(rect)?;
                     }
-                    Ok(())
-                })?;
+                    last = Some((x, y))
+                }
+                Ok(())
+            });
+
+            g.append(h).render(writer)?;
         }
         PlotType::LineFill => {
             if name_exists {
-                writer.single("rect", |d| {
-                    d.attr(
+                hbuild::single("rect").with(attrs!(
+                    (
                         "class",
                         format_args!(
                             "poloto_linefill poloto_legend_icon poloto{}fill poloto{}legend",
                             colori, colori
                         ),
-                    )?;
-                    d.attr("x", legendx1)?;
-                    d.attr("y", legendy1 - padding / 30.0)?;
-                    d.attr("width", padding / 3.0)?;
-                    d.attr("height", padding / 20.0)?;
-                    d.attr("rx", padding / 30.0)?;
-                    d.attr("ry", padding / 30.0)
-                })?;
+                    ),
+                    ("x", legendx1),
+                    ("y", legendy1 - padding / 30.0),
+                    ("width", padding / 3.0),
+                    ("height", padding / 20.0),
+                    ("rx", padding / 30.0),
+                    ("ry", padding / 30.0)
+                )).render(writer)?;
             }
 
-            writer.single("path", |d| {
-                d.attr(
+            hbuild::single("path").with(attrs!(
+                (
                     "class",
                     format_args!("poloto_linefill poloto{}fill", colori),
-                )?;
-                d.path(|path| render::line_fill(path, it, height - paddingy, true, num_fmt))
-            })?;
+                ),
+                LineFill::new(path,it,height-paddingy,true,ffmt)
+            )).render(writer)?;
         }
         PlotType::LineFillRaw => {
             if name_exists {
-                writer.single("rect", |d| {
-                    d.attr(
+                hbuild::single("rect").with(attrs!(
+                    (
                         "class",
                         format_args!(
                             "poloto_linefillraw poloto_legend_icon poloto{}fill poloto{}legend",
                             colori, colori
                         ),
-                    )?;
-                    d.attr("x", legendx1)?;
-                    d.attr("y", legendy1 - padding / 30.0)?;
-                    d.attr("width", padding / 3.0)?;
-                    d.attr("height", padding / 20.0)?;
-                    d.attr("rx", padding / 30.0)?;
-                    d.attr("ry", padding / 30.0)
-                })?;
+                    ),
+                    ("x", legendx1),
+                    ("y", legendy1 - padding / 30.0),
+                    ("width", padding / 3.0),
+                    ("height", padding / 20.0),
+                    ("rx", padding / 30.0),
+                    ("ry", padding / 30.0)
+                )).render(writer)?;
             }
 
-            writer.single("path", |d| {
-                d.attr(
+            hbuild::single("path").with(attrs!(
+                (
                     "class",
-                    format_args!("poloto_linefillraw poloto{}fill", colori),
-                )?;
-                d.path(|path| render::line_fill(path, it, height - paddingy, false, num_fmt))
-            })?;
+                    format_args!("poloto_linefill poloto{}fill", colori),
+                ),
+                LineFill::new(path,it,height-paddingy,false,ffmt)
+            )).render(writer)?;
         }
         PlotType::Bars => {
             if name_exists {
-                writer.single("rect", |d| {
-                    d.attr(
+                let rect=hbuild::single("rect").with(attrs!(
+                    (
                         "class",
                         format_args!(
                             "poloto_histo poloto_legend_icon poloto{}fill poloto{}legend",
                             colori, colori
                         ),
-                    )?;
-                    d.attr("x", legendx1)?;
-                    d.attr("y", legendy1 - padding / 30.0)?;
-                    d.attr("width", padding / 3.0)?;
-                    d.attr("height", padding / 20.0)?;
-                    d.attr("rx", padding / 30.0)?;
-                    d.attr("ry", padding / 30.0)
-                })?;
+                    ),
+                    ("x", legendx1),
+                    ("y", legendy1 - padding / 30.0),
+                    ("width", padding / 3.0),
+                    ("height", padding / 20.0),
+                    ("rx", padding / 30.0),
+                    ("ry", padding / 30.0)
+                ));
+
+                writer.render(rect)?;
             }
 
-            writer
-                .elem("g", |d| {
-                    d.attr("class", format_args!("poloto_histo poloto{}fill", colori))
-                })?
-                .build(|writer| {
-                    for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                        writer.single("rect", |d| {
-                            d.attr("x", num_fmt.fmt(padding))?;
-                            d.attr("y", num_fmt.fmt(y - bar_width / 2.0))?;
-                            d.attr("width", x - padding)?;
-                            d.attr("height", bar_width)
-                        })?;
-                    }
-                    Ok(())
-                })?;
+            let g=hbuild::elem("g").with(("class", format_args!("poloto_histo poloto{}fill", colori)));
+
+            let h=hbuild::from_closure(|w|{
+                for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
+                    let rect=hbuild::single("rect").with(attrs!(
+                        ("x", num_fmt.fmt(padding)),
+                        ("y", num_fmt.fmt(y - bar_width / 2.0)),
+                        ("width", x - padding),
+                        ("height", bar_width)
+                    ));
+
+                    w.render(rect)?;
+                }
+                Ok(())
+            });
+
+            writer.render(g.append(h))?;
+
         }
     }
     Ok(())
