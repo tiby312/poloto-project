@@ -38,15 +38,17 @@ fn main() {
         poloto::build::origin()
     );
 
-    use poloto::simple_theme;
-    let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
+    use hypermelon::prelude::*;
+    let res = poloto::simple_theme::DefaultHeader::new()
+        .with_viewbox([1300.0, 600.0])
+        .with_dim_width(800.0)
+        .append(poloto::simple_theme::simple_theme_dark())
+        .append(
+            hypermelon::build::elem("style").append(hypermelon::build::raw(
+                ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
+            )),
+        )
+        .append(plotter);
 
-    print!(
-        "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a, [simple_theme::DIM[0], hh], dim)),
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    hypermelon::render(res, hypermelon::stdout_fmt()).unwrap();
 }

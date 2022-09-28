@@ -129,6 +129,14 @@ impl DefaultHeader {
             viewbox: viewbox,
         }
     }
+    pub fn with_dim_width(self, width: f64) -> Self {
+        let hh = simple_theme::determine_height_from_width(self.viewbox, width);
+
+        DefaultHeader {
+            dim: [width, hh],
+            viewbox: self.viewbox,
+        }
+    }
 }
 
 impl RenderElem for DefaultHeader {
