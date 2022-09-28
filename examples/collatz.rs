@@ -39,16 +39,16 @@ fn main() {
     );
 
     use hypermelon::prelude::*;
-    let res = poloto::simple_theme::DefaultHeader::new()
+    let header = poloto::simple_theme::DefaultHeader::new()
         .with_viewbox(dim)
-        .with_dim_width(800.0)
-        .append(poloto::simple_theme::simple_theme_dark())
-        .append(
-            hypermelon::build::elem("style").append(hypermelon::build::raw(
-                ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
-            )),
-        )
-        .append(plotter);
+        .with_dim_width(800.0);
+
+    let style =
+        poloto::simple_theme::simple_theme_dark().append(hypermelon::build::elem("style").append(
+            hypermelon::build::raw(".poloto_line{stroke-dasharray:2;stroke-width:2;}"),
+        ));
+
+    let res = header.append(style).append(plotter);
 
     hypermelon::render(res, hypermelon::stdout_fmt()).unwrap();
 }
