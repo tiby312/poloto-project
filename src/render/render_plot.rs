@@ -101,19 +101,19 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
                 let it: &mut dyn Iterator<Item = [f64; 2]> = &mut it;
 
                 let precision = canvas.precision;
-                // render(
-                //     &mut writer,
-                //     it,
-                //     PlotRenderInfo {
-                //         canvas,
-                //         p_type,
-                //         name_exists,
-                //         colori,
-                //         legendy1,
-                //         precision,
-                //         bar_width: canvas.bar_width,
-                //     },
-                // )?;
+                render(
+                    writer,
+                    it,
+                    PlotRenderInfo {
+                        canvas,
+                        p_type,
+                        name_exists,
+                        colori,
+                        legendy1,
+                        precision,
+                        bar_width: canvas.bar_width,
+                    },
+                )?;
             }
         }
     }
@@ -121,29 +121,7 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     Ok(())
 }
 
-struct Hay {
-    num: f64,
-    precision: usize,
-}
-impl Display for Hay {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:.*}", self.precision, self.num)
-    }
-}
 
-struct Roundf64 {
-    precision: usize,
-}
-
-impl NumFmt for Roundf64 {
-    type K = Hay;
-    fn fmt(&self, num: f64) -> Self::K {
-        Hay {
-            num,
-            precision: self.precision,
-        }
-    }
-}
 
 struct PlotRenderInfo<'a> {
     canvas: &'a RenderOptions,

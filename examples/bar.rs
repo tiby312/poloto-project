@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 fn main() {
     let data = [
         (20, "potato"),
@@ -15,5 +14,5 @@ fn main() {
         "Foods"
     );
 
-    print!("{}", poloto::disp(|w| plt.simple_theme(w)));
+    poloto::simple_stdout(plt)
 }

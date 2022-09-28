@@ -4,6 +4,7 @@
 //!
 use super::*;
 
+
 ///
 /// Default SVG Header for a Poloto graph.
 ///
@@ -104,43 +105,67 @@ pub fn write_header<T: std::fmt::Write>(
     )
 }
 
-///
-/// Create a simple theme.
-///
-pub trait SimpleTheme {
-    fn simple_theme<T: fmt::Write>(self, a: T) -> std::fmt::Result;
-    fn simple_theme_dark<T: fmt::Write>(self, a: T) -> std::fmt::Result;
+pub fn default_svg() -> impl RenderElem {
+    default_svg_ext([800., 500.], [800., 500.])
 }
 
-impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> SimpleTheme
-    for Plotter<P, K, B>
-{
-    fn simple_theme<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
-        let dim = self.get_dim();
-
-        write!(
-            a,
-            "{}<style>{}</style>{}{}",
-            disp_const(|w| write_header(w, dim, dim)),
-            STYLE_CONFIG_LIGHT_DEFAULT,
-            disp(|a| self.render(a)),
-            SVG_END
-        )
-    }
-
-    fn simple_theme_dark<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
-        let dim = self.get_dim();
-
-        write!(
-            a,
-            "{}<style>{}</style>{}{}",
-            disp_const(|w| write_header(w, dim, dim)),
-            STYLE_CONFIG_DARK_DEFAULT,
-            disp(|a| self.render(a)),
-            SVG_END
-        )
-    }
+pub fn default_svg_ext(dim: [f64; 2], viewbox: [f64; 2]) -> impl RenderElem {
+    hypermelon::build::elem("svg").with(attrs!(
+        ("class", "poloto"),
+        ("width", dim[0]),
+        ("height", dim[1]),
+        (
+            "viewBox",
+            format_move!("{} {} {} {}", 0, 0, viewbox[0], viewbox[1])
+        ),
+        ("xmlns", "http://www.w3.org/2000/svg")
+    ))
 }
+
+pub fn simple_theme() -> impl RenderElem {
+    hypermelon::build::elem("style").append(hypermelon::build::raw(STYLE_CONFIG_LIGHT_DEFAULT))
+}
+pub fn simple_theme_dark() -> impl RenderElem {
+    hypermelon::build::elem("style").append(hypermelon::build::raw(STYLE_CONFIG_DARK_DEFAULT))
+}
+
+// ///
+// /// Create a simple theme.
+// ///
+// pub trait SimpleTheme {
+//     fn simple_theme<T: fmt::Write>(self, a: T) -> std::fmt::Result;
+//     fn simple_theme_dark<T: fmt::Write>(self, a: T) -> std::fmt::Result;
+// }
+
+// impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> SimpleTheme
+//     for Plotter<P, K, B>
+// {
+//     fn simple_theme<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
+//         let dim = self.get_dim();
+
+//         write!(
+//             a,
+//             "{}<style>{}</style>{}{}",
+//             disp_const(|w| write_header(w, dim, dim)),
+//             STYLE_CONFIG_LIGHT_DEFAULT,
+//             disp(|a| self.render(a)),
+//             SVG_END
+//         )
+//     }
+
+//     fn simple_theme_dark<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
+//         let dim = self.get_dim();
+
+//         write!(
+//             a,
+//             "{}<style>{}</style>{}{}",
+//             disp_const(|w| write_header(w, dim, dim)),
+//             STYLE_CONFIG_DARK_DEFAULT,
+//             disp(|a| self.render(a)),
+//             SVG_END
+//         )
+//     }
+// }
 
 ///
 /// Based on a svg viewport and a desired width, determine the height.

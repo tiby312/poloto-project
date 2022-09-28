@@ -40,5 +40,5 @@ fn main() {
         data.iter().cloned_plot().line("")
     );
 
-    print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
+    poloto::simple_stdout(plotter)
 }

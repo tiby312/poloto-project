@@ -6,83 +6,7 @@ use crate::*;
 mod render_base;
 mod render_plot;
 
-trait NumFmt {
-    type K: Display;
-    fn fmt(&self, a: f64) -> Self::K;
-}
 
-#[deprecated]
-struct MyPathBuilder<'a, 'b, T: fmt::Write, K> {
-    num_fmt: K,
-    path: &'a mut tagger::PathBuilder<'b, T>,
-}
-impl<T: fmt::Write, K: NumFmt> MyPathBuilder<'_, '_, T, K> {
-    #[inline(always)]
-    pub fn put(&mut self, a: tagger::PathCommand<f64>) -> fmt::Result {
-        self.path.put(a.map(|x| self.num_fmt.fmt(x)))
-    }
-
-    #[inline(always)]
-    pub fn put_z(&mut self) -> fmt::Result {
-        self.path.put(tagger::PathCommand::Z(""))
-    }
-}
-
-#[deprecated]
-fn line_fill<T: std::fmt::Write>(
-    path: &mut tagger::PathBuilder<T>,
-    mut it: impl Iterator<Item = [f64; 2]>,
-    base_line: f64,
-    add_start_end_base: bool,
-    num_fmt: impl NumFmt,
-) -> fmt::Result {
-    let mut path = MyPathBuilder { num_fmt, path };
-
-    if let Some([startx, starty]) = it.next() {
-        use tagger::PathCommand::*;
-
-        let mut last = [startx, starty];
-        let mut last_finite = None;
-        let mut first = true;
-        for [newx, newy] in it {
-            match (
-                newx.is_finite() && newy.is_finite(),
-                last[0].is_finite() && last[1].is_finite(),
-            ) {
-                (true, true) => {
-                    if first {
-                        if add_start_end_base {
-                            path.put(M(last[0], base_line))?;
-                            path.put(L(last[0], last[1]))?;
-                        } else {
-                            path.put(M(last[0], last[1]))?;
-                        }
-                        first = false;
-                    }
-                    last_finite = Some([newx, newy]);
-                    path.put(L(newx, newy))?;
-                }
-                (true, false) => {
-                    path.put(M(newx, newy))?;
-                }
-                (false, true) => {
-                    path.put(L(last[0], base_line))?;
-                }
-                _ => {}
-            };
-            last = [newx, newy];
-        }
-        if let Some([x, _]) = last_finite {
-            if add_start_end_base {
-                path.put(L(x, base_line))?;
-            }
-            path.put_z()?;
-        }
-    }
-    Ok(())
-}
-
-//TODO use
 #[derive(Copy, Clone)]
 pub struct FloatFmt {
     precision: usize,
@@ -216,42 +140,6 @@ impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for Line<I> {
             Ok(())
         }))
     }
-}
-
-#[deprecated]
-fn line<T: std::fmt::Write>(
-    path: &mut tagger::PathBuilder<T>,
-    mut it: impl Iterator<Item = [f64; 2]>,
-    num_fmt: impl NumFmt,
-) -> fmt::Result {
-    let mut path = MyPathBuilder { num_fmt, path };
-
-    if let Some([startx, starty]) = it.next() {
-        use tagger::PathCommand::*;
-
-        let mut last = [startx, starty];
-        let mut first = true;
-        for [newx, newy] in it {
-            match (
-                newx.is_finite() && newy.is_finite(),
-                last[0].is_finite() && last[1].is_finite(),
-            ) {
-                (true, true) => {
-                    if first {
-                        path.put(M(last[0], last[1]))?;
-                        first = false;
-                    }
-                    path.put(L(newx, newy))?;
-                }
-                (true, false) => {
-                    path.put(M(newx, newy))?;
-                }
-                _ => {}
-            };
-            last = [newx, newy];
-        }
-    }
-    Ok(())
 }
 
 ///
@@ -450,7 +338,7 @@ impl<T: Renderable> Renderable for &T {
     }
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
-        writer: &mut dyn fmt::Write,
+        writer: &mut hypermelon::ElemWrite,
         plots: &mut impl build::PlotIterator<X, Y>,
         base: &mut dyn BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
@@ -469,21 +357,21 @@ impl Renderable for RenderOptions {
     }
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
-        mut writer: &mut dyn fmt::Write,
+        writer: &mut hypermelon::ElemWrite,
         plots: &mut impl build::PlotIterator<X, Y>,
         base: &mut dyn BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
         boundy: &DataBound<Y>,
     ) -> fmt::Result {
-        let mut writer = hypermelon::ElemWrite::new(writer);
+        //let mut writer = hypermelon::ElemWrite::new(writer);
 
         writer.render(
-            hbuild::single("circle").with(attrs!(("r", "1s5"), ("class", "poloto_background"))),
+            hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
         )?;
 
-        render::render_plot::render_plot(&mut writer, boundx, boundy, self, plots)?;
+        render::render_plot::render_plot(writer, boundx, boundy, self, plots)?;
 
-        render::render_base::render_base(&mut writer, boundx, boundy, base, self)
+        render::render_base::render_base(writer, boundx, boundy, base, self)
     }
 }
 pub trait Renderable {
@@ -492,7 +380,7 @@ pub trait Renderable {
     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound);
     fn render<X: PlotNum, Y: PlotNum>(
         &self,
-        writer: &mut dyn fmt::Write,
+        writer: &mut hypermelon::ElemWrite,
         plots: &mut impl build::PlotIterator<X, Y>,
         base: &mut dyn BaseFmt<X = X, Y = Y>,
         boundx: &DataBound<X>,
@@ -568,37 +456,52 @@ pub struct Plotter<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt
     base: B,
 }
 
-impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> Plotter<P, K, B> {
-    pub fn get_dim(&self) -> [f64; 2] {
-        self.canvas.get_dim()
-    }
-
-    ///
-    /// Use the plot iterators to write out the graph elements.
-    /// Does not add a svg tag, or any styling elements.
-    /// Use this if you want to embed a svg into your html.
-    /// You will just have to add your own svg sag and then supply styling.
-    ///
-    /// Panics if the render fails.
-    ///
-    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
-    /// this function will mutable borrow the Plotter and leave it with empty data.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
-    /// let mut k=String::new();
-    /// plotter.render(&mut k);
-    /// ```
-    pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
+impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> hypermelon::RenderElem
+    for Plotter<P, K, B>
+{
+    type Tail = ();
+    fn render_head(mut self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         self.canvas.render(
-            &mut writer,
+            w,
             &mut self.plots,
             &mut self.base,
             &self.boundx,
             &self.boundy,
         )
     }
+}
+
+impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> Plotter<P, K, B> {
+    pub fn get_dim(&self) -> [f64; 2] {
+        self.canvas.get_dim()
+    }
+
+    // ///
+    // /// Use the plot iterators to write out the graph elements.
+    // /// Does not add a svg tag, or any styling elements.
+    // /// Use this if you want to embed a svg into your html.
+    // /// You will just have to add your own svg sag and then supply styling.
+    // ///
+    // /// Panics if the render fails.
+    // ///
+    // /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
+    // /// this function will mutable borrow the Plotter and leave it with empty data.
+    // ///
+    // /// ```
+    // /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+    // /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
+    // /// let mut k=String::new();
+    // /// plotter.render(&mut k);
+    // /// ```
+    // pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
+    //     self.canvas.render(
+    //         &mut writer,
+    //         &mut self.plots,
+    //         &mut self.base,
+    //         &self.boundx,
+    //         &self.boundy,
+    //     )
+    // }
 }
 
 ///

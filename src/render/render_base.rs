@@ -165,7 +165,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 )))?;
             }
 
-            let text = hbuild::single("text").with(attrs!(
+            let text = hbuild::elem("text").with(attrs!(
                 ("class", "poloto_tick_labels poloto_text"),
                 ("dominant-baseline", "middle"),
                 ("text-anchor", "end"),

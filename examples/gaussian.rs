@@ -15,7 +15,7 @@ fn main() {
     let c = r.zip_output(gau(0.3, 0.)).buffered_plot().line("σ=0.3");
     let d = poloto::build::origin();
 
-    let p = quick_fmt!("gaussian", "x", "y", a, b, c, d);
+    let plots = quick_fmt!("gaussian", "x", "y", a, b, c, d);
 
-    print!("{}", poloto::disp(|w| p.simple_theme(w)));
+    poloto::simple_stdout(plots)
 }

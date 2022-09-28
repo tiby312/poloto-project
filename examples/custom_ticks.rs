@@ -29,5 +29,5 @@ fn main() {
         ),
     );
 
-    print!("{}", poloto::disp(|w| pp.simple_theme(w)));
+    poloto::simple_stdout(pp)
 }

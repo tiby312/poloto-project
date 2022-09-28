@@ -75,7 +75,6 @@ pub mod prelude {
     pub use super::quick_fmt;
     pub use super::quick_fmt_opt;
 
-    pub use super::simple_theme::SimpleTheme;
     pub use super::ticks::TickFormatExt;
 }
 
@@ -91,6 +90,21 @@ const HEIGHT: f64 = 500.0;
 use render::*;
 
 pub mod output_zip;
+
+
+pub fn simple_dark_stdout<E: RenderElem>(elem: E) {
+    use simple_theme::*;
+    let k = default_svg().append(simple_theme_dark()).append(elem);
+    hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
+}
+
+pub fn simple_stdout<E: RenderElem>(elem: E) {
+    use simple_theme::*;
+    let k = default_svg().append(simple_theme()).append(elem);
+    hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
+}
+
+
 
 /// Shorthand for `disp_const(move |w|write!(w,...))`
 /// Similar to `std::format_args!()` except has a more flexible lifetime.
