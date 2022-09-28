@@ -40,7 +40,7 @@ fn main() {
 
     use hypermelon::prelude::*;
     let res = poloto::simple_theme::DefaultHeader::new()
-        .with_viewbox([1300.0, 600.0])
+        .with_viewbox(dim)
         .with_dim_width(800.0)
         .append(poloto::simple_theme::simple_theme_dark())
         .append(
