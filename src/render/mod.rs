@@ -6,7 +6,6 @@ use crate::*;
 mod render_base;
 mod render_plot;
 
-
 #[derive(Copy, Clone)]
 pub struct FloatFmt {
     precision: usize,

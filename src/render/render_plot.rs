@@ -121,8 +121,6 @@ pub fn render_plot<X: PlotNum, Y: PlotNum>(
     Ok(())
 }
 
-
-
 struct PlotRenderInfo<'a> {
     canvas: &'a RenderOptions,
     p_type: PlotType,
