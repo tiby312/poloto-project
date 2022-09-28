@@ -117,6 +117,20 @@ impl DefaultHeader {
             viewbox: [800., 500.],
         }
     }
+
+    pub fn with_viewbox_width(self, width: f64) -> Self {
+        let [xx, yy] = self.dim;
+        let vh = width * (yy / xx);
+        DefaultHeader {
+            dim: self.dim,
+            viewbox: [width, vh],
+        }
+    }
+
+    pub fn get_viewbox(&self) -> [f64; 2] {
+        self.viewbox
+    }
+
     pub fn with_dim(self, dim: [f64; 2]) -> Self {
         DefaultHeader {
             dim,
@@ -127,14 +141,6 @@ impl DefaultHeader {
         DefaultHeader {
             dim: self.dim,
             viewbox: viewbox,
-        }
-    }
-    pub fn with_dim_width(self, width: f64) -> Self {
-        let hh = simple_theme::determine_height_from_width(self.viewbox, width);
-
-        DefaultHeader {
-            dim: [width, hh],
-            viewbox: self.viewbox,
         }
     }
 }
@@ -158,10 +164,10 @@ impl RenderElem for DefaultHeader {
 }
 
 pub fn simple_theme() -> impl RenderElem {
-    hypermelon::build::elem("style").append(hypermelon::build::raw(STYLE_CONFIG_LIGHT_DEFAULT))
+    hypermelon::build::raw(STYLE_CONFIG_LIGHT_DEFAULT)
 }
 pub fn simple_theme_dark() -> impl RenderElem {
-    hypermelon::build::elem("style").append(hypermelon::build::raw(STYLE_CONFIG_DARK_DEFAULT))
+    hypermelon::build::raw(STYLE_CONFIG_DARK_DEFAULT)
 }
 
 // ///
@@ -202,13 +208,6 @@ pub fn simple_theme_dark() -> impl RenderElem {
 //     }
 // }
 
-///
-/// Based on a svg viewport and a desired width, determine the height.
-///
-pub fn determine_height_from_width(viewport: [f64; 2], width: f64) -> f64 {
-    let [xx, yy] = viewport;
-    width * (yy / xx)
-}
 ///
 /// Generate custom css theme.
 ///

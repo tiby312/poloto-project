@@ -1,4 +1,8 @@
+use hypermelon::prelude::*;
 use poloto::prelude::*;
+
+use hypermelon::build as hb;
+use poloto::simple_theme as ps;
 
 // PIPE me to a file!
 fn main() {
@@ -14,12 +18,11 @@ fn main() {
         .fuse()
     };
 
-    //Make the plotting area slightly larger.
-    let dim = [1300.0, 600.0];
+    let header = ps::DefaultHeader::new().with_viewbox_width(1200.0);
 
     let opt = poloto::render::render_opt_builder()
         .with_tick_lines([true, true])
-        .with_dim(dim)
+        .with_dim(header.get_viewbox())
         .build();
 
     let plotter = quick_fmt_opt!(
@@ -38,15 +41,9 @@ fn main() {
         poloto::build::origin()
     );
 
-    use hypermelon::prelude::*;
-    let header = poloto::simple_theme::DefaultHeader::new()
-        .with_viewbox(dim)
-        .with_dim_width(800.0);
-
-    let style =
-        poloto::simple_theme::simple_theme_dark().append(hypermelon::build::elem("style").append(
-            hypermelon::build::raw(".poloto_line{stroke-dasharray:2;stroke-width:2;}"),
-        ));
+    let style = hb::elem("style")
+        .append(ps::simple_theme_dark())
+        .append(hb::raw(".poloto_line{stroke-dasharray:2;stroke-width:2;}"));
 
     let res = header.append(style).append(plotter);
 
