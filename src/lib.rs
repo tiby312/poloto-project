@@ -309,66 +309,61 @@ where
 
 
 
-// fn test(){
+fn test(){
 
 
-//     let k=get_default();
+    let k=get_default();
 
-//     foo(5usize,k);
-// }
+    foo(5usize,k);
+}
 
-// pub struct UsizeTicks;
-// impl Ticks for UsizeTicks{
-//     type Num=usize;
-//     type It=Vec<usize>;
-//     fn generate(self,bounds:Self::Num)->Self::It{
-//         todo!();
-//     }
-// }
-// impl HasDefault for usize{
-//     type K=UsizeTicks;
-//     fn get_default()->Self::K{
-//         UsizeTicks
-//     }
-// }
+pub struct UsizeFmt;
+impl TickFmt for UsizeFmt{
+    type Num=usize;
+    fn fmt(&self,w:&mut dyn fmt::Write,val:Self::Num)->fmt::Result{
+        todo!()
+    }
+}
+pub struct UsizeTicks;
+impl Ticks for UsizeTicks{
+    type Num=usize;
+    type It=Vec<usize>;
+    type Fmt=UsizeFmt;
+    fn generate(self,bounds:Self::Num)->(Self::Fmt,Self::It){
+        todo!();
+    }
+}
+impl HasDefault for usize{
+    type K=UsizeTicks;
+    fn get_default()->Self::K{
+        UsizeTicks
+    }
+}
 
-// fn foo<T:Ticks>(val:T::Num,a:T){
+fn foo<T:Ticks>(val:T::Num,a:T){
 
-// }
+}
 
-// fn get_default<X:HasDefault>()->impl Ticks<Num=X>{
-//     X::get_default()
-// }
+fn get_default<X:HasDefault>()->impl Ticks<Num=X>{
+    X::get_default()
+}
 
-// pub struct MyDefault{}
+pub struct MyDefault{}
 
-// pub trait HasDefault{
-//     type K:Ticks<Num=Self>;
-//     fn get_default()->Self::K;
-// }
+pub trait HasDefault{
+    type K:Ticks<Num=Self>;
+    fn get_default()->Self::K;
+}
 
-// pub trait Ticks{
-//     type Num;
-//     type It:IntoIterator<Item=Self::Num>;
-//     fn generate(self,bounds:Self::Num)->Self::It;
-// }
+pub trait TickFmt{
+    type Num;
+    fn fmt(&self,w:&mut dyn fmt::Write,val:Self::Num)->fmt::Result;
+}
+pub trait Ticks{
+    type Num;
+    type It:IntoIterator<Item=Self::Num>;
+    type Fmt:TickFmt<Num=Self::Num>;
+    fn generate(self,bounds:Self::Num)->(Self::Fmt,Self::It);
+   
+}
 
-
-
-
-// fn ticks<X>()->std::iter::Empty<X>{
-//     std::iter::empty()
-// }
-
-
-// fn testy(){
-
-
-//     let k=ticks();
-
-//     doop(k);
-// }
-
-// fn doop(a:impl Iterator<Item=usize>){
-
-// }
