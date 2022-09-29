@@ -304,3 +304,71 @@ where
         ticky,
     }
 }
+
+
+
+
+
+// fn test(){
+
+
+//     let k=get_default();
+
+//     foo(5usize,k);
+// }
+
+// pub struct UsizeTicks;
+// impl Ticks for UsizeTicks{
+//     type Num=usize;
+//     type It=Vec<usize>;
+//     fn generate(self,bounds:Self::Num)->Self::It{
+//         todo!();
+//     }
+// }
+// impl HasDefault for usize{
+//     type K=UsizeTicks;
+//     fn get_default()->Self::K{
+//         UsizeTicks
+//     }
+// }
+
+// fn foo<T:Ticks>(val:T::Num,a:T){
+
+// }
+
+// fn get_default<X:HasDefault>()->impl Ticks<Num=X>{
+//     X::get_default()
+// }
+
+// pub struct MyDefault{}
+
+// pub trait HasDefault{
+//     type K:Ticks<Num=Self>;
+//     fn get_default()->Self::K;
+// }
+
+// pub trait Ticks{
+//     type Num;
+//     type It:IntoIterator<Item=Self::Num>;
+//     fn generate(self,bounds:Self::Num)->Self::It;
+// }
+
+
+
+
+// fn ticks<X>()->std::iter::Empty<X>{
+//     std::iter::empty()
+// }
+
+
+// fn testy(){
+
+
+//     let k=ticks();
+
+//     doop(k);
+// }
+
+// fn doop(a:impl Iterator<Item=usize>){
+
+// }
