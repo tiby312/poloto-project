@@ -11,10 +11,7 @@ impl std::fmt::Write for EmptyWriter {
 fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
-    poloto::quick_fmt!(
-        "trig",
-        "x",
-        "y",
+    let p = poloto::plots!(
         x.zip_output(f64::tan)
             .crop_above(10.0)
             .crop_below(-10.0)
@@ -31,17 +28,18 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             .crop_above(1.4)
             .cloned_plot()
             .line("2*cos(x)")
-    )
-    .simple_theme(writer)
+    );
+
+    poloto::data(p)
+        .labels("trig", "x", "y")
+        .simple_theme()
+        .render_fmt_write(writer)
 }
 
 fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
-    poloto::quick_fmt!(
-        "box trig",
-        "x",
-        "y",
+    let p = poloto::plots!(
         poloto::build::BoxedPlot::new(
             x.zip_output(f64::tan)
                 .crop_above(10.0)
@@ -64,8 +62,12 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
                 .cloned_plot()
                 .line("2*cos(x)"),
         )
-    )
-    .simple_theme(writer)
+    );
+
+    poloto::data(p)
+        .labels("box trig", "x", "y")
+        .simple_theme()
+        .render_fmt_write(writer)
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {

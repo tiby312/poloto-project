@@ -299,50 +299,29 @@ pub fn plots_dyn<X, Y, F: PlotIterator<X, Y>>(vec: Vec<F>) -> plot_iter_impl::Pl
     plot_iter_impl::PlotsDyn::new(vec)
 }
 
-// trait PlotIteratorAndMarkers<X, Y>: Markerable<X, Y> + PlotIterator<X, Y> {}
+pub struct BoxedPlot<'a, X, Y> {
+    inner: Box<dyn PlotIterator<X, Y> + 'a>,
+}
 
-// impl<X, Y, I: Markerable<X, Y> + PlotIterator<X, Y>> PlotIteratorAndMarkers<X, Y> for I {}
+impl<'a, X, Y> BoxedPlot<'a, X, Y> {
+    pub fn new<A: PlotIterator<X, Y> + 'a>(a: A) -> BoxedPlot<'a, X, Y> {
+        BoxedPlot { inner: Box::new(a) }
+    }
+}
 
-// impl<'a, X: 'a, Y: 'a> PlotIterator<X, Y> for &'a mut dyn PlotIterator<X, Y> {
-//     fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
-//         (*self).next_plot_point()
-//     }
+impl<'a, X: 'a, Y: 'a> PlotIterator<X, Y> for BoxedPlot<'a, X, Y> {
+    fn increase_area(&mut self, area: &mut Area<X, Y>) {
+        self.inner.as_mut().increase_area(area);
+    }
+    fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
+        self.inner.as_mut().next_plot_point()
+    }
 
-//     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
-//         (*self).next_name(w)
-//     }
+    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
+        self.inner.as_mut().next_name(w)
+    }
 
-//     fn next_typ(&mut self) -> Option<PlotMetaType> {
-//         (*self).next_typ()
-//     }
-// }
-
-// pub struct BoxedPlot<'a, X, Y> {
-//     inner: Box<dyn PlotIteratorAndMarkers<X, Y> + 'a>,
-// }
-
-// impl<'a, X, Y> BoxedPlot<'a, X, Y> {
-//     pub fn new<A: Markerable<X, Y> + PlotIterator<X, Y> + 'a>(a: A) -> BoxedPlot<'a, X, Y> {
-//         BoxedPlot { inner: Box::new(a) }
-//     }
-// }
-
-// impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> Markerable<X, Y> for BoxedPlot<'a, X, Y> {
-//     fn increase_area(&mut self, area: &mut Area<X, Y>) {
-//         self.inner.as_mut().increase_area(area);
-//     }
-// }
-
-// impl<'a, X: 'a, Y: 'a> PlotIterator<X, Y> for BoxedPlot<'a, X, Y> {
-//     fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
-//         self.inner.as_mut().next_plot_point()
-//     }
-
-//     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
-//         self.inner.as_mut().next_name(w)
-//     }
-
-//     fn next_typ(&mut self) -> Option<PlotMetaType> {
-//         self.inner.as_mut().next_typ()
-//     }
-// }
+    fn next_typ(&mut self) -> Option<PlotMetaType> {
+        self.inner.as_mut().next_typ()
+    }
+}

@@ -3,19 +3,6 @@
 //!
 use super::*;
 
-///
-/// Building block to make ticks.
-///
-/// Created once the min and max bounds of all the plots has been computed.
-/// Contains in it all the information typically needed to make a [`TickFormat`].
-///
-/// Used by [`ticks::from_default`]
-///
-#[derive(Debug, Clone)]
-pub struct Bound<'a, X> {
-    pub data: &'a ticks::DataBound<X>,
-    pub canvas: &'a RenderOptionsBound,
-}
 
 ///
 /// Tick relevant information of [`Data`]
@@ -26,26 +13,6 @@ pub struct DataBound<X> {
     pub max: X,
 }
 
-// ///
-// /// Construct x and y tick data to be fed into a tick generator.
-// ///
-// pub fn bounds<'a, X, Y, P, K: Renderable>(
-//     data: &'a Data<X, Y, P>,
-//     render: &'a K,
-// ) -> (Bound<'a, X>, Bound<'a, Y>) {
-//     let (dx, dy) = data.bounds();
-//     let (cx, cy) = render.bounds();
-//     (
-//         Bound {
-//             data: dx,
-//             canvas: cx,
-//         },
-//         Bound {
-//             data: dy,
-//             canvas: cy,
-//         },
-//     )
-// }
 
 ///
 /// Tick relevant information of [`RenderOptions`]
@@ -96,8 +63,8 @@ where
     type Fmt = DefaultTickFmt;
     fn generate(
         self,
-        data: &ticks::DataBound<Self::Num>,
-        canvas: &RenderOptionsBound,
+        _: &ticks::DataBound<Self::Num>,
+        _: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt) {
         (TickRes { dash_size: None }, self.ticks, DefaultTickFmt)
     }
@@ -237,81 +204,3 @@ impl<T: TickFormat, F: TickFmt<T::Num>> TickFormat for WithFmt<T, F> {
         (a, b, self.fmt)
     }
 }
-
-// pub trait TickFormatExt: TickFormat {
-//     fn with_tick_fmt<F>(self, func: F) -> TickFmt<Self, F>
-//     where
-//         Self: Sized,
-//         F: Fn(&mut dyn std::fmt::Write, &Self::Num) -> std::fmt::Result,
-//     {
-//         TickFmt { inner: self, func }
-//     }
-
-//     fn with_where_fmt<F>(self, func: F) -> WhereFmt<Self, F>
-//     where
-//         Self: Sized,
-//         F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result,
-//     {
-//         WhereFmt { inner: self, func }
-//     }
-// }
-
-// impl<T: TickFormat> TickFormatExt for T {}
-
-// ///
-// /// Used by [`TickFormatExt::with_where_fmt`]
-// ///
-// pub struct WhereFmt<T, F> {
-//     inner: T,
-//     func: F,
-// }
-// impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result> TickFormat
-//     for WhereFmt<T, F>
-// {
-//     type Num = T::Num;
-//     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-//         self.inner.write_tick(a, val)
-//     }
-//     fn write_where(
-//         &mut self,
-//         a: &mut dyn std::fmt::Write,
-//         _req: IndexRequester,
-//     ) -> std::fmt::Result {
-//         (self.func)(a)
-//     }
-//     fn dash_size(&self) -> Option<f64> {
-//         self.inner.dash_size()
-//     }
-//     fn next_tick(&mut self) -> Option<Self::Num> {
-//         self.inner.next_tick()
-//     }
-// }
-
-// ///
-// /// Used by [`TickFormatExt::with_tick_fmt`]
-// ///
-// pub struct TickFmt<T, F> {
-//     inner: T,
-//     func: F,
-// }
-// impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result> TickFormat
-//     for TickFmt<T, F>
-// {
-//     type Num = T::Num;
-//     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-//         (self.func)(a, val)
-//     }
-//     fn write_where(
-//         &mut self,
-//         a: &mut dyn std::fmt::Write,
-//         ind: IndexRequester,
-//     ) -> std::fmt::Result {
-//         self.inner.write_where(a, ind)
-//     }
-//     fn dash_size(&self) -> Option<f64> {
-//         self.inner.dash_size()
-//     }
-//     fn next_tick(&mut self) -> Option<Self::Num> {
-//         self.inner.next_tick()
-//     }
-// }
