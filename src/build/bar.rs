@@ -14,10 +14,24 @@ impl<'a, D: Display> crate::ticks::TickFmt<i128> for BarTickFmt<D> {
     }
 }
 
+pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
+    name: K,
+    data: impl IntoIterator<Item = (X, D)>,
+    marker: impl IntoIterator<Item = X>,
+) -> Data<impl PlotIterator<X, i128>, impl TickFormat<Num = X>, impl TickFormat<Num = i128>> {
+    let (plots, ytick_fmt) = gen_bar(name, data, marker);
+
+    let opt = crate::render::render_opt_builder()
+        .with_tick_lines([true, false])
+        .build();
+
+    crate::data(plots).with_yticks(ytick_fmt).with_opt(opt)
+}
+
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
-    foo: impl IntoIterator<Item = X>,
+    marker: impl IntoIterator<Item = X>,
 ) -> (impl PlotIterator<X, i128>, impl TickFormat<Num = i128>) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
@@ -35,7 +49,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
         .collect::<Vec<_>>()
         .into_iter();
 
-    let m = build::markers(foo, [-1, i128::try_from(vals_len).unwrap()]);
+    let m = build::markers(marker, [-1, i128::try_from(vals_len).unwrap()]);
     (
         bars.chain(m),
         crate::ticks::from_iter(ticks).with_fmt(BarTickFmt { ticks: names }),

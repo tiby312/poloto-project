@@ -27,8 +27,8 @@ fn main() {
     );
 
     let ff = poloto::ticks::DefaultTickFmt
-        .with_ticks(|w, v| write!(w, "{} pee", v))
-        .with_where(|w, _| write!(w, "{}", "chicken"));
+        .with_ticks(|w, v| write!(w, "{} a", v))
+        .with_where(|w, _| write!(w, "{}", "aaa"));
     let steps = poloto::ticks::from_iter((0..).step_by(6)).with_fmt(ff);
 
     poloto::data(plots)
