@@ -402,11 +402,8 @@ pub struct Data<P, TX, TY> {
 }
 
 //TODO plot iterator should use associated types instead to reduce the number of type arguments?
-impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat> Data<P, TX, TY> {
-    pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY>
-    where
-        P: build::PlotIterator<TX::Num, TY::Num>,
-    {
+impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P, TX, TY> {
+    pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
         Data {
             opt,
             plots,
@@ -423,7 +420,7 @@ impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat> D
             plots: self.plots,
         }
     }
-    pub fn with_xticks<TTT: TickFormat<Num = TX::Num>>(self, tickx: TTT) -> Data<P, TTT, TY> {
+    pub fn with_xticks<TTT: TickFormat<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
             tickx,
@@ -432,7 +429,7 @@ impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat> D
         }
     }
 
-    pub fn with_yticks<TTT: TickFormat<Num = TY::Num>>(self, ticky: TTT) -> Data<P, TX, TTT> {
+    pub fn with_yticks<TTT: TickFormat<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
         Data {
             opt: self.opt,
             tickx: self.tickx,
@@ -488,7 +485,7 @@ pub struct Plotter<P, TX, TY, B: BaseFmt> {
     base: B,
 }
 
-impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat, B: BaseFmt>
+impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>, B: BaseFmt>
     Plotter<P, TX, TY, B>
 {
     pub fn simple_theme(self) -> Themer<impl hypermelon::RenderElem> {
@@ -506,7 +503,7 @@ impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat, B
         Themer(header.append(style).append(self))
     }
 }
-impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat, B: BaseFmt>
+impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>, B: BaseFmt>
     hypermelon::RenderElem for Plotter<P, TX, TY, B>
 {
     type Tail = ();

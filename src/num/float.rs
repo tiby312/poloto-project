@@ -58,13 +58,12 @@ impl crate::ticks::TickFmt<f64> for FloatFmt {
     }
 }
 
-impl TickFormat for FloatTickFmt {
-    type Num = f64;
-    type It = Vec<Self::Num>;
+impl TickFormat<f64> for FloatTickFmt {
+    type It = Vec<f64>;
     type Fmt = FloatFmt;
     fn generate(
         self,
-        data: &ticks::DataBound<Self::Num>,
+        data: &ticks::DataBound<f64>,
         canvas: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt) {
         let range = [data.min, data.max];

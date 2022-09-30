@@ -90,17 +90,16 @@ where
     }
 }
 
-impl<T: TimeZone + Display> TickFormat for UnixTimeTickFmt<T>
+impl<T: TimeZone + Display> TickFormat<UnixTime> for UnixTimeTickFmt<T>
 where
     T::Offset: Display,
 {
-    type Num = UnixTime;
     type It = Vec<UnixTime>;
     type Fmt = UnixTimeFmt<T>;
 
     fn generate(
         self,
-        data: &ticks::DataBound<Self::Num>,
+        data: &ticks::DataBound<UnixTime>,
         canvas: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt) {
         let range = [data.min, data.max];

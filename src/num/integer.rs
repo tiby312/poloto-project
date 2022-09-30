@@ -56,13 +56,12 @@ impl ticks::TickFmt<i128> for IntFmt {
     }
 }
 
-impl TickFormat for IntegerTickFmt {
-    type Num = i128;
-    type It = Vec<Self::Num>;
+impl TickFormat<i128> for IntegerTickFmt {
+    type It = Vec<i128>;
     type Fmt = IntFmt;
     fn generate(
         self,
-        data: &ticks::DataBound<Self::Num>,
+        data: &ticks::DataBound<i128>,
         canvas: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt) {
         let range = [data.min, data.max];

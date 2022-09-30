@@ -2,12 +2,12 @@ use super::*;
 
 use crate::build::*;
 
-pub fn render_plot<X: PlotNum, Y: PlotNum>(
+pub fn render_plot<P: build::PlotIterator>(
     writer: &mut hypermelon::ElemWrite,
-    boundx: &ticks::DataBound<X>,
-    boundy: &ticks::DataBound<Y>,
+    boundx: &ticks::DataBound<P::X>,
+    boundy: &ticks::DataBound<P::Y>,
     canvas: &RenderOptions,
-    plots_all: &mut impl build::PlotIterator<X, Y>,
+    plots_all: &mut P,
 ) -> std::fmt::Result {
     let RenderOptions {
         width,

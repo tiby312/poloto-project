@@ -3,7 +3,6 @@
 //!
 use super::*;
 
-
 ///
 /// Tick relevant information of [`Data`]
 ///
@@ -12,7 +11,6 @@ pub struct DataBound<X> {
     pub min: X,
     pub max: X,
 }
-
 
 ///
 /// Tick relevant information of [`RenderOptions`]
@@ -54,16 +52,15 @@ impl<N: Display> TickFmt<N> for DefaultTickFmt {
 pub struct TickIterFmt<I: Iterator> {
     ticks: I,
 }
-impl<I: Iterator> TickFormat for TickIterFmt<I>
+impl<I: Iterator> TickFormat<I::Item> for TickIterFmt<I>
 where
     I::Item: PlotNum + Display,
 {
-    type Num = I::Item;
     type It = I;
     type Fmt = DefaultTickFmt;
     fn generate(
         self,
-        _: &ticks::DataBound<Self::Num>,
+        _: &ticks::DataBound<I::Item>,
         _: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt) {
         (TickRes { dash_size: None }, self.ticks, DefaultTickFmt)
@@ -169,17 +166,16 @@ pub struct TickRes {
 ///
 /// Formatter for a tick.
 ///
-pub trait TickFormat {
-    type Num: PlotNum;
-    type It: IntoIterator<Item = Self::Num>;
-    type Fmt: TickFmt<Self::Num>;
+pub trait TickFormat<N: PlotNum> {
+    type It: IntoIterator<Item = N>;
+    type Fmt: TickFmt<N>;
     fn generate(
         self,
-        data: &ticks::DataBound<Self::Num>,
+        data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt);
 
-    fn with_fmt<F: TickFmt<Self::Num>>(self, fmt: F) -> WithFmt<Self, F>
+    fn with_fmt<F: TickFmt<N>>(self, fmt: F) -> WithFmt<Self, F>
     where
         Self: Sized,
     {
@@ -191,13 +187,12 @@ pub struct WithFmt<T, F> {
     ticks: T,
     fmt: F,
 }
-impl<T: TickFormat, F: TickFmt<T::Num>> TickFormat for WithFmt<T, F> {
-    type Num = T::Num;
+impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F> {
     type It = T::It;
     type Fmt = F;
     fn generate(
         self,
-        data: &ticks::DataBound<Self::Num>,
+        data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt) {
         let (a, b, c) = self.ticks.generate(data, canvas);

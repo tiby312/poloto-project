@@ -44,17 +44,19 @@ pub enum PlotMetaType {
 /// Iterator over all plots that have been assembled by the user.
 /// This trait is used by the poloto renderer to iterate over and render all the plots.
 ///
-pub trait PlotIterator<X, Y> {
-    fn increase_area(&mut self, area: &mut Area<X, Y>);
+pub trait PlotIterator {
+    type X: PlotNum;
+    type Y: PlotNum;
+    fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>);
     fn next_typ(&mut self) -> Option<PlotMetaType>;
-    fn next_plot_point(&mut self) -> PlotResult<(X, Y)>;
+    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)>;
     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
 }
 
 ///
 /// Allows the user to chain together PlotIterators.
 ///
-pub trait PlotIteratorExt<X, Y>: PlotIterator<X, Y> {
+pub trait PlotIteratorExt: PlotIterator {
     /// Chain together PlotIterators.
     ///
     /// ```
@@ -66,14 +68,14 @@ pub trait PlotIteratorExt<X, Y>: PlotIterator<X, Y> {
     /// a.chain(b);
     /// ```
     ///
-    fn chain<B: PlotIterator<X, Y>>(self, b: B) -> Chain<Self, B>
+    fn chain<B: PlotIterator<X = Self::X, Y = Self::Y>>(self, b: B) -> Chain<Self, B>
     where
         Self: Sized,
     {
         Chain::new(self, b)
     }
 }
-impl<X, Y, I: PlotIterator<X, Y>> PlotIteratorExt<X, Y> for I {}
+impl<I: PlotIterator> PlotIteratorExt for I {}
 
 pub(crate) struct RenderablePlotIter<'a, A> {
     flop: &'a mut A,
@@ -84,9 +86,9 @@ impl<'a, A> RenderablePlotIter<'a, A> {
         RenderablePlotIter { flop }
     }
     #[inline(always)]
-    pub fn next_plot<X, Y>(&mut self) -> Option<SinglePlotAccessor<A>>
+    pub fn next_plot(&mut self) -> Option<SinglePlotAccessor<A>>
     where
-        A: PlotIterator<X, Y>,
+        A: PlotIterator,
     {
         if let Some(typ) = self.flop.next_typ() {
             Some(SinglePlotAccessor {
@@ -110,17 +112,17 @@ impl<'b, A> SinglePlotAccessor<'b, A> {
     }
 
     #[inline(always)]
-    pub fn name<X, Y>(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result>
+    pub fn name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result>
     where
-        A: PlotIterator<X, Y>,
+        A: PlotIterator,
     {
         self.flop.next_name(write)
     }
 
     #[inline(always)]
-    pub fn plots<X, Y>(&mut self) -> impl Iterator<Item = (X, Y)> + '_
+    pub fn plots(&mut self) -> impl Iterator<Item = (A::X, A::Y)> + '_
     where
-        A: PlotIterator<X, Y>,
+        A: PlotIterator,
     {
         //TODO borrow this tick in broccoli for iterating over all elements
         let f: &mut _ = self.flop;
@@ -295,21 +297,23 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
-pub fn plots_dyn<X, Y, F: PlotIterator<X, Y>>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
+pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
     plot_iter_impl::PlotsDyn::new(vec)
 }
 
 pub struct BoxedPlot<'a, X, Y> {
-    inner: Box<dyn PlotIterator<X, Y> + 'a>,
+    inner: Box<dyn PlotIterator<X = X, Y = Y> + 'a>,
 }
 
 impl<'a, X, Y> BoxedPlot<'a, X, Y> {
-    pub fn new<A: PlotIterator<X, Y> + 'a>(a: A) -> BoxedPlot<'a, X, Y> {
+    pub fn new<A: PlotIterator<X = X, Y = Y> + 'a>(a: A) -> BoxedPlot<'a, X, Y> {
         BoxedPlot { inner: Box::new(a) }
     }
 }
 
-impl<'a, X: 'a, Y: 'a> PlotIterator<X, Y> for BoxedPlot<'a, X, Y> {
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> {
+    type X = X;
+    type Y = Y;
     fn increase_area(&mut self, area: &mut Area<X, Y>) {
         self.inner.as_mut().increase_area(area);
     }
