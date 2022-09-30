@@ -235,6 +235,27 @@ macro_rules! plots {
 
 //pub use render::plot_with;
 
+pub fn buffered_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
+    iter: I,
+) -> build::SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
+where
+    I::Item: Clone + build::unwrapper::Unwrapper<Item = (X, Y)>,
+{
+    use build::iter::IterBuilder;
+    iter.buffered_plot()
+}
+
+pub fn cloned_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
+    iter: I,
+) -> build::SinglePlotBuilder<X, Y, build::iter::UnwrapperIter<I>>
+where
+    I: Clone,
+    I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+{
+    use build::iter::IterBuilder;
+    iter.cloned_plot()
+}
+
 ///
 /// Construct a [`Data`].
 ///

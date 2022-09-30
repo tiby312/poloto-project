@@ -1,5 +1,3 @@
-use poloto::prelude::*;
-
 fn main() {
     let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
@@ -13,12 +11,13 @@ fn main() {
         .fuse()
     };
 
-    let plots = plots!(
+    let plots = poloto::plots!(
         poloto::build::plots_dyn(
             (1000..1006)
                 .map(|i| {
-                    let name = formatm!("c({})", i);
-                    (0..).zip(collatz(i)).buffered_plot().line(name)
+                    let name = hypermelon::format_move!("c({})", i);
+                    let it = (0..).zip(collatz(i));
+                    poloto::buffered_plot(it).line(name)
                 })
                 .collect(),
         ),
