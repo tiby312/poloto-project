@@ -20,38 +20,26 @@ fn main() {
 
     let header = ps::DefaultHeader::new().with_viewbox_width(1200.0);
 
-    let opt = poloto::render::render_opt_builder()
-        .with_tick_lines([true, true])
-        .with_dim(header.get_viewbox())
-        .build();
-
-    let plots = compute(plots!(
+    let plots = plots!(
         poloto::build::plots_dyn(
             (1000..1006)
                 .map(|i| {
                     let name = formatm!("c({})", i);
-                    (0..).zip(collatz(i)).buffered_plot().line(name)
-                })
-                .collect(),
-        ),
-        poloto::build::origin()
-    ));
-
-    let plotter = quick_fmt_opt!(
-        opt,
-        "collatz",
-        "x",
-        "y",
-        poloto::build::plots_dyn(
-            (1000..1006)
-                .map(|i| {
-                    let name = formatm!("c({})", i);
-                    (0..).zip(collatz(i)).buffered_plot().line(name)
+                    poloto::buffered_plot((0..).zip(collatz(i))).line(name)
                 })
                 .collect(),
         ),
         poloto::build::origin()
     );
+
+    let opt = poloto::render::render_opt_builder()
+        .with_tick_lines([true, true])
+        .with_dim(header.get_viewbox())
+        .build();
+
+    let plotter = poloto::data(plots)
+        .with_opt(opt)
+        .labels("collatz", "x", "y");
 
     let style = hb::elem("style")
         .append(ps::simple_theme_dark())

@@ -7,18 +7,14 @@ fn main() {
 
     let it = (0..).zip(trend.iter().copied());
 
-    let data = poloto::data(plots!(
+    let plots = poloto::plots!(
         it.cloned_plot().histogram(""),
         poloto::build::markers([24], [])
-    ));
+    );
 
-    let data = data.build("title", "x", "y");
-    let data = data
-        .with_opt(poloto::render::render_opt())
-        .build("title", "x", "y");
-    let data = data
+    poloto::data(plots)
         .with_xticks(poloto::ticks::from_iter((0..).step_by(6)))
-        .build("title", "x", "y");
-
-    poloto::simple_stdout(plotter)
+        .labels("title", "x", "y")
+        .simple_theme()
+        .render_stdout();
 }

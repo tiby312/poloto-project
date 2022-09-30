@@ -415,6 +415,14 @@ impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat> D
         }
     }
 
+    pub fn with_opt(self, opt: RenderOptions) -> Self {
+        Data {
+            opt,
+            tickx: self.tickx,
+            ticky: self.ticky,
+            plots: self.plots,
+        }
+    }
     pub fn with_xticks<TTT: TickFormat<Num = TX::Num>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
