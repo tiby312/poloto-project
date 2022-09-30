@@ -444,17 +444,13 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         self.plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
 
-        let (a, b, c) = self.tickx.generate(&boundx, &self.opt.boundx);
-        let (d, e, f) = self.ticky.generate(&boundy, &self.opt.boundy);
+        let xticks = self.tickx.generate(&boundx, &self.opt.boundx);
+        let yticks = self.ticky.generate(&boundy, &self.opt.boundy);
 
         DataBuilt {
             opt: self.opt,
-            xtick_iter: b,
-            ytick_iter: e,
-            xtick_fmt: c,
-            ytick_fmt: f,
-            xres: a,
-            yres: d,
+            xticks,
+            yticks,
             plots: self.plots,
             boundx,
             boundy,
@@ -464,12 +460,8 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
 
 pub struct DataBuilt<P: PlotIterator, A, B, C, D> {
     opt: RenderOptions,
-    xtick_iter: A,
-    ytick_iter: B,
-    xtick_fmt: C,
-    ytick_fmt: D,
-    xres: crate::ticks::TickRes,
-    yres: crate::ticks::TickRes,
+    xticks: TickGen<A, C>,
+    yticks: TickGen<B, D>,
     plots: P,
     boundx: DataBound<P::X>,
     boundy: DataBound<P::Y>,
@@ -571,12 +563,8 @@ where
 
         render::render_base::render_base(
             writer,
-            self.data.xres,
-            self.data.xtick_iter,
-            self.data.xtick_fmt,
-            self.data.yres,
-            self.data.ytick_iter,
-            self.data.ytick_fmt,
+            self.data.xticks,
+            self.data.yticks,
             &self.data.boundx,
             &self.data.boundy,
             &mut self.base,

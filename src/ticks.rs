@@ -23,6 +23,12 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
+pub struct TickGen<I, F> {
+    pub it: I,
+    pub fmt: F,
+    pub res: TickRes,
+}
+
 ///
 /// Create a [`TickFormat`] from a step iterator.
 ///
@@ -62,8 +68,12 @@ where
         self,
         _: &ticks::DataBound<I::Item>,
         _: &RenderOptionsBound,
-    ) -> (TickRes, Self::It, Self::Fmt) {
-        (TickRes { dash_size: None }, self.ticks, DefaultTickFmt)
+    ) -> TickGen<Self::It, Self::Fmt> {
+        TickGen {
+            it: self.ticks,
+            fmt: DefaultTickFmt,
+            res: TickRes { dash_size: None },
+        }
     }
 }
 
@@ -173,7 +183,7 @@ pub trait TickFormat<N: PlotNum> {
         self,
         data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
-    ) -> (TickRes, Self::It, Self::Fmt);
+    ) -> TickGen<Self::It, Self::Fmt>;
 
     fn with_fmt<F: TickFmt<N>>(self, fmt: F) -> WithFmt<Self, F>
     where
@@ -194,8 +204,12 @@ impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F
         self,
         data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
-    ) -> (TickRes, Self::It, Self::Fmt) {
-        let (a, b, _) = self.ticks.generate(data, canvas);
-        (a, b, self.fmt)
+    ) -> TickGen<Self::It, Self::Fmt> {
+        let TickGen { it, res, .. } = self.ticks.generate(data, canvas);
+        TickGen {
+            it,
+            fmt: self.fmt,
+            res,
+        }
     }
 }

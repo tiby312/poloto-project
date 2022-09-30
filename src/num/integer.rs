@@ -63,7 +63,7 @@ impl TickFormat<i128> for IntegerTickFmt {
         self,
         data: &ticks::DataBound<i128>,
         canvas: &RenderOptionsBound,
-    ) -> (TickRes, Self::It, Self::Fmt) {
+    ) -> TickGen<Self::It, Self::Fmt> {
         let range = [data.min, data.max];
         let ideal_num_steps = canvas.ideal_num_steps;
 
@@ -79,17 +79,17 @@ impl TickFormat<i128> for IntegerTickFmt {
 
         let axis = canvas.axis;
 
-        (
-            TickRes {
+        TickGen {
+            res: TickRes {
                 dash_size: Some(dash_size),
             },
-            ticks,
-            IntFmt {
+            it: ticks,
+            fmt: IntFmt {
                 offset,
                 axis,
                 step: tick_layout.step,
             },
-        )
+        }
         // IntegerTickFmt {
         //     ticks: ticks.into_iter(),
         //     dash_size,

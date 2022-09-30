@@ -2,12 +2,8 @@ use super::*;
 
 pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     writer: &mut hypermelon::ElemWrite,
-    tickx_opt: TickRes,
-    tickx: impl IntoIterator<Item = X>,
-    mut tickx_fmt: impl ticks::TickFmt<X>,
-    ticky_opt: TickRes,
-    ticky: impl IntoIterator<Item = Y>,
-    mut ticky_fmt: impl ticks::TickFmt<Y>,
+    mut xticksg: TickGen<impl IntoIterator<Item = X>, impl ticks::TickFmt<X>>,
+    mut yticksg: TickGen<impl IntoIterator<Item = Y>, impl ticks::TickFmt<Y>>,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt,
@@ -69,10 +65,11 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
     writer.render(text.append(yname))?;
 
-    let xdash_size = tickx_opt.dash_size;
-    let ydash_size = ticky_opt.dash_size;
+    let xdash_size = xticksg.res.dash_size;
+    let ydash_size = yticksg.res.dash_size;
 
-    let mut xticks = tickx
+    let mut xticks = xticksg
+        .it
         .into_iter()
         .skip_while(|&x| x < boundx[0])
         .take_while(|&x| x <= boundx[1]);
@@ -90,7 +87,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     //TODO get rid of collecting ticks upfront.
     let mut xticks = xticks.collect::<Vec<_>>().into_iter();
 
-    let mut yticks = ticky
+    let mut yticks = yticksg
+        .it
         .into_iter()
         .skip_while(|&x| x < boundy[0])
         .take_while(|&x| x <= boundy[1]);
@@ -140,7 +138,9 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         ));
 
         let ywher = hbuild::from_closure(|w| {
-            ticky_fmt.write_where(&mut w.writer(), IndexRequester::new(&mut index_counter))
+            yticksg
+                .fmt
+                .write_where(&mut w.writer(), IndexRequester::new(&mut index_counter))
         });
 
         writer.render(text.append(ywher))?;
@@ -179,7 +179,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 ("y", yaspect_offset + yy)
             ));
 
-            let ytick = hbuild::from_closure(|w| ticky_fmt.write_tick(&mut w.writer(), &val));
+            let ytick = hbuild::from_closure(|w| yticksg.fmt.write_tick(&mut w.writer(), &val));
 
             writer.render(text.append(ytick))?;
         }
@@ -195,7 +195,9 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         ));
 
         let xwher = hbuild::from_closure(|w| {
-            tickx_fmt.write_where(&mut w.writer(), IndexRequester::new(&mut index_counter))
+            xticksg
+                .fmt
+                .write_where(&mut w.writer(), IndexRequester::new(&mut index_counter))
         });
 
         writer.render(text.append(xwher))?;
@@ -235,7 +237,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 ("y", yaspect_offset + height - paddingy + texty_padding)
             ));
 
-            let xtick = hbuild::from_closure(|w| tickx_fmt.write_tick(&mut w.writer(), &val));
+            let xtick = hbuild::from_closure(|w| xticksg.fmt.write_tick(&mut w.writer(), &val));
 
             writer.render(text.append(xtick))?;
         }

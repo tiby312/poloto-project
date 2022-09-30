@@ -101,7 +101,7 @@ where
         self,
         data: &ticks::DataBound<UnixTime>,
         canvas: &RenderOptionsBound,
-    ) -> (TickRes, Self::It, Self::Fmt) {
+    ) -> TickGen<Self::It, Self::Fmt> {
         let range = [data.min, data.max];
 
         assert!(range[0] <= range[1]);
@@ -136,16 +136,16 @@ where
 
         let start = ticks[0];
 
-        (
-            TickRes { dash_size: None },
-            ticks,
-            UnixTimeFmt {
+        TickGen {
+            res: TickRes { dash_size: None },
+            it: ticks,
+            fmt: UnixTimeFmt {
                 timezone: self.timezone,
                 step: ret.unit_data,
                 footnote: None,
                 start,
             },
-        )
+        }
     }
 }
 
