@@ -25,6 +25,18 @@ fn main() {
         .with_dim(header.get_viewbox())
         .build();
 
+    let plots = compute(plots!(
+        poloto::build::plots_dyn(
+            (1000..1006)
+                .map(|i| {
+                    let name = formatm!("c({})", i);
+                    (0..).zip(collatz(i)).buffered_plot().line(name)
+                })
+                .collect(),
+        ),
+        poloto::build::origin()
+    ));
+
     let plotter = quick_fmt_opt!(
         opt,
         "collatz",

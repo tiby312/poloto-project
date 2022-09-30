@@ -72,10 +72,8 @@ pub mod prelude {
     pub use super::formatm;
     pub use super::output_zip::OutputZip;
     pub use super::plots;
-    pub use super::quick_fmt;
-    pub use super::quick_fmt_opt;
-
-    pub use super::ticks::TickFormatExt;
+    //pub use super::quick_fmt;
+    //pub use super::quick_fmt_opt;
 }
 
 use fmt::Display;
@@ -134,114 +132,116 @@ macro_rules! plots {
     };
 }
 
-///
-/// Create a simple bar graph
-///
-#[macro_export]
-macro_rules! simple_bar {
-    ($data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        use $crate::prelude::*;
+// ///
+// /// Create a simple bar graph
+// ///
+// #[macro_export]
+// macro_rules! simple_bar {
+//     ($data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
+//         use $crate::prelude::*;
 
-        let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
+//         let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
 
-        let opt = $crate::render::render_opt_builder()
-            .with_tick_lines([true, false])
-            .build();
+//         let opt = $crate::render::render_opt_builder()
+//             .with_tick_lines([true, false])
+//             .build();
 
-        let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
+//         let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
 
-        let (bx, _) = $crate::ticks::bounds(&data, &opt);
+//         let (bx, _) = $crate::ticks::bounds(&data, &opt);
 
-        let xtick_fmt = $crate::ticks::from_default(bx);
+//         let xtick_fmt = $crate::ticks::from_default(bx);
 
-        $crate::plot_with(
-            data,
-            opt,
-            $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
-        )
-    }};
-    ($opt:expr,$data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
-        use $crate::prelude::*;
+//         $crate::plot_with(
+//             data,
+//             opt,
+//             $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
+//         )
+//     }};
+//     ($opt:expr,$data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
+//         use $crate::prelude::*;
 
-        let opt = $opt;
-        let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
+//         let opt = $opt;
+//         let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
 
-        let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
+//         let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
 
-        let (bx, _) = $crate::ticks::bounds(&data, &opt);
+//         let (bx, _) = $crate::ticks::bounds(&data, &opt);
 
-        let xtick_fmt = $crate::ticks::from_default(bx);
+//         let xtick_fmt = $crate::ticks::from_default(bx);
 
-        $crate::plot_with(
-            data,
-            opt,
-            $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
-        )
-    }};
-}
+//         $crate::plot_with(
+//             data,
+//             opt,
+//             $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
+//         )
+//     }};
+// }
 
-///
-/// Create plots without having to manually create the ticks
-/// for each axis.
-///
-/// ```
-/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-/// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
-/// let mut k=String::new();
-/// plotter.render(&mut k);
-/// ```
-///
-#[macro_export]
-macro_rules! quick_fmt {
-    ($title:expr,$xname:expr,$yname:expr,$a:expr) => {{
-        let opt = $crate::render::render_opt_builder().build();
-        $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a)
-    }};
-    ($title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
-        let opt = $crate::render::render_opt_builder().build();
-        $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a,$($x),*)
-    }};
-}
+// ///
+// /// Create plots without having to manually create the ticks
+// /// for each axis.
+// ///
+// /// ```
+// /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+// /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
+// /// let mut k=String::new();
+// /// plotter.render(&mut k);
+// /// ```
+// ///
+// #[macro_export]
+// macro_rules! quick_fmt {
+//     ($title:expr,$xname:expr,$yname:expr,$a:expr) => {{
+//         let opt = $crate::render::render_opt_builder().build();
+//         $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a)
+//     }};
+//     ($title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
+//         let opt = $crate::render::render_opt_builder().build();
+//         $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a,$($x),*)
+//     }};
+// }
 
-///
-/// Create plots without having to manually create the ticks
-/// for each axis.
-///
-/// ```
-/// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-/// let canvas=poloto::render::canvas();
-/// let plotter=poloto::quick_fmt_opt!(canvas,"title","x","y",poloto::build::line("",data));
-/// let mut k=String::new();
-/// plotter.render(&mut k);
-/// ```
-///
-#[macro_export]
-macro_rules! quick_fmt_opt {
-    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr) => {{
-        let opt=$opt;
-        let data = $crate::data($crate::plots!($a));
-        let (bx, by) = $crate::ticks::bounds(&data, &opt);
-        let xt = $crate::ticks::from_default(bx);
-        let yt = $crate::ticks::from_default(by);
-        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
-    }};
-    ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
-        let opt=$opt;
-        let data = $crate::data($crate::plots!($a,$($x),*));
-        let (bx, by) = $crate::ticks::bounds(&data, &opt);
-        let xt = $crate::ticks::from_default(bx);
-        let yt = $crate::ticks::from_default(by);
-        $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
-    }};
-}
+// ///
+// /// Create plots without having to manually create the ticks
+// /// for each axis.
+// ///
+// /// ```
+// /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+// /// let canvas=poloto::render::canvas();
+// /// let plotter=poloto::quick_fmt_opt!(canvas,"title","x","y",poloto::build::line("",data));
+// /// let mut k=String::new();
+// /// plotter.render(&mut k);
+// /// ```
+// ///
+// #[macro_export]
+// macro_rules! quick_fmt_opt {
+//     ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr) => {{
+//         let opt=$opt;
+//         let data = $crate::data($crate::plots!($a));
+//         let (bx, by) = $crate::ticks::bounds(&data, &opt);
+//         let xt = $crate::ticks::from_default(bx);
+//         let yt = $crate::ticks::from_default(by);
+//         $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+//     }};
+//     ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
+//         let opt=$opt;
+//         let data = $crate::data($crate::plots!($a,$($x),*));
+//         let (bx, by) = $crate::ticks::bounds(&data, &opt);
+//         let xt = $crate::ticks::from_default(bx);
+//         let yt = $crate::ticks::from_default(by);
+//         $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
+//     }};
+// }
 
-pub use render::plot_with;
+//pub use render::plot_with;
 
 ///
 /// Construct a [`Data`].
 ///
-pub fn data<X: PlotNum, Y: PlotNum, P: build::marker::Markerable<X, Y>>(plots: P) -> Data<X, Y, P> {
-    render::Data::new(plots)
+pub fn data<X: PlotNum, Y: PlotNum, P: build::marker::Markerable<X, Y>>(
+    plots: P,
+) -> Data<X, Y, P, X::Fmt, Y::Fmt> {
+    render::Data::new(plots, X::default_ticks(), Y::default_ticks(), render_opt())
 }
 
 ///
@@ -282,88 +282,89 @@ pub fn range_iter(
     (0..num).map(move |x| min + (x as f64 / divf) * diff)
 }
 
-///
-/// Create a plot formatter that implements [`plotnum::BaseFmt`]
-///
-pub fn plot_fmt<A: Display, B: Display, C: Display, D, E>(
-    title: A,
-    xname: B,
-    yname: C,
-    tickx: D,
-    ticky: E,
-) -> SimplePlotFormatter<A, B, C, D, E>
-where
-    D: TickFormat,
-    E: TickFormat,
-{
-    SimplePlotFormatter {
-        title,
-        xname,
-        yname,
-        tickx,
-        ticky,
-    }
+// ///
+// /// Create a plot formatter that implements [`plotnum::BaseFmt`]
+// ///
+// pub fn plot_fmt<A: Display, B: Display, C: Display, D, E>(
+//     title: A,
+//     xname: B,
+//     yname: C,
+//     tickx: D,
+//     ticky: E,
+// ) -> SimplePlotFormatter<A, B, C, D, E>
+// where
+//     D: TickFormat,
+//     E: TickFormat,
+// {
+//     SimplePlotFormatter {
+//         title,
+//         xname,
+//         yname,
+//         tickx,
+//         ticky,
+//     }
+// }
+
+fn dooa<I: Iterator>(func: I, val: I::Item) {}
+
+fn test2() {
+    let k = std::iter::from_fn(|| None);
+
+    dooa(k, 5usize);
 }
 
+fn test() {
+    let k = get_default();
 
-
-
-
-fn test(){
-
-
-    let k=get_default();
-
-    foo(5usize,k);
+    foo(5usize, k);
 }
+
+fn foo<T: Ticks>(val: T::Num, ticks: T) {}
 
 pub struct UsizeFmt;
-impl TickFmt for UsizeFmt{
-    type Num=usize;
-    fn fmt(&self,w:&mut dyn fmt::Write,val:Self::Num)->fmt::Result{
+impl TickFmt for UsizeFmt {
+    type Num = usize;
+    fn fmt(&self, w: &mut dyn fmt::Write, val: Self::Num) -> fmt::Result {
         todo!()
     }
 }
 pub struct UsizeTicks;
-impl Ticks for UsizeTicks{
-    type Num=usize;
-    type It=Vec<usize>;
-    type Fmt=UsizeFmt;
-    fn generate(self,bounds:Self::Num)->(Self::Fmt,Self::It){
-        todo!();
+impl Ticks for UsizeTicks {
+    type Num = usize;
+    type It = Vec<usize>;
+    type Fmt = UsizeFmt;
+    fn gen(self, bound: usize) -> (Self::It, Self::Fmt) {
+        (vec![], UsizeFmt)
     }
 }
-impl HasDefault for usize{
-    type K=UsizeTicks;
-    fn get_default()->Self::K{
+
+impl HasDefault for usize {
+    type K = UsizeTicks;
+    fn get_default() -> UsizeTicks {
         UsizeTicks
     }
 }
 
-fn foo<T:Ticks>(val:T::Num,a:T){
-
+fn get_default<N: HasDefault>() -> impl Ticks<Num = N> {
+    N::get_default()
 }
 
-fn get_default<X:HasDefault>()->impl Ticks<Num=X>{
-    X::get_default()
+pub trait HasDefault
+where
+    Self: Sized,
+{
+    type K: Ticks<Num = Self>;
+    fn get_default() -> Self::K;
 }
 
-pub struct MyDefault{}
-
-pub trait HasDefault{
-    type K:Ticks<Num=Self>;
-    fn get_default()->Self::K;
-}
-
-pub trait TickFmt{
+pub trait TickFmt {
     type Num;
-    fn fmt(&self,w:&mut dyn fmt::Write,val:Self::Num)->fmt::Result;
-}
-pub trait Ticks{
-    type Num;
-    type It:IntoIterator<Item=Self::Num>;
-    type Fmt:TickFmt<Num=Self::Num>;
-    fn generate(self,bounds:Self::Num)->(Self::Fmt,Self::It);
-   
+    fn fmt(&self, w: &mut dyn fmt::Write, val: Self::Num) -> fmt::Result;
 }
 
+pub trait Ticks {
+    type Num;
+    type It: IntoIterator<Item = Self::Num>;
+    type Fmt: TickFmt<Num = Self::Num>;
+    fn gen(self, bound: Self::Num) -> (Self::It, Self::Fmt);
+}

@@ -12,22 +12,13 @@ fn main() {
         poloto::build::markers([24], [])
     ));
 
-    let opt = poloto::render::render_opt();
-    let (_, by) = poloto::ticks::bounds(&data, &opt);
-    let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
-    let ytick_fmt = poloto::ticks::from_default(by);
+    let data = data.build("title", "x", "y");
+    let data = data
+        .with_opt(poloto::render::render_opt())
+        .build("title", "x", "y");
+    let data = data
+        .with_xticks(poloto::ticks::from_iter((0..).step_by(6)))
+        .build("title", "x", "y");
 
-    let pp = poloto::plot_with(
-        data,
-        opt,
-        poloto::plot_fmt(
-            "Number of rides at theme park hourly",
-            "Hour",
-            "Number of rides",
-            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v)),
-            ytick_fmt,
-        ),
-    );
-
-    poloto::simple_stdout(pp)
+    poloto::simple_stdout(plotter)
 }

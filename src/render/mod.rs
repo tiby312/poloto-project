@@ -327,65 +327,58 @@ impl RenderOptions {
     }
 }
 
-impl<T: Renderable> Renderable for &T {
-    fn get_dim(&self) -> [f64; 2] {
-        (*self).get_dim()
-    }
+// impl<T: Renderable> Renderable for &T {
+//     fn get_dim(&self) -> [f64; 2] {
+//         (*self).get_dim()
+//     }
 
-    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
-        (*self).bounds()
-    }
-    fn render<X: PlotNum, Y: PlotNum>(
-        &self,
-        writer: &mut hypermelon::ElemWrite,
-        plots: &mut impl build::PlotIterator<X, Y>,
-        base: &mut dyn BaseFmt<X = X, Y = Y>,
-        boundx: &DataBound<X>,
-        boundy: &DataBound<Y>,
-    ) -> fmt::Result {
-        (*self).render(writer, plots, base, boundx, boundy)
-    }
-}
+//     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
+//         (*self).bounds()
+//     }
+//     fn render<X: PlotNum, Y: PlotNum>(
+//         &self,
+//         writer: &mut hypermelon::ElemWrite,
+//         plots: &mut impl build::PlotIterator<X, Y>,
+//         base: &mut dyn BaseFmt<X = X, Y = Y>,
+//         boundx: &DataBound<X>,
+//         boundy: &DataBound<Y>,
+//     ) -> fmt::Result {
+//         (*self).render(writer, plots, base, boundx, boundy)
+//     }
+// }
 
-impl Renderable for RenderOptions {
-    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
-        (&self.boundx, &self.boundy)
-    }
-    fn get_dim(&self) -> [f64; 2] {
-        [self.width, self.height]
-    }
-    fn render<X: PlotNum, Y: PlotNum>(
-        &self,
-        writer: &mut hypermelon::ElemWrite,
-        plots: &mut impl build::PlotIterator<X, Y>,
-        base: &mut dyn BaseFmt<X = X, Y = Y>,
-        boundx: &DataBound<X>,
-        boundy: &DataBound<Y>,
-    ) -> fmt::Result {
-        //let mut writer = hypermelon::ElemWrite::new(writer);
+// impl Renderable for RenderOptions {
+//     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
+//         (&self.boundx, &self.boundy)
+//     }
+//     fn get_dim(&self) -> [f64; 2] {
+//         [self.width, self.height]
+//     }
+//     fn render<X: PlotNum, Y: PlotNum>(
+//         &self,
+//         writer: &mut hypermelon::ElemWrite,
+//         plots: &mut impl build::PlotIterator<X, Y>,
+//         base: &mut dyn BaseFmt<X = X, Y = Y>,
+//         boundx: &DataBound<X>,
+//         boundy: &DataBound<Y>,
+//     ) -> fmt::Result {
+//         //let mut writer = hypermelon::ElemWrite::new(writer);
+//         todo!()
+//     }
+// }
+// pub trait Renderable {
+//     fn get_dim(&self) -> [f64; 2];
 
-        writer.render(
-            hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
-        )?;
-
-        render::render_plot::render_plot(writer, boundx, boundy, self, plots)?;
-
-        render::render_base::render_base(writer, boundx, boundy, base, self)
-    }
-}
-pub trait Renderable {
-    fn get_dim(&self) -> [f64; 2];
-
-    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound);
-    fn render<X: PlotNum, Y: PlotNum>(
-        &self,
-        writer: &mut hypermelon::ElemWrite,
-        plots: &mut impl build::PlotIterator<X, Y>,
-        base: &mut dyn BaseFmt<X = X, Y = Y>,
-        boundx: &DataBound<X>,
-        boundy: &DataBound<Y>,
-    ) -> fmt::Result;
-}
+//     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound);
+//     fn render<X: PlotNum, Y: PlotNum>(
+//         &self,
+//         writer: &mut hypermelon::ElemWrite,
+//         plots: &mut impl build::PlotIterator<X, Y>,
+//         base: &mut dyn BaseFmt<X = X, Y = Y>,
+//         boundx: &DataBound<X>,
+//         boundy: &DataBound<Y>,
+//     ) -> fmt::Result;
+// }
 
 ///
 /// Build a [`RenderOptions`]
@@ -401,129 +394,213 @@ pub fn render_opt_builder() -> RenderOptionsBuilder {
 ///
 /// Link some plots with a way to render them.
 ///
-pub struct Data<X, Y, P> {
+pub struct Data<X, Y, P, TX, TY> {
+    opt: RenderOptions,
     boundx: ticks::DataBound<X>,
     boundy: ticks::DataBound<Y>,
+    tickx: TX,
+    ticky: TY,
     plots: P,
 }
 
-impl<X, Y, P> Data<X, Y, P> {
-    pub fn new(mut plots: P) -> Data<X, Y, P>
+//TODO plot iterator should use associated types instead to reduce the number of type arguments?
+impl<
+        X,
+        Y,
+        P: build::marker::Markerable<X, Y>,
+        TX: TickFormat<Num = X>,
+        TY: TickFormat<Num = Y>,
+    > Data<X, Y, P, TX, TY>
+{
+    pub fn new(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<X, Y, P, TX, TY>
     where
         P: build::marker::Markerable<X, Y>,
         X: PlotNum,
         Y: PlotNum,
     {
+        //TODO don't do this until render step?
+        //TODO after this, should use new trait?
         let mut area = build::marker::Area::new();
         plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
 
         Data {
+            opt,
             boundx,
             boundy,
             plots,
+            ticky,
+            tickx,
         }
     }
 
-    pub fn bounds(&self) -> (&ticks::DataBound<X>, &ticks::DataBound<Y>) {
-        (&self.boundx, &self.boundy)
+    pub fn with_xticks<TTT: TickFormat<Num = X>>(self, tickx: TTT) -> Data<X, Y, P, TTT, TY> {
+        Data {
+            opt: self.opt,
+            boundx: self.boundx,
+            boundy: self.boundy,
+            tickx,
+            ticky: self.ticky,
+            plots: self.plots,
+        }
+    }
+
+    pub fn build<A: Display, B: Display, C: Display>(
+        self,
+        title: A,
+        xname: B,
+        yname: C,
+    ) -> Plotter<X, Y, P, TX, TY, SimplePlotFormatter<A, B, C>> {
+        Plotter {
+            data: self,
+            base: SimplePlotFormatter {
+                title,
+                xname,
+                yname,
+            },
+        }
     }
 }
 
-pub fn plot_with<X, Y, P: build::PlotIterator<X, Y>, K: Renderable, A: BaseFmt<X = X, Y = Y>>(
-    data: Data<X, Y, P>,
-    canvas: K,
-    base: A,
-) -> Plotter<P, K, A> {
-    Plotter {
-        plots: data.plots,
-        base,
-        boundx: data.boundx,
-        boundy: data.boundy,
-        canvas,
+pub struct Themer<R: RenderElem>(R);
+impl<R: RenderElem> Themer<R> {
+    pub fn to_stdout(self) {
+        hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap();
+    }
+}
+impl<R: RenderElem> RenderElem for Themer<R> {
+    type Tail = R::Tail;
+
+    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        self.0.render_head(w)
     }
 }
 
 ///
 /// Created by [`plot_with`]
 ///
-pub struct Plotter<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> {
-    canvas: K,
-    boundx: DataBound<B::X>,
-    boundy: DataBound<B::Y>,
-    plots: P,
+pub struct Plotter<X, Y, P, TX, TY, B: BaseFmt> {
+    data: Data<X, Y, P, TX, TY>,
     base: B,
 }
 
-impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> hypermelon::RenderElem
-    for Plotter<P, K, B>
+impl<
+        X: PlotNum,
+        Y: PlotNum,
+        P: build::PlotIterator<X, Y>,
+        TX: TickFormat<Num = X>,
+        TY: TickFormat<Num = Y>,
+        B: BaseFmt,
+    > Plotter<X, Y, P, TX, TY, B>
+{
+    pub fn simple_theme(self) -> Themer<impl hypermelon::RenderElem> {
+        let header = simple_theme::DefaultHeader::new();
+
+        let style = hypermelon::build::elem("style").append(simple_theme::simple_theme());
+
+        Themer(header.append(style).append(self))
+    }
+    pub fn simple_theme_dark(self) -> Themer<impl hypermelon::RenderElem> {
+        let header = simple_theme::DefaultHeader::new();
+
+        let style = hypermelon::build::elem("style").append(simple_theme::simple_theme_dark());
+
+        Themer(header.append(style).append(self))
+    }
+}
+impl<
+        X: PlotNum,
+        Y: PlotNum,
+        P: build::PlotIterator<X, Y>,
+        TX: TickFormat<Num = X>,
+        TY: TickFormat<Num = Y>,
+        B: BaseFmt,
+    > hypermelon::RenderElem for Plotter<X, Y, P, TX, TY, B>
 {
     type Tail = ();
-    fn render_head(mut self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        self.canvas.render(
-            w,
-            &mut self.plots,
+    fn render_head(mut self, writer: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        let (a, b, c) = self
+            .data
+            .tickx
+            .generate(&self.data.boundx, &self.data.opt.boundx);
+        let (d, e, f) = self
+            .data
+            .ticky
+            .generate(&self.data.boundy, &self.data.opt.boundy);
+
+        writer.render(
+            hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
+        )?;
+
+        render::render_plot::render_plot(
+            writer,
+            &self.data.boundx,
+            &self.data.boundy,
+            &self.data.opt,
+            &mut self.data.plots,
+        )?;
+
+        render::render_base::render_base(
+            writer,
+            a,
+            b,
+            c,
+            d,
+            e,
+            f,
+            &self.data.boundx,
+            &self.data.boundy,
             &mut self.base,
-            &self.boundx,
-            &self.boundy,
+            &self.data.opt,
         )
     }
 }
 
-impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> Plotter<P, K, B> {
-    pub fn get_dim(&self) -> [f64; 2] {
-        self.canvas.get_dim()
-    }
+//impl<P: build::PlotIterator<B::X, B::Y>, B: BaseFmt> Plotter<P, B> {
 
-    // ///
-    // /// Use the plot iterators to write out the graph elements.
-    // /// Does not add a svg tag, or any styling elements.
-    // /// Use this if you want to embed a svg into your html.
-    // /// You will just have to add your own svg sag and then supply styling.
-    // ///
-    // /// Panics if the render fails.
-    // ///
-    // /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
-    // /// this function will mutable borrow the Plotter and leave it with empty data.
-    // ///
-    // /// ```
-    // /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    // /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
-    // /// let mut k=String::new();
-    // /// plotter.render(&mut k);
-    // /// ```
-    // pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
-    //     self.canvas.render(
-    //         &mut writer,
-    //         &mut self.plots,
-    //         &mut self.base,
-    //         &self.boundx,
-    //         &self.boundy,
-    //     )
-    // }
-}
+// ///
+// /// Use the plot iterators to write out the graph elements.
+// /// Does not add a svg tag, or any styling elements.
+// /// Use this if you want to embed a svg into your html.
+// /// You will just have to add your own svg sag and then supply styling.
+// ///
+// /// Panics if the render fails.
+// ///
+// /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
+// /// this function will mutable borrow the Plotter and leave it with empty data.
+// ///
+// /// ```
+// /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
+// /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
+// /// let mut k=String::new();
+// /// plotter.render(&mut k);
+// /// ```
+// pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
+//     self.canvas.render(
+//         &mut writer,
+//         &mut self.plots,
+//         &mut self.base,
+//         &self.boundx,
+//         &self.boundy,
+//     )
+// }
+//}
 
 ///
 /// A simple plot formatter that is composed of
 /// display objects as TickFormats.
 ///
-pub struct SimplePlotFormatter<A, B, C, D, E> {
+pub struct SimplePlotFormatter<A, B, C> {
     pub(crate) title: A,
     pub(crate) xname: B,
     pub(crate) yname: C,
-    pub(crate) tickx: D,
-    pub(crate) ticky: E,
 }
-impl<A, B, C, D, E> BaseFmt for SimplePlotFormatter<A, B, C, D, E>
+impl<A, B, C> BaseFmt for SimplePlotFormatter<A, B, C>
 where
     A: Display,
     B: Display,
     C: Display,
-    D: TickFormat,
-    E: TickFormat,
 {
-    type X = D::Num;
-    type Y = E::Num;
     fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.title)
     }
@@ -532,41 +609,5 @@ where
     }
     fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.yname)
-    }
-    fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
-        self.tickx.write_tick(writer, val)
-    }
-    fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
-        self.ticky.write_tick(writer, val)
-    }
-    fn write_xwher(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        ind: ticks::IndexRequester,
-    ) -> fmt::Result {
-        self.tickx.write_where(writer, ind)
-    }
-    fn write_ywher(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        ind: ticks::IndexRequester,
-    ) -> fmt::Result {
-        self.ticky.write_where(writer, ind)
-    }
-
-    fn next_xtick(&mut self) -> Option<Self::X> {
-        self.tickx.next_tick()
-    }
-
-    fn next_ytick(&mut self) -> Option<Self::Y> {
-        self.ticky.next_tick()
-    }
-
-    fn xdash_size(&self) -> Option<f64> {
-        self.tickx.dash_size()
-    }
-
-    fn ydash_size(&self) -> Option<f64> {
-        self.ticky.dash_size()
     }
 }
