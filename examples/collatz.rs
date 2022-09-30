@@ -23,8 +23,9 @@ fn main() {
     let dyn_plots = poloto::build::plots_dyn(
         (1000..1006)
             .map(|i| {
-                let name = formatm!("c({})", i);
-                poloto::buffered_plot((0..).zip(collatz(i))).line(name)
+                let name = hypermelon::format_move!("c({})", i);
+                let it = (0..).zip(collatz(i));
+                poloto::buffered_plot(it).line(name)
             })
             .collect(),
     );

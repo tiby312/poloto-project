@@ -7,7 +7,6 @@ use super::*;
 
 pub mod bar;
 pub mod crop;
-pub mod iter;
 pub mod unwrapper;
 use marker::Area;
 

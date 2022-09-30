@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 fn main() {
     // hourly trend over one day.
     let trend = vec![
@@ -8,7 +7,7 @@ fn main() {
     let it = (0..).zip(trend.iter().copied());
 
     let plots = poloto::plots!(
-        it.cloned_plot().histogram(""),
+        poloto::cloned_plot(it).histogram(""),
         poloto::build::markers([24], [])
     );
 

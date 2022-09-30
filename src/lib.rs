@@ -67,13 +67,9 @@ use hypermelon::prelude::*;
 ///
 pub mod prelude {
     pub use super::build::crop::Croppable;
-    pub use super::build::iter::IterBuilder;
     pub use super::build::PlotIteratorExt;
-    pub use super::formatm;
     pub use super::output_zip::OutputZip;
     pub use super::plots;
-    //pub use super::quick_fmt;
-    //pub use super::quick_fmt_opt;
 }
 
 use fmt::Display;
@@ -103,14 +99,14 @@ pub fn simple_stdout<E: RenderElem>(elem: E) {
     hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
 }
 
-/// Shorthand for `disp_const(move |w|write!(w,...))`
-/// Similar to `std::format_args!()` except has a more flexible lifetime.
-#[macro_export]
-macro_rules! formatm {
-    ($($arg:tt)*) => {
-        $crate::disp_const(move |w| write!(w,$($arg)*))
-    }
-}
+// /// Shorthand for `disp_const(move |w|write!(w,...))`
+// /// Similar to `std::format_args!()` except has a more flexible lifetime.
+// #[macro_export]
+// macro_rules! formatm {
+//     ($($arg:tt)*) => {
+//         $crate::disp_const(move |w| write!(w,$($arg)*))
+//     }
+// }
 
 ///
 /// Macro to chain multiple plots together instead of calling [`chain`](build::PlotIteratorExt::chain) repeatedly.
@@ -132,128 +128,23 @@ macro_rules! plots {
     };
 }
 
-// ///
-// /// Create a simple bar graph
-// ///
-// #[macro_export]
-// macro_rules! simple_bar {
-//     ($data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
-//         use $crate::prelude::*;
-
-//         let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
-
-//         let opt = $crate::render::render_opt_builder()
-//             .with_tick_lines([true, false])
-//             .build();
-
-//         let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
-
-//         let (bx, _) = $crate::ticks::bounds(&data, &opt);
-
-//         let xtick_fmt = $crate::ticks::from_default(bx);
-
-//         $crate::plot_with(
-//             data,
-//             opt,
-//             $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
-//         )
-//     }};
-//     ($opt:expr,$data:expr,$markers:expr,$title:expr,$xname:expr,$yname:expr) => {{
-//         use $crate::prelude::*;
-
-//         let opt = $opt;
-//         let (bar, ytick_fmt) = $crate::build::bar::gen_bar("", $data);
-
-//         let data = $crate::data(bar.chain($crate::build::markers($markers, [])));
-
-//         let (bx, _) = $crate::ticks::bounds(&data, &opt);
-
-//         let xtick_fmt = $crate::ticks::from_default(bx);
-
-//         $crate::plot_with(
-//             data,
-//             opt,
-//             $crate::plot_fmt($title, $xname, $yname, xtick_fmt, ytick_fmt),
-//         )
-//     }};
-// }
-
-// ///
-// /// Create plots without having to manually create the ticks
-// /// for each axis.
-// ///
-// /// ```
-// /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-// /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
-// /// let mut k=String::new();
-// /// plotter.render(&mut k);
-// /// ```
-// ///
-// #[macro_export]
-// macro_rules! quick_fmt {
-//     ($title:expr,$xname:expr,$yname:expr,$a:expr) => {{
-//         let opt = $crate::render::render_opt_builder().build();
-//         $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a)
-//     }};
-//     ($title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
-//         let opt = $crate::render::render_opt_builder().build();
-//         $crate::quick_fmt_opt!(opt,$title,$xname,$yname,$a,$($x),*)
-//     }};
-// }
-
-// ///
-// /// Create plots without having to manually create the ticks
-// /// for each axis.
-// ///
-// /// ```
-// /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-// /// let canvas=poloto::render::canvas();
-// /// let plotter=poloto::quick_fmt_opt!(canvas,"title","x","y",poloto::build::line("",data));
-// /// let mut k=String::new();
-// /// plotter.render(&mut k);
-// /// ```
-// ///
-// #[macro_export]
-// macro_rules! quick_fmt_opt {
-//     ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr) => {{
-//         let opt=$opt;
-//         let data = $crate::data($crate::plots!($a));
-//         let (bx, by) = $crate::ticks::bounds(&data, &opt);
-//         let xt = $crate::ticks::from_default(bx);
-//         let yt = $crate::ticks::from_default(by);
-//         $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
-//     }};
-//     ($opt:expr,$title:expr,$xname:expr,$yname:expr,$a:expr,$( $x:expr ),*) => {{
-//         let opt=$opt;
-//         let data = $crate::data($crate::plots!($a,$($x),*));
-//         let (bx, by) = $crate::ticks::bounds(&data, &opt);
-//         let xt = $crate::ticks::from_default(bx);
-//         let yt = $crate::ticks::from_default(by);
-//         $crate::plot_with(data, opt, $crate::plot_fmt($title, $xname, $yname, xt, yt))
-//     }};
-// }
-
-//pub use render::plot_with;
-
 pub fn buffered_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
     iter: I,
 ) -> build::SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
 where
     I::Item: Clone + build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
-    use build::iter::IterBuilder;
-    iter.buffered_plot()
+    build::SinglePlotBuilder::new_buffered(build::unwrapper::UnwrapperIter(iter))
 }
 
 pub fn cloned_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
     iter: I,
-) -> build::SinglePlotBuilder<X, Y, build::iter::UnwrapperIter<I>>
+) -> build::SinglePlotBuilder<X, Y, build::unwrapper::UnwrapperIter<I>>
 where
     I: Clone,
     I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
-    use build::iter::IterBuilder;
-    iter.cloned_plot()
+    build::SinglePlotBuilder::new_cloned(build::unwrapper::UnwrapperIter(iter))
 }
 
 ///
@@ -302,4 +193,3 @@ pub fn range_iter(
     let divf = num as f64;
     (0..num).map(move |x| min + (x as f64 / divf) * diff)
 }
-

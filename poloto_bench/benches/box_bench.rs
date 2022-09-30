@@ -12,22 +12,16 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     let p = poloto::plots!(
-        x.zip_output(f64::tan)
-            .crop_above(10.0)
-            .crop_below(-10.0)
-            .crop_left(2.0)
-            .buffered_plot()
-            .line("tan(x)"),
-        x.clone()
-            .map(|x| [x, 2.0 * x.cos()])
-            .crop_above(1.4)
-            .buffered_plot()
+        poloto::buffered_plot(
+            x.zip_output(f64::tan)
+                .crop_above(10.0)
+                .crop_below(-10.0)
+                .crop_left(2.0)
+        )
+        .line("tan(x)"),
+        poloto::buffered_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
             .line("2*cos(x)"),
-        x.clone()
-            .map(|x| [x, 2.0 * x.cos()])
-            .crop_above(1.4)
-            .cloned_plot()
-            .line("2*cos(x)")
+        poloto::cloned_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)).line("2*cos(x)")
     );
 
     poloto::data(p)
@@ -41,25 +35,20 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
 
     let p = poloto::plots!(
         poloto::build::BoxedPlot::new(
-            x.zip_output(f64::tan)
-                .crop_above(10.0)
-                .crop_below(-10.0)
-                .crop_left(2.0)
-                .buffered_plot()
-                .line("tan(x)"),
+            poloto::buffered_plot(
+                x.zip_output(f64::tan)
+                    .crop_above(10.0)
+                    .crop_below(-10.0)
+                    .crop_left(2.0)
+            )
+            .line("tan(x)"),
         ),
         poloto::build::BoxedPlot::new(
-            x.clone()
-                .map(|x| [x, 2.0 * x.cos()])
-                .crop_above(1.4)
-                .buffered_plot()
+            poloto::buffered_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
                 .line("2*cos(x)"),
         ),
         poloto::build::BoxedPlot::new(
-            x.clone()
-                .map(|x| [x, 2.0 * x.cos()])
-                .crop_above(1.4)
-                .cloned_plot()
+            poloto::cloned_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
                 .line("2*cos(x)"),
         )
     );
