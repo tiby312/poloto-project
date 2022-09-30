@@ -17,8 +17,11 @@ fn main() {
 
     let plots = plots!(a, b, c, d);
 
-    poloto::data(plots)
-        .labels("gaussian", "x", "y")
-        .simple_theme()
-        .render_stdout();
+    let f = poloto::data(plots).build();
+
+    let bound = f.boundx().clone();
+
+    let k = hypermelon::format_move!("gaussian {} to {}", bound.min, bound.max);
+
+    f.labels(k, "x", "y").simple_theme().render_stdout();
 }

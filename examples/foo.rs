@@ -33,6 +33,7 @@ fn main() {
 
     poloto::data(plots)
         .with_xticks(steps)
+        .build()
         .labels("title", "x", "y")
         .simple_theme()
         .render_stdout();

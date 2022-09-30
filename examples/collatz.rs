@@ -39,6 +39,7 @@ fn main() {
 
     let plotter = poloto::data(plots)
         .with_opt(opt)
+        .build()
         .labels("collatz", "x", "y");
 
     let style = hb::elem("style")

@@ -2,7 +2,8 @@
 //! Tools to render plots
 //!
 
-use crate::*;
+use super::*;
+use crate::build::PlotIterator;
 mod render_base;
 mod render_plot;
 
@@ -438,12 +439,62 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         }
     }
 
-    pub fn labels<A: Display, B: Display, C: Display>(
+    pub fn build(mut self) -> DataBuilt<P, TX::It, TY::It, TX::Fmt, TY::Fmt> {
+        let mut area = build::marker::Area::new();
+        self.plots.increase_area(&mut area);
+        let (boundx, boundy) = area.build();
+
+        let (a, b, c) = self.tickx.generate(&boundx, &self.opt.boundx);
+        let (d, e, f) = self.ticky.generate(&boundy, &self.opt.boundy);
+
+        DataBuilt {
+            opt: self.opt,
+            xtick_iter: b,
+            ytick_iter: e,
+            xtick_fmt: c,
+            ytick_fmt: f,
+            xres: a,
+            yres: d,
+            plots: self.plots,
+            boundx,
+            boundy,
+        }
+    }
+}
+
+pub struct DataBuilt<P: PlotIterator, A, B, C, D> {
+    opt: RenderOptions,
+    xtick_iter: A,
+    ytick_iter: B,
+    xtick_fmt: C,
+    ytick_fmt: D,
+    xres: crate::ticks::TickRes,
+    yres: crate::ticks::TickRes,
+    plots: P,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
+}
+impl<P, A, B, C, D> DataBuilt<P, A, B, C, D>
+where
+    P: PlotIterator,
+    A: IntoIterator<Item = P::X>,
+    B: IntoIterator<Item = P::Y>,
+    C: crate::ticks::TickFmt<P::X>,
+    D: crate::ticks::TickFmt<P::Y>,
+{
+    pub fn boundx(&self) -> &DataBound<P::X> {
+        &self.boundx
+    }
+    pub fn boundy(&self) -> &DataBound<P::Y> {
+        &self.boundy
+    }
+
+    pub fn labels<AA: Display, BB: Display, CC: Display>(
         self,
-        title: A,
-        xname: B,
-        yname: C,
-    ) -> Plotter<P, TX, TY, SimplePlotFormatter<A, B, C>> {
+        title: AA,
+        xname: BB,
+        yname: CC,
+    ) -> Plotter<P, A, B, C, D, SimplePlotFormatter<AA, BB, CC>> {
         Plotter {
             data: self,
             base: SimplePlotFormatter {
@@ -455,38 +506,21 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
     }
 }
 
-pub struct Themer<R: RenderElem>(R);
-impl<R: RenderElem> Themer<R> {
-    pub fn render_stdout(self) {
-        hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap();
-    }
-
-    pub fn render_fmt_write<T: fmt::Write>(self, w: T) -> fmt::Result {
-        hypermelon::render(self.0, w)
-    }
-
-    pub fn render_io_write<T: std::io::Write>(self, w: T) -> std::fmt::Result {
-        hypermelon::render(self.0, hypermelon::tools::upgrade_write(w))
-    }
-}
-impl<R: RenderElem> RenderElem for Themer<R> {
-    type Tail = R::Tail;
-
-    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        self.0.render_head(w)
-    }
-}
-
 ///
 /// Created by [`plot_with`]
 ///
-pub struct Plotter<P, TX, TY, B: BaseFmt> {
-    data: Data<P, TX, TY>,
-    base: B,
+pub struct Plotter<P: PlotIterator, A, B, C, D, BB: BaseFmt> {
+    data: DataBuilt<P, A, B, C, D>,
+    base: BB,
 }
 
-impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>, B: BaseFmt>
-    Plotter<P, TX, TY, B>
+impl<P: build::PlotIterator, A, B, C, D, BB: BaseFmt> Plotter<P, A, B, C, D, BB>
+where
+    P: PlotIterator,
+    A: IntoIterator<Item = P::X>,
+    B: IntoIterator<Item = P::Y>,
+    C: crate::ticks::TickFmt<P::X>,
+    D: crate::ticks::TickFmt<P::Y>,
 {
     pub fn simple_theme(self) -> Themer<impl hypermelon::RenderElem> {
         let header = simple_theme::DefaultHeader::new();
@@ -503,18 +537,25 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>, B: Base
         Themer(header.append(style).append(self))
     }
 }
-impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>, B: BaseFmt>
-    hypermelon::RenderElem for Plotter<P, TX, TY, B>
+
+impl<P: build::PlotIterator, A, B, C, D, BB: BaseFmt> hypermelon::RenderElem
+    for Plotter<P, A, B, C, D, BB>
+where
+    P: PlotIterator,
+    A: IntoIterator<Item = P::X>,
+    B: IntoIterator<Item = P::Y>,
+    C: crate::ticks::TickFmt<P::X>,
+    D: crate::ticks::TickFmt<P::Y>,
 {
     type Tail = ();
     fn render_head(mut self, writer: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         //TODO after this, should use new trait?
-        let mut area = build::marker::Area::new();
-        self.data.plots.increase_area(&mut area);
-        let (boundx, boundy) = area.build();
+        // let mut area = build::marker::Area::new();
+        // self.data.plots.increase_area(&mut area);
+        // let (boundx, boundy) = area.build();
 
-        let (a, b, c) = self.data.tickx.generate(&boundx, &self.data.opt.boundx);
-        let (d, e, f) = self.data.ticky.generate(&boundy, &self.data.opt.boundy);
+        //let (a, b, c) = self.data.tickx.generate(&boundx, &self.data.opt.boundx);
+        //let (d, e, f) = self.data.ticky.generate(&boundy, &self.data.opt.boundy);
 
         writer.render(
             hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
@@ -522,22 +563,22 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>, B: Base
 
         render::render_plot::render_plot(
             writer,
-            &boundx,
-            &boundy,
+            &self.data.boundx,
+            &self.data.boundy,
             &self.data.opt,
             &mut self.data.plots,
         )?;
 
         render::render_base::render_base(
             writer,
-            a,
-            b,
-            c,
-            d,
-            e,
-            f,
-            &boundx,
-            &boundy,
+            self.data.xres,
+            self.data.xtick_iter,
+            self.data.xtick_fmt,
+            self.data.yres,
+            self.data.ytick_iter,
+            self.data.ytick_fmt,
+            &self.data.boundx,
+            &self.data.boundy,
             &mut self.base,
             &self.data.opt,
         )
@@ -597,5 +638,27 @@ where
     }
     fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.yname)
+    }
+}
+
+pub struct Themer<R: RenderElem>(R);
+impl<R: RenderElem> Themer<R> {
+    pub fn render_stdout(self) {
+        hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap();
+    }
+
+    pub fn render_fmt_write<T: fmt::Write>(self, w: T) -> fmt::Result {
+        hypermelon::render(self.0, w)
+    }
+
+    pub fn render_io_write<T: std::io::Write>(self, w: T) -> std::fmt::Result {
+        hypermelon::render(self.0, hypermelon::tools::upgrade_write(w))
+    }
+}
+impl<R: RenderElem> RenderElem for Themer<R> {
+    type Tail = R::Tail;
+
+    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        self.0.render_head(w)
     }
 }
