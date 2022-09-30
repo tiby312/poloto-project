@@ -36,44 +36,28 @@ pub fn month_str(month: u32) -> &'static str {
 }
 
 pub struct UnixTimeTickFmt<T: TimeZone> {
+    timezone: T,
+}
+
+impl<T: TimeZone> UnixTimeTickFmt<T> {
+    pub fn new(timezone: T) -> Self {
+        UnixTimeTickFmt { timezone }
+    }
+}
+
+pub struct UnixTimeFmt<T: TimeZone + Display> {
     step: StepUnit,
     timezone: T,
     start: UnixTime,
     footnote: Option<char>,
-    axis: Axis,
-    ticks: std::vec::IntoIter<UnixTime>,
 }
-impl<T: TimeZone> UnixTimeTickFmt<T> {
-    pub fn step(&self) -> StepUnit {
-        self.step
-    }
-    pub fn timezone(&self) -> &T {
-        &self.timezone
-    }
-    pub fn start(&self) -> UnixTime {
-        self.start
-    }
-    pub fn axis(&self) -> Axis {
-        self.axis
-    }
-}
-impl<T: TimeZone + Display> TickFormat for UnixTimeTickFmt<T>
+
+impl<T> crate::ticks::TickFmt<UnixTime> for UnixTimeFmt<T>
 where
+    T: chrono::TimeZone + Display,
     T::Offset: Display,
 {
-    type Num = UnixTime;
-
-    fn next_tick(&mut self) -> Option<Self::Num> {
-        self.ticks.next()
-    }
-    fn dash_size(&self) -> Option<f64> {
-        None
-    }
-    fn write_tick(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
+    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &UnixTime) -> std::fmt::Result {
         if let Some(footnote) = self.footnote.take() {
             write!(
                 writer,
@@ -103,6 +87,66 @@ where
         write!(writer, "{}{} in {}", footnote, val, self.step,)?;
         self.footnote = Some(footnote);
         Ok(())
+    }
+}
+
+impl<T: TimeZone + Display> TickFormat for UnixTimeTickFmt<T>
+where
+    T::Offset: Display,
+{
+    type Num = UnixTime;
+    type It = Vec<UnixTime>;
+    type Fmt = UnixTimeFmt<T>;
+
+    fn generate(
+        self,
+        data: &ticks::DataBound<Self::Num>,
+        canvas: &RenderOptionsBound,
+    ) -> (TickRes, Self::It, Self::Fmt) {
+        let range = [data.min, data.max];
+
+        assert!(range[0] <= range[1]);
+        let ideal_num_steps = canvas.ideal_num_steps;
+
+        let ideal_num_steps = ideal_num_steps.max(2);
+
+        let [start, end] = range;
+        let mut t = tick_finder::BestTickFinder::new(end, ideal_num_steps);
+
+        let steps_yr = &[1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000, 2000, 5000];
+        let steps_mo = &[1, 2, 3, 6];
+        let steps_dy = &[1, 2, 4, 5, 7];
+        let steps_hr = &[1, 2, 4, 6];
+        let steps_mi = &[1, 2, 10, 15, 30];
+        let steps_se = &[1, 2, 5, 10, 15, 30];
+
+        let d = start.datetime(&self.timezone);
+        use StepUnit::*;
+        t.consider_meta(YR, UnixYearGenerator { date: d.clone() }, steps_yr);
+        t.consider_meta(MO, UnixMonthGenerator { date: d.clone() }, steps_mo);
+        t.consider_meta(DY, UnixDayGenerator { date: d.clone() }, steps_dy);
+        t.consider_meta(HR, UnixHourGenerator { date: d.clone() }, steps_hr);
+        t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
+        t.consider_meta(SE, UnixSecondGenerator { date: d }, steps_se);
+
+        let ret = t.into_best().unwrap();
+
+        let ticks: Vec<_> = ret.ticks.into_iter().collect();
+
+        assert!(ticks.len() >= 2);
+
+        let start = ticks[0];
+
+        (
+            TickRes { dash_size: None },
+            ticks,
+            UnixTimeFmt {
+                timezone: self.timezone.clone(),
+                step: ret.unit_data,
+                footnote: None,
+                start,
+            },
+        )
     }
 }
 
@@ -156,65 +200,6 @@ impl std::fmt::Display for StepUnit {
     }
 }
 
-impl HasDefaultTicks for UnixTime {
-    type Fmt = UnixTimeTickFmt<Utc>;
-    fn generate(bound: crate::ticks::Bound<Self>) -> Self::Fmt {
-        unixtime_ticks(bound, &Utc)
-    }
-}
-
-pub fn unixtime_ticks<T: TimeZone + Display>(
-    bound: crate::ticks::Bound<UnixTime>,
-    timezone: &T,
-) -> UnixTimeTickFmt<T>
-where
-    T::Offset: Display,
-{
-    let range = [bound.data.min, bound.data.max];
-
-    assert!(range[0] <= range[1]);
-    let ideal_num_steps = bound.canvas.ideal_num_steps;
-
-    let ideal_num_steps = ideal_num_steps.max(2);
-
-    let [start, end] = range;
-    let mut t = tick_finder::BestTickFinder::new(end, ideal_num_steps);
-
-    let steps_yr = &[1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000, 2000, 5000];
-    let steps_mo = &[1, 2, 3, 6];
-    let steps_dy = &[1, 2, 4, 5, 7];
-    let steps_hr = &[1, 2, 4, 6];
-    let steps_mi = &[1, 2, 10, 15, 30];
-    let steps_se = &[1, 2, 5, 10, 15, 30];
-
-    let d = start.datetime(timezone);
-    use StepUnit::*;
-    t.consider_meta(YR, UnixYearGenerator { date: d.clone() }, steps_yr);
-    t.consider_meta(MO, UnixMonthGenerator { date: d.clone() }, steps_mo);
-    t.consider_meta(DY, UnixDayGenerator { date: d.clone() }, steps_dy);
-    t.consider_meta(HR, UnixHourGenerator { date: d.clone() }, steps_hr);
-    t.consider_meta(MI, UnixMinuteGenerator { date: d.clone() }, steps_mi);
-    t.consider_meta(SE, UnixSecondGenerator { date: d }, steps_se);
-
-    let ret = t.into_best().unwrap();
-
-    let ticks: Vec<_> = ret.ticks.into_iter().collect();
-
-    assert!(ticks.len() >= 2);
-
-    let axis = bound.canvas.axis;
-    let start = ticks[0];
-
-    UnixTimeTickFmt {
-        ticks: ticks.into_iter(),
-        timezone: timezone.clone(),
-        step: ret.unit_data,
-        footnote: None,
-        axis,
-        start,
-    }
-}
-
 impl plotnum::AsPlotnum for &UnixTime {
     type Target = UnixTime;
     fn as_plotnum(&self) -> &Self::Target {
@@ -230,6 +215,11 @@ impl plotnum::AsPlotnum for &mut UnixTime {
 }
 
 impl PlotNum for UnixTime {
+    type Fmt = UnixTimeTickFmt<Utc>;
+    fn default_ticks() -> Self::Fmt {
+        UnixTimeTickFmt::new(Utc)
+    }
+
     #[inline(always)]
     fn is_hole(&self) -> bool {
         false
