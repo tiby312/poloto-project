@@ -10,12 +10,15 @@ fn main() {
     };
 
     let r = poloto::range_iter([-5.0, 5.0], 200);
-    let a = r.zip_output(gau(1.0, 0.)).buffered_plot().line("σ=1.0");
-    let b = r.zip_output(gau(0.5, 0.)).buffered_plot().line("σ=0.5");
-    let c = r.zip_output(gau(0.3, 0.)).buffered_plot().line("σ=0.3");
+    let a = poloto::buffered_plot(r.zip_output(gau(1.0, 0.))).line("σ=1.0");
+    let b = poloto::buffered_plot(r.zip_output(gau(0.5, 0.))).line("σ=0.5");
+    let c = poloto::buffered_plot(r.zip_output(gau(0.3, 0.))).line("σ=0.3");
     let d = poloto::build::origin();
 
-    let plots = quick_fmt!("gaussian", "x", "y", a, b, c, d);
+    let plots = plots!(a, b, c, d);
 
-    poloto::simple_stdout(plots)
+    poloto::data(plots)
+        .labels("gaussian", "x", "y")
+        .simple_theme()
+        .render_stdout();
 }

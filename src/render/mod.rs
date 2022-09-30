@@ -452,8 +452,16 @@ impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat> D
 
 pub struct Themer<R: RenderElem>(R);
 impl<R: RenderElem> Themer<R> {
-    pub fn to_stdout(self) {
+    pub fn render_stdout(self) {
         hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap();
+    }
+
+    pub fn render_fmt_write<T: fmt::Write>(self, w: T) -> fmt::Result {
+        hypermelon::render(self.0, w)
+    }
+
+    pub fn render_io_write<T: std::io::Write>(self, w: T) -> std::fmt::Result {
+        hypermelon::render(self.0, hypermelon::tools::upgrade_write(w))
     }
 }
 impl<R: RenderElem> RenderElem for Themer<R> {

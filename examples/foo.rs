@@ -1,3 +1,5 @@
+use poloto::ticks::TickFmt;
+use poloto::ticks::TickFormat;
 fn main() {
     let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
@@ -24,11 +26,14 @@ fn main() {
         poloto::build::origin()
     );
 
-    let steps = poloto::ticks::from_iter((0..).step_by(6));
+    let ff = poloto::ticks::DefaultTickFmt
+        .with_ticks(|w, v| write!(w, "{} pee", v))
+        .with_where(|w, _| write!(w, "{}", "chicken"));
+    let steps = poloto::ticks::from_iter((0..).step_by(6)).with_fmt(ff);
 
     poloto::data(plots)
         .with_xticks(steps)
         .labels("title", "x", "y")
         .simple_theme()
-        .to_stdout();
+        .render_stdout();
 }

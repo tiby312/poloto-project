@@ -138,7 +138,63 @@ pub trait TickFmt<N> {
     ) -> std::fmt::Result {
         Ok(())
     }
+    fn with_ticks<F>(self, func: F) -> WithTicky<Self, F>
+    where
+        F: FnMut(&mut dyn std::fmt::Write, &N) -> fmt::Result,
+        Self: Sized,
+    {
+        WithTicky { ticks: self, func }
+    }
+    fn with_where<F>(self, func: F) -> WithWhere<Self, F>
+    where
+        F: FnMut(&mut dyn std::fmt::Write, IndexRequester) -> fmt::Result,
+        Self: Sized,
+    {
+        WithWhere { ticks: self, func }
+    }
 }
+
+pub struct WithWhere<D, F> {
+    ticks: D,
+    func: F,
+}
+
+impl<N, D: TickFmt<N>, F> TickFmt<N> for WithWhere<D, F>
+where
+    F: FnMut(&mut dyn std::fmt::Write, IndexRequester) -> fmt::Result,
+{
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        self.ticks.write_tick(a, val)
+    }
+    fn write_where(
+        &mut self,
+        w: &mut dyn std::fmt::Write,
+        req: IndexRequester,
+    ) -> std::fmt::Result {
+        (self.func)(w, req)
+    }
+}
+
+pub struct WithTicky<D, F> {
+    ticks: D,
+    func: F,
+}
+impl<N, D: TickFmt<N>, F> TickFmt<N> for WithTicky<D, F>
+where
+    F: FnMut(&mut dyn std::fmt::Write, &N) -> fmt::Result,
+{
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        (self.func)(a, val)
+    }
+    fn write_where(
+        &mut self,
+        w: &mut dyn std::fmt::Write,
+        req: IndexRequester,
+    ) -> std::fmt::Result {
+        self.ticks.write_where(w, req)
+    }
+}
+
 pub struct TickRes {
     pub dash_size: Option<f64>,
 }
@@ -155,6 +211,31 @@ pub trait TickFormat {
         data: &ticks::DataBound<Self::Num>,
         canvas: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt);
+
+    fn with_fmt<F: TickFmt<Self::Num>>(self, fmt: F) -> WithFmt<Self, F>
+    where
+        Self: Sized,
+    {
+        WithFmt { ticks: self, fmt }
+    }
+}
+
+pub struct WithFmt<T, F> {
+    ticks: T,
+    fmt: F,
+}
+impl<T: TickFormat, F: TickFmt<T::Num>> TickFormat for WithFmt<T, F> {
+    type Num = T::Num;
+    type It = T::It;
+    type Fmt = F;
+    fn generate(
+        self,
+        data: &ticks::DataBound<Self::Num>,
+        canvas: &RenderOptionsBound,
+    ) -> (TickRes, Self::It, Self::Fmt) {
+        let (a, b, c) = self.ticks.generate(data, canvas);
+        (a, b, self.fmt)
+    }
 }
 
 // pub trait TickFormatExt: TickFormat {

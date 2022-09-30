@@ -55,6 +55,7 @@ impl ticks::TickFmt<i128> for IntFmt {
         }
     }
 }
+
 impl TickFormat for IntegerTickFmt {
     type Num = i128;
     type It = Vec<Self::Num>;

@@ -10,39 +10,16 @@ impl DiscNum for f64 {
     }
 }
 
-pub struct FloatTickFmt {
-    ticks: std::vec::IntoIter<f64>,
-    dash_size: f64,
-    step: f64,
+pub struct FloatTickFmt;
+
+pub struct FloatFmt {
     offset: Option<f64>,
-    axis: crate::Axis,
+    axis: Axis,
+    step: f64,
 }
-impl FloatTickFmt {
-    pub fn step(&self) -> f64 {
-        self.step
-    }
 
-    pub fn axis(&self) -> Axis {
-        self.axis
-    }
-    pub fn offset(&self) -> Option<f64> {
-        self.offset
-    }
-}
-impl TickFormat for FloatTickFmt {
-    type Num = f64;
-
-    fn next_tick(&mut self) -> Option<Self::Num> {
-        self.ticks.next()
-    }
-    fn dash_size(&self) -> Option<f64> {
-        Some(self.dash_size)
-    }
-    fn write_tick(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
+impl crate::ticks::TickFmt<f64> for FloatFmt {
+    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &f64) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {
             let val = *val - offset;
             match self.axis {
@@ -81,31 +58,41 @@ impl TickFormat for FloatTickFmt {
     }
 }
 
-impl HasDefaultTicks for f64 {
-    type Fmt = FloatTickFmt;
-    fn generate(bound: crate::ticks::Bound<f64>) -> Self::Fmt {
-        let range = [bound.data.min, bound.data.max];
-        let ideal_num_steps = bound.canvas.ideal_num_steps;
+impl TickFormat for FloatTickFmt {
+    type Num = f64;
+    type It = Vec<Self::Num>;
+    type Fmt = FloatFmt;
+    fn generate(
+        self,
+        data: &ticks::DataBound<Self::Num>,
+        canvas: &RenderOptionsBound,
+    ) -> (TickRes, Self::It, Self::Fmt) {
+        let range = [data.min, data.max];
+        let ideal_num_steps = canvas.ideal_num_steps;
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (offset, ticks) = tick_layout.generate();
 
         let dash_size = compute_best_dash_1_2_5(
-            tick_layout.step.scale(range, bound.canvas.max),
-            bound.canvas.ideal_dash_size,
+            tick_layout.step.scale(range, canvas.max),
+            canvas.ideal_dash_size,
             tick_layout.normalized_step,
         );
 
-        let axis = bound.canvas.axis;
+        let axis = canvas.axis;
 
-        FloatTickFmt {
-            ticks: ticks.into_iter(),
-            dash_size,
-            offset,
-            axis,
-            step: tick_layout.step,
-        }
+        (
+            TickRes {
+                dash_size: Some(dash_size),
+            },
+            ticks,
+            FloatFmt {
+                offset,
+                axis,
+                step: tick_layout.step,
+            },
+        )
     }
 }
 
@@ -124,6 +111,11 @@ impl plotnum::AsPlotnum for &mut f64 {
 }
 
 impl PlotNum for f64 {
+    type Fmt = FloatTickFmt;
+    fn default_ticks() -> FloatTickFmt {
+        FloatTickFmt
+    }
+
     #[inline(always)]
     fn is_hole(&self) -> bool {
         self.is_nan()

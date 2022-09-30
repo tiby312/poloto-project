@@ -7,7 +7,7 @@ use crate::DiscNum;
 use crate::PlotNum;
 use core::fmt;
 
-//pub mod float;
+pub mod float;
 pub mod integer;
 
 //#[cfg(feature = "timestamp")]
