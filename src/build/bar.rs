@@ -5,30 +5,19 @@ use super::*;
 use std::convert::TryFrom;
 struct BarTickFmt<D> {
     ticks: Vec<D>,
-    steps: std::vec::IntoIter<i128>,
 }
 
-impl<'a, D: Display> TickFormat for BarTickFmt<D> {
-    type Num = i128;
-    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &Self::Num) -> fmt::Result {
+impl<'a, D: Display> crate::ticks::TickFmt<i128> for BarTickFmt<D> {
+    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &i128) -> fmt::Result {
         let j = &self.ticks[usize::try_from(*val).unwrap()];
         write!(writer, "{}", j)
-    }
-    fn dash_size(&self) -> Option<f64> {
-        None
-    }
-    fn next_tick(&mut self) -> Option<Self::Num> {
-        self.steps.next()
     }
 }
 
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
-) -> (
-    impl PlotIterator<X, i128> + Markerable<X, i128>,
-    impl TickFormat<Num = i128>,
-) {
+) -> (impl PlotIterator<X, i128>, impl TickFormat<Num = i128>) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
     let vals_len = vals.len();
@@ -48,9 +37,6 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     let m = build::markers([], [-1, i128::try_from(vals_len).unwrap()]);
     (
         bars.chain(m),
-        BarTickFmt {
-            steps: ticks,
-            ticks: names,
-        },
+        crate::ticks::from_iter(ticks).with_fmt(BarTickFmt { ticks: names }),
     )
 }
