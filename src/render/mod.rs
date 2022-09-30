@@ -394,63 +394,51 @@ pub fn render_opt_builder() -> RenderOptionsBuilder {
 ///
 /// Link some plots with a way to render them.
 ///
-pub struct Data<X, Y, P, TX, TY> {
+pub struct Data<P, TX, TY> {
     opt: RenderOptions,
-    boundx: ticks::DataBound<X>,
-    boundy: ticks::DataBound<Y>,
     tickx: TX,
     ticky: TY,
     plots: P,
 }
 
 //TODO plot iterator should use associated types instead to reduce the number of type arguments?
-impl<
-        X,
-        Y,
-        P: build::marker::Markerable<X, Y>,
-        TX: TickFormat<Num = X>,
-        TY: TickFormat<Num = Y>,
-    > Data<X, Y, P, TX, TY>
-{
-    pub fn new(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<X, Y, P, TX, TY>
+impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat> Data<P, TX, TY> {
+    pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY>
     where
-        P: build::marker::Markerable<X, Y>,
-        X: PlotNum,
-        Y: PlotNum,
+        P: build::PlotIterator<TX::Num, TY::Num>,
     {
-        //TODO don't do this until render step?
-        //TODO after this, should use new trait?
-        let mut area = build::marker::Area::new();
-        plots.increase_area(&mut area);
-        let (boundx, boundy) = area.build();
-
         Data {
             opt,
-            boundx,
-            boundy,
             plots,
             ticky,
             tickx,
         }
     }
 
-    pub fn with_xticks<TTT: TickFormat<Num = X>>(self, tickx: TTT) -> Data<X, Y, P, TTT, TY> {
+    pub fn with_xticks<TTT: TickFormat<Num = TX::Num>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
-            boundx: self.boundx,
-            boundy: self.boundy,
             tickx,
             ticky: self.ticky,
             plots: self.plots,
         }
     }
 
-    pub fn build<A: Display, B: Display, C: Display>(
+    pub fn with_yticks<TTT: TickFormat<Num = TY::Num>>(self, ticky: TTT) -> Data<P, TX, TTT> {
+        Data {
+            opt: self.opt,
+            tickx: self.tickx,
+            ticky,
+            plots: self.plots,
+        }
+    }
+
+    pub fn labels<A: Display, B: Display, C: Display>(
         self,
         title: A,
         xname: B,
         yname: C,
-    ) -> Plotter<X, Y, P, TX, TY, SimplePlotFormatter<A, B, C>> {
+    ) -> Plotter<P, TX, TY, SimplePlotFormatter<A, B, C>> {
         Plotter {
             data: self,
             base: SimplePlotFormatter {
@@ -479,19 +467,13 @@ impl<R: RenderElem> RenderElem for Themer<R> {
 ///
 /// Created by [`plot_with`]
 ///
-pub struct Plotter<X, Y, P, TX, TY, B: BaseFmt> {
-    data: Data<X, Y, P, TX, TY>,
+pub struct Plotter<P, TX, TY, B: BaseFmt> {
+    data: Data<P, TX, TY>,
     base: B,
 }
 
-impl<
-        X: PlotNum,
-        Y: PlotNum,
-        P: build::PlotIterator<X, Y>,
-        TX: TickFormat<Num = X>,
-        TY: TickFormat<Num = Y>,
-        B: BaseFmt,
-    > Plotter<X, Y, P, TX, TY, B>
+impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat, B: BaseFmt>
+    Plotter<P, TX, TY, B>
 {
     pub fn simple_theme(self) -> Themer<impl hypermelon::RenderElem> {
         let header = simple_theme::DefaultHeader::new();
@@ -508,25 +490,18 @@ impl<
         Themer(header.append(style).append(self))
     }
 }
-impl<
-        X: PlotNum,
-        Y: PlotNum,
-        P: build::PlotIterator<X, Y>,
-        TX: TickFormat<Num = X>,
-        TY: TickFormat<Num = Y>,
-        B: BaseFmt,
-    > hypermelon::RenderElem for Plotter<X, Y, P, TX, TY, B>
+impl<P: build::PlotIterator<TX::Num, TY::Num>, TX: TickFormat, TY: TickFormat, B: BaseFmt>
+    hypermelon::RenderElem for Plotter<P, TX, TY, B>
 {
     type Tail = ();
     fn render_head(mut self, writer: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        let (a, b, c) = self
-            .data
-            .tickx
-            .generate(&self.data.boundx, &self.data.opt.boundx);
-        let (d, e, f) = self
-            .data
-            .ticky
-            .generate(&self.data.boundy, &self.data.opt.boundy);
+        //TODO after this, should use new trait?
+        let mut area = build::marker::Area::new();
+        self.data.plots.increase_area(&mut area);
+        let (boundx, boundy) = area.build();
+
+        let (a, b, c) = self.data.tickx.generate(&boundx, &self.data.opt.boundx);
+        let (d, e, f) = self.data.ticky.generate(&boundy, &self.data.opt.boundy);
 
         writer.render(
             hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
@@ -534,8 +509,8 @@ impl<
 
         render::render_plot::render_plot(
             writer,
-            &self.data.boundx,
-            &self.data.boundy,
+            &boundx,
+            &boundy,
             &self.data.opt,
             &mut self.data.plots,
         )?;
@@ -548,8 +523,8 @@ impl<
             d,
             e,
             f,
-            &self.data.boundx,
-            &self.data.boundy,
+            &boundx,
+            &boundy,
             &mut self.base,
             &self.data.opt,
         )

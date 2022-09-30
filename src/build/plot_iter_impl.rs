@@ -1,7 +1,6 @@
 use super::*;
 
 use super::marker::Area;
-use super::marker::Markerable;
 
 ///
 /// Represents a single plot.
@@ -27,15 +26,12 @@ impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> SinglePlot<X, Y, I, D> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> Markerable<X, Y>
+impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> PlotIterator<X, Y>
     for SinglePlot<X, Y, I, D>
 {
     fn increase_area(&mut self, area: &mut Area<X, Y>) {
         area.grow_area(&self.area);
     }
-}
-
-impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> PlotIterator<X, Y> for SinglePlot<X, Y, I, D> {
     #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
         if let Some(a) = self.iter.next() {
@@ -81,14 +77,13 @@ impl<A, B> Chain<A, B> {
     }
 }
 
-impl<X, Y, A: Markerable<X, Y>, B: Markerable<X, Y>> Markerable<X, Y> for Chain<A, B> {
+impl<X: PlotNum, Y: PlotNum, A: PlotIterator<X, Y>, B: PlotIterator<X, Y>> PlotIterator<X, Y>
+    for Chain<A, B>
+{
     fn increase_area(&mut self, area: &mut Area<X, Y>) {
         self.a.increase_area(area);
         self.b.increase_area(area);
     }
-}
-
-impl<X, Y, A: PlotIterator<X, Y>, B: PlotIterator<X, Y>> PlotIterator<X, Y> for Chain<A, B> {
     #[inline(always)]
     fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
         match self.a.next_plot_point() {
@@ -117,13 +112,6 @@ impl<X, Y, A: PlotIterator<X, Y>, B: PlotIterator<X, Y>> PlotIterator<X, Y> for 
     }
 }
 
-impl<X, Y, F: Markerable<X, Y>> Markerable<X, Y> for PlotsDyn<F> {
-    fn increase_area(&mut self, area: &mut Area<X, Y>) {
-        for a in self.flop.iter_mut() {
-            a.increase_area(area);
-        }
-    }
-}
 ///
 /// Allows a user to collect plots inside of a loop instead of chaining plots together.
 ///
@@ -141,6 +129,11 @@ impl<F> PlotsDyn<F> {
     }
 }
 impl<X, Y, F: PlotIterator<X, Y>> PlotIterator<X, Y> for PlotsDyn<F> {
+    fn increase_area(&mut self, area: &mut Area<X, Y>) {
+        for a in self.flop.iter_mut() {
+            a.increase_area(area);
+        }
+    }
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         if self.counter >= self.flop.len() {
@@ -185,7 +178,9 @@ impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
         }
     }
 }
-impl<X, Y, XI: Iterator<Item = X>, YI: Iterator<Item = Y>> PlotIterator<X, Y> for Marker<XI, YI> {
+impl<X: PlotNum, Y: PlotNum, XI: Iterator<Item = X>, YI: Iterator<Item = Y>> PlotIterator<X, Y>
+    for Marker<XI, YI>
+{
     #[inline(always)]
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         None
@@ -198,13 +193,6 @@ impl<X, Y, XI: Iterator<Item = X>, YI: Iterator<Item = Y>> PlotIterator<X, Y> fo
     fn next_name(&mut self, _: &mut dyn fmt::Write) -> Option<fmt::Result> {
         None
     }
-}
-
-impl<XI: Iterator, YI: Iterator> Markerable<XI::Item, YI::Item> for Marker<XI, YI>
-where
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-{
     fn increase_area(&mut self, area: &mut Area<XI::Item, YI::Item>) {
         for a in &mut self.x {
             area.grow(Some(&a), None);

@@ -238,9 +238,9 @@ macro_rules! plots {
 ///
 /// Construct a [`Data`].
 ///
-pub fn data<X: PlotNum, Y: PlotNum, P: build::marker::Markerable<X, Y>>(
+pub fn data<X: PlotNum, Y: PlotNum, P: build::PlotIterator<X, Y>>(
     plots: P,
-) -> Data<X, Y, P, X::Fmt, Y::Fmt> {
+) -> Data<P, X::Fmt, Y::Fmt> {
     render::Data::new(plots, X::default_ticks(), Y::default_ticks(), render_opt())
 }
 

@@ -1,4 +1,3 @@
-use hypermelon::RenderElem;
 use poloto::prelude::*;
 
 fn main() {
@@ -14,7 +13,7 @@ fn main() {
         .fuse()
     };
 
-    let plots = poloto::data(plots!(
+    let plots = plots!(
         poloto::build::plots_dyn(
             (1000..1006)
                 .map(|i| {
@@ -24,9 +23,13 @@ fn main() {
                 .collect(),
         ),
         poloto::build::origin()
-    ));
+    );
 
-    let plots = plots.with_xticks(poloto::ticks::from_iter((0..).step_by(6)));
+    let steps = poloto::ticks::from_iter((0..).step_by(6));
 
-    plots.build("title", "x", "y").simple_theme().to_stdout();
+    poloto::data(plots)
+        .with_xticks(steps)
+        .labels("title", "x", "y")
+        .simple_theme()
+        .to_stdout();
 }
