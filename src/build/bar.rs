@@ -17,6 +17,7 @@ impl<'a, D: Display> crate::ticks::TickFmt<i128> for BarTickFmt<D> {
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
+    foo: impl IntoIterator<Item = X>,
 ) -> (impl PlotIterator<X, i128>, impl TickFormat<Num = i128>) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
@@ -34,7 +35,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
         .collect::<Vec<_>>()
         .into_iter();
 
-    let m = build::markers([], [-1, i128::try_from(vals_len).unwrap()]);
+    let m = build::markers(foo, [-1, i128::try_from(vals_len).unwrap()]);
     (
         bars.chain(m),
         crate::ticks::from_iter(ticks).with_fmt(BarTickFmt { ticks: names }),
