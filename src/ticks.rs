@@ -195,7 +195,7 @@ impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F
         data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
     ) -> (TickRes, Self::It, Self::Fmt) {
-        let (a, b, c) = self.ticks.generate(data, canvas);
+        let (a, b, _) = self.ticks.generate(data, canvas);
         (a, b, self.fmt)
     }
 }
