@@ -140,7 +140,7 @@ where
             TickRes { dash_size: None },
             ticks,
             UnixTimeFmt {
-                timezone: self.timezone.clone(),
+                timezone: self.timezone,
                 step: ret.unit_data,
                 footnote: None,
                 start,

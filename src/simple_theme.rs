@@ -110,6 +110,11 @@ pub struct DefaultHeader {
     dim: [f64; 2],
     viewbox: [f64; 2],
 }
+impl Default for DefaultHeader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl DefaultHeader {
     pub fn new() -> Self {
         DefaultHeader {
@@ -140,7 +145,7 @@ impl DefaultHeader {
     pub fn with_viewbox(self, viewbox: [f64; 2]) -> Self {
         DefaultHeader {
             dim: self.dim,
-            viewbox: viewbox,
+            viewbox,
         }
     }
 }
