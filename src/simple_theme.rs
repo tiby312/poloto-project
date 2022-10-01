@@ -115,6 +115,7 @@ impl Default for DefaultHeader {
         Self::new()
     }
 }
+
 impl DefaultHeader {
     pub fn new() -> Self {
         DefaultHeader {
@@ -148,6 +149,10 @@ impl DefaultHeader {
             viewbox,
         }
     }
+
+    pub fn add<R: RenderElem>(self, elem: R) -> hypermelon::Append<Self, R> {
+        self.append(elem)
+    }
 }
 
 impl RenderElem for DefaultHeader {
@@ -168,50 +173,39 @@ impl RenderElem for DefaultHeader {
     }
 }
 
-pub fn simple_theme() -> impl RenderElem {
-    hypermelon::build::raw(STYLE_CONFIG_LIGHT_DEFAULT)
-}
-pub fn simple_theme_dark() -> impl RenderElem {
-    hypermelon::build::raw(STYLE_CONFIG_DARK_DEFAULT)
+pub struct Theme<'a> {
+    styles: &'a str,
 }
 
-// ///
-// /// Create a simple theme.
-// ///
-// pub trait SimpleTheme {
-//     fn simple_theme<T: fmt::Write>(self, a: T) -> std::fmt::Result;
-//     fn simple_theme_dark<T: fmt::Write>(self, a: T) -> std::fmt::Result;
-// }
+impl Theme<'static> {
+    pub fn light() -> Theme<'static> {
+        Theme {
+            styles: STYLE_CONFIG_LIGHT_DEFAULT,
+        }
+    }
+    pub fn dark() -> Theme<'static> {
+        Theme {
+            styles: STYLE_CONFIG_DARK_DEFAULT,
+        }
+    }
 
-// impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> SimpleTheme
-//     for Plotter<P, K, B>
-// {
-//     fn simple_theme<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
-//         let dim = self.get_dim();
+    pub fn with_style<D: Display>(
+        self,
+        display: D,
+    ) -> hypermelon::Append<Self, hypermelon::build::Raw<D>> {
+        self.append(hypermelon::build::raw(display))
+    }
+}
 
-//         write!(
-//             a,
-//             "{}<style>{}</style>{}{}",
-//             disp_const(|w| write_header(w, dim, dim)),
-//             STYLE_CONFIG_LIGHT_DEFAULT,
-//             disp(|a| self.render(a)),
-//             SVG_END
-//         )
-//     }
+impl<'a> RenderElem for Theme<'a> {
+    type Tail = hypermelon::build::ElemTail<&'static str>;
+    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        let k = hypermelon::build::elem("style");
+        let k = k.append(hypermelon::build::raw(self.styles));
 
-//     fn simple_theme_dark<T: fmt::Write>(self, mut a: T) -> std::fmt::Result {
-//         let dim = self.get_dim();
-
-//         write!(
-//             a,
-//             "{}<style>{}</style>{}{}",
-//             disp_const(|w| write_header(w, dim, dim)),
-//             STYLE_CONFIG_DARK_DEFAULT,
-//             disp(|a| self.render(a)),
-//             SVG_END
-//         )
-//     }
-// }
+        k.render_head(w)
+    }
+}
 
 ///
 /// Generate custom css theme.

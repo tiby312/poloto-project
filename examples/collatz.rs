@@ -1,8 +1,4 @@
-use hypermelon::prelude::*;
 use poloto::prelude::*;
-
-use hypermelon::build as hb;
-use poloto::simple_theme as ps;
 
 // PIPE me to a file!
 fn main() {
@@ -18,7 +14,7 @@ fn main() {
         .fuse()
     };
 
-    let header = ps::DefaultHeader::new().with_viewbox_width(1200.0);
+    let svg = poloto::Header::new().with_viewbox_width(1200.0);
 
     let dyn_plots = poloto::build::plots_dyn(
         (1000..1006)
@@ -34,19 +30,16 @@ fn main() {
 
     let opt = poloto::render::render_opt_builder()
         .with_tick_lines([true, true])
-        .with_dim(header.get_viewbox())
+        .with_dim(svg.get_viewbox())
         .build();
 
-    let plotter = poloto::data(plots)
+    let svg = svg
+        .add(poloto::Theme::dark().with_style(".poloto_line{stroke-dasharray:2;stroke-width:2;}"));
+
+    poloto::data(plots)
         .with_opt(opt)
         .build()
-        .labels("collatz", "x", "y");
-
-    let style = hb::elem("style")
-        .append(ps::simple_theme_dark())
-        .append(hb::raw(".poloto_line{stroke-dasharray:2;stroke-width:2;}"));
-
-    let res = header.append(style).append(plotter);
-
-    hypermelon::render(res, hypermelon::stdout_fmt()).unwrap();
+        .labels("collatz", "x", "y")
+        .append_to(svg)
+        .render_stdout();
 }

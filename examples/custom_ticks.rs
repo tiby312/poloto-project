@@ -16,6 +16,5 @@ fn main() {
         .build()
         .labels("title", "x", "y")
         .simple_theme()
-        .render_stdout()
-        .unwrap();
+        .render_stdout();
 }

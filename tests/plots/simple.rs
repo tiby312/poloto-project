@@ -1,3 +1,5 @@
+use hypermelon::{format_move, RenderElem};
+
 use super::*;
 
 #[test]
@@ -16,74 +18,75 @@ fn heart() -> fmt::Result {
         .preserve_aspect()
         .build();
 
-    let plotter = poloto::quick_fmt_opt!(
-        canvas,
-        "Heart Graph",
-        "x",
-        "y",
-        range.map(heart).buffered_plot().line_fill_raw(""),
+    let plots = poloto::plots!(
+        poloto::buffered_plot(range.map(heart)).line_fill_raw(""),
         poloto::build::markers([-20.0, 20.0], [-20.0, 20.0])
     );
 
     let w = util::create_test_file("heart.svg");
 
-    plotter.simple_theme_dark(w)
+    poloto::data(plots)
+        .with_opt(canvas)
+        .build()
+        .labels("Heart Graph", "x", "y")
+        .simple_theme_dark()
+        .render_fmt_write(w)
 }
 
 #[test]
 fn large_scatter() -> fmt::Result {
     let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
 
-    let plotter = poloto::quick_fmt!(
-        "cows per year",
-        "year",
-        "cows",
-        x.zip_output(f64::cos).buffered_plot().scatter("a"),
-        x.zip_output(f64::sin).buffered_plot().line("b")
+    let plots = poloto::plots!(
+        poloto::buffered_plot(x.zip_output(f64::cos)).scatter("a"),
+        poloto::buffered_plot(x.zip_output(f64::sin)).line("b")
     );
+
+    let data = poloto::data(plots)
+        .build()
+        .labels("cows per year", "year", "cows");
+
+    let header = poloto::simple_theme::DefaultHeader::new();
+
+    let style = hypermelon::build::elem("style").append(
+        poloto::simple_theme::simple_theme_dark().append(hypermelon::build::raw(
+            ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
+        )),
+    );
+
     let mut w = util::create_test_file("large_scatter.svg");
 
-    write!(
-        w,
-        "{}<style>{}{}</style>{}{}",
-        poloto::simple_theme::SVG_HEADER,
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    let all = header.append(style).append(data);
+
+    hypermelon::render(all, w)
 }
 
 #[test]
 fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let opt = poloto::render::render_opt();
-    let s = poloto::data(
+    let s = poloto::buffered_plot(
         x.zip_output(f64::tan)
             .crop_above(10.0)
             .crop_below(0.0)
-            .crop_left(2.0)
-            .buffered_plot()
-            .line_fill("tan(x)"),
-    );
+            .crop_left(2.0),
+    )
+    .line_fill("tan(x)");
 
-    let (bx, by) = poloto::ticks::bounds(&s, &opt);
-    let boundx = bx.data.clone();
+    let data = poloto::data(s).build();
 
-    let fmt = poloto::plot_fmt(
-        formatm!("from {} to {}", boundx.min, boundx.max),
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-        poloto::ticks::from_default(bx),
-        poloto::ticks::from_default(by),
-    );
-
-    let plotter = poloto::plot_with(s, &opt, fmt);
+    let boundx = *data.xbound();
+    let data = data
+        .labels(
+            format_move!("from {} to {}", boundx.min, boundx.max),
+            format_move!("This is the {} label", 'x'),
+            "This is the y label",
+        )
+        .simple_theme();
 
     let w = util::create_test_file("line_fill_fmt.svg");
 
-    plotter.simple_theme(w)
+    data.render_fmt_write(w)
 }
 
 #[test]
@@ -101,70 +104,61 @@ fn long_label() -> fmt::Result {
         .fuse()
     };
 
-    let plotter = poloto::quick_fmt!(
-        "collatz",
-        "x",
-        "y",
+    let plots = poloto::plots!(
         poloto::build::text("Some notes here"),
-        (0..).zip(collatz(1000)).buffered_plot().line(formatm!(
+        poloto::buffered_plot((0..).zip(collatz(1000))).line(format_move!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1000
         )),
-        (0..).zip(collatz(1001)).buffered_plot().line(formatm!(
+        poloto::buffered_plot((0..).zip(collatz(1001))).line(format_move!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1001
         )),
         poloto::build::markers([], [0]),
         poloto::build::text(" 🍆 Here is a note using the text() function.🍎",),
-        (0..).zip(collatz(1002)).buffered_plot().line(formatm!(
+        poloto::buffered_plot((0..).zip(collatz(1002))).line(format_move!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1002
         ))
     );
 
+    let data = poloto::data(plots).build().labels("collatz", "x", "y");
+
+    let a = [1200.0, 500.0];
+    let header = poloto::simple_theme::DefaultHeader::new()
+        .with_dim(a)
+        .with_viewbox(a);
+
+    let style = hypermelon::build::elem("style").append(poloto::simple_theme::simple_theme_dark());
+
+    let all = header.append(style).append(data);
+
     let mut w = util::create_test_file("long_label.svg");
 
-    // Use a width of 1200 instead of 800
-    write!(
-        w,
-        "{}<style>{}</style>{}{}",
-        poloto::disp_const(|w| poloto::simple_theme::write_header(
-            w,
-            [1200.0, 500.0],
-            [1200.0, 500.0]
-        )),
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    hypermelon::render(all, w)
 }
 
 #[test]
 fn magnitude() -> fmt::Result {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let p = poloto::quick_fmt!(
-        "cows per year",
-        "year",
-        "cow",
-        data.iter().cloned_plot().scatter(""),
-    );
+    let d = poloto::data(poloto::cloned_plot(data.iter()).scatter(""))
+        .build()
+        .labels("cows per year", "year", "cow")
+        .simple_theme();
 
     let w = util::create_test_file("magnitude.svg");
 
-    p.simple_theme(w)
+    d.render_fmt_write(w)
 }
 
 #[test]
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let plotter = poloto::quick_fmt!(
-        "cows per year",
-        "year",
-        "cow",
-        points.iter().cloned_plot().scatter(""),
-    );
+    let d = poloto::data(poloto::cloned_plot(points.iter()).scatter())
+        .build()
+        .labels("cows per year", "year", "cow");
 
     let mut w = util::create_test_file("base_color.svg");
 

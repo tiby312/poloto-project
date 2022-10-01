@@ -530,19 +530,8 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
-    pub fn simple_theme(self) -> Themer<impl hypermelon::RenderElem> {
-        let header = simple_theme::DefaultHeader::new();
-
-        let style = hypermelon::build::elem("style").append(simple_theme::simple_theme());
-
-        Themer(header.append(style).append(self))
-    }
-    pub fn simple_theme_dark(self) -> Themer<impl hypermelon::RenderElem> {
-        let header = simple_theme::DefaultHeader::new();
-
-        let style = hypermelon::build::elem("style").append(simple_theme::simple_theme_dark());
-
-        Themer(header.append(style).append(self))
+    pub fn append_to<E: RenderElem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
+        Themer(elem.append(self))
     }
 }
 
@@ -609,8 +598,8 @@ where
 
 pub struct Themer<R: RenderElem>(R);
 impl<R: RenderElem> Themer<R> {
-    pub fn render_stdout(self) -> fmt::Result {
-        hypermelon::render(self.0, hypermelon::stdout_fmt())
+    pub fn render_stdout(self) {
+        hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap()
     }
 
     pub fn render_fmt_write<T: fmt::Write>(self, w: T) -> fmt::Result {

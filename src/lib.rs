@@ -83,21 +83,23 @@ const HEIGHT: f64 = 500.0;
 
 use render::*;
 
+pub use simple_theme::DefaultHeader as Header;
+pub use simple_theme::Theme;
+
 pub mod output_zip;
 
-pub fn simple_dark_stdout<E: RenderElem>(elem: E) {
-    use simple_theme::*;
-    let k = DefaultHeader::new()
-        .append(simple_theme_dark())
-        .append(elem);
-    hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
-}
+// pub fn simple_dark_stdout<E: RenderElem>(elem: E) {
+//     use simple_theme::*;
+//     let k = DefaultHeader::new().theme(Theme::dark())
+//         .append(elem);
+//     hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
+// }
 
-pub fn simple_stdout<E: RenderElem>(elem: E) {
-    use simple_theme::*;
-    let k = DefaultHeader::new().append(simple_theme()).append(elem);
-    hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
-}
+// pub fn simple_stdout<E: RenderElem>(elem: E) {
+//     use simple_theme::*;
+//     let k = DefaultHeader::new().append(simple_theme()).append(elem);
+//     hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
+// }
 
 // /// Shorthand for `disp_const(move |w|write!(w,...))`
 // /// Similar to `std::format_args!()` except has a more flexible lifetime.

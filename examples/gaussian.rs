@@ -15,16 +15,9 @@ fn main() {
     let c = poloto::buffered_plot(r.zip_output(gau(0.3, 0.))).line("σ=0.3");
     let d = poloto::build::origin();
 
-    let plots = plots!(a, b, c, d);
-
-    let f = poloto::data(plots).build();
-
-    let bound = *f.xbound();
-    let step = *f.xticks().fmt.step();
-    let k = hypermelon::format_move!("gaussian {} to {} with {}", bound.min, bound.max, step);
-
-    f.labels(k, "x", "y")
+    poloto::data(plots!(a, b, c, d))
+        .build()
+        .labels("gaussian", "x", "y")
         .simple_theme()
-        .render_stdout()
-        .unwrap();
+        .render_stdout();
 }

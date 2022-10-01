@@ -1,3 +1,6 @@
+use hypermelon::prelude::*;
+use poloto::simple_theme::DefaultHeader;
+use poloto::simple_theme::Theme;
 use poloto::ticks::TickFmt;
 use poloto::ticks::TickFormat;
 fn main() {
@@ -35,7 +38,9 @@ fn main() {
         .with_xticks(steps)
         .build()
         .labels("title", "x", "y")
-        .simple_theme()
-        .render_stdout()
-        .unwrap();
+        .append_to(
+            DefaultHeader::new()
+                .append(Theme::light().append(hypermelon::build::raw("more_stuff"))),
+        )
+        .render_stdout();
 }
