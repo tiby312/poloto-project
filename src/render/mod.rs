@@ -439,14 +439,14 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         }
     }
 
-    pub fn build_and_labels<AA: Display, BB: Display, CC: Display>(
-        self,
-        title: AA,
-        xname: BB,
-        yname: CC,
-    ) -> Plotter<P, TX::It, TY::It, TX::Fmt, TY::Fmt, SimplePlotFormatter<AA, BB, CC>> {
-        self.build().labels(title, xname, yname)
-    }
+    // pub fn build_and_labels<AA: Display, BB: Display, CC: Display>(
+    //     self,
+    //     title: AA,
+    //     xname: BB,
+    //     yname: CC,
+    // ) -> Plotter<P, TX::It, TY::It, TX::Fmt, TY::Fmt, SimplePlotFormatter<AA, BB, CC>> {
+    //     self.build().labels(title, xname, yname)
+    // }
 
     pub fn build(mut self) -> DataBuilt<P, TX::It, TY::It, TX::Fmt, TY::Fmt> {
         let mut area = build::marker::Area::new();
