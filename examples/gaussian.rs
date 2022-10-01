@@ -18,6 +18,6 @@ fn main() {
     poloto::data(plots!(a, b, c, d))
         .build()
         .labels("gaussian", "x", "y")
-        .simple_theme()
+        .append_to(poloto::simple_light())
         .render_stdout();
 }

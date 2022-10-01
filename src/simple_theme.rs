@@ -106,6 +106,7 @@ pub fn write_header<T: std::fmt::Write>(
     )
 }
 
+#[derive(Copy, Clone)]
 pub struct DefaultHeader {
     dim: [f64; 2],
     viewbox: [f64; 2],
@@ -173,6 +174,7 @@ impl RenderElem for DefaultHeader {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Theme<'a> {
     styles: &'a str,
 }

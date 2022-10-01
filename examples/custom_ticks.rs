@@ -15,6 +15,6 @@ fn main() {
         .with_xticks(poloto::ticks::from_iter((0..).step_by(6)))
         .build()
         .labels("title", "x", "y")
-        .simple_theme()
+        .append_to(poloto::simple_light())
         .render_stdout();
 }

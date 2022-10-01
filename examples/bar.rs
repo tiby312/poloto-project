@@ -8,6 +8,6 @@ fn main() {
 
     poloto::build::bar::gen_simple("", data, [0])
         .labels("Comparison of Food Tastiness", "Tastiness", "Foods")
-        .simple_theme_dark()
+        .append_to(poloto::simple_light())
         .render_stdout();
 }

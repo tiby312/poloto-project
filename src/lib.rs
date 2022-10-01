@@ -86,29 +86,15 @@ use render::*;
 pub use simple_theme::DefaultHeader as Header;
 pub use simple_theme::Theme;
 
+pub fn simple_light() -> hypermelon::Append<Header, Theme<'static>> {
+    Header::new().add(Theme::light())
+}
+
+pub fn simple_dark() -> hypermelon::Append<Header, Theme<'static>> {
+    Header::new().add(Theme::dark())
+}
+
 pub mod output_zip;
-
-// pub fn simple_dark_stdout<E: RenderElem>(elem: E) {
-//     use simple_theme::*;
-//     let k = DefaultHeader::new().theme(Theme::dark())
-//         .append(elem);
-//     hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
-// }
-
-// pub fn simple_stdout<E: RenderElem>(elem: E) {
-//     use simple_theme::*;
-//     let k = DefaultHeader::new().append(simple_theme()).append(elem);
-//     hypermelon::render(k, hypermelon::stdout_fmt()).unwrap();
-// }
-
-// /// Shorthand for `disp_const(move |w|write!(w,...))`
-// /// Similar to `std::format_args!()` except has a more flexible lifetime.
-// #[macro_export]
-// macro_rules! formatm {
-//     ($($arg:tt)*) => {
-//         $crate::disp_const(move |w| write!(w,$($arg)*))
-//     }
-// }
 
 ///
 /// Macro to chain multiple plots together instead of calling [`chain`](build::PlotIteratorExt::chain) repeatedly.
