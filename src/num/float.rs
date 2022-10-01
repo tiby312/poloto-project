@@ -17,7 +17,14 @@ pub struct FloatFmt {
     axis: Axis,
     step: f64,
 }
-
+impl FloatFmt {
+    pub fn step(&self) -> &f64 {
+        &self.step
+    }
+    pub fn offset(&self) -> &Option<f64> {
+        &self.offset
+    }
+}
 impl crate::ticks::TickFmt<f64> for FloatFmt {
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &f64) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {

@@ -16,6 +16,14 @@ pub struct IntFmt {
     axis: Axis,
     step: i128,
 }
+impl IntFmt {
+    pub fn step(&self) -> &i128 {
+        &self.step
+    }
+    pub fn offset(&self) -> &Option<i128> {
+        &self.offset
+    }
+}
 impl ticks::TickFmt<i128> for IntFmt {
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &i128) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {

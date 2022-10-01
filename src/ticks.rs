@@ -6,7 +6,7 @@ use super::*;
 ///
 /// Tick relevant information of [`Data`]
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct DataBound<X> {
     pub min: X,
     pub max: X,

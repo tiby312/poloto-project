@@ -51,7 +51,17 @@ pub struct UnixTimeFmt<T: TimeZone + Display> {
     start: UnixTime,
     footnote: Option<char>,
 }
-
+impl<T: TimeZone + Display> UnixTimeFmt<T> {
+    pub fn step(&self) -> &StepUnit {
+        &self.step
+    }
+    pub fn timezone(&self) -> &T {
+        &self.timezone
+    }
+    pub fn start(&self) -> &UnixTime {
+        &self.start
+    }
+}
 impl<T> crate::ticks::TickFmt<UnixTime> for UnixTimeFmt<T>
 where
     T: chrono::TimeZone + Display,

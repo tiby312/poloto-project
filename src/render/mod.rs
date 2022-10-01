@@ -474,10 +474,17 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
-    pub fn boundx(&self) -> &DataBound<P::X> {
+    pub fn xticks(&self) -> &TickGen<A, C> {
+        &self.xticks
+    }
+    pub fn yticks(&self) -> &TickGen<B, D> {
+        &self.yticks
+    }
+
+    pub fn xbound(&self) -> &DataBound<P::X> {
         &self.boundx
     }
-    pub fn boundy(&self) -> &DataBound<P::Y> {
+    pub fn ybound(&self) -> &DataBound<P::Y> {
         &self.boundy
     }
 

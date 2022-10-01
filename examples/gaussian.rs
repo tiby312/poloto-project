@@ -19,9 +19,9 @@ fn main() {
 
     let f = poloto::data(plots).build();
 
-    let bound = f.boundx().clone();
-
-    let k = hypermelon::format_move!("gaussian {} to {}", bound.min, bound.max);
+    let bound = *f.xbound();
+    let step = *f.xticks().fmt.step();
+    let k = hypermelon::format_move!("gaussian {} to {} with {}", bound.min, bound.max, step);
 
     f.labels(k, "x", "y").simple_theme().render_stdout();
 }
