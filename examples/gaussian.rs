@@ -23,5 +23,8 @@ fn main() {
     let step = *f.xticks().fmt.step();
     let k = hypermelon::format_move!("gaussian {} to {} with {}", bound.min, bound.max, step);
 
-    f.labels(k, "x", "y").simple_theme().render_stdout();
+    f.labels(k, "x", "y")
+        .simple_theme()
+        .render_stdout()
+        .unwrap();
 }

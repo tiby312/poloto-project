@@ -439,6 +439,15 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         }
     }
 
+    pub fn build_and_labels<AA: Display, BB: Display, CC: Display>(
+        self,
+        title: AA,
+        xname: BB,
+        yname: CC,
+    ) -> Plotter<P, TX::It, TY::It, TX::Fmt, TY::Fmt, SimplePlotFormatter<AA, BB, CC>> {
+        self.build().labels(title, xname, yname)
+    }
+
     pub fn build(mut self) -> DataBuilt<P, TX::It, TY::It, TX::Fmt, TY::Fmt> {
         let mut area = build::marker::Area::new();
         self.plots.increase_area(&mut area);
@@ -548,14 +557,6 @@ where
 {
     type Tail = ();
     fn render_head(mut self, writer: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        //TODO after this, should use new trait?
-        // let mut area = build::marker::Area::new();
-        // self.data.plots.increase_area(&mut area);
-        // let (boundx, boundy) = area.build();
-
-        //let (a, b, c) = self.data.tickx.generate(&boundx, &self.data.opt.boundx);
-        //let (d, e, f) = self.data.ticky.generate(&boundy, &self.data.opt.boundy);
-
         writer.render(
             hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
         )?;
@@ -579,36 +580,6 @@ where
         )
     }
 }
-
-//impl<P: build::PlotIterator<B::X, B::Y>, B: BaseFmt> Plotter<P, B> {
-
-// ///
-// /// Use the plot iterators to write out the graph elements.
-// /// Does not add a svg tag, or any styling elements.
-// /// Use this if you want to embed a svg into your html.
-// /// You will just have to add your own svg sag and then supply styling.
-// ///
-// /// Panics if the render fails.
-// ///
-// /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
-// /// this function will mutable borrow the Plotter and leave it with empty data.
-// ///
-// /// ```
-// /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-// /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
-// /// let mut k=String::new();
-// /// plotter.render(&mut k);
-// /// ```
-// pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
-//     self.canvas.render(
-//         &mut writer,
-//         &mut self.plots,
-//         &mut self.base,
-//         &self.boundx,
-//         &self.boundy,
-//     )
-// }
-//}
 
 ///
 /// A simple plot formatter that is composed of
@@ -638,8 +609,8 @@ where
 
 pub struct Themer<R: RenderElem>(R);
 impl<R: RenderElem> Themer<R> {
-    pub fn render_stdout(self) {
-        hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap();
+    pub fn render_stdout(self) -> fmt::Result {
+        hypermelon::render(self.0, hypermelon::stdout_fmt())
     }
 
     pub fn render_fmt_write<T: fmt::Write>(self, w: T) -> fmt::Result {
@@ -648,6 +619,12 @@ impl<R: RenderElem> Themer<R> {
 
     pub fn render_io_write<T: std::io::Write>(self, w: T) -> std::fmt::Result {
         hypermelon::render(self.0, hypermelon::tools::upgrade_write(w))
+    }
+
+    pub fn render_string(self) -> Result<String, fmt::Error> {
+        let mut s = String::new();
+        hypermelon::render(self.0, &mut s)?;
+        Ok(s)
     }
 }
 impl<R: RenderElem> RenderElem for Themer<R> {

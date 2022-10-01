@@ -13,8 +13,8 @@ fn main() {
 
     poloto::data(plots)
         .with_xticks(poloto::ticks::from_iter((0..).step_by(6)))
-        .build()
-        .labels("title", "x", "y")
+        .build_and_labels("title", "x", "y")
         .simple_theme()
-        .render_stdout();
+        .render_stdout()
+        .unwrap();
 }

@@ -10,4 +10,5 @@ fn main() {
         .labels("Comparison of Food Tastiness", "Tastiness", "Foods")
         .simple_theme_dark()
         .render_stdout()
+        .unwrap()
 }

@@ -44,5 +44,6 @@ fn main() {
             "Mark (in meters)",
         )
         .simple_theme()
-        .render_stdout();
+        .render_stdout()
+        .unwrap();
 }
