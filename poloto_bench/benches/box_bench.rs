@@ -12,16 +12,17 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
     let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
 
     let p = poloto::plots!(
-        poloto::buffered_plot(
+        poloto::build::buffered_plot(
             x.zip_output(f64::tan)
                 .crop_above(10.0)
                 .crop_below(-10.0)
                 .crop_left(2.0)
         )
         .line("tan(x)"),
-        poloto::buffered_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
+        poloto::build::buffered_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
             .line("2*cos(x)"),
-        poloto::cloned_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)).line("2*cos(x)")
+        poloto::build::cloned_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
+            .line("2*cos(x)")
     );
 
     poloto::data(p)
@@ -36,7 +37,7 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
 
     let p = poloto::plots!(
         poloto::build::BoxedPlot::new(
-            poloto::buffered_plot(
+            poloto::build::buffered_plot(
                 x.zip_output(f64::tan)
                     .crop_above(10.0)
                     .crop_below(-10.0)
@@ -45,11 +46,11 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             .line("tan(x)"),
         ),
         poloto::build::BoxedPlot::new(
-            poloto::buffered_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
+            poloto::build::buffered_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
                 .line("2*cos(x)"),
         ),
         poloto::build::BoxedPlot::new(
-            poloto::cloned_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
+            poloto::build::cloned_plot(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
                 .line("2*cos(x)"),
         )
     );

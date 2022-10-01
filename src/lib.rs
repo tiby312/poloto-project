@@ -116,25 +116,6 @@ macro_rules! plots {
     };
 }
 
-pub fn buffered_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
-    iter: I,
-) -> build::SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
-where
-    I::Item: Clone + build::unwrapper::Unwrapper<Item = (X, Y)>,
-{
-    build::SinglePlotBuilder::new_buffered(build::unwrapper::UnwrapperIter(iter))
-}
-
-pub fn cloned_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
-    iter: I,
-) -> build::SinglePlotBuilder<X, Y, build::unwrapper::UnwrapperIter<I>>
-where
-    I: Clone,
-    I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
-{
-    build::SinglePlotBuilder::new_cloned(build::unwrapper::UnwrapperIter(iter))
-}
-
 ///
 /// Construct a [`Data`].
 ///
@@ -144,29 +125,47 @@ pub fn data<X: PlotNum, Y: PlotNum, P: build::PlotIterator<X = X, Y = Y>>(
     render::Data::new(plots, X::default_ticks(), Y::default_ticks(), render_opt())
 }
 
-///
-/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
-///
-pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
-    a: F,
-) -> util::DisplayableClosureOnce<F> {
-    util::DisplayableClosureOnce::new(a)
-}
+// ///
+// /// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
+// ///
+// pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
+//     a: F,
+// ) -> util::DisplayableClosureOnce<F> {
+//     util::DisplayableClosureOnce::new(a)
+// }
 
-///
-/// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
-///
-pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
-    a: F,
-) -> util::DisplayableClosureMut<F> {
-    util::DisplayableClosureMut::new(a)
-}
+// ///
+// /// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
+// ///
+// pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
+//     a: F,
+// ) -> util::DisplayableClosureMut<F> {
+//     util::DisplayableClosureMut::new(a)
+// }
 
 ///
 /// Convert a closure to a object that implements Display
 ///
-pub fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> util::DisplayableClosure<F> {
-    util::DisplayableClosure::new(a)
+fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> DisplayableClosure<F> {
+    DisplayableClosure::new(a)
+}
+
+/// Convert a moved closure into a impl fmt::Display.
+/// This is useful because std's `format_args!()` macro
+/// has a shorter lifetime.
+struct DisplayableClosure<F>(pub F);
+
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
+    #[inline(always)]
+    pub fn new(a: F) -> Self {
+        DisplayableClosure(a)
+    }
+}
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
+    #[inline(always)]
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        (self.0)(formatter)
+    }
 }
 
 ///

@@ -296,8 +296,10 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
-pub fn plots_dyn<F: PlotIterator>(vec: Vec<F>) -> plot_iter_impl::PlotsDyn<F> {
-    plot_iter_impl::PlotsDyn::new(vec)
+pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
+    stuff: I,
+) -> plot_iter_impl::PlotsDyn<F> {
+    plot_iter_impl::PlotsDyn::new(stuff.into_iter().collect::<Vec<_>>())
 }
 
 pub struct BoxedPlot<'a, X, Y> {
@@ -327,4 +329,23 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> 
     fn next_typ(&mut self) -> Option<PlotMetaType> {
         self.inner.as_mut().next_typ()
     }
+}
+
+pub fn buffered_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
+    iter: I,
+) -> build::SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
+where
+    I::Item: Clone + build::unwrapper::Unwrapper<Item = (X, Y)>,
+{
+    build::SinglePlotBuilder::new_buffered(build::unwrapper::UnwrapperIter(iter))
+}
+
+pub fn cloned_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
+    iter: I,
+) -> build::SinglePlotBuilder<X, Y, build::unwrapper::UnwrapperIter<I>>
+where
+    I: Clone,
+    I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+{
+    build::SinglePlotBuilder::new_cloned(build::unwrapper::UnwrapperIter(iter))
 }

@@ -18,7 +18,7 @@ fn marathon() -> fmt::Result {
     let opt = poloto::render::render_opt();
 
     let p = plots!(
-        heart_rate.iter().cloned_plot().line("hay"),
+        poloto::build::cloned_plot(heart_rate.iter()).line("hay"),
         poloto::build::markers(None, Some(0))
     );
 

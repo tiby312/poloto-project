@@ -533,6 +533,10 @@ where
     pub fn append_to<E: RenderElem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
         Themer(elem.append(self))
     }
+
+    pub fn headless(self) -> Themer<Self> {
+        Themer(self)
+    }
 }
 
 impl<P: build::PlotIterator, A, B, C, D, BB: BaseFmt> hypermelon::RenderElem

@@ -10,9 +10,9 @@ fn main() {
     };
 
     let r = poloto::range_iter([-5.0, 5.0], 200);
-    let a = poloto::buffered_plot(r.zip_output(gau(1.0, 0.))).line("σ=1.0");
-    let b = poloto::buffered_plot(r.zip_output(gau(0.5, 0.))).line("σ=0.5");
-    let c = poloto::buffered_plot(r.zip_output(gau(0.3, 0.))).line("σ=0.3");
+    let a = poloto::build::buffered_plot(r.zip_output(gau(1.0, 0.))).line("σ=1.0");
+    let b = poloto::build::buffered_plot(r.zip_output(gau(0.5, 0.))).line("σ=0.5");
+    let c = poloto::build::buffered_plot(r.zip_output(gau(0.3, 0.))).line("σ=0.3");
     let d = poloto::build::origin();
 
     poloto::data(plots!(a, b, c, d))

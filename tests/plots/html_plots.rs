@@ -4,15 +4,17 @@ use super::*;
 fn custom_colors_html() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let l1 = poloto::buffered_plot(x.zip_output(|x| x.cos())).line("cos");
-    let l2 =
-        poloto::buffered_plot(x.clone().step_by(3).map(|x| [x, x.sin() - 10.])).histogram("sin-10");
+    let l1 = poloto::build::buffered_plot(x.zip_output(|x| x.cos())).line("cos");
+    let l2 = poloto::build::buffered_plot(x.clone().step_by(3).map(|x| [x, x.sin() - 10.]))
+        .histogram("sin-10");
 
     let s = poloto::data(poloto::plots!(l1, l2)).build().labels(
         "Demo: you can use CSS patterns if you embed SVG!",
         "x",
         "y",
     );
+
+    let graph = s.headless().render_string().unwrap();
 
     let mut w = util::create_test_file("custom_colors.html");
 
@@ -53,7 +55,7 @@ fn custom_colors_html() -> fmt::Result {
         format_args!(
             "{}{}{}",
             poloto::simple_theme::SVG_HEADER,
-            poloto::disp(|a| hypermelon::render(s, a)),
+            graph,
             poloto::simple_theme::SVG_END
         )
     )
@@ -122,14 +124,17 @@ body {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     let s = poloto::plots!(
-        poloto::buffered_plot(x.zip_output(f64::cos)).line("cos"),
-        poloto::buffered_plot(x.clone().step_by(3).zip_output(|x| x.sin() - 3.)).histogram("sin-3"),
-        poloto::buffered_plot(x.clone().step_by(3).zip_output(|x| x.sin())).scatter("sin")
+        poloto::build::buffered_plot(x.zip_output(f64::cos)).line("cos"),
+        poloto::build::buffered_plot(x.clone().step_by(3).zip_output(|x| x.sin() - 3.))
+            .histogram("sin-3"),
+        poloto::build::buffered_plot(x.clone().step_by(3).zip_output(|x| x.sin())).scatter("sin")
     );
 
     let s = poloto::data(s)
         .build()
         .labels("Demo: Hovering and shadows", "x", "y");
+
+    let s = s.headless().render_string().unwrap();
 
     let mut w = util::create_test_file("hover_shadow.html");
 
@@ -143,7 +148,6 @@ body {
 </div>
 </html>
         "###,
-        HEADER,
-        poloto::disp(|a| s.simple_theme().render_fmt_write(a))
+        HEADER, s
     )
 }

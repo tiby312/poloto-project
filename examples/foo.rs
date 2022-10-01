@@ -1,6 +1,3 @@
-use hypermelon::prelude::*;
-use poloto::simple_theme::DefaultHeader;
-use poloto::simple_theme::Theme;
 use poloto::ticks::TickFmt;
 use poloto::ticks::TickFormat;
 fn main() {
@@ -17,15 +14,11 @@ fn main() {
     };
 
     let plots = poloto::plots!(
-        poloto::build::plots_dyn(
-            (1000..1006)
-                .map(|i| {
-                    let name = hypermelon::format_move!("c({})", i);
-                    let it = (0..).zip(collatz(i));
-                    poloto::buffered_plot(it).line(name)
-                })
-                .collect(),
-        ),
+        poloto::build::plots_dyn((1000..1006).map(|i| {
+            let name = hypermelon::format_move!("c({})", i);
+            let it = (0..).zip(collatz(i));
+            poloto::build::buffered_plot(it).line(name)
+        }),),
         poloto::build::origin()
     );
 
@@ -38,9 +31,6 @@ fn main() {
         .with_xticks(steps)
         .build()
         .labels("title", "x", "y")
-        .append_to(
-            DefaultHeader::new()
-                .append(Theme::light().append(hypermelon::build::raw("more_stuff"))),
-        )
+        .append_to(poloto::simple_light())
         .render_stdout();
 }
