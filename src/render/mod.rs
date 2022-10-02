@@ -483,6 +483,42 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
+    pub fn with_xtick_fmt<L: crate::ticks::TickFmt<P::X>>(
+        self,
+        fmt: L,
+    ) -> DataBuilt<P, A, B, L, D> {
+        DataBuilt {
+            opt: self.opt,
+            xticks: TickGen {
+                it: self.xticks.it,
+                fmt,
+                res: self.xticks.res,
+            },
+            yticks: self.yticks,
+            plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
+        }
+    }
+
+    pub fn with_ytick_fmt<L: crate::ticks::TickFmt<P::Y>>(
+        self,
+        fmt: L,
+    ) -> DataBuilt<P, A, B, C, L> {
+        DataBuilt {
+            opt: self.opt,
+            xticks: self.xticks,
+            yticks: TickGen {
+                it: self.yticks.it,
+                fmt,
+                res: self.yticks.res,
+            },
+            plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
+        }
+    }
+
     pub fn xticks(&self) -> &TickGen<A, C> {
         &self.xticks
     }

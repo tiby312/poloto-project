@@ -122,15 +122,15 @@ fn seconds() -> fmt::Result {
     let fmt = poloto::ticks::DefaultTickFmt
         .with_ticks(|w, v: &UnixTime| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")));
 
-    use poloto::ticks::TickFormat;
-    let xticks = poloto::num::timestamp::UnixTimeTickFmt::new().with_fmt(fmt);
-
     let data = poloto::data(plots!(
         poloto::build::cloned_plot(data.iter()).line(""),
         poloto::build::markers(None, Some(0))
     ))
-    .with_xticks(xticks)
     .build();
+
+    let step = *data.xticks().fmt.step();
+
+    let data = data.with_xtick_fmt(fmt);
 
     let bounds = *data.xbound();
 
@@ -138,9 +138,10 @@ fn seconds() -> fmt::Result {
     data.labels(
         "Number of Wikipedia Articles",
         hypermelon::format_move!(
-            "{} to {}",
+            "{} to {} with {}",
             bounds.min.datetime(timezone).format("%H:%M:%S"),
             bounds.max.datetime(timezone).format("%H:%M:%S"),
+            step
         ),
         "Number of Articles",
     )
