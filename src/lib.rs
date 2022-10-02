@@ -83,8 +83,11 @@ const HEIGHT: f64 = 500.0;
 
 use render::*;
 
-pub use simple_theme::DefaultHeader as Header;
 pub use simple_theme::Theme;
+
+pub fn header()->Header{
+    Header::new()
+}
 
 pub fn simple_light() -> hypermelon::Append<Header, Theme<'static>> {
     Header::new().append(Theme::light())
@@ -179,4 +182,70 @@ pub fn range_iter(
     let diff = max - min;
     let divf = num as f64;
     (0..num).map(move |x| min + (x as f64 / divf) * diff)
+}
+
+
+
+#[derive(Copy, Clone)]
+pub struct Header {
+    dim: [f64; 2],
+    viewbox: [f64; 2],
+}
+impl Default for Header {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Header {
+    pub fn new() -> Self {
+        Header {
+            dim: [800., 500.],
+            viewbox: [800., 500.],
+        }
+    }
+
+    pub fn with_viewbox_width(self, width: f64) -> Self {
+        let [xx, yy] = self.dim;
+        let vh = width * (yy / xx);
+        Header {
+            dim: self.dim,
+            viewbox: [width, vh],
+        }
+    }
+
+    pub fn get_viewbox(&self) -> [f64; 2] {
+        self.viewbox
+    }
+
+    pub fn with_dim(self, dim: [f64; 2]) -> Self {
+        Header {
+            dim,
+            viewbox: self.viewbox,
+        }
+    }
+    pub fn with_viewbox(self, viewbox: [f64; 2]) -> Self {
+        Header {
+            dim: self.dim,
+            viewbox,
+        }
+    }
+}
+
+impl Elem for Header {
+    type Tail = hypermelon::build::ElemTail<&'static str>;
+    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        let elem = hypermelon::build::elem("svg").with(attrs!(
+            ("class", "poloto"),
+            ("width", self.dim[0]),
+            ("height", self.dim[1]),
+            (
+                "viewBox",
+                format_move!("{} {} {} {}", 0, 0, self.viewbox[0], self.viewbox[1])
+            ),
+            ("xmlns", "http://www.w3.org/2000/svg")
+        ));
+
+        elem.render_head(w)
+    }
 }

@@ -15,7 +15,7 @@ fn main() {
         .fuse()
     };
 
-    let svg = poloto::Header::new().with_viewbox_width(1200.0);
+    let svg = poloto::header().with_viewbox_width(1200.0);
 
     let opt = poloto::render::render_opt_builder()
         .with_tick_lines([true, true])

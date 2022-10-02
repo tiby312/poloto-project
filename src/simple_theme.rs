@@ -2,7 +2,6 @@
 //! A simple dark and light css theme.
 //!
 //!
-use hypermelon::build::ElemTail;
 
 use super::*;
 
@@ -104,70 +103,6 @@ pub fn write_header<T: std::fmt::Write>(
         "viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\">",
         viewbox[0], viewbox[1]
     )
-}
-
-#[derive(Copy, Clone)]
-pub struct DefaultHeader {
-    dim: [f64; 2],
-    viewbox: [f64; 2],
-}
-impl Default for DefaultHeader {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl DefaultHeader {
-    pub fn new() -> Self {
-        DefaultHeader {
-            dim: [800., 500.],
-            viewbox: [800., 500.],
-        }
-    }
-
-    pub fn with_viewbox_width(self, width: f64) -> Self {
-        let [xx, yy] = self.dim;
-        let vh = width * (yy / xx);
-        DefaultHeader {
-            dim: self.dim,
-            viewbox: [width, vh],
-        }
-    }
-
-    pub fn get_viewbox(&self) -> [f64; 2] {
-        self.viewbox
-    }
-
-    pub fn with_dim(self, dim: [f64; 2]) -> Self {
-        DefaultHeader {
-            dim,
-            viewbox: self.viewbox,
-        }
-    }
-    pub fn with_viewbox(self, viewbox: [f64; 2]) -> Self {
-        DefaultHeader {
-            dim: self.dim,
-            viewbox,
-        }
-    }
-}
-
-impl Elem for DefaultHeader {
-    type Tail = ElemTail<&'static str>;
-    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        let elem = hypermelon::build::elem("svg").with(attrs!(
-            ("class", "poloto"),
-            ("width", self.dim[0]),
-            ("height", self.dim[1]),
-            (
-                "viewBox",
-                format_move!("{} {} {} {}", 0, 0, self.viewbox[0], self.viewbox[1])
-            ),
-            ("xmlns", "http://www.w3.org/2000/svg")
-        ));
-
-        elem.render_head(w)
-    }
 }
 
 #[derive(Copy, Clone)]

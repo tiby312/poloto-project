@@ -119,7 +119,7 @@ fn long_label() -> fmt::Result {
     let data = poloto::data(plots).build().labels("collatz", "x", "y");
 
     let a = [1200.0, 500.0];
-    let header = poloto::simple_theme::DefaultHeader::new()
+    let header = poloto::header()
         .with_dim(a)
         .with_viewbox(a)
         .append(poloto::Theme::dark());
