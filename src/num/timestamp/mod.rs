@@ -55,6 +55,7 @@ pub struct UnixTimeFmt<T: TimeZone + Display> {
     timezone: T,
     start: UnixTime,
     footnote: Option<char>,
+    index: usize,
 }
 impl<T: TimeZone + Display> UnixTimeFmt<T> {
     pub fn step(&self) -> &StepUnit {
@@ -85,14 +86,8 @@ where
         }
     }
 
-    fn write_where(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        mut req: ticks::IndexRequester,
-    ) -> std::fmt::Result {
-        let index = req.request();
-
-        let footnote = match index {
+    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        let footnote = match self.index {
             0 => '¹',
             1 => '²',
             _ => unreachable!("There is a maximum of only two axis!"),
@@ -116,6 +111,7 @@ where
         self,
         data: &ticks::DataBound<UnixTime>,
         canvas: &RenderOptionsBound,
+        req: IndexRequester,
     ) -> TickGen<Self::It, Self::Fmt> {
         let range = [data.min, data.max];
 
@@ -151,6 +147,8 @@ where
 
         let start = ticks[0];
 
+        let index = req.request();
+
         TickGen {
             res: TickRes { dash_size: None },
             it: ticks,
@@ -159,6 +157,7 @@ where
                 step: ret.unit_data,
                 footnote: None,
                 start,
+                index,
             },
         }
     }

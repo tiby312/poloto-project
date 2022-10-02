@@ -126,8 +126,6 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         (distance_to_firsty, distancey_min_to_max)
     };
 
-    let mut index_counter = 0;
-
     {
         let text = hbuild::elem("text").with(attrs!(
             ("class", "poloto_tick_labels poloto_text"),
@@ -137,11 +135,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             ("y", paddingy * 0.7)
         ));
 
-        let ywher = hbuild::from_closure(|w| {
-            yticksg
-                .fmt
-                .write_where(&mut w.writer(), IndexRequester::new(&mut index_counter))
-        });
+        let ywher = hbuild::from_closure(|w| yticksg.fmt.write_where(&mut w.writer()));
 
         writer.render(text.append(ywher))?;
 
@@ -194,11 +188,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             ("y", paddingy * 0.7)
         ));
 
-        let xwher = hbuild::from_closure(|w| {
-            xticksg
-                .fmt
-                .write_where(&mut w.writer(), IndexRequester::new(&mut index_counter))
-        });
+        let xwher = hbuild::from_closure(|w| xticksg.fmt.write_where(&mut w.writer()));
 
         writer.render(text.append(xwher))?;
 

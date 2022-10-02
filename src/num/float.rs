@@ -44,11 +44,7 @@ impl crate::ticks::TickFmt<f64> for FloatFmt {
 
         util::write_interval_float(writer, val, Some(self.step))
     }
-    fn write_where(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        _req: ticks::IndexRequester,
-    ) -> std::fmt::Result {
+    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
         if let Some(offset) = self.offset {
             match self.axis {
                 Axis::X => {
@@ -72,6 +68,7 @@ impl TickFormat<f64> for FloatTickFmt {
         self,
         data: &ticks::DataBound<f64>,
         canvas: &RenderOptionsBound,
+        _: IndexRequester,
     ) -> TickGen<Self::It, Self::Fmt> {
         let range = [data.min, data.max];
         let ideal_num_steps = canvas.ideal_num_steps;

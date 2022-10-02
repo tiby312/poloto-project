@@ -75,6 +75,7 @@ where
         self,
         data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
+        _: IndexRequester,
     ) -> TickGen<It2, Fmt2> {
         (self.func)(data, canvas)
     }
@@ -119,7 +120,7 @@ impl<I: IntoIterator, K: TickFmt<I::Item>> TickBuilder<I, K> {
         }
     }
 
-    pub fn with_where<F: FnMut(&mut dyn fmt::Write, IndexRequester) -> fmt::Result>(
+    pub fn with_where<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
         self,
         func: F,
     ) -> TickBuilder<I, WithWhere<K, F>> {
@@ -136,11 +137,7 @@ impl<N: Display> TickFmt<N> for DefaultTickFmt {
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
         write!(a, "{}", val)
     }
-    fn write_where(
-        &mut self,
-        _: &mut dyn std::fmt::Write,
-        _req: IndexRequester,
-    ) -> std::fmt::Result {
+    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
     }
 }
@@ -164,7 +161,7 @@ impl<'a> IndexRequester<'a> {
         IndexRequester { counter }
     }
     #[inline(always)]
-    pub fn request(&mut self) -> usize {
+    pub fn request(self) -> usize {
         let val = *self.counter;
         *self.counter += 1;
         val
@@ -173,11 +170,7 @@ impl<'a> IndexRequester<'a> {
 
 pub trait TickFmt<N> {
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result;
-    fn write_where(
-        &mut self,
-        _: &mut dyn std::fmt::Write,
-        _req: IndexRequester,
-    ) -> std::fmt::Result {
+    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
     }
     fn with_ticks<F>(self, func: F) -> WithTicky<Self, F>
@@ -189,7 +182,7 @@ pub trait TickFmt<N> {
     }
     fn with_where<F>(self, func: F) -> WithWhere<Self, F>
     where
-        F: FnMut(&mut dyn std::fmt::Write, IndexRequester) -> fmt::Result,
+        F: FnMut(&mut dyn std::fmt::Write) -> fmt::Result,
         Self: Sized,
     {
         WithWhere { ticks: self, func }
@@ -203,17 +196,13 @@ pub struct WithWhere<D, F> {
 
 impl<N, D: TickFmt<N>, F> TickFmt<N> for WithWhere<D, F>
 where
-    F: FnMut(&mut dyn std::fmt::Write, IndexRequester) -> fmt::Result,
+    F: FnMut(&mut dyn std::fmt::Write) -> fmt::Result,
 {
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
         self.ticks.write_tick(a, val)
     }
-    fn write_where(
-        &mut self,
-        w: &mut dyn std::fmt::Write,
-        req: IndexRequester,
-    ) -> std::fmt::Result {
-        (self.func)(w, req)
+    fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        (self.func)(w)
     }
 }
 
@@ -228,12 +217,8 @@ where
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
         (self.func)(a, val)
     }
-    fn write_where(
-        &mut self,
-        w: &mut dyn std::fmt::Write,
-        req: IndexRequester,
-    ) -> std::fmt::Result {
-        self.ticks.write_where(w, req)
+    fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        self.ticks.write_where(w)
     }
 }
 
@@ -251,6 +236,7 @@ pub trait TickFormat<Num> {
         self,
         data: &ticks::DataBound<Num>,
         canvas: &RenderOptionsBound,
+        req: IndexRequester,
     ) -> TickGen<Self::It, Self::Fmt>;
 
     fn with_fmt<F: TickFmt<Num>>(self, fmt: F) -> WithFmt<Self, F>
@@ -279,6 +265,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for T
         self,
         _: &ticks::DataBound<X>,
         _: &RenderOptionsBound,
+        _: IndexRequester,
     ) -> TickGen<Self::It, Self::Fmt> {
         self
     }
@@ -295,8 +282,9 @@ impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F
         self,
         data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
+        req: IndexRequester,
     ) -> TickGen<Self::It, Self::Fmt> {
-        let TickGen { it, res, .. } = self.ticks.generate(data, canvas);
+        let TickGen { it, res, .. } = self.ticks.generate(data, canvas, req);
         TickGen {
             it,
             fmt: self.fmt,

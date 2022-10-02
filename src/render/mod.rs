@@ -444,8 +444,18 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         self.plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
 
-        let xticks = self.tickx.generate(&boundx, &self.opt.boundx);
-        let yticks = self.ticky.generate(&boundy, &self.opt.boundy);
+        let mut index_counter = 0;
+
+        let xticks = self.tickx.generate(
+            &boundx,
+            &self.opt.boundx,
+            IndexRequester::new(&mut index_counter),
+        );
+        let yticks = self.ticky.generate(
+            &boundy,
+            &self.opt.boundy,
+            IndexRequester::new(&mut index_counter),
+        );
 
         DataBuilt {
             opt: self.opt,
@@ -474,36 +484,6 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
-    pub fn map_xtick<J: TickFormat<P::X>, F: FnOnce(TickGen<A, C>) -> J>(
-        self,
-        func: F,
-    ) -> DataBuilt<P, J::It, B, J::Fmt, D> {
-        let xticks = func(self.xticks).generate(&self.boundx, &self.opt.boundx);
-        DataBuilt {
-            opt: self.opt,
-            xticks,
-            yticks: self.yticks,
-            plots: self.plots,
-            boundx: self.boundx,
-            boundy: self.boundy,
-        }
-    }
-
-    pub fn map_ytick<J: TickFormat<P::Y>, F: FnOnce(TickGen<B, D>) -> J>(
-        self,
-        func: F,
-    ) -> DataBuilt<P, A, J::It, C, J::Fmt> {
-        let yticks = func(self.yticks).generate(&self.boundy, &self.opt.boundy);
-        DataBuilt {
-            opt: self.opt,
-            xticks: self.xticks,
-            yticks,
-            plots: self.plots,
-            boundx: self.boundx,
-            boundy: self.boundy,
-        }
-    }
-
     pub fn xticks(&self) -> &TickGen<A, C> {
         &self.xticks
     }
