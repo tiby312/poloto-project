@@ -18,23 +18,15 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
     name: K,
     data: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> DataBuilt<
-    impl PlotIterator<X = X, Y = i128>,
-    impl IntoIterator<Item = X>,
-    impl IntoIterator<Item = i128>,
-    impl TickFmt<X>,
-    impl TickFmt<i128>,
-> {
+) -> Data<impl PlotIterator<X = X, Y = i128>, impl TickFormat<X>, impl TickFormat<i128>> {
     let (plots, ytick_fmt) = gen_bar(name, data, marker);
 
     let opt = crate::render::render_opt_builder()
         .with_tick_lines([true, false])
         .build();
 
-    crate::data(plots)
-        .with_yticks(ytick_fmt)
-        .with_opt(opt)
-        .build()
+    //TODO somehow forbid user from messing with these settings after its returned?
+    crate::data(plots).with_yticks(ytick_fmt).with_opt(opt)
 }
 
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(

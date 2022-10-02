@@ -27,7 +27,6 @@ fn days() -> fmt::Result {
 
     let w = util::create_test_file("days.svg");
     poloto::data(p)
-        .build()
         .labels("Number of Wikipedia Articles", "Day", "Number of Articles")
         .append_to(poloto::simple_light())
         .render_fmt_write(w)
@@ -59,8 +58,7 @@ fn minutes_local_time() -> fmt::Result {
 
     let w = util::create_test_file("minutes_local_time.svg");
 
-    s.build()
-        .labels("Number of Wikipedia Articles", "time", "Number of Articles")
+    s.labels("Number of Wikipedia Articles", "time", "Number of Articles")
         .append_to(poloto::simple_dark())
         .render_fmt_write(w)
 }
@@ -92,7 +90,6 @@ fn months() -> fmt::Result {
     let w = util::create_test_file("months.svg");
 
     poloto::data(plots)
-        .build()
         .labels(
             "Number of Wikipedia Articles",
             "duration",
@@ -123,28 +120,29 @@ fn seconds() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     ));
 
-    let data = data.build();
-
-    let step = *data.xticks().fmt.step();
-
-    let data = data.map_xtick(|t| {
-        poloto::ticks::TickBuilder::new(t.it)
+    let xticks = poloto::ticks::from_closure(|data, opt, req| {
+        use poloto::ticks::TickFormat;
+        let k = poloto::default_ticks::<UnixTime>().generate(data, opt, req);
+        let step = k.fmt.step();
+        poloto::ticks::TickBuilder::new(k.it)
             .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+            .build()
     });
 
-    let bounds = *data.xbound();
+    let data = data.with_xticks(xticks).labels_ext(|data| {
+        let bounds = *data.boundx;
+        (
+            "Number of Wikipedia Articles",
+            hypermelon::format_move!(
+                "{} to {}",
+                bounds.min.datetime(timezone).format("%H:%M:%S"),
+                bounds.max.datetime(timezone).format("%H:%M:%S")
+            ),
+            "Number of Articles",
+        )
+    });
 
     let w = util::create_test_file("seconds.svg");
-    data.labels(
-        "Number of Wikipedia Articles",
-        hypermelon::format_move!(
-            "{} to {} with {}",
-            bounds.min.datetime(timezone).format("%H:%M:%S"),
-            bounds.max.datetime(timezone).format("%H:%M:%S"),
-            step
-        ),
-        "Number of Articles",
-    )
-    .append_to(poloto::simple_light())
-    .render_fmt_write(w)
+
+    data.append_to(poloto::simple_light()).render_fmt_write(w)
 }

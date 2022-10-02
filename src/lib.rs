@@ -119,6 +119,10 @@ macro_rules! plots {
     };
 }
 
+pub fn default_ticks<X: PlotNum>() -> X::Fmt {
+    X::default_ticks()
+}
+
 ///
 /// Construct a [`Data`].
 ///

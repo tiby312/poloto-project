@@ -43,7 +43,7 @@ pub fn from_closure<N: PlotNum, It, Fmt, F>(func: F) -> Wrappy<F>
 where
     It: IntoIterator<Item = N>,
     Fmt: TickFmt<N>,
-    F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It, Fmt>,
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> TickGen<It, Fmt>,
 {
     Wrappy { func }
 }
@@ -66,7 +66,7 @@ pub struct Wrappy<F> {
 
 impl<N: PlotNum, It2: IntoIterator<Item = N>, Fmt2: TickFmt<N>, F> TickFormat<N> for Wrappy<F>
 where
-    F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It2, Fmt2>,
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> TickGen<It2, Fmt2>,
     It2::Item: PlotNum,
 {
     type It = It2;
@@ -75,9 +75,9 @@ where
         self,
         data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
-        _: IndexRequester,
+        req: IndexRequester,
     ) -> TickGen<It2, Fmt2> {
-        (self.func)(data, canvas)
+        (self.func)(data, canvas, req)
     }
 }
 

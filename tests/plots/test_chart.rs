@@ -72,7 +72,6 @@ fn test_chart() -> std::fmt::Result {
                             poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
                         let p = poloto::data(poloto::build::cloned_plot(test.iter()).scatter(""))
-                            .build()
                             .labels(hypermelon::format_move!("float test {}", i), "x", "y");
 
                         let header = header.append(style).append(p);
@@ -86,7 +85,6 @@ fn test_chart() -> std::fmt::Result {
                             poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
                         let p = poloto::data(poloto::build::cloned_plot(test.iter()).scatter(""))
-                            .build()
                             .labels(hypermelon::format_move!("int test {}", i), "x", "y");
                         let header = header.append(style).append(p);
                         hypermelon::render(header, e.writer_escapable())?;

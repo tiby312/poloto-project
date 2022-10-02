@@ -439,7 +439,10 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         }
     }
 
-    pub fn build(mut self) -> DataBuilt<P, TX::It, TY::It, TX::Fmt, TY::Fmt> {
+    pub fn labels_ext<AA: Display, BB: Display, CC: Display>(
+        mut self,
+        func: impl FnOnce(&Foop<TX::It, TY::It, TX::Fmt, TY::Fmt, P::X, P::Y>) -> (AA, BB, CC),
+    ) -> Plotter<P, TX::It, TY::It, TX::Fmt, TY::Fmt, SimplePlotFormatter<AA, BB, CC>> {
         let mut area = build::marker::Area::new();
         self.plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
@@ -457,55 +460,22 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
             IndexRequester::new(&mut index_counter),
         );
 
-        DataBuilt {
+        let f = Foop {
+            xticks: &xticks,
+            yticks: &yticks,
+            boundx: &boundx,
+            boundy: &boundy,
+        };
+
+        let (title, xname, yname) = func(&f);
+
+        Plotter {
             opt: self.opt,
             xticks,
             yticks,
-            plots: self.plots,
             boundx,
             boundy,
-        }
-    }
-}
-
-pub struct DataBuilt<P: PlotIterator, A, B, C, D> {
-    opt: RenderOptions,
-    xticks: TickGen<A, C>,
-    yticks: TickGen<B, D>,
-    plots: P,
-    boundx: DataBound<P::X>,
-    boundy: DataBound<P::Y>,
-}
-impl<P, A, B, C, D> DataBuilt<P, A, B, C, D>
-where
-    P: PlotIterator,
-    A: IntoIterator<Item = P::X>,
-    B: IntoIterator<Item = P::Y>,
-    C: crate::ticks::TickFmt<P::X>,
-    D: crate::ticks::TickFmt<P::Y>,
-{
-    pub fn xticks(&self) -> &TickGen<A, C> {
-        &self.xticks
-    }
-    pub fn yticks(&self) -> &TickGen<B, D> {
-        &self.yticks
-    }
-
-    pub fn xbound(&self) -> &DataBound<P::X> {
-        &self.boundx
-    }
-    pub fn ybound(&self) -> &DataBound<P::Y> {
-        &self.boundy
-    }
-
-    pub fn labels<AA: Display, BB: Display, CC: Display>(
-        self,
-        title: AA,
-        xname: BB,
-        yname: CC,
-    ) -> Plotter<P, A, B, C, D, SimplePlotFormatter<AA, BB, CC>> {
-        Plotter {
-            data: self,
+            plots: self.plots,
             base: SimplePlotFormatter {
                 title,
                 xname,
@@ -513,13 +483,34 @@ where
             },
         }
     }
+
+    pub fn labels<AA: Display, BB: Display, CC: Display>(
+        self,
+        title: AA,
+        xname: BB,
+        yname: CC,
+    ) -> Plotter<P, TX::It, TY::It, TX::Fmt, TY::Fmt, SimplePlotFormatter<AA, BB, CC>> {
+        self.labels_ext(|_| (title, xname, yname))
+    }
+}
+
+pub struct Foop<'a, A, B, C, D, X, Y> {
+    pub xticks: &'a TickGen<A, C>,
+    pub yticks: &'a TickGen<B, D>,
+    pub boundx: &'a DataBound<X>,
+    pub boundy: &'a DataBound<Y>,
 }
 
 ///
 /// Created by [`plot_with`]
 ///
 pub struct Plotter<P: PlotIterator, A, B, C, D, BB: BaseFmt> {
-    data: DataBuilt<P, A, B, C, D>,
+    opt: RenderOptions,
+    xticks: TickGen<A, C>,
+    yticks: TickGen<B, D>,
+    plots: P,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
     base: BB,
 }
 
@@ -557,20 +548,20 @@ where
 
         render::render_plot::render_plot(
             writer,
-            &self.data.boundx,
-            &self.data.boundy,
-            &self.data.opt,
-            &mut self.data.plots,
+            &self.boundx,
+            &self.boundy,
+            &self.opt,
+            &mut self.plots,
         )?;
 
         render::render_base::render_base(
             writer,
-            self.data.xticks,
-            self.data.yticks,
-            &self.data.boundx,
-            &self.data.boundy,
+            self.xticks,
+            self.yticks,
+            &self.boundx,
+            &self.boundy,
             &mut self.base,
-            &self.data.opt,
+            &self.opt,
         )
     }
 }
