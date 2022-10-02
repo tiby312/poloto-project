@@ -85,7 +85,7 @@ use render::*;
 
 pub use simple_theme::Theme;
 
-pub fn header()->Header{
+pub fn header() -> Header {
     Header::new()
 }
 
@@ -183,8 +183,6 @@ pub fn range_iter(
     let divf = num as f64;
     (0..num).map(move |x| min + (x as f64 / divf) * diff)
 }
-
-
 
 #[derive(Copy, Clone)]
 pub struct Header {

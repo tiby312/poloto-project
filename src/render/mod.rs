@@ -483,17 +483,14 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
-    pub fn with_xtick_fmt<L: crate::ticks::TickFmt<P::X>>(
+    pub fn map_xtick<AA, CC, F: FnOnce(TickGen<A, C>) -> TickGen<AA, CC>>(
         self,
-        fmt: L,
-    ) -> DataBuilt<P, A, B, L, D> {
+        func: F,
+    ) -> DataBuilt<P, AA, B, CC, D> {
+        let xticks = func(self.xticks);
         DataBuilt {
             opt: self.opt,
-            xticks: TickGen {
-                it: self.xticks.it,
-                fmt,
-                res: self.xticks.res,
-            },
+            xticks,
             yticks: self.yticks,
             plots: self.plots,
             boundx: self.boundx,
@@ -501,18 +498,15 @@ where
         }
     }
 
-    pub fn with_ytick_fmt<L: crate::ticks::TickFmt<P::Y>>(
+    pub fn map_ytick<BB, DD, F: FnOnce(TickGen<B, D>) -> TickGen<BB, DD>>(
         self,
-        fmt: L,
-    ) -> DataBuilt<P, A, B, C, L> {
+        func: F,
+    ) -> DataBuilt<P, A, BB, C, DD> {
+        let yticks = func(self.yticks);
         DataBuilt {
             opt: self.opt,
             xticks: self.xticks,
-            yticks: TickGen {
-                it: self.yticks.it,
-                fmt,
-                res: self.yticks.res,
-            },
+            yticks,
             plots: self.plots,
             boundx: self.boundx,
             boundy: self.boundy,

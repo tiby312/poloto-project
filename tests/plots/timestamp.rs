@@ -119,18 +119,22 @@ fn seconds() -> fmt::Result {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
-    let fmt = poloto::ticks::DefaultTickFmt
-        .with_ticks(|w, v: &UnixTime| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")));
-
     let data = poloto::data(plots!(
         poloto::build::cloned_plot(data.iter()).line(""),
         poloto::build::markers(None, Some(0))
-    ))
-    .build();
+    ));
 
-    let step = *data.xticks().fmt.step();
+    let data = data.build();
 
-    let data = data.with_xtick_fmt(fmt);
+    let data = data.map_xtick(|t| {
+        let step = *t.fmt.step();
+
+        poloto::ticks::from_iter_fmt(
+            t.it,
+            |w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")),
+            |_, _| Ok(()),
+        )
+    });
 
     let bounds = *data.xbound();
 

@@ -23,18 +23,37 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
-pub struct TickGen<I, F> {
-    pub it: I,
-    pub fmt: F,
-    pub res: TickRes,
+pub fn from_iter_fmt<
+    X: PlotNum + Display,
+    I: IntoIterator<Item = X>,
+    F: FnMut(&mut dyn std::fmt::Write, &X) -> fmt::Result,
+    L: FnMut(&mut dyn std::fmt::Write, IndexRequester) -> fmt::Result,
+>(
+    it: I,
+    tick_fmt: F,
+    where_fmt: L,
+) -> TickGen<I, impl TickFmt<X>> {
+    let fmt = DefaultTickFmt.with_ticks(tick_fmt).with_where(where_fmt);
+    let k = from_iter(it);
+    TickGen {
+        it: k.it,
+        fmt,
+        res: k.res,
+    }
 }
 
 ///
 /// Create a [`TickFormat`] from a step iterator.
 ///
 ///
-pub fn from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(ticks: I) -> TickIterFmt<I> {
-    TickIterFmt { ticks }
+pub fn from_iter<X: PlotNum + Display, I: IntoIterator<Item = X>>(
+    ticks: I,
+) -> TickGen<I, DefaultTickFmt> {
+    TickGen {
+        it: ticks,
+        fmt: DefaultTickFmt,
+        res: TickRes { dash_size: None },
+    }
 }
 
 pub struct DefaultTickFmt;
@@ -52,30 +71,30 @@ impl<N: Display> TickFmt<N> for DefaultTickFmt {
     }
 }
 
-///
-/// Used by [`ticks::from_iter`]
-///
-pub struct TickIterFmt<I: Iterator> {
-    ticks: I,
-}
-impl<I: Iterator> TickFormat<I::Item> for TickIterFmt<I>
-where
-    I::Item: PlotNum + Display,
-{
-    type It = I;
-    type Fmt = DefaultTickFmt;
-    fn generate(
-        self,
-        _: &ticks::DataBound<I::Item>,
-        _: &RenderOptionsBound,
-    ) -> TickGen<Self::It, Self::Fmt> {
-        TickGen {
-            it: self.ticks,
-            fmt: DefaultTickFmt,
-            res: TickRes { dash_size: None },
-        }
-    }
-}
+// ///
+// /// Used by [`ticks::from_iter`]
+// ///
+// pub struct TickIterFmt<I: Iterator> {
+//     ticks: I,
+// }
+// impl<I: Iterator> TickFormat<I::Item> for TickIterFmt<I>
+// where
+//     I::Item: PlotNum + Display,
+// {
+//     type It = I;
+//     type Fmt = DefaultTickFmt;
+//     fn generate(
+//         self,
+//         _: &ticks::DataBound<I::Item>,
+//         _: &RenderOptionsBound,
+//     ) -> TickGen<Self::It, Self::Fmt> {
+//         TickGen {
+//             it: self.ticks,
+//             fmt: DefaultTickFmt,
+//             res: TickRes { dash_size: None },
+//         }
+//     }
+// }
 
 #[derive(Debug, Copy, Clone)]
 pub enum Axis {
@@ -190,6 +209,31 @@ pub trait TickFormat<N: PlotNum> {
         Self: Sized,
     {
         WithFmt { ticks: self, fmt }
+    }
+}
+
+pub struct TickGen<I, F> {
+    pub it: I,
+    pub fmt: F,
+    pub res: TickRes,
+}
+// impl<I:IntoIterator,F> TickGen<I,F>{
+//     pub fn with_ticks<FF:FnMut(&mut dyn fmt::Write,&I::Item)>(self,func:FF)->TickGen<I>{
+
+//     }
+
+//     pub fn with_fmt(self)
+// }
+
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for TickGen<I, Fmt> {
+    type It = I;
+    type Fmt = Fmt;
+    fn generate(
+        self,
+        _: &ticks::DataBound<X>,
+        _: &RenderOptionsBound,
+    ) -> TickGen<Self::It, Self::Fmt> {
+        self
     }
 }
 

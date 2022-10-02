@@ -11,8 +11,14 @@ fn main() {
         poloto::build::markers([24], [])
     );
 
+    let ticks = poloto::ticks::from_iter_fmt(
+        (0..).step_by(6),
+        |w, v| write!(w, "{} hr", v),
+        |_, _| Ok(()),
+    );
+
     poloto::data(plots)
-        .with_xticks(poloto::ticks::from_iter((0..).step_by(6)))
+        .with_xticks(ticks)
         .build()
         .labels("title", "x", "y")
         .append_to(poloto::simple_light())
