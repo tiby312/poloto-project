@@ -530,7 +530,7 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
-    pub fn append_to<E: RenderElem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
+    pub fn append_to<E: Elem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
         Themer(elem.append(self))
     }
 
@@ -539,7 +539,7 @@ where
     }
 }
 
-impl<P: build::PlotIterator, A, B, C, D, BB: BaseFmt> hypermelon::RenderElem
+impl<P: build::PlotIterator, A, B, C, D, BB: BaseFmt> hypermelon::Elem
     for Plotter<P, A, B, C, D, BB>
 where
     P: PlotIterator,
@@ -600,8 +600,8 @@ where
     }
 }
 
-pub struct Themer<R: RenderElem>(R);
-impl<R: RenderElem> Themer<R> {
+pub struct Themer<R: Elem>(R);
+impl<R: Elem> Themer<R> {
     pub fn render_stdout(self) {
         hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap()
     }
@@ -620,7 +620,7 @@ impl<R: RenderElem> Themer<R> {
         Ok(s)
     }
 }
-impl<R: RenderElem> RenderElem for Themer<R> {
+impl<R: Elem> Elem for Themer<R> {
     type Tail = R::Tail;
 
     fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {

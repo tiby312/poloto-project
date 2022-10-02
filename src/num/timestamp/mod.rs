@@ -39,8 +39,13 @@ pub struct UnixTimeTickFmt<T: TimeZone> {
     timezone: T,
 }
 
+impl UnixTimeTickFmt<Utc> {
+    pub fn new() -> Self {
+        Self::with_timezone(Utc)
+    }
+}
 impl<T: TimeZone> UnixTimeTickFmt<T> {
-    pub fn new(timezone: T) -> Self {
+    pub fn with_timezone(timezone: T) -> Self {
         UnixTimeTickFmt { timezone }
     }
 }
@@ -226,7 +231,7 @@ impl plotnum::AsPlotnum for &mut UnixTime {
 impl PlotNum for UnixTime {
     type Fmt = UnixTimeTickFmt<Utc>;
     fn default_ticks() -> Self::Fmt {
-        UnixTimeTickFmt::new(Utc)
+        UnixTimeTickFmt::new()
     }
 
     #[inline(always)]

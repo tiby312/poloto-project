@@ -1,7 +1,7 @@
 use super::*;
 
 use chrono::TimeZone;
-use poloto::num::timestamp::{unixtime_ticks, UnixTime};
+use poloto::num::timestamp::UnixTime;
 
 #[test]
 fn days() -> fmt::Result {
@@ -20,17 +20,17 @@ fn days() -> fmt::Result {
         (timezone.ymd(2020, 2, 04).into(), 4682000),
     ];
 
-    let s = poloto::quick_fmt!(
-        "Number of Wikipedia Articles",
-        "Day",
-        "Number of Articles",
-        data.iter().cloned_plot().line(""),
+    let p = poloto::plots!(
+        poloto::build::cloned_plot(data.iter()).line(""),
         poloto::build::markers(None, Some(0))
     );
 
-    let mut w = util::create_test_file("days.svg");
-
-    write!(w, "{}", poloto::disp(|a| s.simple_theme(a)))
+    let w = util::create_test_file("days.svg");
+    poloto::data(p)
+        .build()
+        .labels("Number of Wikipedia Articles", "Day", "Number of Articles")
+        .append_to(poloto::simple_light())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -50,32 +50,19 @@ fn minutes_local_time() -> fmt::Result {
     ];
 
     let s = poloto::data(plots!(
-        data.iter().cloned_plot().line(""),
+        poloto::build::cloned_plot(data.iter()).line(""),
         poloto::build::markers(None, Some(0))
     ));
 
-    let opt = poloto::render::render_opt();
-
-    let (bx, by) = poloto::ticks::bounds(&s, &opt);
-
-    let xtick_fmt = unixtime_ticks(bx, time_zone);
-    let ytick_fmt = poloto::ticks::from_default(by);
-
-    let s = poloto::plot_with(
-        s,
-        &opt,
-        poloto::plot_fmt(
-            "Number of Wikipedia Articles",
-            "time",
-            "Number of Articles",
-            xtick_fmt,
-            ytick_fmt,
-        ),
-    );
+    use poloto::num::timestamp::UnixTimeTickFmt;
+    let s = s.with_xticks(UnixTimeTickFmt::with_timezone(time_zone.clone()));
 
     let w = util::create_test_file("minutes_local_time.svg");
 
-    s.simple_theme(w)
+    s.build()
+        .labels("Number of Wikipedia Articles", "time", "Number of Articles")
+        .append_to(poloto::simple_dark())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -97,24 +84,29 @@ fn months() -> fmt::Result {
         (timezone.ymd(2021, 03, 04).into(), 4682000),
     ];
 
-    let s = poloto::quick_fmt!(
-        "Number of Wikipedia Articles",
-        "duration",
-        "Number of Articles",
-        data.iter().cloned_plot().line(""),
+    let plots = poloto::plots!(
+        poloto::build::cloned_plot(data.iter()).line(""),
         poloto::build::markers([], [0])
     );
 
     let w = util::create_test_file("months.svg");
 
-    s.simple_theme(w)
+    poloto::data(plots)
+        .build()
+        .labels(
+            "Number of Wikipedia Articles",
+            "duration",
+            "Number of Articles",
+        )
+        .append_to(poloto::simple_dark())
+        .render_fmt_write(w)
 }
 
 #[cfg(feature = "timestamp_full")]
 #[test]
 fn seconds() -> fmt::Result {
     use chrono::TimeZone;
-
+    use poloto::ticks::TickFmt;
     let timezone = &chrono::Utc;
 
     let date = timezone.ymd(2020, 1, 30);
@@ -127,48 +119,31 @@ fn seconds() -> fmt::Result {
         (date.and_hms(1, 3, 00).into(), 4133000),
     ];
 
+    let fmt = poloto::ticks::DefaultTickFmt
+        .with_ticks(|w, v: &UnixTime| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")));
+
+    use poloto::ticks::TickFormat;
+    let xticks = poloto::num::timestamp::UnixTimeTickFmt::new().with_fmt(fmt);
+
     let data = poloto::data(plots!(
-        data.iter().cloned_plot().line(""),
+        poloto::build::cloned_plot(data.iter()).line(""),
         poloto::build::markers(None, Some(0))
-    ));
+    ))
+    .with_xticks(xticks)
+    .build();
 
-    let opt = poloto::render::render_opt();
-
-    let (bx, by) = poloto::ticks::bounds(&data, &opt);
-
-    let (xmin, xmax) = (bx.data.min, bx.data.max);
-
-    let xtick_fmt = poloto::ticks::from_default(bx);
-
-    let xtick_step = xtick_fmt.step();
-
-    // Assume the steps are in seconds given the data we provided.
-    // We are going to use a custom time format that won't work
-    // if the steps were years, for example.
-    assert!(xtick_step.is_seconds());
-
-    let ytick_fmt = poloto::ticks::from_default(by);
-
-    let plotter = poloto::plot_with(
-        data,
-        &opt,
-        poloto::plot_fmt(
-            "Number of Wikipedia Articles",
-            formatm!(
-                "{} to {} in {}",
-                xmin.datetime(timezone).format("%H:%M:%S"),
-                xmax.datetime(timezone).format("%H:%M:%S"),
-                xtick_step
-            ),
-            "Number of Articles",
-            xtick_fmt
-                .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
-                .with_where_fmt(|_| Ok(())),
-            ytick_fmt,
-        ),
-    );
+    let bounds = *data.xbound();
 
     let w = util::create_test_file("seconds.svg");
-
-    plotter.simple_theme(w)
+    data.labels(
+        "Number of Wikipedia Articles",
+        hypermelon::format_move!(
+            "{} to {}",
+            bounds.min.datetime(timezone).format("%H:%M:%S"),
+            bounds.max.datetime(timezone).format("%H:%M:%S"),
+        ),
+        "Number of Articles",
+    )
+    .append_to(poloto::simple_light())
+    .render_fmt_write(w)
 }

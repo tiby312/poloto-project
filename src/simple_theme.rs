@@ -150,13 +150,9 @@ impl DefaultHeader {
             viewbox,
         }
     }
-
-    pub fn add<R: RenderElem>(self, elem: R) -> hypermelon::Append<Self, R> {
-        self.append(elem)
-    }
 }
 
-impl RenderElem for DefaultHeader {
+impl Elem for DefaultHeader {
     type Tail = ElemTail<&'static str>;
     fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let elem = hypermelon::build::elem("svg").with(attrs!(
@@ -190,21 +186,13 @@ impl Theme<'static> {
             styles: STYLE_CONFIG_DARK_DEFAULT,
         }
     }
-
-    pub fn with_style<D: Display>(
-        self,
-        display: D,
-    ) -> hypermelon::Append<Self, hypermelon::build::Raw<D>> {
-        self.append(hypermelon::build::raw(display))
-    }
 }
 
-impl<'a> RenderElem for Theme<'a> {
+impl<'a> Elem for Theme<'a> {
     type Tail = hypermelon::build::ElemTail<&'static str>;
     fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let k = hypermelon::build::elem("style");
-        let k = k.append(hypermelon::build::raw(self.styles));
-
+        let k = k.append(self.styles);
         k.render_head(w)
     }
 }

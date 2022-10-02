@@ -1,3 +1,4 @@
+use hypermelon::Elem;
 use poloto::prelude::*;
 
 // PIPE me to a file!
@@ -21,8 +22,7 @@ fn main() {
         .with_dim(svg.get_viewbox())
         .build();
 
-    let svg = svg
-        .add(poloto::Theme::dark().with_style(".poloto_line{stroke-dasharray:2;stroke-width:2;}"));
+    let style = poloto::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
     let plots = plots!(
         poloto::build::plots_dyn((1000..1006).map(|i| {
@@ -37,6 +37,6 @@ fn main() {
         .with_opt(opt)
         .build()
         .labels("collatz", "x", "y")
-        .append_to(svg)
+        .append_to(svg.append(style))
         .render_stdout();
 }

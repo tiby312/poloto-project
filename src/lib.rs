@@ -87,11 +87,11 @@ pub use simple_theme::DefaultHeader as Header;
 pub use simple_theme::Theme;
 
 pub fn simple_light() -> hypermelon::Append<Header, Theme<'static>> {
-    Header::new().add(Theme::light())
+    Header::new().append(Theme::light())
 }
 
 pub fn simple_dark() -> hypermelon::Append<Header, Theme<'static>> {
-    Header::new().add(Theme::dark())
+    Header::new().append(Theme::dark())
 }
 
 pub mod output_zip;

@@ -1,4 +1,4 @@
-use hypermelon::{format_move, RenderElem};
+use hypermelon::{format_move, Elem};
 
 use super::*;
 
@@ -46,11 +46,11 @@ fn large_scatter() -> fmt::Result {
         .build()
         .labels("cows per year", "year", "cows");
 
-    let header = poloto::Header::new().add(poloto::Theme::dark().with_style(
+    let header = poloto::Header::new().append(poloto::Theme::dark().append(
         ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
     ));
 
-    let mut w = util::create_test_file("large_scatter.svg");
+    let w = util::create_test_file("large_scatter.svg");
 
     data.append_to(header).render_fmt_write(w)
 }
@@ -122,9 +122,9 @@ fn long_label() -> fmt::Result {
     let header = poloto::simple_theme::DefaultHeader::new()
         .with_dim(a)
         .with_viewbox(a)
-        .add(poloto::Theme::dark());
+        .append(poloto::Theme::dark());
 
-    let mut w = util::create_test_file("long_label.svg");
+    let w = util::create_test_file("long_label.svg");
 
     data.append_to(header).render_fmt_write(w)
 }
@@ -151,11 +151,11 @@ fn base_color() -> fmt::Result {
         .build()
         .labels("cows per year", "year", "cow");
 
-    let header = poloto::Header::new().add(poloto::Theme::dark().with_style(
+    let header = poloto::Header::new().append(poloto::Theme::dark().append(
         ".poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}",
     ));
 
-    let mut w = util::create_test_file("base_color.svg");
+    let w = util::create_test_file("base_color.svg");
 
     d.append_to(header).render_fmt_write(w)
 }
@@ -197,10 +197,10 @@ fn custom_dim() -> fmt::Result {
     .build()
     .labels("collatz", "x", "y");
 
-    let mut w = util::create_test_file("custom_dim.svg");
+    let w = util::create_test_file("custom_dim.svg");
 
     let header = header
-        .add(poloto::Theme::dark().with_style(".poloto_line{stroke-dasharray:2;stroke-width:1;}"));
+        .append(poloto::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:1;}"));
 
     data.append_to(header).render_fmt_write(w)
 }
@@ -218,7 +218,7 @@ fn dark() -> fmt::Result {
     poloto::data(data)
         .build()
         .labels("cos per year", "year", "cows")
-        .append_to(poloto::simple_light())
+        .append_to(poloto::simple_dark())
         .render_fmt_write(w)
 }
 
@@ -238,7 +238,7 @@ fn custom_style() -> fmt::Result {
         "y",
     );
 
-    let header = poloto::Header::new().add(poloto::Theme::dark().append(
+    let header = poloto::Header::new().append(poloto::Theme::dark().append(
         hypermelon::build::raw_escapable(
             r###"
     <defs>
@@ -257,7 +257,7 @@ fn custom_style() -> fmt::Result {
         ),
     ));
 
-    let mut w = util::create_test_file("custom_style.svg");
+    let w = util::create_test_file("custom_style.svg");
 
     data.append_to(header).render_fmt_write(w)
 }

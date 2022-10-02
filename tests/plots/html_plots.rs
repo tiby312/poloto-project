@@ -132,9 +132,10 @@ body {
 
     let s = poloto::data(s)
         .build()
-        .labels("Demo: Hovering and shadows", "x", "y");
+        .labels("Demo: Hovering and shadows", "x", "y")
+        .append_to(poloto::simple_light());
 
-    let s = s.headless().render_string().unwrap();
+    let s = s.render_string().unwrap();
 
     let mut w = util::create_test_file("hover_shadow.html");
 

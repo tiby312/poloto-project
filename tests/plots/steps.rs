@@ -1,3 +1,5 @@
+use poloto::ticks::{DefaultTickFmt, TickFmt, TickFormat};
+
 use super::*;
 
 #[test]
@@ -15,44 +17,23 @@ fn marathon() -> fmt::Result {
 
     // Have there be a tick every hour
 
-    let opt = poloto::render::render_opt();
-
     let p = plots!(
         poloto::build::cloned_plot(heart_rate.iter()).line("hay"),
         poloto::build::markers(None, Some(0))
     );
 
-    let data = poloto::data(p);
+    let tick_fmt = DefaultTickFmt.with_ticks(|w, v| write!(w, "{} hr", v / hr));
 
-    let xtick_fmt = poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)));
+    let xticks = poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)))
+        .with_fmt(tick_fmt);
 
-    let (_, by) = poloto::ticks::bounds(&data, &opt);
+    let data = poloto::data(p).with_xticks(xticks).build();
 
-    let ytick_fmt = poloto::ticks::from_default(by);
+    let w = util::create_test_file("marathon.svg");
 
-    let plotter = poloto::plot_with(
-        data,
-        &opt,
-        poloto::plot_fmt(
-            "collatz",
-            "x",
-            "y",
-            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v / hr)),
-            ytick_fmt,
-        ),
-    );
-
-    let mut w = util::create_test_file("marathon.svg");
-
-    write!(
-        w,
-        "{}<style>{}{}</style>{}{}",
-        poloto::simple_theme::SVG_HEADER,
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    data.labels("collatz", "x", "y")
+        .append_to(poloto::simple_dark())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -75,33 +56,17 @@ fn years() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        data.iter().cloned_plot().histogram("foo"),
+        poloto::build::cloned_plot(data.iter()).histogram("foo"),
         poloto::build::markers(None, Some(0))
     ));
 
     let xtick_fmt = poloto::ticks::from_iter((2010..).step_by(2));
 
-    let opt = poloto::render::render_opt();
+    let w = util::create_test_file("years.svg");
 
-    let (_, by) = poloto::ticks::bounds(&data, &opt);
-
-    let ytick_fmt = poloto::ticks::from_default(by);
-
-    let plotter = poloto::plot_with(
-        data,
-        &opt,
-        poloto::plot_fmt("title", "xname", "yname", xtick_fmt, ytick_fmt),
-    );
-
-    let mut w = util::create_test_file("years.svg");
-
-    write!(
-        w,
-        "{}<style>{}{}</style>{}{}",
-        poloto::simple_theme::SVG_HEADER,
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
-        poloto::disp(|w| plotter.render(w)),
-        poloto::simple_theme::SVG_END
-    )
+    data.with_xticks(xtick_fmt)
+        .build()
+        .labels("title", "xname", "yname")
+        .append_to(poloto::simple_light())
+        .render_fmt_write(w)
 }
