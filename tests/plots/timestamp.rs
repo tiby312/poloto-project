@@ -106,7 +106,6 @@ fn months() -> fmt::Result {
 #[test]
 fn seconds() -> fmt::Result {
     use chrono::TimeZone;
-    use poloto::ticks::TickFmt;
     let timezone = &chrono::Utc;
 
     let date = timezone.ymd(2020, 1, 30);
@@ -129,11 +128,8 @@ fn seconds() -> fmt::Result {
     let step = *data.xticks().fmt.step();
 
     let data = data.map_xtick(|t| {
-        poloto::ticks::from_iter_fmt(
-            t.it,
-            |w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")),
-            |_, _| Ok(()),
-        )
+        poloto::ticks::TickBuilder::new(t.it)
+            .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
     });
 
     let bounds = *data.xbound();

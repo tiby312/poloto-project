@@ -1,5 +1,3 @@
-use poloto::ticks::{DefaultTickFmt, TickFmt, TickFormat};
-
 use super::*;
 
 #[test]
@@ -22,10 +20,8 @@ fn marathon() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     );
 
-    let tick_fmt = DefaultTickFmt.with_ticks(|w, v| write!(w, "{} hr", v / hr));
-
-    let xticks = poloto::ticks::from_iter(std::iter::successors(Some(0), |w| Some(w + hr)))
-        .with_fmt(tick_fmt);
+    let xticks = poloto::ticks::TickBuilder::new(std::iter::successors(Some(0), |w| Some(w + hr)))
+        .with_ticks(|w, v| write!(w, "{} hr", v / hr));
 
     let data = poloto::data(p).with_xticks(xticks).build();
 
@@ -60,7 +56,7 @@ fn years() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     ));
 
-    let xtick_fmt = poloto::ticks::from_iter((2010..).step_by(2));
+    let xtick_fmt = poloto::ticks::TickBuilder::new((2010..).step_by(2));
 
     let w = util::create_test_file("years.svg");
 

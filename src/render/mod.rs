@@ -483,11 +483,11 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
-    pub fn map_xtick<AA, CC, F: FnOnce(TickGen<A, C>) -> TickGen<AA, CC>>(
+    pub fn map_xtick<J: TickFormat<P::X>, F: FnOnce(TickGen<A, C>) -> J>(
         self,
         func: F,
-    ) -> DataBuilt<P, AA, B, CC, D> {
-        let xticks = func(self.xticks);
+    ) -> DataBuilt<P, J::It, B, J::Fmt, D> {
+        let xticks = func(self.xticks).generate(&self.boundx, &self.opt.boundx);
         DataBuilt {
             opt: self.opt,
             xticks,
@@ -498,11 +498,11 @@ where
         }
     }
 
-    pub fn map_ytick<BB, DD, F: FnOnce(TickGen<B, D>) -> TickGen<BB, DD>>(
+    pub fn map_ytick<J: TickFormat<P::Y>, F: FnOnce(TickGen<B, D>) -> J>(
         self,
         func: F,
-    ) -> DataBuilt<P, A, BB, C, DD> {
-        let yticks = func(self.yticks);
+    ) -> DataBuilt<P, A, J::It, C, J::Fmt> {
+        let yticks = func(self.yticks).generate(&self.boundy, &self.opt.boundy);
         DataBuilt {
             opt: self.opt,
             xticks: self.xticks,

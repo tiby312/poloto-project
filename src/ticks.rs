@@ -23,36 +23,64 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
-pub fn from_iter_fmt<
-    X: PlotNum + Display,
-    I: IntoIterator<Item = X>,
-    F: FnMut(&mut dyn std::fmt::Write, &X) -> fmt::Result,
-    L: FnMut(&mut dyn std::fmt::Write, IndexRequester) -> fmt::Result,
->(
+pub struct TickBuilder<I, F> {
     it: I,
-    tick_fmt: F,
-    where_fmt: L,
-) -> TickGen<I, impl TickFmt<X>> {
-    let fmt = DefaultTickFmt.with_ticks(tick_fmt).with_where(where_fmt);
-    let k = from_iter(it);
-    TickGen {
-        it: k.it,
-        fmt,
-        res: k.res,
+    fmt: F,
+}
+impl<I: IntoIterator> TickBuilder<I, DefaultTickFmt> {
+    pub fn new(it: I) -> Self {
+        TickBuilder {
+            it,
+            fmt: DefaultTickFmt,
+        }
     }
 }
 
-///
-/// Create a [`TickFormat`] from a step iterator.
-///
-///
-pub fn from_iter<X: PlotNum + Display, I: IntoIterator<Item = X>>(
-    ticks: I,
-) -> TickGen<I, DefaultTickFmt> {
-    TickGen {
-        it: ticks,
-        fmt: DefaultTickFmt,
-        res: TickRes { dash_size: None },
+impl<I: IntoIterator, K: TickFmt<I::Item>> TickFormat<I::Item> for TickBuilder<I, K>
+where
+    I::Item: PlotNum,
+{
+    type It = I;
+
+    type Fmt = K;
+
+    fn generate(
+        self,
+        _: &ticks::DataBound<I::Item>,
+        _: &RenderOptionsBound,
+    ) -> TickGen<Self::It, Self::Fmt> {
+        TickGen {
+            it: self.it,
+            fmt: self.fmt,
+            res: TickRes { dash_size: None },
+        }
+    }
+}
+impl<I: IntoIterator, K: TickFmt<I::Item>> TickBuilder<I, K> {
+    pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickBuilder<I, J> {
+        TickBuilder {
+            it: self.it,
+            fmt: other,
+        }
+    }
+    pub fn with_ticks<F: FnMut(&mut dyn fmt::Write, &I::Item) -> fmt::Result>(
+        self,
+        func: F,
+    ) -> TickBuilder<I, WithTicky<K, F>> {
+        TickBuilder {
+            it: self.it,
+            fmt: self.fmt.with_ticks(func),
+        }
+    }
+
+    pub fn with_where<F: FnMut(&mut dyn fmt::Write, IndexRequester) -> fmt::Result>(
+        self,
+        func: F,
+    ) -> TickBuilder<I, WithWhere<K, F>> {
+        TickBuilder {
+            it: self.it,
+            fmt: self.fmt.with_where(func),
+        }
     }
 }
 
@@ -70,31 +98,6 @@ impl<N: Display> TickFmt<N> for DefaultTickFmt {
         Ok(())
     }
 }
-
-// ///
-// /// Used by [`ticks::from_iter`]
-// ///
-// pub struct TickIterFmt<I: Iterator> {
-//     ticks: I,
-// }
-// impl<I: Iterator> TickFormat<I::Item> for TickIterFmt<I>
-// where
-//     I::Item: PlotNum + Display,
-// {
-//     type It = I;
-//     type Fmt = DefaultTickFmt;
-//     fn generate(
-//         self,
-//         _: &ticks::DataBound<I::Item>,
-//         _: &RenderOptionsBound,
-//     ) -> TickGen<Self::It, Self::Fmt> {
-//         TickGen {
-//             it: self.ticks,
-//             fmt: DefaultTickFmt,
-//             res: TickRes { dash_size: None },
-//         }
-//     }
-// }
 
 #[derive(Debug, Copy, Clone)]
 pub enum Axis {
@@ -217,13 +220,6 @@ pub struct TickGen<I, F> {
     pub fmt: F,
     pub res: TickRes,
 }
-// impl<I:IntoIterator,F> TickGen<I,F>{
-//     pub fn with_ticks<FF:FnMut(&mut dyn fmt::Write,&I::Item)>(self,func:FF)->TickGen<I>{
-
-//     }
-
-//     pub fn with_fmt(self)
-// }
 
 impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for TickGen<I, Fmt> {
     type It = I;

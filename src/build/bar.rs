@@ -61,6 +61,6 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     let m = build::markers(marker, [-1, i128::try_from(vals_len).unwrap()]);
     (
         bars.chain(m),
-        crate::ticks::from_iter(ticks).with_fmt(BarTickFmt { ticks: names }),
+        crate::ticks::TickBuilder::new(ticks).with_fmt(BarTickFmt { ticks: names }),
     )
 }

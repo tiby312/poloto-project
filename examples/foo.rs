@@ -1,5 +1,3 @@
-use poloto::ticks::TickFmt;
-use poloto::ticks::TickFormat;
 fn main() {
     let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
@@ -22,10 +20,9 @@ fn main() {
         poloto::build::origin()
     );
 
-    let ff = poloto::ticks::DefaultTickFmt
+    let steps = poloto::ticks::TickBuilder::new((0..).step_by(6))
         .with_ticks(|w, v| write!(w, "{} a", v))
         .with_where(|w, _| write!(w, "{}", "aaa"));
-    let steps = poloto::ticks::from_iter((0..).step_by(6)).with_fmt(ff);
 
     poloto::data(plots)
         .with_xticks(steps)
