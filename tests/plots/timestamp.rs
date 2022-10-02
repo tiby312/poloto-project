@@ -126,9 +126,9 @@ fn seconds() -> fmt::Result {
 
     let data = data.build();
 
-    let data = data.map_xtick(|t| {
-        let step = *t.fmt.step();
+    let step = *data.xticks().fmt.step();
 
+    let data = data.map_xtick(|t| {
         poloto::ticks::from_iter_fmt(
             t.it,
             |w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")),
