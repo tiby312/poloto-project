@@ -23,6 +23,102 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
+pub struct Mapper<X> {
+    inner: X,
+}
+
+impl<X> Mapper<X> {
+    pub fn map<N: PlotNum, It2, Fmt2, F>(self, func: F) -> Wrappy<Mapper<X>, F>
+    where
+        It2: IntoIterator<Item = N>,
+        Fmt2: TickFmt<N>,
+        F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It2, Fmt2>,
+        X: TickFormat<N>,
+    {
+        Wrappy { inner: self, func }
+    }
+}
+
+pub fn default<X: PlotNum>() -> Mapper<X::Fmt> {
+    Mapper {
+        inner: X::default_ticks(),
+    }
+}
+
+impl<N: PlotNum, X: TickFormat<N>> TickFormat<N> for Mapper<X> {
+    type It = X::It;
+    type Fmt = X::Fmt;
+    fn generate(
+        self,
+        data: &ticks::DataBound<N>,
+        canvas: &RenderOptionsBound,
+    ) -> TickGen<Self::It, Self::Fmt> {
+        self.inner.generate(data, canvas)
+    }
+}
+
+pub struct Wrappy<T, F> {
+    inner: T,
+    func: F,
+}
+
+impl<N: PlotNum, It2: IntoIterator<Item = N>, Fmt2: TickFmt<N>, T: TickFormat<N>, F> TickFormat<N>
+    for Wrappy<T, F>
+where
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It2, Fmt2>,
+    It2::Item: PlotNum,
+{
+    type It = It2;
+    type Fmt = Fmt2;
+    fn generate(
+        self,
+        data: &ticks::DataBound<N>,
+        canvas: &RenderOptionsBound,
+    ) -> TickGen<It2, Fmt2> {
+        (self.func)(data, canvas)
+    }
+}
+
+// pub fn mapper<
+//     It:IntoIterator,
+//     D:TickFmt<It::Item>,
+//     F:FnOnce(&DataBound<It::Item>,&RenderOptionsBound)->TickGen<It,D>
+//     >(func:F)->impl TickFormat<Num=It::Item,It=It,Fmt=D> where It::Item:PlotNum{
+//     use std::marker::PhantomData;
+//     pub struct Doop<X,Y,F>{
+//         _p:PhantomData<X>,
+//         _p2:PhantomData<Y>,
+//         func:F,
+//     }
+
+//     impl<
+//         It:IntoIterator,
+//         D:TickFmt<It::Item>,
+//         F
+//     > TickFormat for Doop<It,D,F> where F:FnOnce(&DataBound<It::Item>,&RenderOptionsBound)->TickGen<It,D>{
+//         type Num=It::Item;
+
+//         type It=It;
+
+//         type Fmt=D;
+
+//         fn generate(
+//         self,
+//         data: &ticks::DataBound<Self::Num>,
+//         canvas: &RenderOptionsBound,
+//         ) -> TickGen<Self::It, Self::Fmt> {
+//             (self.func)(data,canvas)
+//         }
+//     }
+
+//     Doop{
+//         func,
+//         _p:PhantomData::<It>,
+//         _p2:PhantomData::<D>
+//     }
+
+// }
+
 pub struct TickBuilder<I, F> {
     it: I,
     fmt: F,
@@ -36,11 +132,10 @@ impl<I: IntoIterator> TickBuilder<I, DefaultTickFmt> {
     }
 }
 
-impl<I: IntoIterator, K: TickFmt<I::Item>> TickFormat for TickBuilder<I, K>
+impl<I: IntoIterator, K: TickFmt<I::Item>> TickFormat<I::Item> for TickBuilder<I, K>
 where
     I::Item: PlotNum,
 {
-    type Num = I::Item;
     type It = I;
 
     type Fmt = K;
@@ -199,17 +294,16 @@ pub struct TickRes {
 ///
 /// Formatter for a tick.
 ///
-pub trait TickFormat {
-    type Num;
-    type It: IntoIterator<Item = Self::Num>;
-    type Fmt: TickFmt<Self::Num>;
+pub trait TickFormat<Num> {
+    type It: IntoIterator<Item = Num>;
+    type Fmt: TickFmt<Num>;
     fn generate(
         self,
-        data: &ticks::DataBound<Self::Num>,
+        data: &ticks::DataBound<Num>,
         canvas: &RenderOptionsBound,
     ) -> TickGen<Self::It, Self::Fmt>;
 
-    fn with_fmt<F: TickFmt<Self::Num>>(self, fmt: F) -> WithFmt<Self, F>
+    fn with_fmt<F: TickFmt<Num>>(self, fmt: F) -> WithFmt<Self, F>
     where
         Self: Sized,
     {
@@ -223,8 +317,7 @@ pub struct TickGen<I, F> {
     pub res: TickRes,
 }
 
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat for TickGen<I, Fmt> {
-    type Num = X;
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for TickGen<I, Fmt> {
     type It = I;
     type Fmt = Fmt;
     fn generate(
@@ -240,8 +333,7 @@ pub struct WithFmt<T, F> {
     ticks: T,
     fmt: F,
 }
-impl<N: PlotNum, T: TickFormat<Num = N>, F: TickFmt<N>> TickFormat for WithFmt<T, F> {
-    type Num = N;
+impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F> {
     type It = T::It;
     type Fmt = F;
     fn generate(

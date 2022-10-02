@@ -65,8 +65,7 @@ impl crate::ticks::TickFmt<f64> for FloatFmt {
     }
 }
 
-impl TickFormat for FloatTickFmt {
-    type Num = f64;
+impl TickFormat<f64> for FloatTickFmt {
     type It = Vec<f64>;
     type Fmt = FloatFmt;
     fn generate(

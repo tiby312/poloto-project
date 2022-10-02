@@ -64,8 +64,7 @@ impl ticks::TickFmt<i128> for IntFmt {
     }
 }
 
-impl TickFormat for IntegerTickFmt {
-    type Num = i128;
+impl TickFormat<i128> for IntegerTickFmt {
     type It = Vec<i128>;
     type Fmt = IntFmt;
     fn generate(

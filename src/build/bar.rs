@@ -41,10 +41,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> (
-    impl PlotIterator<X = X, Y = i128>,
-    impl TickFormat<Num = i128>,
-) {
+) -> (impl PlotIterator<X = X, Y = i128>, impl TickFormat<i128>) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
     let vals_len = vals.len();

@@ -20,9 +20,19 @@ fn main() {
         poloto::build::origin()
     );
 
-    let steps = poloto::ticks::TickBuilder::new((0..).step_by(6))
-        .with_ticks(|w, v| write!(w, "{} a", v))
-        .with_where(|w, _| write!(w, "{}", "aaa"));
+    let steps = poloto::ticks::default::<i128>().map(|data, canvas| {
+        use poloto::ticks::TickFormat;
+        poloto::ticks::TickBuilder::new((0..).step_by(6)).generate(data, canvas)
+    });
+
+    // let steps = poloto::ticks::TickBuilder::new((0..).step_by(6))
+    //     .with_ticks(|w, v| write!(w, "{} a", v))
+    //     .with_where(|w, _| write!(w, "{}", "aaa"));
+
+    // let steps2 = poloto::ticks::mapper(|data, canvas| {
+    //     use poloto::ticks::TickFormat;
+    //     poloto::ticks::TickBuilder::new((0..).step_by(6)).generate(data, canvas)
+    // });
 
     poloto::data(plots)
         .with_xticks(steps)
