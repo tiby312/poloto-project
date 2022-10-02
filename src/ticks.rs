@@ -79,46 +79,6 @@ where
     }
 }
 
-// pub fn mapper<
-//     It:IntoIterator,
-//     D:TickFmt<It::Item>,
-//     F:FnOnce(&DataBound<It::Item>,&RenderOptionsBound)->TickGen<It,D>
-//     >(func:F)->impl TickFormat<Num=It::Item,It=It,Fmt=D> where It::Item:PlotNum{
-//     use std::marker::PhantomData;
-//     pub struct Doop<X,Y,F>{
-//         _p:PhantomData<X>,
-//         _p2:PhantomData<Y>,
-//         func:F,
-//     }
-
-//     impl<
-//         It:IntoIterator,
-//         D:TickFmt<It::Item>,
-//         F
-//     > TickFormat for Doop<It,D,F> where F:FnOnce(&DataBound<It::Item>,&RenderOptionsBound)->TickGen<It,D>{
-//         type Num=It::Item;
-
-//         type It=It;
-
-//         type Fmt=D;
-
-//         fn generate(
-//         self,
-//         data: &ticks::DataBound<Self::Num>,
-//         canvas: &RenderOptionsBound,
-//         ) -> TickGen<Self::It, Self::Fmt> {
-//             (self.func)(data,canvas)
-//         }
-//     }
-
-//     Doop{
-//         func,
-//         _p:PhantomData::<It>,
-//         _p2:PhantomData::<D>
-//     }
-
-// }
-
 pub struct TickBuilder<I, F> {
     it: I,
     fmt: F,
@@ -131,20 +91,8 @@ impl<I: IntoIterator> TickBuilder<I, DefaultTickFmt> {
         }
     }
 }
-
-impl<I: IntoIterator, K: TickFmt<I::Item>> TickFormat<I::Item> for TickBuilder<I, K>
-where
-    I::Item: PlotNum,
-{
-    type It = I;
-
-    type Fmt = K;
-
-    fn generate(
-        self,
-        _: &ticks::DataBound<I::Item>,
-        _: &RenderOptionsBound,
-    ) -> TickGen<Self::It, Self::Fmt> {
+impl<I: IntoIterator, F: TickFmt<I::Item>> TickBuilder<I, F> {
+    pub fn build(self) -> TickGen<I, F> {
         TickGen {
             it: self.it,
             fmt: self.fmt,
@@ -152,6 +100,7 @@ where
         }
     }
 }
+
 impl<I: IntoIterator, K: TickFmt<I::Item>> TickBuilder<I, K> {
     pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickBuilder<I, J> {
         TickBuilder {

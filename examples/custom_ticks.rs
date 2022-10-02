@@ -11,8 +11,9 @@ fn main() {
         poloto::build::markers([24], [])
     );
 
-    let ticks =
-        poloto::ticks::TickBuilder::new((0..).step_by(6)).with_ticks(|w, v| write!(w, "{} hr", v));
+    let ticks = poloto::ticks::TickBuilder::new((0..).step_by(6))
+        .with_ticks(|w, v| write!(w, "{} hr", v))
+        .build();
 
     poloto::data(plots)
         .with_xticks(ticks)

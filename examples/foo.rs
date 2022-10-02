@@ -1,5 +1,3 @@
-use poloto::ticks::{DefaultTickFmt, TickGen, TickRes};
-
 fn main() {
     let collatz = |mut a: i128| {
         std::iter::from_fn(move || {
@@ -22,12 +20,8 @@ fn main() {
         poloto::build::origin()
     );
 
-    
-    let steps = poloto::ticks::default::<i128>().map(|data, canvas| TickGen {
-        it: (0..).step_by(6),
-        fmt: DefaultTickFmt,
-        res: TickRes { dash_size: None },
-    });
+    let steps = poloto::ticks::default::<i128>()
+        .map(|_, _| poloto::ticks::TickBuilder::new((0..).step_by(6)).build());
 
     poloto::data(plots)
         .with_xticks(steps)
