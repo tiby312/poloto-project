@@ -36,10 +36,11 @@ impl<I: IntoIterator> TickBuilder<I, DefaultTickFmt> {
     }
 }
 
-impl<I: IntoIterator, K: TickFmt<I::Item>> TickFormat<I::Item> for TickBuilder<I, K>
+impl<I: IntoIterator, K: TickFmt<I::Item>> TickFormat for TickBuilder<I, K>
 where
     I::Item: PlotNum,
 {
+    type Num = I::Item;
     type It = I;
 
     type Fmt = K;
@@ -198,16 +199,17 @@ pub struct TickRes {
 ///
 /// Formatter for a tick.
 ///
-pub trait TickFormat<N: PlotNum> {
-    type It: IntoIterator<Item = N>;
-    type Fmt: TickFmt<N>;
+pub trait TickFormat {
+    type Num;
+    type It: IntoIterator<Item = Self::Num>;
+    type Fmt: TickFmt<Self::Num>;
     fn generate(
         self,
-        data: &ticks::DataBound<N>,
+        data: &ticks::DataBound<Self::Num>,
         canvas: &RenderOptionsBound,
     ) -> TickGen<Self::It, Self::Fmt>;
 
-    fn with_fmt<F: TickFmt<N>>(self, fmt: F) -> WithFmt<Self, F>
+    fn with_fmt<F: TickFmt<Self::Num>>(self, fmt: F) -> WithFmt<Self, F>
     where
         Self: Sized,
     {
@@ -221,7 +223,8 @@ pub struct TickGen<I, F> {
     pub res: TickRes,
 }
 
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for TickGen<I, Fmt> {
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat for TickGen<I, Fmt> {
+    type Num = X;
     type It = I;
     type Fmt = Fmt;
     fn generate(
@@ -237,7 +240,8 @@ pub struct WithFmt<T, F> {
     ticks: T,
     fmt: F,
 }
-impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F> {
+impl<N: PlotNum, T: TickFormat<Num = N>, F: TickFmt<N>> TickFormat for WithFmt<T, F> {
+    type Num = N;
     type It = T::It;
     type Fmt = F;
     fn generate(

@@ -403,7 +403,9 @@ pub struct Data<P, TX, TY> {
 }
 
 //TODO plot iterator should use associated types instead to reduce the number of type arguments?
-impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P, TX, TY> {
+impl<P: build::PlotIterator, TX: TickFormat<Num = P::X>, TY: TickFormat<Num = P::Y>>
+    Data<P, TX, TY>
+{
     pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
         Data {
             opt,
@@ -421,7 +423,7 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
             plots: self.plots,
         }
     }
-    pub fn with_xticks<TTT: TickFormat<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
+    pub fn with_xticks<TTT: TickFormat<Num = P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
             tickx,
@@ -430,7 +432,7 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         }
     }
 
-    pub fn with_yticks<TTT: TickFormat<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
+    pub fn with_yticks<TTT: TickFormat<Num = P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
         Data {
             opt: self.opt,
             tickx: self.tickx,
@@ -483,7 +485,7 @@ where
     C: crate::ticks::TickFmt<P::X>,
     D: crate::ticks::TickFmt<P::Y>,
 {
-    pub fn map_xtick<J: TickFormat<P::X>, F: FnOnce(TickGen<A, C>) -> J>(
+    pub fn map_xtick<J: TickFormat<Num = P::X>, F: FnOnce(TickGen<A, C>) -> J>(
         self,
         func: F,
     ) -> DataBuilt<P, J::It, B, J::Fmt, D> {
@@ -498,7 +500,7 @@ where
         }
     }
 
-    pub fn map_ytick<J: TickFormat<P::Y>, F: FnOnce(TickGen<B, D>) -> J>(
+    pub fn map_ytick<J: TickFormat<Num = P::Y>, F: FnOnce(TickGen<B, D>) -> J>(
         self,
         func: F,
     ) -> DataBuilt<P, A, J::It, C, J::Fmt> {

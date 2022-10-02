@@ -105,10 +105,11 @@ where
     }
 }
 
-impl<T: TimeZone + Display> TickFormat<UnixTime> for UnixTimeTickFmt<T>
+impl<T: TimeZone + Display> TickFormat for UnixTimeTickFmt<T>
 where
     T::Offset: Display,
 {
+    type Num = UnixTime;
     type It = Vec<UnixTime>;
     type Fmt = UnixTimeFmt<T>;
 
