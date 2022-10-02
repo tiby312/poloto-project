@@ -20,8 +20,9 @@ fn main() {
         poloto::build::origin()
     );
 
-    let steps = poloto::ticks::default::<i128>()
-        .map(|_, _| poloto::ticks::TickBuilder::new((0..).step_by(6)).build());
+    let steps = poloto::ticks::from_closure(|_, _| {
+        poloto::ticks::TickBuilder::new((0..).step_by(6)).build()
+    });
 
     poloto::data(plots)
         .with_xticks(steps)

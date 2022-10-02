@@ -23,47 +23,48 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
-pub struct Mapper<X> {
-    inner: X,
+// pub struct Mapper<X> {
+//     inner: X,
+// }
+
+// impl<X> Mapper<X> {
+//     pub fn map<N: PlotNum, It2, Fmt2, F>(self, func: F) -> Wrappy<Mapper<X>, F>
+//     where
+//         It2: IntoIterator<Item = N>,
+//         Fmt2: TickFmt<N>,
+//         F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It2, Fmt2>,
+//         X: TickFormat<N>,
+//     {
+//         Wrappy { inner: self, func }
+//     }
+// }
+
+pub fn from_closure<N: PlotNum, It, Fmt, F>(func: F) -> Wrappy<F>
+where
+    It: IntoIterator<Item = N>,
+    Fmt: TickFmt<N>,
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It, Fmt>,
+{
+    Wrappy { func }
 }
 
-impl<X> Mapper<X> {
-    pub fn map<N: PlotNum, It2, Fmt2, F>(self, func: F) -> Wrappy<Mapper<X>, F>
-    where
-        It2: IntoIterator<Item = N>,
-        Fmt2: TickFmt<N>,
-        F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It2, Fmt2>,
-        X: TickFormat<N>,
-    {
-        Wrappy { inner: self, func }
-    }
-}
+// impl<N: PlotNum, X: TickFormat<N>> TickFormat<N> for Mapper<X> {
+//     type It = X::It;
+//     type Fmt = X::Fmt;
+//     fn generate(
+//         self,
+//         data: &ticks::DataBound<N>,
+//         canvas: &RenderOptionsBound,
+//     ) -> TickGen<Self::It, Self::Fmt> {
+//         self.inner.generate(data, canvas)
+//     }
+// }
 
-pub fn default<X: PlotNum>() -> Mapper<X::Fmt> {
-    Mapper {
-        inner: X::default_ticks(),
-    }
-}
-
-impl<N: PlotNum, X: TickFormat<N>> TickFormat<N> for Mapper<X> {
-    type It = X::It;
-    type Fmt = X::Fmt;
-    fn generate(
-        self,
-        data: &ticks::DataBound<N>,
-        canvas: &RenderOptionsBound,
-    ) -> TickGen<Self::It, Self::Fmt> {
-        self.inner.generate(data, canvas)
-    }
-}
-
-pub struct Wrappy<T, F> {
-    inner: T,
+pub struct Wrappy<F> {
     func: F,
 }
 
-impl<N: PlotNum, It2: IntoIterator<Item = N>, Fmt2: TickFmt<N>, T: TickFormat<N>, F> TickFormat<N>
-    for Wrappy<T, F>
+impl<N: PlotNum, It2: IntoIterator<Item = N>, Fmt2: TickFmt<N>, F> TickFormat<N> for Wrappy<F>
 where
     F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It2, Fmt2>,
     It2::Item: PlotNum,
@@ -266,6 +267,11 @@ pub struct TickGen<I, F> {
     pub res: TickRes,
 }
 
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickGen<I, Fmt> {
+    pub fn new(it: I, fmt: Fmt, res: TickRes) -> Self {
+        TickGen { it, fmt, res }
+    }
+}
 impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for TickGen<I, Fmt> {
     type It = I;
     type Fmt = Fmt;
