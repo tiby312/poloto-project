@@ -1,4 +1,4 @@
-use hypermelon::Elem;
+use hypermelon::prelude::*;
 use poloto::prelude::*;
 
 // PIPE me to a file!
@@ -26,7 +26,7 @@ fn main() {
 
     let plots = plots!(
         poloto::build::plots_dyn((1000..1006).map(|i| {
-            let name = hypermelon::format_move!("c({})", i);
+            let name = format_move!("c({})", i);
             let it = (0..).zip(collatz(i));
             poloto::build::buffered_plot(it).line(name)
         })),
