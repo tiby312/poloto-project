@@ -121,7 +121,7 @@ fn seconds() -> fmt::Result {
     ));
 
     let xticks = poloto::ticks::from_closure(|data, opt, req| {
-        use poloto::ticks::TickFormat;
+        use poloto::ticks::IntoTickDist;
         let k = poloto::default_ticks::<UnixTime>().generate(data, opt, req);
         let step = *k.fmt.step();
         poloto::ticks::TickBuilder::new(k.it)

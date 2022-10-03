@@ -61,8 +61,8 @@ impl crate::ticks::TickFmt<f64> for FloatFmt {
     }
 }
 
-impl TickFormat<f64> for FloatTickFmt {
-    type Res = TickGen<Vec<f64>, FloatFmt>;
+impl IntoTickDist<f64> for FloatTickFmt {
+    type Res = TickDistRes<Vec<f64>, FloatFmt>;
     fn generate(
         self,
         data: &ticks::DataBound<f64>,
@@ -84,7 +84,7 @@ impl TickFormat<f64> for FloatTickFmt {
 
         let axis = canvas.axis;
 
-        TickGen {
+        TickDistRes {
             res: TickRes {
                 dash_size: Some(dash_size),
             },

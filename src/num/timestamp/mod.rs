@@ -105,11 +105,11 @@ where
     }
 }
 
-impl<T: TimeZone + Display> TickFormat<UnixTime> for UnixTimeTickFmt<T>
+impl<T: TimeZone + Display> IntoTickDist<UnixTime> for UnixTimeTickFmt<T>
 where
     T::Offset: Display,
 {
-    type Res = TickGen<Vec<UnixTime>, UnixTimeFmt<T>>;
+    type Res = TickDistRes<Vec<UnixTime>, UnixTimeFmt<T>>;
 
     fn generate(
         self,
@@ -153,7 +153,7 @@ where
 
         let index = req.request();
 
-        TickGen {
+        TickDistRes {
             res: TickRes { dash_size: None },
             it: ticks,
             fmt: UnixTimeFmt {

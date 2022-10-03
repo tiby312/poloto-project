@@ -60,8 +60,8 @@ impl ticks::TickFmt<i128> for IntFmt {
     }
 }
 
-impl TickFormat<i128> for IntegerTickFmt {
-    type Res = TickGen<Vec<i128>, IntFmt>;
+impl IntoTickDist<i128> for IntegerTickFmt {
+    type Res = TickDistRes<Vec<i128>, IntFmt>;
     fn generate(
         self,
         data: &ticks::DataBound<i128>,
@@ -83,7 +83,7 @@ impl TickFormat<i128> for IntegerTickFmt {
 
         let axis = canvas.axis;
 
-        TickGen {
+        TickDistRes {
             res: TickRes {
                 dash_size: Some(dash_size),
             },

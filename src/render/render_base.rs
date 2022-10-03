@@ -2,8 +2,8 @@ use super::*;
 
 pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     writer: &mut hypermelon::ElemWrite,
-    xticksg: impl TickRez<Num = X>,
-    yticksg: impl TickRez<Num = Y>,
+    xticksg: impl TickDist<Num = X>,
+    yticksg: impl TickDist<Num = Y>,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt,

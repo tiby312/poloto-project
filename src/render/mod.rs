@@ -349,7 +349,7 @@ pub struct Data<P, TX, TY> {
     plots: P,
 }
 
-impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P, TX, TY> {
+impl<P: build::PlotIterator, TX: IntoTickDist<P::X>, TY: IntoTickDist<P::Y>> Data<P, TX, TY> {
     pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
         Data {
             opt,
@@ -367,7 +367,7 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
             plots: self.plots,
         }
     }
-    pub fn with_xticks<TTT: TickFormat<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
+    pub fn with_xticks<TTT: IntoTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
             tickx,
@@ -376,7 +376,7 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         }
     }
 
-    pub fn with_yticks<TTT: TickFormat<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
+    pub fn with_yticks<TTT: IntoTickDist<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
         Data {
             opt: self.opt,
             tickx: self.tickx,
@@ -440,7 +440,7 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
     }
 }
 
-pub struct Foop<'a, X: TickRez, Y: TickRez> {
+pub struct Foop<'a, X: TickDist, Y: TickDist> {
     pub xticks: &'a X,
     pub yticks: &'a Y,
     pub boundx: &'a DataBound<X::Num>,
@@ -463,8 +463,8 @@ pub struct Plotter<P: PlotIterator, A, B, BB: BaseFmt> {
 impl<P, A, B, BB> Plotter<P, A, B, BB>
 where
     P: PlotIterator,
-    A: crate::ticks::TickRez<Num = P::X>,
-    B: crate::ticks::TickRez<Num = P::Y>,
+    A: crate::ticks::TickDist<Num = P::X>,
+    B: crate::ticks::TickDist<Num = P::Y>,
     BB: BaseFmt,
 {
     pub fn append_to<E: Elem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
@@ -479,8 +479,8 @@ where
 impl<P, A, B, BB> hypermelon::Elem for Plotter<P, A, B, BB>
 where
     P: PlotIterator,
-    A: crate::ticks::TickRez<Num = P::X>,
-    B: crate::ticks::TickRez<Num = P::Y>,
+    A: crate::ticks::TickDist<Num = P::X>,
+    B: crate::ticks::TickDist<Num = P::Y>,
     BB: BaseFmt,
 {
     type Tail = ();

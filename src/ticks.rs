@@ -23,48 +23,19 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
-// pub struct Mapper<X> {
-//     inner: X,
-// }
-
-// impl<X> Mapper<X> {
-//     pub fn map<N: PlotNum, It2, Fmt2, F>(self, func: F) -> Wrappy<Mapper<X>, F>
-//     where
-//         It2: IntoIterator<Item = N>,
-//         Fmt2: TickFmt<N>,
-//         F: FnOnce(&DataBound<N>, &RenderOptionsBound) -> TickGen<It2, Fmt2>,
-//         X: TickFormat<N>,
-//     {
-//         Wrappy { inner: self, func }
-//     }
-// }
-
-pub fn from_closure<N: PlotNum, It, Fmt, F>(func: F) -> Wrappy<F>
+pub fn from_closure<N: PlotNum, It, F>(func: F) -> ClosureTickFormat<F>
 where
-    It: IntoIterator<Item = N>,
-    Fmt: TickFmt<N>,
-    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> TickGen<It, Fmt>,
+    It: TickDist<Num = N>,
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> It,
 {
-    Wrappy { func }
+    ClosureTickFormat { func }
 }
 
-// impl<N: PlotNum, X: TickFormat<N>> TickFormat<N> for Mapper<X> {
-//     type It = X::It;
-//     type Fmt = X::Fmt;
-//     fn generate(
-//         self,
-//         data: &ticks::DataBound<N>,
-//         canvas: &RenderOptionsBound,
-//     ) -> TickGen<Self::It, Self::Fmt> {
-//         self.inner.generate(data, canvas)
-//     }
-// }
-
-pub struct Wrappy<F> {
+pub struct ClosureTickFormat<F> {
     func: F,
 }
 
-impl<N: PlotNum, Res: TickRez<Num = N>, F> TickFormat<N> for Wrappy<F>
+impl<N: PlotNum, Res: TickDist<Num = N>, F> IntoTickDist<N> for ClosureTickFormat<F>
 where
     F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> Res,
     N: PlotNum,
@@ -93,8 +64,12 @@ impl<I: IntoIterator> TickBuilder<I, DefaultTickFmt> {
     }
 }
 impl<I: IntoIterator, F: TickFmt<I::Item>> TickBuilder<I, F> {
-    pub fn build(self) -> TickGen<I, F> {
-        TickGen {
+    pub fn from_parts(it: I, fmt: F, res: TickRes) -> TickDistRes<I, F> {
+        TickDistRes { it, fmt, res }
+    }
+
+    pub fn build(self) -> TickDistRes<I, F> {
+        TickDistRes {
             it: self.it,
             fmt: self.fmt,
             res: TickRes { dash_size: None },
@@ -115,7 +90,10 @@ impl<I: IntoIterator, K: TickFmt<I::Item>> TickBuilder<I, K> {
     ) -> TickBuilder<I, WithTicky<K, F>> {
         TickBuilder {
             it: self.it,
-            fmt: self.fmt.with_ticks(func),
+            fmt: WithTicky {
+                ticks: self.fmt,
+                func,
+            },
         }
     }
 
@@ -135,7 +113,10 @@ impl<I: IntoIterator, K: TickFmt<I::Item>> TickBuilder<I, K> {
     ) -> TickBuilder<I, WithWhere<K, F>> {
         TickBuilder {
             it: self.it,
-            fmt: self.fmt.with_where(func),
+            fmt: WithWhere {
+                ticks: self.fmt,
+                func,
+            },
         }
     }
 }
@@ -196,20 +177,6 @@ pub trait TickFmt<N> {
     fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
     }
-    fn with_ticks<F>(self, func: F) -> WithTicky<Self, F>
-    where
-        F: FnMut(&mut dyn std::fmt::Write, &N) -> fmt::Result,
-        Self: Sized,
-    {
-        WithTicky { ticks: self, func }
-    }
-    fn with_where<F>(self, func: F) -> WithWhere<Self, F>
-    where
-        F: FnMut(&mut dyn std::fmt::Write) -> fmt::Result,
-        Self: Sized,
-    {
-        WithWhere { ticks: self, func }
-    }
 }
 
 pub struct WithWhere<D, F> {
@@ -252,8 +219,8 @@ pub struct TickRes {
 ///
 /// Formatter for a tick.
 ///
-pub trait TickFormat<Num> {
-    type Res: TickRez<Num = Num>;
+pub trait IntoTickDist<Num> {
+    type Res: TickDist<Num = Num>;
     fn generate(
         self,
         data: &ticks::DataBound<Num>,
@@ -262,57 +229,37 @@ pub trait TickFormat<Num> {
     ) -> Self::Res;
 }
 
-pub trait TickRez {
+pub trait TickDist {
     type Num;
     type It: IntoIterator<Item = Self::Num>;
     type Fmt: TickFmt<Self::Num>;
-    fn unwrap(self) -> TickGen<Self::It, Self::Fmt>;
+    fn unwrap(self) -> TickDistRes<Self::It, Self::Fmt>;
 }
-impl<I: IntoIterator, F: TickFmt<I::Item>> TickRez for TickGen<I, F> {
+impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistRes<I, F> {
     type Num = I::Item;
     type It = I;
     type Fmt = F;
-    fn unwrap(self) -> TickGen<Self::It, Self::Fmt> {
+    fn unwrap(self) -> TickDistRes<Self::It, Self::Fmt> {
         self
     }
 }
 
-pub struct TickGen<I, F> {
+pub struct TickDistRes<I, F> {
     pub it: I,
     pub fmt: F,
     pub res: TickRes,
 }
 
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickGen<I, Fmt> {
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt> {
     pub fn new(it: I, fmt: Fmt, res: TickRes) -> Self {
-        TickGen { it, fmt, res }
+        TickDistRes { it, fmt, res }
     }
 }
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for TickGen<I, Fmt> {
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> IntoTickDist<X>
+    for TickDistRes<I, Fmt>
+{
     type Res = Self;
     fn generate(self, _: &ticks::DataBound<X>, _: &RenderOptionsBound, _: IndexRequester) -> Self {
         self
     }
 }
-
-// pub struct WithFmt<T, F> {
-//     ticks: T,
-//     fmt: F,
-// }
-// impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F> {
-//     type It = T::It;
-//     type Fmt = F;
-//     fn generate(
-//         self,
-//         data: &ticks::DataBound<N>,
-//         canvas: &RenderOptionsBound,
-//         req: IndexRequester,
-//     ) -> TickGen<Self::It, Self::Fmt> {
-//         let TickGen { it, res, .. } = self.ticks.generate(data, canvas, req);
-//         TickGen {
-//             it,
-//             fmt: self.fmt,
-//             res,
-//         }
-//     }
-// }
