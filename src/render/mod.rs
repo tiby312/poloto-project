@@ -440,7 +440,7 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
 
     pub fn labels_ext<AA: Display, BB: Display, CC: Display>(
         mut self,
-        func: impl FnOnce(&Foop<P::X, P::Y, TX::Res, TY::Res>) -> (AA, BB, CC),
+        func: impl FnOnce(&Foop<TX::Res, TY::Res>) -> (AA, BB, CC),
     ) -> Plotter<P, TX::Res, TY::Res, SimplePlotFormatter<AA, BB, CC>> {
         let mut area = build::marker::Area::new();
         self.plots.increase_area(&mut area);
@@ -493,11 +493,11 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
     }
 }
 
-pub struct Foop<'a, X, Y, A, B> {
-    pub xticks: &'a A,
-    pub yticks: &'a B,
-    pub boundx: &'a DataBound<X>,
-    pub boundy: &'a DataBound<Y>,
+pub struct Foop<'a, X: TickRez, Y: TickRez> {
+    pub xticks: &'a X,
+    pub yticks: &'a Y,
+    pub boundx: &'a DataBound<X::Num>,
+    pub boundy: &'a DataBound<Y::Num>,
 }
 
 ///
