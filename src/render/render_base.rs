@@ -2,13 +2,16 @@ use super::*;
 
 pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     writer: &mut hypermelon::ElemWrite,
-    mut xticksg: TickGen<impl IntoIterator<Item = X>, impl ticks::TickFmt<X>>,
-    mut yticksg: TickGen<impl IntoIterator<Item = Y>, impl ticks::TickFmt<Y>>,
+    xticksg: impl TickRez<Num = X>,
+    yticksg: impl TickRez<Num = Y>,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt,
     canvas: &RenderOptions,
 ) -> std::fmt::Result {
+    let mut xticksg = xticksg.unwrap();
+    let mut yticksg = yticksg.unwrap();
+
     let RenderOptions {
         width,
         height,

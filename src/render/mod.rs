@@ -402,7 +402,6 @@ pub struct Data<P, TX, TY> {
     plots: P,
 }
 
-//TODO plot iterator should use associated types instead to reduce the number of type arguments?
 impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P, TX, TY> {
     pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
         Data {
@@ -441,8 +440,8 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
 
     pub fn labels_ext<AA: Display, BB: Display, CC: Display>(
         mut self,
-        func: impl FnOnce(&Foop<TX::It, TY::It, TX::Fmt, TY::Fmt, P::X, P::Y>) -> (AA, BB, CC),
-    ) -> Plotter<P, TX::It, TY::It, TX::Fmt, TY::Fmt, SimplePlotFormatter<AA, BB, CC>> {
+        func: impl FnOnce(&Foop<P::X, P::Y, TX::Res, TY::Res>) -> (AA, BB, CC),
+    ) -> Plotter<P, TX::Res, TY::Res, SimplePlotFormatter<AA, BB, CC>> {
         let mut area = build::marker::Area::new();
         self.plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
@@ -489,14 +488,14 @@ impl<P: build::PlotIterator, TX: TickFormat<P::X>, TY: TickFormat<P::Y>> Data<P,
         title: AA,
         xname: BB,
         yname: CC,
-    ) -> Plotter<P, TX::It, TY::It, TX::Fmt, TY::Fmt, SimplePlotFormatter<AA, BB, CC>> {
+    ) -> Plotter<P, TX::Res, TY::Res, SimplePlotFormatter<AA, BB, CC>> {
         self.labels_ext(|_| (title, xname, yname))
     }
 }
 
-pub struct Foop<'a, A, B, C, D, X, Y> {
-    pub xticks: &'a TickGen<A, C>,
-    pub yticks: &'a TickGen<B, D>,
+pub struct Foop<'a, X, Y, A, B> {
+    pub xticks: &'a A,
+    pub yticks: &'a B,
     pub boundx: &'a DataBound<X>,
     pub boundy: &'a DataBound<Y>,
 }
@@ -504,23 +503,21 @@ pub struct Foop<'a, A, B, C, D, X, Y> {
 ///
 /// Created by [`plot_with`]
 ///
-pub struct Plotter<P: PlotIterator, A, B, C, D, BB: BaseFmt> {
+pub struct Plotter<P: PlotIterator, A, B, BB: BaseFmt> {
     opt: RenderOptions,
-    xticks: TickGen<A, C>,
-    yticks: TickGen<B, D>,
+    xticks: A,
+    yticks: B,
     plots: P,
     boundx: DataBound<P::X>,
     boundy: DataBound<P::Y>,
     base: BB,
 }
 
-impl<P: build::PlotIterator, A, B, C, D, BB: BaseFmt> Plotter<P, A, B, C, D, BB>
+impl<P: build::PlotIterator, A, B, BB: BaseFmt> Plotter<P, A, B, BB>
 where
     P: PlotIterator,
-    A: IntoIterator<Item = P::X>,
-    B: IntoIterator<Item = P::Y>,
-    C: crate::ticks::TickFmt<P::X>,
-    D: crate::ticks::TickFmt<P::Y>,
+    A: crate::ticks::TickRez<Num = P::X>,
+    B: crate::ticks::TickRez<Num = P::Y>,
 {
     pub fn append_to<E: Elem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
         Themer(elem.append(self))
@@ -531,14 +528,11 @@ where
     }
 }
 
-impl<P: build::PlotIterator, A, B, C, D, BB: BaseFmt> hypermelon::Elem
-    for Plotter<P, A, B, C, D, BB>
+impl<P: build::PlotIterator, A, B, BB: BaseFmt> hypermelon::Elem for Plotter<P, A, B, BB>
 where
     P: PlotIterator,
-    A: IntoIterator<Item = P::X>,
-    B: IntoIterator<Item = P::Y>,
-    C: crate::ticks::TickFmt<P::X>,
-    D: crate::ticks::TickFmt<P::Y>,
+    A: crate::ticks::TickRez<Num = P::X>,
+    B: crate::ticks::TickRez<Num = P::Y>,
 {
     type Tail = ();
     fn render_head(mut self, writer: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {

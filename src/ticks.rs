@@ -64,19 +64,18 @@ pub struct Wrappy<F> {
     func: F,
 }
 
-impl<N: PlotNum, It2: IntoIterator<Item = N>, Fmt2: TickFmt<N>, F> TickFormat<N> for Wrappy<F>
+impl<N: PlotNum, Res: TickRez<Num = N>, F> TickFormat<N> for Wrappy<F>
 where
-    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> TickGen<It2, Fmt2>,
-    It2::Item: PlotNum,
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> Res,
+    N: PlotNum,
 {
-    type It = It2;
-    type Fmt = Fmt2;
+    type Res = Res;
     fn generate(
         self,
         data: &ticks::DataBound<N>,
         canvas: &RenderOptionsBound,
         req: IndexRequester,
-    ) -> TickGen<It2, Fmt2> {
+    ) -> Res {
         (self.func)(data, canvas, req)
     }
 }
@@ -254,14 +253,28 @@ pub struct TickRes {
 /// Formatter for a tick.
 ///
 pub trait TickFormat<Num> {
-    type It: IntoIterator<Item = Num>;
-    type Fmt: TickFmt<Num>;
+    type Res: TickRez<Num = Num>;
     fn generate(
         self,
         data: &ticks::DataBound<Num>,
         canvas: &RenderOptionsBound,
         req: IndexRequester,
-    ) -> TickGen<Self::It, Self::Fmt>;
+    ) -> Self::Res;
+}
+
+pub trait TickRez {
+    type Num;
+    type It: IntoIterator<Item = Self::Num>;
+    type Fmt: TickFmt<Self::Num>;
+    fn unwrap(self) -> TickGen<Self::It, Self::Fmt>;
+}
+impl<I: IntoIterator, F: TickFmt<I::Item>> TickRez for TickGen<I, F> {
+    type Num = I::Item;
+    type It = I;
+    type Fmt = F;
+    fn unwrap(self) -> TickGen<Self::It, Self::Fmt> {
+        self
+    }
 }
 
 pub struct TickGen<I, F> {
@@ -276,14 +289,8 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickGen<I, Fmt> {
     }
 }
 impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for TickGen<I, Fmt> {
-    type It = I;
-    type Fmt = Fmt;
-    fn generate(
-        self,
-        _: &ticks::DataBound<X>,
-        _: &RenderOptionsBound,
-        _: IndexRequester,
-    ) -> TickGen<Self::It, Self::Fmt> {
+    type Res = Self;
+    fn generate(self, _: &ticks::DataBound<X>, _: &RenderOptionsBound, _: IndexRequester) -> Self {
         self
     }
 }

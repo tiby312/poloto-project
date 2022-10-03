@@ -61,14 +61,13 @@ impl ticks::TickFmt<i128> for IntFmt {
 }
 
 impl TickFormat<i128> for IntegerTickFmt {
-    type It = Vec<i128>;
-    type Fmt = IntFmt;
+    type Res = TickGen<Vec<i128>, IntFmt>;
     fn generate(
         self,
         data: &ticks::DataBound<i128>,
         canvas: &RenderOptionsBound,
         _: IndexRequester,
-    ) -> TickGen<Self::It, Self::Fmt> {
+    ) -> Self::Res {
         let range = [data.min, data.max];
         let ideal_num_steps = canvas.ideal_num_steps;
 

@@ -44,6 +44,11 @@ impl UnixTimeTickFmt<Utc> {
         Self::with_timezone(Utc)
     }
 }
+impl Default for UnixTimeTickFmt<Utc> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl<T: TimeZone> UnixTimeTickFmt<T> {
     pub fn with_timezone(timezone: T) -> Self {
         UnixTimeTickFmt { timezone }
@@ -104,15 +109,14 @@ impl<T: TimeZone + Display> TickFormat<UnixTime> for UnixTimeTickFmt<T>
 where
     T::Offset: Display,
 {
-    type It = Vec<UnixTime>;
-    type Fmt = UnixTimeFmt<T>;
+    type Res = TickGen<Vec<UnixTime>, UnixTimeFmt<T>>;
 
     fn generate(
         self,
         data: &ticks::DataBound<UnixTime>,
         canvas: &RenderOptionsBound,
         req: IndexRequester,
-    ) -> TickGen<Self::It, Self::Fmt> {
+    ) -> Self::Res {
         let range = [data.min, data.max];
 
         assert!(range[0] <= range[1]);

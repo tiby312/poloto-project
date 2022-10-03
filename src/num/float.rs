@@ -62,14 +62,13 @@ impl crate::ticks::TickFmt<f64> for FloatFmt {
 }
 
 impl TickFormat<f64> for FloatTickFmt {
-    type It = Vec<f64>;
-    type Fmt = FloatFmt;
+    type Res = TickGen<Vec<f64>, FloatFmt>;
     fn generate(
         self,
         data: &ticks::DataBound<f64>,
         canvas: &RenderOptionsBound,
         _: IndexRequester,
-    ) -> TickGen<Self::It, Self::Fmt> {
+    ) -> Self::Res {
         let range = [data.min, data.max];
         let ideal_num_steps = canvas.ideal_num_steps;
 
