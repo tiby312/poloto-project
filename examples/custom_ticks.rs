@@ -17,7 +17,7 @@ fn main() {
 
     poloto::data(plots)
         .with_xticks(ticks)
-        .build("title", "x", "y")
+        .build_and_label("title", "x", "y")
         .append_to(poloto::simple_light())
         .render_stdout();
 }

@@ -8,7 +8,7 @@ fn custom_colors_html() -> fmt::Result {
     let l2 = poloto::build::buffered_plot(x.clone().step_by(3).map(|x| [x, x.sin() - 10.]))
         .histogram("sin-10");
 
-    let s = poloto::data(poloto::plots!(l1, l2)).build(
+    let s = poloto::data(poloto::plots!(l1, l2)).build_and_label(
         "Demo: you can use CSS patterns if you embed SVG!",
         "x",
         "y",
@@ -131,7 +131,7 @@ body {
     );
 
     let s = poloto::data(s)
-        .build("Demo: Hovering and shadows", "x", "y")
+        .build_and_label("Demo: Hovering and shadows", "x", "y")
         .append_to(poloto::simple_light());
 
     let s = s.render_string().unwrap();

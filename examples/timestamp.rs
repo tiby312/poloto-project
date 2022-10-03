@@ -37,7 +37,7 @@ fn main() {
     );
 
     poloto::data(plots)
-        .build(
+        .build_and_label(
             "Long Jump world record progression",
             "Date",
             "Mark (in meters)",

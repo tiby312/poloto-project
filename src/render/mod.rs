@@ -385,51 +385,8 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn compute_map<K, F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K>(self, func: F) -> K {
-        let data = DataBuilt::new(self);
-        func(data)
-    }
-
-    pub fn build<AA: Display, BB: Display, CC: Display>(
-        self,
-        title: AA,
-        xname: BB,
-        yname: CC,
-    ) -> Plotter<P, TX::Res, TY::Res, (AA, BB, CC)> {
-        let data = DataBuilt::new(self);
-
-        Plotter {
-            data,
-            base: (title, xname, yname),
-        }
-    }
-}
-
-pub struct DataBuilt<P: PlotIterator, A, B> {
-    opt: RenderOptions,
-    xticks: A,
-    yticks: B,
-    plots: P,
-    boundx: DataBound<P::X>,
-    boundy: DataBound<P::Y>,
-}
-
-impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuilt<P, A, B> {
-    pub fn labels<AA: Display, BB: Display, CC: Display>(
-        self,
-        title: AA,
-        xname: BB,
-        yname: CC,
-    ) -> Plotter<P, A, B, (AA, BB, CC)> {
-        Plotter {
-            data: self,
-            base: (title, xname, yname),
-        }
-    }
-
-    pub fn new<AA: GenTickDist<P::X, Res = A>, BB: GenTickDist<P::Y, Res = B>>(
-        mut data: Data<P, AA, BB>,
-    ) -> Self {
+    pub fn build(self) -> DataBuilt<P, TX::Res, TY::Res> {
+        let mut data = self;
         let mut area = build::marker::Area::new();
         data.plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
@@ -455,13 +412,42 @@ impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuil
             plots: data.plots,
         }
     }
+
+    pub fn build_map<K, F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K>(self, func: F) -> K {
+        let data = self.build();
+        func(data)
+    }
+
+    pub fn build_and_label<AA: Display, BB: Display, CC: Display>(
+        self,
+        title: AA,
+        xname: BB,
+        yname: CC,
+    ) -> Plotter<P, TX::Res, TY::Res, (AA, BB, CC)> {
+        self.build().label((title, xname, yname))
+    }
+
+    pub fn build_and_label2<Fmt: BaseFmt>(self, fmt: Fmt) -> Plotter<P, TX::Res, TY::Res, Fmt> {
+        self.build().label(fmt)
+    }
 }
 
-pub struct Foop<'a, X: TickDist, Y: TickDist> {
-    pub xticks: &'a X,
-    pub yticks: &'a Y,
-    pub boundx: &'a DataBound<X::Num>,
-    pub boundy: &'a DataBound<Y::Num>,
+pub struct DataBuilt<P: PlotIterator, A, B> {
+    opt: RenderOptions,
+    xticks: A,
+    yticks: B,
+    plots: P,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
+}
+
+impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuilt<P, A, B> {
+    pub fn label<Fmt: BaseFmt>(self, fmt: Fmt) -> Plotter<P, A, B, Fmt> {
+        Plotter {
+            data: self,
+            base: fmt,
+        }
+    }
 }
 
 ///
@@ -563,37 +549,5 @@ impl<R: Elem> Elem for Themer<R> {
 
     fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         self.0.render_head(w)
-    }
-}
-
-pub trait GenBaseFmt<X: TickDist, Y: TickDist> {
-    type Res: BaseFmt;
-    fn generate(self, stuff: Foop<X, Y>) -> Self::Res;
-}
-
-impl<X: fmt::Display, Y: fmt::Display, Z: fmt::Display, XX: TickDist, YY: TickDist>
-    GenBaseFmt<XX, YY> for (X, Y, Z)
-{
-    type Res = Self;
-    fn generate(self, stuff: Foop<XX, YY>) -> Self::Res {
-        self
-    }
-}
-
-pub fn base_from_closure<X: TickDist, Y: TickDist, F: FnOnce(Foop<X, Y>) -> Res, Res: BaseFmt>(
-    func: F,
-) -> BaseFmtClosure<F> {
-    BaseFmtClosure { func }
-}
-pub struct BaseFmtClosure<F> {
-    func: F,
-}
-
-impl<X: TickDist, Y: TickDist, F: FnOnce(Foop<X, Y>) -> Res, Res: BaseFmt> GenBaseFmt<X, Y>
-    for BaseFmtClosure<F>
-{
-    type Res = Res;
-    fn generate(self, stuff: Foop<X, Y>) -> Self::Res {
-        (self.func)(stuff)
     }
 }
