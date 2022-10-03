@@ -328,59 +328,6 @@ impl RenderOptions {
     }
 }
 
-// impl<T: Renderable> Renderable for &T {
-//     fn get_dim(&self) -> [f64; 2] {
-//         (*self).get_dim()
-//     }
-
-//     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
-//         (*self).bounds()
-//     }
-//     fn render<X: PlotNum, Y: PlotNum>(
-//         &self,
-//         writer: &mut hypermelon::ElemWrite,
-//         plots: &mut impl build::PlotIterator<X, Y>,
-//         base: &mut dyn BaseFmt<X = X, Y = Y>,
-//         boundx: &DataBound<X>,
-//         boundy: &DataBound<Y>,
-//     ) -> fmt::Result {
-//         (*self).render(writer, plots, base, boundx, boundy)
-//     }
-// }
-
-// impl Renderable for RenderOptions {
-//     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
-//         (&self.boundx, &self.boundy)
-//     }
-//     fn get_dim(&self) -> [f64; 2] {
-//         [self.width, self.height]
-//     }
-//     fn render<X: PlotNum, Y: PlotNum>(
-//         &self,
-//         writer: &mut hypermelon::ElemWrite,
-//         plots: &mut impl build::PlotIterator<X, Y>,
-//         base: &mut dyn BaseFmt<X = X, Y = Y>,
-//         boundx: &DataBound<X>,
-//         boundy: &DataBound<Y>,
-//     ) -> fmt::Result {
-//         //let mut writer = hypermelon::ElemWrite::new(writer);
-//         todo!()
-//     }
-// }
-// pub trait Renderable {
-//     fn get_dim(&self) -> [f64; 2];
-
-//     fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound);
-//     fn render<X: PlotNum, Y: PlotNum>(
-//         &self,
-//         writer: &mut hypermelon::ElemWrite,
-//         plots: &mut impl build::PlotIterator<X, Y>,
-//         base: &mut dyn BaseFmt<X = X, Y = Y>,
-//         boundx: &DataBound<X>,
-//         boundy: &DataBound<Y>,
-//     ) -> fmt::Result;
-// }
-
 ///
 /// Build a [`RenderOptions`]
 ///
@@ -513,11 +460,12 @@ pub struct Plotter<P: PlotIterator, A, B, BB: BaseFmt> {
     base: BB,
 }
 
-impl<P: build::PlotIterator, A, B, BB: BaseFmt> Plotter<P, A, B, BB>
+impl<P, A, B, BB> Plotter<P, A, B, BB>
 where
     P: PlotIterator,
     A: crate::ticks::TickRez<Num = P::X>,
     B: crate::ticks::TickRez<Num = P::Y>,
+    BB: BaseFmt,
 {
     pub fn append_to<E: Elem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
         Themer(elem.append(self))
@@ -528,11 +476,12 @@ where
     }
 }
 
-impl<P: build::PlotIterator, A, B, BB: BaseFmt> hypermelon::Elem for Plotter<P, A, B, BB>
+impl<P, A, B, BB> hypermelon::Elem for Plotter<P, A, B, BB>
 where
     P: PlotIterator,
     A: crate::ticks::TickRez<Num = P::X>,
     B: crate::ticks::TickRez<Num = P::Y>,
+    BB: BaseFmt,
 {
     type Tail = ();
     fn render_head(mut self, writer: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
