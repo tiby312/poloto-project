@@ -120,6 +120,16 @@ impl<I: IntoIterator, K: TickFmt<I::Item>> TickBuilder<I, K> {
         }
     }
 
+    pub fn with_fmt_data<E>(self, data: E) -> TickBuilder<I, WithExtra<K, E>> {
+        TickBuilder {
+            it: self.it,
+            fmt: WithExtra {
+                inner: self.fmt,
+                data,
+            },
+        }
+    }
+
     pub fn with_where<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
         self,
         func: F,
@@ -128,6 +138,20 @@ impl<I: IntoIterator, K: TickFmt<I::Item>> TickBuilder<I, K> {
             it: self.it,
             fmt: self.fmt.with_where(func),
         }
+    }
+}
+
+pub struct WithExtra<K, E> {
+    inner: K,
+    pub data: E,
+}
+
+impl<N, K: TickFmt<N>, E> TickFmt<N> for WithExtra<K, E> {
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        self.inner.write_tick(a, val)
+    }
+    fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        self.inner.write_where(w)
     }
 }
 
@@ -238,13 +262,6 @@ pub trait TickFormat<Num> {
         canvas: &RenderOptionsBound,
         req: IndexRequester,
     ) -> TickGen<Self::It, Self::Fmt>;
-
-    fn with_fmt<F: TickFmt<Num>>(self, fmt: F) -> WithFmt<Self, F>
-    where
-        Self: Sized,
-    {
-        WithFmt { ticks: self, fmt }
-    }
 }
 
 pub struct TickGen<I, F> {
@@ -271,24 +288,24 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickFormat<X> for T
     }
 }
 
-pub struct WithFmt<T, F> {
-    ticks: T,
-    fmt: F,
-}
-impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F> {
-    type It = T::It;
-    type Fmt = F;
-    fn generate(
-        self,
-        data: &ticks::DataBound<N>,
-        canvas: &RenderOptionsBound,
-        req: IndexRequester,
-    ) -> TickGen<Self::It, Self::Fmt> {
-        let TickGen { it, res, .. } = self.ticks.generate(data, canvas, req);
-        TickGen {
-            it,
-            fmt: self.fmt,
-            res,
-        }
-    }
-}
+// pub struct WithFmt<T, F> {
+//     ticks: T,
+//     fmt: F,
+// }
+// impl<N: PlotNum, T: TickFormat<N>, F: TickFmt<N>> TickFormat<N> for WithFmt<T, F> {
+//     type It = T::It;
+//     type Fmt = F;
+//     fn generate(
+//         self,
+//         data: &ticks::DataBound<N>,
+//         canvas: &RenderOptionsBound,
+//         req: IndexRequester,
+//     ) -> TickGen<Self::It, Self::Fmt> {
+//         let TickGen { it, res, .. } = self.ticks.generate(data, canvas, req);
+//         TickGen {
+//             it,
+//             fmt: self.fmt,
+//             res,
+//         }
+//     }
+// }
