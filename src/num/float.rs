@@ -61,7 +61,7 @@ impl crate::ticks::TickFmt<f64> for FloatFmt {
     }
 }
 
-impl IntoTickDist<f64> for FloatTickFmt {
+impl GenTickDist<f64> for FloatTickFmt {
     type Res = TickDistRes<Vec<f64>, FloatFmt>;
     fn generate(
         self,

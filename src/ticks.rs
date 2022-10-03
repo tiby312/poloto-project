@@ -35,7 +35,7 @@ pub struct ClosureTickFormat<F> {
     func: F,
 }
 
-impl<N: PlotNum, Res: TickDist<Num = N>, F> IntoTickDist<N> for ClosureTickFormat<F>
+impl<N: PlotNum, Res: TickDist<Num = N>, F> GenTickDist<N> for ClosureTickFormat<F>
 where
     F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> Res,
     N: PlotNum,
@@ -219,7 +219,7 @@ pub struct TickRes {
 ///
 /// Formatter for a tick.
 ///
-pub trait IntoTickDist<Num> {
+pub trait GenTickDist<Num> {
     type Res: TickDist<Num = Num>;
     fn generate(
         self,
@@ -255,7 +255,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt>
         TickDistRes { it, fmt, res }
     }
 }
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> IntoTickDist<X>
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> GenTickDist<X>
     for TickDistRes<I, Fmt>
 {
     type Res = Self;

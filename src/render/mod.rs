@@ -349,7 +349,7 @@ pub struct Data<P, TX, TY> {
     plots: P,
 }
 
-impl<P: build::PlotIterator, TX: IntoTickDist<P::X>, TY: IntoTickDist<P::Y>> Data<P, TX, TY> {
+impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<P, TX, TY> {
     pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
         Data {
             opt,
@@ -367,7 +367,7 @@ impl<P: build::PlotIterator, TX: IntoTickDist<P::X>, TY: IntoTickDist<P::Y>> Dat
             plots: self.plots,
         }
     }
-    pub fn with_xticks<TTT: IntoTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
+    pub fn with_xticks<TTT: GenTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
             tickx,
@@ -376,7 +376,7 @@ impl<P: build::PlotIterator, TX: IntoTickDist<P::X>, TY: IntoTickDist<P::Y>> Dat
         }
     }
 
-    pub fn with_yticks<TTT: IntoTickDist<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
+    pub fn with_yticks<TTT: GenTickDist<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
         Data {
             opt: self.opt,
             tickx: self.tickx,

@@ -60,7 +60,7 @@ impl ticks::TickFmt<i128> for IntFmt {
     }
 }
 
-impl IntoTickDist<i128> for IntegerTickFmt {
+impl GenTickDist<i128> for IntegerTickFmt {
     type Res = TickDistRes<Vec<i128>, IntFmt>;
     fn generate(
         self,
