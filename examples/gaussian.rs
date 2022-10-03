@@ -16,7 +16,7 @@ fn main() {
     let d = poloto::build::origin();
 
     poloto::data(plots!(a, b, c, d))
-        .build_and_label("gaussian", "x", "y")
+        .build_and_label2(("gaussian", "x", "y"))
         .append_to(poloto::simple_light())
         .render_stdout();
 }

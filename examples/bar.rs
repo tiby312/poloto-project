@@ -7,7 +7,7 @@ fn main() {
     ];
 
     poloto::build::bar::gen_simple("", data, [0])
-        .build_and_label("Comparison of Food Tastiness", "Tastiness", "Foods")
+        .build_and_label2(("Comparison of Food Tastiness", "Tastiness", "Foods"))
         .append_to(poloto::simple_light())
         .render_stdout();
 }

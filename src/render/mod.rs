@@ -413,10 +413,10 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn build_map<K, F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K>(self, func: F) -> K {
-        let data = self.build();
-        func(data)
-    }
+    // pub fn build_map<K, F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K>(self, func: F) -> K {
+    //     let data = self.build();
+    //     func(data)
+    // }
 
     pub fn build_and_label<AA: Display, BB: Display, CC: Display>(
         self,
@@ -447,6 +447,20 @@ impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuil
             data: self,
             base: fmt,
         }
+    }
+    pub fn boundx(&self) -> &DataBound<P::X> {
+        &self.boundx
+    }
+
+    pub fn boundy(&self) -> &DataBound<P::Y> {
+        &self.boundy
+    }
+
+    pub fn xticks(&self) -> &A {
+        &self.xticks
+    }
+    pub fn yticks(&self) -> &B {
+        &self.yticks
     }
 }
 
