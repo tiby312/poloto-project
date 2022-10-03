@@ -385,10 +385,17 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
+    pub fn labels2<A: GenBaseFmt<TX::Res, TY::Res>>(
+        self,
+        _: A,
+    ) -> Plotter<P, TX::Res, TY::Res, A::Res> {
+        unimplemented!();
+    }
+
     pub fn labels_ext<AA: Display, BB: Display, CC: Display>(
         mut self,
         func: impl FnOnce(&Foop<TX::Res, TY::Res>) -> (AA, BB, CC),
-    ) -> Plotter<P, TX::Res, TY::Res, SimplePlotFormatter<AA, BB, CC>> {
+    ) -> Plotter<P, TX::Res, TY::Res, (AA, BB, CC)> {
         let mut area = build::marker::Area::new();
         self.plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
@@ -422,11 +429,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             boundx,
             boundy,
             plots: self.plots,
-            base: SimplePlotFormatter {
-                title,
-                xname,
-                yname,
-            },
+            base: (title, xname, yname),
         }
     }
 
@@ -435,7 +438,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         title: AA,
         xname: BB,
         yname: CC,
-    ) -> Plotter<P, TX::Res, TY::Res, SimplePlotFormatter<AA, BB, CC>> {
+    ) -> Plotter<P, TX::Res, TY::Res, (AA, BB, CC)> {
         self.labels_ext(|_| (title, xname, yname))
     }
 }
@@ -509,29 +512,20 @@ where
     }
 }
 
-///
-/// A simple plot formatter that is composed of
-/// display objects as TickFormats.
-///
-pub struct SimplePlotFormatter<A, B, C> {
-    pub(crate) title: A,
-    pub(crate) xname: B,
-    pub(crate) yname: C,
-}
-impl<A, B, C> BaseFmt for SimplePlotFormatter<A, B, C>
+impl<A, B, C> BaseFmt for (A, B, C)
 where
     A: Display,
     B: Display,
     C: Display,
 {
     fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.title)
+        write!(writer, "{}", self.0)
     }
     fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.xname)
+        write!(writer, "{}", self.1)
     }
     fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.yname)
+        write!(writer, "{}", self.2)
     }
 }
 
@@ -560,5 +554,37 @@ impl<R: Elem> Elem for Themer<R> {
 
     fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         self.0.render_head(w)
+    }
+}
+
+pub trait GenBaseFmt<X: TickDist, Y: TickDist> {
+    type Res: BaseFmt;
+    fn generate(self, stuff: Foop<X, Y>) -> Self::Res;
+}
+
+impl<X: fmt::Display, Y: fmt::Display, Z: fmt::Display, XX: TickDist, YY: TickDist>
+    GenBaseFmt<XX, YY> for (X, Y, Z)
+{
+    type Res = Self;
+    fn generate(self, stuff: Foop<XX, YY>) -> Self::Res {
+        self
+    }
+}
+
+pub fn base_from_closure<X: TickDist, Y: TickDist, F: FnOnce(Foop<X, Y>) -> Res, Res: BaseFmt>(
+    func: F,
+) -> BaseFmtClosure<F> {
+    BaseFmtClosure { func }
+}
+pub struct BaseFmtClosure<F> {
+    func: F,
+}
+
+impl<X: TickDist, Y: TickDist, F: FnOnce(Foop<X, Y>) -> Res, Res: BaseFmt> GenBaseFmt<X, Y>
+    for BaseFmtClosure<F>
+{
+    type Res = Res;
+    fn generate(self, stuff: Foop<X, Y>) -> Self::Res {
+        (self.func)(stuff)
     }
 }
