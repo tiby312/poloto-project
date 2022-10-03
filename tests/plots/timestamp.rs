@@ -123,20 +123,25 @@ fn seconds() -> fmt::Result {
     let xticks = poloto::ticks::from_closure(|data, opt, req| {
         use poloto::ticks::TickFormat;
         let k = poloto::default_ticks::<UnixTime>().generate(data, opt, req);
-        let step = k.fmt.step();
+        let step = *k.fmt.step();
         poloto::ticks::TickBuilder::new(k.it)
             .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+            .with_fmt_data(step)
             .build()
     });
 
-    let data = data.with_xticks(xticks).labels_ext(|data| {
+    let data = data.with_xticks(xticks);
+
+    let data = data.labels_ext(|data| {
         let bounds = *data.boundx;
+        let j = data.xticks.fmt.data;
         (
             "Number of Wikipedia Articles",
             hypermelon::format_move!(
-                "{} to {}",
+                "{} to {} with {}",
                 bounds.min.datetime(timezone).format("%H:%M:%S"),
-                bounds.max.datetime(timezone).format("%H:%M:%S")
+                bounds.max.datetime(timezone).format("%H:%M:%S"),
+                j
             ),
             "Number of Articles",
         )
