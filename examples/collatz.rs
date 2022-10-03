@@ -33,12 +33,9 @@ fn main() {
         poloto::build::origin()
     );
 
-    let k = poloto::render::base_from_closure(|foop| ("collatz", "x", "y"));
-
-    
     poloto::data(plots)
         .with_opt(opt)
-        .labels2(k)
+        .compute_map(|data| data.labels("a", "b", "c"))
         .append_to(svg.append(style))
         .render_stdout();
 }

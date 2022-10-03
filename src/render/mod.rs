@@ -385,61 +385,75 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn labels2<A: GenBaseFmt<TX::Res, TY::Res>>(
-        self,
-        _: A,
-    ) -> Plotter<P, TX::Res, TY::Res, A::Res> {
-        unimplemented!();
+    pub fn compute_map<K, F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K>(self, func: F) -> K {
+        let data = DataBuilt::new(self);
+        func(data)
     }
 
-    pub fn labels_ext<AA: Display, BB: Display, CC: Display>(
-        mut self,
-        func: impl FnOnce(&Foop<TX::Res, TY::Res>) -> (AA, BB, CC),
-    ) -> Plotter<P, TX::Res, TY::Res, (AA, BB, CC)> {
-        let mut area = build::marker::Area::new();
-        self.plots.increase_area(&mut area);
-        let (boundx, boundy) = area.build();
-
-        let mut index_counter = 0;
-
-        let xticks = self.tickx.generate(
-            &boundx,
-            &self.opt.boundx,
-            IndexRequester::new(&mut index_counter),
-        );
-        let yticks = self.ticky.generate(
-            &boundy,
-            &self.opt.boundy,
-            IndexRequester::new(&mut index_counter),
-        );
-
-        let f = Foop {
-            xticks: &xticks,
-            yticks: &yticks,
-            boundx: &boundx,
-            boundy: &boundy,
-        };
-
-        let (title, xname, yname) = func(&f);
-
-        Plotter {
-            opt: self.opt,
-            xticks,
-            yticks,
-            boundx,
-            boundy,
-            plots: self.plots,
-            base: (title, xname, yname),
-        }
-    }
-
-    pub fn labels<AA: Display, BB: Display, CC: Display>(
+    pub fn build<AA: Display, BB: Display, CC: Display>(
         self,
         title: AA,
         xname: BB,
         yname: CC,
     ) -> Plotter<P, TX::Res, TY::Res, (AA, BB, CC)> {
-        self.labels_ext(|_| (title, xname, yname))
+        let data = DataBuilt::new(self);
+
+        Plotter {
+            data,
+            base: (title, xname, yname),
+        }
+    }
+}
+
+pub struct DataBuilt<P: PlotIterator, A, B> {
+    opt: RenderOptions,
+    xticks: A,
+    yticks: B,
+    plots: P,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
+}
+
+impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuilt<P, A, B> {
+    pub fn labels<AA: Display, BB: Display, CC: Display>(
+        self,
+        title: AA,
+        xname: BB,
+        yname: CC,
+    ) -> Plotter<P, A, B, (AA, BB, CC)> {
+        Plotter {
+            data: self,
+            base: (title, xname, yname),
+        }
+    }
+
+    pub fn new<AA: GenTickDist<P::X, Res = A>, BB: GenTickDist<P::Y, Res = B>>(
+        mut data: Data<P, AA, BB>,
+    ) -> Self {
+        let mut area = build::marker::Area::new();
+        data.plots.increase_area(&mut area);
+        let (boundx, boundy) = area.build();
+
+        let mut index_counter = 0;
+
+        let xticks = data.tickx.generate(
+            &boundx,
+            &data.opt.boundx,
+            IndexRequester::new(&mut index_counter),
+        );
+        let yticks = data.ticky.generate(
+            &boundy,
+            &data.opt.boundy,
+            IndexRequester::new(&mut index_counter),
+        );
+        DataBuilt {
+            opt: data.opt,
+            xticks,
+            yticks,
+            boundx,
+            boundy,
+            plots: data.plots,
+        }
     }
 }
 
@@ -454,12 +468,7 @@ pub struct Foop<'a, X: TickDist, Y: TickDist> {
 /// Created by [`plot_with`]
 ///
 pub struct Plotter<P: PlotIterator, A, B, BB: BaseFmt> {
-    opt: RenderOptions,
-    xticks: A,
-    yticks: B,
-    plots: P,
-    boundx: DataBound<P::X>,
-    boundy: DataBound<P::Y>,
+    data: DataBuilt<P, A, B>,
     base: BB,
 }
 
@@ -494,20 +503,20 @@ where
 
         render::render_plot::render_plot(
             writer,
-            &self.boundx,
-            &self.boundy,
-            &self.opt,
-            &mut self.plots,
+            &self.data.boundx,
+            &self.data.boundy,
+            &self.data.opt,
+            &mut self.data.plots,
         )?;
 
         render::render_base::render_base(
             writer,
-            self.xticks,
-            self.yticks,
-            &self.boundx,
-            &self.boundy,
+            self.data.xticks,
+            self.data.yticks,
+            &self.data.boundx,
+            &self.data.boundy,
             &mut self.base,
-            &self.opt,
+            &self.data.opt,
         )
     }
 }
