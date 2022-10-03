@@ -35,7 +35,7 @@ fn main() {
 
     poloto::data(plots)
         .with_opt(opt)
-        .build_and_label2(("a", "b", "c"))
+        .build_and_label(("a", "b", "c"))
         .append_to(svg.append(style))
         .render_stdout();
 }

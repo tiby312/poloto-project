@@ -28,7 +28,7 @@ fn marathon() -> fmt::Result {
 
     let w = util::create_test_file("marathon.svg");
 
-    data.build_and_label2(("collatz", "x", "y"))
+    data.build_and_label(("collatz", "x", "y"))
         .append_to(poloto::simple_dark())
         .render_fmt_write(w)
 }
@@ -62,7 +62,7 @@ fn years() -> fmt::Result {
     let w = util::create_test_file("years.svg");
 
     data.with_xticks(xtick_fmt)
-        .build_and_label2(("title", "xname", "yname"))
+        .build_and_label(("title", "xname", "yname"))
         .append_to(poloto::simple_light())
         .render_fmt_write(w)
 }

@@ -418,16 +418,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
     //     func(data)
     // }
 
-    pub fn build_and_label<AA: Display, BB: Display, CC: Display>(
-        self,
-        title: AA,
-        xname: BB,
-        yname: CC,
-    ) -> Plotter<P, TX::Res, TY::Res, (AA, BB, CC)> {
-        self.build().label((title, xname, yname))
-    }
-
-    pub fn build_and_label2<Fmt: BaseFmt>(self, fmt: Fmt) -> Plotter<P, TX::Res, TY::Res, Fmt> {
+    pub fn build_and_label<Fmt: BaseFmt>(self, fmt: Fmt) -> Plotter<P, TX::Res, TY::Res, Fmt> {
         self.build().label(fmt)
     }
 }
