@@ -427,7 +427,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             IndexRequester::new(&mut index_counter),
         );
         DataBuilt {
-            opt: opt,
+            opt,
             xticks,
             yticks,
             boundx: data.boundx,

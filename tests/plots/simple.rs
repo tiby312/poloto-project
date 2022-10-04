@@ -64,16 +64,16 @@ fn line_fill_fmt() -> fmt::Result {
     )
     .line_fill("tan(x)");
 
-    let data = poloto::data(s).build();
-
-    let boundx = *data.boundx();
-    let data = data
-        .label((
+    let data = poloto::data(s).build_map(|data| {
+        let boundx = *data.boundx();
+        data.label((
             format_move!("from {} to {}", boundx.min, boundx.max),
             format_move!("This is the {} label", 'x'),
             "This is the y label",
         ))
-        .append_to(poloto::simple_light());
+    });
+
+    let data = data.append_to(poloto::simple_light());
 
     let w = util::create_test_file("line_fill_fmt.svg");
 

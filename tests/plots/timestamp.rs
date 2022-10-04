@@ -103,7 +103,6 @@ fn months() -> fmt::Result {
 #[test]
 fn seconds() -> fmt::Result {
     use chrono::TimeZone;
-    use poloto::ticks::GenTickDist;
     let timezone = &chrono::Utc;
 
     let date = timezone.ymd(2020, 1, 30);
