@@ -408,27 +408,27 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn with_xticks<TTT: GenTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
-        Data {
-            opt: self.opt,
-            tickx,
-            ticky: self.ticky,
-            plots: self.plots,
-            boundx: self.boundx,
-            boundy: self.boundy,
-        }
-    }
+    // pub fn with_xticks<TTT: GenTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
+    //     Data {
+    //         opt: self.opt,
+    //         tickx,
+    //         ticky: self.ticky,
+    //         plots: self.plots,
+    //         boundx: self.boundx,
+    //         boundy: self.boundy,
+    //     }
+    // }
 
-    pub fn with_yticks<TTT: GenTickDist<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
-        Data {
-            opt: self.opt,
-            tickx: self.tickx,
-            ticky,
-            plots: self.plots,
-            boundx: self.boundx,
-            boundy: self.boundy,
-        }
-    }
+    // pub fn with_yticks<TTT: GenTickDist<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
+    //     Data {
+    //         opt: self.opt,
+    //         tickx: self.tickx,
+    //         ticky,
+    //         plots: self.plots,
+    //         boundx: self.boundx,
+    //         boundy: self.boundy,
+    //     }
+    // }
 
     pub fn build(self) -> DataBuilt<P, TX::Res, TY::Res> {
         let mut index_counter = 0;
