@@ -13,8 +13,7 @@ fn main() {
 
     let data = poloto::data(plots);
 
-    let ticks =
-        poloto::ticks::custom_ticks((0..).step_by(6)).with_ticks(|w, v| write!(w, "{} hr", v));
+    let ticks = poloto::ticks::from_iter((0..).step_by(6)).with_ticks(|w, v| write!(w, "{} hr", v));
 
     data.with_xticks(|_| ticks)
         .build_and_label(("title", "x", "y"))

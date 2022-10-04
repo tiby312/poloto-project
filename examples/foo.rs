@@ -20,7 +20,7 @@ fn main() {
         poloto::build::origin()
     );
 
-    let steps = poloto::ticks::TickDistribution::new((0..).step_by(6));
+    let steps = poloto::ticks::from_iter((0..).step_by(6));
 
     poloto::data(plots)
         .with_xticks(|_| steps)

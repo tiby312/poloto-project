@@ -191,15 +191,15 @@ impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistribution<I, F> {
     }
 }
 
-pub fn custom_ticks<I: IntoIterator>(it: I) -> TickDistribution<I, DefaultTickFmt>
-where
-    I::Item: PlotNum + fmt::Display,
-{
-    TickDistribution::new(it)
-}
-pub fn default_ticks<X: HasDefaultTicks>() -> X::DefaultTicks {
-    X::default_ticks()
-}
+// pub fn custom_ticks<I: IntoIterator>(it: I) -> TickDistribution<I, DefaultTickFmt>
+// where
+//     I::Item: PlotNum + fmt::Display,
+// {
+//     TickDistribution::new(it)
+// }
+// pub fn default_ticks<X: HasDefaultTicks>() -> X::DefaultTicks {
+//     X::default_ticks()
+// }
 
 pub struct TickDistribution<I, F> {
     pub it: I,
@@ -207,7 +207,7 @@ pub struct TickDistribution<I, F> {
     pub res: TickRes,
 }
 
-pub fn distribution<I: IntoIterator<Item = X>, X: PlotNum + fmt::Display>(
+pub fn from_iter<I: IntoIterator<Item = X>, X: PlotNum + fmt::Display>(
     it: I,
 ) -> TickDistribution<I, DefaultTickFmt> {
     TickDistribution::new(it)
