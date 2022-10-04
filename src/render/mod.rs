@@ -388,7 +388,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn map_opt<F: FnOnce(RenderOptionsBuilder) -> RenderOptionsBuilder>(self, func: F) -> Self {
+    pub fn with_opt<F: FnOnce(RenderOptionsBuilder) -> RenderOptionsBuilder>(self, func: F) -> Self {
         Data {
             opt: func(self.opt),
             tickx: self.tickx,
@@ -399,7 +399,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn map_xticks<TTT: GenTickDist<P::X>, F: FnOnce(TX) -> TTT>(
+    pub fn with_xticks<TTT: GenTickDist<P::X>, F: FnOnce(TX) -> TTT>(
         self,
         func: F,
     ) -> Data<P, TTT, TY> {
@@ -414,7 +414,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn map_yticks<TTT: GenTickDist<P::Y>, F: FnOnce(TY) -> TTT>(
+    pub fn with_yticks<TTT: GenTickDist<P::Y>, F: FnOnce(TY) -> TTT>(
         self,
         func: F,
     ) -> Data<P, TX, TTT> {

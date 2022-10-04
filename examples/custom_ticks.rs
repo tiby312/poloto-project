@@ -16,7 +16,7 @@ fn main() {
     let ticks =
         poloto::ticks::custom_ticks((0..).step_by(6)).with_ticks(|w, v| write!(w, "{} hr", v));
 
-    data.map_xticks(|_| ticks)
+    data.with_xticks(|_| ticks)
         .build_and_label(("title", "x", "y"))
         .append_to(poloto::simple_light())
         .render_stdout();

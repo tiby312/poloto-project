@@ -27,7 +27,7 @@ fn heart() -> fmt::Result {
     let w = util::create_test_file("heart.svg");
 
     poloto::data(plots)
-        .map_opt(|_| canvas)
+        .with_opt(|_| canvas)
         .build_and_label(("Heart Graph", "x", "y"))
         .append_to(poloto::simple_dark())
         .render_fmt_write(w)
@@ -199,7 +199,7 @@ fn custom_dim() -> fmt::Result {
         poloto::build::markers([], [0]),
         poloto::build::plots_dyn(v)
     ))
-    .map_opt(|_| canvas)
+    .with_opt(|_| canvas)
     .build_and_label(("collatz", "x", "y"));
 
     let w = util::create_test_file("custom_dim.svg");

@@ -54,7 +54,7 @@ fn minutes_local_time() -> fmt::Result {
     ));
 
     use poloto::num::timestamp::UnixTimeTickFmt;
-    let s = s.map_xticks(|_| UnixTimeTickFmt::with_timezone(time_zone.clone()));
+    let s = s.with_xticks(|_| UnixTimeTickFmt::with_timezone(time_zone.clone()));
 
     let w = util::create_test_file("minutes_local_time.svg");
 

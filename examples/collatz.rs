@@ -33,7 +33,7 @@ fn main() {
     let b = poloto::build::origin();
 
     poloto::data(plots!(a, b))
-        .map_opt(|_| opt)
+        .with_opt(|_| opt)
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))
         .render_stdout();
