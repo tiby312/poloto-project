@@ -2,7 +2,7 @@ use hypermelon::{format_move, Elem};
 
 use super::*;
 use poloto::build::plot;
-
+use poloto::render::*;
 #[test]
 fn heart() -> fmt::Result {
     // https://mathworld.wolfram.com/HeartCurve.html
@@ -44,7 +44,7 @@ fn large_scatter() -> fmt::Result {
 
     let data = poloto::data(plots).build_and_label(("cows per year", "year", "cows"));
 
-    let header = poloto::Header::new().append(poloto::Theme::dark().append(
+    let header = Header::new().append(Theme::dark().append(
         ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
     ));
 
@@ -122,10 +122,7 @@ fn long_label() -> fmt::Result {
     let data = poloto::data(plots).build_and_label(("collatz", "x", "y"));
 
     let a = [1200.0, 500.0];
-    let header = poloto::header()
-        .with_dim(a)
-        .with_viewbox(a)
-        .append(poloto::Theme::dark());
+    let header = header().with_dim(a).with_viewbox(a).append(Theme::dark());
 
     let w = util::create_test_file("long_label.svg");
 
@@ -155,7 +152,7 @@ fn base_color() -> fmt::Result {
         "cow",
     ));
 
-    let header = poloto::Header::new().append(poloto::Theme::dark().append(
+    let header = Header::new().append(Theme::dark().append(
         ".poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}",
     ));
 
@@ -188,10 +185,10 @@ fn custom_dim() -> fmt::Result {
 
     let ddd = [2000.0, 1000.0];
 
-    let header = poloto::Header::new().with_dim(ddd).with_viewbox(ddd);
+    let header = Header::new().with_dim(ddd).with_viewbox(ddd);
 
     let canvas = poloto::render::render_opt_builder()
-        .with_dim(header.get_viewbox())
+        .with_viewbox(header.get_viewbox())
         .with_tick_lines([true, true])
         .move_into();
 
@@ -204,8 +201,8 @@ fn custom_dim() -> fmt::Result {
 
     let w = util::create_test_file("custom_dim.svg");
 
-    let header = header
-        .append(poloto::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:1;}"));
+    let header =
+        header.append(Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:1;}"));
 
     data.append_to(header).render_fmt_write(w)
 }
@@ -247,9 +244,8 @@ fn custom_style() -> fmt::Result {
         "y",
     ));
 
-    let header = poloto::Header::new().append(poloto::Theme::dark().chain(
-        hypermelon::build::raw_escapable(
-            r###"
+    let header = Header::new().append(Theme::dark().chain(hypermelon::build::raw_escapable(
+        r###"
     <defs>
         <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
             <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
@@ -263,8 +259,7 @@ fn custom_style() -> fmt::Result {
         fill: url(#pattern2);
     }
     </style>"###,
-        ),
-    ));
+    )));
 
     let w = util::create_test_file("custom_style.svg");
 

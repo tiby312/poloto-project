@@ -52,13 +52,13 @@ fn custom_colors_html() -> fmt::Result {
         </div>
         </htmls>
         "###,
-        poloto::Theme::light().get_str(),
-        poloto::Theme::dark().get_str(),
+        poloto::render::Theme::light().get_str(),
+        poloto::render::Theme::dark().get_str(),
         format_args!(
             "{}{}{}",
-            poloto::Header::new().to_string().0,
+            poloto::render::Header::new().to_string().0,
             graph,
-            poloto::Header::new().to_string().1
+            poloto::render::Header::new().to_string().1
         )
     )
 }

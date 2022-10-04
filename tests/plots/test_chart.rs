@@ -1,5 +1,5 @@
 use super::*;
-
+use poloto::render::*;
 const fn generate_test() -> [&'static [[f64; 2]]; 9] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
@@ -68,8 +68,8 @@ fn test_chart() -> std::fmt::Result {
                     for (i, &test) in generate_test().iter().enumerate() {
                         let header = header();
 
-                        let style =
-                            poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
+                        //TODO dont include style in every instance!
+                        let style = Theme::light().append(".poloto_scatter{stroke-width:20}");
 
                         let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
                             .build_and_label((
@@ -85,8 +85,7 @@ fn test_chart() -> std::fmt::Result {
                     for (i, &test) in generate_test_int().iter().enumerate() {
                         let header = header();
 
-                        let style =
-                            poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
+                        let style = Theme::light().append(".poloto_scatter{stroke-width:20}");
 
                         let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
                             .build_and_label((
