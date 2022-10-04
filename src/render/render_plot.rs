@@ -6,10 +6,10 @@ pub(super) fn render_plot<P: build::PlotIterator>(
     writer: &mut hypermelon::ElemWrite,
     boundx: &ticks::DataBound<P::X>,
     boundy: &ticks::DataBound<P::Y>,
-    canvas: &RenderOptions,
+    canvas: &RenderOptionsResult,
     plots_all: &mut P,
 ) -> std::fmt::Result {
-    let RenderOptions {
+    let RenderOptionsResult {
         width,
         height,
         padding,
@@ -122,7 +122,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 }
 
 struct PlotRenderInfo<'a> {
-    canvas: &'a RenderOptions,
+    canvas: &'a RenderOptionsResult,
     p_type: PlotType,
     name_exists: bool,
     colori: usize,
@@ -146,7 +146,7 @@ fn render(
         bar_width,
     } = info;
 
-    let RenderOptions {
+    let RenderOptionsResult {
         height,
         padding,
         paddingy,

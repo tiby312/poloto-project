@@ -7,12 +7,12 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     plot_fmt: &mut dyn BaseFmt,
-    canvas: &RenderOptions,
+    canvas: &RenderOptionsResult,
 ) -> std::fmt::Result {
     let mut xticksg = xticksg.unwrap();
     let mut yticksg = yticksg.unwrap();
 
-    let RenderOptions {
+    let RenderOptionsResult {
         width,
         height,
         padding,

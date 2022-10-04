@@ -1,5 +1,5 @@
 //!
-//! Some impls of [`PlotNum`] and [`GenTickDist`].
+//! Some impls of [`PlotNum`] and [`TickDistGen`].
 //!
 use super::*;
 use crate::util;

@@ -8,12 +8,10 @@ mod render_base;
 mod render_plot;
 
 ///
-/// Build a [`RenderOptions`]
-///
-/// Created by [`render_opt_builder()`]
+/// Specify options for the svg plots
 ///
 #[derive(Clone)]
-pub struct RenderOptionsBuilder {
+pub struct RenderOptions {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
     dim: Option<[f64; 2]>,
@@ -23,9 +21,9 @@ pub struct RenderOptionsBuilder {
     bar_width: f64,
 }
 
-impl Default for RenderOptionsBuilder {
+impl Default for RenderOptions {
     fn default() -> Self {
-        RenderOptionsBuilder {
+        RenderOptions {
             num_css_classes: Some(8),
             preserve_aspect: false,
             dim: None,
@@ -37,7 +35,7 @@ impl Default for RenderOptionsBuilder {
     }
 }
 
-impl RenderOptionsBuilder {
+impl RenderOptions {
     pub fn new() -> Self {
         Self::default()
     }
@@ -92,7 +90,7 @@ impl RenderOptionsBuilder {
         self.clone()
     }
 
-    fn compute(&mut self) -> RenderOptions {
+    fn compute(&mut self) -> RenderOptionsResult {
         let (width, height) = if let Some([x, y]) = self.dim {
             (x, y)
         } else {
@@ -143,7 +141,7 @@ impl RenderOptionsBuilder {
         let spacing = padding / 3.0;
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
-        RenderOptions {
+        RenderOptionsResult {
             boundx: ticks::RenderOptionsBound {
                 ideal_num_steps: ideal_num_xsteps,
                 ideal_dash_size,
@@ -178,7 +176,7 @@ impl RenderOptionsBuilder {
 /// Contains graphical information for a svg graph.
 ///
 #[derive(Clone)]
-struct RenderOptions {
+struct RenderOptionsResult {
     boundx: ticks::RenderOptionsBound,
     boundy: ticks::RenderOptionsBound,
     width: f64,
@@ -196,15 +194,15 @@ struct RenderOptions {
     bar_width: f64,
 }
 
-pub fn render_opt_builder() -> RenderOptionsBuilder {
-    RenderOptionsBuilder::default()
+pub fn render_opt() -> RenderOptions {
+    RenderOptions::default()
 }
 
 ///
 /// Link some plots with a way to render them.
 ///
 pub struct Stage1<P: PlotIterator, TX, TY> {
-    opt: RenderOptionsBuilder,
+    opt: RenderOptions,
     tickx: TX,
     ticky: TY,
     plots: P,
@@ -222,18 +220,13 @@ where
             plots,
             P::X::default_ticks(),
             P::Y::default_ticks(),
-            RenderOptionsBuilder::new(),
+            RenderOptions::new(),
         )
     }
 }
 
-impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Stage1<P, TX, TY> {
-    pub fn from_parts(
-        mut plots: P,
-        tickx: TX,
-        ticky: TY,
-        opt: RenderOptionsBuilder,
-    ) -> Stage1<P, TX, TY> {
+impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage1<P, TX, TY> {
+    pub fn from_parts(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Stage1<P, TX, TY> {
         let mut area = build::marker::Area::new();
         plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
@@ -248,10 +241,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Stage
         }
     }
 
-    pub fn with_opt<F: FnOnce(RenderOptionsBuilder) -> RenderOptionsBuilder>(
-        self,
-        func: F,
-    ) -> Self {
+    pub fn with_opt<F: FnOnce(RenderOptions) -> RenderOptions>(self, func: F) -> Self {
         Stage1 {
             opt: func(self.opt),
             tickx: self.tickx,
@@ -262,7 +252,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Stage
         }
     }
 
-    pub fn with_xticks<TTT: GenTickDist<P::X>, F: FnOnce(TX) -> TTT>(
+    pub fn with_xticks<TTT: TickDistGen<P::X>, F: FnOnce(TX) -> TTT>(
         self,
         func: F,
     ) -> Stage1<P, TTT, TY> {
@@ -277,7 +267,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Stage
         }
     }
 
-    pub fn with_yticks<TTT: GenTickDist<P::Y>, F: FnOnce(TY) -> TTT>(
+    pub fn with_yticks<TTT: TickDistGen<P::Y>, F: FnOnce(TY) -> TTT>(
         self,
         func: F,
     ) -> Stage1<P, TX, TTT> {
@@ -328,7 +318,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Stage
 }
 
 pub struct Stage2<P: PlotIterator, A, B> {
-    opt: RenderOptions,
+    opt: RenderOptionsResult,
     xticks: A,
     yticks: B,
     plots: P,
@@ -390,9 +380,6 @@ impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stage2<P
     // }
 }
 
-///
-/// Created by [`plot_with`]
-///
 pub struct Stage3<P: PlotIterator, A, B, BB: BaseFmt> {
     data: Stage2<P, A, B>,
     base: BB,

@@ -35,14 +35,14 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
 }
 
 pub trait HasDefaultTicks: Sized {
-    type DefaultTicks: crate::ticks::GenTickDist<Self>;
+    type DefaultTicks: crate::ticks::TickDistGen<Self>;
     fn default_ticks() -> Self::DefaultTicks;
 }
 
 use std::fmt;
 
 ///
-/// Used by [`crate::render::plot_with`]
+/// Group methods to write title/xname/yname
 ///
 pub trait BaseFmt {
     fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;

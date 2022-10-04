@@ -105,7 +105,7 @@ where
     }
 }
 
-impl<T: TimeZone + Display> GenTickDist<UnixTime> for UnixTimeTickFmt<T>
+impl<T: TimeZone + Display> TickDistGen<UnixTime> for UnixTimeTickFmt<T>
 where
     T::Offset: Display,
 {

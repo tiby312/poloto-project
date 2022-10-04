@@ -5,7 +5,7 @@
 use super::*;
 
 ///
-/// Tick relevant information of [`Data`]
+/// Min/max bounds for all plots
 ///
 #[derive(Debug, Clone, Copy)]
 pub struct DataBound<X> {
@@ -133,7 +133,7 @@ pub struct GenTickDistClosure<F> {
     func: F,
 }
 
-impl<N: PlotNum, Res: TickDist<Num = N>, F> GenTickDist<N> for GenTickDistClosure<F>
+impl<N: PlotNum, Res: TickDist<Num = N>, F> TickDistGen<N> for GenTickDistClosure<F>
 where
     F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> Res,
     N: PlotNum,
@@ -156,7 +156,7 @@ pub struct TickRes {
 ///
 /// Formatter for a tick.
 ///
-pub trait GenTickDist<N> {
+pub trait TickDistGen<N> {
     type Res: TickDist<Num = N>;
     fn generate(
         self,
@@ -166,7 +166,7 @@ pub trait GenTickDist<N> {
     ) -> Self::Res;
 }
 
-pub fn gen_ticks<N: PlotNum, G: GenTickDist<N>>(
+pub fn gen_ticks<N: PlotNum, G: TickDistGen<N>>(
     gen: G,
     data: &ticks::DataBound<N>,
     opt: &RenderOptionsBound,
@@ -276,7 +276,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I,
         func(self)
     }
 }
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> GenTickDist<X>
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistGen<X>
     for TickDistribution<I, Fmt>
 {
     type Res = Self;

@@ -16,9 +16,7 @@ fn heart() -> fmt::Result {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let canvas = poloto::render::render_opt_builder()
-        .preserve_aspect()
-        .move_into();
+    let canvas = poloto::render::render_opt().preserve_aspect().move_into();
 
     let plots = poloto::plots!(
         plot("").line_fill_raw().buffered(range.map(heart)),
@@ -191,7 +189,7 @@ fn custom_dim() -> fmt::Result {
 
     let header = Header::new().with_dim(ddd).with_viewbox(ddd);
 
-    let canvas = poloto::render::render_opt_builder()
+    let canvas = poloto::render::render_opt()
         .with_viewbox(header.get_viewbox())
         .with_tick_lines([true, true])
         .move_into();

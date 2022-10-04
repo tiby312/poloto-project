@@ -17,7 +17,7 @@ fn main() {
 
     let svg = poloto::header().with_viewbox_width(1200.0);
 
-    let opt = poloto::render::render_opt_builder()
+    let opt = poloto::render::render_opt()
         .with_tick_lines([true, true])
         .with_viewbox(svg.get_viewbox())
         .move_into();

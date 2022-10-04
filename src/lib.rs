@@ -18,11 +18,11 @@
 //! the ticks that were selected.
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
-//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickFormat`].
-//! Alternatively you can use the [`ticks::from_iter`] function that just takes an iterator of ticks and returns a [`TickFormat`].
-//! This puts more responsibility on the user to pass a decent number of ticks. This should only really be used when the user
+//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickDistGen`].
+//! Alternatively you can use the [`ticks::from_iter`] function that just takes an iterator of ticks and returns a [`TickDistGen`].
+//! This puts more responsibility on the user to pass a decent distribution of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
-//! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/steps.rs)
+//! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/custom_ticks.rs)
 
 #[cfg(doctest)]
 mod test_readme {
@@ -87,7 +87,7 @@ macro_rules! plots {
 }
 
 ///
-/// Construct a [`Data`].
+/// Start plotting!
 ///
 pub fn data<
     X: PlotNum + HasDefaultTicks,
@@ -96,12 +96,7 @@ pub fn data<
 >(
     plots: P,
 ) -> Stage1<P, X::DefaultTicks, Y::DefaultTicks> {
-    render::Stage1::from_parts(
-        plots,
-        X::default_ticks(),
-        Y::default_ticks(),
-        render_opt_builder(),
-    )
+    render::Stage1::from_parts(plots, X::default_ticks(), Y::default_ticks(), render_opt())
 }
 
 ///
