@@ -443,6 +443,10 @@ impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuil
             base: fmt,
         }
     }
+
+    pub fn opt(&self)->&RenderOptions{
+        &self.opt
+    }
     pub fn boundx(&self) -> &DataBound<P::X> {
         &self.boundx
     }
