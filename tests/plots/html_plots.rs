@@ -137,7 +137,7 @@ body {
 
     let s = poloto::data(s)
         .build_and_label(("Demo: Hovering and shadows", "x", "y"))
-        .append_to(poloto::simple_light());
+        .append_to(poloto::simple::light());
 
     let s = s.render_string().unwrap();
 

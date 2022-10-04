@@ -121,19 +121,19 @@ impl<N, K: TickFmt<N>, E> TickFmt<N> for WithData<K, E> {
 ///
 /// Create a `GenTickDist` from a closure.
 ///
-pub fn from_closure<N: PlotNum, It, F>(func: F) -> ClosureTickFormat<F>
+pub fn from_closure<N: PlotNum, It, F>(func: F) -> GenTickDistClosure<F>
 where
     It: TickDist<Num = N>,
     F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> It,
 {
-    ClosureTickFormat { func }
+    GenTickDistClosure { func }
 }
 
-pub struct ClosureTickFormat<F> {
+pub struct GenTickDistClosure<F> {
     func: F,
 }
 
-impl<N: PlotNum, Res: TickDist<Num = N>, F> GenTickDist<N> for ClosureTickFormat<F>
+impl<N: PlotNum, Res: TickDist<Num = N>, F> GenTickDist<N> for GenTickDistClosure<F>
 where
     F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> Res,
     N: PlotNum,

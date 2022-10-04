@@ -28,7 +28,7 @@ fn days() -> fmt::Result {
     let w = util::create_test_file("days.svg");
     poloto::data(p)
         .build_and_label(("Number of Wikipedia Articles", "Day", "Number of Articles"))
-        .append_to(poloto::simple_light())
+        .append_to(poloto::simple::light())
         .render_fmt_write(w)
 }
 
@@ -59,7 +59,7 @@ fn minutes_local_time() -> fmt::Result {
     let w = util::create_test_file("minutes_local_time.svg");
 
     s.build_and_label(("Number of Wikipedia Articles", "time", "Number of Articles"))
-        .append_to(poloto::simple_dark())
+        .append_to(poloto::simple::dark())
         .render_fmt_write(w)
 }
 
@@ -95,7 +95,7 @@ fn months() -> fmt::Result {
             "duration",
             "Number of Articles",
         ))
-        .append_to(poloto::simple_dark())
+        .append_to(poloto::simple::dark())
         .render_fmt_write(w)
 }
 
@@ -124,7 +124,7 @@ fn seconds() -> fmt::Result {
         poloto::ticks::from_closure(|data, canvas, opt| {
             let k = poloto::ticks::gen_ticks(g, data, canvas, opt);
             let step = *k.fmt.step();
-            poloto::ticks::distribution(k.it)
+            poloto::ticks::from_iter(k.it)
                 .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
                 .with_data(step)
         })
@@ -147,5 +147,5 @@ fn seconds() -> fmt::Result {
 
     let w = util::create_test_file("seconds.svg");
 
-    data.append_to(poloto::simple_light()).render_fmt_write(w)
+    data.append_to(poloto::simple::light()).render_fmt_write(w)
 }

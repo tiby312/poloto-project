@@ -82,12 +82,14 @@ use ticks::*;
 
 use render::*;
 
-pub fn simple_light() -> hypermelon::Append<Header, Theme<'static>> {
-    Header::new().append(Theme::light())
-}
-
-pub fn simple_dark() -> hypermelon::Append<Header, Theme<'static>> {
-    Header::new().append(Theme::dark())
+pub mod simple {
+    use super::*;
+    pub fn light() -> hypermelon::Append<Header, Theme<'static>> {
+        Header::new().append(Theme::light())
+    }
+    pub fn dark() -> hypermelon::Append<Header, Theme<'static>> {
+        Header::new().append(Theme::dark())
+    }
 }
 
 ///
