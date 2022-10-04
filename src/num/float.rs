@@ -88,7 +88,7 @@ impl GenTickDist<f64> for FloatTickFmt {
             res: TickRes {
                 dash_size: Some(dash_size),
             },
-            it: ticks,
+            iter: ticks,
             fmt: FloatFmt {
                 offset,
                 axis,

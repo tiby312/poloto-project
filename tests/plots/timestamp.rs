@@ -124,8 +124,8 @@ fn seconds() -> fmt::Result {
         poloto::ticks::from_closure(|data, canvas, opt| {
             let k = poloto::ticks::gen_ticks(g, data, canvas, opt);
             let step = *k.fmt.step();
-            poloto::ticks::from_iter(k.it)
-                .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+            poloto::ticks::from_iter(k.iter)
+                .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
                 .with_data(step)
         })
     });
@@ -147,5 +147,6 @@ fn seconds() -> fmt::Result {
 
     let w = util::create_test_file("seconds.svg");
 
-    data.append_to(poloto::simple::light()).render_fmt_write(w)
+    data.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }

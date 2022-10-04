@@ -155,7 +155,7 @@ where
 
         TickDistribution {
             res: TickRes { dash_size: None },
-            it: ticks,
+            iter: ticks,
             fmt: UnixTimeFmt {
                 timezone: self.timezone,
                 step: ret.unit_data,

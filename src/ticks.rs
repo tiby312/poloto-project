@@ -202,7 +202,7 @@ impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistribution<I, F> {
 // }
 
 pub struct TickDistribution<I, F> {
-    pub it: I,
+    pub iter: I,
     pub fmt: F,
     pub res: TickRes,
 }
@@ -222,15 +222,15 @@ where
 }
 impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
     pub fn from_parts(it: I, fmt: Fmt, res: TickRes) -> Self {
-        TickDistribution { it, fmt, res }
+        TickDistribution { iter: it, fmt, res }
     }
 
-    pub fn with_ticks<F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
+    pub fn with_tick_fmt<F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
         self,
         func: F,
     ) -> TickDistribution<I, WithTicky<Fmt, F>> {
         TickDistribution {
-            it: self.it,
+            iter: self.iter,
             fmt: WithTicky {
                 ticks: self.fmt,
                 func,
@@ -239,12 +239,12 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I,
         }
     }
 
-    pub fn with_where<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
+    pub fn with_where_fmt<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
         self,
         func: F,
     ) -> TickDistribution<I, WithWhere<Fmt, F>> {
         TickDistribution {
-            it: self.it,
+            iter: self.iter,
             fmt: WithWhere {
                 ticks: self.fmt,
                 func,
@@ -255,7 +255,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I,
 
     pub fn with_data<E>(self, data: E) -> TickDistribution<I, WithData<Fmt, E>> {
         TickDistribution {
-            it: self.it,
+            iter: self.iter,
             fmt: WithData {
                 ticks: self.fmt,
                 data,
@@ -266,7 +266,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I,
 
     pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickDistribution<I, J> {
         TickDistribution {
-            it: self.it,
+            iter: self.iter,
             fmt: other,
             res: self.res,
         }

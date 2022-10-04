@@ -7,16 +7,6 @@
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/target/assets) folder.
 //!
-//!
-//!
-//! Pipeline:
-//! * Collect plots using functions in [`build`] module
-//! * Create a RenderOptions using [`render`] module.
-//! * Compute min/max by calling [`data()`].
-//! * Create tick distributions. (This step can be done automatically using [`quick_fmt!`])
-//! * Collect title/xname/yname using [`plot_with()`] (done automatically using [`quick_fmt!`])
-//! * Write everything to svg. [`Plotter::render()`] for no svg tag/css. [`simple_theme::SimpleTheme`] for basic css/svg tag.
-//!
 //! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
 //!
 //! * [`i128`] - decimal/scientific notation ticks.
@@ -25,7 +15,7 @@
 //!
 //! The above types have the advantage of automatically selecting reasonable
 //! tick intervals. The user can change the formatting of the ticks while still using
-//! the ticks that were selected via its automatic methods using [`TickFormatExt::with_tick_fmt`].
+//! the ticks that were selected.
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
 //! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickFormat`].
@@ -113,24 +103,6 @@ pub fn data<
         render_opt_builder(),
     )
 }
-
-// ///
-// /// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
-// ///
-// pub fn disp<F: FnOnce(&mut fmt::Formatter) -> fmt::Result>(
-//     a: F,
-// ) -> util::DisplayableClosureOnce<F> {
-//     util::DisplayableClosureOnce::new(a)
-// }
-
-// ///
-// /// Leverage rust's display format system using [`std::cell::RefCell`] under the hood.
-// ///
-// pub fn disp_mut<F: FnMut(&mut fmt::Formatter) -> fmt::Result>(
-//     a: F,
-// ) -> util::DisplayableClosureMut<F> {
-//     util::DisplayableClosureMut::new(a)
-// }
 
 ///
 /// Default svg header

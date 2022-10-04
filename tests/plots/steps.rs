@@ -22,7 +22,7 @@ fn marathon() -> fmt::Result {
 
     let xticks =
         poloto::ticks::TickDistribution::new(std::iter::successors(Some(0), |w| Some(w + hr)))
-            .with_ticks(|w, v| write!(w, "{} hr", v / hr));
+            .with_tick_fmt(|w, v| write!(w, "{} hr", v / hr));
 
     let data = poloto::data(p).with_xticks(|_| xticks);
 

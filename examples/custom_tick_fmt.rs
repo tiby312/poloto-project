@@ -13,11 +13,14 @@ fn main() {
 
     let data = poloto::data(plots);
 
-    let ticks =
-        poloto::ticks::from_iter((0..).step_by(6)).with_tick_fmt(|w, v| write!(w, "{} hr", v));
+    let data = data.with_xticks(|orig| {
+        poloto::ticks::from_closure(|a, b, c| {
+            let orig = poloto::ticks::gen_ticks(orig, a, b, c);
+            poloto::ticks::from_iter(orig.iter).with_tick_fmt(|w, v| write!(w, "{} hr", v))
+        })
+    });
 
-    data.with_xticks(|_| ticks)
-        .build_and_label(("title", "x", "y"))
+    data.build_and_label(("title", "x", "y"))
         .append_to(poloto::header().light_theme())
         .render_stdout();
 }

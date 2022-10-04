@@ -72,7 +72,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let ydash_size = yticksg.res.dash_size;
 
     let mut xticks = xticksg
-        .it
+        .iter
         .into_iter()
         .skip_while(|&x| x < boundx[0])
         .take_while(|&x| x <= boundx[1]);
@@ -91,7 +91,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let mut xticks = xticks.collect::<Vec<_>>().into_iter();
 
     let mut yticks = yticksg
-        .it
+        .iter
         .into_iter()
         .skip_while(|&x| x < boundy[0])
         .take_while(|&x| x <= boundy[1]);
