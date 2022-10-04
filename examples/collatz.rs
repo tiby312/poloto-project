@@ -33,9 +33,11 @@ fn main() {
         poloto::build::origin()
     );
 
+    let labels = ("collatz", "x", "y");
+
     poloto::data(plots)
         .with_opt(opt)
-        .build_and_label(("a", "b", "c"))
+        .build_and_label(labels)
         .append_to(svg.append(style))
         .render_stdout();
 }
