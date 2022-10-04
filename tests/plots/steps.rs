@@ -20,11 +20,8 @@ fn marathon() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     );
 
-    use poloto::ticks::TickFmt;
-    let k = poloto::ticks::DefaultTickFmt::new().with_ticks(|w, v| write!(w, "{} hr", v / hr));
-
     let xticks = poloto::ticks::TickDistRes::new(std::iter::successors(Some(0), |w| Some(w + hr)))
-        .with_fmt(k);
+        .with_ticks(|w, v| write!(w, "{} hr", v / hr));
 
     let data = poloto::data(p).with_xticks(xticks);
 

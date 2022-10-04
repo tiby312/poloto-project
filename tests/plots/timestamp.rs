@@ -103,6 +103,7 @@ fn months() -> fmt::Result {
 #[test]
 fn seconds() -> fmt::Result {
     use chrono::TimeZone;
+    use poloto::ticks::GenTickDist;
     let timezone = &chrono::Utc;
 
     let date = timezone.ymd(2020, 1, 30);
@@ -120,15 +121,14 @@ fn seconds() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     ));
 
-    use poloto::ticks::GenTickDist;
-    let k = poloto::default_ticks::<UnixTime>().generate(data, opt, req);
-    let step = *k.fmt.step();
-
     let xticks = poloto::ticks::from_closure(|data, opt, req| {
-        poloto::ticks::TickBuilder::new(k.it)
+        use poloto::ticks::GenTickDist;
+        let k = poloto::ticks::custom_gen(poloto::default_ticks::<UnixTime>(), data, opt, req);
+        let step = *k.fmt.step();
+
+        poloto::ticks::TickDistRes::new(k.it)
             .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
-            .with_fmt_data(step)
-            .build()
+            .with_data(step)
     });
 
     let data = data.with_xticks(xticks);
@@ -136,14 +136,13 @@ fn seconds() -> fmt::Result {
     let data = data.build();
 
     let bounds = *data.boundx();
-    let j = data.xticks().fmt.data;
+    //let j = data.xticks().fmt.data;
     let data = data.label((
         "Number of Wikipedia Articles",
         hypermelon::format_move!(
-            "{} to {} with {}",
+            "{} to {}",
             bounds.min.datetime(timezone).format("%H:%M:%S"),
             bounds.max.datetime(timezone).format("%H:%M:%S"),
-            j
         ),
         "Number of Articles",
     ));

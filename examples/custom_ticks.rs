@@ -13,10 +13,12 @@ fn main() {
 
     let data = poloto::data(plots);
 
-    let ticks = poloto::ticks::from_closure(|_, _, _| {
-        use poloto::ticks::TickFmt;
-        let k = poloto::ticks::DefaultTickFmt::new().with_ticks(|w, v| write!(w, "{} hr", v));
-        poloto::ticks::TickDistRes::new((0..).step_by(6)).with_fmt(k)
+    let ticks = poloto::ticks::from_closure(|data, _, _| {
+        println!("{}", data.min);
+        poloto::ticks::TickDistRes::new((0..).step_by(6)).with_ticks(|w, v| {
+            println!("{}", v.abs());
+            write!(w, "{} hr", v)
+        })
     });
 
     data.with_xticks(ticks)

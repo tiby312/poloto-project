@@ -352,7 +352,6 @@ pub struct Data<P: PlotIterator, TX, TY> {
 }
 
 impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<P, TX, TY> {
-    
     pub fn new(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
         let mut area = build::marker::Area::new();
         plots.increase_area(&mut area);

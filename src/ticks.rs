@@ -24,18 +24,9 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
-pub struct DefaultTickFmt<'a, N> {
-    _inner: std::marker::PhantomData<&'a N>,
-}
-impl<'a, N: Display> DefaultTickFmt<'a, N> {
-    pub fn new() -> DefaultTickFmt<'a, N> {
-        DefaultTickFmt {
-            _inner: std::marker::PhantomData,
-        }
-    }
-}
-impl<'a, N: Display> TickFmt for DefaultTickFmt<'a, N> {
-    type Num = N;
+pub struct DefaultTickFmt;
+
+impl<'a, N: Display> TickFmt<N> for DefaultTickFmt {
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
         write!(a, "{}", val)
     }
@@ -70,28 +61,10 @@ impl<'a> IndexRequester<'a> {
     }
 }
 
-pub trait TickFmt {
-    type Num;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
+pub trait TickFmt<Num> {
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Num) -> std::fmt::Result;
     fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
-    }
-
-    fn with_ticks<F: FnMut(&mut dyn fmt::Write, &Self::Num) -> fmt::Result>(
-        self,
-        func: F,
-    ) -> WithTicky<Self, F>
-    where
-        Self: Sized,
-    {
-        WithTicky { ticks: self, func }
-    }
-
-    fn with_where<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(self, func: F) -> WithWhere<Self, F>
-    where
-        Self: Sized,
-    {
-        WithWhere { ticks: self, func }
     }
 }
 
@@ -100,12 +73,11 @@ pub struct WithWhere<D, F> {
     func: F,
 }
 
-impl<D: TickFmt, F> TickFmt for WithWhere<D, F>
+impl<N, D: TickFmt<N>, F> TickFmt<N> for WithWhere<D, F>
 where
     F: FnMut(&mut dyn std::fmt::Write) -> fmt::Result,
 {
-    type Num = D::Num;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
         self.ticks.write_tick(a, val)
     }
     fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
@@ -117,13 +89,26 @@ pub struct WithTicky<D, F> {
     ticks: D,
     func: F,
 }
-impl<D: TickFmt, F> TickFmt for WithTicky<D, F>
+impl<N, D: TickFmt<N>, F> TickFmt<N> for WithTicky<D, F>
 where
-    F: FnMut(&mut dyn std::fmt::Write, &D::Num) -> fmt::Result,
+    F: FnMut(&mut dyn std::fmt::Write, &N) -> fmt::Result,
 {
-    type Num = D::Num;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
         (self.func)(a, val)
+    }
+    fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        self.ticks.write_where(w)
+    }
+}
+
+pub struct WithData<K, E> {
+    ticks: K,
+    pub data: E,
+}
+
+impl<N, K: TickFmt<N>, E> TickFmt<N> for WithData<K, E> {
+    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        self.ticks.write_tick(a, val)
     }
     fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
         self.ticks.write_where(w)
@@ -175,13 +160,23 @@ pub trait GenTickDist<N> {
     ) -> Self::Res;
 }
 
+pub fn custom_gen<G: GenTickDist<N>, N: PlotNum>(
+    gen: G,
+    data: &ticks::DataBound<N>,
+    opt: &RenderOptionsBound,
+    req: IndexRequester,
+) -> G::Res {
+    gen.generate(data, opt, req)
+}
+
 pub trait TickDist {
     type Num;
     type It: IntoIterator<Item = Self::Num>;
-    type Fmt: TickFmt<Num = Self::Num>;
+    type Fmt: TickFmt<Self::Num>;
     fn unwrap(self) -> TickDistRes<Self::It, Self::Fmt>;
 }
-impl<I: IntoIterator, F: TickFmt<Num = I::Item>> TickDist for TickDistRes<I, F> {
+
+impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistRes<I, F> {
     type Num = I::Item;
     type It = I;
     type Fmt = F;
@@ -196,28 +191,71 @@ pub struct TickDistRes<I, F> {
     pub res: TickRes,
 }
 
-impl<'a, X: PlotNum, I: IntoIterator<Item = X>> TickDistRes<I, DefaultTickFmt<'a, X>>
+impl<'a, X: PlotNum, I: IntoIterator<Item = X>> TickDistRes<I, DefaultTickFmt>
 where
     X: fmt::Display,
 {
     pub fn new(it: I) -> Self {
-        Self::from_parts(it, DefaultTickFmt::new(), TickRes { dash_size: None })
+        Self::from_parts(it, DefaultTickFmt, TickRes { dash_size: None })
     }
 }
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<Num = X>> TickDistRes<I, Fmt> {
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt> {
     pub fn from_parts(it: I, fmt: Fmt, res: TickRes) -> Self {
         TickDistRes { it, fmt, res }
     }
 
-    pub fn with_fmt<J: TickFmt<Num = I::Item>>(self, other: J) -> TickDistRes<I, J> {
+    pub fn with_ticks<F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
+        self,
+        func: F,
+    ) -> TickDistRes<I, WithTicky<Fmt, F>> {
+        TickDistRes {
+            it: self.it,
+            fmt: WithTicky {
+                ticks: self.fmt,
+                func,
+            },
+            res: self.res,
+        }
+    }
+
+    pub fn with_where<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
+        self,
+        func: F,
+    ) -> TickDistRes<I, WithWhere<Fmt, F>> {
+        TickDistRes {
+            it: self.it,
+            fmt: WithWhere {
+                ticks: self.fmt,
+                func,
+            },
+            res: self.res,
+        }
+    }
+
+    pub fn with_data<E>(self, data: E) -> TickDistRes<I, WithData<Fmt, E>> {
+        TickDistRes {
+            it: self.it,
+            fmt: WithData {
+                ticks: self.fmt,
+                data,
+            },
+            res: self.res,
+        }
+    }
+
+    pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickDistRes<I, J> {
         TickDistRes {
             it: self.it,
             fmt: other,
             res: self.res,
         }
     }
+
+    pub fn map<K, F: FnOnce(Self) -> K>(self, func: F) -> K {
+        func(self)
+    }
 }
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<Num = X>> GenTickDist<X>
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> GenTickDist<X>
     for TickDistRes<I, Fmt>
 {
     type Res = Self;
