@@ -437,6 +437,6 @@ impl<D: Display> SinglePlotBuilder1<D> {
         )
     }
 }
-pub fn label<D: Display>(label: D) -> SinglePlotBuilder1<D> {
+pub fn plot<D: Display>(label: D) -> SinglePlotBuilder1<D> {
     SinglePlotBuilder1 { label }
 }

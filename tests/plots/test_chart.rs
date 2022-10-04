@@ -72,7 +72,7 @@ fn test_chart() -> std::fmt::Result {
                             poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
                         let p =
-                            poloto::data(poloto::build::label("").scatter().cloned(test.iter()))
+                            poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
                                 .build_and_label((
                                     hypermelon::format_move!("float test {}", i),
                                     "x",
@@ -90,7 +90,7 @@ fn test_chart() -> std::fmt::Result {
                             poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
                         let p =
-                            poloto::data(poloto::build::label("").scatter().cloned(test.iter()))
+                            poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
                                 .build_and_label((
                                     hypermelon::format_move!("int test {}", i),
                                     "x",

@@ -1,12 +1,12 @@
 use super::*;
 
-use poloto::build::label;
+use poloto::build::plot;
 #[test]
 fn custom_colors_html() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let l1 = label("cos").line().buffered(x.zip_output(|x| x.cos()));
-    let l2 = label("sin-10")
+    let l1 = plot("cos").line().buffered(x.zip_output(|x| x.cos()));
+    let l2 = plot("sin-10")
         .histogram()
         .buffered(x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
@@ -126,11 +126,11 @@ body {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     let s = poloto::plots!(
-        label("cos").line().buffered(x.zip_output(f64::cos)),
-        label("sin-3")
+        plot("cos").line().buffered(x.zip_output(f64::cos)),
+        plot("sin-3")
             .histogram()
             .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 3.)),
-        label("sin")
+        plot("sin")
             .scatter()
             .buffered(x.clone().step_by(3).zip_output(|x| x.sin()))
     );

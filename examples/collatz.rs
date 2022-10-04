@@ -27,7 +27,7 @@ fn main() {
     let a = poloto::build::plots_dyn((1000..1006).map(|i| {
         let name = format_move!("c({})", i);
         let it = (0..).zip(collatz(i));
-        poloto::build::label(name).line().buffered(it)
+        poloto::build::plot(name).line().buffered(it)
     }));
 
     let b = poloto::build::origin();

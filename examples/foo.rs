@@ -15,7 +15,7 @@ fn main() {
         poloto::build::plots_dyn((1000..1006).map(|i| {
             let name = hypermelon::format_move!("c({})", i);
             let it = (0..).zip(collatz(i));
-            poloto::build::label(name).line().buffered(it)
+            poloto::build::plot(name).line().buffered(it)
         }),),
         poloto::build::origin()
     );
