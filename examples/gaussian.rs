@@ -1,4 +1,4 @@
-use poloto::build;
+use poloto::build::label;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -11,10 +11,11 @@ fn main() {
     };
 
     let r = poloto::util::range_iter([-5.0, 5.0], 200);
-    let a = build::buffered_plot(r.zip_output(gau(1.0, 0.))).line("σ=1.0");
-    let b = build::buffered_plot(r.zip_output(gau(0.5, 0.))).line("σ=0.5");
-    let c = build::buffered_plot(r.zip_output(gau(0.3, 0.))).line("σ=0.3");
-    let d = build::origin();
+
+    let a = label("σ=1.0").line().buffered(r.zip_output(gau(1.0, 0.)));
+    let b = label("σ=0.5").line().buffered(r.zip_output(gau(0.5, 0.)));
+    let c = label("σ=0.3").line().buffered(r.zip_output(gau(0.3, 0.)));
+    let d = poloto::build::origin();
 
     poloto::data(plots!(a, b, c, d))
         .build_and_label(("gaussian", "x", "y"))

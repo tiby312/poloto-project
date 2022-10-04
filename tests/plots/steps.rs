@@ -16,7 +16,7 @@ fn marathon() -> fmt::Result {
     // Have there be a tick every hour
 
     let p = plots!(
-        poloto::build::cloned_plot(heart_rate.iter()).line("hay"),
+        poloto::build::label("hay").line().cloned(heart_rate.iter()),
         poloto::build::markers(None, Some(0))
     );
 
@@ -53,7 +53,7 @@ fn years() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::cloned_plot(data.iter()).histogram("foo"),
+        poloto::build::label("foo").histogram().cloned(data.iter()),
         poloto::build::markers(None, Some(0))
     ));
 

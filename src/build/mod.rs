@@ -144,12 +144,13 @@ pub enum PlotResult<T> {
     Finished,
 }
 
-pub struct SinglePlotBuilder<X, Y, I: Iterator<Item = (X, Y)>> {
+pub struct SinglePlotBuilder<X, Y, I: Iterator<Item = (X, Y)>, D: Display> {
     area: Area<X, Y>,
     iter: I,
+    label: D,
 }
-impl<X: PlotNum, Y: PlotNum> SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>> {
-    pub fn new_buffered<I: Iterator<Item = (X, Y)>>(iter: I) -> Self {
+impl<X: PlotNum, Y: PlotNum, D: Display> SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>, D> {
+    pub fn new_buffered<I: Iterator<Item = (X, Y)>>(iter: I, label: D) -> Self {
         let mut vec = Vec::with_capacity(iter.size_hint().0);
         let mut area = Area::new();
         for (x, y) in iter {
@@ -159,12 +160,13 @@ impl<X: PlotNum, Y: PlotNum> SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
         SinglePlotBuilder {
             area,
             iter: vec.into_iter(),
+            label,
         }
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y, I> {
-    pub fn new_cloned(iter: I) -> Self
+impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> SinglePlotBuilder<X, Y, I, D> {
+    pub fn new_cloned(iter: I, label: D) -> Self
     where
         I: Clone,
     {
@@ -172,34 +174,17 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
         for (x, y) in iter.clone() {
             area.grow(Some(&x), Some(&y));
         }
-        SinglePlotBuilder { area, iter }
+        SinglePlotBuilder { area, iter, label }
     }
-
-    /*
-    pub fn new_rect_bound_plot(x: [X; 2], y: [Y; 2], iter: I) -> Self {
-        let mut area = Area::new();
-        area.grow(Some(&x[0]), Some(&y[0]));
-        area.grow(Some(&x[1]), Some(&y[1]));
-        SinglePlotBuilder { area, iter }
-    }
-
-    pub fn new_custom_bound_plot<J: Iterator<Item = (X, Y)>>(bound: J, iter: I) -> Self {
-        let mut area = Area::new();
-        for (x, y) in bound {
-            area.grow(Some(&x), Some(&y));
-        }
-        SinglePlotBuilder { area, iter }
-    }
-    */
 
     /// Create a scatter plot from plots, using a SVG path with lines with zero length.
     /// Each point can be sized using the stroke width.
     /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
     /// with the latter class overriding the former.
-    pub fn scatter<D: Display>(self, name: D) -> SinglePlot<X, Y, I, D> {
+    pub fn scatter(self) -> SinglePlot<X, Y, I, D> {
         SinglePlot::new(
             PlotMetaType::Plot(PlotType::Scatter),
-            name,
+            self.label,
             self.iter,
             self.area,
         )
@@ -207,10 +192,10 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
 
     /// Create a line from plots using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.    
-    pub fn line<D: Display>(self, name: D) -> SinglePlot<X, Y, I, D> {
+    pub fn line(self) -> SinglePlot<X, Y, I, D> {
         SinglePlot::new(
             PlotMetaType::Plot(PlotType::Line),
-            name,
+            self.label,
             self.iter,
             self.area,
         )
@@ -218,10 +203,10 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
 
     /// Create a line from plots that will be filled underneath using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill<D: Display>(self, name: D) -> SinglePlot<X, Y, I, D> {
+    pub fn line_fill(self) -> SinglePlot<X, Y, I, D> {
         SinglePlot::new(
             PlotMetaType::Plot(PlotType::LineFill),
-            name,
+            self.label,
             self.iter,
             self.area,
         )
@@ -230,10 +215,10 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
     /// Create a line from plots that will be filled using a SVG path element.
     /// The first and last points will be connected and then filled in.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill_raw<D: Display>(self, name: D) -> SinglePlot<X, Y, I, D> {
+    pub fn line_fill_raw(self) -> SinglePlot<X, Y, I, D> {
         SinglePlot::new(
             PlotMetaType::Plot(PlotType::LineFillRaw),
-            name,
+            self.label,
             self.iter,
             self.area,
         )
@@ -242,19 +227,19 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
     /// Create a histogram from plots using SVG rect elements.
     /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
-    pub fn histogram<D: Display>(self, name: D) -> SinglePlot<X, Y, I, D> {
+    pub fn histogram(self) -> SinglePlot<X, Y, I, D> {
         SinglePlot::new(
             PlotMetaType::Plot(PlotType::Histo),
-            name,
+            self.label,
             self.iter,
             self.area,
         )
     }
 
-    pub(crate) fn bars<D: Display>(self, name: D) -> SinglePlot<X, Y, I, D> {
+    pub(crate) fn bars(self) -> SinglePlot<X, Y, I, D> {
         SinglePlot::new(
             PlotMetaType::Plot(PlotType::Bars),
-            name,
+            self.label,
             self.iter,
             self.area,
         )
@@ -267,8 +252,8 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>> SinglePlotBuilder<X, Y,
 pub fn text<X: PlotNum, Y: PlotNum, D: Display>(
     name: D,
 ) -> SinglePlot<X, Y, std::iter::Empty<(X, Y)>, D> {
-    let f = SinglePlotBuilder::new_cloned(std::iter::empty());
-    SinglePlot::new(PlotMetaType::Text, name, f.iter, f.area)
+    let f = SinglePlotBuilder::new_cloned(std::iter::empty(), name);
+    SinglePlot::new(PlotMetaType::Text, f.label, f.iter, f.area)
 }
 
 ///
@@ -331,21 +316,117 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> 
     }
 }
 
-pub fn buffered_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
+pub fn buffered_plot<X: PlotNum, Y: PlotNum, I: Iterator, D: Display>(
+    label: D,
     iter: I,
-) -> build::SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>>
+) -> build::SinglePlotBuilder<X, Y, std::vec::IntoIter<(X, Y)>, D>
 where
     I::Item: Clone + build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
-    build::SinglePlotBuilder::new_buffered(build::unwrapper::UnwrapperIter(iter))
+    build::SinglePlotBuilder::new_buffered(build::unwrapper::UnwrapperIter(iter), label)
 }
 
-pub fn cloned_plot<X: PlotNum, Y: PlotNum, I: Iterator>(
+pub fn cloned_plot<X: PlotNum, Y: PlotNum, I: Iterator, D: Display>(
+    label: D,
     iter: I,
-) -> build::SinglePlotBuilder<X, Y, build::unwrapper::UnwrapperIter<I>>
+) -> build::SinglePlotBuilder<X, Y, build::unwrapper::UnwrapperIter<I>, D>
 where
     I: Clone,
     I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
-    build::SinglePlotBuilder::new_cloned(build::unwrapper::UnwrapperIter(iter))
+    build::SinglePlotBuilder::new_cloned(build::unwrapper::UnwrapperIter(iter), label)
+}
+
+pub struct PointBuilder<D: Display> {
+    label: D,
+    typ: PlotMetaType,
+}
+
+impl<D: Display> PointBuilder<D> {
+    pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(
+        self,
+        it: I,
+    ) -> SinglePlot<X, Y, build::unwrapper::UnwrapperIter<I>, D>
+    where
+        I: Clone,
+        I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+    {
+        let mut area = Area::new();
+        for k in it.clone() {
+            let (x, y) = k.unwrap();
+            area.grow(Some(&x), Some(&y));
+        }
+        SinglePlot::new(
+            self.typ,
+            self.label,
+            build::unwrapper::UnwrapperIter(it),
+            area,
+        )
+    }
+
+    pub fn buffered<X: PlotNum, Y: PlotNum, I: Iterator>(
+        self,
+        it: I,
+    ) -> SinglePlot<X, Y, std::vec::IntoIter<(X, Y)>, D>
+    where
+        I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+    {
+        let mut vec = Vec::with_capacity(it.size_hint().0);
+        let mut area = Area::new();
+        for j in it {
+            let (x, y) = j.unwrap();
+            area.grow(Some(&x), Some(&y));
+            vec.push((x, y));
+        }
+        SinglePlot::new(self.typ, self.label, vec.into_iter(), area)
+    }
+}
+
+pub struct SinglePlotBuilder1<D> {
+    label: D,
+}
+
+impl<D: Display> SinglePlotBuilder1<D> {
+    pub fn line(self) -> PointBuilder<D> {
+        PointBuilder {
+            label: self.label,
+            typ: PlotMetaType::Plot(PlotType::Line),
+        }
+    }
+    pub fn scatter(self) -> PointBuilder<D> {
+        PointBuilder {
+            label: self.label,
+            typ: PlotMetaType::Plot(PlotType::Scatter),
+        }
+    }
+
+    pub fn histogram(self) -> PointBuilder<D> {
+        PointBuilder {
+            label: self.label,
+            typ: PlotMetaType::Plot(PlotType::Histo),
+        }
+    }
+    pub fn line_fill(self) -> PointBuilder<D> {
+        PointBuilder {
+            label: self.label,
+            typ: PlotMetaType::Plot(PlotType::LineFill),
+        }
+    }
+    pub fn line_fill_raw(self) -> PointBuilder<D> {
+        PointBuilder {
+            label: self.label,
+            typ: PlotMetaType::Plot(PlotType::LineFillRaw),
+        }
+    }
+    pub fn text<X: PlotNum, Y: PlotNum>(self) -> SinglePlot<X, Y, std::iter::Empty<(X, Y)>, D> {
+        SinglePlot::new(
+            PlotMetaType::Text,
+            self.label,
+            std::iter::empty(),
+            Area::new(),
+        )
+    }
+}
+pub fn label<D: Display>(label: D) -> SinglePlotBuilder1<D> {
+    SinglePlotBuilder1 { label }
 }

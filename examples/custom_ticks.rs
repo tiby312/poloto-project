@@ -7,7 +7,7 @@ fn main() {
     let it = (0..).zip(trend.iter().copied());
 
     let plots = poloto::plots!(
-        poloto::build::cloned_plot(it).histogram(""),
+        poloto::build::label("").histogram().cloned(it),
         poloto::build::markers([24], [])
     );
 

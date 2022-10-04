@@ -1,12 +1,14 @@
 use super::*;
 
+use poloto::build::label;
 #[test]
 fn custom_colors_html() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let l1 = poloto::build::buffered_plot(x.zip_output(|x| x.cos())).line("cos");
-    let l2 = poloto::build::buffered_plot(x.clone().step_by(3).map(|x| [x, x.sin() - 10.]))
-        .histogram("sin-10");
+    let l1 = label("cos").line().buffered(x.zip_output(|x| x.cos()));
+    let l2 = label("sin-10")
+        .histogram()
+        .buffered(x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
     let s = poloto::data(poloto::plots!(l1, l2)).build_and_label((
         "Demo: you can use CSS patterns if you embed SVG!",
@@ -124,10 +126,13 @@ body {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     let s = poloto::plots!(
-        poloto::build::buffered_plot(x.zip_output(f64::cos)).line("cos"),
-        poloto::build::buffered_plot(x.clone().step_by(3).zip_output(|x| x.sin() - 3.))
-            .histogram("sin-3"),
-        poloto::build::buffered_plot(x.clone().step_by(3).zip_output(|x| x.sin())).scatter("sin")
+        label("cos").line().buffered(x.zip_output(f64::cos)),
+        label("sin-3")
+            .histogram()
+            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 3.)),
+        label("sin")
+            .scatter()
+            .buffered(x.clone().step_by(3).zip_output(|x| x.sin()))
     );
 
     let s = poloto::data(s)

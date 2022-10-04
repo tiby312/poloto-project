@@ -21,7 +21,7 @@ fn days() -> fmt::Result {
     ];
 
     let p = poloto::plots!(
-        poloto::build::cloned_plot(data.iter()).line(""),
+        poloto::build::label("").line().cloned(data.iter()),
         poloto::build::markers(None, Some(0))
     );
 
@@ -49,7 +49,7 @@ fn minutes_local_time() -> fmt::Result {
     ];
 
     let s = poloto::data(plots!(
-        poloto::build::cloned_plot(data.iter()).line(""),
+        poloto::build::label("").line().cloned(data.iter()),
         poloto::build::markers(None, Some(0))
     ));
 
@@ -83,7 +83,7 @@ fn months() -> fmt::Result {
     ];
 
     let plots = poloto::plots!(
-        poloto::build::cloned_plot(data.iter()).line(""),
+        poloto::build::label("").line().cloned(data.iter()),
         poloto::build::markers([], [0])
     );
 
@@ -116,7 +116,7 @@ fn seconds() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::cloned_plot(data.iter()).line(""),
+        poloto::build::label("").line().cloned(data.iter()),
         poloto::build::markers(None, Some(0))
     ));
 

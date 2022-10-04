@@ -71,12 +71,13 @@ fn test_chart() -> std::fmt::Result {
                         let style =
                             poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
-                        let p = poloto::data(poloto::build::cloned_plot(test.iter()).scatter(""))
-                            .build_and_label((
-                                hypermelon::format_move!("float test {}", i),
-                                "x",
-                                "y",
-                            ));
+                        let p =
+                            poloto::data(poloto::build::label("").scatter().cloned(test.iter()))
+                                .build_and_label((
+                                    hypermelon::format_move!("float test {}", i),
+                                    "x",
+                                    "y",
+                                ));
 
                         let header = header.append(style).append(p);
                         hypermelon::render(header, e.writer_escapable())?;
@@ -88,12 +89,13 @@ fn test_chart() -> std::fmt::Result {
                         let style =
                             poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
-                        let p = poloto::data(poloto::build::cloned_plot(test.iter()).scatter(""))
-                            .build_and_label((
-                                hypermelon::format_move!("int test {}", i),
-                                "x",
-                                "y",
-                            ));
+                        let p =
+                            poloto::data(poloto::build::label("").scatter().cloned(test.iter()))
+                                .build_and_label((
+                                    hypermelon::format_move!("int test {}", i),
+                                    "x",
+                                    "y",
+                                ));
                         let header = header.append(style).append(p);
                         hypermelon::render(header, e.writer_escapable())?;
                     }

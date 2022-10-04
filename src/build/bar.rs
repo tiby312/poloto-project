@@ -43,8 +43,9 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
         vals.into_iter()
             .enumerate()
             .map(|(i, x)| (x, i128::try_from(i).unwrap())),
+        name,
     )
-    .bars(name);
+    .bars();
 
     let ticks = (0..vals_len)
         .map(|x| i128::try_from(x).unwrap())

@@ -24,16 +24,15 @@ fn main() {
 
     let style = poloto::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
-    let plots = plots!(
-        poloto::build::plots_dyn((1000..1006).map(|i| {
-            let name = format_move!("c({})", i);
-            let it = (0..).zip(collatz(i));
-            poloto::build::buffered_plot(it).line(name)
-        })),
-        poloto::build::origin()
-    );
+    let a = poloto::build::plots_dyn((1000..1006).map(|i| {
+        let name = format_move!("c({})", i);
+        let it = (0..).zip(collatz(i));
+        poloto::build::label(name).line().buffered(it)
+    }));
 
-    poloto::data(plots)
+    let b = poloto::build::origin();
+
+    poloto::data(plots!(a, b))
         .map_opt(|_| opt)
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))
