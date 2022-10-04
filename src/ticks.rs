@@ -184,6 +184,13 @@ impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistRes<I, F> {
     }
 }
 
+pub fn custom_ticks<I: IntoIterator>(it: I) -> TickDistRes<I, DefaultTickFmt>
+where
+    I::Item: PlotNum + fmt::Display,
+{
+    TickDistRes::new(it)
+}
+
 pub struct TickDistRes<I, F> {
     pub it: I,
     pub fmt: F,

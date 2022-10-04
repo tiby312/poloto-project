@@ -13,12 +13,9 @@ fn main() {
 
     let data = poloto::data(plots);
 
-    let ticks = poloto::ticks::from_closure(|data, _, _| {
-        println!("{}", data.min);
-        poloto::ticks::TickDistRes::new((0..).step_by(6)).with_ticks(|w, v| {
-            println!("{}", v.abs());
-            write!(w, "{} hr", v)
-        })
+    let ticks = poloto::ticks::custom_ticks((0..).step_by(6)).with_ticks(|w, v| {
+        println!("{}", v.abs());
+        write!(w, "{} hr", v)
     });
 
     data.with_xticks(ticks)
