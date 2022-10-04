@@ -231,12 +231,13 @@ impl plotnum::AsPlotnum for &mut UnixTime {
     }
 }
 
-impl PlotNum for UnixTime {
+impl HasDefaultTicks for UnixTime {
     type DefaultTicks = UnixTimeTickFmt<Utc>;
     fn default_ticks() -> Self::DefaultTicks {
         UnixTimeTickFmt::new()
     }
-
+}
+impl PlotNum for UnixTime {
     #[inline(always)]
     fn is_hole(&self) -> bool {
         false

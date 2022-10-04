@@ -112,12 +112,14 @@ impl plotnum::AsPlotnum for &mut f64 {
     }
 }
 
-impl PlotNum for f64 {
+impl HasDefaultTicks for f64 {
     type DefaultTicks = FloatTickFmt;
     fn default_ticks() -> FloatTickFmt {
         FloatTickFmt
     }
+}
 
+impl PlotNum for f64 {
     #[inline(always)]
     fn is_hole(&self) -> bool {
         self.is_nan()

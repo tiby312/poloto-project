@@ -118,12 +118,14 @@ impl plotnum::AsPlotnum for &mut i128 {
     }
 }
 
-impl PlotNum for i128 {
+impl HasDefaultTicks for i128 {
     type DefaultTicks = IntegerTickFmt;
     fn default_ticks() -> Self::DefaultTicks {
         IntegerTickFmt
     }
+}
 
+impl PlotNum for i128 {
     #[inline(always)]
     fn is_hole(&self) -> bool {
         false

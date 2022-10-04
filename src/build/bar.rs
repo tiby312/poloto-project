@@ -14,7 +14,7 @@ impl<D: Display> crate::ticks::TickFmt<i128> for BarTickFmt<D> {
     }
 }
 
-pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
+pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
     name: K,
     data: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
@@ -27,10 +27,7 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
         .move_into();
 
     //TODO somehow forbid user from messing with these settings after its returned?
-    crate::data(plots)
-        .map_yticks(|_| ytick_fmt)
-        .map_opt(|_| opt)
-        .build()
+    crate::render::Data::new(plots, default_ticks::<X>(), ytick_fmt, opt).build()
 }
 
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(

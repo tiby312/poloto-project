@@ -119,14 +119,18 @@ macro_rules! plots {
     };
 }
 
-pub fn default_ticks<X: PlotNum>() -> X::DefaultTicks {
+pub fn default_ticks<X: HasDefaultTicks>() -> X::DefaultTicks {
     X::default_ticks()
 }
 
 ///
 /// Construct a [`Data`].
 ///
-pub fn data<X: PlotNum, Y: PlotNum, P: build::PlotIterator<X = X, Y = Y>>(
+pub fn data<
+    X: PlotNum + HasDefaultTicks,
+    Y: PlotNum + HasDefaultTicks,
+    P: build::PlotIterator<X = X, Y = Y>,
+>(
     plots: P,
 ) -> Data<P, X::DefaultTicks, Y::DefaultTicks> {
     render::Data::new(

@@ -26,15 +26,17 @@ impl<P: PlotNum> AsPlotnum for P {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
-    type DefaultTicks: crate::ticks::GenTickDist<Self>;
-    fn default_ticks() -> Self::DefaultTicks;
-
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool;
 
     fn scale(&self, range: [Self; 2], max: f64) -> f64;
 
     fn unit_range(offset: Option<Self>) -> [Self; 2];
+}
+
+pub trait HasDefaultTicks: Sized {
+    type DefaultTicks: crate::ticks::GenTickDist<Self>;
+    fn default_ticks() -> Self::DefaultTicks;
 }
 
 use std::fmt;
