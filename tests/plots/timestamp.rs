@@ -132,20 +132,20 @@ fn seconds() -> fmt::Result {
         })
     });
 
-    let data = data.build();
-
-    let bounds = *data.boundx();
-    let j = data.xticks().fmt.data;
-    let data = data.label((
-        "Number of Wikipedia Articles",
-        hypermelon::format_move!(
-            "{} to {} with {}",
-            bounds.min.datetime(timezone).format("%H:%M:%S"),
-            bounds.max.datetime(timezone).format("%H:%M:%S"),
-            j
-        ),
-        "Number of Articles",
-    ));
+    let data = data.build_map(|data| {
+        let bounds = *data.boundx();
+        let j = data.xticks().fmt.data;
+        data.label((
+            "Number of Wikipedia Articles",
+            hypermelon::format_move!(
+                "{} to {} with {}",
+                bounds.min.datetime(timezone).format("%H:%M:%S"),
+                bounds.max.datetime(timezone).format("%H:%M:%S"),
+                j
+            ),
+            "Number of Articles",
+        ))
+    });
 
     let w = util::create_test_file("seconds.svg");
 

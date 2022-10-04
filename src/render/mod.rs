@@ -430,6 +430,11 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
     //     }
     // }
 
+    pub fn build_map<F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K, K>(self, func: F) -> K {
+        let k = self.build();
+        func(k)
+    }
+
     pub fn build(self) -> DataBuilt<P, TX::Res, TY::Res> {
         let mut index_counter = 0;
         let data = self;
