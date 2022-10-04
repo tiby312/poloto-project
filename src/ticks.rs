@@ -160,13 +160,12 @@ pub trait GenTickDist<N> {
     ) -> Self::Res;
 }
 
-pub fn custom_gen<G: GenTickDist<N>, N: PlotNum>(
-    gen: G,
+pub fn custom_gen<N: PlotNum>(
     data: &ticks::DataBound<N>,
     opt: &RenderOptionsBound,
     req: IndexRequester,
-) -> G::Res {
-    gen.generate(data, opt, req)
+) -> <N::Fmt as GenTickDist<N>>::Res {
+    crate::default_ticks::<N>().generate(data, opt, req)
 }
 
 pub trait TickDist {

@@ -122,8 +122,7 @@ fn seconds() -> fmt::Result {
     ));
 
     let xticks = poloto::ticks::from_closure(|data, opt, req| {
-        use poloto::ticks::GenTickDist;
-        let k = poloto::ticks::custom_gen(poloto::default_ticks::<UnixTime>(), data, opt, req);
+        let k = poloto::ticks::custom_gen::<UnixTime>(data, opt, req);
         let step = *k.fmt.step();
 
         poloto::ticks::TickDistRes::new(k.it)
