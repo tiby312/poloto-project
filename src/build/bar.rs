@@ -27,7 +27,7 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
         .move_into();
 
     //TODO somehow forbid user from messing with these settings after its returned?
-    crate::render::Data::new(plots, default_ticks::<X>(), ytick_fmt, opt).build()
+    crate::render::Data::from_parts(plots, default_ticks::<X>(), ytick_fmt, opt).build()
 }
 
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(

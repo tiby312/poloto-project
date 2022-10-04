@@ -173,6 +173,9 @@ impl Default for RenderOptionsBuilder {
 }
 
 impl RenderOptionsBuilder {
+    pub fn new() -> Self {
+        Self::default()
+    }
     pub fn with_dim(&mut self, dim: [f64; 2]) -> &mut Self {
         self.dim = Some(dim);
         self
@@ -349,8 +352,28 @@ pub struct Data<P: PlotIterator, TX, TY> {
     boundy: DataBound<P::Y>,
 }
 
+impl<X, Y, P: build::PlotIterator<X = X, Y = Y>> Data<P, X::DefaultTicks, Y::DefaultTicks>
+where
+    X: HasDefaultTicks,
+    Y: HasDefaultTicks,
+{
+    pub fn new(plots: P) -> Self {
+        Self::from_parts(
+            plots,
+            P::X::default_ticks(),
+            P::Y::default_ticks(),
+            RenderOptionsBuilder::new(),
+        )
+    }
+}
+
 impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<P, TX, TY> {
-    pub fn new(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptionsBuilder) -> Data<P, TX, TY> {
+    pub fn from_parts(
+        mut plots: P,
+        tickx: TX,
+        ticky: TY,
+        opt: RenderOptionsBuilder,
+    ) -> Data<P, TX, TY> {
         let mut area = build::marker::Area::new();
         plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();

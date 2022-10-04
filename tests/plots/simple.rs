@@ -234,7 +234,7 @@ fn custom_style() -> fmt::Result {
         "y",
     ));
 
-    let header = poloto::Header::new().append(poloto::Theme::dark().append(
+    let header = poloto::Header::new().append(poloto::Theme::dark().chain(
         hypermelon::build::raw_escapable(
             r###"
     <defs>

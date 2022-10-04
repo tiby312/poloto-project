@@ -26,7 +26,7 @@ pub struct RenderOptionsBound {
 
 pub struct DefaultTickFmt;
 
-impl< N: Display> TickFmt<N> for DefaultTickFmt {
+impl<N: Display> TickFmt<N> for DefaultTickFmt {
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
         write!(a, "{}", val)
     }
@@ -191,6 +191,9 @@ where
 {
     TickDistRes::new(it)
 }
+pub fn default_ticks<X: HasDefaultTicks>() -> X::DefaultTicks {
+    X::default_ticks()
+}
 
 pub struct TickDistRes<I, F> {
     pub it: I,
@@ -198,7 +201,7 @@ pub struct TickDistRes<I, F> {
     pub res: TickRes,
 }
 
-impl< X: PlotNum, I: IntoIterator<Item = X>> TickDistRes<I, DefaultTickFmt>
+impl<X: PlotNum, I: IntoIterator<Item = X>> TickDistRes<I, DefaultTickFmt>
 where
     X: fmt::Display,
 {

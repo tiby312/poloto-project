@@ -119,10 +119,6 @@ macro_rules! plots {
     };
 }
 
-pub fn default_ticks<X: HasDefaultTicks>() -> X::DefaultTicks {
-    X::default_ticks()
-}
-
 ///
 /// Construct a [`Data`].
 ///
@@ -133,7 +129,7 @@ pub fn data<
 >(
     plots: P,
 ) -> Data<P, X::DefaultTicks, Y::DefaultTicks> {
-    render::Data::new(
+    render::Data::from_parts(
         plots,
         X::default_ticks(),
         Y::default_ticks(),
