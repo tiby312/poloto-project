@@ -17,7 +17,7 @@ impl FloatFmt {
     }
     pub fn disp(&self, num: f64) -> impl Display {
         let precision = self.precision;
-        disp_const(move |f| write!(f, "{:.*}", precision, num))
+        util::disp_const(move |f| write!(f, "{:.*}", precision, num))
     }
 }
 

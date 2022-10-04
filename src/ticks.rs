@@ -201,7 +201,9 @@ pub struct TickDistribution<I, F> {
     pub res: TickRes,
 }
 
-pub fn distribution<I:IntoIterator<Item=X>,X:PlotNum+fmt::Display>(it:I)->TickDistribution<I,DefaultTickFmt>{
+pub fn distribution<I: IntoIterator<Item = X>, X: PlotNum + fmt::Display>(
+    it: I,
+) -> TickDistribution<I, DefaultTickFmt> {
     TickDistribution::new(it)
 }
 impl<X: PlotNum, I: IntoIterator<Item = X>> TickDistribution<I, DefaultTickFmt>

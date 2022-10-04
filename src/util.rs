@@ -167,3 +167,41 @@ impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
         self.writer.write_str(s)
     }
 }
+
+///
+/// Convert a closure to a object that implements Display
+///
+pub(crate) fn disp_const<F: Fn(&mut fmt::Formatter) -> fmt::Result>(a: F) -> DisplayableClosure<F> {
+    DisplayableClosure::new(a)
+}
+
+/// Convert a moved closure into a impl fmt::Display.
+/// This is useful because std's `format_args!()` macro
+/// has a shorter lifetime.
+pub(crate) struct DisplayableClosure<F>(pub F);
+
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> DisplayableClosure<F> {
+    #[inline(always)]
+    pub fn new(a: F) -> Self {
+        DisplayableClosure(a)
+    }
+}
+impl<F: Fn(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosure<F> {
+    #[inline(always)]
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        (self.0)(formatter)
+    }
+}
+
+///
+/// Iterate over the specified range over num iterations.
+///
+pub fn range_iter(
+    range: [f64; 2],
+    num: usize,
+) -> impl ExactSizeIterator<Item = f64> + Clone + Send + Sync + std::iter::FusedIterator {
+    let [min, max] = range;
+    let diff = max - min;
+    let divf = num as f64;
+    (0..num).map(move |x| min + (x as f64 / divf) * diff)
+}

@@ -1,3 +1,4 @@
+use poloto::build;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -9,11 +10,11 @@ fn main() {
         move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let r = poloto::range_iter([-5.0, 5.0], 200);
-    let a = poloto::build::buffered_plot(r.zip_output(gau(1.0, 0.))).line("σ=1.0");
-    let b = poloto::build::buffered_plot(r.zip_output(gau(0.5, 0.))).line("σ=0.5");
-    let c = poloto::build::buffered_plot(r.zip_output(gau(0.3, 0.))).line("σ=0.3");
-    let d = poloto::build::origin();
+    let r = poloto::util::range_iter([-5.0, 5.0], 200);
+    let a = build::buffered_plot(r.zip_output(gau(1.0, 0.))).line("σ=1.0");
+    let b = build::buffered_plot(r.zip_output(gau(0.5, 0.))).line("σ=0.5");
+    let c = build::buffered_plot(r.zip_output(gau(0.3, 0.))).line("σ=0.3");
+    let d = build::origin();
 
     poloto::data(plots!(a, b, c, d))
         .build_and_label(("gaussian", "x", "y"))
