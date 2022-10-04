@@ -61,6 +61,10 @@ impl<'a> IndexRequester<'a> {
     }
 }
 
+
+///
+/// Formatter for a tick distribution
+/// 
 pub trait TickFmt<Num> {
     fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Num) -> std::fmt::Result;
     fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
@@ -115,6 +119,10 @@ impl<N, K: TickFmt<N>, E> TickFmt<N> for WithData<K, E> {
     }
 }
 
+
+///
+/// Create a `GenTickDist` from a closure.
+/// 
 pub fn from_closure<N: PlotNum, It, F>(func: F) -> ClosureTickFormat<F>
 where
     It: TickDist<Num = N>,
