@@ -121,14 +121,25 @@ fn seconds() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     ));
 
+    let data = data.map_xticks(|g| {
+        poloto::ticks::from_closure(|data, canvas, opt| {
+            let k = poloto::ticks::gen_ticks(g, data, canvas, opt);
+
+            let step = *k.fmt.step();
+            poloto::ticks::TickDistRes::new(k.it)
+                .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+                .with_data(step)
+        })
+    });
+
     let data = data.build();
 
-    let data = data.map_xticks(|k| {
-        let step = *k.fmt.step();
-        poloto::ticks::TickDistRes::new(k.it)
-            .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
-            .with_data(step)
-    });
+    // let data = data.map_xticks(|k| {
+    //     let step = *k.fmt.step();
+    //     poloto::ticks::TickDistRes::new(k.it)
+    //         .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+    //         .with_data(step)
+    // });
 
     let bounds = *data.boundx();
     let j = data.xticks().fmt.data;

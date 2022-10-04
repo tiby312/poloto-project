@@ -28,7 +28,7 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
 
     //TODO somehow forbid user from messing with these settings after its returned?
     crate::data(plots)
-        .with_yticks(ytick_fmt)
+        .map_yticks(|_| ytick_fmt)
         .with_opt(opt)
         .build()
 }

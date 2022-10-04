@@ -407,6 +407,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             boundy: self.boundy,
         }
     }
+
     pub fn with_xticks<TTT: GenTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
@@ -492,35 +493,35 @@ impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuil
         &self.yticks
     }
 
-    pub fn map_xticks<X: TickDist<Num = P::X>, F: FnOnce(A) -> X>(
-        self,
-        func: F,
-    ) -> DataBuilt<P, X, B> {
-        let k = func(self.xticks);
-        DataBuilt {
-            opt: self.opt,
-            xticks: k,
-            yticks: self.yticks,
-            plots: self.plots,
-            boundx: self.boundx,
-            boundy: self.boundy,
-        }
-    }
+    // pub fn map_xticks<X: TickDist<Num = P::X>, F: FnOnce(A) -> X>(
+    //     self,
+    //     func: F,
+    // ) -> DataBuilt<P, X, B> {
+    //     let k = func(self.xticks);
+    //     DataBuilt {
+    //         opt: self.opt,
+    //         xticks: k,
+    //         yticks: self.yticks,
+    //         plots: self.plots,
+    //         boundx: self.boundx,
+    //         boundy: self.boundy,
+    //     }
+    // }
 
-    pub fn map_yticks<Y: TickDist<Num = P::Y>, F: FnOnce(B) -> Y>(
-        self,
-        func: F,
-    ) -> DataBuilt<P, A, Y> {
-        let k = func(self.yticks);
-        DataBuilt {
-            opt: self.opt,
-            xticks: self.xticks,
-            yticks: k,
-            plots: self.plots,
-            boundx: self.boundx,
-            boundy: self.boundy,
-        }
-    }
+    // pub fn map_yticks<Y: TickDist<Num = P::Y>, F: FnOnce(B) -> Y>(
+    //     self,
+    //     func: F,
+    // ) -> DataBuilt<P, A, Y> {
+    //     let k = func(self.yticks);
+    //     DataBuilt {
+    //         opt: self.opt,
+    //         xticks: self.xticks,
+    //         yticks: k,
+    //         plots: self.plots,
+    //         boundx: self.boundx,
+    //         boundy: self.boundy,
+    //     }
+    // }
 }
 
 ///
