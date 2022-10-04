@@ -134,13 +134,6 @@ fn seconds() -> fmt::Result {
 
     let data = data.build();
 
-    // let data = data.map_xticks(|k| {
-    //     let step = *k.fmt.step();
-    //     poloto::ticks::TickDistRes::new(k.it)
-    //         .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
-    //         .with_data(step)
-    // });
-
     let bounds = *data.boundx();
     let j = data.xticks().fmt.data;
     let data = data.label((
