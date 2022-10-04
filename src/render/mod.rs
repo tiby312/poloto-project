@@ -377,6 +377,36 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             boundy: self.boundy,
         }
     }
+
+    pub fn map_xticks<TTT: GenTickDist<P::X>, F: FnOnce(TX) -> TTT>(
+        self,
+        func: F,
+    ) -> Data<P, TTT, TY> {
+        let tickx = func(self.tickx);
+        Data {
+            opt: self.opt,
+            tickx,
+            ticky: self.ticky,
+            plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
+        }
+    }
+
+    pub fn map_yticks<TTT: GenTickDist<P::Y>, F: FnOnce(TY) -> TTT>(
+        self,
+        func: F,
+    ) -> Data<P, TX, TTT> {
+        let ticky = func(self.ticky);
+        Data {
+            opt: self.opt,
+            tickx: self.tickx,
+            ticky,
+            plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
+        }
+    }
     pub fn with_xticks<TTT: GenTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
         Data {
             opt: self.opt,
