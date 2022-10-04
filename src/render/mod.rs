@@ -7,141 +7,6 @@ use crate::build::PlotIterator;
 mod render_base;
 mod render_plot;
 
-#[derive(Copy, Clone)]
-pub struct FloatFmt {
-    precision: usize,
-}
-impl FloatFmt {
-    pub fn new(precision: usize) -> Self {
-        FloatFmt { precision }
-    }
-    pub fn disp(&self, num: f64) -> impl Display {
-        let precision = self.precision;
-        util::disp_const(move |f| write!(f, "{:.*}", precision, num))
-    }
-}
-
-pub struct LineFill<I> {
-    it: I,
-    fmt: FloatFmt,
-    base_line: f64,
-    add_start_end_base: bool,
-}
-impl<I: Iterator<Item = [f64; 2]>> LineFill<I> {
-    pub fn new(it: I, fmt: FloatFmt, base_line: f64, add_start_end_base: bool) -> Self {
-        LineFill {
-            it,
-            fmt,
-            base_line,
-            add_start_end_base,
-        }
-    }
-}
-impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for LineFill<I> {
-    fn render(self, w: &mut hypermelon::AttrWrite) -> fmt::Result {
-        let LineFill {
-            mut it,
-            fmt,
-            base_line,
-            add_start_end_base,
-        } = self;
-
-        w.render(hypermelon::build::sink::path_ext(|w| {
-            let mut w = w.start();
-
-            if let Some([startx, starty]) = it.next() {
-                use hypermelon::build::PathCommand::*;
-
-                let mut last = [startx, starty];
-                let mut last_finite = None;
-                let mut first = true;
-                for [newx, newy] in it {
-                    match (
-                        newx.is_finite() && newy.is_finite(),
-                        last[0].is_finite() && last[1].is_finite(),
-                    ) {
-                        (true, true) => {
-                            if first {
-                                if add_start_end_base {
-                                    w.put(M(fmt.disp(last[0]), fmt.disp(base_line)))?;
-                                    w.put(L(fmt.disp(last[0]), fmt.disp(last[1])))?;
-                                } else {
-                                    w.put(M(fmt.disp(last[0]), fmt.disp(last[1])))?;
-                                }
-                                first = false;
-                            }
-                            last_finite = Some([newx, newy]);
-                            w.put(L(fmt.disp(newx), fmt.disp(newy)))?;
-                        }
-                        (true, false) => {
-                            w.put(M(fmt.disp(newx), fmt.disp(newy)))?;
-                        }
-                        (false, true) => {
-                            w.put(L(fmt.disp(last[0]), fmt.disp(base_line)))?;
-                        }
-                        _ => {}
-                    };
-                    last = [newx, newy];
-                }
-                if let Some([x, _]) = last_finite {
-                    if add_start_end_base {
-                        w.put(L(fmt.disp(x), fmt.disp(base_line)))?;
-                    }
-                    w.put(Z())?;
-                }
-            }
-
-            Ok(())
-        }))
-    }
-}
-
-pub struct Line<I> {
-    it: I,
-    fmt: FloatFmt,
-}
-impl<I: Iterator<Item = [f64; 2]>> Line<I> {
-    pub fn new(it: I, fmt: FloatFmt) -> Self {
-        Line { it, fmt }
-    }
-}
-impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for Line<I> {
-    fn render(self, w: &mut hypermelon::AttrWrite) -> fmt::Result {
-        let Line { mut it, fmt } = self;
-
-        w.render(hypermelon::build::sink::path_ext(|w| {
-            let mut w = w.start();
-
-            if let Some([startx, starty]) = it.next() {
-                use hypermelon::build::PathCommand::*;
-
-                let mut last = [startx, starty];
-                let mut first = true;
-                for [newx, newy] in it {
-                    match (
-                        newx.is_finite() && newy.is_finite(),
-                        last[0].is_finite() && last[1].is_finite(),
-                    ) {
-                        (true, true) => {
-                            if first {
-                                w.put(M(fmt.disp(last[0]), fmt.disp(last[1])))?;
-                                first = false;
-                            }
-                            w.put(L(fmt.disp(newx), fmt.disp(newy)))?;
-                        }
-                        (true, false) => {
-                            w.put(M(fmt.disp(newx), fmt.disp(newy)))?;
-                        }
-                        _ => {}
-                    };
-                    last = [newx, newy];
-                }
-            }
-            Ok(())
-        }))
-    }
-}
-
 ///
 /// Build a [`RenderOptions`]
 ///
@@ -312,7 +177,7 @@ impl RenderOptionsBuilder {
 /// Contains graphical information for a svg graph.
 ///
 #[derive(Clone)]
-pub struct RenderOptions {
+struct RenderOptions {
     boundx: ticks::RenderOptionsBound,
     boundy: ticks::RenderOptionsBound,
     width: f64,
@@ -330,12 +195,6 @@ pub struct RenderOptions {
     bar_width: f64,
 }
 
-impl RenderOptions {
-    pub fn get_dim(&self) -> [f64; 2] {
-        [self.width, self.height]
-    }
-}
-
 pub fn render_opt_builder() -> RenderOptionsBuilder {
     RenderOptionsBuilder::default()
 }
@@ -343,7 +202,7 @@ pub fn render_opt_builder() -> RenderOptionsBuilder {
 ///
 /// Link some plots with a way to render them.
 ///
-pub struct Data<P: PlotIterator, TX, TY> {
+pub struct Stage1<P: PlotIterator, TX, TY> {
     opt: RenderOptionsBuilder,
     tickx: TX,
     ticky: TY,
@@ -352,7 +211,7 @@ pub struct Data<P: PlotIterator, TX, TY> {
     boundy: DataBound<P::Y>,
 }
 
-impl<X, Y, P: build::PlotIterator<X = X, Y = Y>> Data<P, X::DefaultTicks, Y::DefaultTicks>
+impl<X, Y, P: build::PlotIterator<X = X, Y = Y>> Stage1<P, X::DefaultTicks, Y::DefaultTicks>
 where
     X: HasDefaultTicks,
     Y: HasDefaultTicks,
@@ -367,18 +226,18 @@ where
     }
 }
 
-impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<P, TX, TY> {
+impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Stage1<P, TX, TY> {
     pub fn from_parts(
         mut plots: P,
         tickx: TX,
         ticky: TY,
         opt: RenderOptionsBuilder,
-    ) -> Data<P, TX, TY> {
+    ) -> Stage1<P, TX, TY> {
         let mut area = build::marker::Area::new();
         plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
 
-        Data {
+        Stage1 {
             opt,
             plots,
             ticky,
@@ -392,7 +251,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         self,
         func: F,
     ) -> Self {
-        Data {
+        Stage1 {
             opt: func(self.opt),
             tickx: self.tickx,
             ticky: self.ticky,
@@ -405,9 +264,9 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
     pub fn with_xticks<TTT: GenTickDist<P::X>, F: FnOnce(TX) -> TTT>(
         self,
         func: F,
-    ) -> Data<P, TTT, TY> {
+    ) -> Stage1<P, TTT, TY> {
         let tickx = func(self.tickx);
-        Data {
+        Stage1 {
             opt: self.opt,
             tickx,
             ticky: self.ticky,
@@ -420,9 +279,9 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
     pub fn with_yticks<TTT: GenTickDist<P::Y>, F: FnOnce(TY) -> TTT>(
         self,
         func: F,
-    ) -> Data<P, TX, TTT> {
+    ) -> Stage1<P, TX, TTT> {
         let ticky = func(self.ticky);
-        Data {
+        Stage1 {
             opt: self.opt,
             tickx: self.tickx,
             ticky,
@@ -432,12 +291,12 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn build_map<F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K, K>(self, func: F) -> K {
+    pub fn build_map<F: FnOnce(Stage2<P, TX::Res, TY::Res>) -> K, K>(self, func: F) -> K {
         let k = self.build();
         func(k)
     }
 
-    pub fn build(self) -> DataBuilt<P, TX::Res, TY::Res> {
+    pub fn build(self) -> Stage2<P, TX::Res, TY::Res> {
         let mut index_counter = 0;
         let mut data = self;
         let opt = data.opt.compute();
@@ -452,7 +311,7 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             &opt.boundy,
             IndexRequester::new(&mut index_counter),
         );
-        DataBuilt {
+        Stage2 {
             opt,
             xticks,
             yticks,
@@ -462,12 +321,12 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn build_and_label<Fmt: BaseFmt>(self, fmt: Fmt) -> Plotter<P, TX::Res, TY::Res, Fmt> {
+    pub fn build_and_label<Fmt: BaseFmt>(self, fmt: Fmt) -> Stage3<P, TX::Res, TY::Res, Fmt> {
         self.build().label(fmt)
     }
 }
 
-pub struct DataBuilt<P: PlotIterator, A, B> {
+pub struct Stage2<P: PlotIterator, A, B> {
     opt: RenderOptions,
     xticks: A,
     yticks: B,
@@ -476,17 +335,14 @@ pub struct DataBuilt<P: PlotIterator, A, B> {
     boundy: DataBound<P::Y>,
 }
 
-impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuilt<P, A, B> {
-    pub fn label<Fmt: BaseFmt>(self, fmt: Fmt) -> Plotter<P, A, B, Fmt> {
-        Plotter {
+impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stage2<P, A, B> {
+    pub fn label<Fmt: BaseFmt>(self, fmt: Fmt) -> Stage3<P, A, B, Fmt> {
+        Stage3 {
             data: self,
             base: fmt,
         }
     }
 
-    pub fn opt(&self) -> &RenderOptions {
-        &self.opt
-    }
     pub fn boundx(&self) -> &DataBound<P::X> {
         &self.boundx
     }
@@ -536,28 +392,28 @@ impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> DataBuil
 ///
 /// Created by [`plot_with`]
 ///
-pub struct Plotter<P: PlotIterator, A, B, BB: BaseFmt> {
-    data: DataBuilt<P, A, B>,
+pub struct Stage3<P: PlotIterator, A, B, BB: BaseFmt> {
+    data: Stage2<P, A, B>,
     base: BB,
 }
 
-impl<P, A, B, BB> Plotter<P, A, B, BB>
+impl<P, A, B, BB> Stage3<P, A, B, BB>
 where
     P: PlotIterator,
     A: crate::ticks::TickDist<Num = P::X>,
     B: crate::ticks::TickDist<Num = P::Y>,
     BB: BaseFmt,
 {
-    pub fn append_to<E: Elem>(self, elem: E) -> Themer<hypermelon::Append<E, Self>> {
-        Themer(elem.append(self))
+    pub fn append_to<E: Elem>(self, elem: E) -> Stage4<hypermelon::Append<E, Self>> {
+        Stage4(elem.append(self))
     }
 
-    pub fn headless(self) -> Themer<Self> {
-        Themer(self)
+    pub fn headless(self) -> Stage4<Self> {
+        Stage4(self)
     }
 }
 
-impl<P, A, B, BB> hypermelon::Elem for Plotter<P, A, B, BB>
+impl<P, A, B, BB> hypermelon::Elem for Stage3<P, A, B, BB>
 where
     P: PlotIterator,
     A: crate::ticks::TickDist<Num = P::X>,
@@ -607,8 +463,8 @@ where
     }
 }
 
-pub struct Themer<R: Elem>(R);
-impl<R: Elem> Themer<R> {
+pub struct Stage4<R: Elem>(R);
+impl<R: Elem> Stage4<R> {
     pub fn render_stdout(self) {
         hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap()
     }
@@ -627,7 +483,7 @@ impl<R: Elem> Themer<R> {
         Ok(s)
     }
 }
-impl<R: Elem> Elem for Themer<R> {
+impl<R: Elem> Elem for Stage4<R> {
     type Tail = R::Tail;
 
     fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {

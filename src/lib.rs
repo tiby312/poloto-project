@@ -123,8 +123,8 @@ pub fn data<
     P: build::PlotIterator<X = X, Y = Y>,
 >(
     plots: P,
-) -> Data<P, X::DefaultTicks, Y::DefaultTicks> {
-    render::Data::from_parts(
+) -> Stage1<P, X::DefaultTicks, Y::DefaultTicks> {
+    render::Stage1::from_parts(
         plots,
         X::default_ticks(),
         Y::default_ticks(),

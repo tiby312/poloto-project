@@ -18,8 +18,7 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
     name: K,
     data: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> DataBuilt<impl PlotIterator<X = X, Y = i128>, impl TickDist<Num = X>, impl TickDist<Num = i128>>
-{
+) -> Stage2<impl PlotIterator<X = X, Y = i128>, impl TickDist<Num = X>, impl TickDist<Num = i128>> {
     let (plots, ytick_fmt) = gen_bar(name, data, marker);
 
     let opt = crate::render::render_opt_builder()
@@ -27,7 +26,7 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
         .move_into();
 
     //TODO somehow forbid user from messing with these settings after its returned?
-    crate::render::Data::from_parts(plots, default_ticks::<X>(), ytick_fmt, opt).build()
+    crate::render::Stage1::from_parts(plots, default_ticks::<X>(), ytick_fmt, opt).build()
 }
 
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
