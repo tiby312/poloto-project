@@ -20,7 +20,7 @@ fn marathon() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     );
 
-    let xticks = poloto::ticks::TickDistRes::new(std::iter::successors(Some(0), |w| Some(w + hr)))
+    let xticks = poloto::ticks::TickDistribution::new(std::iter::successors(Some(0), |w| Some(w + hr)))
         .with_ticks(|w, v| write!(w, "{} hr", v / hr));
 
     let data = poloto::data(p).map_xticks(|_| xticks);
@@ -56,7 +56,7 @@ fn years() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     ));
 
-    let xtick_fmt = poloto::ticks::TickDistRes::new((2010..).step_by(2));
+    let xtick_fmt = poloto::ticks::TickDistribution::new((2010..).step_by(2));
 
     let w = util::create_test_file("years.svg");
 

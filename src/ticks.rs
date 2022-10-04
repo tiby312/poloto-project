@@ -173,35 +173,38 @@ pub trait TickDist {
     type Num;
     type It: IntoIterator<Item = Self::Num>;
     type Fmt: TickFmt<Self::Num>;
-    fn unwrap(self) -> TickDistRes<Self::It, Self::Fmt>;
+    fn unwrap(self) -> TickDistribution<Self::It, Self::Fmt>;
 }
 
-impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistRes<I, F> {
+impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistribution<I, F> {
     type Num = I::Item;
     type It = I;
     type Fmt = F;
-    fn unwrap(self) -> TickDistRes<Self::It, Self::Fmt> {
+    fn unwrap(self) -> TickDistribution<Self::It, Self::Fmt> {
         self
     }
 }
 
-pub fn custom_ticks<I: IntoIterator>(it: I) -> TickDistRes<I, DefaultTickFmt>
+pub fn custom_ticks<I: IntoIterator>(it: I) -> TickDistribution<I, DefaultTickFmt>
 where
     I::Item: PlotNum + fmt::Display,
 {
-    TickDistRes::new(it)
+    TickDistribution::new(it)
 }
 pub fn default_ticks<X: HasDefaultTicks>() -> X::DefaultTicks {
     X::default_ticks()
 }
 
-pub struct TickDistRes<I, F> {
+pub struct TickDistribution<I, F> {
     pub it: I,
     pub fmt: F,
     pub res: TickRes,
 }
 
-impl<X: PlotNum, I: IntoIterator<Item = X>> TickDistRes<I, DefaultTickFmt>
+pub fn distribution<I:IntoIterator<Item=X>,X:PlotNum+fmt::Display>(it:I)->TickDistribution<I,DefaultTickFmt>{
+    TickDistribution::new(it)
+}
+impl<X: PlotNum, I: IntoIterator<Item = X>> TickDistribution<I, DefaultTickFmt>
 where
     X: fmt::Display,
 {
@@ -209,16 +212,16 @@ where
         Self::from_parts(it, DefaultTickFmt, TickRes { dash_size: None })
     }
 }
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt> {
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
     pub fn from_parts(it: I, fmt: Fmt, res: TickRes) -> Self {
-        TickDistRes { it, fmt, res }
+        TickDistribution { it, fmt, res }
     }
 
     pub fn with_ticks<F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
         self,
         func: F,
-    ) -> TickDistRes<I, WithTicky<Fmt, F>> {
-        TickDistRes {
+    ) -> TickDistribution<I, WithTicky<Fmt, F>> {
+        TickDistribution {
             it: self.it,
             fmt: WithTicky {
                 ticks: self.fmt,
@@ -231,8 +234,8 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt>
     pub fn with_where<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
         self,
         func: F,
-    ) -> TickDistRes<I, WithWhere<Fmt, F>> {
-        TickDistRes {
+    ) -> TickDistribution<I, WithWhere<Fmt, F>> {
+        TickDistribution {
             it: self.it,
             fmt: WithWhere {
                 ticks: self.fmt,
@@ -242,8 +245,8 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt>
         }
     }
 
-    pub fn with_data<E>(self, data: E) -> TickDistRes<I, WithData<Fmt, E>> {
-        TickDistRes {
+    pub fn with_data<E>(self, data: E) -> TickDistribution<I, WithData<Fmt, E>> {
+        TickDistribution {
             it: self.it,
             fmt: WithData {
                 ticks: self.fmt,
@@ -253,8 +256,8 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt>
         }
     }
 
-    pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickDistRes<I, J> {
-        TickDistRes {
+    pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickDistribution<I, J> {
+        TickDistribution {
             it: self.it,
             fmt: other,
             res: self.res,
@@ -266,7 +269,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistRes<I, Fmt>
     }
 }
 impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> GenTickDist<X>
-    for TickDistRes<I, Fmt>
+    for TickDistribution<I, Fmt>
 {
     type Res = Self;
     fn generate(self, _: &ticks::DataBound<X>, _: &RenderOptionsBound, _: IndexRequester) -> Self {

@@ -55,6 +55,6 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
 
     (
         bars.chain(m),
-        crate::ticks::TickDistRes::new(ticks).with_fmt(BarTickFmt { ticks: names }),
+        crate::ticks::TickDistribution::new(ticks).with_fmt(BarTickFmt { ticks: names }),
     )
 }

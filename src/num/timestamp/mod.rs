@@ -109,7 +109,7 @@ impl<T: TimeZone + Display> GenTickDist<UnixTime> for UnixTimeTickFmt<T>
 where
     T::Offset: Display,
 {
-    type Res = TickDistRes<Vec<UnixTime>, UnixTimeFmt<T>>;
+    type Res = TickDistribution<Vec<UnixTime>, UnixTimeFmt<T>>;
 
     fn generate(
         self,
@@ -153,7 +153,7 @@ where
 
         let index = req.request();
 
-        TickDistRes {
+        TickDistribution {
             res: TickRes { dash_size: None },
             it: ticks,
             fmt: UnixTimeFmt {
