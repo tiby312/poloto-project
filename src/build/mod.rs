@@ -144,8 +144,6 @@ pub enum PlotResult<T> {
     Finished,
 }
 
-
-
 ///
 /// Ensure that the origin point is within view.
 ///

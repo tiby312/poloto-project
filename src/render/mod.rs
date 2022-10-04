@@ -388,7 +388,10 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn with_opt<F: FnOnce(RenderOptionsBuilder) -> RenderOptionsBuilder>(self, func: F) -> Self {
+    pub fn with_opt<F: FnOnce(RenderOptionsBuilder) -> RenderOptionsBuilder>(
+        self,
+        func: F,
+    ) -> Self {
         Data {
             opt: func(self.opt),
             tickx: self.tickx,

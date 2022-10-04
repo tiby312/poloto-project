@@ -116,11 +116,11 @@ fn seconds() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::label("").line().cloned(data.iter()),
+        poloto::build::plot("").line().cloned(data.iter()),
         poloto::build::markers(None, Some(0))
     ));
 
-    let data = data.map_xticks(|g| {
+    let data = data.with_xticks(|g| {
         poloto::ticks::from_closure(|data, canvas, opt| {
             let k = poloto::ticks::gen_ticks(g, data, canvas, opt);
             let step = *k.fmt.step();
