@@ -113,7 +113,7 @@ impl plotnum::AsPlotnum for &mut f64 {
 }
 
 impl PlotNum for f64 {
-    type Fmt = FloatTickFmt;
+    type DefaultTicks = FloatTickFmt;
     fn default_ticks() -> FloatTickFmt {
         FloatTickFmt
     }

@@ -119,7 +119,7 @@ macro_rules! plots {
     };
 }
 
-pub fn default_ticks<X: PlotNum>() -> X::Fmt {
+pub fn default_ticks<X: PlotNum>() -> X::DefaultTicks {
     X::default_ticks()
 }
 
@@ -128,8 +128,13 @@ pub fn default_ticks<X: PlotNum>() -> X::Fmt {
 ///
 pub fn data<X: PlotNum, Y: PlotNum, P: build::PlotIterator<X = X, Y = Y>>(
     plots: P,
-) -> Data<P, X::Fmt, Y::Fmt> {
-    render::Data::new(plots, X::default_ticks(), Y::default_ticks(), render_opt())
+) -> Data<P, X::DefaultTicks, Y::DefaultTicks> {
+    render::Data::new(
+        plots,
+        X::default_ticks(),
+        Y::default_ticks(),
+        render_opt_builder(),
+    )
 }
 
 // ///

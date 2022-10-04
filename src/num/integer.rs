@@ -119,8 +119,8 @@ impl plotnum::AsPlotnum for &mut i128 {
 }
 
 impl PlotNum for i128 {
-    type Fmt = IntegerTickFmt;
-    fn default_ticks() -> Self::Fmt {
+    type DefaultTicks = IntegerTickFmt;
+    fn default_ticks() -> Self::DefaultTicks {
         IntegerTickFmt
     }
 

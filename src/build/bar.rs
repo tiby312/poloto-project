@@ -24,12 +24,12 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
 
     let opt = crate::render::render_opt_builder()
         .with_tick_lines([true, false])
-        .build();
+        .move_into();
 
     //TODO somehow forbid user from messing with these settings after its returned?
     crate::data(plots)
         .map_yticks(|_| ytick_fmt)
-        .with_opt(opt)
+        .map_opt(|_| opt)
         .build()
 }
 

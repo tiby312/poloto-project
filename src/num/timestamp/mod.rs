@@ -232,8 +232,8 @@ impl plotnum::AsPlotnum for &mut UnixTime {
 }
 
 impl PlotNum for UnixTime {
-    type Fmt = UnixTimeTickFmt<Utc>;
-    fn default_ticks() -> Self::Fmt {
+    type DefaultTicks = UnixTimeTickFmt<Utc>;
+    fn default_ticks() -> Self::DefaultTicks {
         UnixTimeTickFmt::new()
     }
 

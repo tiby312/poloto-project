@@ -147,6 +147,7 @@ impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for Line<I> {
 ///
 /// Created by [`render_opt_builder()`]
 ///
+#[derive(Clone)]
 pub struct RenderOptionsBuilder {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
@@ -219,7 +220,11 @@ impl RenderOptionsBuilder {
         self
     }
 
-    pub fn build(&mut self) -> RenderOptions {
+    pub fn move_into(&mut self) -> Self {
+        self.clone()
+    }
+
+    fn compute(&mut self) -> RenderOptions {
         let (width, height) = if let Some([x, y]) = self.dim {
             (x, y)
         } else {
@@ -328,13 +333,6 @@ impl RenderOptions {
     }
 }
 
-///
-/// Build a [`RenderOptions`]
-///
-pub fn render_opt() -> RenderOptions {
-    RenderOptionsBuilder::default().build()
-}
-
 pub fn render_opt_builder() -> RenderOptionsBuilder {
     RenderOptionsBuilder::default()
 }
@@ -343,7 +341,7 @@ pub fn render_opt_builder() -> RenderOptionsBuilder {
 /// Link some plots with a way to render them.
 ///
 pub struct Data<P: PlotIterator, TX, TY> {
-    opt: RenderOptions,
+    opt: RenderOptionsBuilder,
     tickx: TX,
     ticky: TY,
     plots: P,
@@ -352,7 +350,7 @@ pub struct Data<P: PlotIterator, TX, TY> {
 }
 
 impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<P, TX, TY> {
-    pub fn new(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
+    pub fn new(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptionsBuilder) -> Data<P, TX, TY> {
         let mut area = build::marker::Area::new();
         plots.increase_area(&mut area);
         let (boundx, boundy) = area.build();
@@ -367,9 +365,9 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    pub fn with_opt(self, opt: RenderOptions) -> Self {
+    pub fn map_opt<F: FnOnce(RenderOptionsBuilder) -> RenderOptionsBuilder>(self, func: F) -> Self {
         Data {
-            opt,
+            opt: func(self.opt),
             tickx: self.tickx,
             ticky: self.ticky,
             plots: self.plots,
@@ -408,28 +406,6 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
         }
     }
 
-    // pub fn with_xticks<TTT: GenTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
-    //     Data {
-    //         opt: self.opt,
-    //         tickx,
-    //         ticky: self.ticky,
-    //         plots: self.plots,
-    //         boundx: self.boundx,
-    //         boundy: self.boundy,
-    //     }
-    // }
-
-    // pub fn with_yticks<TTT: GenTickDist<P::Y>>(self, ticky: TTT) -> Data<P, TX, TTT> {
-    //     Data {
-    //         opt: self.opt,
-    //         tickx: self.tickx,
-    //         ticky,
-    //         plots: self.plots,
-    //         boundx: self.boundx,
-    //         boundy: self.boundy,
-    //     }
-    // }
-
     pub fn build_map<F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K, K>(self, func: F) -> K {
         let k = self.build();
         func(k)
@@ -437,19 +413,21 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
 
     pub fn build(self) -> DataBuilt<P, TX::Res, TY::Res> {
         let mut index_counter = 0;
-        let data = self;
+        let mut data = self;
+        let opt = data.opt.compute();
+
         let xticks = data.tickx.generate(
             &data.boundx,
-            &data.opt.boundx,
+            &opt.boundx,
             IndexRequester::new(&mut index_counter),
         );
         let yticks = data.ticky.generate(
             &data.boundy,
-            &data.opt.boundy,
+            &opt.boundy,
             IndexRequester::new(&mut index_counter),
         );
         DataBuilt {
-            opt: data.opt,
+            opt: opt,
             xticks,
             yticks,
             boundx: data.boundx,

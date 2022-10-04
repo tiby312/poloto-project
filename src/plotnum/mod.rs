@@ -26,8 +26,8 @@ impl<P: PlotNum> AsPlotnum for P {
 /// to display it as well as the interval ticks.
 ///
 pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
-    type Fmt: crate::ticks::GenTickDist<Self>;
-    fn default_ticks() -> Self::Fmt;
+    type DefaultTicks: crate::ticks::GenTickDist<Self>;
+    fn default_ticks() -> Self::DefaultTicks;
 
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool;

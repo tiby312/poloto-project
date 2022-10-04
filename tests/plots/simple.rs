@@ -16,7 +16,7 @@ fn heart() -> fmt::Result {
 
     let canvas = poloto::render::render_opt_builder()
         .preserve_aspect()
-        .build();
+        .move_into();
 
     let plots = poloto::plots!(
         poloto::build::buffered_plot(range.map(heart)).line_fill_raw(""),
@@ -26,7 +26,7 @@ fn heart() -> fmt::Result {
     let w = util::create_test_file("heart.svg");
 
     poloto::data(plots)
-        .with_opt(canvas)
+        .map_opt(|_| canvas)
         .build_and_label(("Heart Graph", "x", "y"))
         .append_to(poloto::simple_dark())
         .render_fmt_write(w)
@@ -185,13 +185,13 @@ fn custom_dim() -> fmt::Result {
     let canvas = poloto::render::render_opt_builder()
         .with_dim(header.get_viewbox())
         .with_tick_lines([true, true])
-        .build();
+        .move_into();
 
     let data = poloto::data(poloto::plots!(
         poloto::build::markers([], [0]),
         poloto::build::plots_dyn(v)
     ))
-    .with_opt(canvas)
+    .map_opt(|_| canvas)
     .build_and_label(("collatz", "x", "y"));
 
     let w = util::create_test_file("custom_dim.svg");

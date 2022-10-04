@@ -20,7 +20,7 @@ fn main() {
     let opt = poloto::render::render_opt_builder()
         .with_tick_lines([true, true])
         .with_dim(svg.get_viewbox())
-        .build();
+        .move_into();
 
     let style = poloto::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
@@ -34,7 +34,7 @@ fn main() {
     );
 
     poloto::data(plots)
-        .with_opt(opt)
+        .map_opt(|_| opt)
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))
         .render_stdout();
