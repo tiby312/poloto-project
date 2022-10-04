@@ -25,6 +25,6 @@ fn main() {
     poloto::data(plots)
         .with_xticks(|_| steps)
         .build_and_label(("title", "x", "y"))
-        .append_to(poloto::simple::light())
+        .append_to(poloto::header().light_theme())
         .render_stdout();
 }

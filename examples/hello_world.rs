@@ -6,6 +6,6 @@ fn main() {
 
     poloto::data(a)
         .build_and_label(("hello world", "x", "y"))
-        .append_to(poloto::simple::light())
+        .append_to(poloto::header().light_theme())
         .render_stdout();
 }

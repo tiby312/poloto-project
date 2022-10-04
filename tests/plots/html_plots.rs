@@ -52,13 +52,13 @@ fn custom_colors_html() -> fmt::Result {
         </div>
         </htmls>
         "###,
-        poloto::render::Theme::light().get_str(),
-        poloto::render::Theme::dark().get_str(),
+        poloto::Theme::light().get_str(),
+        poloto::Theme::dark().get_str(),
         format_args!(
             "{}{}{}",
-            poloto::render::Header::new().to_string().0,
+            poloto::header().to_string().0,
             graph,
-            poloto::render::Header::new().to_string().1
+            poloto::header().to_string().1
         )
     )
 }
@@ -137,7 +137,7 @@ body {
 
     let s = poloto::data(s)
         .build_and_label(("Demo: Hovering and shadows", "x", "y"))
-        .append_to(poloto::simple::light());
+        .append_to(poloto::header().light_theme());
 
     let s = s.render_string().unwrap();
 

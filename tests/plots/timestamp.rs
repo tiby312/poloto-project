@@ -28,7 +28,7 @@ fn days() -> fmt::Result {
     let w = util::create_test_file("days.svg");
     poloto::data(p)
         .build_and_label(("Number of Wikipedia Articles", "Day", "Number of Articles"))
-        .append_to(poloto::simple::light())
+        .append_to(poloto::header().light_theme())
         .render_fmt_write(w)
 }
 
@@ -59,7 +59,7 @@ fn minutes_local_time() -> fmt::Result {
     let w = util::create_test_file("minutes_local_time.svg");
 
     s.build_and_label(("Number of Wikipedia Articles", "time", "Number of Articles"))
-        .append_to(poloto::simple::dark())
+        .append_to(poloto::header().dark_theme())
         .render_fmt_write(w)
 }
 
@@ -95,7 +95,7 @@ fn months() -> fmt::Result {
             "duration",
             "Number of Articles",
         ))
-        .append_to(poloto::simple::dark())
+        .append_to(poloto::header().dark_theme())
         .render_fmt_write(w)
 }
 

@@ -15,15 +15,14 @@ fn main() {
         .fuse()
     };
 
-    let svg = poloto::render::header().with_viewbox_width(1200.0);
+    let svg = poloto::header().with_viewbox_width(1200.0);
 
     let opt = poloto::render::render_opt_builder()
         .with_tick_lines([true, true])
         .with_viewbox(svg.get_viewbox())
         .move_into();
 
-    let style =
-        poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
+    let style = poloto::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
     let a = poloto::build::plots_dyn((1000..1006).map(|i| {
         let name = format_move!("c({})", i);

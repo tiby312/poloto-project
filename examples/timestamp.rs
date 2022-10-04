@@ -42,6 +42,6 @@ fn main() {
             "Date",
             "Mark (in meters)",
         ))
-        .append_to(poloto::simple::light())
+        .append_to(poloto::header().light_theme())
         .render_stdout();
 }

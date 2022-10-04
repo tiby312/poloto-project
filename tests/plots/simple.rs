@@ -2,7 +2,8 @@ use hypermelon::{format_move, Elem};
 
 use super::*;
 use poloto::build::plot;
-use poloto::render::*;
+use poloto::Header;
+use poloto::Theme;
 #[test]
 fn heart() -> fmt::Result {
     // https://mathworld.wolfram.com/HeartCurve.html
@@ -29,7 +30,7 @@ fn heart() -> fmt::Result {
     poloto::data(plots)
         .with_opt(|_| canvas)
         .build_and_label(("Heart Graph", "x", "y"))
-        .append_to(poloto::simple::dark())
+        .append_to(poloto::header().dark_theme())
         .render_fmt_write(w)
 }
 
@@ -73,7 +74,7 @@ fn line_fill_fmt() -> fmt::Result {
         ))
     });
 
-    let data = data.append_to(poloto::simple::light());
+    let data = data.append_to(poloto::header().light_theme());
 
     let w = util::create_test_file("line_fill_fmt.svg");
 
@@ -122,7 +123,10 @@ fn long_label() -> fmt::Result {
     let data = poloto::data(plots).build_and_label(("collatz", "x", "y"));
 
     let a = [1200.0, 500.0];
-    let header = header().with_dim(a).with_viewbox(a).append(Theme::dark());
+    let header = Header::new()
+        .with_dim(a)
+        .with_viewbox(a)
+        .append(Theme::dark());
 
     let w = util::create_test_file("long_label.svg");
 
@@ -135,7 +139,7 @@ fn magnitude() -> fmt::Result {
 
     let d = poloto::data(plot("").scatter().cloned(data.iter()))
         .build_and_label(("cows per year", "year", "cow"))
-        .append_to(poloto::simple::light());
+        .append_to(poloto::header().light_theme());
 
     let w = util::create_test_file("magnitude.svg");
 
@@ -223,7 +227,7 @@ fn dark() -> fmt::Result {
     let w = util::create_test_file("dark.svg");
     poloto::data(data)
         .build_and_label(("cos per year", "year", "cows"))
-        .append_to(poloto::simple::dark())
+        .append_to(poloto::header().dark_theme())
         .render_fmt_write(w)
 }
 
@@ -289,7 +293,8 @@ fn trig() -> fmt::Result {
 
     let w = util::create_test_file("trig.svg");
 
-    data.append_to(poloto::simple::light()).render_fmt_write(w)
+    data.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -311,7 +316,8 @@ fn no_plots() -> fmt::Result {
 
     let w = util::create_test_file("no_plots.svg");
 
-    data.append_to(poloto::simple::light()).render_fmt_write(w)
+    data.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -336,7 +342,8 @@ fn no_plots_only_marker() -> fmt::Result {
     ));
 
     let w = util::create_test_file("no_plots_only_makrer.svg");
-    data.append_to(poloto::simple::light()).render_fmt_write(w)
+    data.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -355,7 +362,8 @@ fn one_empty_plot() -> fmt::Result {
 
     let w = util::create_test_file("one_empty_plot.svg");
 
-    p.append_to(poloto::simple::light()).render_fmt_write(w)
+    p.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]

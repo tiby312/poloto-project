@@ -1,10 +1,18 @@
+// pub fn light() -> hypermelon::Append<Header, Theme<'static>> {
+//     Header::new().append(Theme::light())
+// }
+// pub fn dark() -> hypermelon::Append<Header, Theme<'static>> {
+//     Header::new().append(Theme::dark())
+// }
+
 //
 // TODO add back? I'm not sure if this is an api that we should support.
-// css already has an api, and adding another on top of it doesnt seem necessary.
+// css already is an api, and adding another layer on top of it doesnt seem worth the cost.
 // I would expect users to be able to 'hardcode' in their own css and bake that
 // into the graphs. No need for a programmatic interface. However, maybe there are
-// cases where this is good? If you want a web-user to be able to dynamically
-// change all these css values, it might be good to support.
+// cases where this would be useful? If you want a web-user to be able to dynamically
+// change all these css values, it might be good to support. However, even in these cases,
+// I think a user would probably be better of using format!() macro.
 //
 //
 // ///
