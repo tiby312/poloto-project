@@ -120,10 +120,11 @@ fn seconds() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     ));
 
+    use poloto::ticks::GenTickDist;
+    let k = poloto::default_ticks::<UnixTime>().generate(data, opt, req);
+    let step = *k.fmt.step();
+
     let xticks = poloto::ticks::from_closure(|data, opt, req| {
-        use poloto::ticks::GenTickDist;
-        let k = poloto::default_ticks::<UnixTime>().generate(data, opt, req);
-        let step = *k.fmt.step();
         poloto::ticks::TickBuilder::new(k.it)
             .with_ticks(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
             .with_fmt_data(step)

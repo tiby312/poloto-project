@@ -24,7 +24,8 @@ impl IntFmt {
         &self.offset
     }
 }
-impl ticks::TickFmt<i128> for IntFmt {
+impl ticks::TickFmt for IntFmt {
+    type Num = i128;
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &i128) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {
             let val = *val - offset;

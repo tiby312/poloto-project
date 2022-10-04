@@ -25,7 +25,8 @@ impl FloatFmt {
         &self.offset
     }
 }
-impl crate::ticks::TickFmt<f64> for FloatFmt {
+impl crate::ticks::TickFmt for FloatFmt {
+    type Num = f64;
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &f64) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {
             let val = *val - offset;

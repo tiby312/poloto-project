@@ -73,11 +73,12 @@ impl<T: TimeZone + Display> UnixTimeFmt<T> {
         &self.start
     }
 }
-impl<T> crate::ticks::TickFmt<UnixTime> for UnixTimeFmt<T>
+impl<T> crate::ticks::TickFmt for UnixTimeFmt<T>
 where
     T: chrono::TimeZone + Display,
     T::Offset: Display,
 {
+    type Num = UnixTime;
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &UnixTime) -> std::fmt::Result {
         if let Some(footnote) = self.footnote.take() {
             write!(

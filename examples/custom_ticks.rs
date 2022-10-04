@@ -11,12 +11,15 @@ fn main() {
         poloto::build::markers([24], [])
     );
 
-    let ticks = poloto::ticks::TickBuilder::new((0..).step_by(6))
-        .with_ticks(|w, v| write!(w, "{} hr", v))
-        .build();
+    let data = poloto::data(plots);
 
-    poloto::data(plots)
-        .with_xticks(ticks)
+    let ticks = poloto::ticks::from_closure(|_, _, _| {
+        use poloto::ticks::TickFmt;
+        let k = poloto::ticks::DefaultTickFmt::new().with_ticks(|w, v| write!(w, "{} hr", v));
+        poloto::ticks::TickDistRes::new((0..).step_by(6)).with_fmt(k)
+    });
+
+    data.with_xticks(ticks)
         .build_and_label(("title", "x", "y"))
         .append_to(poloto::simple_light())
         .render_stdout();

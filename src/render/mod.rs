@@ -342,20 +342,29 @@ pub fn render_opt_builder() -> RenderOptionsBuilder {
 ///
 /// Link some plots with a way to render them.
 ///
-pub struct Data<P, TX, TY> {
+pub struct Data<P: PlotIterator, TX, TY> {
     opt: RenderOptions,
     tickx: TX,
     ticky: TY,
     plots: P,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
 }
 
 impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<P, TX, TY> {
-    pub fn new(plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
+    
+    pub fn new(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Data<P, TX, TY> {
+        let mut area = build::marker::Area::new();
+        plots.increase_area(&mut area);
+        let (boundx, boundy) = area.build();
+
         Data {
             opt,
             plots,
             ticky,
             tickx,
+            boundx,
+            boundy,
         }
     }
 
@@ -365,6 +374,8 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             tickx: self.tickx,
             ticky: self.ticky,
             plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
         }
     }
     pub fn with_xticks<TTT: GenTickDist<P::X>>(self, tickx: TTT) -> Data<P, TTT, TY> {
@@ -373,6 +384,8 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             tickx,
             ticky: self.ticky,
             plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
         }
     }
 
@@ -382,24 +395,21 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             tickx: self.tickx,
             ticky,
             plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
         }
     }
 
     pub fn build(self) -> DataBuilt<P, TX::Res, TY::Res> {
-        let mut data = self;
-        let mut area = build::marker::Area::new();
-        data.plots.increase_area(&mut area);
-        let (boundx, boundy) = area.build();
-
         let mut index_counter = 0;
-
+        let data = self;
         let xticks = data.tickx.generate(
-            &boundx,
+            &data.boundx,
             &data.opt.boundx,
             IndexRequester::new(&mut index_counter),
         );
         let yticks = data.ticky.generate(
-            &boundy,
+            &data.boundy,
             &data.opt.boundy,
             IndexRequester::new(&mut index_counter),
         );
@@ -407,16 +417,11 @@ impl<P: build::PlotIterator, TX: GenTickDist<P::X>, TY: GenTickDist<P::Y>> Data<
             opt: data.opt,
             xticks,
             yticks,
-            boundx,
-            boundy,
+            boundx: data.boundx,
+            boundy: data.boundy,
             plots: data.plots,
         }
     }
-
-    // pub fn build_map<K, F: FnOnce(DataBuilt<P, TX::Res, TY::Res>) -> K>(self, func: F) -> K {
-    //     let data = self.build();
-    //     func(data)
-    // }
 
     pub fn build_and_label<Fmt: BaseFmt>(self, fmt: Fmt) -> Plotter<P, TX::Res, TY::Res, Fmt> {
         self.build().label(fmt)

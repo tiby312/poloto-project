@@ -7,7 +7,8 @@ struct BarTickFmt<D> {
     ticks: Vec<D>,
 }
 
-impl<D: Display> crate::ticks::TickFmt<i128> for BarTickFmt<D> {
+impl<D: Display> crate::ticks::TickFmt for BarTickFmt<D> {
+    type Num = i128;
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &i128) -> fmt::Result {
         let j = &self.ticks[usize::try_from(*val).unwrap()];
         write!(writer, "{}", j)
@@ -18,7 +19,8 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
     name: K,
     data: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> Data<impl PlotIterator<X = X, Y = i128>, impl GenTickDist<X>, impl GenTickDist<i128>> {
+) -> DataBuilt<impl PlotIterator<X = X, Y = i128>, impl TickDist<Num = X>, impl TickDist<Num = i128>>
+{
     let (plots, ytick_fmt) = gen_bar(name, data, marker);
 
     let opt = crate::render::render_opt_builder()
@@ -26,7 +28,10 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum>(
         .build();
 
     //TODO somehow forbid user from messing with these settings after its returned?
-    crate::data(plots).with_yticks(ytick_fmt).with_opt(opt)
+    crate::data(plots)
+        .with_yticks(ytick_fmt)
+        .with_opt(opt)
+        .build()
 }
 
 pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
@@ -51,10 +56,9 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
         .into_iter();
 
     let m = build::markers(marker, [-1, i128::try_from(vals_len).unwrap()]);
+
     (
         bars.chain(m),
-        crate::ticks::TickBuilder::new(ticks)
-            .with_fmt(BarTickFmt { ticks: names })
-            .build(),
+        crate::ticks::TickDistRes::new(ticks).with_fmt(BarTickFmt { ticks: names }),
     )
 }
