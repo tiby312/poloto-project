@@ -20,7 +20,6 @@ fn main() {
             let orig = poloto::ticks::gen_ticks(orig, a, b, c);
             poloto::ticks::from_iter(orig.iter)
                 .with_tick_fmt(|&v| format_move!("{} hr", v))
-                .with_where_fmt(|| "x = in hours")
         })
     });
 

@@ -99,10 +99,11 @@ fn months() -> fmt::Result {
         .render_fmt_write(w)
 }
 
-use hypermelon::format_move;
 #[cfg(feature = "timestamp_full")]
 #[test]
 fn seconds() -> fmt::Result {
+    use hypermelon::format_move;
+
     use chrono::TimeZone;
     let timezone = &chrono::Utc;
 

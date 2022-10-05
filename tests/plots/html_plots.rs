@@ -20,6 +20,7 @@ fn custom_colors_html() -> fmt::Result {
 
     let mut w = util::create_test_file("custom_colors.html");
 
+    let (header_start, header_end) = poloto::header().to_string();
     write!(
         w,
         r###"
@@ -52,14 +53,9 @@ fn custom_colors_html() -> fmt::Result {
         </div>
         </htmls>
         "###,
-        poloto::Theme::light().get_str(),
-        poloto::Theme::dark().get_str(),
-        format_args!(
-            "{}{}{}",
-            poloto::header().to_string().0,
-            graph,
-            poloto::header().to_string().1
-        )
+        poloto::render::Theme::light().get_str(),
+        poloto::render::Theme::dark().get_str(),
+        format_args!("{}{}{}", header_start, graph, header_end)
     )
 }
 

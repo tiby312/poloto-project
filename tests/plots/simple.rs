@@ -2,8 +2,8 @@ use hypermelon::{elem::Elem, format_move};
 
 use super::*;
 use poloto::build::plot;
-use poloto::Header;
-use poloto::Theme;
+use poloto::render::Header;
+use poloto::render::Theme;
 #[test]
 fn heart() -> fmt::Result {
     // https://mathworld.wolfram.com/HeartCurve.html

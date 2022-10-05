@@ -62,7 +62,7 @@ fn test_chart() -> std::fmt::Result {
 
     e.elem("html", |e| e.attr("style", "background-color:#262626"))?
         .build(|e| {
-            let style = poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
+            let style = poloto::render::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
             hypermelon::render(style, e.writer_escapable())?;
 

@@ -478,3 +478,187 @@ impl<R: Elem> Elem for Stage4<R> {
         self.0.render_head(w)
     }
 }
+
+///
+/// Default svg header
+///
+#[derive(Copy, Clone)]
+pub struct Header {
+    dim: [f64; 2],
+    viewbox: [f64; 2],
+}
+impl Default for Header {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Header {
+    pub fn new() -> Self {
+        let a = [800.0, 500.0];
+        Header { dim: a, viewbox: a }
+    }
+
+    pub fn with_viewbox_width(self, width: f64) -> Self {
+        let [xx, yy] = self.dim;
+        let vh = width * (yy / xx);
+        Header {
+            dim: self.dim,
+            viewbox: [width, vh],
+        }
+    }
+
+    pub fn get_viewbox(&self) -> [f64; 2] {
+        self.viewbox
+    }
+
+    pub fn with_dim(self, dim: [f64; 2]) -> Self {
+        Header {
+            dim,
+            viewbox: self.viewbox,
+        }
+    }
+    pub fn with_viewbox(self, viewbox: [f64; 2]) -> Self {
+        Header {
+            dim: self.dim,
+            viewbox,
+        }
+    }
+
+    pub fn to_string(self) -> (String, String) {
+        let mut s = String::new();
+        let tail = self.render_head(&mut elem::ElemWrite::new(&mut s)).unwrap();
+
+        use elem::RenderTail;
+        let mut b = String::new();
+        tail.render(&mut elem::ElemWrite::new(&mut b)).unwrap();
+
+        (s, b)
+    }
+
+    pub fn light_theme(self) -> elem::Append<Self, Theme<'static>> {
+        self.append(Theme::light())
+    }
+    pub fn dark_theme(self) -> elem::Append<Self, Theme<'static>> {
+        self.append(Theme::light())
+    }
+}
+
+impl Elem for Header {
+    type Tail = hypermelon::build::ElemTail<&'static str>;
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        let elem = hypermelon::build::elem("svg").with(attrs!(
+            ("class", "poloto"),
+            ("width", self.dim[0]),
+            ("height", self.dim[1]),
+            (
+                "viewBox",
+                format_move!("{} {} {} {}", 0, 0, self.viewbox[0], self.viewbox[1])
+            ),
+            ("xmlns", "http://www.w3.org/2000/svg")
+        ));
+
+        elem.render_head(w)
+    }
+}
+
+///
+/// Default theme
+///
+#[derive(Copy, Clone)]
+pub struct Theme<'a> {
+    styles: &'a str,
+}
+
+impl Theme<'static> {
+    pub const fn light() -> Theme<'static> {
+        /// Default light theme
+
+        const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto{\
+            stroke-linecap:round;\
+            stroke-linejoin:round;\
+            font-family:Roboto,sans-serif;\
+            font-size:16px;\
+            }\
+            .poloto_background{fill:AliceBlue;}\
+            .poloto_scatter{stroke-width:7}\
+            .poloto_tick_line{stroke:gray;stroke-width:0.5}\
+            .poloto_line{stroke-width:2}\
+            .poloto_text{fill: black;}\
+            .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}\
+            .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+            .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+            .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+            .poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}\
+            .poloto0stroke{stroke:blue;}\
+            .poloto1stroke{stroke:red;}\
+            .poloto2stroke{stroke:green;}\
+            .poloto3stroke{stroke:gold;}\
+            .poloto4stroke{stroke:aqua;}\
+            .poloto5stroke{stroke:lime;}\
+            .poloto6stroke{stroke:orange;}\
+            .poloto7stroke{stroke:chocolate;}\
+            .poloto0fill{fill:blue;}\
+            .poloto1fill{fill:red;}\
+            .poloto2fill{fill:green;}\
+            .poloto3fill{fill:gold;}\
+            .poloto4fill{fill:aqua;}\
+            .poloto5fill{fill:lime;}\
+            .poloto6fill{fill:orange;}\
+            .poloto7fill{fill:chocolate;}";
+
+        Theme {
+            styles: STYLE_CONFIG_LIGHT_DEFAULT,
+        }
+    }
+    pub const fn dark() -> Theme<'static> {
+        /// Default dark theme
+        const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto{\
+    stroke-linecap:round;\
+    stroke-linejoin:round;\
+    font-family:Roboto,sans-serif;\
+    font-size:16px;\
+    }\
+    .poloto_background{fill:#262626;}\
+    .poloto_scatter{stroke-width:7}\
+    .poloto_tick_line{stroke:dimgray;stroke-width:0.5}\
+    .poloto_line{stroke-width:2}\
+    .poloto_text{fill: white;}\
+    .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}\
+    .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+    .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+    .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+    .poloto0stroke{stroke:blue;}\
+    .poloto1stroke{stroke:red;}\
+    .poloto2stroke{stroke:green;}\
+    .poloto3stroke{stroke:gold;}\
+    .poloto4stroke{stroke:aqua;}\
+    .poloto5stroke{stroke:lime;}\
+    .poloto6stroke{stroke:orange;}\
+    .poloto7stroke{stroke:chocolate;}\
+    .poloto0fill{fill:blue;}\
+    .poloto1fill{fill:red;}\
+    .poloto2fill{fill:green;}\
+    .poloto3fill{fill:gold;}\
+    .poloto4fill{fill:aqua;}\
+    .poloto5fill{fill:lime;}\
+    .poloto6fill{fill:orange;}\
+    .poloto7fill{fill:chocolate;}";
+        Theme {
+            styles: STYLE_CONFIG_DARK_DEFAULT,
+        }
+    }
+
+    pub const fn get_str(&self) -> &'static str {
+        self.styles
+    }
+}
+
+impl<'a> Elem for Theme<'a> {
+    type Tail = hypermelon::build::ElemTail<&'static str>;
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        let k = hypermelon::build::elem("style");
+        let k = k.append(self.styles);
+        k.render_head(w)
+    }
+}
