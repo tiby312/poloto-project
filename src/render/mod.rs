@@ -241,7 +241,7 @@ impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage
         }
     }
 
-    pub fn with_opt<F: FnOnce(RenderOptions) -> RenderOptions>(self, func: F) -> Self {
+    pub fn map_opt<F: FnOnce(RenderOptions) -> RenderOptions>(self, func: F) -> Self {
         Stage1 {
             opt: func(self.opt),
             tickx: self.tickx,
@@ -252,7 +252,7 @@ impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage
         }
     }
 
-    pub fn with_xticks<TTT: TickDistGen<P::X>, F: FnOnce(TX) -> TTT>(
+    pub fn map_xticks<TTT: TickDistGen<P::X>, F: FnOnce(TX) -> TTT>(
         self,
         func: F,
     ) -> Stage1<P, TTT, TY> {
@@ -267,7 +267,7 @@ impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage
         }
     }
 
-    pub fn with_yticks<TTT: TickDistGen<P::Y>, F: FnOnce(TY) -> TTT>(
+    pub fn map_yticks<TTT: TickDistGen<P::Y>, F: FnOnce(TY) -> TTT>(
         self,
         func: F,
     ) -> Stage1<P, TX, TTT> {

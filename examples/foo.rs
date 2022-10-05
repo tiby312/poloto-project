@@ -23,7 +23,7 @@ fn main() {
     let steps = poloto::ticks::from_iter((0..).step_by(6));
 
     poloto::data(plots)
-        .with_xticks(|_| steps)
+        .map_xticks(|_| steps)
         .build_and_label(("title", "x", "y"))
         .append_to(poloto::header().light_theme())
         .render_stdout();

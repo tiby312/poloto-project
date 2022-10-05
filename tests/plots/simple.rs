@@ -1,4 +1,4 @@
-use hypermelon::{format_move, elem::Elem};
+use hypermelon::{elem::Elem, format_move};
 
 use super::*;
 use poloto::build::plot;
@@ -26,7 +26,7 @@ fn heart() -> fmt::Result {
     let w = util::create_test_file("heart.svg");
 
     poloto::data(plots)
-        .with_opt(|_| canvas)
+        .map_opt(|_| canvas)
         .build_and_label(("Heart Graph", "x", "y"))
         .append_to(poloto::header().dark_theme())
         .render_fmt_write(w)
@@ -198,7 +198,7 @@ fn custom_dim() -> fmt::Result {
         poloto::build::markers([], [0]),
         poloto::build::plots_dyn(v)
     ))
-    .with_opt(|_| canvas)
+    .map_opt(|_| canvas)
     .build_and_label(("collatz", "x", "y"));
 
     let w = util::create_test_file("custom_dim.svg");

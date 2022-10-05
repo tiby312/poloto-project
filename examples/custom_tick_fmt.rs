@@ -13,7 +13,7 @@ fn main() {
 
     let data = poloto::data(plots);
 
-    let data = data.with_xticks(|orig| {
+    let data = data.map_xticks(|orig| {
         poloto::ticks::from_closure(|a, b, c| {
             let orig = poloto::ticks::gen_ticks(orig, a, b, c);
             poloto::ticks::from_iter(orig.iter).with_tick_fmt(|w, v| write!(w, "{} hr", v))

@@ -62,10 +62,9 @@ fn test_chart() -> std::fmt::Result {
 
     e.elem("html", |e| e.attr("style", "background-color:#262626"))?
         .build(|e| {
-
             let style = poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
-            hypermelon::render(style, e.writer_escapable())?; 
+            hypermelon::render(style, e.writer_escapable())?;
 
             e.elem("div", |d| d.attr("style", "display:flex;flex-wrap:wrap;"))?
                 .build(|e| {
@@ -73,7 +72,7 @@ fn test_chart() -> std::fmt::Result {
                         let header = header();
 
                         //TODO dont include style in every instance!
-                        
+
                         let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
                             .build_and_label((
                                 hypermelon::format_move!("float test {}", i),
