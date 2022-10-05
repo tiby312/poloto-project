@@ -486,7 +486,7 @@ impl<R: Elem> Elem for Stage4<R> {
 pub struct Header<A> {
     dim: [f64; 2],
     viewbox: [f64; 2],
-    attr:A
+    attr: A,
 }
 impl Default for Header<()> {
     fn default() -> Self {
@@ -498,18 +498,20 @@ use hypermelon::attr::Attr;
 impl Header<()> {
     pub fn new() -> Self {
         let a = [800.0, 500.0];
-        Header { dim: a, viewbox: a ,attr:()}
+        Header {
+            dim: a,
+            viewbox: a,
+            attr: (),
+        }
     }
-
 }
 
-impl<A:Attr> Header<A> {
-    
-    pub fn with<AA:Attr>(self,attr:AA)->Header<AA>{
-        Header{
-            dim:self.dim,
-            viewbox:self.viewbox,
-            attr
+impl<A: Attr> Header<A> {
+    pub fn with<AA: Attr>(self, attr: AA) -> Header<AA> {
+        Header {
+            dim: self.dim,
+            viewbox: self.viewbox,
+            attr,
         }
     }
 
@@ -519,7 +521,7 @@ impl<A:Attr> Header<A> {
         Header {
             dim: self.dim,
             viewbox: [width, vh],
-            attr:self.attr
+            attr: self.attr,
         }
     }
 
@@ -531,14 +533,14 @@ impl<A:Attr> Header<A> {
         Header {
             dim,
             viewbox: self.viewbox,
-            attr:self.attr
+            attr: self.attr,
         }
     }
     pub fn with_viewbox(self, viewbox: [f64; 2]) -> Self {
         Header {
             dim: self.dim,
             viewbox,
-            attr:self.attr
+            attr: self.attr,
         }
     }
 
@@ -561,7 +563,7 @@ impl<A:Attr> Header<A> {
     }
 }
 
-impl<A:Attr> Elem for Header<A> {
+impl<A: Attr> Elem for Header<A> {
     type Tail = hypermelon::build::ElemTail<&'static str>;
     fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let elem = hypermelon::build::elem("svg").with(attrs!(

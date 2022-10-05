@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "15.2.0"
+version = "16.0.0"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -24,7 +24,7 @@ timestamp_full = ["chrono","chrono/std"]
 
 [dependencies]
 chrono = {version="0.4", optional = true, default-features = false}
-hypermelon={path="../hypermelon"}
+hypermelon={version="0.2"}
 
 [lib]
 doctest = false
