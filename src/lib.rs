@@ -105,6 +105,6 @@ pub fn data<
 ///
 /// shorthand for [`Header::new()`]
 ///
-pub fn header() -> Header {
+pub fn header() -> Header<()> {
     Header::new()
 }

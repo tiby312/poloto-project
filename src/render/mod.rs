@@ -483,20 +483,34 @@ impl<R: Elem> Elem for Stage4<R> {
 /// Default svg header
 ///
 #[derive(Copy, Clone)]
-pub struct Header {
+pub struct Header<A> {
     dim: [f64; 2],
     viewbox: [f64; 2],
+    attr:A
 }
-impl Default for Header {
+impl Default for Header<()> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Header {
+use hypermelon::attr::Attr;
+impl Header<()> {
     pub fn new() -> Self {
         let a = [800.0, 500.0];
-        Header { dim: a, viewbox: a }
+        Header { dim: a, viewbox: a ,attr:()}
+    }
+
+}
+
+impl<A:Attr> Header<A> {
+    
+    pub fn with<AA:Attr>(self,attr:AA)->Header<AA>{
+        Header{
+            dim:self.dim,
+            viewbox:self.viewbox,
+            attr
+        }
     }
 
     pub fn with_viewbox_width(self, width: f64) -> Self {
@@ -505,6 +519,7 @@ impl Header {
         Header {
             dim: self.dim,
             viewbox: [width, vh],
+            attr:self.attr
         }
     }
 
@@ -516,12 +531,14 @@ impl Header {
         Header {
             dim,
             viewbox: self.viewbox,
+            attr:self.attr
         }
     }
     pub fn with_viewbox(self, viewbox: [f64; 2]) -> Self {
         Header {
             dim: self.dim,
             viewbox,
+            attr:self.attr
         }
     }
 
@@ -544,7 +561,7 @@ impl Header {
     }
 }
 
-impl Elem for Header {
+impl<A:Attr> Elem for Header<A> {
     type Tail = hypermelon::build::ElemTail<&'static str>;
     fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let elem = hypermelon::build::elem("svg").with(attrs!(
@@ -555,7 +572,8 @@ impl Elem for Header {
                 "viewBox",
                 format_move!("{} {} {} {}", 0, 0, self.viewbox[0], self.viewbox[1])
             ),
-            ("xmlns", "http://www.w3.org/2000/svg")
+            ("xmlns", "http://www.w3.org/2000/svg"),
+            self.attr
         ));
 
         elem.render_head(w)
