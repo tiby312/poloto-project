@@ -24,17 +24,6 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
-pub struct DefaultTickFmt;
-
-impl<N: Display> TickFmt<N> for DefaultTickFmt {
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
-        write!(a, "{}", val)
-    }
-    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        Ok(())
-    }
-}
-
 #[derive(Debug, Copy, Clone)]
 pub enum Axis {
     X,
@@ -61,65 +50,137 @@ impl<'a> IndexRequester<'a> {
     }
 }
 
+use tick_fmt::*;
+pub mod tick_fmt {
+    use super::*;
+    pub struct DefaultTickFmt;
+
+    impl<N: Display> TickFmt<N> for DefaultTickFmt {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            write!(a, "{}", val)
+        }
+        fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            Ok(())
+        }
+    }
+
+    ///
+    /// Formatter for a tick distribution
+    ///
+    pub trait TickFmt<Num> {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Num) -> std::fmt::Result;
+        fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            Ok(())
+        }
+    }
+
+    pub struct WithWhereFmt<D, F> {
+        ticks: D,
+        func: F,
+    }
+
+    impl<N, D: TickFmt<N>, F> TickFmt<N> for WithWhereFmt<D, F>
+    where
+        F: FnMut(&mut dyn std::fmt::Write) -> fmt::Result,
+    {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            self.ticks.write_tick(a, val)
+        }
+        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            (self.func)(w)
+        }
+    }
+
+    pub struct WithTickFmt<D, F> {
+        ticks: D,
+        func: F,
+    }
+    impl<N, D: TickFmt<N>, F> TickFmt<N> for WithTickFmt<D, F>
+    where
+        F: FnMut(&mut dyn std::fmt::Write, &N) -> fmt::Result,
+    {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            (self.func)(a, val)
+        }
+        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            self.ticks.write_where(w)
+        }
+    }
+
+    pub struct WithData<K, E> {
+        ticks: K,
+        pub data: E,
+    }
+
+    impl<N, K: TickFmt<N>, E> TickFmt<N> for WithData<K, E> {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            self.ticks.write_tick(a, val)
+        }
+        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            self.ticks.write_where(w)
+        }
+    }
+
+    impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
+        pub fn with_tick_fmt<F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
+            self,
+            func: F,
+        ) -> TickDistribution<I, WithTickFmt<Fmt, F>> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: WithTickFmt {
+                    ticks: self.fmt,
+                    func,
+                },
+                res: self.res,
+            }
+        }
+
+        pub fn with_where_fmt<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
+            self,
+            func: F,
+        ) -> TickDistribution<I, WithWhereFmt<Fmt, F>> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: WithWhereFmt {
+                    ticks: self.fmt,
+                    func,
+                },
+                res: self.res,
+            }
+        }
+
+        pub fn with_data<E>(self, data: E) -> TickDistribution<I, WithData<Fmt, E>> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: WithData {
+                    ticks: self.fmt,
+                    data,
+                },
+                res: self.res,
+            }
+        }
+
+        pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickDistribution<I, J> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: other,
+                res: self.res,
+            }
+        }
+    }
+}
+
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
+    pub fn from_parts(it: I, fmt: Fmt, res: TickRes) -> Self {
+        TickDistribution { iter: it, fmt, res }
+    }
+    pub fn map<K, F: FnOnce(Self) -> K>(self, func: F) -> K {
+        func(self)
+    }
+}
 ///
-/// Formatter for a tick distribution
-///
-pub trait TickFmt<Num> {
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Num) -> std::fmt::Result;
-    fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        Ok(())
-    }
-}
-
-pub struct WithWhere<D, F> {
-    ticks: D,
-    func: F,
-}
-
-impl<N, D: TickFmt<N>, F> TickFmt<N> for WithWhere<D, F>
-where
-    F: FnMut(&mut dyn std::fmt::Write) -> fmt::Result,
-{
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
-        self.ticks.write_tick(a, val)
-    }
-    fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        (self.func)(w)
-    }
-}
-
-pub struct WithTicky<D, F> {
-    ticks: D,
-    func: F,
-}
-impl<N, D: TickFmt<N>, F> TickFmt<N> for WithTicky<D, F>
-where
-    F: FnMut(&mut dyn std::fmt::Write, &N) -> fmt::Result,
-{
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
-        (self.func)(a, val)
-    }
-    fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        self.ticks.write_where(w)
-    }
-}
-
-pub struct WithData<K, E> {
-    ticks: K,
-    pub data: E,
-}
-
-impl<N, K: TickFmt<N>, E> TickFmt<N> for WithData<K, E> {
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
-        self.ticks.write_tick(a, val)
-    }
-    fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        self.ticks.write_where(w)
-    }
-}
-
-///
-/// Create a `GenTickDist` from a closure.
+/// Create a [`TickDistGen`] from a closure.
 ///
 pub fn from_closure<N: PlotNum, It, F>(func: F) -> GenTickDistClosure<F>
 where
@@ -191,16 +252,6 @@ impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistribution<I, F> {
     }
 }
 
-// pub fn custom_ticks<I: IntoIterator>(it: I) -> TickDistribution<I, DefaultTickFmt>
-// where
-//     I::Item: PlotNum + fmt::Display,
-// {
-//     TickDistribution::new(it)
-// }
-// pub fn default_ticks<X: HasDefaultTicks>() -> X::DefaultTicks {
-//     X::default_ticks()
-// }
-
 pub struct TickDistribution<I, F> {
     pub iter: I,
     pub fmt: F,
@@ -220,62 +271,7 @@ where
         Self::from_parts(it, DefaultTickFmt, TickRes { dash_size: None })
     }
 }
-impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
-    pub fn from_parts(it: I, fmt: Fmt, res: TickRes) -> Self {
-        TickDistribution { iter: it, fmt, res }
-    }
 
-    pub fn with_tick_fmt<F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
-        self,
-        func: F,
-    ) -> TickDistribution<I, WithTicky<Fmt, F>> {
-        TickDistribution {
-            iter: self.iter,
-            fmt: WithTicky {
-                ticks: self.fmt,
-                func,
-            },
-            res: self.res,
-        }
-    }
-
-    pub fn with_where_fmt<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
-        self,
-        func: F,
-    ) -> TickDistribution<I, WithWhere<Fmt, F>> {
-        TickDistribution {
-            iter: self.iter,
-            fmt: WithWhere {
-                ticks: self.fmt,
-                func,
-            },
-            res: self.res,
-        }
-    }
-
-    pub fn with_data<E>(self, data: E) -> TickDistribution<I, WithData<Fmt, E>> {
-        TickDistribution {
-            iter: self.iter,
-            fmt: WithData {
-                ticks: self.fmt,
-                data,
-            },
-            res: self.res,
-        }
-    }
-
-    pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickDistribution<I, J> {
-        TickDistribution {
-            iter: self.iter,
-            fmt: other,
-            res: self.res,
-        }
-    }
-
-    pub fn map<K, F: FnOnce(Self) -> K>(self, func: F) -> K {
-        func(self)
-    }
-}
 impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistGen<X>
     for TickDistribution<I, Fmt>
 {

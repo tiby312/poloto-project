@@ -9,6 +9,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     plot_fmt: &mut dyn BaseFmt,
     canvas: &RenderOptionsResult,
 ) -> std::fmt::Result {
+    use crate::ticks::tick_fmt::TickFmt;
+
     let mut xticksg = xticksg.unwrap();
     let mut yticksg = yticksg.unwrap();
 

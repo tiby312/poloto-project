@@ -73,7 +73,7 @@ impl<T: TimeZone + Display> UnixTimeFmt<T> {
         &self.start
     }
 }
-impl<T> crate::ticks::TickFmt<UnixTime> for UnixTimeFmt<T>
+impl<T> crate::ticks::tick_fmt::TickFmt<UnixTime> for UnixTimeFmt<T>
 where
     T: chrono::TimeZone + Display,
     T::Offset: Display,
