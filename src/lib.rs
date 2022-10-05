@@ -24,6 +24,9 @@
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/custom_ticks.rs)
 
+use hypermelon::attr;
+use hypermelon::elem;
+
 #[cfg(doctest)]
 mod test_readme {
     macro_rules! external_doc_test {
@@ -147,29 +150,26 @@ impl Header {
 
     pub fn to_string(self) -> (String, String) {
         let mut s = String::new();
-        let tail = self
-            .render_head(&mut hypermelon::ElemWrite::new(&mut s))
-            .unwrap();
+        let tail = self.render_head(&mut elem::ElemWrite::new(&mut s)).unwrap();
 
-        use hypermelon::RenderTail;
+        use elem::RenderTail;
         let mut b = String::new();
-        tail.render(&mut hypermelon::ElemWrite::new(&mut b))
-            .unwrap();
+        tail.render(&mut elem::ElemWrite::new(&mut b)).unwrap();
 
         (s, b)
     }
 
-    pub fn light_theme(self) -> hypermelon::Append<Self, Theme<'static>> {
+    pub fn light_theme(self) -> elem::Append<Self, Theme<'static>> {
         self.append(Theme::light())
     }
-    pub fn dark_theme(self) -> hypermelon::Append<Self, Theme<'static>> {
+    pub fn dark_theme(self) -> elem::Append<Self, Theme<'static>> {
         self.append(Theme::light())
     }
 }
 
 impl Elem for Header {
     type Tail = hypermelon::build::ElemTail<&'static str>;
-    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let elem = hypermelon::build::elem("svg").with(attrs!(
             ("class", "poloto"),
             ("width", self.dim[0]),
@@ -280,7 +280,7 @@ impl Theme<'static> {
 
 impl<'a> Elem for Theme<'a> {
     type Tail = hypermelon::build::ElemTail<&'static str>;
-    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let k = hypermelon::build::elem("style");
         let k = k.append(self.styles);
         k.render_head(w)

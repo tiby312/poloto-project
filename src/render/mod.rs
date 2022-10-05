@@ -392,7 +392,7 @@ where
     B: crate::ticks::TickDist<Num = P::Y>,
     BB: BaseFmt,
 {
-    pub fn append_to<E: Elem>(self, elem: E) -> Stage4<hypermelon::Append<E, Self>> {
+    pub fn append_to<E: Elem>(self, elem: E) -> Stage4<elem::Append<E, Self>> {
         Stage4(elem.append(self))
     }
 
@@ -401,7 +401,7 @@ where
     }
 }
 
-impl<P, A, B, BB> hypermelon::Elem for Stage3<P, A, B, BB>
+impl<P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
 where
     P: PlotIterator,
     A: crate::ticks::TickDist<Num = P::X>,
@@ -409,7 +409,7 @@ where
     BB: BaseFmt,
 {
     type Tail = ();
-    fn render_head(mut self, writer: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+    fn render_head(mut self, writer: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         writer.render(
             hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
         )?;
@@ -474,7 +474,7 @@ impl<R: Elem> Stage4<R> {
 impl<R: Elem> Elem for Stage4<R> {
     type Tail = R::Tail;
 
-    fn render_head(self, w: &mut hypermelon::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         self.0.render_head(w)
     }
 }

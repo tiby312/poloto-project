@@ -1,7 +1,7 @@
 use super::*;
 
 pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
-    writer: &mut hypermelon::ElemWrite,
+    writer: &mut elem::ElemWrite,
     xticksg: impl TickDist<Num = X>,
     yticksg: impl TickDist<Num = Y>,
     boundx: &ticks::DataBound<X>,

@@ -3,7 +3,7 @@ use super::*;
 use crate::build::*;
 
 pub(super) fn render_plot<P: build::PlotIterator>(
-    writer: &mut hypermelon::ElemWrite,
+    writer: &mut elem::ElemWrite,
     boundx: &ticks::DataBound<P::X>,
     boundy: &ticks::DataBound<P::Y>,
     canvas: &RenderOptionsResult,
@@ -132,7 +132,7 @@ struct PlotRenderInfo<'a> {
 }
 
 fn render(
-    writer: &mut hypermelon::ElemWrite,
+    writer: &mut elem::ElemWrite,
     it: impl Iterator<Item = [f64; 2]>,
     info: PlotRenderInfo,
 ) -> fmt::Result {
@@ -372,8 +372,8 @@ impl<I: Iterator<Item = [f64; 2]>> LineFill<I> {
         }
     }
 }
-impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for LineFill<I> {
-    fn render(self, w: &mut hypermelon::AttrWrite) -> fmt::Result {
+impl<I: Iterator<Item = [f64; 2]>> attr::Attr for LineFill<I> {
+    fn render(self, w: &mut attr::AttrWrite) -> fmt::Result {
         let LineFill {
             mut it,
             fmt,
@@ -440,8 +440,8 @@ impl<I: Iterator<Item = [f64; 2]>> Line<I> {
         Line { it, fmt }
     }
 }
-impl<I: Iterator<Item = [f64; 2]>> hypermelon::Attr for Line<I> {
-    fn render(self, w: &mut hypermelon::AttrWrite) -> fmt::Result {
+impl<I: Iterator<Item = [f64; 2]>> attr::Attr for Line<I> {
+    fn render(self, w: &mut attr::AttrWrite) -> fmt::Result {
         let Line { mut it, fmt } = self;
 
         w.render(hypermelon::build::sink::path_ext(|w| {
