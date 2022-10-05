@@ -99,6 +99,7 @@ fn months() -> fmt::Result {
         .render_fmt_write(w)
 }
 
+use hypermelon::format_move;
 #[cfg(feature = "timestamp_full")]
 #[test]
 fn seconds() -> fmt::Result {
@@ -120,12 +121,12 @@ fn seconds() -> fmt::Result {
         poloto::build::markers(None, Some(0))
     ));
 
-    let data = data.with_xticks(|g| {
+    let data = data.map_xticks(|g| {
         poloto::ticks::from_closure(|data, canvas, opt| {
             let k = poloto::ticks::gen_ticks(g, data, canvas, opt);
             let step = *k.fmt.step();
             poloto::ticks::from_iter(k.iter)
-                .with_tick_fmt(|w, v| write!(w, "{}", v.datetime(timezone).format("%H:%M:%S")))
+                .with_tick_fmt(|&v| format_move!("{}", v.datetime(timezone).format("%H:%M:%S")))
                 .with_data(step)
         })
     });

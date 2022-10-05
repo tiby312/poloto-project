@@ -1,3 +1,5 @@
+use hypermelon::format_move;
+
 use super::*;
 
 #[test]
@@ -22,7 +24,7 @@ fn marathon() -> fmt::Result {
 
     let xticks =
         poloto::ticks::TickDistribution::new(std::iter::successors(Some(0), |w| Some(w + hr)))
-            .with_tick_fmt(|w, v| write!(w, "{} hr", v / hr));
+            .with_tick_fmt(|&v| format_move!("{} hr", v / hr));
 
     let data = poloto::data(p).map_xticks(|_| xticks);
 

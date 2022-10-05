@@ -79,15 +79,16 @@ pub mod tick_fmt {
         func: F,
     }
 
-    impl<N, D: TickFmt<N>, F> TickFmt<N> for WithWhereFmt<D, F>
+    impl<N, D: TickFmt<N>, F, J: fmt::Display> TickFmt<N> for WithWhereFmt<D, F>
     where
-        F: FnMut(&mut dyn std::fmt::Write) -> fmt::Result,
+        F: FnMut() -> J,
     {
         fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
             self.ticks.write_tick(a, val)
         }
         fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
-            (self.func)(w)
+            let j = (self.func)();
+            write!(w, "{}", j)
         }
     }
 
@@ -95,12 +96,13 @@ pub mod tick_fmt {
         ticks: D,
         func: F,
     }
-    impl<N, D: TickFmt<N>, F> TickFmt<N> for WithTickFmt<D, F>
+    impl<N, D: TickFmt<N>, F, K: fmt::Display> TickFmt<N> for WithTickFmt<D, F>
     where
-        F: FnMut(&mut dyn std::fmt::Write, &N) -> fmt::Result,
+        F: FnMut(&N) -> K,
     {
         fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
-            (self.func)(a, val)
+            let j = (self.func)(val);
+            write!(a, "{}", j)
         }
         fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
             self.ticks.write_where(w)
@@ -122,7 +124,7 @@ pub mod tick_fmt {
     }
 
     impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
-        pub fn with_tick_fmt<F: FnMut(&mut dyn fmt::Write, &X) -> fmt::Result>(
+        pub fn with_tick_fmt<F: FnMut(&X) -> J, J: fmt::Display>(
             self,
             func: F,
         ) -> TickDistribution<I, WithTickFmt<Fmt, F>> {
@@ -136,7 +138,7 @@ pub mod tick_fmt {
             }
         }
 
-        pub fn with_where_fmt<F: FnMut(&mut dyn fmt::Write) -> fmt::Result>(
+        pub fn with_where_fmt<F: FnMut() -> J, J: fmt::Display>(
             self,
             func: F,
         ) -> TickDistribution<I, WithWhereFmt<Fmt, F>> {

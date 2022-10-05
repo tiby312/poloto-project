@@ -1,3 +1,4 @@
+use hypermelon::format_move;
 fn main() {
     // hourly trend over one day.
     let trend = vec![
@@ -14,7 +15,7 @@ fn main() {
     let data = poloto::data(plots);
 
     let ticks =
-        poloto::ticks::from_iter((0..).step_by(6)).with_tick_fmt(|w, v| write!(w, "{} hr", v));
+        poloto::ticks::from_iter((0..).step_by(6)).with_tick_fmt(|&v| format_move!("{} hr", v));
 
     data.map_xticks(|_| ticks)
         .build_and_label(("title", "x", "y"))
