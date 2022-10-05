@@ -56,53 +56,43 @@ use hypermelon::prelude::*;
 //Create a bunch of graphs with different scales to try to expose corner cases.
 #[test]
 fn test_chart() -> std::fmt::Result {
+    use hypermelon::build;
+
+    let html = build::elem("html").with(("style", "background-color:#262626"));
+    let style = poloto::render::Theme::dark().append(".poloto_scatter{stroke-width:20}");
+
+    let div = build::elem("div").with(("style", "display:flex;flex-wrap:wrap;"));
+
+    let float_tests = build::from_iter(generate_test().into_iter().enumerate().map(|(i, test)| {
+        let header = header();
+
+        //TODO dont include style in every instance!
+
+        let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
+            .build_and_label((hypermelon::format_move!("float test {}", i), "x", "y"));
+
+        header.append(p)
+    }));
+
+    let int_test = build::from_iter(generate_test_int().into_iter().enumerate().map(
+        |(i, test)| {
+            let header = header();
+
+            // let style =
+            //     poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
+
+            let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
+                .build_and_label((hypermelon::format_move!("int test {}", i), "x", "y"));
+            header.append(p)
+        },
+    ));
+
+    let d = div.append(float_tests).append(int_test);
+    let d = html.append(style).append(d);
+
     let w = util::create_test_file("test_chart.html");
 
-    let mut e = tagger::new(w);
-
-    e.elem("html", |e| e.attr("style", "background-color:#262626"))?
-        .build(|e| {
-            let style = poloto::render::Theme::light().append(".poloto_scatter{stroke-width:20}");
-
-            hypermelon::render(style, e.writer_escapable())?;
-
-            e.elem("div", |d| d.attr("style", "display:flex;flex-wrap:wrap;"))?
-                .build(|e| {
-                    for (i, &test) in generate_test().iter().enumerate() {
-                        let header = header();
-
-                        //TODO dont include style in every instance!
-
-                        let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
-                            .build_and_label((
-                                hypermelon::format_move!("float test {}", i),
-                                "x",
-                                "y",
-                            ));
-
-                        let header = header.append(p);
-                        hypermelon::render(header, e.writer_escapable())?;
-                    }
-
-                    for (i, &test) in generate_test_int().iter().enumerate() {
-                        let header = header();
-
-                        // let style =
-                        //     poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
-
-                        let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
-                            .build_and_label((
-                                hypermelon::format_move!("int test {}", i),
-                                "x",
-                                "y",
-                            ));
-                        let header = header.append(p);
-                        hypermelon::render(header, e.writer_escapable())?;
-                    }
-
-                    Ok(())
-                })
-        })
+    hypermelon::render(d, w)
 }
 
 pub fn header() -> impl Elem {

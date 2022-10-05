@@ -23,7 +23,6 @@ timestamp = ["chrono"]
 timestamp_full = ["chrono","chrono/std"]
 
 [dependencies]
-tagger = "4.3"
 chrono = {version="0.4", optional = true, default-features = false}
 hypermelon={path="../hypermelon"}
 
