@@ -1,4 +1,4 @@
-use hypermelon::{format_move, Elem};
+use hypermelon::{format_move, elem::Elem};
 
 use super::*;
 use poloto::build::plot;

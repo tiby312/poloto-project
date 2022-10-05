@@ -25,7 +25,6 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
         .with_tick_lines([true, false])
         .move_into();
 
-    //TODO somehow forbid user from messing with these settings after its returned?
     crate::render::Stage1::from_parts(plots, X::default_ticks(), ytick_fmt, opt).build()
 }
 

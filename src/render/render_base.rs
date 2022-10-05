@@ -89,8 +89,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         vec![a, b].into_iter().chain(xticks)
     };
 
-    //TODO get rid of collecting ticks upfront.
-    let mut xticks = xticks.collect::<Vec<_>>().into_iter();
+    let mut xticks = xticks.into_iter();
 
     let mut yticks = yticksg
         .iter
@@ -108,8 +107,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         vec![a, b].into_iter().chain(yticks)
     };
 
-    //TODO get rid of collecting ticks upfront.
-    let mut yticks = yticks.collect::<Vec<_>>().into_iter();
+    let mut yticks = yticks.into_iter();
 
     let first_tickx = xticks.next().unwrap();
 
