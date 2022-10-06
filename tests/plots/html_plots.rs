@@ -1,27 +1,26 @@
 use super::*;
 
+use poloto::build::plot;
 #[test]
 fn custom_colors_html() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let l1 = x.zip_output(|x| x.cos()).buffered_plot().line("cos");
-    let l2 = x
-        .clone()
-        .step_by(3)
-        .map(|x| [x, x.sin() - 10.])
-        .buffered_plot()
-        .histogram("sin-10");
+    let l1 = plot("cos").line().buffered(x.zip_output(|x| x.cos()));
+    let l2 = plot("sin-10")
+        .histogram()
+        .buffered(x.clone().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let s = poloto::quick_fmt!(
+    let s = poloto::data(poloto::plots!(l1, l2)).build_and_label((
         "Demo: you can use CSS patterns if you embed SVG!",
         "x",
         "y",
-        l1,
-        l2
-    );
+    ));
+
+    let graph = s.headless().render_string().unwrap();
 
     let mut w = util::create_test_file("custom_colors.html");
 
+    let (header_start, header_end) = poloto::header().to_string();
     write!(
         w,
         r###"
@@ -54,14 +53,9 @@ fn custom_colors_html() -> fmt::Result {
         </div>
         </htmls>
         "###,
-        poloto::simple_theme::STYLE_CONFIG_LIGHT_DEFAULT,
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        format_args!(
-            "{}{}{}",
-            poloto::simple_theme::SVG_HEADER,
-            poloto::disp(|a| s.render(a)),
-            poloto::simple_theme::SVG_END
-        )
+        poloto::render::Theme::light().get_str(),
+        poloto::render::Theme::dark().get_str(),
+        format_args!("{}{}{}", header_start, graph, header_end)
     )
 }
 
@@ -127,22 +121,21 @@ body {
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let s = poloto::quick_fmt!(
-        "Demo: Hovering and shadows",
-        "x",
-        "y",
-        x.zip_output(f64::cos).buffered_plot().line("cos"),
-        x.clone()
-            .step_by(3)
-            .zip_output(|x| x.sin() - 3.)
-            .buffered_plot()
-            .histogram("sin-3"),
-        x.clone()
-            .step_by(3)
-            .zip_output(|x| x.sin())
-            .buffered_plot()
-            .scatter("sin")
+    let s = poloto::plots!(
+        plot("cos").line().buffered(x.zip_output(f64::cos)),
+        plot("sin-3")
+            .histogram()
+            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 3.)),
+        plot("sin")
+            .scatter()
+            .buffered(x.clone().step_by(3).zip_output(|x| x.sin()))
     );
+
+    let s = poloto::data(s)
+        .build_and_label(("Demo: Hovering and shadows", "x", "y"))
+        .append_to(poloto::header().light_theme());
+
+    let s = s.render_string().unwrap();
 
     let mut w = util::create_test_file("hover_shadow.html");
 
@@ -156,7 +149,6 @@ body {
 </div>
 </html>
         "###,
-        HEADER,
-        poloto::disp(|a| s.simple_theme(a))
+        HEADER, s
     )
 }

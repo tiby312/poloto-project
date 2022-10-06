@@ -1,5 +1,4 @@
 use super::*;
-
 const fn generate_test() -> [&'static [[f64; 2]]; 9] {
     let test0 = &[[0.0, 6000.0], [0.0, 200.0]];
 
@@ -52,69 +51,56 @@ const fn generate_test_int() -> [&'static [[i128; 2]]; 9] {
         test0, test1, test2, test3, test4, test5, test6, test7, test8,
     ]
 }
-use poloto::formatm;
+use hypermelon::prelude::*;
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
 #[test]
 fn test_chart() -> std::fmt::Result {
+    use hypermelon::build;
+
+    let html = build::elem("html").with(("style", "background-color:#262626"));
+    let style = poloto::render::Theme::dark().append(".poloto_scatter{stroke-width:20}");
+
+    let div = build::elem("div").with(("style", "display:flex;flex-wrap:wrap;"));
+
+    let float_tests = build::from_iter(generate_test().into_iter().enumerate().map(|(i, test)| {
+        let header = header();
+
+        //TODO dont include style in every instance!
+
+        let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
+            .build_and_label((hypermelon::format_move!("float test {}", i), "x", "y"));
+
+        header.append(p)
+    }));
+
+    let int_test = build::from_iter(generate_test_int().into_iter().enumerate().map(
+        |(i, test)| {
+            let header = header();
+
+            // let style =
+            //     poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
+
+            let p = poloto::data(poloto::build::plot("").scatter().cloned(test.iter()))
+                .build_and_label((hypermelon::format_move!("int test {}", i), "x", "y"));
+            header.append(p)
+        },
+    ));
+
+    let d = div.append(float_tests).append(int_test);
+    let d = html.append(style).append(d);
+
     let w = util::create_test_file("test_chart.html");
 
-    let mut e = tagger::new(w);
-
-    let opt = poloto::render::render_opt();
-
-    e.elem("html", |e| e.attr("style", "background-color:#262626"))?
-        .build(|e| {
-            e.elem("div", |d| d.attr("style", "display:flex;flex-wrap:wrap;"))?
-                .build(|e| {
-                    for (i, &test) in generate_test().iter().enumerate() {
-                        use std::fmt::Write;
-
-                        write!(
-                            e.writer_escapable(),
-                            "{}<style>{}{}</style>{}{}",
-                            CUSTOM_SVG,
-                            poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-                            ".poloto_scatter{stroke-width:20}",
-                            poloto::disp(|a| {
-                                let s = poloto::quick_fmt_opt!(
-                                    &opt,
-                                    formatm!("test {}", i),
-                                    "x",
-                                    "y",
-                                    test.iter().cloned_plot().scatter(""),
-                                );
-                                s.render(a)
-                            }),
-                            poloto::simple_theme::SVG_END
-                        )?;
-                    }
-
-                    for (i, &test) in generate_test_int().iter().enumerate() {
-                        use std::fmt::Write;
-                        write!(
-                            e.writer_escapable(),
-                            "{}<style>{}{}</style>{}{}",
-                            CUSTOM_SVG,
-                            poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-                            ".poloto_scatter{stroke-width:20}",
-                            poloto::disp(|a| {
-                                let s = poloto::quick_fmt_opt!(
-                                    &opt,
-                                    formatm!("test {}", i),
-                                    "x",
-                                    "y",
-                                    test.iter().cloned_plot().scatter(""),
-                                );
-                                s.render(a)
-                            }),
-                            poloto::simple_theme::SVG_END
-                        )?;
-                    }
-
-                    Ok(())
-                })
-        })
+    hypermelon::render(d, w)
 }
 
-pub const CUSTOM_SVG: &str = r####"<svg class="poloto_background poloto" width="500px" height="100%" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">"####;
+pub fn header() -> impl Elem {
+    hypermelon::build::elem("svg").with(hypermelon::attrs!(
+        ("class", "poloto_background poloto"),
+        ("width", "500px"),
+        ("height", "100%"),
+        ("viewBox", "0 0 800 500"),
+        ("xmlns", "http://www.w3.org/2000/svg")
+    ))
+}

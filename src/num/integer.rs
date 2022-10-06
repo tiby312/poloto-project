@@ -9,39 +9,23 @@ fn round_up_to_nearest_multiple(val: i128, multiple: i128) -> i128 {
     ((val + ss) / multiple) * multiple
 }
 
-pub struct IntegerTickFmt {
-    ticks: std::vec::IntoIter<i128>,
-    dash_size: f64,
-    step: i128,
+pub struct IntegerTickFmt;
+
+pub struct IntFmt {
     offset: Option<i128>,
-    axis: crate::Axis,
+    axis: Axis,
+    step: i128,
 }
-impl IntegerTickFmt {
-    pub fn step(&self) -> i128 {
-        self.step
+impl IntFmt {
+    pub fn step(&self) -> &i128 {
+        &self.step
     }
-    pub fn axis(&self) -> Axis {
-        self.axis
-    }
-    pub fn offset(&self) -> Option<i128> {
-        self.offset
+    pub fn offset(&self) -> &Option<i128> {
+        &self.offset
     }
 }
-impl TickFormat for IntegerTickFmt {
-    type Num = i128;
-
-    fn next_tick(&mut self) -> Option<Self::Num> {
-        self.ticks.next()
-    }
-    fn dash_size(&self) -> Option<f64> {
-        Some(self.dash_size)
-    }
-
-    fn write_tick(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
+impl ticks::tick_fmt::TickFmt<i128> for IntFmt {
+    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &i128) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {
             let val = *val - offset;
             match self.axis {
@@ -59,11 +43,7 @@ impl TickFormat for IntegerTickFmt {
 
         util::write_interval_i128(writer, val, Some(self.step))
     }
-    fn write_where(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        _req: ticks::IndexRequester,
-    ) -> std::fmt::Result {
+    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
         if let Some(offset) = self.offset {
             match self.axis {
                 Axis::X => {
@@ -80,31 +60,47 @@ impl TickFormat for IntegerTickFmt {
     }
 }
 
-impl HasDefaultTicks for i128 {
-    type Fmt = IntegerTickFmt;
-    fn generate(bound: crate::ticks::Bound<i128>) -> Self::Fmt {
-        let range = [bound.data.min, bound.data.max];
-        let ideal_num_steps = bound.canvas.ideal_num_steps;
+impl TickDistGen<i128> for IntegerTickFmt {
+    type Res = TickDistribution<Vec<i128>, IntFmt>;
+    fn generate(
+        self,
+        data: &ticks::DataBound<i128>,
+        canvas: &RenderOptionsBound,
+        _: IndexRequester,
+    ) -> Self::Res {
+        let range = [data.min, data.max];
+        let ideal_num_steps = canvas.ideal_num_steps;
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
 
         let (offset, ticks) = tick_layout.generate();
 
         let dash_size = compute_best_dash_1_2_5(
-            tick_layout.step.scale(range, bound.canvas.max),
-            bound.canvas.ideal_dash_size,
+            tick_layout.step.scale(range, canvas.max),
+            canvas.ideal_dash_size,
             tick_layout.normalized_step,
         );
 
-        let axis = bound.canvas.axis;
+        let axis = canvas.axis;
 
-        IntegerTickFmt {
-            ticks: ticks.into_iter(),
-            dash_size,
-            step: tick_layout.step,
-            offset,
-            axis,
+        TickDistribution {
+            res: TickRes {
+                dash_size: Some(dash_size),
+            },
+            iter: ticks,
+            fmt: IntFmt {
+                offset,
+                axis,
+                step: tick_layout.step,
+            },
         }
+        // IntegerTickFmt {
+        //     ticks: ticks.into_iter(),
+        //     dash_size,
+        //     step: tick_layout.step,
+        //     offset,
+        //     axis,
+        // }
     }
 }
 
@@ -119,6 +115,13 @@ impl plotnum::AsPlotnum for &mut i128 {
     type Target = i128;
     fn as_plotnum(&self) -> &Self::Target {
         self
+    }
+}
+
+impl HasDefaultTicks for i128 {
+    type DefaultTicks = IntegerTickFmt;
+    fn default_ticks() -> Self::DefaultTicks {
+        IntegerTickFmt
     }
 }
 

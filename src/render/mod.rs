@@ -2,125 +2,16 @@
 //! Tools to render plots
 //!
 
-use crate::*;
+use super::*;
+use crate::build::PlotIterator;
 mod render_base;
 mod render_plot;
 
-trait NumFmt {
-    type K: Display;
-    fn fmt(&self, a: f64) -> Self::K;
-}
-
-struct MyPathBuilder<'a, 'b, T: fmt::Write, K> {
-    num_fmt: K,
-    path: &'a mut tagger::PathBuilder<'b, T>,
-}
-impl<T: fmt::Write, K: NumFmt> MyPathBuilder<'_, '_, T, K> {
-    #[inline(always)]
-    pub fn put(&mut self, a: tagger::PathCommand<f64>) -> fmt::Result {
-        self.path.put(a.map(|x| self.num_fmt.fmt(x)))
-    }
-
-    #[inline(always)]
-    pub fn put_z(&mut self) -> fmt::Result {
-        self.path.put(tagger::PathCommand::Z(""))
-    }
-}
-
-fn line_fill<T: std::fmt::Write>(
-    path: &mut tagger::PathBuilder<T>,
-    mut it: impl Iterator<Item = [f64; 2]>,
-    base_line: f64,
-    add_start_end_base: bool,
-    num_fmt: impl NumFmt,
-) -> fmt::Result {
-    let mut path = MyPathBuilder { num_fmt, path };
-
-    if let Some([startx, starty]) = it.next() {
-        use tagger::PathCommand::*;
-
-        let mut last = [startx, starty];
-        let mut last_finite = None;
-        let mut first = true;
-        for [newx, newy] in it {
-            match (
-                newx.is_finite() && newy.is_finite(),
-                last[0].is_finite() && last[1].is_finite(),
-            ) {
-                (true, true) => {
-                    if first {
-                        if add_start_end_base {
-                            path.put(M(last[0], base_line))?;
-                            path.put(L(last[0], last[1]))?;
-                        } else {
-                            path.put(M(last[0], last[1]))?;
-                        }
-                        first = false;
-                    }
-                    last_finite = Some([newx, newy]);
-                    path.put(L(newx, newy))?;
-                }
-                (true, false) => {
-                    path.put(M(newx, newy))?;
-                }
-                (false, true) => {
-                    path.put(L(last[0], base_line))?;
-                }
-                _ => {}
-            };
-            last = [newx, newy];
-        }
-        if let Some([x, _]) = last_finite {
-            if add_start_end_base {
-                path.put(L(x, base_line))?;
-            }
-            path.put_z()?;
-        }
-    }
-    Ok(())
-}
-
-fn line<T: std::fmt::Write>(
-    path: &mut tagger::PathBuilder<T>,
-    mut it: impl Iterator<Item = [f64; 2]>,
-    num_fmt: impl NumFmt,
-) -> fmt::Result {
-    let mut path = MyPathBuilder { num_fmt, path };
-
-    if let Some([startx, starty]) = it.next() {
-        use tagger::PathCommand::*;
-
-        let mut last = [startx, starty];
-        let mut first = true;
-        for [newx, newy] in it {
-            match (
-                newx.is_finite() && newy.is_finite(),
-                last[0].is_finite() && last[1].is_finite(),
-            ) {
-                (true, true) => {
-                    if first {
-                        path.put(M(last[0], last[1]))?;
-                        first = false;
-                    }
-                    path.put(L(newx, newy))?;
-                }
-                (true, false) => {
-                    path.put(M(newx, newy))?;
-                }
-                _ => {}
-            };
-            last = [newx, newy];
-        }
-    }
-    Ok(())
-}
-
 ///
-/// Build a [`RenderOptions`]
+/// Specify options for the svg plots
 ///
-/// Created by [`render_opt_builder()`]
-///
-pub struct RenderOptionsBuilder {
+#[derive(Clone)]
+pub struct RenderOptions {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
     dim: Option<[f64; 2]>,
@@ -130,9 +21,9 @@ pub struct RenderOptionsBuilder {
     bar_width: f64,
 }
 
-impl Default for RenderOptionsBuilder {
+impl Default for RenderOptions {
     fn default() -> Self {
-        RenderOptionsBuilder {
+        RenderOptions {
             num_css_classes: Some(8),
             preserve_aspect: false,
             dim: None,
@@ -144,8 +35,11 @@ impl Default for RenderOptionsBuilder {
     }
 }
 
-impl RenderOptionsBuilder {
-    pub fn with_dim(&mut self, dim: [f64; 2]) -> &mut Self {
+impl RenderOptions {
+    pub fn new() -> Self {
+        Self::default()
+    }
+    pub fn with_viewbox(&mut self, dim: [f64; 2]) -> &mut Self {
         self.dim = Some(dim);
         self
     }
@@ -192,11 +86,16 @@ impl RenderOptionsBuilder {
         self
     }
 
-    pub fn build(&mut self) -> RenderOptions {
+    pub fn move_into(&mut self) -> Self {
+        self.clone()
+    }
+
+    fn compute(&mut self) -> RenderOptionsResult {
         let (width, height) = if let Some([x, y]) = self.dim {
             (x, y)
         } else {
-            (crate::WIDTH as f64, crate::HEIGHT as f64)
+            let [x, y] = Header::new().get_viewbox();
+            (x, y)
         };
 
         let ideal_dash_size = 20.0;
@@ -242,7 +141,7 @@ impl RenderOptionsBuilder {
         let spacing = padding / 3.0;
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
-        RenderOptions {
+        RenderOptionsResult {
             boundx: ticks::RenderOptionsBound {
                 ideal_num_steps: ideal_num_xsteps,
                 ideal_dash_size,
@@ -277,7 +176,7 @@ impl RenderOptionsBuilder {
 /// Contains graphical information for a svg graph.
 ///
 #[derive(Clone)]
-pub struct RenderOptions {
+struct RenderOptionsResult {
     boundx: ticks::RenderOptionsBound,
     boundy: ticks::RenderOptionsBound,
     width: f64,
@@ -295,240 +194,491 @@ pub struct RenderOptions {
     bar_width: f64,
 }
 
-impl RenderOptions {
-    pub fn get_dim(&self) -> [f64; 2] {
-        [self.width, self.height]
-    }
-}
-
-impl<T: Renderable> Renderable for &T {
-    fn get_dim(&self) -> [f64; 2] {
-        (*self).get_dim()
-    }
-
-    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
-        (*self).bounds()
-    }
-    fn render<X: PlotNum, Y: PlotNum>(
-        &self,
-        writer: &mut dyn fmt::Write,
-        plots: &mut impl build::PlotIterator<X, Y>,
-        base: &mut dyn BaseFmt<X = X, Y = Y>,
-        boundx: &DataBound<X>,
-        boundy: &DataBound<Y>,
-    ) -> fmt::Result {
-        (*self).render(writer, plots, base, boundx, boundy)
-    }
-}
-
-impl Renderable for RenderOptions {
-    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound) {
-        (&self.boundx, &self.boundy)
-    }
-    fn get_dim(&self) -> [f64; 2] {
-        [self.width, self.height]
-    }
-    fn render<X: PlotNum, Y: PlotNum>(
-        &self,
-        mut writer: &mut dyn fmt::Write,
-        plots: &mut impl build::PlotIterator<X, Y>,
-        base: &mut dyn BaseFmt<X = X, Y = Y>,
-        boundx: &DataBound<X>,
-        boundy: &DataBound<Y>,
-    ) -> fmt::Result {
-        //render background
-        {
-            let mut writer = tagger::new(&mut writer);
-            writer.single("circle", |d| {
-                d.attr("r", "1e5")?;
-                d.attr("class", "poloto_background")
-            })?;
-        }
-
-        render::render_plot::render_plot(&mut writer, boundx, boundy, self, plots)?;
-
-        render::render_base::render_base(&mut writer, boundx, boundy, base, self)
-    }
-}
-pub trait Renderable {
-    fn get_dim(&self) -> [f64; 2];
-
-    fn bounds(&self) -> (&RenderOptionsBound, &RenderOptionsBound);
-    fn render<X: PlotNum, Y: PlotNum>(
-        &self,
-        writer: &mut dyn fmt::Write,
-        plots: &mut impl build::PlotIterator<X, Y>,
-        base: &mut dyn BaseFmt<X = X, Y = Y>,
-        boundx: &DataBound<X>,
-        boundy: &DataBound<Y>,
-    ) -> fmt::Result;
-}
-
-///
-/// Build a [`RenderOptions`]
-///
 pub fn render_opt() -> RenderOptions {
-    RenderOptionsBuilder::default().build()
-}
-
-pub fn render_opt_builder() -> RenderOptionsBuilder {
-    RenderOptionsBuilder::default()
+    RenderOptions::default()
 }
 
 ///
 /// Link some plots with a way to render them.
 ///
-pub struct Data<X, Y, P> {
-    boundx: ticks::DataBound<X>,
-    boundy: ticks::DataBound<Y>,
+pub struct Stage1<P: PlotIterator, TX, TY> {
+    opt: RenderOptions,
+    tickx: TX,
+    ticky: TY,
     plots: P,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
 }
 
-impl<X, Y, P> Data<X, Y, P> {
-    pub fn new(mut plots: P) -> Data<X, Y, P>
-    where
-        P: build::marker::Markerable<X, Y>,
-        X: PlotNum,
-        Y: PlotNum,
-    {
-        let mut area = build::marker::Area::new();
-        plots.increase_area(&mut area);
-        let (boundx, boundy) = area.build();
-
-        Data {
-            boundx,
-            boundy,
+impl<X, Y, P: build::PlotIterator<X = X, Y = Y>> Stage1<P, X::DefaultTicks, Y::DefaultTicks>
+where
+    X: HasDefaultTicks,
+    Y: HasDefaultTicks,
+{
+    pub fn new(plots: P) -> Self {
+        Self::from_parts(
             plots,
-        }
-    }
-
-    pub fn bounds(&self) -> (&ticks::DataBound<X>, &ticks::DataBound<Y>) {
-        (&self.boundx, &self.boundy)
-    }
-}
-
-pub fn plot_with<X, Y, P: build::PlotIterator<X, Y>, K: Renderable, A: BaseFmt<X = X, Y = Y>>(
-    data: Data<X, Y, P>,
-    canvas: K,
-    base: A,
-) -> Plotter<P, K, A> {
-    Plotter {
-        plots: data.plots,
-        base,
-        boundx: data.boundx,
-        boundy: data.boundy,
-        canvas,
-    }
-}
-
-///
-/// Created by [`plot_with`]
-///
-pub struct Plotter<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> {
-    canvas: K,
-    boundx: DataBound<B::X>,
-    boundy: DataBound<B::Y>,
-    plots: P,
-    base: B,
-}
-
-impl<P: build::PlotIterator<B::X, B::Y>, K: Renderable, B: BaseFmt> Plotter<P, K, B> {
-    pub fn get_dim(&self) -> [f64; 2] {
-        self.canvas.get_dim()
-    }
-
-    ///
-    /// Use the plot iterators to write out the graph elements.
-    /// Does not add a svg tag, or any styling elements.
-    /// Use this if you want to embed a svg into your html.
-    /// You will just have to add your own svg sag and then supply styling.
-    ///
-    /// Panics if the render fails.
-    ///
-    /// In order to meet a more flexible builder pattern, instead of consuming the Plotter,
-    /// this function will mutable borrow the Plotter and leave it with empty data.
-    ///
-    /// ```
-    /// let data = [[1.0,4.0], [2.0,5.0], [3.0,6.0]];
-    /// let plotter=poloto::quick_fmt!("title","x","y",poloto::build::line("",data));
-    /// let mut k=String::new();
-    /// plotter.render(&mut k);
-    /// ```
-    pub fn render<T: std::fmt::Write>(mut self, mut writer: T) -> fmt::Result {
-        self.canvas.render(
-            &mut writer,
-            &mut self.plots,
-            &mut self.base,
-            &self.boundx,
-            &self.boundy,
+            P::X::default_ticks(),
+            P::Y::default_ticks(),
+            RenderOptions::new(),
         )
     }
 }
 
-///
-/// A simple plot formatter that is composed of
-/// display objects as TickFormats.
-///
-pub struct SimplePlotFormatter<A, B, C, D, E> {
-    pub(crate) title: A,
-    pub(crate) xname: B,
-    pub(crate) yname: C,
-    pub(crate) tickx: D,
-    pub(crate) ticky: E,
+impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage1<P, TX, TY> {
+    pub fn from_parts(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Stage1<P, TX, TY> {
+        let mut area = build::marker::Area::new();
+        plots.increase_area(&mut area);
+        let (boundx, boundy) = area.build();
+
+        Stage1 {
+            opt,
+            plots,
+            ticky,
+            tickx,
+            boundx,
+            boundy,
+        }
+    }
+
+    pub fn map_opt<F: FnOnce(RenderOptions) -> RenderOptions>(self, func: F) -> Self {
+        Stage1 {
+            opt: func(self.opt),
+            tickx: self.tickx,
+            ticky: self.ticky,
+            plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
+        }
+    }
+
+    pub fn map_xticks<TTT: TickDistGen<P::X>, F: FnOnce(TX) -> TTT>(
+        self,
+        func: F,
+    ) -> Stage1<P, TTT, TY> {
+        let tickx = func(self.tickx);
+        Stage1 {
+            opt: self.opt,
+            tickx,
+            ticky: self.ticky,
+            plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
+        }
+    }
+
+    pub fn map_yticks<TTT: TickDistGen<P::Y>, F: FnOnce(TY) -> TTT>(
+        self,
+        func: F,
+    ) -> Stage1<P, TX, TTT> {
+        let ticky = func(self.ticky);
+        Stage1 {
+            opt: self.opt,
+            tickx: self.tickx,
+            ticky,
+            plots: self.plots,
+            boundx: self.boundx,
+            boundy: self.boundy,
+        }
+    }
+
+    pub fn build_map<F: FnOnce(Stage2<P, TX::Res, TY::Res>) -> K, K>(self, func: F) -> K {
+        let k = self.build();
+        func(k)
+    }
+
+    pub fn build(self) -> Stage2<P, TX::Res, TY::Res> {
+        let mut index_counter = 0;
+        let mut data = self;
+        let opt = data.opt.compute();
+
+        let xticks = data.tickx.generate(
+            &data.boundx,
+            &opt.boundx,
+            IndexRequester::new(&mut index_counter),
+        );
+        let yticks = data.ticky.generate(
+            &data.boundy,
+            &opt.boundy,
+            IndexRequester::new(&mut index_counter),
+        );
+        Stage2 {
+            opt,
+            xticks,
+            yticks,
+            boundx: data.boundx,
+            boundy: data.boundy,
+            plots: data.plots,
+        }
+    }
+
+    pub fn build_and_label<Fmt: BaseFmt>(self, fmt: Fmt) -> Stage3<P, TX::Res, TY::Res, Fmt> {
+        self.build().label(fmt)
+    }
 }
-impl<A, B, C, D, E> BaseFmt for SimplePlotFormatter<A, B, C, D, E>
+
+pub struct Stage2<P: PlotIterator, A, B> {
+    opt: RenderOptionsResult,
+    xticks: A,
+    yticks: B,
+    plots: P,
+    boundx: DataBound<P::X>,
+    boundy: DataBound<P::Y>,
+}
+
+impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stage2<P, A, B> {
+    pub fn label<Fmt: BaseFmt>(self, fmt: Fmt) -> Stage3<P, A, B, Fmt> {
+        Stage3 {
+            data: self,
+            base: fmt,
+        }
+    }
+
+    pub fn boundx(&self) -> &DataBound<P::X> {
+        &self.boundx
+    }
+
+    pub fn boundy(&self) -> &DataBound<P::Y> {
+        &self.boundy
+    }
+
+    pub fn xticks(&self) -> &A {
+        &self.xticks
+    }
+    pub fn yticks(&self) -> &B {
+        &self.yticks
+    }
+
+    // pub fn map_xticks<X: TickDist<Num = P::X>, F: FnOnce(A) -> X>(
+    //     self,
+    //     func: F,
+    // ) -> DataBuilt<P, X, B> {
+    //     let k = func(self.xticks);
+    //     DataBuilt {
+    //         opt: self.opt,
+    //         xticks: k,
+    //         yticks: self.yticks,
+    //         plots: self.plots,
+    //         boundx: self.boundx,
+    //         boundy: self.boundy,
+    //     }
+    // }
+
+    // pub fn map_yticks<Y: TickDist<Num = P::Y>, F: FnOnce(B) -> Y>(
+    //     self,
+    //     func: F,
+    // ) -> DataBuilt<P, A, Y> {
+    //     let k = func(self.yticks);
+    //     DataBuilt {
+    //         opt: self.opt,
+    //         xticks: self.xticks,
+    //         yticks: k,
+    //         plots: self.plots,
+    //         boundx: self.boundx,
+    //         boundy: self.boundy,
+    //     }
+    // }
+}
+
+pub struct Stage3<P: PlotIterator, A, B, BB: BaseFmt> {
+    data: Stage2<P, A, B>,
+    base: BB,
+}
+
+impl<P, A, B, BB> Stage3<P, A, B, BB>
+where
+    P: PlotIterator,
+    A: crate::ticks::TickDist<Num = P::X>,
+    B: crate::ticks::TickDist<Num = P::Y>,
+    BB: BaseFmt,
+{
+    pub fn append_to<E: Elem>(self, elem: E) -> Stage4<elem::Append<E, Self>> {
+        Stage4(elem.append(self))
+    }
+
+    pub fn headless(self) -> Stage4<Self> {
+        Stage4(self)
+    }
+}
+
+impl<P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
+where
+    P: PlotIterator,
+    A: crate::ticks::TickDist<Num = P::X>,
+    B: crate::ticks::TickDist<Num = P::Y>,
+    BB: BaseFmt,
+{
+    type Tail = ();
+    fn render_head(mut self, writer: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        writer.render(
+            hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
+        )?;
+
+        render::render_plot::render_plot(
+            writer,
+            &self.data.boundx,
+            &self.data.boundy,
+            &self.data.opt,
+            &mut self.data.plots,
+        )?;
+
+        render::render_base::render_base(
+            writer,
+            self.data.xticks,
+            self.data.yticks,
+            &self.data.boundx,
+            &self.data.boundy,
+            &mut self.base,
+            &self.data.opt,
+        )
+    }
+}
+
+impl<A, B, C> BaseFmt for (A, B, C)
 where
     A: Display,
     B: Display,
     C: Display,
-    D: TickFormat,
-    E: TickFormat,
 {
-    type X = D::Num;
-    type Y = E::Num;
     fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.title)
+        write!(writer, "{}", self.0)
     }
     fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.xname)
+        write!(writer, "{}", self.1)
     }
     fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
-        write!(writer, "{}", self.yname)
+        write!(writer, "{}", self.2)
     }
-    fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result {
-        self.tickx.write_tick(writer, val)
-    }
-    fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result {
-        self.ticky.write_tick(writer, val)
-    }
-    fn write_xwher(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        ind: ticks::IndexRequester,
-    ) -> fmt::Result {
-        self.tickx.write_where(writer, ind)
-    }
-    fn write_ywher(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        ind: ticks::IndexRequester,
-    ) -> fmt::Result {
-        self.ticky.write_where(writer, ind)
+}
+
+pub struct Stage4<R: Elem>(R);
+impl<R: Elem> Stage4<R> {
+    pub fn render_stdout(self) {
+        hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap()
     }
 
-    fn next_xtick(&mut self) -> Option<Self::X> {
-        self.tickx.next_tick()
+    pub fn render_fmt_write<T: fmt::Write>(self, w: T) -> fmt::Result {
+        hypermelon::render(self.0, w)
     }
 
-    fn next_ytick(&mut self) -> Option<Self::Y> {
-        self.ticky.next_tick()
+    pub fn render_io_write<T: std::io::Write>(self, w: T) -> std::fmt::Result {
+        hypermelon::render(self.0, hypermelon::tools::upgrade_write(w))
     }
 
-    fn xdash_size(&self) -> Option<f64> {
-        self.tickx.dash_size()
+    pub fn render_string(self) -> Result<String, fmt::Error> {
+        let mut s = String::new();
+        hypermelon::render(self.0, &mut s)?;
+        Ok(s)
+    }
+}
+impl<R: Elem> Elem for Stage4<R> {
+    type Tail = R::Tail;
+
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        self.0.render_head(w)
+    }
+}
+
+///
+/// Default svg header
+///
+#[derive(Copy, Clone)]
+pub struct Header<A> {
+    dim: [f64; 2],
+    viewbox: [f64; 2],
+    attr: A,
+}
+impl Default for Header<()> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+use hypermelon::attr::Attr;
+impl Header<()> {
+    pub fn new() -> Self {
+        let a = [800.0, 500.0];
+        Header {
+            dim: a,
+            viewbox: a,
+            attr: (),
+        }
+    }
+}
+
+impl<A: Attr> Header<A> {
+    pub fn with<AA: Attr>(self, attr: AA) -> Header<AA> {
+        Header {
+            dim: self.dim,
+            viewbox: self.viewbox,
+            attr,
+        }
     }
 
-    fn ydash_size(&self) -> Option<f64> {
-        self.ticky.dash_size()
+    pub fn with_viewbox_width(self, width: f64) -> Self {
+        let [xx, yy] = self.dim;
+        let vh = width * (yy / xx);
+        Header {
+            dim: self.dim,
+            viewbox: [width, vh],
+            attr: self.attr,
+        }
+    }
+
+    pub fn get_viewbox(&self) -> [f64; 2] {
+        self.viewbox
+    }
+
+    pub fn with_dim(self, dim: [f64; 2]) -> Self {
+        Header {
+            dim,
+            viewbox: self.viewbox,
+            attr: self.attr,
+        }
+    }
+    pub fn with_viewbox(self, viewbox: [f64; 2]) -> Self {
+        Header {
+            dim: self.dim,
+            viewbox,
+            attr: self.attr,
+        }
+    }
+
+    pub fn to_string(self) -> (String, String) {
+        let mut s = String::new();
+        let tail = self.render_head(&mut elem::ElemWrite::new(&mut s)).unwrap();
+
+        use elem::RenderTail;
+        let mut b = String::new();
+        tail.render(&mut elem::ElemWrite::new(&mut b)).unwrap();
+
+        (s, b)
+    }
+
+    pub fn light_theme(self) -> elem::Append<Self, Theme<'static>> {
+        self.append(Theme::light())
+    }
+    pub fn dark_theme(self) -> elem::Append<Self, Theme<'static>> {
+        self.append(Theme::light())
+    }
+}
+
+impl<A: Attr> Elem for Header<A> {
+    type Tail = hypermelon::build::ElemTail<&'static str>;
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        let elem = hypermelon::build::elem("svg").with(attrs!(
+            ("class", "poloto"),
+            ("width", self.dim[0]),
+            ("height", self.dim[1]),
+            (
+                "viewBox",
+                format_move!("{} {} {} {}", 0, 0, self.viewbox[0], self.viewbox[1])
+            ),
+            ("xmlns", "http://www.w3.org/2000/svg"),
+            self.attr
+        ));
+
+        elem.render_head(w)
+    }
+}
+
+///
+/// Default theme
+///
+#[derive(Copy, Clone)]
+pub struct Theme<'a> {
+    styles: &'a str,
+}
+
+impl Theme<'static> {
+    pub const fn light() -> Theme<'static> {
+        /// Default light theme
+
+        const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto{\
+            stroke-linecap:round;\
+            stroke-linejoin:round;\
+            font-family:Roboto,sans-serif;\
+            font-size:16px;\
+            }\
+            .poloto_background{fill:AliceBlue;}\
+            .poloto_scatter{stroke-width:7}\
+            .poloto_tick_line{stroke:gray;stroke-width:0.5}\
+            .poloto_line{stroke-width:2}\
+            .poloto_text{fill: black;}\
+            .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}\
+            .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+            .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+            .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+            .poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}\
+            .poloto0stroke{stroke:blue;}\
+            .poloto1stroke{stroke:red;}\
+            .poloto2stroke{stroke:green;}\
+            .poloto3stroke{stroke:gold;}\
+            .poloto4stroke{stroke:aqua;}\
+            .poloto5stroke{stroke:lime;}\
+            .poloto6stroke{stroke:orange;}\
+            .poloto7stroke{stroke:chocolate;}\
+            .poloto0fill{fill:blue;}\
+            .poloto1fill{fill:red;}\
+            .poloto2fill{fill:green;}\
+            .poloto3fill{fill:gold;}\
+            .poloto4fill{fill:aqua;}\
+            .poloto5fill{fill:lime;}\
+            .poloto6fill{fill:orange;}\
+            .poloto7fill{fill:chocolate;}";
+
+        Theme {
+            styles: STYLE_CONFIG_LIGHT_DEFAULT,
+        }
+    }
+    pub const fn dark() -> Theme<'static> {
+        /// Default dark theme
+        const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto{\
+    stroke-linecap:round;\
+    stroke-linejoin:round;\
+    font-family:Roboto,sans-serif;\
+    font-size:16px;\
+    }\
+    .poloto_background{fill:#262626;}\
+    .poloto_scatter{stroke-width:7}\
+    .poloto_tick_line{stroke:dimgray;stroke-width:0.5}\
+    .poloto_line{stroke-width:2}\
+    .poloto_text{fill: white;}\
+    .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}\
+    .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+    .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+    .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
+    .poloto0stroke{stroke:blue;}\
+    .poloto1stroke{stroke:red;}\
+    .poloto2stroke{stroke:green;}\
+    .poloto3stroke{stroke:gold;}\
+    .poloto4stroke{stroke:aqua;}\
+    .poloto5stroke{stroke:lime;}\
+    .poloto6stroke{stroke:orange;}\
+    .poloto7stroke{stroke:chocolate;}\
+    .poloto0fill{fill:blue;}\
+    .poloto1fill{fill:red;}\
+    .poloto2fill{fill:green;}\
+    .poloto3fill{fill:gold;}\
+    .poloto4fill{fill:aqua;}\
+    .poloto5fill{fill:lime;}\
+    .poloto6fill{fill:orange;}\
+    .poloto7fill{fill:chocolate;}";
+        Theme {
+            styles: STYLE_CONFIG_DARK_DEFAULT,
+        }
+    }
+
+    pub const fn get_str(&self) -> &'static str {
+        self.styles
+    }
+}
+
+impl<'a> Elem for Theme<'a> {
+    type Tail = hypermelon::build::ElemTail<&'static str>;
+    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+        let k = hypermelon::build::elem("style");
+        let k = k.append(self.styles);
+        k.render_head(w)
     }
 }

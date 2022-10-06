@@ -1,3 +1,4 @@
+use hypermelon::prelude::*;
 use poloto::prelude::*;
 
 // PIPE me to a file!
@@ -14,39 +15,27 @@ fn main() {
         .fuse()
     };
 
-    //Make the plotting area slightly larger.
-    let dim = [1300.0, 600.0];
+    let svg = poloto::header().with_viewbox_width(1200.0);
 
-    let opt = poloto::render::render_opt_builder()
+    let opt = poloto::render::render_opt()
         .with_tick_lines([true, true])
-        .with_dim(dim)
-        .build();
+        .with_viewbox(svg.get_viewbox())
+        .move_into();
 
-    let plotter = quick_fmt_opt!(
-        opt,
-        "collatz",
-        "x",
-        "y",
-        poloto::build::plots_dyn(
-            (1000..1006)
-                .map(|i| {
-                    let name = formatm!("c({})", i);
-                    (0..).zip(collatz(i)).buffered_plot().line(name)
-                })
-                .collect(),
-        ),
-        poloto::build::origin()
-    );
+    let style =
+        poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
-    use poloto::simple_theme;
-    let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
+    let a = poloto::build::plots_dyn((1000..1006).map(|i| {
+        let name = format_move!("c({})", i);
+        let it = (0..).zip(collatz(i));
+        poloto::build::plot(name).line().buffered(it)
+    }));
 
-    print!(
-        "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a, [simple_theme::DIM[0], hh], dim)),
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    let b = poloto::build::origin();
+
+    poloto::data(plots!(a, b))
+        .map_opt(|_| opt)
+        .build_and_label(("collatz", "x", "y"))
+        .append_to(svg.append(style))
+        .render_stdout();
 }

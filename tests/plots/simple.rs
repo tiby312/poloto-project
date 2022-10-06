@@ -1,5 +1,9 @@
-use super::*;
+use hypermelon::{elem::Elem, format_move};
 
+use super::*;
+use poloto::build::plot;
+use poloto::render::Header;
+use poloto::render::Theme;
 #[test]
 fn heart() -> fmt::Result {
     // https://mathworld.wolfram.com/HeartCurve.html
@@ -12,78 +16,67 @@ fn heart() -> fmt::Result {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let canvas = poloto::render::render_opt_builder()
-        .preserve_aspect()
-        .build();
+    let canvas = poloto::render::render_opt().preserve_aspect().move_into();
 
-    let plotter = poloto::quick_fmt_opt!(
-        canvas,
-        "Heart Graph",
-        "x",
-        "y",
-        range.map(heart).buffered_plot().line_fill_raw(""),
+    let plots = poloto::plots!(
+        plot("").line_fill_raw().buffered(range.map(heart)),
         poloto::build::markers([-20.0, 20.0], [-20.0, 20.0])
     );
 
     let w = util::create_test_file("heart.svg");
 
-    plotter.simple_theme_dark(w)
+    poloto::data(plots)
+        .map_opt(|_| canvas)
+        .build_and_label(("Heart Graph", "x", "y"))
+        .append_to(poloto::header().dark_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
 fn large_scatter() -> fmt::Result {
     let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
 
-    let plotter = poloto::quick_fmt!(
-        "cows per year",
-        "year",
-        "cows",
-        x.zip_output(f64::cos).buffered_plot().scatter("a"),
-        x.zip_output(f64::sin).buffered_plot().line("b")
+    let plots = poloto::plots!(
+        plot("a").scatter().buffered(x.zip_output(f64::cos)),
+        plot("b").line().buffered(x.zip_output(f64::sin))
     );
-    let mut w = util::create_test_file("large_scatter.svg");
 
-    write!(
-        w,
-        "{}<style>{}{}</style>{}{}",
-        poloto::simple_theme::SVG_HEADER,
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
+    let data = poloto::data(plots).build_and_label(("cows per year", "year", "cows"));
+
+    let header = Header::new().append(Theme::dark().append(
         ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    ));
+
+    let w = util::create_test_file("large_scatter.svg");
+
+    data.append_to(header).render_fmt_write(w)
 }
 
 #[test]
 fn line_fill_fmt() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let opt = poloto::render::render_opt();
-    let s = poloto::data(
+    let s = plot("tan(x)").line_fill().buffered(
         x.zip_output(f64::tan)
             .crop_above(10.0)
             .crop_below(0.0)
-            .crop_left(2.0)
-            .buffered_plot()
-            .line_fill("tan(x)"),
+            .crop_left(2.0),
     );
 
-    let (bx, by) = poloto::ticks::bounds(&s, &opt);
-    let boundx = bx.data.clone();
+    let data = poloto::data(s).build_map(|data| {
+        let boundx = *data.boundx();
+        data.label((
+            format_move!("from {} to {}", boundx.min, boundx.max),
+            format_move!("This is the {} label", 'x'),
+            "This is the y label",
+        ))
+    });
 
-    let fmt = poloto::plot_fmt(
-        formatm!("from {} to {}", boundx.min, boundx.max),
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-        poloto::ticks::from_default(bx),
-        poloto::ticks::from_default(by),
-    );
-
-    let plotter = poloto::plot_with(s, &opt, fmt);
+    let data = data.append_to(poloto::header().light_theme());
 
     let w = util::create_test_file("line_fill_fmt.svg");
 
-    plotter.simple_theme(w)
+    data.render_fmt_write(w)
 }
 
 #[test]
@@ -101,82 +94,73 @@ fn long_label() -> fmt::Result {
         .fuse()
     };
 
-    let plotter = poloto::quick_fmt!(
-        "collatz",
-        "x",
-        "y",
-        poloto::build::text("Some notes here"),
-        (0..).zip(collatz(1000)).buffered_plot().line(formatm!(
+    let plots = poloto::plots!(
+        plot("Some notes here").text(),
+        plot(format_move!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1000
-        )),
-        (0..).zip(collatz(1001)).buffered_plot().line(formatm!(
+        ))
+        .line()
+        .buffered((0..).zip(collatz(1000))),
+        plot(format_move!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1001
-        )),
+        ))
+        .line()
+        .buffered((0..).zip(collatz(1001))),
         poloto::build::markers([], [0]),
-        poloto::build::text(" 🍆 Here is a note using the text() function.🍎",),
-        (0..).zip(collatz(1002)).buffered_plot().line(formatm!(
+        plot(" 🍆 Here is a note using the text() function.🍎",).text(),
+        plot(format_move!(
             "c({}) The quick brown fox jumps over the lazy dog",
             1002
         ))
+        .line()
+        .buffered((0..).zip(collatz(1002)))
     );
 
-    let mut w = util::create_test_file("long_label.svg");
+    let data = poloto::data(plots).build_and_label(("collatz", "x", "y"));
 
-    // Use a width of 1200 instead of 800
-    write!(
-        w,
-        "{}<style>{}</style>{}{}",
-        poloto::disp_const(|w| poloto::simple_theme::write_header(
-            w,
-            [1200.0, 500.0],
-            [1200.0, 500.0]
-        )),
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    let a = [1200.0, 500.0];
+    let header = Header::new()
+        .with_dim(a)
+        .with_viewbox(a)
+        .append(Theme::dark());
+
+    let w = util::create_test_file("long_label.svg");
+
+    data.append_to(header).render_fmt_write(w)
 }
 
 #[test]
 fn magnitude() -> fmt::Result {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let p = poloto::quick_fmt!(
-        "cows per year",
-        "year",
-        "cow",
-        data.iter().cloned_plot().scatter(""),
-    );
+    let d = poloto::data(plot("").scatter().cloned(data.iter()))
+        .build_and_label(("cows per year", "year", "cow"))
+        .append_to(poloto::header().light_theme());
 
     let w = util::create_test_file("magnitude.svg");
 
-    p.simple_theme(w)
+    d.render_fmt_write(w)
 }
 
 #[test]
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let plotter = poloto::quick_fmt!(
+    let d = poloto::data(plot("").scatter().cloned(points.iter())).build_and_label((
         "cows per year",
         "year",
         "cow",
-        points.iter().cloned_plot().scatter(""),
-    );
+    ));
 
-    let mut w = util::create_test_file("base_color.svg");
-
-    write!(
-        w,
-        "{}<style>{}{}</style>{}{}",
-        poloto::simple_theme::SVG_HEADER,
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
+    let header = Header::new().append(Theme::dark().append(
         ".poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    ));
+
+    let w = util::create_test_file("base_color.svg");
+
+    d.append_to(header).render_fmt_write(w)
 }
 
 #[test]
@@ -195,87 +179,74 @@ fn custom_dim() -> fmt::Result {
 
     let mut v = vec![];
     for i in 1000..1006 {
-        let l = (0..)
-            .zip(collatz(i))
-            .buffered_plot()
-            .line(formatm!("c({})", i));
+        let l = plot(format_move!("c({})", i))
+            .line()
+            .buffered((0..).zip(collatz(i)));
         v.push(l);
     }
 
-    let canvas = poloto::render::render_opt_builder()
-        .with_dim([2000.0, 1000.0])
+    let ddd = [2000.0, 1000.0];
+
+    let header = Header::new().with_dim(ddd).with_viewbox(ddd);
+
+    let canvas = poloto::render::render_opt()
+        .with_viewbox(header.get_viewbox())
         .with_tick_lines([true, true])
-        .build();
+        .move_into();
 
-    let plotter = poloto::quick_fmt_opt!(
-        canvas,
-        "collatz",
-        "x",
-        "y",
-        poloto::build::markers([], [0]).chain(poloto::build::plots_dyn(v)),
-    );
+    let data = poloto::data(poloto::plots!(
+        poloto::build::markers([], [0]),
+        poloto::build::plots_dyn(v)
+    ))
+    .map_opt(|_| canvas)
+    .build_and_label(("collatz", "x", "y"));
 
-    let mut w = util::create_test_file("custom_dim.svg");
+    let w = util::create_test_file("custom_dim.svg");
 
-    write!(
-        w,
-        "{}<style>{}{}</style>{}{}",
-        poloto::disp_const(|w| poloto::simple_theme::write_header(
-            w,
-            [2000.0, 1000.0],
-            [2000.0, 1000.0]
-        )),
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_line{stroke-dasharray:2;stroke-width:1;}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    let header =
+        header.append(Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:1;}"));
+
+    data.append_to(header).render_fmt_write(w)
 }
 
 #[test]
 fn dark() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let plotter = poloto::quick_fmt!(
-        "cos per year",
-        "year",
-        "cows",
-        x.zip_output(f64::cos)
-            .buffered_plot()
-            .line(formatm!("test {}", 1)),
-        x.zip_output(f64::sin)
-            .buffered_plot()
-            .line(formatm!("test {}", 2))
+    let data = poloto::plots!(
+        plot(format_move!("test {}", 1))
+            .line()
+            .buffered(x.zip_output(f64::cos)),
+        plot(format_move!("test {}", 2))
+            .line()
+            .buffered(x.zip_output(f64::sin))
     );
 
     let w = util::create_test_file("dark.svg");
-
-    plotter.simple_theme_dark(w)
+    poloto::data(data)
+        .build_and_label(("cos per year", "year", "cows"))
+        .append_to(poloto::header().dark_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
 fn custom_style() -> fmt::Result {
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
-    let p = poloto::quick_fmt!(
+    let data = poloto::plots!(
+        plot("cos").line().buffered(x.zip_output(f64::cos)),
+        plot("sin-10")
+            .histogram()
+            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 10.))
+    );
+
+    let data = poloto::data(data).build_and_label((
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
-        x.zip_output(f64::cos).buffered_plot().line("cos"),
-        x.clone()
-            .step_by(3)
-            .zip_output(|x| x.sin() - 10.)
-            .buffered_plot()
-            .histogram("sin-10")
-    );
+    ));
 
-    let mut w = util::create_test_file("custom_style.svg");
-
-    write!(
-        w,
-        "{}<style>{}</style>{}{}{}",
-        poloto::simple_theme::SVG_HEADER,
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
+    let header = Header::new().append(Theme::dark().chain(hypermelon::build::raw_escapable(
         r###"
     <defs>
         <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
@@ -290,37 +261,38 @@ fn custom_style() -> fmt::Result {
         fill: url(#pattern2);
     }
     </style>"###,
-        poloto::disp(|a| p.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    )));
+
+    let w = util::create_test_file("custom_style.svg");
+
+    data.append_to(header).render_fmt_write(w)
 }
 
 #[test]
 fn trig() -> fmt::Result {
     let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
-    let plotter = poloto::quick_fmt!(
+    let data = poloto::data(poloto::plots!(
+        plot("tan(x)").line().buffered(
+            x.zip_output(f64::tan)
+                .crop_above(10.0)
+                .crop_below(-10.0)
+                .crop_left(2.0)
+        ),
+        plot("2*cos(x)")
+            .line()
+            .buffered(x.zip_output(|x| 2.0 * x.cos()).crop_above(1.4))
+    ))
+    .build_and_label((
         "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
+        format_move!("This is the {} label", 'x'),
         "This is the y label",
-        x.zip_output(f64::tan)
-            .crop_above(10.0)
-            .crop_below(-10.0)
-            .crop_left(2.0)
-            .buffered_plot()
-            .line("tan(x"),
-        /*
-        x.zip_output(|x| (2.0 * x).sin())
-            .rect_bound_plot([0.0, 10.0], [0.0, 10.0])
-            .line("sin(2x"),*/
-        x.zip_output(|x| 2.0 * x.cos())
-            .crop_above(1.4)
-            .buffered_plot()
-            .line("2*cos(x")
-    );
+    ));
 
     let w = util::create_test_file("trig.svg");
-    plotter.simple_theme(w)
+
+    data.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -334,15 +306,16 @@ fn no_plots() -> fmt::Result {
         >,
     > = vec![];
 
-    let plotter = poloto::quick_fmt!(
+    let data = poloto::data(poloto::build::plots_dyn(v)).build_and_label((
         "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
+        format_move!("This is the {} label", 'x'),
         "This is the y label",
-        poloto::build::plots_dyn(v),
-    );
+    ));
 
     let w = util::create_test_file("no_plots.svg");
-    plotter.simple_theme(w)
+
+    data.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
@@ -356,72 +329,57 @@ fn no_plots_only_marker() -> fmt::Result {
         >,
     > = vec![];
 
-    let plotter = poloto::quick_fmt!(
-        "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
+    let data = poloto::data(poloto::plots!(
         poloto::build::plots_dyn(v),
         poloto::build::markers([], [5])
-    );
+    ))
+    .build_and_label((
+        "Some Trigonometry Plots 🥳",
+        format_move!("This is the {} label", 'x'),
+        "This is the y label",
+    ));
 
     let w = util::create_test_file("no_plots_only_makrer.svg");
-    plotter.simple_theme(w)
+    data.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
 fn one_empty_plot() -> fmt::Result {
-    let plotter = poloto::quick_fmt!(
-        "Some Trigonometry Plots 🥳",
-        formatm!("This is the {} label", 'x'),
-        "This is the y label",
-        std::iter::empty::<(i128, i128)>()
-            .cloned_plot()
-            .scatter("hay"),
+    let p = poloto::data(poloto::plots!(
+        plot("hay")
+            .scatter()
+            .cloned(std::iter::empty::<(i128, i128)>()),
         poloto::build::markers([], [5])
-    );
+    ))
+    .build_and_label((
+        "Some Trigonometry Plots 🥳",
+        format_move!("This is the {} label", 'x'),
+        "This is the y label",
+    ));
 
     let w = util::create_test_file("one_empty_plot.svg");
-    plotter.simple_theme(w)
+
+    p.append_to(poloto::header().light_theme())
+        .render_fmt_write(w)
 }
 
 #[test]
-fn test_bounded_cloneable() {
+fn test_cloned_cloneable() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let l1 = data.iter().buffered_plot().scatter("");
-    let l2 = data.iter().cloned_plot().scatter("");
+    let l1 = plot("").scatter().cloned(data.iter());
+    let l2 = plot("").scatter().buffered(data.iter());
     let l = plots!(l1, l2);
 
-    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
-
-    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l,);
+    let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
+    let p2 = poloto::data(l).build_and_label(("title", "x", "y"));
 
     let mut s1 = String::new();
     let mut s2 = String::new();
 
-    p1.render(&mut s1).unwrap();
-    p2.render(&mut s2).unwrap();
-
-    assert_eq!(s1, s2);
-}
-
-#[test]
-fn test_buffered_clonable() {
-    let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
-
-    let l1 = data.iter().buffered_plot().scatter("");
-    let l2 = data.iter().cloned_plot().scatter("");
-    let l = plots!(l1, l2);
-
-    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
-
-    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l,);
-
-    let mut s1 = String::new();
-    let mut s2 = String::new();
-
-    p1.render(&mut s1).unwrap();
-    p2.render(&mut s2).unwrap();
+    p1.headless().render_fmt_write(&mut s1).unwrap();
+    p2.headless().render_fmt_write(&mut s2).unwrap();
 
     assert_eq!(s1, s2);
 }
@@ -430,33 +388,33 @@ fn test_buffered_clonable() {
 fn test_single_and_chain_and_dyn_cloneable() {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let l1 = data.iter().cloned_plot().scatter("");
-    let l2 = data.iter().cloned_plot().scatter("");
+    let l1 = plot("").scatter().cloned(data.iter());
+    let l2 = plot("").scatter().cloned(data.iter());
     let l = plots!(l1, l2);
 
-    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
-
-    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
+    let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
+    let p2 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
 
     let mut s1 = String::new();
     let mut s2 = String::new();
 
-    p1.render(&mut s1).unwrap();
-    p2.render(&mut s2).unwrap();
+    p1.headless().render_fmt_write(&mut s1).unwrap();
+    p2.headless().render_fmt_write(&mut s2).unwrap();
 
     assert_eq!(s1, s2);
 
-    let l3 = poloto::build::plots_dyn(vec![data.iter().cloned_plot().scatter("")]);
+    let l3 = poloto::build::plots_dyn(vec![plot("").scatter().cloned(data.iter())]);
 
     let l = plots!(l, l3);
 
-    let p1 = poloto::quick_fmt!("cows per year", "year", "cow", l.clone());
-
-    let p2 = poloto::quick_fmt!("cows per year", "year", "cow", l,);
+    let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
+    let p2 = poloto::data(l).build_and_label(("title", "x", "y"));
 
     let mut s1 = String::new();
     let mut s2 = String::new();
 
-    p1.render(&mut s1).unwrap();
-    p2.render(&mut s2).unwrap();
+    p1.headless().render_fmt_write(&mut s1).unwrap();
+    p2.headless().render_fmt_write(&mut s2).unwrap();
+
+    assert_eq!(s1, s2);
 }

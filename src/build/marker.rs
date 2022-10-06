@@ -123,7 +123,3 @@ impl<X: PlotNum, Y: PlotNum> Area<X, Y> {
         )
     }
 }
-
-pub trait Markerable<X, Y> {
-    fn increase_area(&mut self, area: &mut Area<X, Y>);
-}

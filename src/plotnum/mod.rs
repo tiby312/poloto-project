@@ -34,35 +34,20 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
     fn unit_range(offset: Option<Self>) -> [Self; 2];
 }
 
+pub trait HasDefaultTicks: Sized {
+    type DefaultTicks: crate::ticks::TickDistGen<Self>;
+    fn default_ticks() -> Self::DefaultTicks;
+}
+
 use std::fmt;
 
 ///
-/// Used by [`crate::render::plot_with`]
+/// Group methods to write title/xname/yname
 ///
 pub trait BaseFmt {
-    type X: PlotNum;
-    type Y: PlotNum;
-
     fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
     fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
     fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result;
-    fn write_xwher(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        ind: crate::ticks::IndexRequester,
-    ) -> fmt::Result;
-    fn write_ywher(
-        &mut self,
-        writer: &mut dyn fmt::Write,
-        ind: crate::ticks::IndexRequester,
-    ) -> fmt::Result;
-    fn write_xtick(&mut self, writer: &mut dyn fmt::Write, val: &Self::X) -> fmt::Result;
-    fn write_ytick(&mut self, writer: &mut dyn fmt::Write, val: &Self::Y) -> fmt::Result;
-
-    fn next_xtick(&mut self) -> Option<Self::X>;
-    fn next_ytick(&mut self) -> Option<Self::Y>;
-    fn xdash_size(&self) -> Option<f64>;
-    fn ydash_size(&self) -> Option<f64>;
 }
 
 ///

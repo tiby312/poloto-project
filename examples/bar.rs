@@ -1,4 +1,3 @@
-use poloto::prelude::*;
 fn main() {
     let data = [
         (20, "potato"),
@@ -7,13 +6,8 @@ fn main() {
         (30, "avocado"),
     ];
 
-    let plt = poloto::simple_bar!(
-        data,
-        [0],
-        "Comparison of Food Tastiness",
-        "Tastiness",
-        "Foods"
-    );
-
-    print!("{}", poloto::disp(|w| plt.simple_theme(w)));
+    poloto::build::bar::gen_simple("", data, [0])
+        .label(("Comparison of Food Tastiness", "Tastiness", "Foods"))
+        .append_to(poloto::header().light_theme())
+        .render_stdout();
 }

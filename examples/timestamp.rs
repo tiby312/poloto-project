@@ -1,5 +1,4 @@
 use poloto::num::timestamp::UnixTime;
-use poloto::prelude::*;
 
 fn main() {
     let timezone = &chrono::Utc;
@@ -32,13 +31,17 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let plotter = quick_fmt!(
-        "Long Jump world record progression",
-        "Date",
-        "Mark (in meters)",
-        poloto::build::markers([], [0.0]),
-        data.iter().cloned_plot().line("")
+    let plots = poloto::plots!(
+        poloto::build::plot("").line().cloned(data.iter()),
+        poloto::build::markers([], [0.0])
     );
 
-    print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
+    poloto::data(plots)
+        .build_and_label((
+            "Long Jump world record progression",
+            "Date",
+            "Mark (in meters)",
+        ))
+        .append_to(poloto::header().light_theme())
+        .render_stdout();
 }

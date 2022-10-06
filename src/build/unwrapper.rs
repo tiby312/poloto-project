@@ -2,6 +2,8 @@
 //! Contains the [`Unwrapper`] trait and adapters that work on it.
 //!
 
+use std::iter::FusedIterator;
+
 use super::*;
 
 ///
@@ -42,5 +44,19 @@ impl<A: AsPlotnum, B: AsPlotnum> Unwrapper for &(A, B) {
     fn unwrap(self) -> (A::Target, B::Target) {
         let (a, b) = self;
         (*a.as_plotnum(), *b.as_plotnum())
+    }
+}
+
+#[derive(Clone)]
+pub struct UnwrapperIter<I>(pub I);
+impl<I: ExactSizeIterator> ExactSizeIterator for UnwrapperIter<I> where I::Item: Unwrapper {}
+impl<I: FusedIterator> FusedIterator for UnwrapperIter<I> where I::Item: Unwrapper {}
+impl<I: Iterator> Iterator for UnwrapperIter<I>
+where
+    I::Item: Unwrapper,
+{
+    type Item = <I::Item as Unwrapper>::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|x| x.unwrap())
     }
 }

@@ -1,4 +1,5 @@
 use hypermelon::format_move;
+
 fn main() {
     // hourly trend over one day.
     let trend = vec![
@@ -14,11 +15,14 @@ fn main() {
 
     let data = poloto::data(plots);
 
-    let ticks =
-        poloto::ticks::from_iter((0..).step_by(6)).with_tick_fmt(|&v| format_move!("{} hr", v));
+    let data = data.map_xticks(|orig| {
+        poloto::ticks::from_closure(|a, b, c| {
+            let orig = poloto::ticks::gen_ticks(orig, a, b, c);
+            poloto::ticks::from_iter(orig.iter).with_tick_fmt(|&v| format_move!("{} hr", v))
+        })
+    });
 
-    data.map_xticks(|_| ticks)
-        .build_and_label(("title", "x", "y"))
+    data.build_and_label(("title", "x", "y"))
         .append_to(poloto::header().light_theme())
         .render_stdout();
 }

@@ -1,50 +1,16 @@
 //!
 //! Tools to create tick distributions.
 //!
+
 use super::*;
 
 ///
-/// Building block to make ticks.
+/// Min/max bounds for all plots
 ///
-/// Created once the min and max bounds of all the plots has been computed.
-/// Contains in it all the information typically needed to make a [`TickFormat`].
-///
-/// Used by [`ticks::from_default`]
-///
-#[derive(Debug, Clone)]
-pub struct Bound<'a, X> {
-    pub data: &'a ticks::DataBound<X>,
-    pub canvas: &'a RenderOptionsBound,
-}
-
-///
-/// Tick relevant information of [`Data`]
-///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct DataBound<X> {
     pub min: X,
     pub max: X,
-}
-
-///
-/// Construct x and y tick data to be fed into a tick generator.
-///
-pub fn bounds<'a, X, Y, P, K: Renderable>(
-    data: &'a Data<X, Y, P>,
-    render: &'a K,
-) -> (Bound<'a, X>, Bound<'a, Y>) {
-    let (dx, dy) = data.bounds();
-    let (cx, cy) = render.bounds();
-    (
-        Bound {
-            data: dx,
-            canvas: cx,
-        },
-        Bound {
-            data: dy,
-            canvas: cy,
-        },
-    )
 }
 
 ///
@@ -58,81 +24,11 @@ pub struct RenderOptionsBound {
     pub axis: Axis,
 }
 
-///
-/// Create a tick distribution from the default tick generator for the plotnum type.
-///
-pub fn from_default<X: HasDefaultTicks>(bound: Bound<X>) -> X::Fmt {
-    X::generate(bound)
-}
-
-///
-/// Create a [`TickFormat`] from a step iterator.
-///
-///
-pub fn from_iter<X: PlotNum + Display, I: Iterator<Item = X>>(ticks: I) -> TickIterFmt<I> {
-    TickIterFmt { ticks }
-}
-
-///
-/// Used by [`ticks::from_iter`]
-///
-pub struct TickIterFmt<I: Iterator> {
-    ticks: I,
-}
-impl<I: Iterator> TickFormat for TickIterFmt<I>
-where
-    I::Item: PlotNum + Display,
-{
-    type Num = I::Item;
-    fn dash_size(&self) -> Option<f64> {
-        None
-    }
-    fn next_tick(&mut self) -> Option<Self::Num> {
-        self.ticks.next()
-    }
-    fn write_tick(
-        &mut self,
-        writer: &mut dyn std::fmt::Write,
-        val: &Self::Num,
-    ) -> std::fmt::Result {
-        write!(writer, "{}", val)
-    }
-}
-
-///
-/// Trait to allow a plotnum to have a default tick distribution.
-///
-///
-pub trait HasDefaultTicks: PlotNum {
-    type Fmt: TickFormat<Num = Self>;
-    fn generate(bound: ticks::Bound<Self>) -> Self::Fmt;
-}
-
 #[derive(Debug, Copy, Clone)]
 pub enum Axis {
     X,
     Y,
 }
-
-pub trait TickFormatExt: TickFormat {
-    fn with_tick_fmt<F>(self, func: F) -> TickFmt<Self, F>
-    where
-        Self: Sized,
-        F: Fn(&mut dyn std::fmt::Write, &Self::Num) -> std::fmt::Result,
-    {
-        TickFmt { inner: self, func }
-    }
-
-    fn with_where_fmt<F>(self, func: F) -> WhereFmt<Self, F>
-    where
-        Self: Sized,
-        F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result,
-    {
-        WhereFmt { inner: self, func }
-    }
-}
-
-impl<T: TickFormat> TickFormatExt for T {}
 
 ///
 /// Useful for numbering footnotes. If one axis uses the number one as a footnote,
@@ -147,83 +43,242 @@ impl<'a> IndexRequester<'a> {
         IndexRequester { counter }
     }
     #[inline(always)]
-    pub fn request(&mut self) -> usize {
+    pub fn request(self) -> usize {
         let val = *self.counter;
         *self.counter += 1;
         val
     }
 }
+
+use tick_fmt::*;
+pub mod tick_fmt {
+    use super::*;
+    pub struct DefaultTickFmt;
+
+    impl<N: Display> TickFmt<N> for DefaultTickFmt {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            write!(a, "{}", val)
+        }
+        fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            Ok(())
+        }
+    }
+
+    ///
+    /// Formatter for a tick distribution
+    ///
+    pub trait TickFmt<Num> {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Num) -> std::fmt::Result;
+        fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            Ok(())
+        }
+    }
+
+    pub struct WithWhereFmt<D, F> {
+        ticks: D,
+        func: F,
+    }
+
+    impl<N, D: TickFmt<N>, F, J: fmt::Display> TickFmt<N> for WithWhereFmt<D, F>
+    where
+        F: FnMut() -> J,
+    {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            self.ticks.write_tick(a, val)
+        }
+        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            let j = (self.func)();
+            write!(w, "{}", j)
+        }
+    }
+
+    pub struct WithTickFmt<D, F> {
+        ticks: D,
+        func: F,
+    }
+    impl<N, D: TickFmt<N>, F, K: fmt::Display> TickFmt<N> for WithTickFmt<D, F>
+    where
+        F: FnMut(&N) -> K,
+    {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            let j = (self.func)(val);
+            write!(a, "{}", j)
+        }
+        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            self.ticks.write_where(w)
+        }
+    }
+
+    pub struct WithData<K, E> {
+        ticks: K,
+        pub data: E,
+    }
+
+    impl<N, K: TickFmt<N>, E> TickFmt<N> for WithData<K, E> {
+        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+            self.ticks.write_tick(a, val)
+        }
+        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+            self.ticks.write_where(w)
+        }
+    }
+
+    impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
+        pub fn with_tick_fmt<F: FnMut(&X) -> J, J: fmt::Display>(
+            self,
+            func: F,
+        ) -> TickDistribution<I, WithTickFmt<Fmt, F>> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: WithTickFmt {
+                    ticks: self.fmt,
+                    func,
+                },
+                res: self.res,
+            }
+        }
+
+        pub fn with_where_fmt<F: FnMut() -> J, J: fmt::Display>(
+            self,
+            func: F,
+        ) -> TickDistribution<I, WithWhereFmt<Fmt, F>> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: WithWhereFmt {
+                    ticks: self.fmt,
+                    func,
+                },
+                res: self.res,
+            }
+        }
+
+        pub fn with_data<E>(self, data: E) -> TickDistribution<I, WithData<Fmt, E>> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: WithData {
+                    ticks: self.fmt,
+                    data,
+                },
+                res: self.res,
+            }
+        }
+
+        pub fn with_fmt<J: TickFmt<I::Item>>(self, other: J) -> TickDistribution<I, J> {
+            TickDistribution {
+                iter: self.iter,
+                fmt: other,
+                res: self.res,
+            }
+        }
+    }
+}
+
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
+    pub fn from_parts(it: I, fmt: Fmt, res: TickRes) -> Self {
+        TickDistribution { iter: it, fmt, res }
+    }
+    pub fn map<K, F: FnOnce(Self) -> K>(self, func: F) -> K {
+        func(self)
+    }
+}
+///
+/// Create a [`TickDistGen`] from a closure.
+///
+pub fn from_closure<N: PlotNum, It, F>(func: F) -> GenTickDistClosure<F>
+where
+    It: TickDist<Num = N>,
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> It,
+{
+    GenTickDistClosure { func }
+}
+
+pub struct GenTickDistClosure<F> {
+    func: F,
+}
+
+impl<N: PlotNum, Res: TickDist<Num = N>, F> TickDistGen<N> for GenTickDistClosure<F>
+where
+    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> Res,
+    N: PlotNum,
+{
+    type Res = Res;
+    fn generate(
+        self,
+        data: &ticks::DataBound<N>,
+        canvas: &RenderOptionsBound,
+        req: IndexRequester,
+    ) -> Res {
+        (self.func)(data, canvas, req)
+    }
+}
+
+pub struct TickRes {
+    pub dash_size: Option<f64>,
+}
+
 ///
 /// Formatter for a tick.
 ///
-pub trait TickFormat {
-    type Num: PlotNum;
-    fn dash_size(&self) -> Option<f64>;
-    fn next_tick(&mut self) -> Option<Self::Num>;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result;
-    fn write_where(
-        &mut self,
-        _: &mut dyn std::fmt::Write,
-        _req: IndexRequester,
-    ) -> std::fmt::Result {
-        Ok(())
+pub trait TickDistGen<N> {
+    type Res: TickDist<Num = N>;
+    fn generate(
+        self,
+        data: &ticks::DataBound<N>,
+        canvas: &RenderOptionsBound,
+        req: IndexRequester,
+    ) -> Self::Res;
+}
+
+pub fn gen_ticks<N: PlotNum, G: TickDistGen<N>>(
+    gen: G,
+    data: &ticks::DataBound<N>,
+    opt: &RenderOptionsBound,
+    req: IndexRequester,
+) -> G::Res {
+    gen.generate(data, opt, req)
+}
+
+pub trait TickDist {
+    type Num;
+    type It: IntoIterator<Item = Self::Num>;
+    type Fmt: TickFmt<Self::Num>;
+    fn unwrap(self) -> TickDistribution<Self::It, Self::Fmt>;
+}
+
+impl<I: IntoIterator, F: TickFmt<I::Item>> TickDist for TickDistribution<I, F> {
+    type Num = I::Item;
+    type It = I;
+    type Fmt = F;
+    fn unwrap(self) -> TickDistribution<Self::It, Self::Fmt> {
+        self
     }
 }
 
-///
-/// Used by [`TickFormatExt::with_where_fmt`]
-///
-pub struct WhereFmt<T, F> {
-    inner: T,
-    func: F,
+pub struct TickDistribution<I, F> {
+    pub iter: I,
+    pub fmt: F,
+    pub res: TickRes,
 }
-impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write) -> std::fmt::Result> TickFormat
-    for WhereFmt<T, F>
+
+pub fn from_iter<I: IntoIterator<Item = X>, X: PlotNum + fmt::Display>(
+    it: I,
+) -> TickDistribution<I, DefaultTickFmt> {
+    TickDistribution::new(it)
+}
+impl<X: PlotNum, I: IntoIterator<Item = X>> TickDistribution<I, DefaultTickFmt>
+where
+    X: fmt::Display,
 {
-    type Num = T::Num;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-        self.inner.write_tick(a, val)
-    }
-    fn write_where(
-        &mut self,
-        a: &mut dyn std::fmt::Write,
-        _req: IndexRequester,
-    ) -> std::fmt::Result {
-        (self.func)(a)
-    }
-    fn dash_size(&self) -> Option<f64> {
-        self.inner.dash_size()
-    }
-    fn next_tick(&mut self) -> Option<Self::Num> {
-        self.inner.next_tick()
+    pub fn new(it: I) -> Self {
+        Self::from_parts(it, DefaultTickFmt, TickRes { dash_size: None })
     }
 }
 
-///
-/// Used by [`TickFormatExt::with_tick_fmt`]
-///
-pub struct TickFmt<T, F> {
-    inner: T,
-    func: F,
-}
-impl<T: TickFormat, F: Fn(&mut dyn std::fmt::Write, &T::Num) -> std::fmt::Result> TickFormat
-    for TickFmt<T, F>
+impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistGen<X>
+    for TickDistribution<I, Fmt>
 {
-    type Num = T::Num;
-    fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Self::Num) -> std::fmt::Result {
-        (self.func)(a, val)
-    }
-    fn write_where(
-        &mut self,
-        a: &mut dyn std::fmt::Write,
-        ind: IndexRequester,
-    ) -> std::fmt::Result {
-        self.inner.write_where(a, ind)
-    }
-    fn dash_size(&self) -> Option<f64> {
-        self.inner.dash_size()
-    }
-    fn next_tick(&mut self) -> Option<Self::Num> {
-        self.inner.next_tick()
+    type Res = Self;
+    fn generate(self, _: &ticks::DataBound<X>, _: &RenderOptionsBound, _: IndexRequester) -> Self {
+        self
     }
 }
