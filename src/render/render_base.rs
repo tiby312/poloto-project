@@ -79,17 +79,15 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         .skip_while(|&x| x < boundx[0])
         .take_while(|&x| x <= boundx[1]);
 
-    let xticks = {
+    let mut xticks = {
         let a = xticks
             .next()
             .expect("There must be atleast two ticks for each axis");
         let b = xticks
             .next()
             .expect("There must be atleast two ticks for each axis");
-        vec![a, b].into_iter().chain(xticks)
+        [a, b].into_iter().chain(xticks)
     };
-
-    let mut xticks = xticks.into_iter();
 
     let mut yticks = yticksg
         .iter
@@ -97,17 +95,15 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         .skip_while(|&x| x < boundy[0])
         .take_while(|&x| x <= boundy[1]);
 
-    let yticks = {
+    let mut yticks = {
         let a = yticks
             .next()
             .expect("There must be atleast two ticks for each axis");
         let b = yticks
             .next()
             .expect("There must be atleast two ticks for each axis");
-        vec![a, b].into_iter().chain(yticks)
+        [a, b].into_iter().chain(yticks)
     };
-
-    let mut yticks = yticks.into_iter();
 
     let first_tickx = xticks.next().unwrap();
 

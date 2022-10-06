@@ -51,7 +51,7 @@ pub fn write_interval_float<T: fmt::Write>(
     step: Option<f64>,
 ) -> std::fmt::Result {
     //TODO handle zero???
-    //want to display zero with a formatting that is cosistent with others
+    //want to display zero with a formatting that is consistent with others
     if a.abs().log10().floor().abs() > SCIENCE as f64 {
         let mut k = String::new();
         write_science_float(&mut k, a, step)?;
@@ -84,7 +84,7 @@ pub fn write_interval_i128<T: fmt::Write>(
     step: Option<i128>,
 ) -> std::fmt::Result {
     //TODO handle zero???
-    //want to display zero with a formatting that is cosistent with others
+    //want to display zero with a formatting that is consistent with others
     if (a.abs() as f64).log10().floor().abs() > SCIENCE as f64 {
         let mut k = String::new();
         write_science_float(&mut k, a as f64, step.map(|x| x as f64))?;
@@ -103,48 +103,6 @@ pub fn write_interval_i128<T: fmt::Write>(
     }
     Ok(())
 }
-
-// use std::cell::RefCell;
-
-// ///
-// /// Wrap a mutable closure in a `RefCell` to allow it to be called inside of `fmt::Display::fmt`
-// ///
-// pub struct DisplayableClosureOnce<F>(pub RefCell<Option<F>>);
-
-// impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureOnce<F> {
-//     #[inline(always)]
-//     pub fn new(a: F) -> Self {
-//         DisplayableClosureOnce(RefCell::new(Some(a)))
-//     }
-// }
-// impl<F: FnOnce(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureOnce<F> {
-//     #[inline(always)]
-//     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-//         if let Some(f) = (self.0.borrow_mut()).take() {
-//             (f)(formatter)
-//         } else {
-//             Ok(())
-//         }
-//     }
-// }
-
-// ///
-// /// Wrap a mutable closure in a `RefCell` to allow it to be called inside of `fmt::Display::fmt`
-// ///
-// pub struct DisplayableClosureMut<F>(pub RefCell<F>);
-
-// impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> DisplayableClosureMut<F> {
-//     #[inline(always)]
-//     pub fn new(a: F) -> Self {
-//         DisplayableClosureMut(RefCell::new(a))
-//     }
-// }
-// impl<F: FnMut(&mut fmt::Formatter) -> fmt::Result> fmt::Display for DisplayableClosureMut<F> {
-//     #[inline(always)]
-//     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-//         (self.0.borrow_mut())(formatter)
-//     }
-// }
 
 pub(crate) struct WriteCounter<T> {
     counter: usize,
