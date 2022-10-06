@@ -63,8 +63,8 @@ pub trait PlotIteratorExt: PlotIterator {
     /// use poloto::build::PlotIteratorExt;
     /// let data1=[[5,2],[4,3]];
     /// let data2=[[2,4],[2,2]];
-    /// let a=poloto::build::line("test1",&data1);
-    /// let b=poloto::build::scatter("test2",&data2);
+    /// let a=poloto::build::plot("test1").line().cloned(data1.iter());
+    /// let b=poloto::build::plot("test2").scatter().cloned(data2.iter());
     /// a.chain(b);
     /// ```
     ///

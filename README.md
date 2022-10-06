@@ -12,39 +12,42 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 Poloto converts each plot into svg elements like circles. Because of this its not really suitable for plots with many many plots. For those you might want to use a library to lets you plot directly to a png/jpg image instead. You can certainly rasterize the generated svg image, but generating and displaying the svg wont be all that efficient if there are a ton of plots.
 
-### `cloned_plot()` vs `buffered_plot()`
+### `cloned()` vs `buffered()`
 
 poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
 the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
 both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
 poloto forces the user to choose every time which method to use. Some scenarios:
-```rust
+```rust,ignore
+
 //BAD because the entire vec of data will be duplicated in memory!
-vec_of_data.into_iter().cloned_plot().scatter("")
+plot("").scatter().cloned(vec_of_data.into_iter());
 
 //GOOD because we are just cloning a iterator over references.
-vec_of_data.iter().cloned_plot().scatter("")
+plot("").scatter().cloned(vec_of_data.iter());
 
 //BAD because more memory is used than necessary. We can just iterate over
 //the existing vec twice returning references instead of collecting the plots into
 //another vec. 
-vec_of_data.into_iter().buffered_plot().scatter("")
+plot("").scatter().buffered(vec_of_data.into_iter());
 
 //BAD because expensive_calc() will be called 2000 times instead of just 1000 times.
-(0..1000).zip_output(|x|x.expensive_calc()).cloned_plot().scatter("")
+plot("").scatter().cloned((0..1000).zip_output(|x|x.expensive_calc()));
 
 //GOOD because expensive_calc() will be called only 1000 times.
-(0..1000).zip_output(|x|x.expensive_calc()).buffered_plot().scatter("")
+plot("").scatter().buffered((0..1000).zip_output(|x|x.expensive_calc()));
+
 
 //GOOD because multiplying by 2 is fast operation that most likely
 //beats buffering all the plots.
-(0..1000).zip_output(|x|x*2).cloned_plot().scatter("")
+plot("").scatter().cloned((0..1000).zip_output(|x|x*2));
 
 ```
 
 ## Gaussian Example
 
 ```rust
+use poloto::build::plot;
 use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
@@ -56,15 +59,19 @@ fn main() {
         move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let r = poloto::range_iter([-5.0, 5.0], 200);
-    let a = r.zip_output(gau(1.0, 0.)).buffered_plot().line("σ=1.0");
-    let b = r.zip_output(gau(0.5, 0.)).buffered_plot().line("σ=0.5");
-    let c = r.zip_output(gau(0.3, 0.)).buffered_plot().line("σ=0.3");
-    let d = poloto::build::origin();
+    let r = poloto::util::range_iter([-5.0, 5.0], 200);
 
-    let p = quick_fmt!("gaussian", "x", "y", a, b, c, d);
+    let plots = poloto::plots!(
+        plot("σ=1.0").line().buffered(r.zip_output(gau(1.0, 0.))),
+        plot("σ=0.5").line().buffered(r.zip_output(gau(0.5, 0.))),
+        plot("σ=0.3").line().buffered(r.zip_output(gau(0.3, 0.))),
+        poloto::build::origin()
+    );
 
-    print!("{}", poloto::disp(|w| p.simple_theme(w)));
+    poloto::data(plots)
+        .build_and_label(("gaussian", "x", "y"))
+        .append_to(poloto::header().light_theme())
+        .render_stdout();
 }
 
 ```
@@ -77,6 +84,7 @@ fn main() {
 ## Collatz Example
 
 ```rust
+use hypermelon::prelude::*;
 use poloto::prelude::*;
 
 // PIPE me to a file!
@@ -93,41 +101,29 @@ fn main() {
         .fuse()
     };
 
-    //Make the plotting area slightly larger.
-    let dim = [1300.0, 600.0];
+    let svg = poloto::header().with_viewbox_width(1200.0);
 
-    let opt = poloto::render::render_opt_builder()
+    let opt = poloto::render::render_opt()
         .with_tick_lines([true, true])
-        .with_dim(dim)
-        .build();
+        .with_viewbox(svg.get_viewbox())
+        .move_into();
 
-    let plotter = quick_fmt_opt!(
-        opt,
-        "collatz",
-        "x",
-        "y",
-        poloto::build::plots_dyn(
-            (1000..1006)
-                .map(|i| {
-                    let name = formatm!("c({})", i);
-                    (0..).zip(collatz(i)).buffered_plot().line(name)
-                })
-                .collect(),
-        ),
-        poloto::build::origin()
-    );
+    let style =
+        poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
-    use poloto::simple_theme;
-    let hh = simple_theme::determine_height_from_width(plotter.get_dim(), simple_theme::DIM[0]);
+    let a = poloto::build::plots_dyn((1000..1006).map(|i| {
+        let name = format_move!("c({})", i);
+        let it = (0..).zip(collatz(i));
+        poloto::build::plot(name).line().buffered(it)
+    }));
 
-    print!(
-        "{}<style>{}{}</style>{}{}",
-        poloto::disp(|a| poloto::simple_theme::write_header(a, [simple_theme::DIM[0], hh], dim)),
-        poloto::simple_theme::STYLE_CONFIG_DARK_DEFAULT,
-        ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
-        poloto::disp(|a| plotter.render(a)),
-        poloto::simple_theme::SVG_END
-    )
+    let b = poloto::build::origin();
+
+    poloto::data(plots!(a, b))
+        .map_opt(|_| opt)
+        .build_and_label(("collatz", "x", "y"))
+        .append_to(svg.append(style))
+        .render_stdout();
 }
 
 ```
@@ -142,7 +138,6 @@ fn main() {
 
 ```rust
 use poloto::num::timestamp::UnixTime;
-use poloto::prelude::*;
 
 fn main() {
     let timezone = &chrono::Utc;
@@ -175,16 +170,21 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let plotter = quick_fmt!(
-        "Long Jump world record progression",
-        "Date",
-        "Mark (in meters)",
-        poloto::build::markers([], [0.0]),
-        data.iter().cloned_plot().line("")
+    let plots = poloto::plots!(
+        poloto::build::plot("").line().cloned(data.iter()),
+        poloto::build::markers([], [0.0])
     );
 
-    print!("{}", poloto::disp(|w| plotter.simple_theme_dark(w)));
+    poloto::data(plots)
+        .build_and_label((
+            "Long Jump world record progression",
+            "Date",
+            "Mark (in meters)",
+        ))
+        .append_to(poloto::header().light_theme())
+        .render_stdout();
 }
+
 ```
 
 ## Output
@@ -195,7 +195,7 @@ fn main() {
 ## Custom Ticks Example
 
 ```rust
-use poloto::prelude::*;
+use hypermelon::format_move;
 fn main() {
     // hourly trend over one day.
     let trend = vec![
@@ -204,30 +204,22 @@ fn main() {
 
     let it = (0..).zip(trend.iter().copied());
 
-    let data = poloto::data(plots!(
-        it.cloned_plot().histogram(""),
+    let plots = poloto::plots!(
+        poloto::build::plot("").histogram().cloned(it),
         poloto::build::markers([24], [])
-    ));
-
-    let opt = poloto::render::render_opt();
-    let (_, by) = poloto::ticks::bounds(&data, &opt);
-    let xtick_fmt = poloto::ticks::from_iter((0..).step_by(6));
-    let ytick_fmt = poloto::ticks::from_default(by);
-
-    let pp = poloto::plot_with(
-        data,
-        opt,
-        poloto::plot_fmt(
-            "Number of rides at theme park hourly",
-            "Hour",
-            "Number of rides",
-            xtick_fmt.with_tick_fmt(|w, v| write!(w, "{} hr", v)),
-            ytick_fmt,
-        ),
     );
 
-    print!("{}", poloto::disp(|w| pp.simple_theme(w)));
+    let data = poloto::data(plots);
+
+    let ticks =
+        poloto::ticks::from_iter((0..).step_by(6)).with_tick_fmt(|&v| format_move!("{} hr", v));
+
+    data.map_xticks(|_| ticks)
+        .build_and_label(("title", "x", "y"))
+        .append_to(poloto::header().light_theme())
+        .render_stdout();
 }
+
 ```
 
 ## Output
@@ -238,7 +230,6 @@ fn main() {
 ## Bar example
 
 ```rust
-use poloto::prelude::*;
 fn main() {
     let data = [
         (20, "potato"),
@@ -247,16 +238,12 @@ fn main() {
         (30, "avocado"),
     ];
 
-    let plt = poloto::simple_bar!(
-        data,
-        [0],
-        "Comparison of Food Tastiness",
-        "Tastiness",
-        "Foods"
-    );
-
-    print!("{}", poloto::disp(|w| plt.simple_theme(w)));
+    poloto::build::bar::gen_simple("", data, [0])
+        .label(("Comparison of Food Tastiness", "Tastiness", "Foods"))
+        .append_to(poloto::header().light_theme())
+        .render_stdout();
 }
+
 ```
 
 ## Output
