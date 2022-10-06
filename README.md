@@ -8,42 +8,6 @@ Poloto graphs can be stylized using css either directly in the SVG, or from insi
 
 You can see it in action in this rust book [broccoli-book](https://tiby312.github.io/broccoli_report/)
 
-### Usecases
-
-Poloto converts each plot into svg elements like circles. Because of this its not really suitable for plots with many many plots. For those you might want to use a library to lets you plot directly to a png/jpg image instead. You can certainly rasterize the generated svg image, but generating and displaying the svg wont be all that efficient if there are a ton of plots.
-
-### `cloned()` vs `buffered()`
-
-poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
-the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
-both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
-poloto forces the user to choose every time which method to use. Some scenarios:
-```rust,ignore
-
-//BAD because the entire vec of data will be duplicated in memory!
-plot("").scatter().cloned(vec_of_data.into_iter());
-
-//GOOD because we are just cloning a iterator over references.
-plot("").scatter().cloned(vec_of_data.iter());
-
-//BAD because more memory is used than necessary. We can just iterate over
-//the existing vec twice returning references instead of collecting the plots into
-//another vec. 
-plot("").scatter().buffered(vec_of_data.into_iter());
-
-//BAD because expensive_calc() will be called 2000 times instead of just 1000 times.
-plot("").scatter().cloned((0..1000).zip_output(|x|x.expensive_calc()));
-
-//GOOD because expensive_calc() will be called only 1000 times.
-plot("").scatter().buffered((0..1000).zip_output(|x|x.expensive_calc()));
-
-
-//GOOD because multiplying by 2 is fast operation that most likely
-//beats buffering all the plots.
-plot("").scatter().cloned((0..1000).zip_output(|x|x*2));
-
-```
-
 ## Gaussian Example
 
 ```rust
@@ -250,10 +214,47 @@ fn main() {
 <img src="./target/assets/bar.svg" alt="demo">
 
 
+### Usecases
+
+Poloto converts each plot into svg elements like circles. Because of this its not really suitable for plots with many many plots. For those you might want to use a library to lets you plot directly to a png/jpg image instead. You can certainly rasterize the generated svg image, but generating and displaying the svg wont be all that efficient if there are a ton of plots.
+
+### `cloned()` vs `buffered()`
+
+poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
+the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
+both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
+poloto forces the user to choose every time which method to use. Some scenarios:
+```rust,ignore
+
+//BAD because the entire vec of data will be duplicated in memory!
+plot("").scatter().cloned(vec_of_data.into_iter());
+
+//GOOD because we are just cloning a iterator over references.
+plot("").scatter().cloned(vec_of_data.iter());
+
+//BAD because more memory is used than necessary. We can just iterate over
+//the existing vec twice returning references instead of collecting the plots into
+//another vec. 
+plot("").scatter().buffered(vec_of_data.into_iter());
+
+//BAD because expensive_calc() will be called 2000 times instead of just 1000 times.
+plot("").scatter().cloned((0..1000).zip_output(|x|x.expensive_calc()));
+
+//GOOD because expensive_calc() will be called only 1000 times.
+plot("").scatter().buffered((0..1000).zip_output(|x|x.expensive_calc()));
+
+
+//GOOD because multiplying by 2 is fast operation that most likely
+//beats buffering all the plots.
+plot("").scatter().cloned((0..1000).zip_output(|x|x*2));
+
+```
+
+
 ## Escape protection
 
 If a user tried to inject html through the title/xname/yname/tick format/ or plot names, the html escapes
-will get turned into their encoded values. This protection is provided by the `tagger` dependency crate.
+will get turned into their encoded values. This protection is provided by the `hypermelon` dependency crate.
 
 ## CSS Usage Example
 
