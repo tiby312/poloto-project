@@ -557,14 +557,7 @@ impl<A: Attr> Header<A> {
     }
 
     pub fn to_string(self) -> (String, String) {
-        let mut s = String::new();
-        let tail = self.render_head(&mut elem::ElemWrite::new(&mut s)).unwrap();
-
-        use elem::RenderTail;
-        let mut b = String::new();
-        tail.render(&mut elem::ElemWrite::new(&mut b)).unwrap();
-
-        (s, b)
+        hypermelon::build::BufferedElem::new(self).unwrap().into_parts()
     }
 
     pub fn light_theme(self) -> elem::Append<Self, Theme<'static>> {
