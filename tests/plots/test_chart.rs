@@ -51,7 +51,7 @@ const fn generate_test_int() -> [&'static [[i128; 2]]; 9] {
         test0, test1, test2, test3, test4, test5, test6, test7, test8,
     ]
 }
-use hypermelon::prelude::*;
+use hypermelon::{elem::SafeElem, prelude::*};
 
 //Create a bunch of graphs with different scales to try to expose corner cases.
 #[test]
@@ -95,7 +95,7 @@ fn test_chart() -> std::fmt::Result {
     hypermelon::render(d, w)
 }
 
-pub fn header() -> impl Elem {
+pub fn header() -> impl SafeElem {
     hypermelon::build::elem("svg").with(hypermelon::attrs!(
         ("class", "poloto_background poloto"),
         ("width", "500px"),

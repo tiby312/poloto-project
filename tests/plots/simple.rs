@@ -265,7 +265,10 @@ fn custom_style() -> fmt::Result {
 
     let w = util::create_test_file("custom_style.svg");
 
-    data.append_to(header).render_fmt_write(w)
+    let k = header.append(data);
+
+    hypermelon::render_escapable(k, w)
+    //data.append_to(header).render_fmt_write(w)
 }
 
 #[test]

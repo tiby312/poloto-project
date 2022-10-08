@@ -401,6 +401,15 @@ where
     }
 }
 
+impl<P, A, B, BB> SafeElem for Stage3<P, A, B, BB>
+where
+    P: PlotIterator,
+    A: crate::ticks::TickDist<Num = P::X>,
+    B: crate::ticks::TickDist<Num = P::Y>,
+    BB: BaseFmt,
+{
+}
+
 impl<P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
 where
     P: PlotIterator,
@@ -451,8 +460,8 @@ where
     }
 }
 
-pub struct Stage4<R: Elem>(R);
-impl<R: Elem> Stage4<R> {
+pub struct Stage4<R>(R);
+impl<R: Elem + SafeElem> Stage4<R> {
     pub fn render_stdout(self) {
         hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap()
     }
@@ -471,6 +480,9 @@ impl<R: Elem> Stage4<R> {
         Ok(s)
     }
 }
+
+impl<R: Elem> SafeElem for Stage4<R> {}
+
 impl<R: Elem> Elem for Stage4<R> {
     type Tail = R::Tail;
 
@@ -494,7 +506,7 @@ impl Default for Header<()> {
     }
 }
 
-use hypermelon::attr::Attr;
+use hypermelon::{attr::Attr, elem::SafeElem};
 impl Header<()> {
     pub fn new() -> Self {
         let a = [800.0, 500.0];
@@ -563,6 +575,7 @@ impl<A: Attr> Header<A> {
     }
 }
 
+impl<A: Attr> SafeElem for Header<A> {}
 impl<A: Attr> Elem for Header<A> {
     type Tail = hypermelon::build::ElemTail<&'static str>;
     fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
@@ -674,6 +687,7 @@ impl Theme<'static> {
     }
 }
 
+impl<'a> SafeElem for Theme<'a> {}
 impl<'a> Elem for Theme<'a> {
     type Tail = hypermelon::build::ElemTail<&'static str>;
     fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
