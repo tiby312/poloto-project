@@ -209,7 +209,7 @@ fn render(
                 ),
                 hbuild::sink::path_ext(|w| {
                     let mut w = w.start();
-                    use hypermelon::build::PathCommand::*;
+                    use hypermelon::attr::PathCommand::*;
                     for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                         w.put(M(ffmt.disp(x), ffmt.disp(y)))?;
                         w.put(H_(ffmt.disp(0.0)))?;
@@ -385,7 +385,7 @@ impl<I: Iterator<Item = [f64; 2]>> attr::Attr for LineFill<I> {
             let mut w = w.start();
 
             if let Some([startx, starty]) = it.next() {
-                use hypermelon::build::PathCommand::*;
+                use hypermelon::attr::PathCommand::*;
 
                 let mut last = [startx, starty];
                 let mut last_finite = None;
@@ -448,7 +448,7 @@ impl<I: Iterator<Item = [f64; 2]>> attr::Attr for Line<I> {
             let mut w = w.start();
 
             if let Some([startx, starty]) = it.next() {
-                use hypermelon::build::PathCommand::*;
+                use hypermelon::attr::PathCommand::*;
 
                 let mut last = [startx, starty];
                 let mut first = true;

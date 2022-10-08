@@ -246,7 +246,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         Ok(())
     });
 
-    use hbuild::PathCommand::*;
+    use attr::PathCommand::*;
     writer.render(hbuild::single("path").with(attrs!(
         ("stroke", "black"),
         ("fill", "none"),
