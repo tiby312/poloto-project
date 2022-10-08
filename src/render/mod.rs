@@ -401,7 +401,7 @@ where
     }
 }
 
-impl<P:PlotIterator, A, B, BB> Locked for Stage3<P, A, B, BB>{}
+impl<P: PlotIterator, A, B, BB> Locked for Stage3<P, A, B, BB> {}
 
 impl<P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
 where
@@ -550,7 +550,9 @@ impl<A: Attr> Header<A> {
     }
 
     pub fn to_string(self) -> (String, String) {
-        hypermelon::elem::BufferedElem::new(self).unwrap().into_parts()
+        hypermelon::elem::BufferedElem::new(self)
+            .unwrap()
+            .into_parts()
     }
 
     pub fn light_theme(self) -> elem::Append<Self, Theme<'static>> {

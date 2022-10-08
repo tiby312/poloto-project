@@ -95,7 +95,7 @@ fn test_chart() -> std::fmt::Result {
     hypermelon::render(d, w)
 }
 
-pub fn header() -> impl Elem+Locked {
+pub fn header() -> impl Elem + Locked {
     hypermelon::build::elem("svg").with(hypermelon::attrs!(
         ("class", "poloto_background poloto"),
         ("width", "500px"),
