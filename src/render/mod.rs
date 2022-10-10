@@ -559,7 +559,7 @@ impl<A: Attr> Header<A> {
         self.append(Theme::light())
     }
     pub fn dark_theme(self) -> elem::Append<Self, Theme<'static>> {
-        self.append(Theme::light())
+        self.append(Theme::dark())
     }
 }
 
