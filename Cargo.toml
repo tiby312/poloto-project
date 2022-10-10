@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "16.1.4"
+version = "16.1.5"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -33,7 +33,6 @@ doctest = false
 # This sets the default target to `x86_64-unknown-linux-gnu`
 # and only builds that target
 targets = ["x86_64-unknown-linux-gnu"]
-
 
 # [patch.crates-io]
 # hypermelon={path="../hypermelon"}

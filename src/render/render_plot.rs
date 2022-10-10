@@ -207,7 +207,7 @@ fn render(
                     "class",
                     format_move!("poloto_scatter poloto{}stroke", colori),
                 ),
-                hbuild::path_ext(|w| {
+                hbuild::path_from_closure(|w| {
                     let mut w = w.start();
                     use hypermelon::attr::PathCommand::*;
                     for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
@@ -381,7 +381,7 @@ impl<I: Iterator<Item = [f64; 2]>> attr::Attr for LineFill<I> {
             add_start_end_base,
         } = self;
 
-        w.render(hypermelon::build::path_ext(|w| {
+        w.render(hypermelon::build::path_from_closure(|w| {
             let mut w = w.start();
 
             if let Some([startx, starty]) = it.next() {
@@ -444,7 +444,7 @@ impl<I: Iterator<Item = [f64; 2]>> attr::Attr for Line<I> {
     fn render(self, w: &mut attr::AttrWrite) -> fmt::Result {
         let Line { mut it, fmt } = self;
 
-        w.render(hypermelon::build::path_ext(|w| {
+        w.render(hypermelon::build::path_from_closure(|w| {
             let mut w = w.start();
 
             if let Some([startx, starty]) = it.next() {

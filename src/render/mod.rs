@@ -565,7 +565,7 @@ impl<A: Attr> Header<A> {
 
 impl<A> Locked for Header<A> {}
 impl<A: Attr> Elem for Header<A> {
-    type Tail = hypermelon::elem::ElemTail<&'static str>;
+    type Tail = hypermelon::elem::ElementTail<&'static str>;
     fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let elem = hypermelon::build::elem("svg").with(attrs!(
             ("class", "poloto"),
@@ -677,7 +677,7 @@ impl Theme<'static> {
 
 impl<'a> Locked for Theme<'a> {}
 impl<'a> Elem for Theme<'a> {
-    type Tail = hypermelon::elem::ElemTail<&'static str>;
+    type Tail = hypermelon::elem::ElementTail<&'static str>;
     fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let k = hypermelon::build::elem("style");
         let k = k.append(self.styles);
