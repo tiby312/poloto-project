@@ -34,5 +34,5 @@ doctest = false
 # and only builds that target
 targets = ["x86_64-unknown-linux-gnu"]
 
-# [patch.crates-io]
-# hypermelon={path="../hypermelon"}
+[patch.crates-io]
+hypermelon={path="../hypermelon"}
