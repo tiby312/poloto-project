@@ -94,11 +94,7 @@ body {
 .poloto7fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="100">cos</text>
-	<line class="poloto_line poloto_legend_icon poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 100.00 L 160.20 101.20 L 170.41 104.74 L 180.61 110.49 L 190.82 118.21 L 201.02 127.60 L 211.22 138.29 L 221.43 149.84 L 231.63 161.80 L 241.84 173.69 L 252.04 185.03 L 262.24 195.38 L 272.45 204.32 L 282.65 211.50 L 292.86 216.62 L 303.06 219.49 L 313.27 219.99 L 323.47 218.10 L 333.67 213.89 L 343.88 207.54 L 354.08 199.29 L 364.29 189.48 L 374.49 178.50 L 384.69 166.78 L 394.90 154.79 L 405.10 143.01 L 415.31 131.91 L 425.51 121.94 L 435.71 113.48 L 445.92 106.87 L 456.12 102.39 L 466.33 100.21 L 476.53 100.41 L 486.73 102.99 L 496.94 107.84 L 507.14 114.78 L 517.35 123.52 L 527.55 133.71 L 537.76 144.96 L 547.96 156.81 L 558.16 168.78 L 568.37 180.41 L 578.57 191.23 L 588.78 200.80 L 598.98 208.75 L 609.18 214.76 L 619.39 218.58 L 629.59 220.07 L 639.80 219.17 L 650.00 215.91"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="150">sin-3</text>
-	<rect class="poloto_histo poloto_legend_icon poloto1fill poloto1legend" x="680" y="126.25" width="50" height="7.5" rx="5" ry="5"/>
 	<g class="poloto_histo poloto1fill">
 		<rect x="150.00" y="340.18" width="27.612244897959187" height="59.81575989754816"/>
 		<rect x="180.61" y="306.28" width="27.612244897959187" height="93.72031574803702"/>
@@ -117,12 +113,22 @@ body {
 		<rect x="578.57" y="288.87" width="27.612244897959158" height="111.13105723044032"/>
 		<rect x="609.18" y="315.44" width="27.612244897959158" height="84.56185120003937"/>
 	</g>
-	<text class="poloto_text poloto_legend_text" x="675" y="200">sin</text>
-	<line class="poloto_scatter poloto_legend_icon poloto2stroke poloto2legend" stroke="black" x1="685" x2="685" y1="181.25" y2="181.25"/>
 	<path class="poloto_scatter poloto2stroke" d=" M 150.00 160.05 h 0.00 M 180.61 126.14 h 0.00 M 211.22 104.08 h 0.00 M 241.84 101.57 h 0.00 M 272.45 119.49 h 0.00 M 303.06 151.57 h 0.00 M 333.67 186.62 h 0.00 M 364.29 212.38 h 0.00 M 394.90 219.86 h 0.00 M 425.51 206.45 h 0.00 M 456.12 176.82 h 0.00 M 486.73 141.34 h 0.00 M 517.35 112.39 h 0.00 M 547.96 100.09 h 0.00 M 578.57 108.73 h 0.00 M 609.18 135.30 h 0.00 M 639.80 170.51 h 0.00"/>
-	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Demo: Hovering and shadows</text>
-	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">x</text>
-	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	<g class="poloto_legend_icon">
+		<line class="poloto_line poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
+		<rect class="poloto_legend_icon poloto1fill poloto1legend" x="680" y="126.25" width="50" height="7.5" rx="5" ry="5"/>
+		<line class="poloto_legend_icon poloto2stroke poloto2legend" stroke="black" x1="685" x2="685" y1="181.25" y2="181.25"/>
+	</g>
+	<g class="poloto_text poloto_legend_text">
+		<text x="675" y="100">cos</text>
+		<text x="675" y="150">sin-3</text>
+		<text x="675" y="200">sin</text>
+	</g>
+	<g class="poloto_labels poloto_text">
+		<text class="poloto_title" x="400.00" y="37.50">Demo: Hovering and shadows</text>
+		<text class="poloto_xname" x="400.00" y="481.25">x</text>
+		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="135.00" y="340.18">-3</text>
 		<text x="135.00" y="280.14">-2</text>

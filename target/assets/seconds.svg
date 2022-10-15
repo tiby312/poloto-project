@@ -35,9 +35,15 @@
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 171.79 L 158.20 144.64 L 404.10 121.63 L 486.07 245.17 L 650.00 100.00"/>
-	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
-	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">01:01:59 to 01:03:00 with Seconds</text>
-	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">Number of Articles</text>
+	<g class="poloto_legend_icon">
+	</g>
+	<g class="poloto_text poloto_legend_text">
+	</g>
+	<g class="poloto_labels poloto_text">
+		<text class="poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
+		<text class="poloto_xname" x="400.00" y="481.25">01:01:59 to 01:03:00 with Seconds</text>
+		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">Number of Articles</text>
+	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="135.00" y="400.00">0</text>
 		<text x="135.00" y="327.41">1e6</text>

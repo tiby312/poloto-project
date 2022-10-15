@@ -34,15 +34,21 @@
 .poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="100">a</text>
-	<line class="poloto_scatter poloto_legend_icon poloto0stroke poloto0legend" stroke="black" x1="685" x2="685" y1="81.25" y2="81.25"/>
 	<path class="poloto_scatter poloto0stroke" d=" M 150.00 100.00 h 0.00 M 167.24 108.26 h 0.00 M 184.48 132.13 h 0.00 M 201.72 168.99 h 0.00 M 218.97 214.77 h 0.00 M 236.21 264.44 h 0.00 M 253.45 312.53 h 0.00 M 270.69 353.75 h 0.00 M 287.93 383.55 h 0.00 M 305.17 398.65 h 0.00 M 322.41 397.41 h 0.00 M 339.66 379.94 h 0.00 M 356.90 348.18 h 0.00 M 374.14 305.61 h 0.00 M 391.38 256.94 h 0.00 M 408.62 207.51 h 0.00 M 425.86 162.76 h 0.00 M 443.10 127.63 h 0.00 M 460.34 105.98 h 0.00 M 477.59 100.19 h 0.00 M 494.83 110.90 h 0.00 M 512.07 136.93 h 0.00 M 529.31 175.42 h 0.00 M 546.55 222.13 h 0.00 M 563.79 271.91 h 0.00 M 581.03 319.30 h 0.00 M 598.28 359.06 h 0.00 M 615.52 386.82 h 0.00 M 632.76 399.53 h 0.00 M 650.00 395.79 h 0.00"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="150">b</text>
-	<line class="poloto_line poloto_legend_icon poloto1stroke poloto1legend" stroke="black" x1="680" x2="730" y1="131.25" y2="131.25"/>
 	<path class="poloto_line poloto1stroke" fill="none" stroke="black" d=" M 150.00 250.08 L 167.24 200.97 L 184.48 157.27 L 201.72 123.79 L 218.97 104.21 L 236.21 100.69 L 253.45 113.61 L 270.69 141.56 L 287.93 181.45 L 305.17 228.90 L 322.41 278.68 L 339.66 325.31 L 356.90 363.66 L 374.14 389.50 L 391.38 400.00 L 408.62 393.99 L 425.86 372.14 L 443.10 336.85 L 460.34 292.01 L 477.59 242.56 L 494.83 193.93 L 512.07 151.48 L 529.31 119.89 L 546.55 102.63 L 563.79 101.60 L 581.03 116.91 L 598.28 146.89 L 615.52 188.23 L 632.76 236.37 L 650.00 286.03"/>
-	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">cows per year</text>
-	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">year</text>
-	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">cows</text>
+	<g class="poloto_legend_icon">
+		<line class="poloto_legend_icon poloto0stroke poloto0legend" stroke="black" x1="685" x2="685" y1="81.25" y2="81.25"/>
+		<line class="poloto_line poloto1stroke poloto1legend" stroke="black" x1="680" x2="730" y1="131.25" y2="131.25"/>
+	</g>
+	<g class="poloto_text poloto_legend_text">
+		<text x="675" y="100">a</text>
+		<text x="675" y="150">b</text>
+	</g>
+	<g class="poloto_labels poloto_text">
+		<text class="poloto_title" x="400.00" y="37.50">cows per year</text>
+		<text class="poloto_xname" x="400.00" y="481.25">year</text>
+		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">cows</text>
+	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="135.00" y="325.12">-0.5</text>
 		<text x="135.00" y="250.08">0.0</text>

@@ -40,9 +40,15 @@
 		<rect x="150.00" y="210.00" width="500" height="20"/>
 		<rect x="150.00" y="150.00" width="283.0188679245283" height="20"/>
 	</g>
-	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Comparison of Food Tastiness</text>
-	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">Tastiness</text>
-	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">Foods</text>
+	<g class="poloto_legend_icon">
+	</g>
+	<g class="poloto_text poloto_legend_text">
+	</g>
+	<g class="poloto_labels poloto_text">
+		<text class="poloto_title" x="400.00" y="37.50">Comparison of Food Tastiness</text>
+		<text class="poloto_xname" x="400.00" y="481.25">Tastiness</text>
+		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">Foods</text>
+	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="135.00" y="340.00">potato</text>
 		<text x="135.00" y="280.00">broccoli</text>

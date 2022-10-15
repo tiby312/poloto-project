@@ -40,7 +40,11 @@ pub(super) fn render_plot<P: build::PlotIterator>(
         (0..max).cycle()
     };
 
+    let mut color_iter2 = color_iter.clone();
+
     let mut f = crate::build::RenderablePlotIter::new(plots_all);
+
+    let mut names = vec![];
 
     for i in 0.. {
         let mut ppp = if let Some(ppp) = f.next_plot() {
@@ -48,8 +52,6 @@ pub(super) fn render_plot<P: build::PlotIterator>(
         } else {
             break;
         };
-
-        let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
 
         let typ = ppp.typ();
 
@@ -59,15 +61,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
         let name_exists = !name.is_empty();
 
         if name_exists {
-            let text = hbuild::elem("text")
-                .with(attrs!(
-                    ("class", "poloto_text poloto_legend_text"),
-                    ("x", width - padding / 1.2),
-                    ("y", paddingy - yaspect_offset + (i as f64) * spacing)
-                ))
-                .inline();
-
-            writer.render(text.append(name))?;
+            names.push((typ, name));
         }
 
         let aa = minx.scale([minx, maxx], scalex);
@@ -111,9 +105,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
                     PlotRenderInfo {
                         canvas,
                         p_type,
-                        name_exists,
                         colori,
-                        legendy1,
                         precision,
                         bar_width: canvas.bar_width,
                     },
@@ -122,17 +114,196 @@ pub(super) fn render_plot<P: build::PlotIterator>(
         }
     }
 
+    let j = hbuild::from_closure(|w| {
+        //TODO redesign so that not all names need to be written to memory at once
+        for (i, (typ, name)) in names.iter().enumerate() {
+            match typ {
+                PlotMetaType::Text => {
+                    //assert_eq!(ppp.plots().count(), 0);
+
+                    // don't need to render any legend or plots
+                }
+                &PlotMetaType::Plot(p_type) => {
+                    let colori = color_iter2.next().unwrap();
+                    let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
+
+                    let precision = canvas.precision;
+                    if !name.is_empty() {
+                        render_label(
+                            w,
+                            PlotRenderInfo2 {
+                                canvas,
+                                p_type,
+                                colori,
+                                legendy1,
+                                precision,
+                                bar_width: canvas.bar_width,
+                            },
+                        )?;
+                    }
+                }
+            }
+        }
+        Ok(())
+    });
+
+    let g = hbuild::elem("g").with(("class", format_move!("poloto_legend_icon",)));
+
+    writer.render(g.append(j))?;
+
+    let j = hbuild::from_closure(|w| {
+        for (i, (_, name)) in names.into_iter().enumerate() {
+            let text = hbuild::elem("text")
+                .with(attrs!(
+                    ("x", width - padding / 1.2),
+                    ("y", paddingy - yaspect_offset + (i as f64) * spacing)
+                ))
+                .inline();
+
+            w.render(text.append(name))?;
+        }
+        Ok(())
+    });
+    let g = hbuild::elem("g").with(("class", "poloto_text poloto_legend_text"));
+    writer.render(g.append(j))?;
+
     Ok(())
+}
+
+struct PlotRenderInfo2<'a> {
+    canvas: &'a RenderOptionsResult,
+    p_type: PlotType,
+    colori: usize,
+    legendy1: f64,
+    precision: usize,
+    bar_width: f64,
 }
 
 struct PlotRenderInfo<'a> {
     canvas: &'a RenderOptionsResult,
     p_type: PlotType,
-    name_exists: bool,
     colori: usize,
-    legendy1: f64,
     precision: usize,
     bar_width: f64,
+}
+
+fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Result {
+    let PlotRenderInfo2 {
+        canvas,
+        p_type,
+        colori,
+        legendy1,
+        ..
+    } = info;
+
+    let RenderOptionsResult {
+        padding, legendx1, ..
+    } = *canvas;
+
+    match p_type {
+        PlotType::Line => {
+            writer.render(hbuild::single("line").with(attrs!(
+                (
+                    "class",
+                    format_move!("poloto_line poloto{}stroke poloto{}legend", colori, colori)
+                ),
+                ("stroke", "black"),
+                ("x1", legendx1),
+                ("x2", legendx1 + padding / 3.0),
+                ("y1", legendy1),
+                ("y2", legendy1)
+            )))?;
+        }
+        PlotType::Scatter => {
+            writer.render(hbuild::single("line").with(attrs!(
+                (
+                    "class",
+                    format_move!(
+                        "poloto_legend_icon poloto{}stroke poloto{}legend",
+                        colori,
+                        colori
+                    ),
+                ),
+                ("stroke", "black"),
+                ("x1", legendx1 + padding / 30.0),
+                ("x2", legendx1 + padding / 30.0),
+                ("y1", legendy1),
+                ("y2", legendy1)
+            )))?;
+        }
+        PlotType::Histo => {
+            writer.render(hbuild::single("rect").with(attrs!(
+                (
+                    "class",
+                    format_move!(
+                        "poloto_legend_icon poloto{}fill poloto{}legend",
+                        colori,
+                        colori
+                    ),
+                ),
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )))?;
+        }
+        PlotType::LineFill => {
+            writer.render(hbuild::single("rect").with(attrs!(
+                (
+                    "class",
+                    format_move!(
+                        "poloto_legend_icon poloto{}fill poloto{}legend",
+                        colori,
+                        colori
+                    ),
+                ),
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )))?;
+        }
+
+        PlotType::LineFillRaw => {
+            writer.render(hbuild::single("rect").with(attrs!(
+                (
+                    "class",
+                    format_move!(
+                        "poloto_linefillraw poloto{}fill poloto{}legend",
+                        colori,
+                        colori
+                    ),
+                ),
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )))?;
+        }
+
+        PlotType::Bars => {
+            writer.render(hbuild::single("rect").with(attrs!(
+                (
+                    "class",
+                    format_move!("poloto_histo poloto{}fill poloto{}legend", colori, colori),
+                ),
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )))?;
+        }
+    }
+
+    Ok(())
 }
 
 fn render(
@@ -143,18 +314,16 @@ fn render(
     let PlotRenderInfo {
         canvas,
         p_type,
-        name_exists,
         colori,
-        legendy1,
         precision,
         bar_width,
+        ..
     } = info;
 
     let RenderOptionsResult {
         height,
         padding,
         paddingy,
-        legendx1,
         ..
     } = *canvas;
 
@@ -162,24 +331,6 @@ fn render(
 
     match p_type {
         PlotType::Line => {
-            if name_exists {
-                writer.render(hbuild::single("line").with(attrs!(
-                    (
-                        "class",
-                        format_move!(
-                            "poloto_line poloto_legend_icon poloto{}stroke poloto{}legend",
-                            colori,
-                            colori
-                        )
-                    ),
-                    ("stroke", "black"),
-                    ("x1", legendx1),
-                    ("x2", legendx1 + padding / 3.0),
-                    ("y1", legendy1),
-                    ("y2", legendy1)
-                )))?;
-            }
-
             writer.render(hbuild::single("path").with(attrs!(
                 ("class", format_move!("poloto_line poloto{}stroke", colori)),
                 ("fill", "none"),
@@ -188,24 +339,6 @@ fn render(
             )))?;
         }
         PlotType::Scatter => {
-            if name_exists {
-                writer.render(hbuild::single("line").with(attrs!(
-                    (
-                        "class",
-                        format_move!(
-                            "poloto_scatter poloto_legend_icon poloto{}stroke poloto{}legend",
-                            colori,
-                            colori
-                        ),
-                    ),
-                    ("stroke", "black"),
-                    ("x1", legendx1 + padding / 30.0),
-                    ("x2", legendx1 + padding / 30.0),
-                    ("y1", legendy1),
-                    ("y2", legendy1)
-                )))?;
-            }
-
             writer.render(hbuild::single("path").with(attrs!(
                 (
                     "class",
@@ -223,25 +356,6 @@ fn render(
             )))?;
         }
         PlotType::Histo => {
-            if name_exists {
-                writer.render(hbuild::single("rect").with(attrs!(
-                    (
-                        "class",
-                        format_move!(
-                            "poloto_histo poloto_legend_icon poloto{}fill poloto{}legend",
-                            colori,
-                            colori
-                        ),
-                    ),
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )))?;
-            }
-
             let g = hbuild::elem("g")
                 .with(("class", format_move!("poloto_histo poloto{}fill", colori)));
 
@@ -264,25 +378,6 @@ fn render(
             writer.render(g.append(h))?;
         }
         PlotType::LineFill => {
-            if name_exists {
-                writer.render(hbuild::single("rect").with(attrs!(
-                    (
-                        "class",
-                        format_move!(
-                            "poloto_linefill poloto_legend_icon poloto{}fill poloto{}legend",
-                            colori,
-                            colori
-                        ),
-                    ),
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )))?;
-            }
-
             writer.render(hbuild::single("path").with(attrs!(
                 (
                     "class",
@@ -292,25 +387,6 @@ fn render(
             )))?;
         }
         PlotType::LineFillRaw => {
-            if name_exists {
-                writer.render(hbuild::single("rect").with(attrs!(
-                    (
-                        "class",
-                        format_move!(
-                            "poloto_linefillraw poloto_legend_icon poloto{}fill poloto{}legend",
-                            colori,
-                            colori
-                        ),
-                    ),
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )))?;
-            }
-
             writer.render(hbuild::single("path").with(attrs!(
                 (
                     "class",
@@ -320,25 +396,6 @@ fn render(
             )))?;
         }
         PlotType::Bars => {
-            if name_exists {
-                writer.render(hbuild::single("rect").with(attrs!(
-                    (
-                        "class",
-                        format_move!(
-                            "poloto_histo poloto_legend_icon poloto{}fill poloto{}legend",
-                            colori,
-                            colori
-                        ),
-                    ),
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )))?;
-            }
-
             let g = hbuild::elem("g")
                 .with(("class", format_move!("poloto_histo poloto{}fill", colori)));
 

@@ -47,11 +47,7 @@
     }
     </style>
 	<circle r="1e5" class="poloto_background"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="100">cos</text>
-	<line class="poloto_line poloto_legend_icon poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 100.00 L 160.20 100.50 L 170.41 101.97 L 180.61 104.37 L 190.82 107.58 L 201.02 111.50 L 211.22 115.95 L 221.43 120.76 L 231.63 125.74 L 241.84 130.69 L 252.04 135.41 L 262.24 139.73 L 272.45 143.45 L 282.65 146.44 L 292.86 148.57 L 303.06 149.77 L 313.27 149.97 L 323.47 149.19 L 333.67 147.43 L 343.88 144.79 L 354.08 141.35 L 364.29 137.27 L 374.49 132.69 L 384.69 127.81 L 394.90 122.82 L 405.10 117.91 L 415.31 113.29 L 425.51 109.14 L 435.71 105.61 L 445.92 102.86 L 456.12 101.00 L 466.33 100.09 L 476.53 100.17 L 486.73 101.24 L 496.94 103.27 L 507.14 106.15 L 517.35 109.79 L 527.55 114.04 L 537.76 118.72 L 547.96 123.66 L 558.16 128.65 L 568.37 133.49 L 578.57 137.99 L 588.78 141.98 L 598.98 145.29 L 609.18 147.79 L 619.39 149.39 L 629.59 150.01 L 639.80 149.63 L 650.00 148.28"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="150">sin-10</text>
-	<rect class="poloto_histo poloto_legend_icon poloto1fill poloto1legend" x="680" y="126.25" width="50" height="7.5" rx="5" ry="5"/>
 	<g class="poloto_histo poloto1fill">
 		<rect x="150.00" y="375.09" width="27.612244897959187" height="24.912077517728676"/>
 		<rect x="180.61" y="360.97" width="27.612244897959187" height="39.03265251331885"/>
@@ -70,9 +66,19 @@
 		<rect x="578.57" y="353.72" width="27.612244897959158" height="46.28388098878531"/>
 		<rect x="609.18" y="364.78" width="27.612244897959158" height="35.2183336924283"/>
 	</g>
-	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Demo: you can change the style of the svg file itself!</text>
-	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">x</text>
-	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	<g class="poloto_legend_icon">
+		<line class="poloto_line poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
+		<rect class="poloto_legend_icon poloto1fill poloto1legend" x="680" y="126.25" width="50" height="7.5" rx="5" ry="5"/>
+	</g>
+	<g class="poloto_text poloto_legend_text">
+		<text x="675" y="100">cos</text>
+		<text x="675" y="150">sin-10</text>
+	</g>
+	<g class="poloto_labels poloto_text">
+		<text class="poloto_title" x="400.00" y="37.50">Demo: you can change the style of the svg file itself!</text>
+		<text class="poloto_xname" x="400.00" y="481.25">x</text>
+		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="135.00" y="375.09">-10</text>
 		<text x="135.00" y="325.07">-8</text>

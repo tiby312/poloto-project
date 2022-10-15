@@ -38,49 +38,54 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
 
-    let text = hbuild::elem("text")
-        .with(attrs!(
-            ("class", "poloto_labels poloto_text poloto_title"),
-            ("x", ffmt.disp(width / 2.0)),
-            ("y", ffmt.disp(padding / 4.0))
-        ))
-        .inline();
+    let g = hbuild::elem("g").with(("class", "poloto_labels poloto_text"));
 
-    let title = hbuild::from_closure(|w| plot_fmt.write_title(&mut w.writer()));
+    writer.session(g).build(|w| {
+        let text = hbuild::elem("text")
+            .with(attrs!(
+                ("class", "poloto_title"),
+                ("x", ffmt.disp(width / 2.0)),
+                ("y", ffmt.disp(padding / 4.0))
+            ))
+            .inline();
 
-    writer.render(text.append(title))?;
+        let title = hbuild::from_closure(|w| plot_fmt.write_title(&mut w.writer()));
+        let title = text.append(title);
+        w.render(title)?;
 
-    let text = hbuild::elem("text")
-        .with(attrs!(
-            ("class", "poloto_labels poloto_text poloto_xname"),
-            ("x", ffmt.disp(width / 2.0)),
-            ("y", ffmt.disp(height - padding / 8.))
-        ))
-        .inline();
+        let text = hbuild::elem("text")
+            .with(attrs!(
+                ("class", "poloto_xname"),
+                ("x", ffmt.disp(width / 2.0)),
+                ("y", ffmt.disp(height - padding / 8.))
+            ))
+            .inline();
 
-    let xname = hbuild::from_closure(|w| plot_fmt.write_xname(&mut w.writer()));
+        let xname = hbuild::from_closure(|w| plot_fmt.write_xname(&mut w.writer()));
+        let xname = text.append(xname);
+        w.render(xname)?;
 
-    writer.render(text.append(xname))?;
-
-    let text = hbuild::elem("text")
-        .with(attrs!(
-            ("class", "poloto_labels poloto_text poloto_yname"),
-            (
-                "transform",
-                format_move!(
-                    "rotate(-90,{},{})",
-                    ffmt.disp(padding / 4.0),
-                    ffmt.disp(height / 2.0)
+        let text = hbuild::elem("text")
+            .with(attrs!(
+                ("class", "poloto_yname"),
+                (
+                    "transform",
+                    format_move!(
+                        "rotate(-90,{},{})",
+                        ffmt.disp(padding / 4.0),
+                        ffmt.disp(height / 2.0)
+                    ),
                 ),
-            ),
-            ("x", ffmt.disp(padding / 4.0)),
-            ("y", ffmt.disp(height / 2.0))
-        ))
-        .inline();
+                ("x", ffmt.disp(padding / 4.0)),
+                ("y", ffmt.disp(height / 2.0))
+            ))
+            .inline();
 
-    let yname = hbuild::from_closure(|w| plot_fmt.write_yname(&mut w.writer()));
-
-    writer.render(text.append(yname))?;
+        let yname = hbuild::from_closure(|w| plot_fmt.write_yname(&mut w.writer()));
+        let yname = text.append(yname);
+        w.render(yname)?;
+        Ok(())
+    })?;
 
     let xdash_size = xticksg.res.dash_size;
     let ydash_size = yticksg.res.dash_size;

@@ -34,12 +34,18 @@
 .poloto7fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="100">label</text>
-	<line class="poloto_line poloto_legend_icon poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 400.00 L 400.00 200.00 L 650.00 100.00"/>
-	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">hello world</text>
-	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">x</text>
-	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	<g class="poloto_legend_icon">
+		<line class="poloto_line poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
+	</g>
+	<g class="poloto_text poloto_legend_text">
+		<text x="675" y="100">label</text>
+	</g>
+	<g class="poloto_labels poloto_text">
+		<text class="poloto_title" x="400.00" y="37.50">hello world</text>
+		<text class="poloto_xname" x="400.00" y="481.25">x</text>
+		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="135.00" y="400.00">0</text>
 		<text x="135.00" y="300.00">1</text>

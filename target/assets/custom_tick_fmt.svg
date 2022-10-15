@@ -59,9 +59,15 @@
 		<rect x="587.50" y="382.86" width="17.833333333333258" height="17.142857142857167"/>
 		<rect x="608.33" y="391.43" width="17.83333333333337" height="8.571428571428555"/>
 	</g>
-	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">title</text>
-	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">x</text>
-	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	<g class="poloto_legend_icon">
+	</g>
+	<g class="poloto_text poloto_legend_text">
+	</g>
+	<g class="poloto_labels poloto_text">
+		<text class="poloto_title" x="400.00" y="37.50">title</text>
+		<text class="poloto_xname" x="400.00" y="481.25">x</text>
+		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="135.00" y="400.00">0</text>
 		<text x="135.00" y="314.29">20</text>
