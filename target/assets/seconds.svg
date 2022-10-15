@@ -39,26 +39,34 @@
 	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
 	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">01:01:59 to 01:03:00 with Seconds</text>
 	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">Number of Articles</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="400.00">0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="327.41">1e6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="254.83">2.0e6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="182.24">3.0e6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="109.65">4.0e6</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="327.41" y2="327.41"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="254.83" y2="254.83"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="182.24" y2="182.24"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="109.65" y2="109.65"/>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="158.20" y="430.00">01:02:00</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="281.15" y="430.00">01:02:15</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="404.10" y="430.00">01:02:30</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="527.05" y="430.00">01:02:45</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="650.00" y="430.00">01:03:00</text>
-	<line class="poloto_axis_lines" stroke="black" x1="158.20" x2="158.20" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="281.15" x2="281.15" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="404.10" x2="404.10" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="527.05" x2="527.05" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
+		<text x="135.00" y="400.00">0</text>
+		<text x="135.00" y="327.41">1e6</text>
+		<text x="135.00" y="254.83">2.0e6</text>
+		<text x="135.00" y="182.24">3.0e6</text>
+		<text x="135.00" y="109.65">4.0e6</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="327.41" y2="327.41"/>
+		<line x1="150.00" x2="144.00" y1="254.83" y2="254.83"/>
+		<line x1="150.00" x2="144.00" y1="182.24" y2="182.24"/>
+		<line x1="150.00" x2="144.00" y1="109.65" y2="109.65"/>
+	</g>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
+		<text x="158.20" y="430.00">01:02:00</text>
+		<text x="281.15" y="430.00">01:02:15</text>
+		<text x="404.10" y="430.00">01:02:30</text>
+		<text x="527.05" y="430.00">01:02:45</text>
+		<text x="650.00" y="430.00">01:03:00</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="158.20" x2="158.20" y1="400.00" y2="405.00"/>
+		<line x1="281.15" x2="281.15" y1="400.00" y2="405.00"/>
+		<line x1="404.10" x2="404.10" y1="400.00" y2="405.00"/>
+		<line x1="527.05" x2="527.05" y1="400.00" y2="405.00"/>
+		<line x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	</g>
 	<path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:7.2586498911202515;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

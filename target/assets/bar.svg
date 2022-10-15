@@ -44,31 +44,39 @@
 	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Comparison of Food Tastiness</text>
 	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">Tastiness</text>
 	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">Foods</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="340.00">potato</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="280.00">broccoli</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="220.00">pizza</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="160.00">avocado</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="340.00" y2="340.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="280.00" y2="280.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="220.00" y2="220.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="160.00" y2="160.00"/>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="150.00" y="430.00">0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="244.34" y="430.00">10</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="338.68" y="430.00">20</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="433.02" y="430.00">30</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="527.36" y="430.00">40</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="621.70" y="430.00">50</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
+		<text x="135.00" y="340.00">potato</text>
+		<text x="135.00" y="280.00">broccoli</text>
+		<text x="135.00" y="220.00">pizza</text>
+		<text x="135.00" y="160.00">avocado</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="144.00" y1="340.00" y2="340.00"/>
+		<line x1="150.00" x2="144.00" y1="280.00" y2="280.00"/>
+		<line x1="150.00" x2="144.00" y1="220.00" y2="220.00"/>
+		<line x1="150.00" x2="144.00" y1="160.00" y2="160.00"/>
+	</g>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
+		<text x="150.00" y="430.00">0</text>
+		<text x="244.34" y="430.00">10</text>
+		<text x="338.68" y="430.00">20</text>
+		<text x="433.02" y="430.00">30</text>
+		<text x="527.36" y="430.00">40</text>
+		<text x="621.70" y="430.00">50</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+		<line x1="244.34" x2="244.34" y1="400.00" y2="405.00"/>
+		<line x1="338.68" x2="338.68" y1="400.00" y2="405.00"/>
+		<line x1="433.02" x2="433.02" y1="400.00" y2="405.00"/>
+		<line x1="527.36" x2="527.36" y1="400.00" y2="405.00"/>
+		<line x1="621.70" x2="621.70" y1="400.00" y2="405.00"/>
+	</g>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="150.00" y1="400.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="244.34" x2="244.34" y1="400.00" y2="405.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="244.34" x2="244.34" y1="400.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="338.68" x2="338.68" y1="400.00" y2="405.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="338.68" x2="338.68" y1="400.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="433.02" x2="433.02" y1="400.00" y2="405.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="433.02" x2="433.02" y1="400.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="527.36" x2="527.36" y1="400.00" y2="405.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="527.36" x2="527.36" y1="400.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="621.70" x2="621.70" y1="400.00" y2="405.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="621.70" x2="621.70" y1="400.00" y2="100.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:9.433962264150944;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150.00 400.00 L 150.00 100.00"/>

@@ -55,62 +55,70 @@
 	<text class="poloto_labels poloto_text poloto_title" x="600.00" y="37.50">collatz</text>
 	<text class="poloto_labels poloto_text poloto_xname" x="600.00" y="731.25">x</text>
 	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,375.00)" x="37.50" y="375.00">y</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="650.00">0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="599.28">2000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="548.56">4000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="497.84">6000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="447.12">8000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="396.40">10000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="345.68">12000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="294.96">14000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="244.25">16000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="193.53">18000</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="142.81">20000</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="650.00" y2="650.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
+		<text x="135.00" y="650.00">0</text>
+		<text x="135.00" y="599.28">2000</text>
+		<text x="135.00" y="548.56">4000</text>
+		<text x="135.00" y="497.84">6000</text>
+		<text x="135.00" y="447.12">8000</text>
+		<text x="135.00" y="396.40">10000</text>
+		<text x="135.00" y="345.68">12000</text>
+		<text x="135.00" y="294.96">14000</text>
+		<text x="135.00" y="244.25">16000</text>
+		<text x="135.00" y="193.53">18000</text>
+		<text x="135.00" y="142.81">20000</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="144.00" y1="650.00" y2="650.00"/>
+		<line x1="150.00" x2="144.00" y1="599.28" y2="599.28"/>
+		<line x1="150.00" x2="144.00" y1="548.56" y2="548.56"/>
+		<line x1="150.00" x2="144.00" y1="497.84" y2="497.84"/>
+		<line x1="150.00" x2="144.00" y1="447.12" y2="447.12"/>
+		<line x1="150.00" x2="144.00" y1="396.40" y2="396.40"/>
+		<line x1="150.00" x2="144.00" y1="345.68" y2="345.68"/>
+		<line x1="150.00" x2="144.00" y1="294.96" y2="294.96"/>
+		<line x1="150.00" x2="144.00" y1="244.25" y2="244.25"/>
+		<line x1="150.00" x2="144.00" y1="193.53" y2="193.53"/>
+		<line x1="150.00" x2="144.00" y1="142.81" y2="142.81"/>
+	</g>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="650.00" y2="650.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="599.28" y2="599.28"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="599.28" y2="599.28"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="548.56" y2="548.56"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="548.56" y2="548.56"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="497.84" y2="497.84"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="497.84" y2="497.84"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="447.12" y2="447.12"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="447.12" y2="447.12"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="396.40" y2="396.40"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="396.40" y2="396.40"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="345.68" y2="345.68"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="345.68" y2="345.68"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="294.96" y2="294.96"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="294.96" y2="294.96"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="244.25" y2="244.25"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="244.25" y2="244.25"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="193.53" y2="193.53"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="193.53" y2="193.53"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="142.81" y2="142.81"/>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="1050.00" y1="142.81" y2="142.81"/>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="150.00" y="680.00">0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="277.66" y="680.00">20</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="405.32" y="680.00">40</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="532.98" y="680.00">60</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="660.64" y="680.00">80</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="788.30" y="680.00">100</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="915.96" y="680.00">120</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="1043.62" y="680.00">140</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="150.00" y1="650.00" y2="655.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
+		<text x="150.00" y="680.00">0</text>
+		<text x="277.66" y="680.00">20</text>
+		<text x="405.32" y="680.00">40</text>
+		<text x="532.98" y="680.00">60</text>
+		<text x="660.64" y="680.00">80</text>
+		<text x="788.30" y="680.00">100</text>
+		<text x="915.96" y="680.00">120</text>
+		<text x="1043.62" y="680.00">140</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="150.00" y1="650.00" y2="655.00"/>
+		<line x1="277.66" x2="277.66" y1="650.00" y2="655.00"/>
+		<line x1="405.32" x2="405.32" y1="650.00" y2="655.00"/>
+		<line x1="532.98" x2="532.98" y1="650.00" y2="655.00"/>
+		<line x1="660.64" x2="660.64" y1="650.00" y2="655.00"/>
+		<line x1="788.30" x2="788.30" y1="650.00" y2="655.00"/>
+		<line x1="915.96" x2="915.96" y1="650.00" y2="655.00"/>
+		<line x1="1043.62" x2="1043.62" y1="650.00" y2="655.00"/>
+	</g>
 	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="150.00" y1="650.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="277.66" x2="277.66" y1="650.00" y2="655.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="277.66" x2="277.66" y1="650.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="405.32" x2="405.32" y1="650.00" y2="655.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="405.32" x2="405.32" y1="650.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="532.98" x2="532.98" y1="650.00" y2="655.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="532.98" x2="532.98" y1="650.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="660.64" x2="660.64" y1="650.00" y2="655.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="660.64" x2="660.64" y1="650.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="788.30" x2="788.30" y1="650.00" y2="655.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="788.30" x2="788.30" y1="650.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="915.96" x2="915.96" y1="650.00" y2="655.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="915.96" x2="915.96" y1="650.00" y2="100.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="1043.62" x2="1043.62" y1="650.00" y2="655.00"/>
 	<line class="poloto_tick_line" stroke="black" x1="1043.62" x2="1043.62" y1="650.00" y2="100.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:6.382978723404255;stroke-dashoffset:-0;" d=" M 150.00 650.00 L 1050.00 650.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:12.679822943563261;stroke-dashoffset:-0;" d=" M 150.00 650.00 L 150.00 100.00"/>

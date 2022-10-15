@@ -40,31 +40,39 @@
 	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">year</text>
 	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">cow</text>
 	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="start" x="150.00" y="70.00">where k=1e-6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="400.00">k+0e0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="340.00">k+2e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="280.00">k+4e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="220.00">k+6e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="160.00">k+8e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="100.00">k+1e-15</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="340.00" y2="340.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="280.00" y2="280.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="220.00" y2="220.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="160.00" y2="160.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
+		<text x="135.00" y="400.00">k+0e0</text>
+		<text x="135.00" y="340.00">k+2e-16</text>
+		<text x="135.00" y="280.00">k+4e-16</text>
+		<text x="135.00" y="220.00">k+6e-16</text>
+		<text x="135.00" y="160.00">k+8e-16</text>
+		<text x="135.00" y="100.00">k+1e-15</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="340.00" y2="340.00"/>
+		<line x1="150.00" x2="144.00" y1="280.00" y2="280.00"/>
+		<line x1="150.00" x2="144.00" y1="220.00" y2="220.00"/>
+		<line x1="150.00" x2="144.00" y1="160.00" y2="160.00"/>
+		<line x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
+	</g>
 	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="start" x="440.00" y="70.00">where j=1e-6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="150.00" y="430.00">j+0e0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="250.00" y="430.00">j+2e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="350.00" y="430.00">j+4e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="450.00" y="430.00">j+6e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="550.00" y="430.00">j+8e-16</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="650.00" y="430.00">j+1e-15</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="250.00" x2="250.00" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="350.00" x2="350.00" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="450.00" x2="450.00" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="550.00" x2="550.00" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
+		<text x="150.00" y="430.00">j+0e0</text>
+		<text x="250.00" y="430.00">j+2e-16</text>
+		<text x="350.00" y="430.00">j+4e-16</text>
+		<text x="450.00" y="430.00">j+6e-16</text>
+		<text x="550.00" y="430.00">j+8e-16</text>
+		<text x="650.00" y="430.00">j+1e-15</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+		<line x1="250.00" x2="250.00" y1="400.00" y2="405.00"/>
+		<line x1="350.00" x2="350.00" y1="400.00" y2="405.00"/>
+		<line x1="450.00" x2="450.00" y1="400.00" y2="405.00"/>
+		<line x1="550.00" x2="550.00" y1="400.00" y2="405.00"/>
+		<line x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	</g>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:12.499998631167497;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:7.499999178700499;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

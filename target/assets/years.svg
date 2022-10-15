@@ -53,28 +53,36 @@
 	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">title</text>
 	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">xname</text>
 	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">yname</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="400.00">0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="303.53">2e6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="207.06">4e6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="110.60">6e6</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="303.53" y2="303.53"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="207.06" y2="207.06"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="110.60" y2="110.60"/>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="150.00" y="430.00">2010</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="233.33" y="430.00">2012</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="316.67" y="430.00">2014</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="400.00" y="430.00">2016</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="483.33" y="430.00">2018</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="566.67" y="430.00">2020</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="650.00" y="430.00">2022</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="233.33" x2="233.33" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="316.67" x2="316.67" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="483.33" x2="483.33" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="566.67" x2="566.67" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
+		<text x="135.00" y="400.00">0</text>
+		<text x="135.00" y="303.53">2e6</text>
+		<text x="135.00" y="207.06">4e6</text>
+		<text x="135.00" y="110.60">6e6</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="303.53" y2="303.53"/>
+		<line x1="150.00" x2="144.00" y1="207.06" y2="207.06"/>
+		<line x1="150.00" x2="144.00" y1="110.60" y2="110.60"/>
+	</g>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
+		<text x="150.00" y="430.00">2010</text>
+		<text x="233.33" y="430.00">2012</text>
+		<text x="316.67" y="430.00">2014</text>
+		<text x="400.00" y="430.00">2016</text>
+		<text x="483.33" y="430.00">2018</text>
+		<text x="566.67" y="430.00">2020</text>
+		<text x="650.00" y="430.00">2022</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+		<line x1="233.33" x2="233.33" y1="400.00" y2="405.00"/>
+		<line x1="316.67" x2="316.67" y1="400.00" y2="405.00"/>
+		<line x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
+		<line x1="483.33" x2="483.33" y1="400.00" y2="405.00"/>
+		<line x1="566.67" x2="566.67" y1="400.00" y2="405.00"/>
+		<line x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	</g>
 	<path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:12.058459411225622;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

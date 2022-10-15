@@ -39,25 +39,33 @@
 	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Long Jump world record progression</text>
 	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">Date</text>
 	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">Mark (in meters)</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="400.00">0</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="332.96">2</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="265.92">4</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="198.88">6</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="135.00" y="131.84">8</text>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="332.96" y2="332.96"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="265.92" y2="265.92"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="198.88" y2="198.88"/>
-	<line class="poloto_axis_lines" stroke="black" x1="150.00" x2="144.00" y1="131.84" y2="131.84"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
+		<text x="135.00" y="400.00">0</text>
+		<text x="135.00" y="332.96">2</text>
+		<text x="135.00" y="265.92">4</text>
+		<text x="135.00" y="198.88">6</text>
+		<text x="135.00" y="131.84">8</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="332.96" y2="332.96"/>
+		<line x1="150.00" x2="144.00" y1="265.92" y2="265.92"/>
+		<line x1="150.00" x2="144.00" y1="198.88" y2="198.88"/>
+		<line x1="150.00" x2="144.00" y1="131.84" y2="131.84"/>
+	</g>
 	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="start" x="440.00" y="70.00">¹1920-01-01 00:00:00 UTC in Years</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="252.18" y="430.00">1920¹</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="363.21" y="430.00">1940</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="474.24" y="430.00">1960</text>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="585.27" y="430.00">1980</text>
-	<line class="poloto_axis_lines" stroke="black" x1="252.18" x2="252.18" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="363.21" x2="363.21" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="474.24" x2="474.24" y1="400.00" y2="405.00"/>
-	<line class="poloto_axis_lines" stroke="black" x1="585.27" x2="585.27" y1="400.00" y2="405.00"/>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
+		<text x="252.18" y="430.00">1920¹</text>
+		<text x="363.21" y="430.00">1940</text>
+		<text x="474.24" y="430.00">1960</text>
+		<text x="585.27" y="430.00">1980</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="252.18" x2="252.18" y1="400.00" y2="405.00"/>
+		<line x1="363.21" x2="363.21" y1="400.00" y2="405.00"/>
+		<line x1="474.24" x2="474.24" y1="400.00" y2="405.00"/>
+		<line x1="585.27" x2="585.27" y1="400.00" y2="405.00"/>
+	</g>
 	<path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:8.379888268156424;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>
