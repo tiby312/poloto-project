@@ -44,7 +44,8 @@ fn large_scatter() -> fmt::Result {
     let data = poloto::data(plots).build_and_label(("cows per year", "year", "cows"));
 
     let header = Header::new().append(Theme::dark().append(
-        ".poloto_scatter{stroke-width:33;}.poloto_scatter.poloto_legend_icon{stroke-width:10}",
+".poloto_scatter{stroke-width:33;}
+.poloto_legend_icon .poloto_scatter{stroke-width:10}",
     ));
 
     let w = util::create_test_file("large_scatter.svg");
@@ -148,7 +149,7 @@ fn magnitude() -> fmt::Result {
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let d = poloto::data(plot("").scatter().cloned(points.iter())).build_and_label((
+    let d = poloto::data(plot("").line().cloned(points.iter())).build_and_label((
         "cows per year",
         "year",
         "cow",

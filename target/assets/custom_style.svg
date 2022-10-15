@@ -68,7 +68,7 @@
 	</g>
 	<g class="poloto_legend_icon">
 		<line class="poloto_line poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
-		<rect class="poloto_legend_icon poloto1fill poloto1legend" x="680" y="126.25" width="50" height="7.5" rx="5" ry="5"/>
+		<rect class="poloto_histo poloto1fill poloto1legend" x="680" y="126.25" width="50" height="7.5" rx="5" ry="5"/>
 	</g>
 	<g class="poloto_text poloto_legend_text">
 		<text x="675" y="100">cos</text>

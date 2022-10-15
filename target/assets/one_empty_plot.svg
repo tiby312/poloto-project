@@ -36,7 +36,7 @@
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_scatter poloto0stroke" d=""/>
 	<g class="poloto_legend_icon">
-		<line class="poloto_legend_icon poloto0stroke poloto0legend" stroke="black" x1="685" x2="685" y1="81.25" y2="81.25"/>
+		<line class="poloto_scatter poloto0stroke poloto0legend" stroke="black" x1="685" x2="685" y1="81.25" y2="81.25"/>
 	</g>
 	<g class="poloto_text poloto_legend_text">
 		<text x="675" y="100">hay</text>

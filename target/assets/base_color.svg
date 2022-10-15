@@ -34,7 +34,7 @@
 .poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<path class="poloto_scatter poloto0stroke" d=" M 150.00 400.00 h 0.00 M 650.00 100.00 h 0.00"/>
+	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 400.00 L 650.00 100.00"/>
 	<g class="poloto_labels poloto_text">
 		<text class="poloto_title" x="400.00" y="37.50">cows per year</text>
 		<text class="poloto_xname" x="400.00" y="481.25">year</text>

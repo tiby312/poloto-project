@@ -49,7 +49,7 @@
 		<rect x="608.33" y="100.00" width="38.66666666667152" height="300"/>
 	</g>
 	<g class="poloto_legend_icon">
-		<rect class="poloto_legend_icon poloto0fill poloto0legend" x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/>
+		<rect class="poloto_histo poloto0fill poloto0legend" x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/>
 	</g>
 	<g class="poloto_text poloto_legend_text">
 		<text x="675" y="100">foo</text>

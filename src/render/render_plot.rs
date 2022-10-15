@@ -216,7 +216,7 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_legend_icon poloto{}stroke poloto{}legend",
+                        "poloto_scatter poloto{}stroke poloto{}legend",
                         colori,
                         colori
                     ),
@@ -233,7 +233,7 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_legend_icon poloto{}fill poloto{}legend",
+                        "poloto_histo poloto{}fill poloto{}legend",
                         colori,
                         colori
                     ),
@@ -251,7 +251,7 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_legend_icon poloto{}fill poloto{}legend",
+                        "poloto_linefill poloto{}fill poloto{}legend",
                         colori,
                         colori
                     ),
