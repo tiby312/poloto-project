@@ -174,7 +174,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                     ))
                     .inline();
 
-                let ytick = hbuild::from_closure(|w| yticksg.fmt.write_tick(&mut w.writer(), &val));
+                let ytick = hbuild::from_closure(|w| yticksg.fmt.write_tick(&mut w.writer(), val));
 
                 w.render(text.append(ytick))?;
             }
@@ -262,7 +262,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                     ))
                     .inline();
 
-                let xtick = hbuild::from_closure(|w| xticksg.fmt.write_tick(&mut w.writer(), &val));
+                let xtick = hbuild::from_closure(|w| xticksg.fmt.write_tick(&mut w.writer(), val));
                 w.render(text.append(xtick))?;
             }
             Ok(())
