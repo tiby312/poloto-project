@@ -68,6 +68,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         let text = hbuild::elem("text")
             .with(attrs!(
                 ("class", "poloto_yname"),
+                ("x", ffmt.disp(padding / 4.0)),
+                ("y", ffmt.disp(height / 2.0)),
                 (
                     "transform",
                     format_move!(
@@ -75,9 +77,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                         ffmt.disp(padding / 4.0),
                         ffmt.disp(height / 2.0)
                     ),
-                ),
-                ("x", ffmt.disp(padding / 4.0)),
-                ("y", ffmt.disp(height / 2.0))
+                )
             ))
             .inline();
 

@@ -37,7 +37,7 @@
 	<g class="poloto_labels poloto_text">
 		<text class="poloto_title" x="400.00" y="37.50">Heart Graph</text>
 		<text class="poloto_xname" x="400.00" y="481.25">x</text>
-		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+		<text class="poloto_yname" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">y</text>
 	</g>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
 		<text x="235.00" y="400.00">-20</text>

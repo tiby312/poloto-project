@@ -38,7 +38,7 @@
 	<g class="poloto_labels poloto_text">
 		<text class="poloto_title" x="400.00" y="37.50">cows per year</text>
 		<text class="poloto_xname" x="400.00" y="481.25">year</text>
-		<text class="poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">cow</text>
+		<text class="poloto_yname" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">cow</text>
 	</g>
 	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="start" x="150.00" y="70.00">where k=1e-6</text>
 	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
