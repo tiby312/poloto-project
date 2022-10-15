@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "16.1.6"
+version = "16.2.0"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -24,7 +24,7 @@ timestamp_full = ["chrono","chrono/std"]
 
 [dependencies]
 chrono = {version="0.4", optional = true, default-features = false}
-hypermelon={version="0.3"}
+hypermelon={version="0.4"}
 
 [lib]
 doctest = false
@@ -33,6 +33,3 @@ doctest = false
 # This sets the default target to `x86_64-unknown-linux-gnu`
 # and only builds that target
 targets = ["x86_64-unknown-linux-gnu"]
-
-# [patch.crates-io]
-# hypermelon={path="../hypermelon"}

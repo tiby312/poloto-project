@@ -28,7 +28,7 @@ impl FloatFmt {
 impl crate::ticks::tick_fmt::TickFmt<f64> for FloatFmt {
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &f64) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {
-            let val = *val - offset;
+            let val = val - offset;
             match self.axis {
                 Axis::X => {
                     write!(writer, "j+")?;

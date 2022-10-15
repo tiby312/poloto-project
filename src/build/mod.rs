@@ -93,7 +93,7 @@ impl<'a, A> RenderablePlotIter<'a, A> {
         if let Some(typ) = self.flop.next_typ() {
             Some(SinglePlotAccessor {
                 typ,
-                flop: &mut self.flop,
+                flop: self.flop,
             })
         } else {
             None

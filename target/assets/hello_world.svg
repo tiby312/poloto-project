@@ -1,1 +1,67 @@
-<svg  class="poloto"  width="800"  height="500"  viewBox="0 0 800 500"  xmlns="http://www.w3.org/2000/svg"  ><style  > .poloto{stroke-linecap:round;stroke-linejoin:round;font-family:Roboto,sans-serif;font-size:16px;}.poloto_background{fill:AliceBlue;}.poloto_scatter{stroke-width:7}.poloto_tick_line{stroke:gray;stroke-width:0.5}.poloto_line{stroke-width:2}.poloto_text{fill: black;}.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}.poloto0stroke{stroke:blue;}.poloto1stroke{stroke:red;}.poloto2stroke{stroke:green;}.poloto3stroke{stroke:gold;}.poloto4stroke{stroke:aqua;}.poloto5stroke{stroke:lime;}.poloto6stroke{stroke:orange;}.poloto7stroke{stroke:chocolate;}.poloto0fill{fill:blue;}.poloto1fill{fill:red;}.poloto2fill{fill:green;}.poloto3fill{fill:gold;}.poloto4fill{fill:aqua;}.poloto5fill{fill:lime;}.poloto6fill{fill:orange;}.poloto7fill{fill:chocolate;}</style><circle  r="1e5"  class="poloto_background" /><text  class="poloto_text poloto_legend_text"  x="675"  y="100" >label</text><line  class="poloto_line poloto_legend_icon poloto0stroke poloto0legend"  stroke="black"  x1="680"  x2="730"  y1="81.25"  y2="81.25" /><path  class="poloto_line poloto0stroke"  fill="none"  stroke="black"  d=" M 150.00 400.00 L 400.00 200.00 L 650.00 100.00" /><text  class="poloto_labels poloto_text poloto_title"  x="400"  y="37.5" >hello world</text><text  class="poloto_labels poloto_text poloto_xname"  x="400"  y="481.25" >x</text><text  class="poloto_labels poloto_text poloto_yname"  transform="rotate(-90,37.5,250)"  x="37.5"  y="250" >y</text><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="start"  x="150"  y="70" ></text><line  class="poloto_axis_lines"  stroke="black"  x1="150"  x2="144"  y1="400"  y2="400" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="135"  y="400" >0</text><line  class="poloto_axis_lines"  stroke="black"  x1="150"  x2="144"  y1="300"  y2="300" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="135"  y="300" >1</text><line  class="poloto_axis_lines"  stroke="black"  x1="150"  x2="144"  y1="200"  y2="200" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="135"  y="200" >2</text><line  class="poloto_axis_lines"  stroke="black"  x1="150"  x2="144"  y1="100"  y2="100" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="135"  y="100" >3</text><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="start"  x="440.00000000000006"  y="70" ></text><line  class="poloto_axis_lines"  stroke="black"  x1="150"  x2="150"  y1="400"  y2="405" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="start"  text-anchor="middle"  x="150"  y="430" >0</text><line  class="poloto_axis_lines"  stroke="black"  x1="400"  x2="400"  y1="400"  y2="405" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="start"  text-anchor="middle"  x="400"  y="430" >1</text><line  class="poloto_axis_lines"  stroke="black"  x1="650"  x2="650"  y1="400"  y2="405" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="start"  text-anchor="middle"  x="650"  y="430" >2</text><path  stroke="black"  fill="none"  class="poloto_axis_lines"  style="stroke-dasharray:12.5;stroke-dashoffset:-0;"  d=" M 150 400 L 650 400" /><path  stroke="black"  fill="none"  class="poloto_axis_lines"  style="stroke-dasharray:10;stroke-dashoffset:-0;"  d=" M 150 400 L 150 100" /></svg>
+<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+	<style>
+.poloto{
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  font-family:Roboto,sans-serif;
+  font-size:16px;
+}
+.poloto_background{fill:AliceBlue;}
+.poloto_scatter{stroke-width:7}
+.poloto_tick_line{stroke:gray;stroke-width:0.5}
+.poloto_line{stroke-width:2}
+.poloto_text{fill: black;}
+.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto0stroke{stroke:blue;}
+.poloto1stroke{stroke:red;}
+.poloto2stroke{stroke:green;}
+.poloto3stroke{stroke:gold;}
+.poloto4stroke{stroke:aqua;}
+.poloto5stroke{stroke:lime;}
+.poloto6stroke{stroke:orange;}
+.poloto7stroke{stroke:chocolate;}
+.poloto0fill{fill:blue;}
+.poloto1fill{fill:red;}
+.poloto2fill{fill:green;}
+.poloto3fill{fill:gold;}
+.poloto4fill{fill:aqua;}
+.poloto5fill{fill:lime;}
+.poloto6fill{fill:orange;}
+.poloto7fill{fill:chocolate;}
+	</style>
+	<circle r="1e5" class="poloto_background"/>
+	<text class="poloto_text poloto_legend_text" x="675" y="100">label</text>
+	<line class="poloto_line poloto_legend_icon poloto0stroke poloto0legend" stroke="black" x1="680" x2="730" y1="81.25" y2="81.25"/>
+	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 400.00 L 400.00 200.00 L 650.00 100.00"/>
+	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">hello world</text>
+	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">x</text>
+	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
+		<text x="135.00" y="400.00">0</text>
+		<text x="135.00" y="300.00">1</text>
+		<text x="135.00" y="200.00">2</text>
+		<text x="135.00" y="100.00">3</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="300.00" y2="300.00"/>
+		<line x1="150.00" x2="144.00" y1="200.00" y2="200.00"/>
+		<line x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
+	</g>
+	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
+		<text x="150.00" y="430.00">0</text>
+		<text x="400.00" y="430.00">1</text>
+		<text x="650.00" y="430.00">2</text>
+	</g>
+	<g class="poloto_axis_lines" stroke="black">
+		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+		<line x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
+		<line x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	</g>
+	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:12.5;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:10;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+</svg>

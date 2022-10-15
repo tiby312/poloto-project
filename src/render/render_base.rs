@@ -9,6 +9,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     plot_fmt: &mut dyn BaseFmt,
     canvas: &RenderOptionsResult,
 ) -> std::fmt::Result {
+    let ffmt = FloatFmt::new(canvas.precision);
+
     use crate::ticks::tick_fmt::TickFmt;
 
     let mut xticksg = xticksg.unwrap();
@@ -36,35 +38,45 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
 
-    let text = hbuild::elem("text").with(attrs!(
-        ("class", "poloto_labels poloto_text poloto_title"),
-        ("x", width / 2.0),
-        ("y", padding / 4.0)
-    ));
+    let text = hbuild::elem("text")
+        .with(attrs!(
+            ("class", "poloto_labels poloto_text poloto_title"),
+            ("x", ffmt.disp(width / 2.0)),
+            ("y", ffmt.disp(padding / 4.0))
+        ))
+        .inline();
 
     let title = hbuild::from_closure(|w| plot_fmt.write_title(&mut w.writer()));
 
     writer.render(text.append(title))?;
 
-    let text = hbuild::elem("text").with(attrs!(
-        ("class", "poloto_labels poloto_text poloto_xname"),
-        ("x", width / 2.0),
-        ("y", height - padding / 8.)
-    ));
+    let text = hbuild::elem("text")
+        .with(attrs!(
+            ("class", "poloto_labels poloto_text poloto_xname"),
+            ("x", ffmt.disp(width / 2.0)),
+            ("y", ffmt.disp(height - padding / 8.))
+        ))
+        .inline();
 
     let xname = hbuild::from_closure(|w| plot_fmt.write_xname(&mut w.writer()));
 
     writer.render(text.append(xname))?;
 
-    let text = hbuild::elem("text").with(attrs!(
-        ("class", "poloto_labels poloto_text poloto_yname"),
-        (
-            "transform",
-            format_move!("rotate(-90,{},{})", padding / 4.0, height / 2.0),
-        ),
-        ("x", padding / 4.0),
-        ("y", height / 2.0)
-    ));
+    let text = hbuild::elem("text")
+        .with(attrs!(
+            ("class", "poloto_labels poloto_text poloto_yname"),
+            (
+                "transform",
+                format_move!(
+                    "rotate(-90,{},{})",
+                    ffmt.disp(padding / 4.0),
+                    ffmt.disp(height / 2.0)
+                ),
+            ),
+            ("x", ffmt.disp(padding / 4.0)),
+            ("y", ffmt.disp(height / 2.0))
+        ))
+        .inline();
 
     let yname = hbuild::from_closure(|w| plot_fmt.write_yname(&mut w.writer()));
 
@@ -126,109 +138,174 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     };
 
     {
-        let text = hbuild::elem("text").with(attrs!(
+        let mut ywher = String::new();
+        yticksg.fmt.write_where(&mut ywher)?;
+
+        if !ywher.is_empty() {
+            let text = hbuild::elem("text")
+                .with(attrs!(
+                    ("class", "poloto_tick_labels poloto_text"),
+                    ("dominant-baseline", "middle"),
+                    ("text-anchor", "start"),
+                    ("x", ffmt.disp(*padding)),
+                    ("y", ffmt.disp(paddingy * 0.7))
+                ))
+                .inline();
+
+            writer.render(text.append(ywher))?;
+        }
+
+        let ticks: Vec<_> = std::iter::once(first_ticky)
+            .chain(yticks)
+            .map(|val| {
+                let yy = height
+                    - (val.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
+                    - paddingy;
+                (val, yy)
+            })
+            .collect();
+
+        let j = hbuild::from_closure(|w| {
+            for (val, yy) in ticks.iter() {
+                let text = hbuild::elem("text")
+                    .with(attrs!(
+                        ("x", ffmt.disp(xaspect_offset + padding - textx_padding)),
+                        ("y", ffmt.disp(yaspect_offset + yy))
+                    ))
+                    .inline();
+
+                let ytick = hbuild::from_closure(|w| yticksg.fmt.write_tick(&mut w.writer(), val));
+
+                w.render(text.append(ytick))?;
+            }
+            Ok(())
+        });
+
+        let g = hbuild::elem("g").with(attrs!(
             ("class", "poloto_tick_labels poloto_text"),
             ("dominant-baseline", "middle"),
-            ("text-anchor", "start"),
-            ("x", padding),
-            ("y", paddingy * 0.7)
+            ("text-anchor", "end")
         ));
 
-        let ywher = hbuild::from_closure(|w| yticksg.fmt.write_where(&mut w.writer()));
+        writer.render(g.append(j))?;
 
-        writer.render(text.append(ywher))?;
+        let j = hbuild::from_closure(|w| {
+            for (_, yy) in ticks.iter() {
+                w.render(hbuild::single("line").with(attrs!(
+                    ("x1", ffmt.disp(xaspect_offset + padding)),
+                    ("x2", ffmt.disp(xaspect_offset + padding * 0.96)),
+                    ("y1", ffmt.disp(yaspect_offset + yy)),
+                    ("y2", ffmt.disp(yaspect_offset + yy))
+                )))?;
+            }
+            Ok(())
+        });
+
+        let g = hbuild::elem("g").with(attrs!(("class", "poloto_axis_lines"), ("stroke", "black")));
+
+        writer.render(g.append(j))?;
 
         //Draw interval y text
-        for val in std::iter::once(first_ticky).chain(yticks) {
-            let yy = height
-                - (val.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
-                - paddingy;
-
-            writer.render(hbuild::single("line").with(attrs!(
-                ("class", "poloto_axis_lines"),
-                ("stroke", "black"),
-                ("x1", xaspect_offset + padding),
-                ("x2", xaspect_offset + padding * 0.96),
-                ("y1", yaspect_offset + yy),
-                ("y2", yaspect_offset + yy)
-            )))?;
-
+        for (_, yy) in ticks.iter() {
             if canvas.ytick_lines {
                 writer.render(hbuild::single("line").with(attrs!(
                     ("class", "poloto_tick_line"),
                     ("stroke", "black"),
-                    ("x1", xaspect_offset + padding),
-                    ("x2", padding + xaspect_offset + distancex_min_to_max),
-                    ("y1", yaspect_offset + yy),
-                    ("y2", yaspect_offset + yy)
+                    ("x1", ffmt.disp(xaspect_offset + padding)),
+                    (
+                        "x2",
+                        ffmt.disp(padding + xaspect_offset + distancex_min_to_max)
+                    ),
+                    ("y1", ffmt.disp(yaspect_offset + yy)),
+                    ("y2", ffmt.disp(yaspect_offset + yy))
                 )))?;
             }
-
-            let text = hbuild::elem("text").with(attrs!(
-                ("class", "poloto_tick_labels poloto_text"),
-                ("dominant-baseline", "middle"),
-                ("text-anchor", "end"),
-                ("x", xaspect_offset + padding - textx_padding),
-                ("y", yaspect_offset + yy)
-            ));
-
-            let ytick = hbuild::from_closure(|w| yticksg.fmt.write_tick(&mut w.writer(), &val));
-
-            writer.render(text.append(ytick))?;
         }
     }
 
     {
-        let text = hbuild::elem("text").with(attrs!(
+        let mut xwher = String::new();
+        xticksg.fmt.write_where(&mut xwher)?;
+
+        if !xwher.is_empty() {
+            let text = hbuild::elem("text")
+                .with(attrs!(
+                    ("class", "poloto_tick_labels poloto_text"),
+                    ("dominant-baseline", "middle"),
+                    ("text-anchor", "start"),
+                    ("x", ffmt.disp(width * 0.55)),
+                    ("y", ffmt.disp(paddingy * 0.7))
+                ))
+                .inline();
+
+            writer.render(text.append(xwher))?;
+        }
+
+        let ticks: Vec<_> = std::iter::once(first_tickx)
+            .chain(xticks)
+            .map(|val| {
+                let xx =
+                    (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
+                (val, xx)
+            })
+            .collect();
+
+        let j = hbuild::from_closure(|w| {
+            for (val, xx) in ticks.iter() {
+                let text = hbuild::elem("text")
+                    .with(attrs!(
+                        ("x", ffmt.disp(xaspect_offset + xx)),
+                        (
+                            "y",
+                            ffmt.disp(yaspect_offset + height - paddingy + texty_padding)
+                        )
+                    ))
+                    .inline();
+
+                let xtick = hbuild::from_closure(|w| xticksg.fmt.write_tick(&mut w.writer(), val));
+                w.render(text.append(xtick))?;
+            }
+            Ok(())
+        });
+
+        let g = hbuild::elem("g").with(attrs!(
             ("class", "poloto_tick_labels poloto_text"),
-            ("dominant-baseline", "middle"),
-            ("text-anchor", "start"),
-            ("x", width * 0.55),
-            ("y", paddingy * 0.7)
+            ("dominant-baseline", "start"),
+            ("text-anchor", "middle")
         ));
+        writer.render(g.append(j))?;
 
-        let xwher = hbuild::from_closure(|w| xticksg.fmt.write_where(&mut w.writer()));
+        let j = hbuild::from_closure(|w| {
+            for (_, xx) in ticks.iter() {
+                w.render(hbuild::single("line").with(attrs!(
+                    ("x1", ffmt.disp(xaspect_offset + xx)),
+                    ("x2", ffmt.disp(xaspect_offset + xx)),
+                    ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
+                    ("y2", ffmt.disp(yaspect_offset + height - paddingy * 0.95))
+                )))?;
+            }
+            Ok(())
+        });
 
-        writer.render(text.append(xwher))?;
+        let g = hbuild::elem("g").with(attrs!(("class", "poloto_axis_lines"), ("stroke", "black")));
+
+        writer.render(g.append(j))?;
 
         //Draw interva`l x text
-        for val in std::iter::once(first_tickx).chain(xticks) {
-            let xx = (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
-
-            writer.render(hbuild::single("line").with(attrs!(
-                ("class", "poloto_axis_lines"),
-                ("stroke", "black"),
-                ("x1", xaspect_offset + xx),
-                ("x2", xaspect_offset + xx),
-                ("y1", yaspect_offset + height - paddingy),
-                ("y2", yaspect_offset + height - paddingy * 0.95)
-            )))?;
-
+        for (_, xx) in ticks.iter() {
             if canvas.xtick_lines {
                 writer.render(hbuild::single("line").with(attrs!(
                     ("class", "poloto_tick_line"),
                     ("stroke", "black"),
-                    ("x1", xaspect_offset + xx),
-                    ("x2", xaspect_offset + xx),
-                    ("y1", yaspect_offset + height - paddingy),
+                    ("x1", ffmt.disp(xaspect_offset + xx)),
+                    ("x2", ffmt.disp(xaspect_offset + xx)),
+                    ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
                     (
                         "y2",
-                        yaspect_offset + height - paddingy - distancey_min_to_max,
+                        ffmt.disp(yaspect_offset + height - paddingy - distancey_min_to_max),
                     )
                 )))?;
             }
-
-            let text = hbuild::elem("text").with(attrs!(
-                ("class", "poloto_tick_labels poloto_text"),
-                ("dominant-baseline", "start"),
-                ("text-anchor", "middle"),
-                ("x", xaspect_offset + xx),
-                ("y", yaspect_offset + height - paddingy + texty_padding)
-            ));
-
-            let xtick = hbuild::from_closure(|w| xticksg.fmt.write_tick(&mut w.writer(), &val));
-
-            writer.render(text.append(xtick))?;
         }
     }
 
@@ -253,10 +330,13 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         ("class", "poloto_axis_lines"),
         xclosure,
         hbuild::path([
-            M(padding + xaspect_offset, height - paddingy + yaspect_offset,),
+            M(
+                ffmt.disp(padding + xaspect_offset),
+                ffmt.disp(height - paddingy + yaspect_offset)
+            ),
             L(
-                padding + xaspect_offset + distancex_min_to_max,
-                height - paddingy + yaspect_offset,
+                ffmt.disp(padding + xaspect_offset + distancex_min_to_max),
+                ffmt.disp(height - paddingy + yaspect_offset),
             )
         ])
     )))?;
@@ -280,10 +360,13 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         ("class", "poloto_axis_lines"),
         yclosure,
         hbuild::path([
-            M(xaspect_offset + padding, yaspect_offset + height - paddingy,),
+            M(
+                ffmt.disp(xaspect_offset + padding),
+                ffmt.disp(yaspect_offset + height - paddingy)
+            ),
             L(
-                xaspect_offset + padding,
-                yaspect_offset + height - paddingy - distancey_min_to_max,
+                ffmt.disp(xaspect_offset + padding),
+                ffmt.disp(yaspect_offset + height - paddingy - distancey_min_to_max),
             )
         ])
     )))?;

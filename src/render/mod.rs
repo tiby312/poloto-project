@@ -549,11 +549,11 @@ impl<A: Attr> Header<A> {
         }
     }
 
-    pub fn to_string(self) -> (String, String) {
-        hypermelon::elem::BufferedElem::new(self)
-            .unwrap()
-            .into_parts()
-    }
+    // pub fn to_string(self) -> (String, String) {
+    //     hypermelon::elem::BufferedElem::new(self)
+    //         .unwrap()
+    //         .into_parts()
+    // }
 
     pub fn light_theme(self) -> elem::Append<Self, Theme<'static>> {
         self.append(Theme::light())
@@ -595,38 +595,38 @@ impl Theme<'static> {
     pub const fn light() -> Theme<'static> {
         /// Default light theme
 
-        const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto{\
-            stroke-linecap:round;\
-            stroke-linejoin:round;\
-            font-family:Roboto,sans-serif;\
-            font-size:16px;\
-            }\
-            .poloto_background{fill:AliceBlue;}\
-            .poloto_scatter{stroke-width:7}\
-            .poloto_tick_line{stroke:gray;stroke-width:0.5}\
-            .poloto_line{stroke-width:2}\
-            .poloto_text{fill: black;}\
-            .poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}\
-            .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
-            .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
-            .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
-            .poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}\
-            .poloto0stroke{stroke:blue;}\
-            .poloto1stroke{stroke:red;}\
-            .poloto2stroke{stroke:green;}\
-            .poloto3stroke{stroke:gold;}\
-            .poloto4stroke{stroke:aqua;}\
-            .poloto5stroke{stroke:lime;}\
-            .poloto6stroke{stroke:orange;}\
-            .poloto7stroke{stroke:chocolate;}\
-            .poloto0fill{fill:blue;}\
-            .poloto1fill{fill:red;}\
-            .poloto2fill{fill:green;}\
-            .poloto3fill{fill:gold;}\
-            .poloto4fill{fill:aqua;}\
-            .poloto5fill{fill:lime;}\
-            .poloto6fill{fill:orange;}\
-            .poloto7fill{fill:chocolate;}";
+        const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto{
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  font-family:Roboto,sans-serif;
+  font-size:16px;
+}
+.poloto_background{fill:AliceBlue;}
+.poloto_scatter{stroke-width:7}
+.poloto_tick_line{stroke:gray;stroke-width:0.5}
+.poloto_line{stroke-width:2}
+.poloto_text{fill: black;}
+.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto0stroke{stroke:blue;}
+.poloto1stroke{stroke:red;}
+.poloto2stroke{stroke:green;}
+.poloto3stroke{stroke:gold;}
+.poloto4stroke{stroke:aqua;}
+.poloto5stroke{stroke:lime;}
+.poloto6stroke{stroke:orange;}
+.poloto7stroke{stroke:chocolate;}
+.poloto0fill{fill:blue;}
+.poloto1fill{fill:red;}
+.poloto2fill{fill:green;}
+.poloto3fill{fill:gold;}
+.poloto4fill{fill:aqua;}
+.poloto5fill{fill:lime;}
+.poloto6fill{fill:orange;}
+.poloto7fill{fill:chocolate;}";
 
         Theme {
             styles: STYLE_CONFIG_LIGHT_DEFAULT,
@@ -634,37 +634,37 @@ impl Theme<'static> {
     }
     pub const fn dark() -> Theme<'static> {
         /// Default dark theme
-        const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto{\
-    stroke-linecap:round;\
-    stroke-linejoin:round;\
-    font-family:Roboto,sans-serif;\
-    font-size:16px;\
-    }\
-    .poloto_background{fill:#262626;}\
-    .poloto_scatter{stroke-width:7}\
-    .poloto_tick_line{stroke:dimgray;stroke-width:0.5}\
-    .poloto_line{stroke-width:2}\
-    .poloto_text{fill: white;}\
-    .poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}\
-    .poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
-    .poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
-    .poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}\
-    .poloto0stroke{stroke:blue;}\
-    .poloto1stroke{stroke:red;}\
-    .poloto2stroke{stroke:green;}\
-    .poloto3stroke{stroke:gold;}\
-    .poloto4stroke{stroke:aqua;}\
-    .poloto5stroke{stroke:lime;}\
-    .poloto6stroke{stroke:orange;}\
-    .poloto7stroke{stroke:chocolate;}\
-    .poloto0fill{fill:blue;}\
-    .poloto1fill{fill:red;}\
-    .poloto2fill{fill:green;}\
-    .poloto3fill{fill:gold;}\
-    .poloto4fill{fill:aqua;}\
-    .poloto5fill{fill:lime;}\
-    .poloto6fill{fill:orange;}\
-    .poloto7fill{fill:chocolate;}";
+        const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto{
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  font-family:Roboto,sans-serif;
+  font-size:16px;
+}
+.poloto_background{fill:#262626;}
+.poloto_scatter{stroke-width:7}
+.poloto_tick_line{stroke:dimgray;stroke-width:0.5}
+.poloto_line{stroke-width:2}
+.poloto_text{fill: white;}
+.poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto0stroke{stroke:blue;}
+.poloto1stroke{stroke:red;}
+.poloto2stroke{stroke:green;}
+.poloto3stroke{stroke:gold;}
+.poloto4stroke{stroke:aqua;}
+.poloto5stroke{stroke:lime;}
+.poloto6stroke{stroke:orange;}
+.poloto7stroke{stroke:chocolate;}
+.poloto0fill{fill:blue;}
+.poloto1fill{fill:red;}
+.poloto2fill{fill:green;}
+.poloto3fill{fill:gold;}
+.poloto4fill{fill:aqua;}
+.poloto5fill{fill:lime;}
+.poloto6fill{fill:orange;}
+.poloto7fill{fill:chocolate;}";
         Theme {
             styles: STYLE_CONFIG_DARK_DEFAULT,
         }
@@ -682,5 +682,19 @@ impl<'a> Elem for Theme<'a> {
         let k = hypermelon::build::elem("style");
         let k = k.append(self.styles);
         k.render_head(w)
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct FloatFmt {
+    precision: usize,
+}
+impl FloatFmt {
+    pub fn new(precision: usize) -> Self {
+        FloatFmt { precision }
+    }
+    pub fn disp(&self, num: f64) -> impl Display {
+        let precision = self.precision;
+        util::disp_const(move |f| write!(f, "{:.*}", precision, num))
     }
 }

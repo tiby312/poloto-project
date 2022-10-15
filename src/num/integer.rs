@@ -27,7 +27,7 @@ impl IntFmt {
 impl ticks::tick_fmt::TickFmt<i128> for IntFmt {
     fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &i128) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {
-            let val = *val - offset;
+            let val = val - offset;
             match self.axis {
                 Axis::X => {
                     write!(writer, "j+")?;
