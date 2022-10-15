@@ -33,7 +33,6 @@
 .poloto7fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<text class="poloto_text poloto_legend_text" x="675" y="100"></text>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 171.79 L 477.32 144.64 L 488.17 121.63 L 581.55 245.17 L 650.00 100.00"/>
 	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
 	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">time</text>

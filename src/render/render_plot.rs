@@ -53,20 +53,22 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 
         let typ = ppp.typ();
 
-        let text = hbuild::elem("text")
-            .with(attrs!(
-                ("class", "poloto_text poloto_legend_text"),
-                ("x", width - padding / 1.2),
-                ("y", paddingy - yaspect_offset + (i as f64) * spacing)
-            ))
-            .inline();
+        let mut name = String::new();
+        ppp.name(&mut name).unwrap()?;
 
-        let name_exists = text.render_closure(writer, |w| {
-            let mut wc = util::WriteCounter::new(w.writer());
-            ppp.name(&mut wc).unwrap()?;
-            //p.write_name(&mut wc)?;
-            Ok(wc.get_counter() != 0)
-        })?;
+        let name_exists = !name.is_empty();
+
+        if name_exists {
+            let text = hbuild::elem("text")
+                .with(attrs!(
+                    ("class", "poloto_text poloto_legend_text"),
+                    ("x", width - padding / 1.2),
+                    ("y", paddingy - yaspect_offset + (i as f64) * spacing)
+                ))
+                .inline();
+
+            writer.render(text.append(name))?;
+        }
 
         let aa = minx.scale([minx, maxx], scalex);
         let bb = miny.scale([miny, maxy], scaley);
