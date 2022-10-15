@@ -1,1 +1,59 @@
-<svg  class="poloto"  width="800"  height="500"  viewBox="0 0 800 500"  xmlns="http://www.w3.org/2000/svg"  ><style  > .poloto{stroke-linecap:round;stroke-linejoin:round;font-family:Roboto,sans-serif;font-size:16px;}.poloto_background{fill:#262626;}.poloto_scatter{stroke-width:7}.poloto_tick_line{stroke:dimgray;stroke-width:0.5}.poloto_line{stroke-width:2}.poloto_text{fill: white;}.poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}.poloto0stroke{stroke:blue;}.poloto1stroke{stroke:red;}.poloto2stroke{stroke:green;}.poloto3stroke{stroke:gold;}.poloto4stroke{stroke:aqua;}.poloto5stroke{stroke:lime;}.poloto6stroke{stroke:orange;}.poloto7stroke{stroke:chocolate;}.poloto0fill{fill:blue;}.poloto1fill{fill:red;}.poloto2fill{fill:green;}.poloto3fill{fill:gold;}.poloto4fill{fill:aqua;}.poloto5fill{fill:lime;}.poloto6fill{fill:orange;}.poloto7fill{fill:chocolate;}</style><circle  r="1e5"  class="poloto_background" /><text  class="poloto_text poloto_legend_text"  x="675"  y="100" ></text><path  class="poloto_linefill poloto0fill"  d=" M 399.66 375.19 L 399.04 372.87 L 397.92 369.81 L 396.21 366.07 L 393.80 361.72 L 390.63 356.84 L 386.66 351.50 L 381.88 345.77 L 376.30 339.73 L 369.99 333.43 L 363.02 326.92 L 355.50 320.23 L 347.56 313.38 L 339.35 306.39 L 331.04 299.24 L 322.82 291.94 L 314.85 284.46 L 307.34 276.80 L 300.44 268.93 L 294.34 260.86 L 289.17 252.61 L 285.07 244.18 L 282.13 235.64 L 280.44 227.04 L 280.02 218.46 L 280.90 210.02 L 283.05 201.82 L 286.41 194.00 L 290.91 186.70 L 296.43 180.06 L 302.84 174.22 L 309.98 169.30 L 317.68 165.41 L 325.76 162.63 L 334.03 161.02 L 342.32 160.59 L 350.45 161.32 L 358.26 163.16 L 365.60 166.01 L 372.34 169.74 L 378.40 174.18 L 383.69 179.14 L 388.18 184.42 L 391.86 189.77 L 394.75 194.99 L 396.90 199.85 L 398.39 204.14 L 399.31 207.68 L 399.79 210.32 L 399.97 211.95 L 400.00 212.50 L 400.03 211.95 L 400.21 210.32 L 400.69 207.68 L 401.61 204.14 L 403.10 199.85 L 405.25 194.99 L 408.14 189.77 L 411.82 184.42 L 416.31 179.14 L 421.60 174.18 L 427.66 169.74 L 434.40 166.01 L 441.74 163.16 L 449.55 161.32 L 457.68 160.59 L 465.97 161.02 L 474.24 162.63 L 482.32 165.41 L 490.02 169.30 L 497.16 174.22 L 503.57 180.06 L 509.09 186.70 L 513.59 194.00 L 516.95 201.82 L 519.10 210.02 L 519.98 218.46 L 519.56 227.04 L 517.87 235.64 L 514.93 244.18 L 510.83 252.61 L 505.66 260.86 L 499.56 268.93 L 492.66 276.80 L 485.15 284.46 L 477.18 291.94 L 468.96 299.24 L 460.65 306.39 L 452.44 313.38 L 444.50 320.23 L 436.98 326.92 L 430.01 333.43 L 423.70 339.73 L 418.12 345.77 L 413.34 351.50 L 409.37 356.84 L 406.20 361.72 L 403.79 366.07 L 402.08 369.81 L 400.96 372.87 Z" /><text  class="poloto_labels poloto_text poloto_title"  x="400"  y="37.5" >Heart Graph</text><text  class="poloto_labels poloto_text poloto_xname"  x="400"  y="481.25" >x</text><text  class="poloto_labels poloto_text poloto_yname"  transform="rotate(-90,37.5,250)"  x="37.5"  y="250" >y</text><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="start"  x="150"  y="70" ></text><line  class="poloto_axis_lines"  stroke="black"  x1="250"  x2="244"  y1="400"  y2="400" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="235"  y="400" >-20</text><line  class="poloto_axis_lines"  stroke="black"  x1="250"  x2="244"  y1="325"  y2="325" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="235"  y="325" >-10</text><line  class="poloto_axis_lines"  stroke="black"  x1="250"  x2="244"  y1="250"  y2="250" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="235"  y="250" >0</text><line  class="poloto_axis_lines"  stroke="black"  x1="250"  x2="244"  y1="175"  y2="175" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="235"  y="175" >10</text><line  class="poloto_axis_lines"  stroke="black"  x1="250"  x2="244"  y1="100"  y2="100" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="end"  x="235"  y="100" >20</text><text  class="poloto_tick_labels poloto_text"  dominant-baseline="middle"  text-anchor="start"  x="440.00000000000006"  y="70" ></text><line  class="poloto_axis_lines"  stroke="black"  x1="250"  x2="250"  y1="400"  y2="405" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="start"  text-anchor="middle"  x="250"  y="430" >-20</text><line  class="poloto_axis_lines"  stroke="black"  x1="400"  x2="400"  y1="400"  y2="405" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="start"  text-anchor="middle"  x="400"  y="430" >0</text><line  class="poloto_axis_lines"  stroke="black"  x1="550"  x2="550"  y1="400"  y2="405" /><text  class="poloto_tick_labels poloto_text"  dominant-baseline="start"  text-anchor="middle"  x="550"  y="430" >20</text><path  stroke="black"  fill="none"  class="poloto_axis_lines"  style="stroke-dasharray:7.5;stroke-dashoffset:-0;"  d=" M 250 400 L 550 400" /><path  stroke="black"  fill="none"  class="poloto_axis_lines"  style="stroke-dasharray:7.5;stroke-dashoffset:-0;"  d=" M 250 400 L 250 100" /></svg>
+<svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+	<style>
+.poloto{
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  font-family:Roboto,sans-serif;
+  font-size:16px;
+}
+.poloto_background{fill:#262626;}
+.poloto_scatter{stroke-width:7}
+.poloto_tick_line{stroke:dimgray;stroke-width:0.5}
+.poloto_line{stroke-width:2}
+.poloto_text{fill: white;}
+.poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto0stroke{stroke:blue;}
+.poloto1stroke{stroke:red;}
+.poloto2stroke{stroke:green;}
+.poloto3stroke{stroke:gold;}
+.poloto4stroke{stroke:aqua;}
+.poloto5stroke{stroke:lime;}
+.poloto6stroke{stroke:orange;}
+.poloto7stroke{stroke:chocolate;}
+.poloto0fill{fill:blue;}
+.poloto1fill{fill:red;}
+.poloto2fill{fill:green;}
+.poloto3fill{fill:gold;}
+.poloto4fill{fill:aqua;}
+.poloto5fill{fill:lime;}
+.poloto6fill{fill:orange;}
+.poloto7fill{fill:chocolate;}
+	</style>
+	<circle r="1e5" class="poloto_background"/>
+	<text class="poloto_text poloto_legend_text" x="675" y="100"></text>
+	<path class="poloto_linefill poloto0fill" d=" M 399.66 375.19 L 399.04 372.87 L 397.92 369.81 L 396.21 366.07 L 393.80 361.72 L 390.63 356.84 L 386.66 351.50 L 381.88 345.77 L 376.30 339.73 L 369.99 333.43 L 363.02 326.92 L 355.50 320.23 L 347.56 313.38 L 339.35 306.39 L 331.04 299.24 L 322.82 291.94 L 314.85 284.46 L 307.34 276.80 L 300.44 268.93 L 294.34 260.86 L 289.17 252.61 L 285.07 244.18 L 282.13 235.64 L 280.44 227.04 L 280.02 218.46 L 280.90 210.02 L 283.05 201.82 L 286.41 194.00 L 290.91 186.70 L 296.43 180.06 L 302.84 174.22 L 309.98 169.30 L 317.68 165.41 L 325.76 162.63 L 334.03 161.02 L 342.32 160.59 L 350.45 161.32 L 358.26 163.16 L 365.60 166.01 L 372.34 169.74 L 378.40 174.18 L 383.69 179.14 L 388.18 184.42 L 391.86 189.77 L 394.75 194.99 L 396.90 199.85 L 398.39 204.14 L 399.31 207.68 L 399.79 210.32 L 399.97 211.95 L 400.00 212.50 L 400.03 211.95 L 400.21 210.32 L 400.69 207.68 L 401.61 204.14 L 403.10 199.85 L 405.25 194.99 L 408.14 189.77 L 411.82 184.42 L 416.31 179.14 L 421.60 174.18 L 427.66 169.74 L 434.40 166.01 L 441.74 163.16 L 449.55 161.32 L 457.68 160.59 L 465.97 161.02 L 474.24 162.63 L 482.32 165.41 L 490.02 169.30 L 497.16 174.22 L 503.57 180.06 L 509.09 186.70 L 513.59 194.00 L 516.95 201.82 L 519.10 210.02 L 519.98 218.46 L 519.56 227.04 L 517.87 235.64 L 514.93 244.18 L 510.83 252.61 L 505.66 260.86 L 499.56 268.93 L 492.66 276.80 L 485.15 284.46 L 477.18 291.94 L 468.96 299.24 L 460.65 306.39 L 452.44 313.38 L 444.50 320.23 L 436.98 326.92 L 430.01 333.43 L 423.70 339.73 L 418.12 345.77 L 413.34 351.50 L 409.37 356.84 L 406.20 361.72 L 403.79 366.07 L 402.08 369.81 L 400.96 372.87 Z"/>
+	<text class="poloto_labels poloto_text poloto_title" x="400.00" y="37.50">Heart Graph</text>
+	<text class="poloto_labels poloto_text poloto_xname" x="400.00" y="481.25">x</text>
+	<text class="poloto_labels poloto_text poloto_yname" transform="rotate(-90,37.50,250.00)" x="37.50" y="250.00">y</text>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="235.00" y="400.00">-20</text>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="235.00" y="325.00">-10</text>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="235.00" y="250.00">0</text>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="235.00" y="175.00">10</text>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end" x="235.00" y="100.00">20</text>
+	<line class="poloto_axis_lines" stroke="black" x1="250.00" x2="244.00" y1="400.00" y2="400.00"/>
+	<line class="poloto_axis_lines" stroke="black" x1="250.00" x2="244.00" y1="325.00" y2="325.00"/>
+	<line class="poloto_axis_lines" stroke="black" x1="250.00" x2="244.00" y1="250.00" y2="250.00"/>
+	<line class="poloto_axis_lines" stroke="black" x1="250.00" x2="244.00" y1="175.00" y2="175.00"/>
+	<line class="poloto_axis_lines" stroke="black" x1="250.00" x2="244.00" y1="100.00" y2="100.00"/>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="250.00" y="430.00">-20</text>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="400.00" y="430.00">0</text>
+	<text class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle" x="550.00" y="430.00">20</text>
+	<line class="poloto_axis_lines" stroke="black" x1="250.00" x2="250.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_axis_lines" stroke="black" x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_axis_lines" stroke="black" x1="550.00" x2="550.00" y1="400.00" y2="405.00"/>
+	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:7.5;stroke-dashoffset:-0;" d=" M 250.00 400.00 L 550.00 400.00"/>
+	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:7.5;stroke-dashoffset:-0;" d=" M 250.00 400.00 L 250.00 100.00"/>
+</svg>

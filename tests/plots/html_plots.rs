@@ -20,7 +20,9 @@ fn custom_colors_html() -> fmt::Result {
 
     let mut w = util::create_test_file("custom_colors.html");
 
-    let (header_start, header_end) = poloto::header().to_string();
+    let b = hypermelon::elem::BufferedElem::new(poloto::header(), hypermelon::NoFmt)?;
+
+    let (header_start, header_end) = b.into_parts();
     write!(
         w,
         r###"

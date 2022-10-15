@@ -595,8 +595,7 @@ impl Theme<'static> {
     pub const fn light() -> Theme<'static> {
         /// Default light theme
 
-        const STYLE_CONFIG_LIGHT_DEFAULT: &str = 
-".poloto{
+        const STYLE_CONFIG_LIGHT_DEFAULT: &str = ".poloto{
   stroke-linecap:round;
   stroke-linejoin:round;
   font-family:Roboto,sans-serif;
@@ -635,8 +634,7 @@ impl Theme<'static> {
     }
     pub const fn dark() -> Theme<'static> {
         /// Default dark theme
-        const STYLE_CONFIG_DARK_DEFAULT: &str = 
-".poloto{
+        const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto{
   stroke-linecap:round;
   stroke-linejoin:round;
   font-family:Roboto,sans-serif;
@@ -684,5 +682,19 @@ impl<'a> Elem for Theme<'a> {
         let k = hypermelon::build::elem("style");
         let k = k.append(self.styles);
         k.render_head(w)
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct FloatFmt {
+    precision: usize,
+}
+impl FloatFmt {
+    pub fn new(precision: usize) -> Self {
+        FloatFmt { precision }
+    }
+    pub fn disp(&self, num: f64) -> impl Display {
+        let precision = self.precision;
+        util::disp_const(move |f| write!(f, "{:.*}", precision, num))
     }
 }

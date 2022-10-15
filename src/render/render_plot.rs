@@ -53,11 +53,13 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 
         let typ = ppp.typ();
 
-        let text = hbuild::elem("text").with(attrs!(
-            ("class", "poloto_text poloto_legend_text"),
-            ("x", width - padding / 1.2),
-            ("y", paddingy - yaspect_offset + (i as f64) * spacing)
-        ));
+        let text = hbuild::elem("text")
+            .with(attrs!(
+                ("class", "poloto_text poloto_legend_text"),
+                ("x", width - padding / 1.2),
+                ("y", paddingy - yaspect_offset + (i as f64) * spacing)
+            ))
+            .inline();
 
         let name_exists = text.render_closure(writer, |w| {
             let mut wc = util::WriteCounter::new(w.writer());
@@ -474,19 +476,5 @@ impl<I: Iterator<Item = [f64; 2]>> attr::Attr for Line<I> {
             }
             Ok(())
         }))
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct FloatFmt {
-    precision: usize,
-}
-impl FloatFmt {
-    pub fn new(precision: usize) -> Self {
-        FloatFmt { precision }
-    }
-    pub fn disp(&self, num: f64) -> impl Display {
-        let precision = self.precision;
-        util::disp_const(move |f| write!(f, "{:.*}", precision, num))
     }
 }
