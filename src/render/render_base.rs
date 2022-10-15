@@ -210,21 +210,26 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
         writer.render(g.append(j))?;
 
-        //Draw interval y text
-        for (_, yy) in ticks.iter() {
-            if canvas.ytick_lines {
-                writer.render(hbuild::single("line").with(attrs!(
-                    ("class", "poloto_tick_line"),
-                    ("stroke", "black"),
-                    ("x1", ffmt.disp(xaspect_offset + padding)),
-                    (
-                        "x2",
-                        ffmt.disp(padding + xaspect_offset + distancex_min_to_max)
-                    ),
-                    ("y1", ffmt.disp(yaspect_offset + yy)),
-                    ("y2", ffmt.disp(yaspect_offset + yy))
-                )))?;
-            }
+        if canvas.ytick_lines {
+            let g =
+                hbuild::elem("g").with(attrs!(("class", "poloto_tick_line"), ("stroke", "black")));
+
+            let j = hbuild::from_closure(|w| {
+                //Draw interval y text
+                for (_, yy) in ticks.iter() {
+                    w.render(hbuild::single("line").with(attrs!(
+                        ("x1", ffmt.disp(xaspect_offset + padding)),
+                        (
+                            "x2",
+                            ffmt.disp(padding + xaspect_offset + distancex_min_to_max)
+                        ),
+                        ("y1", ffmt.disp(yaspect_offset + yy)),
+                        ("y2", ffmt.disp(yaspect_offset + yy))
+                    )))?;
+                }
+                Ok(())
+            });
+            writer.render(g.append(j))?;
         }
     }
 
@@ -296,21 +301,26 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
         writer.render(g.append(j))?;
 
-        //Draw interva`l x text
-        for (_, xx) in ticks.iter() {
-            if canvas.xtick_lines {
-                writer.render(hbuild::single("line").with(attrs!(
-                    ("class", "poloto_tick_line"),
-                    ("stroke", "black"),
-                    ("x1", ffmt.disp(xaspect_offset + xx)),
-                    ("x2", ffmt.disp(xaspect_offset + xx)),
-                    ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
-                    (
-                        "y2",
-                        ffmt.disp(yaspect_offset + height - paddingy - distancey_min_to_max),
-                    )
-                )))?;
-            }
+        if canvas.xtick_lines {
+            let g =
+                hbuild::elem("g").with(attrs!(("class", "poloto_tick_line"), ("stroke", "black")));
+
+            let j = hbuild::from_closure(|w| {
+                //Draw interva`l x text
+                for (_, xx) in ticks.iter() {
+                    w.render(hbuild::single("line").with(attrs!(
+                        ("x1", ffmt.disp(xaspect_offset + xx)),
+                        ("x2", ffmt.disp(xaspect_offset + xx)),
+                        ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
+                        (
+                            "y2",
+                            ffmt.disp(yaspect_offset + height - paddingy - distancey_min_to_max),
+                        )
+                    )))?;
+                }
+                Ok(())
+            });
+            writer.render(g.append(j))?;
         }
     }
 

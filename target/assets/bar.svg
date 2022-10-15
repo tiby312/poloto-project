@@ -77,12 +77,14 @@
 		<line x1="527.36" x2="527.36" y1="400.00" y2="405.00"/>
 		<line x1="621.70" x2="621.70" y1="400.00" y2="405.00"/>
 	</g>
-	<line class="poloto_tick_line" stroke="black" x1="150.00" x2="150.00" y1="400.00" y2="100.00"/>
-	<line class="poloto_tick_line" stroke="black" x1="244.34" x2="244.34" y1="400.00" y2="100.00"/>
-	<line class="poloto_tick_line" stroke="black" x1="338.68" x2="338.68" y1="400.00" y2="100.00"/>
-	<line class="poloto_tick_line" stroke="black" x1="433.02" x2="433.02" y1="400.00" y2="100.00"/>
-	<line class="poloto_tick_line" stroke="black" x1="527.36" x2="527.36" y1="400.00" y2="100.00"/>
-	<line class="poloto_tick_line" stroke="black" x1="621.70" x2="621.70" y1="400.00" y2="100.00"/>
+	<g class="poloto_tick_line" stroke="black">
+		<line x1="150.00" x2="150.00" y1="400.00" y2="100.00"/>
+		<line x1="244.34" x2="244.34" y1="400.00" y2="100.00"/>
+		<line x1="338.68" x2="338.68" y1="400.00" y2="100.00"/>
+		<line x1="433.02" x2="433.02" y1="400.00" y2="100.00"/>
+		<line x1="527.36" x2="527.36" y1="400.00" y2="100.00"/>
+		<line x1="621.70" x2="621.70" y1="400.00" y2="100.00"/>
+	</g>
 	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:9.433962264150944;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>
