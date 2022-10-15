@@ -40,10 +40,6 @@
 		<rect x="150.00" y="210.00" width="500" height="20"/>
 		<rect x="150.00" y="150.00" width="283.0188679245283" height="20"/>
 	</g>
-	<g class="poloto_legend_icon">
-	</g>
-	<g class="poloto_text poloto_legend_text">
-	</g>
 	<g class="poloto_labels poloto_text">
 		<text class="poloto_title" x="400.00" y="37.50">Comparison of Food Tastiness</text>
 		<text class="poloto_xname" x="400.00" y="481.25">Tastiness</text>

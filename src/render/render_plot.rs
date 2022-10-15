@@ -46,7 +46,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 
     let mut names = vec![];
 
-    for _ in 0.. {
+    for i in 0.. {
         let mut ppp = if let Some(ppp) = f.next_plot() {
             ppp
         } else {
@@ -61,7 +61,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
         let name_exists = !name.is_empty();
 
         if name_exists {
-            names.push((typ, name));
+            names.push((typ, name, i));
         }
 
         let aa = minx.scale([minx, maxx], scalex);
@@ -114,56 +114,58 @@ pub(super) fn render_plot<P: build::PlotIterator>(
         }
     }
 
-    let j = hbuild::from_closure(|w| {
-        //TODO redesign so that not all names need to be written to memory at once
-        for (i, (typ, name)) in names.iter().enumerate() {
-            match typ {
-                PlotMetaType::Text => {
-                    //assert_eq!(ppp.plots().count(), 0);
+    if !names.is_empty() {
+        let j = hbuild::from_closure(|w| {
+            //TODO redesign so that not all names need to be written to memory at once
+            for (typ, name, i) in names.iter() {
+                match typ {
+                    PlotMetaType::Text => {
+                        //assert_eq!(ppp.plots().count(), 0);
 
-                    // don't need to render any legend or plots
-                }
-                &PlotMetaType::Plot(p_type) => {
-                    let colori = color_iter2.next().unwrap();
-                    let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
+                        // don't need to render any legend or plots
+                    }
+                    &PlotMetaType::Plot(p_type) => {
+                        let colori = color_iter2.next().unwrap();
+                        let legendy1 =
+                            paddingy - yaspect_offset - padding / 8.0 + (*i as f64) * spacing;
 
-                    if !name.is_empty() {
-                        render_label(
-                            w,
-                            PlotRenderInfo2 {
-                                canvas,
-                                p_type,
-                                colori,
-                                legendy1,
-                            },
-                        )?;
+                        if !name.is_empty() {
+                            render_label(
+                                w,
+                                PlotRenderInfo2 {
+                                    canvas,
+                                    p_type,
+                                    colori,
+                                    legendy1,
+                                },
+                            )?;
+                        }
                     }
                 }
             }
-        }
-        Ok(())
-    });
+            Ok(())
+        });
 
-    let g = hbuild::elem("g").with(("class", format_move!("poloto_legend_icon",)));
+        let g = hbuild::elem("g").with(("class", format_move!("poloto_legend_icon",)));
 
-    writer.render(g.append(j))?;
+        writer.render(g.append(j))?;
 
-    let j = hbuild::from_closure(|w| {
-        for (i, (_, name)) in names.into_iter().enumerate() {
-            let text = hbuild::elem("text")
-                .with(attrs!(
-                    ("x", width - padding / 1.2),
-                    ("y", paddingy - yaspect_offset + (i as f64) * spacing)
-                ))
-                .inline();
+        let j = hbuild::from_closure(|w| {
+            for (_, name, i) in names.into_iter() {
+                let text = hbuild::elem("text")
+                    .with(attrs!(
+                        ("x", width - padding / 1.2),
+                        ("y", paddingy - yaspect_offset + (i as f64) * spacing)
+                    ))
+                    .inline();
 
-            w.render(text.append(name))?;
-        }
-        Ok(())
-    });
-    let g = hbuild::elem("g").with(("class", "poloto_text poloto_legend_text"));
-    writer.render(g.append(j))?;
-
+                w.render(text.append(name))?;
+            }
+            Ok(())
+        });
+        let g = hbuild::elem("g").with(("class", "poloto_text poloto_legend_text"));
+        writer.render(g.append(j))?;
+    }
     Ok(())
 }
 

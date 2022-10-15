@@ -35,10 +35,6 @@
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_scatter poloto0stroke" d=" M 150.00 400.00 h 0.00 M 650.00 100.00 h 0.00"/>
-	<g class="poloto_legend_icon">
-	</g>
-	<g class="poloto_text poloto_legend_text">
-	</g>
 	<g class="poloto_labels poloto_text">
 		<text class="poloto_title" x="400.00" y="37.50">cows per year</text>
 		<text class="poloto_xname" x="400.00" y="481.25">year</text>

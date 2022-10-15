@@ -35,10 +35,6 @@
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 198.55 L 250.00 174.58 L 350.00 154.27 L 404.17 263.33 L 450.00 135.18 L 550.00 117.24 L 650.00 100.00"/>
-	<g class="poloto_legend_icon">
-	</g>
-	<g class="poloto_text poloto_legend_text">
-	</g>
 	<g class="poloto_labels poloto_text">
 		<text class="poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
 		<text class="poloto_xname" x="400.00" y="481.25">Day</text>
