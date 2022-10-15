@@ -46,7 +46,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 
     let mut names = vec![];
 
-    for i in 0.. {
+    for _ in 0.. {
         let mut ppp = if let Some(ppp) = f.next_plot() {
             ppp
         } else {
@@ -127,7 +127,6 @@ pub(super) fn render_plot<P: build::PlotIterator>(
                     let colori = color_iter2.next().unwrap();
                     let legendy1 = paddingy - yaspect_offset - padding / 8.0 + (i as f64) * spacing;
 
-                    let precision = canvas.precision;
                     if !name.is_empty() {
                         render_label(
                             w,
@@ -136,8 +135,6 @@ pub(super) fn render_plot<P: build::PlotIterator>(
                                 p_type,
                                 colori,
                                 legendy1,
-                                precision,
-                                bar_width: canvas.bar_width,
                             },
                         )?;
                     }
@@ -175,8 +172,6 @@ struct PlotRenderInfo2<'a> {
     p_type: PlotType,
     colori: usize,
     legendy1: f64,
-    precision: usize,
-    bar_width: f64,
 }
 
 struct PlotRenderInfo<'a> {

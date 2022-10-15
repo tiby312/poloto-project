@@ -104,27 +104,27 @@ pub fn write_interval_i128<T: fmt::Write>(
     Ok(())
 }
 
-pub(crate) struct WriteCounter<T> {
-    counter: usize,
-    writer: T,
-}
-impl<T: std::fmt::Write> WriteCounter<T> {
-    #[inline(always)]
-    pub fn new(writer: T) -> WriteCounter<T> {
-        WriteCounter { writer, counter: 0 }
-    }
-    #[inline(always)]
-    pub fn get_counter(&self) -> usize {
-        self.counter
-    }
-}
-impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
-    #[inline(always)]
-    fn write_str(&mut self, s: &str) -> std::fmt::Result {
-        self.counter += s.len();
-        self.writer.write_str(s)
-    }
-}
+// pub(crate) struct WriteCounter<T> {
+//     counter: usize,
+//     writer: T,
+// }
+// impl<T: std::fmt::Write> WriteCounter<T> {
+//     #[inline(always)]
+//     pub fn new(writer: T) -> WriteCounter<T> {
+//         WriteCounter { writer, counter: 0 }
+//     }
+//     #[inline(always)]
+//     pub fn get_counter(&self) -> usize {
+//         self.counter
+//     }
+// }
+// impl<T: std::fmt::Write> std::fmt::Write for WriteCounter<T> {
+//     #[inline(always)]
+//     fn write_str(&mut self, s: &str) -> std::fmt::Result {
+//         self.counter += s.len();
+//         self.writer.write_str(s)
+//     }
+// }
 
 ///
 /// Convert a closure to a object that implements Display
