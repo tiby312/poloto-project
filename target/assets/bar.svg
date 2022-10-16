@@ -36,7 +36,7 @@
 .poloto7fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<g class="poloto_plot poloto_histo poloto0fill">
+	<g id="poloto_plot0" class="poloto_plot poloto_histo poloto0fill">
 		<rect x="150.00" y="330.00" width="188.67924528301887" height="20"/>
 		<rect x="150.00" y="270.00" width="132.07547169811323" height="20"/>
 		<rect x="150.00" y="210.00" width="500" height="20"/>

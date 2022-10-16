@@ -36,7 +36,7 @@
 .poloto7fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<path class="poloto_plot poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 133.33 L 316.65 133.33 L 483.30 133.33 L 649.96 100.00 L 650.00 300.00"/>
+	<path id="poloto_plot0" class="poloto_plot poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 133.33 L 316.65 133.33 L 483.30 133.33 L 649.96 100.00 L 650.00 300.00"/>
 	<line class="poloto_legend poloto_imgs poloto_line poloto0stroke" x1="680" x2="730" y1="81.25" y2="81.25"/>
 	<text class="poloto_legend poloto_text" x="675" y="100">hay</text>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">collatz</text>
