@@ -43,9 +43,8 @@ fn large_scatter() -> fmt::Result {
 
     let data = poloto::data(plots).build_and_label(("cows per year", "year", "cows"));
 
-    let header = Header::new().append(Theme::dark().append(
-".poloto_scatter.poloto_plot{stroke-width:33;}",
-    ));
+    let header =
+        Header::new().append(Theme::dark().append(".poloto_scatter.poloto_plot{stroke-width:33;}"));
 
     let w = util::create_test_file("large_scatter.svg");
 

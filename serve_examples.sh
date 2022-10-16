@@ -8,7 +8,7 @@ cargo run --release --example custom_tick_fmt > target/assets/custom_tick_fmt.sv
 cargo run --release --example timestamp > target/assets/timestamp.svg
 cargo run --release --example bar > target/assets/bar.svg
 cargo run --release --example hello_world > target/assets/hello_world.svg
-cargo run --release --example syling > target/assets/styling.svg
+cargo run --release --example styling > target/assets/styling.svg
 
 cargo bloat  --test plots --features timestamp_full
 cd target/assets

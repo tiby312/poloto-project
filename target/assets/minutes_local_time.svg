@@ -41,24 +41,32 @@
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">time</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
 	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹2020-01-31 00:00:00 -05:00 in Minutes</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="400.00">0</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="327.41">1e6</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="254.83">2.0e6</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="182.24">3.0e6</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="109.65">4.0e6</text>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="327.41" y2="327.41"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="254.83" y2="254.83"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="182.24" y2="182.24"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="109.65" y2="109.65"/>
-	<text class="poloto_text poloto_ticks poloto_x" x="254.35" y="430.00">00:00¹</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="362.24" y="430.00">00:30</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="470.13" y="430.00">01:00</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="578.01" y="430.00">01:30</text>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="254.35" x2="254.35" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="362.24" x2="362.24" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="470.13" x2="470.13" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="578.01" x2="578.01" y1="400.00" y2="405.00"/>
+	<g class="poloto_text poloto_ticks poloto_y">
+		<text x="135.00" y="400.00">0</text>
+		<text x="135.00" y="327.41">1e6</text>
+		<text x="135.00" y="254.83">2.0e6</text>
+		<text x="135.00" y="182.24">3.0e6</text>
+		<text x="135.00" y="109.65">4.0e6</text>
+	</g>
+	<g class="poloto_imgs poloto_ticks poloto_y">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="327.41" y2="327.41"/>
+		<line x1="150.00" x2="144.00" y1="254.83" y2="254.83"/>
+		<line x1="150.00" x2="144.00" y1="182.24" y2="182.24"/>
+		<line x1="150.00" x2="144.00" y1="109.65" y2="109.65"/>
+	</g>
+	<g class="poloto_text poloto_ticks poloto_x">
+		<text x="254.35" y="430.00">00:00¹</text>
+		<text x="362.24" y="430.00">00:30</text>
+		<text x="470.13" y="430.00">01:00</text>
+		<text x="578.01" y="430.00">01:30</text>
+	</g>
+	<g class="poloto_imgs poloto_ticks poloto_x">
+		<line x1="254.35" x2="254.35" y1="400.00" y2="405.00"/>
+		<line x1="362.24" x2="362.24" y1="400.00" y2="405.00"/>
+		<line x1="470.13" x2="470.13" y1="400.00" y2="405.00"/>
+		<line x1="578.01" x2="578.01" y1="400.00" y2="405.00"/>
+	</g>
 	<path class="poloto_imgs poloto_ticks poloto_x" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:7.2586498911202515;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

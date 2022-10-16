@@ -41,24 +41,32 @@
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">Date</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Mark (in meters)</text>
 	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹1920-01-01 00:00:00 UTC in Years</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="400.00">0</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="332.96">2</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="265.92">4</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="198.88">6</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="131.84">8</text>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="332.96" y2="332.96"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="265.92" y2="265.92"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="198.88" y2="198.88"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="131.84" y2="131.84"/>
-	<text class="poloto_text poloto_ticks poloto_x" x="252.18" y="430.00">1920¹</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="363.21" y="430.00">1940</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="474.24" y="430.00">1960</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="585.27" y="430.00">1980</text>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="252.18" x2="252.18" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="363.21" x2="363.21" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="474.24" x2="474.24" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="585.27" x2="585.27" y1="400.00" y2="405.00"/>
+	<g class="poloto_text poloto_ticks poloto_y">
+		<text x="135.00" y="400.00">0</text>
+		<text x="135.00" y="332.96">2</text>
+		<text x="135.00" y="265.92">4</text>
+		<text x="135.00" y="198.88">6</text>
+		<text x="135.00" y="131.84">8</text>
+	</g>
+	<g class="poloto_imgs poloto_ticks poloto_y">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="332.96" y2="332.96"/>
+		<line x1="150.00" x2="144.00" y1="265.92" y2="265.92"/>
+		<line x1="150.00" x2="144.00" y1="198.88" y2="198.88"/>
+		<line x1="150.00" x2="144.00" y1="131.84" y2="131.84"/>
+	</g>
+	<g class="poloto_text poloto_ticks poloto_x">
+		<text x="252.18" y="430.00">1920¹</text>
+		<text x="363.21" y="430.00">1940</text>
+		<text x="474.24" y="430.00">1960</text>
+		<text x="585.27" y="430.00">1980</text>
+	</g>
+	<g class="poloto_imgs poloto_ticks poloto_x">
+		<line x1="252.18" x2="252.18" y1="400.00" y2="405.00"/>
+		<line x1="363.21" x2="363.21" y1="400.00" y2="405.00"/>
+		<line x1="474.24" x2="474.24" y1="400.00" y2="405.00"/>
+		<line x1="585.27" x2="585.27" y1="400.00" y2="405.00"/>
+	</g>
 	<path class="poloto_imgs poloto_ticks poloto_x" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:8.379888268156424;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

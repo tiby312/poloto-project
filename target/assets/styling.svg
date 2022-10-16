@@ -6,16 +6,16 @@
   font-family:Roboto,sans-serif;
   font-size:16px;
 }
-.poloto_background{fill:#262626;}
+.poloto_background{fill:AliceBlue;}
 .poloto_scatter{stroke-width:7}
 .poloto_line{stroke-width:2}
-.poloto_text{fill: white;}
+.poloto_text{fill: black;}
 .poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
 .poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
 .poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
-.poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
 .poloto0.poloto_stroke{stroke:blue;}
@@ -34,24 +34,15 @@
 .poloto5.poloto_fill{fill:lime;}
 .poloto6.poloto_fill{fill:orange;}
 .poloto7.poloto_fill{fill:chocolate;}
+.poloto0.poloto_histo.poloto_imgs{fill:red;stroke:black;stroke-width:2px}
+.poloto0.poloto_histo.poloto_imgs&gt;*{rx:20px;ry:20px}
+.poloto0.poloto_legend.poloto_text{fill:blue;}
+.poloto_line.poloto_imgs.poloto_plot{stroke:purple;stroke-width:20px;stroke-dasharray:40px}
+.poloto_line.poloto_imgs.poloto_legend{stroke:purple;stroke-width:10px;stroke-dasharray:10px}
+.poloto_scatter.poloto_plot{fill:purple;stroke-width:20px;}
 	</style>
- 
-    <defs>
-        <pattern id="pattern2" patternUnits="userSpaceOnUse" width="10" height="10">
-            <line x1="0" y1="5" x2="10" y2="5" stroke="red" stroke-width="5"/>
-        </pattern> 
-    </defs>
-    <style>
-    .poloto0stroke.poloto0stroke{
-        stroke-dasharray:10 2 2;
-    }
-    .poloto1fill.poloto1fill{
-        fill: url(#pattern2);
-    }
-    </style>
 	<circle r="1e5" class="poloto_background"/>
-	<path id="poloto_plot0" class="poloto_plot poloto_imgs poloto_line poloto0 poloto_stroke" fill="none" stroke="black" d=" M 150.00 100.00 L 160.20 100.50 L 170.41 101.97 L 180.61 104.37 L 190.82 107.58 L 201.02 111.50 L 211.22 115.95 L 221.43 120.76 L 231.63 125.74 L 241.84 130.69 L 252.04 135.41 L 262.24 139.73 L 272.45 143.45 L 282.65 146.44 L 292.86 148.57 L 303.06 149.77 L 313.27 149.97 L 323.47 149.19 L 333.67 147.43 L 343.88 144.79 L 354.08 141.35 L 364.29 137.27 L 374.49 132.69 L 384.69 127.81 L 394.90 122.82 L 405.10 117.91 L 415.31 113.29 L 425.51 109.14 L 435.71 105.61 L 445.92 102.86 L 456.12 101.00 L 466.33 100.09 L 476.53 100.17 L 486.73 101.24 L 496.94 103.27 L 507.14 106.15 L 517.35 109.79 L 527.55 114.04 L 537.76 118.72 L 547.96 123.66 L 558.16 128.65 L 568.37 133.49 L 578.57 137.99 L 588.78 141.98 L 598.98 145.29 L 609.18 147.79 L 619.39 149.39 L 629.59 150.01 L 639.80 149.63 L 650.00 148.28"/>
-	<g id="poloto_plot1" class="poloto_plot poloto_imgs poloto_histo poloto1 poloto_fill">
+	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_histo poloto0 poloto_fill">
 		<rect x="150.00" y="375.09" width="27.612244897959187" height="24.912077517728676"/>
 		<rect x="180.61" y="360.97" width="27.612244897959187" height="39.03265251331885"/>
 		<rect x="211.22" y="351.78" width="27.612244897959158" height="48.22050441145586"/>
@@ -69,10 +60,14 @@
 		<rect x="578.57" y="353.72" width="27.612244897959158" height="46.28388098878531"/>
 		<rect x="609.18" y="364.78" width="27.612244897959158" height="35.2183336924283"/>
 	</g>
-	<g class="poloto_legend poloto_imgs poloto_line poloto0 poloto_stroke"><line x1="680" x2="730" y1="81.25" y2="81.25"/></g>
-	<g class="poloto_legend poloto_imgs poloto_histo poloto1 poloto_fill"><rect x="680" y="126.25" width="50" height="7.5" rx="5" ry="5"/></g>
-	<text class="poloto_legend poloto_text poloto_line poloto0" x="675" y="100">cos</text>
-	<text class="poloto_legend poloto_text poloto_histo poloto1" x="675" y="150">sin-10</text>
+	<path id="poloto_plot1" class="poloto_plot poloto_imgs poloto_line poloto1 poloto_stroke" fill="none" stroke="black" d=" M 150.00 100.00 L 160.20 100.50 L 170.41 101.97 L 180.61 104.37 L 190.82 107.58 L 201.02 111.50 L 211.22 115.95 L 221.43 120.76 L 231.63 125.74 L 241.84 130.69 L 252.04 135.41 L 262.24 139.73 L 272.45 143.45 L 282.65 146.44 L 292.86 148.57 L 303.06 149.77 L 313.27 149.97 L 323.47 149.19 L 333.67 147.43 L 343.88 144.79 L 354.08 141.35 L 364.29 137.27 L 374.49 132.69 L 384.69 127.81 L 394.90 122.82 L 405.10 117.91 L 415.31 113.29 L 425.51 109.14 L 435.71 105.61 L 445.92 102.86 L 456.12 101.00 L 466.33 100.09 L 476.53 100.17 L 486.73 101.24 L 496.94 103.27 L 507.14 106.15 L 517.35 109.79 L 527.55 114.04 L 537.76 118.72 L 547.96 123.66 L 558.16 128.65 L 568.37 133.49 L 578.57 137.99 L 588.78 141.98 L 598.98 145.29 L 609.18 147.79 L 619.39 149.39 L 629.59 150.01 L 639.80 149.63 L 650.00 148.28"/>
+	<path id="poloto_plot2" class="poloto_plot poloto_imgs poloto_scatter poloto2 poloto_stroke" d=" M 150.00 250.05 h 0.00 M 180.61 235.93 h 0.00 M 211.22 226.74 h 0.00 M 241.84 225.69 h 0.00 M 272.45 233.16 h 0.00 M 303.06 246.52 h 0.00 M 333.67 261.11 h 0.00 M 364.29 271.84 h 0.00 M 394.90 274.96 h 0.00 M 425.51 269.37 h 0.00 M 456.12 257.04 h 0.00 M 486.73 242.26 h 0.00 M 517.35 230.20 h 0.00 M 547.96 225.08 h 0.00 M 578.57 228.68 h 0.00 M 609.18 239.74 h 0.00 M 639.80 254.41 h 0.00"/>
+	<g class="poloto_legend poloto_imgs poloto_histo poloto0 poloto_fill"><rect x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/></g>
+	<g class="poloto_legend poloto_imgs poloto_line poloto1 poloto_stroke"><line x1="680" x2="730" y1="131.25" y2="131.25"/></g>
+	<g class="poloto_legend poloto_imgs poloto_scatter poloto2 poloto_stroke"><line x1="685" x2="685" y1="181.25" y2="181.25"/></g>
+	<text class="poloto_legend poloto_text poloto_histo poloto0" x="675" y="100">sin-10</text>
+	<text class="poloto_legend poloto_text poloto_line poloto1" x="675" y="150">cos</text>
+	<text class="poloto_legend poloto_text poloto_scatter poloto2" x="675" y="200">sin-5</text>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Demo: you can change the style of the svg file itself!</text>
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">x</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">y</text>

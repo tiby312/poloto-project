@@ -41,24 +41,32 @@
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">duration</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
 	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹2020-09-01 00:00:00 UTC in Months</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="400.00">0</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="326.33">2e6</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="252.65">4e6</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="178.98">6e6</text>
-	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="105.30">8e6</text>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="326.33" y2="326.33"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="252.65" y2="252.65"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="178.98" y2="178.98"/>
-	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="105.30" y2="105.30"/>
-	<text class="poloto_text poloto_ticks poloto_x" x="222.09" y="430.00">2020 Sep¹</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="363.95" y="430.00">2020 Nov</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="505.81" y="430.00">2021 Jan</text>
-	<text class="poloto_text poloto_ticks poloto_x" x="643.02" y="430.00">2021 Mar</text>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="222.09" x2="222.09" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="363.95" x2="363.95" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="505.81" x2="505.81" y1="400.00" y2="405.00"/>
-	<line class="poloto_imgs poloto_ticks poloto_x" x1="643.02" x2="643.02" y1="400.00" y2="405.00"/>
+	<g class="poloto_text poloto_ticks poloto_y">
+		<text x="135.00" y="400.00">0</text>
+		<text x="135.00" y="326.33">2e6</text>
+		<text x="135.00" y="252.65">4e6</text>
+		<text x="135.00" y="178.98">6e6</text>
+		<text x="135.00" y="105.30">8e6</text>
+	</g>
+	<g class="poloto_imgs poloto_ticks poloto_y">
+		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+		<line x1="150.00" x2="144.00" y1="326.33" y2="326.33"/>
+		<line x1="150.00" x2="144.00" y1="252.65" y2="252.65"/>
+		<line x1="150.00" x2="144.00" y1="178.98" y2="178.98"/>
+		<line x1="150.00" x2="144.00" y1="105.30" y2="105.30"/>
+	</g>
+	<g class="poloto_text poloto_ticks poloto_x">
+		<text x="222.09" y="430.00">2020 Sep¹</text>
+		<text x="363.95" y="430.00">2020 Nov</text>
+		<text x="505.81" y="430.00">2021 Jan</text>
+		<text x="643.02" y="430.00">2021 Mar</text>
+	</g>
+	<g class="poloto_imgs poloto_ticks poloto_x">
+		<line x1="222.09" x2="222.09" y1="400.00" y2="405.00"/>
+		<line x1="363.95" x2="363.95" y1="400.00" y2="405.00"/>
+		<line x1="505.81" x2="505.81" y1="400.00" y2="405.00"/>
+		<line x1="643.02" x2="643.02" y1="400.00" y2="405.00"/>
+	</g>
 	<path class="poloto_imgs poloto_ticks poloto_x" d=" M 150.00 400.00 L 650.00 400.00"/>
 	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:9.209233791748527;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

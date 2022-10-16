@@ -183,11 +183,12 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             })
             .collect();
 
+        let g = hbuild::elem("g").with(attrs!(("class", "poloto_text poloto_ticks poloto_y"),));
+
         let j = hbuild::from_closure(|w| {
             for (val, yy) in ticks.iter() {
                 let text = hbuild::elem("text")
                     .with(attrs!(
-                        ("class", "poloto_text poloto_ticks poloto_y"),
                         ("x", ffmt.disp(xaspect_offset + padding - textx_padding)),
                         ("y", ffmt.disp(yaspect_offset + yy))
                     ))
@@ -200,17 +201,13 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             Ok(())
         });
 
-        // let g = hbuild::elem("g").with(attrs!(
-        //     ("dominant-baseline", "middle"),
-        //     ("text-anchor", "end")
-        // ));
+        writer.render(g.append(j))?;
 
-        writer.render(j)?;
+        let g = hbuild::elem("g").with(attrs!(("class", "poloto_imgs poloto_ticks poloto_y"),));
 
         let j = hbuild::from_closure(|w| {
             for (_, yy) in ticks.iter() {
                 w.render(hbuild::single("line").with(attrs!(
-                    ("class", "poloto_imgs poloto_ticks poloto_y"),
                     ("x1", ffmt.disp(xaspect_offset + padding)),
                     ("x2", ffmt.disp(xaspect_offset + padding * 0.96)),
                     ("y1", ffmt.disp(yaspect_offset + yy)),
@@ -220,14 +217,14 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             Ok(())
         });
 
-        writer.render(j)?;
+        writer.render(g.append(j))?;
 
         if canvas.ytick_lines {
+            let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_y")));
             let j = hbuild::from_closure(|w| {
                 //Draw interval y text
                 for (_, yy) in ticks.iter() {
                     w.render(hbuild::single("line").with(attrs!(
-                        ("class", "poloto_grid poloto_y"),
                         ("x1", ffmt.disp(xaspect_offset + padding)),
                         (
                             "x2",
@@ -239,7 +236,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 }
                 Ok(())
             });
-            writer.render(j)?;
+            writer.render(g.append(j))?;
         }
     }
 
@@ -253,11 +250,11 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             })
             .collect();
 
+        let g = hbuild::elem("g").with(attrs!(("class", "poloto_text poloto_ticks poloto_x"),));
         let j = hbuild::from_closure(|w| {
             for (val, xx) in ticks.iter() {
                 let text = hbuild::elem("text")
                     .with(attrs!(
-                        ("class", "poloto_text poloto_ticks poloto_x"),
                         ("x", ffmt.disp(xaspect_offset + xx)),
                         (
                             "y",
@@ -272,16 +269,13 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             Ok(())
         });
 
-        // let g = hbuild::elem("g").with(attrs!(
-        //     ("dominant-baseline", "start"),
-        //     ("text-anchor", "middle")
-        // ));
-        writer.render(j)?;
+        writer.render(g.append(j))?;
+
+        let g = hbuild::elem("g").with(attrs!(("class", "poloto_imgs poloto_ticks poloto_x")));
 
         let j = hbuild::from_closure(|w| {
             for (_, xx) in ticks.iter() {
                 w.render(hbuild::single("line").with(attrs!(
-                    ("class", "poloto_imgs poloto_ticks poloto_x"),
                     ("x1", ffmt.disp(xaspect_offset + xx)),
                     ("x2", ffmt.disp(xaspect_offset + xx)),
                     ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
@@ -291,14 +285,14 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             Ok(())
         });
 
-        writer.render(j)?;
+        writer.render(g.append(j))?;
 
         if canvas.xtick_lines {
+            let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_x")));
             let j = hbuild::from_closure(|w| {
                 //Draw interva`l x text
                 for (_, xx) in ticks.iter() {
                     w.render(hbuild::single("line").with(attrs!(
-                        ("class", "poloto_grid poloto_x"),
                         ("x1", ffmt.disp(xaspect_offset + xx)),
                         ("x2", ffmt.disp(xaspect_offset + xx)),
                         ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
@@ -310,7 +304,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 }
                 Ok(())
             });
-            writer.render(j)?;
+            writer.render(g.append(j))?;
         }
     }
 
