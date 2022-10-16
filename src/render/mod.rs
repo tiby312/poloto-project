@@ -628,8 +628,7 @@ impl Theme<'static> {
 .poloto4fill{fill:aqua;}
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
-.poloto7fill{fill:chocolate;}
-";
+.poloto7fill{fill:chocolate;}";
 
         Theme {
             styles: STYLE_CONFIG_LIGHT_DEFAULT,
@@ -669,8 +668,7 @@ impl Theme<'static> {
 .poloto4fill{fill:aqua;}
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
-.poloto7fill{fill:chocolate;}
-";
+.poloto7fill{fill:chocolate;}";
         Theme {
             styles: STYLE_CONFIG_DARK_DEFAULT,
         }

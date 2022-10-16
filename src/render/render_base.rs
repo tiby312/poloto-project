@@ -330,7 +330,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
     use attr::PathCommand::*;
     writer.render(hbuild::single("path").with(attrs!(
-        ("class", "poloto_imgs poloto_ticks"),
+        ("class", "poloto_imgs poloto_ticks poloto_x"),
         xclosure,
         hbuild::path([
             M(
@@ -358,7 +358,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         Ok(())
     });
     writer.render(hbuild::single("path").with(attrs!(
-        ("class", "poloto_imgs poloto_ticks"),
+        ("class", "poloto_imgs poloto_ticks poloto_y"),
         yclosure,
         hbuild::path([
             M(

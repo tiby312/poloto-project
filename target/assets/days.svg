@@ -34,10 +34,9 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
-
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 198.55 L 250.00 174.58 L 350.00 154.27 L 404.17 263.33 L 450.00 135.18 L 550.00 117.24 L 650.00 100.00"/>
+	<path class="poloto_plot poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 198.55 L 250.00 174.58 L 350.00 154.27 L 404.17 263.33 L 450.00 135.18 L 550.00 117.24 L 650.00 100.00"/>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">Day</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
@@ -64,6 +63,6 @@
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="450.00" x2="450.00" y1="400.00" y2="405.00"/>
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="550.00" x2="550.00" y1="400.00" y2="405.00"/>
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
-	<path class="poloto_imgs poloto_ticks" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:6.40751815463477;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_x" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:6.40751815463477;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

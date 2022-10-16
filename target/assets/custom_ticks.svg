@@ -34,10 +34,9 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
-
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<g class="poloto_histo poloto0fill">
+	<g class="poloto_plot poloto_histo poloto0fill">
 		<rect x="150.00" y="400.00" width="17.833333333333343" height="0"/>
 		<rect x="170.83" y="400.00" width="17.833333333333314" height="0"/>
 		<rect x="191.67" y="400.00" width="17.833333333333343" height="0"/>
@@ -83,6 +82,6 @@
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="525.00" x2="525.00" y1="400.00" y2="405.00"/>
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
-	<path class="poloto_imgs poloto_ticks" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:10.714285714285714;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_x" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:10.714285714285714;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

@@ -327,7 +327,10 @@ fn render(
     match p_type {
         PlotType::Line => {
             writer.render(hbuild::single("path").with(attrs!(
-                ("class", format_move!("poloto_line poloto{}stroke", colori)),
+                (
+                    "class",
+                    format_move!("poloto_plot poloto_line poloto{}stroke", colori)
+                ),
                 ("fill", "none"),
                 ("stroke", "black"),
                 Line::new(it, ffmt)
@@ -337,7 +340,7 @@ fn render(
             writer.render(hbuild::single("path").with(attrs!(
                 (
                     "class",
-                    format_move!("poloto_scatter poloto{}stroke", colori),
+                    format_move!("poloto_plot poloto_scatter poloto{}stroke", colori),
                 ),
                 hbuild::path_from_closure(|w| {
                     let mut w = w.start();
@@ -351,8 +354,10 @@ fn render(
             )))?;
         }
         PlotType::Histo => {
-            let g = hbuild::elem("g")
-                .with(("class", format_move!("poloto_histo poloto{}fill", colori)));
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!("poloto_plot poloto_histo poloto{}fill", colori),
+            ));
 
             let h = hbuild::from_closure(|w| {
                 let mut last = None;
@@ -376,7 +381,7 @@ fn render(
             writer.render(hbuild::single("path").with(attrs!(
                 (
                     "class",
-                    format_move!("poloto_linefill poloto{}fill", colori),
+                    format_move!("poloto_plot poloto_linefill poloto{}fill", colori),
                 ),
                 LineFill::new(it, ffmt, height - paddingy, true)
             )))?;
@@ -385,14 +390,16 @@ fn render(
             writer.render(hbuild::single("path").with(attrs!(
                 (
                     "class",
-                    format_move!("poloto_linefill poloto{}fill", colori),
+                    format_move!("poloto_plot poloto_linefill poloto{}fill", colori),
                 ),
                 LineFill::new(it, ffmt, height - paddingy, false)
             )))?;
         }
         PlotType::Bars => {
-            let g = hbuild::elem("g")
-                .with(("class", format_move!("poloto_histo poloto{}fill", colori)));
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!("poloto_plot poloto_histo poloto{}fill", colori),
+            ));
 
             let h = hbuild::from_closure(|w| {
                 for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {

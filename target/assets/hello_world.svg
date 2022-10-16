@@ -34,10 +34,9 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
-
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 400.00 L 400.00 200.00 L 650.00 100.00"/>
+	<path class="poloto_plot poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 400.00 L 400.00 200.00 L 650.00 100.00"/>
 	<line class="poloto_legend poloto_imgs poloto_line poloto0stroke" x1="680" x2="730" y1="81.25" y2="81.25"/>
 	<text class="poloto_legend poloto_text" x="675" y="100">label</text>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">hello world</text>
@@ -57,6 +56,6 @@
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
 	<line class="poloto_imgs poloto_ticks poloto_x" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
-	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:12.5;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:10;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_x" style="stroke-dasharray:12.5;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:10;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>
