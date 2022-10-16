@@ -262,33 +262,6 @@ See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccol
 
 ## CSS classes
 
-Below are the css classes that can be stylized. There are default styles settings
-for these css classes in the static strings `STYLE_CONFIG_LIGHT_DEFAULT` and `STYLE_CONFIG_DARK_DEFAULT`.
-
-These are the css classes added through `Plotter::render`
-
-* `poloto_text` - all poloto text
-* `poloto_axis_lines` - axis lines and ticks 
-* `poloto_tick_labels` - x and y labels as well as `where` labels
-* `poloto_labels` - title, x label, ylabel
-* `poloto_title` - title
-* `poloto_xname` - xlabel
-* `poloto_yname` - ylabel
-* `poloto_legend_text` - legend text
-* `poloto_legend_icon` - legend icon
-* `poloto_scatter` - scatter plots and legend icon
-* `poloto_line` - line plots and legend icon
-* `poloto_histo` - histogram and legend icon 
-* `poloto_linefill` - line fill and legend icon
-* `poloto_linefillraw` - line fill raw and legend icon
-* `poloto_tick_line` - grid lines that occur on each tick.
-
-These are the css classes added through `poloto::SVG_HEADER` which is used by `simple_theme` and `simple_theme_dark`.
-
-* `poloto` - default svg element
-
-For plots:
-
 * `poloto[n]fill` - If the n'th plot requires fill. (e.g. linefill or histogram)
 * `poloto[n]stroke` - If the n'th plot requires stroke. (e.g. line or scatter)
 

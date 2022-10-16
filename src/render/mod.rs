@@ -603,14 +603,16 @@ impl Theme<'static> {
 }
 .poloto_background{fill:AliceBlue;}
 .poloto_scatter{stroke-width:7}
-.poloto_tick_line{stroke:gray;stroke-width:0.5}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
-.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_where{dominant-baseline:middle;text-anchor:start}
+.poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_grid{stroke:gray;stroke-width:0.5}
+
 .poloto0stroke{stroke:blue;}
 .poloto1stroke{stroke:red;}
 .poloto2stroke{stroke:green;}
@@ -626,14 +628,14 @@ impl Theme<'static> {
 .poloto4fill{fill:aqua;}
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
-.poloto7fill{fill:chocolate;}";
+.poloto7fill{fill:chocolate;}
+";
 
         Theme {
             styles: STYLE_CONFIG_LIGHT_DEFAULT,
         }
     }
     pub const fn dark() -> Theme<'static> {
-        /// Default dark theme
         const STYLE_CONFIG_DARK_DEFAULT: &str = ".poloto{
   stroke-linecap:round;
   stroke-linejoin:round;
@@ -642,13 +644,16 @@ impl Theme<'static> {
 }
 .poloto_background{fill:#262626;}
 .poloto_scatter{stroke-width:7}
-.poloto_tick_line{stroke:dimgray;stroke-width:0.5}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: white;}
-.poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
-.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_where{dominant-baseline:middle;text-anchor:start}
+.poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_grid{stroke:gray;stroke-width:0.5}
+
 .poloto0stroke{stroke:blue;}
 .poloto1stroke{stroke:red;}
 .poloto2stroke{stroke:green;}
@@ -664,7 +669,8 @@ impl Theme<'static> {
 .poloto4fill{fill:aqua;}
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
-.poloto7fill{fill:chocolate;}";
+.poloto7fill{fill:chocolate;}
+";
         Theme {
             styles: STYLE_CONFIG_DARK_DEFAULT,
         }

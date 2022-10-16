@@ -146,14 +146,13 @@ pub(super) fn render_plot<P: build::PlotIterator>(
             Ok(())
         });
 
-        let g = hbuild::elem("g").with(("class", format_move!("poloto_legend_icon",)));
-
-        writer.render(g.append(j))?;
+        writer.render(j)?;
 
         let j = hbuild::from_closure(|w| {
             for (_, name, i) in names.into_iter() {
                 let text = hbuild::elem("text")
                     .with(attrs!(
+                        ("class", "poloto_legend poloto_text"),
                         ("x", width - padding / 1.2),
                         ("y", paddingy - yaspect_offset + (i as f64) * spacing)
                     ))
@@ -163,8 +162,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
             }
             Ok(())
         });
-        let g = hbuild::elem("g").with(("class", "poloto_text poloto_legend_text"));
-        writer.render(g.append(j))?;
+        writer.render(j)?;
     }
     Ok(())
 }
@@ -202,9 +200,11 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
             writer.render(hbuild::single("line").with(attrs!(
                 (
                     "class",
-                    format_move!("poloto_line poloto{}stroke poloto{}legend", colori, colori)
+                    format_move!(
+                        "poloto_legend poloto_imgs poloto_line poloto{}stroke",
+                        colori
+                    )
                 ),
-                ("stroke", "black"),
                 ("x1", legendx1),
                 ("x2", legendx1 + padding / 3.0),
                 ("y1", legendy1),
@@ -216,12 +216,10 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_scatter poloto{}stroke poloto{}legend",
+                        "poloto_legend poloto_imgs poloto_scatter poloto{}stroke",
                         colori,
-                        colori
                     ),
                 ),
-                ("stroke", "black"),
                 ("x1", legendx1 + padding / 30.0),
                 ("x2", legendx1 + padding / 30.0),
                 ("y1", legendy1),
@@ -233,9 +231,8 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_histo poloto{}fill poloto{}legend",
+                        "poloto_legend poloto_imgs poloto_histo poloto{}fill",
                         colori,
-                        colori
                     ),
                 ),
                 ("x", legendx1),
@@ -251,9 +248,8 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_linefill poloto{}fill poloto{}legend",
+                        "poloto_legend poloto_imgs poloto_linefill poloto{}fill",
                         colori,
-                        colori
                     ),
                 ),
                 ("x", legendx1),
@@ -270,9 +266,8 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_linefillraw poloto{}fill poloto{}legend",
+                        "poloto_legend poloto_imgs poloto_linefillraw poloto{}fill",
                         colori,
-                        colori
                     ),
                 ),
                 ("x", legendx1),
@@ -288,7 +283,10 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
             writer.render(hbuild::single("rect").with(attrs!(
                 (
                     "class",
-                    format_move!("poloto_histo poloto{}fill poloto{}legend", colori, colori),
+                    format_move!(
+                        "poloto_legend poloto_imgs poloto_histo poloto{}fill",
+                        colori
+                    ),
                 ),
                 ("x", legendx1),
                 ("y", legendy1 - padding / 30.0),

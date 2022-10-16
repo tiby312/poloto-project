@@ -8,14 +8,16 @@
 }
 .poloto_background{fill:AliceBlue;}
 .poloto_scatter{stroke-width:7}
-.poloto_tick_line{stroke:gray;stroke-width:0.5}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
-.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_where{dominant-baseline:middle;text-anchor:start}
+.poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_grid{stroke:gray;stroke-width:0.5}
+
 .poloto0stroke{stroke:blue;}
 .poloto1stroke{stroke:red;}
 .poloto2stroke{stroke:green;}
@@ -32,33 +34,24 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
+
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<g class="poloto_labels poloto_text">
-		<text class="poloto_title" x="400.00" y="37.50">Some Trigonometry Plots 🥳</text>
-		<text class="poloto_xname" x="400.00" y="481.25">This is the x label</text>
-		<text class="poloto_yname" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
-		<text x="135.00" y="400.00">4</text>
-		<text x="135.00" y="250.00">5</text>
-		<text x="135.00" y="100.00">6</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-		<line x1="150.00" x2="144.00" y1="250.00" y2="250.00"/>
-		<line x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
-		<text x="150.00" y="430.00">-1</text>
-		<text x="400.00" y="430.00">0</text>
-		<text x="650.00" y="430.00">1</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
-		<line x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
-		<line x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
-	</g>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:12.5;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:7.5;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Some Trigonometry Plots 🥳</text>
+	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">This is the x label</text>
+	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="400.00">4</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="250.00">5</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="100.00">6</text>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="250.00" y2="250.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
+	<text class="poloto_text poloto_ticks poloto_x" x="150.00" y="430.00">-1</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="400.00" y="430.00">0</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="650.00" y="430.00">1</text>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="400.00" x2="400.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:12.5;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:7.5;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

@@ -22,6 +22,9 @@ fn custom_colors_html() -> fmt::Result {
 
     let b = hypermelon::elem::BufferedElem::new(poloto::header(), hypermelon::render::NoFmt)?;
 
+    let light = poloto::render::Theme::light().get_str().replace('\n', "");
+    let dark = poloto::render::Theme::dark().get_str().replace('\n', "");
+
     let (header_start, header_end) = b.into_parts();
     write!(
         w,
@@ -55,8 +58,8 @@ fn custom_colors_html() -> fmt::Result {
         </div>
         </htmls>
         "###,
-        poloto::render::Theme::light().get_str(),
-        poloto::render::Theme::dark().get_str(),
+        light,
+        dark,
         format_args!("{}{}{}", header_start, graph, header_end)
     )
 }

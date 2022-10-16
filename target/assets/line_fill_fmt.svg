@@ -8,14 +8,16 @@
 }
 .poloto_background{fill:AliceBlue;}
 .poloto_scatter{stroke-width:7}
-.poloto_tick_line{stroke:gray;stroke-width:0.5}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
-.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_where{dominant-baseline:middle;text-anchor:start}
+.poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_grid{stroke:gray;stroke-width:0.5}
+
 .poloto0stroke{stroke:blue;}
 .poloto1stroke{stroke:red;}
 .poloto2stroke{stroke:green;}
@@ -32,54 +34,41 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
+
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_linefill poloto0fill" d=" M 222.68 399.39 M 222.68 400.00 L 222.68 399.39 L 223.93 398.72 L 225.19 398.05 L 226.44 397.38 L 227.69 396.70 L 228.95 396.03 L 230.20 395.35 L 231.45 394.67 L 232.71 393.98 L 233.96 393.29 L 235.21 392.59 L 236.47 391.89 L 237.72 391.18 L 238.97 390.46 L 240.23 389.73 L 241.48 389.00 L 242.73 388.25 L 243.98 387.50 L 245.24 386.73 L 246.49 385.95 L 247.74 385.16 L 249.00 384.35 L 250.25 383.53 L 251.50 382.69 L 252.76 381.84 L 254.01 380.96 L 255.26 380.07 L 256.52 379.15 L 257.77 378.21 L 259.02 377.24 L 260.28 376.25 L 261.53 375.23 L 262.78 374.18 L 264.04 373.10 L 265.29 371.98 L 266.54 370.82 L 267.79 369.62 L 269.05 368.38 L 270.30 367.09 L 271.55 365.74 L 272.81 364.34 L 274.06 362.88 L 275.31 361.36 L 276.57 359.76 L 277.82 358.08 L 279.07 356.31 L 280.33 354.45 L 281.58 352.49 L 282.83 350.41 L 284.09 348.20 L 285.34 345.85 L 286.59 343.35 L 287.84 340.67 L 289.10 337.79 L 290.35 334.68 L 291.60 331.33 L 292.86 327.68 L 294.11 323.71 L 295.36 319.35 L 296.62 314.56 L 297.87 309.24 L 299.12 303.31 L 300.38 296.66 L 301.63 289.12 L 302.88 280.52 L 304.14 270.58 L 305.39 258.98 L 306.64 245.23 L 307.89 228.67 L 309.15 208.32 L 310.40 182.68 L 311.65 149.37 L 312.91 104.29 L 312.91 400.00 M 419.42 399.44 L 420.68 398.77 L 421.93 398.10 L 423.18 397.43 L 424.44 396.76 L 425.69 396.08 L 426.94 395.41 L 428.20 394.72 L 429.45 394.04 L 430.70 393.35 L 431.95 392.65 L 433.21 391.95 L 434.46 391.24 L 435.71 390.52 L 436.97 389.79 L 438.22 389.06 L 439.47 388.31 L 440.73 387.56 L 441.98 386.79 L 443.23 386.01 L 444.49 385.22 L 445.74 384.42 L 446.99 383.60 L 448.25 382.76 L 449.50 381.90 L 450.75 381.03 L 452.01 380.14 L 453.26 379.22 L 454.51 378.29 L 455.76 377.32 L 457.02 376.33 L 458.27 375.32 L 459.52 374.27 L 460.78 373.19 L 462.03 372.07 L 463.28 370.91 L 464.54 369.72 L 465.79 368.48 L 467.04 367.19 L 468.30 365.85 L 469.55 364.46 L 470.80 363.00 L 472.06 361.48 L 473.31 359.89 L 474.56 358.22 L 475.81 356.46 L 477.07 354.61 L 478.32 352.65 L 479.57 350.58 L 480.83 348.38 L 482.08 346.05 L 483.33 343.55 L 484.59 340.89 L 485.84 338.02 L 487.09 334.94 L 488.35 331.60 L 489.60 327.98 L 490.85 324.04 L 492.11 319.72 L 493.36 314.96 L 494.61 309.69 L 495.86 303.81 L 497.12 297.22 L 498.37 289.76 L 499.62 281.25 L 500.88 271.43 L 502.13 259.97 L 503.38 246.41 L 504.64 230.11 L 505.89 210.11 L 507.14 184.97 L 508.40 152.39 L 509.65 108.45 L 509.65 400.00 M 616.17 399.49 L 617.42 398.82 L 618.67 398.16 L 619.92 397.48 L 621.18 396.81 L 622.43 396.14 L 623.68 395.46 L 624.94 394.78 L 626.19 394.09 L 627.44 393.40 L 628.70 392.70 L 629.95 392.00 L 631.20 391.29 L 632.46 390.58 L 633.71 389.85 L 634.96 389.12 L 636.22 388.37 L 637.47 387.62 L 638.72 386.85 L 639.97 386.08 L 641.23 385.29 L 642.48 384.48 L 643.73 383.66 L 644.99 382.83 L 646.24 381.97 L 647.49 381.10 L 648.75 380.21 L 650.00 379.30 L 650.00 400.00 Z"/>
-	<g class="poloto_legend_icon">
-		<rect class="poloto_linefill poloto0fill poloto0legend" x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/>
-	</g>
-	<g class="poloto_text poloto_legend_text">
-		<text x="675" y="100">tan(x)</text>
-	</g>
-	<g class="poloto_labels poloto_text">
-		<text class="poloto_title" x="400.00" y="37.50">from 2 to 9.98</text>
-		<text class="poloto_xname" x="400.00" y="481.25">This is the x label</text>
-		<text class="poloto_yname" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
-		<text x="135.00" y="400.00">0</text>
-		<text x="135.00" y="333.25">2</text>
-		<text x="135.00" y="266.50">4</text>
-		<text x="135.00" y="199.75">6</text>
-		<text x="135.00" y="133.00">8</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-		<line x1="150.00" x2="144.00" y1="333.25" y2="333.25"/>
-		<line x1="150.00" x2="144.00" y1="266.50" y2="266.50"/>
-		<line x1="150.00" x2="144.00" y1="199.75" y2="199.75"/>
-		<line x1="150.00" x2="144.00" y1="133.00" y2="133.00"/>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
-		<text x="150.00" y="430.00">2</text>
-		<text x="212.66" y="430.00">3</text>
-		<text x="275.31" y="430.00">4</text>
-		<text x="337.97" y="430.00">5</text>
-		<text x="400.63" y="430.00">6</text>
-		<text x="463.28" y="430.00">7</text>
-		<text x="525.94" y="430.00">8</text>
-		<text x="588.60" y="430.00">9</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
-		<line x1="212.66" x2="212.66" y1="400.00" y2="405.00"/>
-		<line x1="275.31" x2="275.31" y1="400.00" y2="405.00"/>
-		<line x1="337.97" x2="337.97" y1="400.00" y2="405.00"/>
-		<line x1="400.63" x2="400.63" y1="400.00" y2="405.00"/>
-		<line x1="463.28" x2="463.28" y1="400.00" y2="405.00"/>
-		<line x1="525.94" x2="525.94" y1="400.00" y2="405.00"/>
-		<line x1="588.60" x2="588.60" y1="400.00" y2="405.00"/>
-	</g>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:6.265664160401002;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:8.343895219723878;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<rect class="poloto_legend poloto_imgs poloto_linefill poloto0fill" x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/>
+	<text class="poloto_legend poloto_text" x="675" y="100">tan(x)</text>
+	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">from 2 to 9.98</text>
+	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">This is the x label</text>
+	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="400.00">0</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="333.25">2</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="266.50">4</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="199.75">6</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="133.00">8</text>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="333.25" y2="333.25"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="266.50" y2="266.50"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="199.75" y2="199.75"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="133.00" y2="133.00"/>
+	<text class="poloto_text poloto_ticks poloto_x" x="150.00" y="430.00">2</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="212.66" y="430.00">3</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="275.31" y="430.00">4</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="337.97" y="430.00">5</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="400.63" y="430.00">6</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="463.28" y="430.00">7</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="525.94" y="430.00">8</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="588.60" y="430.00">9</text>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="212.66" x2="212.66" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="275.31" x2="275.31" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="337.97" x2="337.97" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="400.63" x2="400.63" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="463.28" x2="463.28" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="525.94" x2="525.94" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="588.60" x2="588.60" y1="400.00" y2="405.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:6.265664160401002;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:8.343895219723878;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

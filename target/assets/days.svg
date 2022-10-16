@@ -8,14 +8,16 @@
 }
 .poloto_background{fill:AliceBlue;}
 .poloto_scatter{stroke-width:7}
-.poloto_tick_line{stroke:gray;stroke-width:0.5}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
-.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_where{dominant-baseline:middle;text-anchor:start}
+.poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_grid{stroke:gray;stroke-width:0.5}
+
 .poloto0stroke{stroke:blue;}
 .poloto1stroke{stroke:red;}
 .poloto2stroke{stroke:green;}
@@ -32,45 +34,36 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
+
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 198.55 L 250.00 174.58 L 350.00 154.27 L 404.17 263.33 L 450.00 135.18 L 550.00 117.24 L 650.00 100.00"/>
-	<g class="poloto_labels poloto_text">
-		<text class="poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
-		<text class="poloto_xname" x="400.00" y="481.25">Day</text>
-		<text class="poloto_yname" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
-		<text x="135.00" y="400.00">0</text>
-		<text x="135.00" y="335.92">1e6</text>
-		<text x="135.00" y="271.85">2.0e6</text>
-		<text x="135.00" y="207.77">3.0e6</text>
-		<text x="135.00" y="143.70">4.0e6</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-		<line x1="150.00" x2="144.00" y1="335.92" y2="335.92"/>
-		<line x1="150.00" x2="144.00" y1="271.85" y2="271.85"/>
-		<line x1="150.00" x2="144.00" y1="207.77" y2="207.77"/>
-		<line x1="150.00" x2="144.00" y1="143.70" y2="143.70"/>
-	</g>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="start" x="440.00" y="70.00">¹2020-01-30 00:00:00 UTC in Days</text>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
-		<text x="150.00" y="430.00">Jan 30¹</text>
-		<text x="250.00" y="430.00">Jan 31</text>
-		<text x="350.00" y="430.00">Feb 01</text>
-		<text x="450.00" y="430.00">Feb 02</text>
-		<text x="550.00" y="430.00">Feb 03</text>
-		<text x="650.00" y="430.00">Feb 04</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
-		<line x1="250.00" x2="250.00" y1="400.00" y2="405.00"/>
-		<line x1="350.00" x2="350.00" y1="400.00" y2="405.00"/>
-		<line x1="450.00" x2="450.00" y1="400.00" y2="405.00"/>
-		<line x1="550.00" x2="550.00" y1="400.00" y2="405.00"/>
-		<line x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
-	</g>
-	<path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:6.40751815463477;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
+	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">Day</text>
+	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
+	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹2020-01-30 00:00:00 UTC in Days</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="400.00">0</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="335.92">1e6</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="271.85">2.0e6</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="207.77">3.0e6</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="143.70">4.0e6</text>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="335.92" y2="335.92"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="271.85" y2="271.85"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="207.77" y2="207.77"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="143.70" y2="143.70"/>
+	<text class="poloto_text poloto_ticks poloto_x" x="150.00" y="430.00">Jan 30¹</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="250.00" y="430.00">Jan 31</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="350.00" y="430.00">Feb 01</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="450.00" y="430.00">Feb 02</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="550.00" y="430.00">Feb 03</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="650.00" y="430.00">Feb 04</text>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="250.00" x2="250.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="350.00" x2="350.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="450.00" x2="450.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="550.00" x2="550.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
+	<path class="poloto_imgs poloto_ticks" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:6.40751815463477;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

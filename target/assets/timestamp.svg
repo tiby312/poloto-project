@@ -8,14 +8,16 @@
 }
 .poloto_background{fill:AliceBlue;}
 .poloto_scatter{stroke-width:7}
-.poloto_tick_line{stroke:gray;stroke-width:0.5}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_axis_lines{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
-.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_legend_text{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_where{dominant-baseline:middle;text-anchor:start}
+.poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_grid{stroke:gray;stroke-width:0.5}
+
 .poloto0stroke{stroke:blue;}
 .poloto1stroke{stroke:red;}
 .poloto2stroke{stroke:green;}
@@ -32,41 +34,32 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
+
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_line poloto0stroke" fill="none" stroke="black" d=" M 150.00 144.92 L 260.83 142.23 L 277.25 139.89 L 282.43 135.53 L 299.45 135.20 L 300.42 134.19 L 317.80 132.51 L 337.65 127.49 L 477.64 124.80 L 482.02 123.80 L 482.78 122.46 L 487.78 121.45 L 493.09 120.78 L 500.32 120.45 L 504.26 120.11 L 517.53 120.11 L 523.07 101.68 L 650.00 100.00"/>
-	<g class="poloto_labels poloto_text">
-		<text class="poloto_title" x="400.00" y="37.50">Long Jump world record progression</text>
-		<text class="poloto_xname" x="400.00" y="481.25">Date</text>
-		<text class="poloto_yname" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Mark (in meters)</text>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
-		<text x="135.00" y="400.00">0</text>
-		<text x="135.00" y="332.96">2</text>
-		<text x="135.00" y="265.92">4</text>
-		<text x="135.00" y="198.88">6</text>
-		<text x="135.00" y="131.84">8</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
-		<line x1="150.00" x2="144.00" y1="332.96" y2="332.96"/>
-		<line x1="150.00" x2="144.00" y1="265.92" y2="265.92"/>
-		<line x1="150.00" x2="144.00" y1="198.88" y2="198.88"/>
-		<line x1="150.00" x2="144.00" y1="131.84" y2="131.84"/>
-	</g>
-	<text class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="start" x="440.00" y="70.00">¹1920-01-01 00:00:00 UTC in Years</text>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
-		<text x="252.18" y="430.00">1920¹</text>
-		<text x="363.21" y="430.00">1940</text>
-		<text x="474.24" y="430.00">1960</text>
-		<text x="585.27" y="430.00">1980</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="252.18" x2="252.18" y1="400.00" y2="405.00"/>
-		<line x1="363.21" x2="363.21" y1="400.00" y2="405.00"/>
-		<line x1="474.24" x2="474.24" y1="400.00" y2="405.00"/>
-		<line x1="585.27" x2="585.27" y1="400.00" y2="405.00"/>
-	</g>
-	<path stroke="black" fill="none" class="poloto_axis_lines" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:8.379888268156424;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Long Jump world record progression</text>
+	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">Date</text>
+	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Mark (in meters)</text>
+	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹1920-01-01 00:00:00 UTC in Years</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="400.00">0</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="332.96">2</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="265.92">4</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="198.88">6</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="131.84">8</text>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="332.96" y2="332.96"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="265.92" y2="265.92"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="198.88" y2="198.88"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="131.84" y2="131.84"/>
+	<text class="poloto_text poloto_ticks poloto_x" x="252.18" y="430.00">1920¹</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="363.21" y="430.00">1940</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="474.24" y="430.00">1960</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="585.27" y="430.00">1980</text>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="252.18" x2="252.18" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="363.21" x2="363.21" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="474.24" x2="474.24" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="585.27" x2="585.27" y1="400.00" y2="405.00"/>
+	<path class="poloto_imgs poloto_ticks" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:8.379888268156424;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

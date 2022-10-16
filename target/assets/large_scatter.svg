@@ -8,13 +8,16 @@
 }
 .poloto_background{fill:#262626;}
 .poloto_scatter{stroke-width:7}
-.poloto_tick_line{stroke:dimgray;stroke-width:0.5}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: white;}
-.poloto_axis_lines{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
-.poloto_title{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_xname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
-.poloto_yname{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_where{dominant-baseline:middle;text-anchor:start}
+.poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
+.poloto_grid{stroke:gray;stroke-width:0.5}
+
 .poloto0stroke{stroke:blue;}
 .poloto1stroke{stroke:red;}
 .poloto2stroke{stroke:green;}
@@ -31,51 +34,37 @@
 .poloto5fill{fill:lime;}
 .poloto6fill{fill:orange;}
 .poloto7fill{fill:chocolate;}
-.poloto_scatter{stroke-width:33;}
-.poloto_legend_icon .poloto_scatter{stroke-width:10}
+
+.poloto_scatter{stroke-width:33;}.poloto_legend.poloto_imgs.poloto_scatter{stroke-width:10}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<path class="poloto_scatter poloto0stroke" d=" M 150.00 100.00 h 0.00 M 167.24 108.26 h 0.00 M 184.48 132.13 h 0.00 M 201.72 168.99 h 0.00 M 218.97 214.77 h 0.00 M 236.21 264.44 h 0.00 M 253.45 312.53 h 0.00 M 270.69 353.75 h 0.00 M 287.93 383.55 h 0.00 M 305.17 398.65 h 0.00 M 322.41 397.41 h 0.00 M 339.66 379.94 h 0.00 M 356.90 348.18 h 0.00 M 374.14 305.61 h 0.00 M 391.38 256.94 h 0.00 M 408.62 207.51 h 0.00 M 425.86 162.76 h 0.00 M 443.10 127.63 h 0.00 M 460.34 105.98 h 0.00 M 477.59 100.19 h 0.00 M 494.83 110.90 h 0.00 M 512.07 136.93 h 0.00 M 529.31 175.42 h 0.00 M 546.55 222.13 h 0.00 M 563.79 271.91 h 0.00 M 581.03 319.30 h 0.00 M 598.28 359.06 h 0.00 M 615.52 386.82 h 0.00 M 632.76 399.53 h 0.00 M 650.00 395.79 h 0.00"/>
 	<path class="poloto_line poloto1stroke" fill="none" stroke="black" d=" M 150.00 250.08 L 167.24 200.97 L 184.48 157.27 L 201.72 123.79 L 218.97 104.21 L 236.21 100.69 L 253.45 113.61 L 270.69 141.56 L 287.93 181.45 L 305.17 228.90 L 322.41 278.68 L 339.66 325.31 L 356.90 363.66 L 374.14 389.50 L 391.38 400.00 L 408.62 393.99 L 425.86 372.14 L 443.10 336.85 L 460.34 292.01 L 477.59 242.56 L 494.83 193.93 L 512.07 151.48 L 529.31 119.89 L 546.55 102.63 L 563.79 101.60 L 581.03 116.91 L 598.28 146.89 L 615.52 188.23 L 632.76 236.37 L 650.00 286.03"/>
-	<g class="poloto_legend_icon">
-		<line class="poloto_scatter poloto0stroke poloto0legend" stroke="black" x1="685" x2="685" y1="81.25" y2="81.25"/>
-		<line class="poloto_line poloto1stroke poloto1legend" stroke="black" x1="680" x2="730" y1="131.25" y2="131.25"/>
-	</g>
-	<g class="poloto_text poloto_legend_text">
-		<text x="675" y="100">a</text>
-		<text x="675" y="150">b</text>
-	</g>
-	<g class="poloto_labels poloto_text">
-		<text class="poloto_title" x="400.00" y="37.50">cows per year</text>
-		<text class="poloto_xname" x="400.00" y="481.25">year</text>
-		<text class="poloto_yname" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">cows</text>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="middle" text-anchor="end">
-		<text x="135.00" y="325.12">-0.5</text>
-		<text x="135.00" y="250.08">0.0</text>
-		<text x="135.00" y="175.04">0.5</text>
-		<text x="135.00" y="100.00">1.0</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="144.00" y1="325.12" y2="325.12"/>
-		<line x1="150.00" x2="144.00" y1="250.08" y2="250.08"/>
-		<line x1="150.00" x2="144.00" y1="175.04" y2="175.04"/>
-		<line x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
-	</g>
-	<g class="poloto_tick_labels poloto_text" dominant-baseline="start" text-anchor="middle">
-		<text x="150.00" y="430.00">0</text>
-		<text x="253.45" y="430.00">2</text>
-		<text x="356.90" y="430.00">4</text>
-		<text x="460.34" y="430.00">6</text>
-		<text x="563.79" y="430.00">8</text>
-	</g>
-	<g class="poloto_axis_lines" stroke="black">
-		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
-		<line x1="253.45" x2="253.45" y1="400.00" y2="405.00"/>
-		<line x1="356.90" x2="356.90" y1="400.00" y2="405.00"/>
-		<line x1="460.34" x2="460.34" y1="400.00" y2="405.00"/>
-		<line x1="563.79" x2="563.79" y1="400.00" y2="405.00"/>
-	</g>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:12.931034482758621;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path stroke="black" fill="none" class="poloto_axis_lines" style="stroke-dasharray:7.503921109825187;stroke-dashoffset:-74.8823667052444;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<line class="poloto_legend poloto_imgs poloto_scatter poloto0stroke" x1="685" x2="685" y1="81.25" y2="81.25"/>
+	<line class="poloto_legend poloto_imgs poloto_line poloto1stroke" x1="680" x2="730" y1="131.25" y2="131.25"/>
+	<text class="poloto_legend poloto_text" x="675" y="100">a</text>
+	<text class="poloto_legend poloto_text" x="675" y="150">b</text>
+	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">cows per year</text>
+	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">year</text>
+	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">cows</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="325.12">-0.5</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="250.08">0.0</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="175.04">0.5</text>
+	<text class="poloto_text poloto_ticks poloto_y" x="135.00" y="100.00">1.0</text>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="325.12" y2="325.12"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="250.08" y2="250.08"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="175.04" y2="175.04"/>
+	<line class="poloto_imgs poloto_ticks poloto_y" x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
+	<text class="poloto_text poloto_ticks poloto_x" x="150.00" y="430.00">0</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="253.45" y="430.00">2</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="356.90" y="430.00">4</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="460.34" y="430.00">6</text>
+	<text class="poloto_text poloto_ticks poloto_x" x="563.79" y="430.00">8</text>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="253.45" x2="253.45" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="356.90" x2="356.90" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="460.34" x2="460.34" y1="400.00" y2="405.00"/>
+	<line class="poloto_imgs poloto_ticks poloto_x" x1="563.79" x2="563.79" y1="400.00" y2="405.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:12.931034482758621;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks" style="stroke-dasharray:7.503921109825187;stroke-dashoffset:-74.8823667052444;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>
