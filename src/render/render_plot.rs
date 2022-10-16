@@ -357,7 +357,7 @@ fn render(
 
     match p_type {
         PlotType::Line => {
-            writer.render(hbuild::single("path").with(attrs!(
+            let g = hbuild::elem("g").with(attrs!(
                 ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
@@ -367,12 +367,15 @@ fn render(
                     )
                 ),
                 ("fill", "none"),
-                ("stroke", "black"),
-                Line::new(it, ffmt)
-            )))?;
+                ("stroke", "black")
+            ));
+
+            let j = hbuild::single("path").with(attrs!(Line::new(it, ffmt)));
+
+            writer.render(g.append(j))?;
         }
         PlotType::Scatter => {
-            writer.render(hbuild::single("path").with(attrs!(
+            let g = hbuild::elem("g").with(attrs!(
                 ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
@@ -380,17 +383,19 @@ fn render(
                         "poloto_plot poloto_imgs poloto_scatter poloto{} poloto_stroke",
                         colori
                     ),
-                ),
-                hbuild::path_from_closure(|w| {
-                    let mut w = w.start();
-                    use hypermelon::attr::PathCommand::*;
-                    for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                        w.put(M(ffmt.disp(x), ffmt.disp(y)))?;
-                        w.put(H_(ffmt.disp(0.0)))?;
-                    }
-                    Ok(())
-                })
-            )))?;
+                )
+            ));
+
+            let j = hbuild::single("path").with(attrs!(hbuild::path_from_closure(|w| {
+                let mut w = w.start();
+                use hypermelon::attr::PathCommand::*;
+                for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
+                    w.put(M(ffmt.disp(x), ffmt.disp(y)))?;
+                    w.put(H_(ffmt.disp(0.0)))?;
+                }
+                Ok(())
+            })));
+            writer.render(g.append(j))?;
         }
         PlotType::Histo => {
             let g = hbuild::elem("g").with(attrs!(
@@ -423,7 +428,7 @@ fn render(
             writer.render(g.append(h))?;
         }
         PlotType::LineFill => {
-            writer.render(hbuild::single("path").with(attrs!(
+            let g = hbuild::elem("g").with(attrs!(
                 ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
@@ -431,12 +436,19 @@ fn render(
                         "poloto_plot poloto_imgs poloto_linefill poloto{} poloto_fill",
                         colori
                     ),
-                ),
-                LineFill::new(it, ffmt, height - paddingy, true)
-            )))?;
+                )
+            ));
+
+            let j = hbuild::single("path").with(attrs!(LineFill::new(
+                it,
+                ffmt,
+                height - paddingy,
+                true
+            )));
+            writer.render(g.append(j))?;
         }
         PlotType::LineFillRaw => {
-            writer.render(hbuild::single("path").with(attrs!(
+            let g = hbuild::elem("g").with(attrs!(
                 ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
@@ -444,9 +456,15 @@ fn render(
                         "poloto_plot poloto_imgs poloto_linefill poloto{} poloto_fill",
                         colori
                     ),
-                ),
-                LineFill::new(it, ffmt, height - paddingy, false)
-            )))?;
+                )
+            ));
+            let j = hbuild::single("path").with(attrs!(LineFill::new(
+                it,
+                ffmt,
+                height - paddingy,
+                false
+            )));
+            writer.render(g.append(j))?;
         }
         PlotType::Bars => {
             let g = hbuild::elem("g").with(attrs!(

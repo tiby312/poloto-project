@@ -36,7 +36,9 @@
 .poloto7.poloto_fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<path id="poloto_plot0" class="poloto_plot poloto_imgs poloto_line poloto0 poloto_stroke" fill="none" stroke="black" d=" M 150.00 198.55 L 250.00 174.58 L 350.00 154.27 L 404.17 263.33 L 450.00 135.18 L 550.00 117.24 L 650.00 100.00"/>
+	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_line poloto0 poloto_stroke" fill="none" stroke="black">
+		<path d=" M 150.00 198.55 L 250.00 174.58 L 350.00 154.27 L 404.17 263.33 L 450.00 135.18 L 550.00 117.24 L 650.00 100.00"/>
+	</g>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">Day</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>

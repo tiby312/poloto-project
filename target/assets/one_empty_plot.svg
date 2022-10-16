@@ -36,7 +36,9 @@
 .poloto7.poloto_fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<path id="poloto_plot0" class="poloto_plot poloto_imgs poloto_scatter poloto0 poloto_stroke" d=""/>
+	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_scatter poloto0 poloto_stroke">
+		<path d=""/>
+	</g>
 	<g class="poloto_legend poloto_imgs poloto_scatter poloto0 poloto_stroke"><line x1="685" x2="685" y1="81.25" y2="81.25"/></g>
 	<text class="poloto_legend poloto_text poloto_scatter poloto0" x="675" y="100">hay</text>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Some Trigonometry Plots 🥳</text>

@@ -14,7 +14,9 @@ fn main() {
     // Say you want to style the first plot and its legend image if it is a histogram.
     let theme =
         theme.append(".poloto0.poloto_histo.poloto_imgs{fill:red;stroke:black;stroke-width:2px}");
-    let theme = theme.append(".poloto0.poloto_histo.poloto_imgs>*{rx:20px;ry:20px}");
+
+    // Some attributes have to accessed directly , so use >* to select the rects directly.
+    let theme = theme.append(".poloto0.poloto_histo.poloto_imgs>*{x:5px,y:5px,rx:20px;ry:20px}");
 
     // Say you want to style the text of the first legend
     let theme = theme.append(".poloto0.poloto_legend.poloto_text{fill:blue;}");

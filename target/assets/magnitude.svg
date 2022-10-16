@@ -36,7 +36,9 @@
 .poloto7.poloto_fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<path id="poloto_plot0" class="poloto_plot poloto_imgs poloto_scatter poloto0 poloto_stroke" d=" M 150.00 400.00 h 0.00 M 650.00 100.00 h 0.00"/>
+	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_scatter poloto0 poloto_stroke">
+		<path d=" M 150.00 400.00 h 0.00 M 650.00 100.00 h 0.00"/>
+	</g>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">cows per year</text>
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">year</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">cow</text>
