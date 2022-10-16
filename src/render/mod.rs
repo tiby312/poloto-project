@@ -613,22 +613,22 @@ impl Theme<'static> {
 .poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
-.poloto0stroke{stroke:blue;}
-.poloto1stroke{stroke:red;}
-.poloto2stroke{stroke:green;}
-.poloto3stroke{stroke:gold;}
-.poloto4stroke{stroke:aqua;}
-.poloto5stroke{stroke:lime;}
-.poloto6stroke{stroke:orange;}
-.poloto7stroke{stroke:chocolate;}
-.poloto0fill{fill:blue;}
-.poloto1fill{fill:red;}
-.poloto2fill{fill:green;}
-.poloto3fill{fill:gold;}
-.poloto4fill{fill:aqua;}
-.poloto5fill{fill:lime;}
-.poloto6fill{fill:orange;}
-.poloto7fill{fill:chocolate;}";
+.poloto0.poloto_stroke{stroke:blue;}
+.poloto1.poloto_stroke{stroke:red;}
+.poloto2.poloto_stroke{stroke:green;}
+.poloto3.poloto_stroke{stroke:gold;}
+.poloto4.poloto_stroke{stroke:aqua;}
+.poloto5.poloto_stroke{stroke:lime;}
+.poloto6.poloto_stroke{stroke:orange;}
+.poloto7.poloto_stroke{stroke:chocolate;}
+.poloto0.poloto_fill{fill:blue;}
+.poloto1.poloto_fill{fill:red;}
+.poloto2.poloto_fill{fill:green;}
+.poloto3.poloto_fill{fill:gold;}
+.poloto4.poloto_fill{fill:aqua;}
+.poloto5.poloto_fill{fill:lime;}
+.poloto6.poloto_fill{fill:orange;}
+.poloto7.poloto_fill{fill:chocolate;}";
 
         Theme {
             styles: STYLE_CONFIG_LIGHT_DEFAULT,
@@ -653,22 +653,22 @@ impl Theme<'static> {
 .poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
-.poloto0stroke{stroke:blue;}
-.poloto1stroke{stroke:red;}
-.poloto2stroke{stroke:green;}
-.poloto3stroke{stroke:gold;}
-.poloto4stroke{stroke:aqua;}
-.poloto5stroke{stroke:lime;}
-.poloto6stroke{stroke:orange;}
-.poloto7stroke{stroke:chocolate;}
-.poloto0fill{fill:blue;}
-.poloto1fill{fill:red;}
-.poloto2fill{fill:green;}
-.poloto3fill{fill:gold;}
-.poloto4fill{fill:aqua;}
-.poloto5fill{fill:lime;}
-.poloto6fill{fill:orange;}
-.poloto7fill{fill:chocolate;}";
+.poloto0.poloto_stroke{stroke:blue;}
+.poloto1.poloto_stroke{stroke:red;}
+.poloto2.poloto_stroke{stroke:green;}
+.poloto3.poloto_stroke{stroke:gold;}
+.poloto4.poloto_stroke{stroke:aqua;}
+.poloto5.poloto_stroke{stroke:lime;}
+.poloto6.poloto_stroke{stroke:orange;}
+.poloto7.poloto_stroke{stroke:chocolate;}
+.poloto0.poloto_fill{fill:blue;}
+.poloto1.poloto_fill{fill:red;}
+.poloto2.poloto_fill{fill:green;}
+.poloto3.poloto_fill{fill:gold;}
+.poloto4.poloto_fill{fill:aqua;}
+.poloto5.poloto_fill{fill:lime;}
+.poloto6.poloto_fill{fill:orange;}
+.poloto7.poloto_fill{fill:chocolate;}";
         Theme {
             styles: STYLE_CONFIG_DARK_DEFAULT,
         }

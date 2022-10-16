@@ -149,10 +149,25 @@ pub(super) fn render_plot<P: build::PlotIterator>(
         writer.render(j)?;
 
         let j = hbuild::from_closure(|w| {
-            for (_, name, i) in names.into_iter() {
+            for (typ, name, i) in names.into_iter() {
+
+                let class=match typ{
+                    PlotMetaType::Plot(e) => {
+                        match e{
+                            PlotType::Scatter => "poloto_scatter",
+                            PlotType::Line => "poloto_line",
+                            PlotType::Histo => "poloto_histo",
+                            PlotType::LineFill => "poloto_linefill",
+                            PlotType::LineFillRaw => "poloto_linefillraw",
+                            PlotType::Bars => "poloto_bars",
+                        }
+                    },
+                    PlotMetaType::Text => "",
+                };
+
                 let text = hbuild::elem("text")
                     .with(attrs!(
-                        ("class", "poloto_legend poloto_text"),
+                        ("class", format_move!("poloto_legend poloto_text {} poloto{}",class,i)),
                         ("x", width - padding / 1.2),
                         ("y", paddingy - yaspect_offset + (i as f64) * spacing)
                     ))
@@ -201,7 +216,7 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_legend poloto_imgs poloto_line poloto{}stroke",
+                        "poloto_legend poloto_imgs poloto_line poloto{} poloto_stroke",
                         colori
                     )
                 ),
@@ -216,7 +231,7 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_legend poloto_imgs poloto_scatter poloto{}stroke",
+                        "poloto_legend poloto_imgs poloto_scatter poloto{} poloto_stroke",
                         colori,
                     ),
                 ),
@@ -227,11 +242,13 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
             )))?;
         }
         PlotType::Histo => {
-            writer.render(hbuild::single("rect").with(attrs!(
+            //let g=hbuild::elem("g").with();
+
+            let g=hbuild::single("rect").with(attrs!(
                 (
                     "class",
                     format_move!(
-                        "poloto_legend poloto_imgs poloto_histo poloto{}fill",
+                        "poloto_legend poloto_imgs poloto_histo poloto{} poloto_fill",
                         colori,
                     ),
                 ),
@@ -241,14 +258,16 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 ("height", padding / 20.0),
                 ("rx", padding / 30.0),
                 ("ry", padding / 30.0)
-            )))?;
+            ));
+
+            writer.render(g)?;
         }
         PlotType::LineFill => {
             writer.render(hbuild::single("rect").with(attrs!(
                 (
                     "class",
                     format_move!(
-                        "poloto_legend poloto_imgs poloto_linefill poloto{}fill",
+                        "poloto_legend poloto_imgs poloto_linefill poloto{} poloto_fill",
                         colori,
                     ),
                 ),
@@ -266,7 +285,7 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_legend poloto_imgs poloto_linefillraw poloto{}fill",
+                        "poloto_legend poloto_imgs poloto_linefillraw poloto{} poloto_fill",
                         colori,
                     ),
                 ),
@@ -284,7 +303,7 @@ fn render_label(writer: &mut elem::ElemWrite, info: PlotRenderInfo2) -> fmt::Res
                 (
                     "class",
                     format_move!(
-                        "poloto_legend poloto_imgs poloto_histo poloto{}fill",
+                        "poloto_legend poloto_imgs poloto_bars poloto{} poloto_fill",
                         colori
                     ),
                 ),
@@ -327,10 +346,10 @@ fn render(
     match p_type {
         PlotType::Line => {
             writer.render(hbuild::single("path").with(attrs!(
-                ("id",format_move!("poloto_plot{}",colori)),
+                ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!("poloto_plot poloto_line poloto{}stroke", colori)
+                    format_move!("poloto_plot poloto_imgs poloto_line poloto{} poloto_stroke", colori)
                 ),
                 ("fill", "none"),
                 ("stroke", "black"),
@@ -339,10 +358,10 @@ fn render(
         }
         PlotType::Scatter => {
             writer.render(hbuild::single("path").with(attrs!(
-                ("id",format_move!("poloto_plot{}",colori)),
+                ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!("poloto_plot poloto_scatter poloto{}stroke", colori),
+                    format_move!("poloto_plot poloto_imgs poloto_scatter poloto{} poloto_stroke", colori),
                 ),
                 hbuild::path_from_closure(|w| {
                     let mut w = w.start();
@@ -356,10 +375,13 @@ fn render(
             )))?;
         }
         PlotType::Histo => {
-            let g = hbuild::elem("g").with(attrs!(("id",format_move!("poloto_plot{}",colori)),(
-                "class",
-                format_move!("poloto_plot poloto_histo poloto{}fill", colori),
-            )));
+            let g = hbuild::elem("g").with(attrs!(
+                ("id", format_move!("poloto_plot{}", colori)),
+                (
+                    "class",
+                    format_move!("poloto_plot poloto_imgs poloto_histo poloto{} poloto_fill", colori),
+                )
+            ));
 
             let h = hbuild::from_closure(|w| {
                 let mut last = None;
@@ -381,29 +403,32 @@ fn render(
         }
         PlotType::LineFill => {
             writer.render(hbuild::single("path").with(attrs!(
-                ("id",format_move!("poloto_plot{}",colori)),
+                ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!("poloto_plot poloto_linefill poloto{}fill", colori),
+                    format_move!("poloto_plot poloto_imgs poloto_linefill poloto{} poloto_fill", colori),
                 ),
                 LineFill::new(it, ffmt, height - paddingy, true)
             )))?;
         }
         PlotType::LineFillRaw => {
             writer.render(hbuild::single("path").with(attrs!(
-                ("id",format_move!("poloto_plot{}",colori)),
+                ("id", format_move!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!("poloto_plot poloto_linefill poloto{}fill", colori),
+                    format_move!("poloto_plot poloto_imgs poloto_linefill poloto{} poloto_fill", colori),
                 ),
                 LineFill::new(it, ffmt, height - paddingy, false)
             )))?;
         }
         PlotType::Bars => {
-            let g = hbuild::elem("g").with(attrs!(("id",format_move!("poloto_plot{}",colori)),(
-                "class",
-                format_move!("poloto_plot poloto_histo poloto{}fill", colori),
-            )));
+            let g = hbuild::elem("g").with(attrs!(
+                ("id", format_move!("poloto_plot{}", colori)),
+                (
+                    "class",
+                    format_move!("poloto_plot poloto_imgs poloto_histo poloto{} poloto_fill", colori),
+                )
+            ));
 
             let h = hbuild::from_closure(|w| {
                 for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {

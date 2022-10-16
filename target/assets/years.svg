@@ -18,25 +18,25 @@
 .poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
-.poloto0stroke{stroke:blue;}
-.poloto1stroke{stroke:red;}
-.poloto2stroke{stroke:green;}
-.poloto3stroke{stroke:gold;}
-.poloto4stroke{stroke:aqua;}
-.poloto5stroke{stroke:lime;}
-.poloto6stroke{stroke:orange;}
-.poloto7stroke{stroke:chocolate;}
-.poloto0fill{fill:blue;}
-.poloto1fill{fill:red;}
-.poloto2fill{fill:green;}
-.poloto3fill{fill:gold;}
-.poloto4fill{fill:aqua;}
-.poloto5fill{fill:lime;}
-.poloto6fill{fill:orange;}
-.poloto7fill{fill:chocolate;}
+.poloto0.poloto_stroke{stroke:blue;}
+.poloto1.poloto_stroke{stroke:red;}
+.poloto2.poloto_stroke{stroke:green;}
+.poloto3.poloto_stroke{stroke:gold;}
+.poloto4.poloto_stroke{stroke:aqua;}
+.poloto5.poloto_stroke{stroke:lime;}
+.poloto6.poloto_stroke{stroke:orange;}
+.poloto7.poloto_stroke{stroke:chocolate;}
+.poloto0.poloto_fill{fill:blue;}
+.poloto1.poloto_fill{fill:red;}
+.poloto2.poloto_fill{fill:green;}
+.poloto3.poloto_fill{fill:gold;}
+.poloto4.poloto_fill{fill:aqua;}
+.poloto5.poloto_fill{fill:lime;}
+.poloto6.poloto_fill{fill:orange;}
+.poloto7.poloto_fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<g id="poloto_plot0" class="poloto_plot poloto_histo poloto0fill">
+	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_histo poloto0 poloto_fill">
 		<rect x="150.00" y="248.35" width="38.666666666656965" height="151.64718555557343"/>
 		<rect x="191.67" y="230.31" width="38.66666666667152" height="169.68664083476696"/>
 		<rect x="233.33" y="215.02" width="38.66666666667152" height="184.97676736820102"/>
@@ -50,8 +50,8 @@
 		<rect x="566.67" y="111.11" width="38.66666666667152" height="288.89174719037896"/>
 		<rect x="608.33" y="100.00" width="38.66666666667152" height="300"/>
 	</g>
-	<rect class="poloto_legend poloto_imgs poloto_histo poloto0fill" x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/>
-	<text class="poloto_legend poloto_text" x="675" y="100">foo</text>
+	<rect class="poloto_legend poloto_imgs poloto_histo poloto0 poloto_fill" x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/>
+	<text class="poloto_legend poloto_text poloto_histo poloto0" x="675" y="100">foo</text>
 	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">title</text>
 	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">xname</text>
 	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">yname</text>
