@@ -15,10 +15,10 @@ fn main() {
     let theme = theme.append(".poloto0.poloto_legend.poloto_text{fill:blue;}");
 
     // Style all line plots but not legend img.
-    let theme=theme.append(".poloto_line.poloto_imgs.poloto_plot{stroke:purple;stroke-width:20px;stroke-dasharray:40px}");
+    let theme = theme.append(".poloto_line.poloto_imgs.poloto_plot{stroke:purple;stroke-width:20px;stroke-dasharray:40px}");
 
     // Style all line plot legend imgs.
-    let theme=theme.append(".poloto_line.poloto_imgs.poloto_legend{stroke:purple;stroke-width:10px;stroke-dasharray:10px}");
+    let theme = theme.append(".poloto_line.poloto_imgs.poloto_legend{stroke:purple;stroke-width:10px;stroke-dasharray:10px}");
 
     // Style the scatter plots but not legend img
     let theme = theme.append(".poloto_scatter.poloto_plot{fill:purple;stroke-width:20px;}");
