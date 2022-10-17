@@ -10,7 +10,7 @@
 .poloto_scatter{stroke-width:7}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
 .poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
@@ -36,9 +36,9 @@
 .poloto7.poloto_fill{fill:chocolate;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
-	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Some Trigonometry Plots 🥳</text>
-	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">This is the x label</text>
-	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
+	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">Some Trigonometry Plots 🥳</text>
+	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">This is the x label</text>
+	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
 	<g class="poloto_text poloto_ticks poloto_y">
 		<text x="135.00" y="400.00">4</text>
 		<text x="135.00" y="250.00">5</text>

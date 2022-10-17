@@ -41,7 +41,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let g = hbuild::from_closure(|w| {
         let text = hbuild::elem("text")
             .with(attrs!(
-                ("class", "poloto_text poloto_names poloto_title"),
+                ("class", "poloto_text poloto_name poloto_title"),
                 ("x", ffmt.disp(width / 2.0)),
                 ("y", ffmt.disp(padding / 4.0))
             ))
@@ -53,7 +53,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
         let text = hbuild::elem("text")
             .with(attrs!(
-                ("class", "poloto_text poloto_names poloto_x"),
+                ("class", "poloto_text poloto_name poloto_x"),
                 ("x", ffmt.disp(width / 2.0)),
                 ("y", ffmt.disp(height - padding / 8.))
             ))
@@ -65,7 +65,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
         let text = hbuild::elem("text")
             .with(attrs!(
-                ("class", "poloto_text poloto_names poloto_y"),
+                ("class", "poloto_text poloto_name poloto_y"),
                 ("x", ffmt.disp(padding / 4.0)),
                 ("y", ffmt.disp(height / 2.0)),
                 (

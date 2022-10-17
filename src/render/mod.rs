@@ -605,7 +605,7 @@ impl Theme<'static> {
 .poloto_scatter{stroke-width:7}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
 .poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
@@ -645,7 +645,7 @@ impl Theme<'static> {
 .poloto_scatter{stroke-width:7}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: white;}
-.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
 .poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}

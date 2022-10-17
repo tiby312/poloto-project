@@ -10,7 +10,7 @@
 .poloto_scatter{stroke-width:7}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
 .poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
@@ -39,9 +39,9 @@
 	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_line poloto0 poloto_stroke" fill="none" stroke="black">
 		<path d=" M 150.00 144.92 L 260.83 142.23 L 277.25 139.89 L 282.43 135.53 L 299.45 135.20 L 300.42 134.19 L 317.80 132.51 L 337.65 127.49 L 477.64 124.80 L 482.02 123.80 L 482.78 122.46 L 487.78 121.45 L 493.09 120.78 L 500.32 120.45 L 504.26 120.11 L 517.53 120.11 L 523.07 101.68 L 650.00 100.00"/>
 	</g>
-	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">Long Jump world record progression</text>
-	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">Date</text>
-	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Mark (in meters)</text>
+	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">Long Jump world record progression</text>
+	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">Date</text>
+	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Mark (in meters)</text>
 	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹1920-01-01 00:00:00 UTC in Years</text>
 	<g class="poloto_text poloto_ticks poloto_y">
 		<text x="135.00" y="400.00">0</text>

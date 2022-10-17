@@ -10,7 +10,7 @@
 .poloto_scatter{stroke-width:7}
 .poloto_line{stroke-width:2}
 .poloto_text{fill: black;}
-.poloto_names{font-size:24px;dominant-baseline:start;text-anchor:middle;}
+.poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
 .poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
@@ -61,9 +61,9 @@
 		<rect x="587.50" y="382.86" width="17.833333333333258" height="17.142857142857167"/>
 		<rect x="608.33" y="391.43" width="17.83333333333337" height="8.571428571428555"/>
 	</g>
-	<text class="poloto_text poloto_names poloto_title" x="400.00" y="37.50">title</text>
-	<text class="poloto_text poloto_names poloto_x" x="400.00" y="481.25">x</text>
-	<text class="poloto_text poloto_names poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">y</text>
+	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">title</text>
+	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">x</text>
+	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">y</text>
 	<g class="poloto_text poloto_ticks poloto_y">
 		<text x="135.00" y="400.00">0</text>
 		<text x="135.00" y="314.29">20</text>
