@@ -40,16 +40,18 @@ fn main() {
     // Style the ticks
     let theme = theme.append(".poloto_imgs.poloto_ticks{stroke:springgreen;}");
 
-    let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
+    let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
 
     let data = poloto::plots!(
         plot("sin-10")
             .histogram()
-            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 10.)),
-        plot("cos").line().buffered(x.zip_output(f64::cos)),
+            .buffered(x.iter().copied().step_by(3).map(|x| (x, x.sin() - 10.))),
+        plot("cos")
+            .line()
+            .buffered(x.iter().copied().zip_output(f64::cos)),
         plot("sin-5")
             .scatter()
-            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 5.))
+            .buffered(x.iter().copied().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
     poloto::data(data)

@@ -34,11 +34,15 @@ fn heart() -> fmt::Result {
 
 #[test]
 fn large_scatter() -> fmt::Result {
-    let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
+    let x: Vec<_> = (0..30).map(|x| (x as f64 / 30.0) * 10.0).collect();
 
     let plots = poloto::plots!(
-        plot("a").scatter().buffered(x.zip_output(f64::cos)),
-        plot("b").line().buffered(x.zip_output(f64::sin))
+        plot("a")
+            .scatter()
+            .buffered(x.iter().copied().zip_output(f64::cos)),
+        plot("b")
+            .line()
+            .buffered(x.iter().copied().zip_output(f64::sin))
     );
 
     let data = poloto::data(plots).build_and_label(("cows per year", "year", "cows"));
@@ -210,15 +214,15 @@ fn custom_dim() -> fmt::Result {
 
 #[test]
 fn dark() -> fmt::Result {
-    let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
+    let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
 
     let data = poloto::plots!(
         plot(format_move!("test {}", 1))
             .line()
-            .buffered(x.zip_output(f64::cos)),
+            .buffered(x.iter().copied().zip_output(f64::cos)),
         plot(format_move!("test {}", 2))
             .line()
-            .buffered(x.zip_output(f64::sin))
+            .buffered(x.iter().copied().zip_output(f64::sin))
     );
 
     let w = util::create_test_file("dark.svg");
@@ -230,13 +234,15 @@ fn dark() -> fmt::Result {
 
 #[test]
 fn custom_style() -> fmt::Result {
-    let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
+    let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
 
     let data = poloto::plots!(
-        plot("cos").line().buffered(x.zip_output(f64::cos)),
+        plot("cos")
+            .line()
+            .buffered(x.iter().copied().zip_output(f64::cos)),
         plot("sin-10")
             .histogram()
-            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 10.))
+            .buffered(x.iter().copied().step_by(3).zip_output(|x| x.sin() - 10.))
     );
 
     let data = poloto::data(data).build_and_label((
@@ -272,18 +278,23 @@ fn custom_style() -> fmt::Result {
 
 #[test]
 fn trig() -> fmt::Result {
-    let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
+    let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
 
     let data = poloto::data(poloto::plots!(
         plot("tan(x)").line().buffered(
-            x.zip_output(f64::tan)
+            x.iter()
+                .copied()
+                .zip_output(f64::tan)
                 .crop_above(10.0)
                 .crop_below(-10.0)
                 .crop_left(2.0)
         ),
-        plot("2*cos(x)")
-            .line()
-            .buffered(x.zip_output(|x| 2.0 * x.cos()).crop_above(1.4))
+        plot("2*cos(x)").line().buffered(
+            x.iter()
+                .copied()
+                .zip_output(|x| 2.0 * x.cos())
+                .crop_above(1.4)
+        )
     ))
     .build_and_label((
         "Some Trigonometry Plots 🥳",

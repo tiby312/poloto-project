@@ -9,21 +9,31 @@ impl std::fmt::Write for EmptyWriter {
     }
 }
 fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
-    let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
+    let x: Vec<_> = (0..steps)
+        .map(move |x| (x as f64 / steps as f64) * 10.0)
+        .collect();
 
     let p = poloto::plots!(
         plot("tan(x)").line().buffered(
-            x.zip_output(f64::tan)
+            x.iter()
+                .copied()
+                .zip_output(f64::tan)
                 .crop_above(10.0)
                 .crop_below(-10.0)
                 .crop_left(2.0),
         ),
-        plot("2*cos(x)")
-            .line()
-            .buffered(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4)),
-        plot("2*cos(x)")
-            .line()
-            .cloned(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
+        plot("2*cos(x)").line().buffered(
+            x.iter()
+                .copied()
+                .zip_output(|x| 2.0 * x.cos())
+                .crop_above(1.4)
+        ),
+        plot("2*cos(x)").line().cloned(
+            x.iter()
+                .copied()
+                .zip_output(|x| 2.0 * x.cos())
+                .crop_above(1.4)
+        )
     );
 
     poloto::data(p)
@@ -34,26 +44,36 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
 
 use poloto::build::plot;
 fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
-    let x = (0..steps).map(move |x| (x as f64 / steps as f64) * 10.0);
+    let x: Vec<_> = (0..steps)
+        .map(move |x| (x as f64 / steps as f64) * 10.0)
+        .collect();
 
     let p = poloto::plots!(
         poloto::build::BoxedPlot::new(
             plot("tan(x)").line().buffered(
-                x.zip_output(f64::tan)
+                x.iter()
+                    .copied()
+                    .zip_output(f64::tan)
                     .crop_above(10.0)
                     .crop_below(-10.0)
                     .crop_left(2.0)
             )
         ),
         poloto::build::BoxedPlot::new(
-            plot("2*cos(x)")
-                .line()
-                .buffered(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
+            plot("2*cos(x)").line().buffered(
+                x.iter()
+                    .copied()
+                    .zip_output(|x| 2.0 * x.cos())
+                    .crop_above(1.4)
+            )
         ),
         poloto::build::BoxedPlot::new(
-            plot("2*cos(x")
-                .line()
-                .cloned(x.clone().map(|x| [x, 2.0 * x.cos()]).crop_above(1.4))
+            plot("2*cos(x").line().cloned(
+                x.iter()
+                    .copied()
+                    .zip_output(|x| 2.0 * x.cos())
+                    .crop_above(1.4)
+            )
         )
     );
 

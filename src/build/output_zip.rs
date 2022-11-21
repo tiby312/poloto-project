@@ -50,7 +50,7 @@ where
     }
 }
 
-pub trait OutputZip: Iterator + Clone
+pub trait OutputZip: Iterator
 where
     Self::Item: Clone,
 {
@@ -73,11 +73,11 @@ where
     /// let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
     /// let _ = poloto::build::plot("a").scatter().buffered(x.zip_output(|x|x.cos()));
     /// ```
-    fn zip_output<Y, F: Fn(Self::Item) -> Y>(&self, func: F) -> OutputZipper<Self, F> {
-        OutputZipper {
-            inner: self.clone(),
-            func,
-        }
+    fn zip_output<Y, F: Fn(Self::Item) -> Y>(self, func: F) -> OutputZipper<Self, F>
+    where
+        Self: Sized,
+    {
+        OutputZipper { inner: self, func }
     }
 }
-impl<I: Iterator + Clone> OutputZip for I where Self::Item: Clone {}
+impl<I: Iterator> OutputZip for I where Self::Item: Clone {}

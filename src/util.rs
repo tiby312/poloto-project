@@ -158,6 +158,7 @@ pub fn range_iter(
     range: [f64; 2],
     num: usize,
 ) -> impl ExactSizeIterator<Item = f64> + Clone + Send + Sync + std::iter::FusedIterator {
+    assert!(range[1] > range[0]);
     let [min, max] = range;
     let diff = max - min;
     let divf = num as f64;
