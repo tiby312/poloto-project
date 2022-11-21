@@ -608,8 +608,8 @@ impl Theme<'static> {
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -648,8 +648,8 @@ impl Theme<'static> {
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 

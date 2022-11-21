@@ -13,8 +13,8 @@
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -43,7 +43,7 @@
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">duration</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
 	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹2020-09-01 00:00:00 UTC in Months</text>
-	<text dominant-baseline="middle" class="poloto_text poloto_ticks poloto_y">
+	<text class="poloto_text poloto_ticks poloto_y">
 		<tspan x="135.00" y="400.00">0</tspan>
 		<tspan x="135.00" y="326.33">2e6</tspan>
 		<tspan x="135.00" y="252.65">4e6</tspan>
@@ -57,7 +57,7 @@
 		<line x1="150.00" x2="144.00" y1="178.98" y2="178.98"/>
 		<line x1="150.00" x2="144.00" y1="105.30" y2="105.30"/>
 	</g>
-	<text dominant-baseline="start" class="poloto_text poloto_ticks poloto_x">
+	<text class="poloto_text poloto_ticks poloto_x">
 		<tspan x="222.09" y="430.00">2020 Sep¹</tspan>
 		<tspan x="363.95" y="430.00">2020 Nov</tspan>
 		<tspan x="505.81" y="430.00">2021 Jan</tspan>

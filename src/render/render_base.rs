@@ -183,10 +183,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             })
             .collect();
 
-        let g = hbuild::elem("text").with(attrs!(
-            ("dominant-baseline", "middle"),
-            ("class", "poloto_text poloto_ticks poloto_y")
-        ));
+        let g = hbuild::elem("text").with(attrs!(("class", "poloto_text poloto_ticks poloto_y")));
 
         let j = hbuild::from_closure(|w| {
             for (val, yy) in ticks.iter() {
@@ -253,10 +250,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             })
             .collect();
 
-        let g = hbuild::elem("text").with(attrs!(
-            ("dominant-baseline", "start"),
-            ("class", "poloto_text poloto_ticks poloto_x")
-        ));
+        let g = hbuild::elem("text").with(attrs!(("class", "poloto_text poloto_ticks poloto_x")));
         let j = hbuild::from_closure(|w| {
             for (val, xx) in ticks.iter() {
                 let text = hbuild::elem("tspan")

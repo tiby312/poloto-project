@@ -13,8 +13,8 @@
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -40,11 +40,11 @@
 		<path d=""/>
 	</g>
 	<g class="poloto_legend poloto_imgs poloto_scatter poloto0 poloto_stroke"><line x1="685" x2="685" y1="81.25" y2="81.25"/></g>
-	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_scatter poloto0" x="675" y="100">hay</text>
+	<text class="poloto_legend poloto_text poloto_scatter poloto0" x="675" y="100">hay</text>
 	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">Some Trigonometry Plots 🥳</text>
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">This is the x label</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
-	<text dominant-baseline="middle" class="poloto_text poloto_ticks poloto_y">
+	<text class="poloto_text poloto_ticks poloto_y">
 		<tspan x="135.00" y="400.00">4</tspan>
 		<tspan x="135.00" y="250.00">5</tspan>
 		<tspan x="135.00" y="100.00">6</tspan>
@@ -54,7 +54,7 @@
 		<line x1="150.00" x2="144.00" y1="250.00" y2="250.00"/>
 		<line x1="150.00" x2="144.00" y1="100.00" y2="100.00"/>
 	</g>
-	<text dominant-baseline="start" class="poloto_text poloto_ticks poloto_x">
+	<text class="poloto_text poloto_ticks poloto_x">
 		<tspan x="150.00" y="430.00">-1</tspan>
 		<tspan x="400.00" y="430.00">0</tspan>
 		<tspan x="650.00" y="430.00">1</tspan>
