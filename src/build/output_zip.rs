@@ -1,5 +1,5 @@
 //!
-//! Shortand replacing `x.clone().map(|x|[x,func(x)])` with `x.zip_output(|x|func(x))`
+//! Shortand replacing `x.map(|x|[x,func(x)])` with `x.zip_output(|x|func(x))`
 //!
 
 use std::iter::FusedIterator;
