@@ -23,12 +23,16 @@ fn main() {
         move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let r = poloto::util::range_iter([-5.0, 5.0], 200);
+    let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
+
+    let it1 = r.iter().copied().zip_output(gau(1.0, 0.));
+    let it2 = r.iter().copied().zip_output(gau(0.5, 0.));
+    let it3 = r.iter().copied().zip_output(gau(0.3, 0.));
 
     let plots = poloto::plots!(
-        plot("σ=1.0").line().buffered(r.zip_output(gau(1.0, 0.))),
-        plot("σ=0.5").line().buffered(r.zip_output(gau(0.5, 0.))),
-        plot("σ=0.3").line().buffered(r.zip_output(gau(0.3, 0.))),
+        plot("σ=1.0").line().buffered(it1),
+        plot("σ=0.5").line().buffered(it2),
+        plot("σ=0.3").line().buffered(it3),
         poloto::build::origin()
     );
 
@@ -259,16 +263,18 @@ fn main() {
     // Style the ticks
     let theme = theme.append(".poloto_imgs.poloto_ticks{stroke:springgreen;}");
 
-    let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
+    let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
 
     let data = poloto::plots!(
         plot("sin-10")
             .histogram()
-            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 10.)),
-        plot("cos").line().buffered(x.zip_output(f64::cos)),
+            .buffered(x.iter().copied().step_by(3).map(|x| (x, x.sin() - 10.))),
+        plot("cos")
+            .line()
+            .buffered(x.iter().copied().zip_output(f64::cos)),
         plot("sin-5")
             .scatter()
-            .buffered(x.clone().step_by(3).zip_output(|x| x.sin() - 5.))
+            .buffered(x.iter().copied().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
     poloto::data(data)
@@ -383,7 +389,7 @@ In these cases, poloto will fall back to making the number relative to the first
 
 You can use [resvg](https://crates.io/crates/resvg). Install that, and then run a command similar to:
 
-```
+```rust,ignore
 resvg -w 1200 target/assets/collatz.svg target/assets/collatz.png
 ```
 
