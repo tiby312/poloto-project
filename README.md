@@ -378,3 +378,15 @@ when you consider the precision that might be required to capture the step size.
 Even with the above system, there are cases where the numbers all have a really big magnitude, but
 are all really close together (small step size). In this case, there isn't really a good way to format it.
 In these cases, poloto will fall back to making the number relative to the first number.
+
+## How to render to png? 
+
+You can use [resvg](https://crates.io/crates/resvg). Install that, and then run a command similar to:
+
+```
+resvg target/assets/collatz.svg target/assets/collatz.png
+```
+
+### Output
+
+<img src="./target/assets/collatz.png" alt="demo">
