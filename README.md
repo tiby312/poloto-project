@@ -384,7 +384,7 @@ In these cases, poloto will fall back to making the number relative to the first
 You can use [resvg](https://crates.io/crates/resvg). Install that, and then run a command similar to:
 
 ```
-resvg target/assets/collatz.svg target/assets/collatz.png
+resvg -w 1200 target/assets/collatz.svg target/assets/collatz.png
 ```
 
 ### Output

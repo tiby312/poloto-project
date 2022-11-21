@@ -1,4 +1,4 @@
 
 set -ex
 
-resvg target/assets/collatz.svg target/assets/collatz.png
+resvg -w 1200 target/assets/collatz.svg target/assets/collatz.png
