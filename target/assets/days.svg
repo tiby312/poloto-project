@@ -13,8 +13,8 @@
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -43,13 +43,13 @@
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">Day</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
 	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹2020-01-30 00:00:00 UTC in Days</text>
-	<g class="poloto_text poloto_ticks poloto_y">
-		<text x="135.00" y="400.00">0</text>
-		<text x="135.00" y="335.92">1e6</text>
-		<text x="135.00" y="271.85">2.0e6</text>
-		<text x="135.00" y="207.77">3.0e6</text>
-		<text x="135.00" y="143.70">4.0e6</text>
-	</g>
+	<text dominant-baseline="middle" class="poloto_text poloto_ticks poloto_y">
+		<tspan x="135.00" y="400.00">0</tspan>
+		<tspan x="135.00" y="335.92">1e6</tspan>
+		<tspan x="135.00" y="271.85">2.0e6</tspan>
+		<tspan x="135.00" y="207.77">3.0e6</tspan>
+		<tspan x="135.00" y="143.70">4.0e6</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_y">
 		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
 		<line x1="150.00" x2="144.00" y1="335.92" y2="335.92"/>
@@ -57,14 +57,14 @@
 		<line x1="150.00" x2="144.00" y1="207.77" y2="207.77"/>
 		<line x1="150.00" x2="144.00" y1="143.70" y2="143.70"/>
 	</g>
-	<g class="poloto_text poloto_ticks poloto_x">
-		<text x="150.00" y="430.00">Jan 30¹</text>
-		<text x="250.00" y="430.00">Jan 31</text>
-		<text x="350.00" y="430.00">Feb 01</text>
-		<text x="450.00" y="430.00">Feb 02</text>
-		<text x="550.00" y="430.00">Feb 03</text>
-		<text x="650.00" y="430.00">Feb 04</text>
-	</g>
+	<text dominant-baseline="start" class="poloto_text poloto_ticks poloto_x">
+		<tspan x="150.00" y="430.00">Jan 30¹</tspan>
+		<tspan x="250.00" y="430.00">Jan 31</tspan>
+		<tspan x="350.00" y="430.00">Feb 01</tspan>
+		<tspan x="450.00" y="430.00">Feb 02</tspan>
+		<tspan x="550.00" y="430.00">Feb 03</tspan>
+		<tspan x="650.00" y="430.00">Feb 04</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_x">
 		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
 		<line x1="250.00" x2="250.00" y1="400.00" y2="405.00"/>

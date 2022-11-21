@@ -13,8 +13,8 @@
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -48,21 +48,21 @@
 	<g class="poloto_legend poloto_imgs poloto_line poloto0 poloto_stroke"><line x1="680" x2="730" y1="131.25" y2="131.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto1 poloto_stroke"><line x1="680" x2="730" y1="181.25" y2="181.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto2 poloto_stroke"><line x1="680" x2="730" y1="281.25" y2="281.25"/></g>
-	<text class="poloto_legend poloto_text  poloto0" x="675" y="100">Some notes here</text>
-	<text class="poloto_legend poloto_text poloto_line poloto1" x="675" y="150">c(1000) The quick brown fox jumps over the lazy dog</text>
-	<text class="poloto_legend poloto_text poloto_line poloto2" x="675" y="200">c(1001) The quick brown fox jumps over the lazy dog</text>
-	<text class="poloto_legend poloto_text  poloto3" x="675" y="250"> 🍆 Here is a note using the text() function.🍎</text>
-	<text class="poloto_legend poloto_text poloto_line poloto4" x="675" y="300">c(1002) The quick brown fox jumps over the lazy dog</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text  poloto0" x="675" y="100">Some notes here</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto1" x="675" y="150">c(1000) The quick brown fox jumps over the lazy dog</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto2" x="675" y="200">c(1001) The quick brown fox jumps over the lazy dog</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text  poloto3" x="675" y="250"> 🍆 Here is a note using the text() function.🍎</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto4" x="675" y="300">c(1002) The quick brown fox jumps over the lazy dog</text>
 	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">collatz</text>
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">x</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">y</text>
-	<g class="poloto_text poloto_ticks poloto_y">
-		<text x="135.00" y="400.00">0</text>
-		<text x="135.00" y="330.84">5000</text>
-		<text x="135.00" y="261.67">10000</text>
-		<text x="135.00" y="192.51">15000</text>
-		<text x="135.00" y="123.35">20000</text>
-	</g>
+	<text dominant-baseline="middle" class="poloto_text poloto_ticks poloto_y">
+		<tspan x="135.00" y="400.00">0</tspan>
+		<tspan x="135.00" y="330.84">5000</tspan>
+		<tspan x="135.00" y="261.67">10000</tspan>
+		<tspan x="135.00" y="192.51">15000</tspan>
+		<tspan x="135.00" y="123.35">20000</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_y">
 		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
 		<line x1="150.00" x2="144.00" y1="330.84" y2="330.84"/>
@@ -70,16 +70,16 @@
 		<line x1="150.00" x2="144.00" y1="192.51" y2="192.51"/>
 		<line x1="150.00" x2="144.00" y1="123.35" y2="123.35"/>
 	</g>
-	<g class="poloto_text poloto_ticks poloto_x">
-		<text x="150.00" y="430.00">0</text>
-		<text x="220.92" y="430.00">20</text>
-		<text x="291.84" y="430.00">40</text>
-		<text x="362.77" y="430.00">60</text>
-		<text x="433.69" y="430.00">80</text>
-		<text x="504.61" y="430.00">100</text>
-		<text x="575.53" y="430.00">120</text>
-		<text x="646.45" y="430.00">140</text>
-	</g>
+	<text dominant-baseline="start" class="poloto_text poloto_ticks poloto_x">
+		<tspan x="150.00" y="430.00">0</tspan>
+		<tspan x="220.92" y="430.00">20</tspan>
+		<tspan x="291.84" y="430.00">40</tspan>
+		<tspan x="362.77" y="430.00">60</tspan>
+		<tspan x="433.69" y="430.00">80</tspan>
+		<tspan x="504.61" y="430.00">100</tspan>
+		<tspan x="575.53" y="430.00">120</tspan>
+		<tspan x="646.45" y="430.00">140</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_x">
 		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
 		<line x1="220.92" x2="220.92" y1="400.00" y2="405.00"/>

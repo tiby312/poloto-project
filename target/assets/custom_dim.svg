@@ -13,8 +13,8 @@
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: white;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -61,28 +61,28 @@
 	<g class="poloto_legend poloto_imgs poloto_line poloto3 poloto_stroke"><line x1="1880" x2="1930" y1="231.25" y2="231.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto4 poloto_stroke"><line x1="1880" x2="1930" y1="281.25" y2="281.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto5 poloto_stroke"><line x1="1880" x2="1930" y1="331.25" y2="331.25"/></g>
-	<text class="poloto_legend poloto_text poloto_line poloto0" x="1875" y="100">c(1000)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto1" x="1875" y="150">c(1001)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto2" x="1875" y="200">c(1002)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto3" x="1875" y="250">c(1003)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto4" x="1875" y="300">c(1004)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto5" x="1875" y="350">c(1005)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto0" x="1875" y="100">c(1000)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto1" x="1875" y="150">c(1001)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto2" x="1875" y="200">c(1002)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto3" x="1875" y="250">c(1003)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto4" x="1875" y="300">c(1004)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto5" x="1875" y="350">c(1005)</text>
 	<text class="poloto_text poloto_name poloto_title" x="1000.00" y="37.50">collatz</text>
 	<text class="poloto_text poloto_name poloto_x" x="1000.00" y="981.25">x</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="500.00" transform="rotate(-90,37.50,500.00)">y</text>
-	<g class="poloto_text poloto_ticks poloto_y">
-		<text x="135.00" y="900.00">0</text>
-		<text x="135.00" y="826.23">2000</text>
-		<text x="135.00" y="752.45">4000</text>
-		<text x="135.00" y="678.68">6000</text>
-		<text x="135.00" y="604.91">8000</text>
-		<text x="135.00" y="531.13">10000</text>
-		<text x="135.00" y="457.36">12000</text>
-		<text x="135.00" y="383.59">14000</text>
-		<text x="135.00" y="309.81">16000</text>
-		<text x="135.00" y="236.04">18000</text>
-		<text x="135.00" y="162.26">20000</text>
-	</g>
+	<text dominant-baseline="middle" class="poloto_text poloto_ticks poloto_y">
+		<tspan x="135.00" y="900.00">0</tspan>
+		<tspan x="135.00" y="826.23">2000</tspan>
+		<tspan x="135.00" y="752.45">4000</tspan>
+		<tspan x="135.00" y="678.68">6000</tspan>
+		<tspan x="135.00" y="604.91">8000</tspan>
+		<tspan x="135.00" y="531.13">10000</tspan>
+		<tspan x="135.00" y="457.36">12000</tspan>
+		<tspan x="135.00" y="383.59">14000</tspan>
+		<tspan x="135.00" y="309.81">16000</tspan>
+		<tspan x="135.00" y="236.04">18000</tspan>
+		<tspan x="135.00" y="162.26">20000</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_y">
 		<line x1="150.00" x2="144.00" y1="900.00" y2="900.00"/>
 		<line x1="150.00" x2="144.00" y1="826.23" y2="826.23"/>
@@ -109,37 +109,37 @@
 		<line x1="150.00" x2="1850.00" y1="236.04" y2="236.04"/>
 		<line x1="150.00" x2="1850.00" y1="162.26" y2="162.26"/>
 	</g>
-	<g class="poloto_text poloto_ticks poloto_x">
-		<text x="150.00" y="930.00">0</text>
-		<text x="210.28" y="930.00">5</text>
-		<text x="270.57" y="930.00">10</text>
-		<text x="330.85" y="930.00">15</text>
-		<text x="391.13" y="930.00">20</text>
-		<text x="451.42" y="930.00">25</text>
-		<text x="511.70" y="930.00">30</text>
-		<text x="571.99" y="930.00">35</text>
-		<text x="632.27" y="930.00">40</text>
-		<text x="692.55" y="930.00">45</text>
-		<text x="752.84" y="930.00">50</text>
-		<text x="813.12" y="930.00">55</text>
-		<text x="873.40" y="930.00">60</text>
-		<text x="933.69" y="930.00">65</text>
-		<text x="993.97" y="930.00">70</text>
-		<text x="1054.26" y="930.00">75</text>
-		<text x="1114.54" y="930.00">80</text>
-		<text x="1174.82" y="930.00">85</text>
-		<text x="1235.11" y="930.00">90</text>
-		<text x="1295.39" y="930.00">95</text>
-		<text x="1355.67" y="930.00">100</text>
-		<text x="1415.96" y="930.00">105</text>
-		<text x="1476.24" y="930.00">110</text>
-		<text x="1536.52" y="930.00">115</text>
-		<text x="1596.81" y="930.00">120</text>
-		<text x="1657.09" y="930.00">125</text>
-		<text x="1717.38" y="930.00">130</text>
-		<text x="1777.66" y="930.00">135</text>
-		<text x="1837.94" y="930.00">140</text>
-	</g>
+	<text dominant-baseline="start" class="poloto_text poloto_ticks poloto_x">
+		<tspan x="150.00" y="930.00">0</tspan>
+		<tspan x="210.28" y="930.00">5</tspan>
+		<tspan x="270.57" y="930.00">10</tspan>
+		<tspan x="330.85" y="930.00">15</tspan>
+		<tspan x="391.13" y="930.00">20</tspan>
+		<tspan x="451.42" y="930.00">25</tspan>
+		<tspan x="511.70" y="930.00">30</tspan>
+		<tspan x="571.99" y="930.00">35</tspan>
+		<tspan x="632.27" y="930.00">40</tspan>
+		<tspan x="692.55" y="930.00">45</tspan>
+		<tspan x="752.84" y="930.00">50</tspan>
+		<tspan x="813.12" y="930.00">55</tspan>
+		<tspan x="873.40" y="930.00">60</tspan>
+		<tspan x="933.69" y="930.00">65</tspan>
+		<tspan x="993.97" y="930.00">70</tspan>
+		<tspan x="1054.26" y="930.00">75</tspan>
+		<tspan x="1114.54" y="930.00">80</tspan>
+		<tspan x="1174.82" y="930.00">85</tspan>
+		<tspan x="1235.11" y="930.00">90</tspan>
+		<tspan x="1295.39" y="930.00">95</tspan>
+		<tspan x="1355.67" y="930.00">100</tspan>
+		<tspan x="1415.96" y="930.00">105</tspan>
+		<tspan x="1476.24" y="930.00">110</tspan>
+		<tspan x="1536.52" y="930.00">115</tspan>
+		<tspan x="1596.81" y="930.00">120</tspan>
+		<tspan x="1657.09" y="930.00">125</tspan>
+		<tspan x="1717.38" y="930.00">130</tspan>
+		<tspan x="1777.66" y="930.00">135</tspan>
+		<tspan x="1837.94" y="930.00">140</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_x">
 		<line x1="150.00" x2="150.00" y1="900.00" y2="905.00"/>
 		<line x1="210.28" x2="210.28" y1="900.00" y2="905.00"/>

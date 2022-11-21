@@ -1,4 +1,4 @@
 
 set -ex
 
-inkscape target/assets/collatz.svg -e target/assets/collatz.png
+resvg -w 2000 target/assets/collatz.svg target/assets/collatz.png

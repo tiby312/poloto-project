@@ -164,6 +164,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 
                 let text = hbuild::elem("text")
                     .with(attrs!(
+                        ("dominant-baseline", "middle"),
                         (
                             "class",
                             format_move!("poloto_legend poloto_text {} poloto{}", class, i)

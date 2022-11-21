@@ -13,8 +13,8 @@
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -44,28 +44,28 @@
 	</g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto0 poloto_stroke"><line x1="680" x2="730" y1="81.25" y2="81.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto1 poloto_stroke"><line x1="680" x2="730" y1="131.25" y2="131.25"/></g>
-	<text class="poloto_legend poloto_text poloto_line poloto0" x="675" y="100">tan(x)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto1" x="675" y="150">2*cos(x)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto0" x="675" y="100">tan(x)</text>
+	<text dominant-baseline="middle" class="poloto_legend poloto_text poloto_line poloto1" x="675" y="150">2*cos(x)</text>
 	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">Some Trigonometry Plots 🥳</text>
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">This is the x label</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">This is the y label</text>
-	<g class="poloto_text poloto_ticks poloto_y">
-		<text x="135.00" y="328.25">-5</text>
-		<text x="135.00" y="246.67">0</text>
-		<text x="135.00" y="165.08">5</text>
-	</g>
+	<text dominant-baseline="middle" class="poloto_text poloto_ticks poloto_y">
+		<tspan x="135.00" y="328.25">-5</tspan>
+		<tspan x="135.00" y="246.67">0</tspan>
+		<tspan x="135.00" y="165.08">5</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_y">
 		<line x1="150.00" x2="144.00" y1="328.25" y2="328.25"/>
 		<line x1="150.00" x2="144.00" y1="246.67" y2="246.67"/>
 		<line x1="150.00" x2="144.00" y1="165.08" y2="165.08"/>
 	</g>
-	<g class="poloto_text poloto_ticks poloto_x">
-		<text x="150.00" y="430.00">0</text>
-		<text x="250.20" y="430.00">2</text>
-		<text x="350.40" y="430.00">4</text>
-		<text x="450.60" y="430.00">6</text>
-		<text x="550.80" y="430.00">8</text>
-	</g>
+	<text dominant-baseline="start" class="poloto_text poloto_ticks poloto_x">
+		<tspan x="150.00" y="430.00">0</tspan>
+		<tspan x="250.20" y="430.00">2</tspan>
+		<tspan x="350.40" y="430.00">4</tspan>
+		<tspan x="450.60" y="430.00">6</tspan>
+		<tspan x="550.80" y="430.00">8</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_x">
 		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
 		<line x1="250.20" x2="250.20" y1="400.00" y2="405.00"/>

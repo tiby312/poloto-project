@@ -13,8 +13,8 @@
 .poloto_name{font-size:24px;dominant-baseline:start;text-anchor:middle;}
 .poloto_where{dominant-baseline:middle;text-anchor:start}
 .poloto_text.poloto_legend{font-size:20px;dominant-baseline:middle;text-anchor:start;}
-.poloto_text.poloto_ticks.poloto_y{dominant-baseline:middle;text-anchor:end}
-.poloto_text.poloto_ticks.poloto_x{dominant-baseline:start;text-anchor:middle}
+.poloto_text.poloto_ticks.poloto_y{text-anchor:end}
+.poloto_text.poloto_ticks.poloto_x{text-anchor:middle}
 .poloto_imgs.poloto_ticks{stroke: black;stroke-width:3;fill:none;stroke-dasharray:none}
 .poloto_grid{stroke:gray;stroke-width:0.5}
 
@@ -43,13 +43,13 @@
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">Date</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Mark (in meters)</text>
 	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00">¹1920-01-01 00:00:00 UTC in Years</text>
-	<g class="poloto_text poloto_ticks poloto_y">
-		<text x="135.00" y="400.00">0</text>
-		<text x="135.00" y="332.96">2</text>
-		<text x="135.00" y="265.92">4</text>
-		<text x="135.00" y="198.88">6</text>
-		<text x="135.00" y="131.84">8</text>
-	</g>
+	<text dominant-baseline="middle" class="poloto_text poloto_ticks poloto_y">
+		<tspan x="135.00" y="400.00">0</tspan>
+		<tspan x="135.00" y="332.96">2</tspan>
+		<tspan x="135.00" y="265.92">4</tspan>
+		<tspan x="135.00" y="198.88">6</tspan>
+		<tspan x="135.00" y="131.84">8</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_y">
 		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
 		<line x1="150.00" x2="144.00" y1="332.96" y2="332.96"/>
@@ -57,12 +57,12 @@
 		<line x1="150.00" x2="144.00" y1="198.88" y2="198.88"/>
 		<line x1="150.00" x2="144.00" y1="131.84" y2="131.84"/>
 	</g>
-	<g class="poloto_text poloto_ticks poloto_x">
-		<text x="252.18" y="430.00">1920¹</text>
-		<text x="363.21" y="430.00">1940</text>
-		<text x="474.24" y="430.00">1960</text>
-		<text x="585.27" y="430.00">1980</text>
-	</g>
+	<text dominant-baseline="start" class="poloto_text poloto_ticks poloto_x">
+		<tspan x="252.18" y="430.00">1920¹</tspan>
+		<tspan x="363.21" y="430.00">1940</tspan>
+		<tspan x="474.24" y="430.00">1960</tspan>
+		<tspan x="585.27" y="430.00">1980</tspan>
+	</text>
 	<g class="poloto_imgs poloto_ticks poloto_x">
 		<line x1="252.18" x2="252.18" y1="400.00" y2="405.00"/>
 		<line x1="363.21" x2="363.21" y1="400.00" y2="405.00"/>
