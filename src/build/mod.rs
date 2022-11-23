@@ -239,14 +239,81 @@ impl<D: Display> PointBuilder<D> {
     where
         I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
     {
-        let mut vec = Vec::with_capacity(it.size_hint().0);
         let mut area = Area::new();
+
+        let mut vec = Vec::with_capacity(it.size_hint().0);
         for j in it {
             let (x, y) = j.unwrap();
             area.grow(Some(&x), Some(&y));
             vec.push((x, y));
         }
         SinglePlot::new(self.typ, self.label, vec.into_iter(), area)
+    }
+
+    /// Struct of arrays version as opposed to array of structs
+    pub fn buffered_soa<X: PlotNum, Y: PlotNum, IX, IY>(
+        self,
+        xiter: IX,
+        yiter: IY,
+    ) -> SinglePlot<X, Y, std::iter::Zip<std::vec::IntoIter<X>, std::vec::IntoIter<Y>>, D>
+    where
+        IX: Iterator,
+        IY: Iterator,
+        IX::Item: build::unwrapper::Unwrapper<Item = X>,
+        IY::Item: build::unwrapper::Unwrapper<Item = Y>,
+    {
+        let mut area = Area::new();
+
+        let mut xvec = Vec::with_capacity(xiter.size_hint().0);
+        for j in xiter {
+            let x = j.unwrap();
+            area.grow(Some(&x), None);
+            xvec.push(x);
+        }
+
+        let mut yvec = Vec::with_capacity(yiter.size_hint().0);
+        for j in yiter {
+            let y = j.unwrap();
+            area.grow(None, Some(&y));
+            yvec.push(y);
+        }
+
+        let it = xvec.into_iter().zip(yvec.into_iter());
+        SinglePlot::new(self.typ, self.label, it, area)
+    }
+
+    /// Struct of arrays version as opposed to array of structs
+    pub fn cloned_soa<X: PlotNum, Y: PlotNum, IX, IY>(
+        self,
+        xiter: IX,
+        yiter: IY,
+    ) -> SinglePlot<
+        X,
+        Y,
+        std::iter::Zip<build::unwrapper::UnwrapperIter<IX>, build::unwrapper::UnwrapperIter<IY>>,
+        D,
+    >
+    where
+        IX: Iterator + Clone,
+        IY: Iterator + Clone,
+        IX::Item: build::unwrapper::Unwrapper<Item = X>,
+        IY::Item: build::unwrapper::Unwrapper<Item = Y>,
+    {
+        let mut area = Area::new();
+
+        for j in xiter.clone() {
+            let x = j.unwrap();
+            area.grow(Some(&x), None);
+        }
+
+        for j in yiter.clone() {
+            let y = j.unwrap();
+            area.grow(None, Some(&y));
+        }
+
+        let x = build::unwrapper::UnwrapperIter(xiter);
+        let y = build::unwrapper::UnwrapperIter(yiter);
+        SinglePlot::new(self.typ, self.label, x.zip(y), area)
     }
 }
 
