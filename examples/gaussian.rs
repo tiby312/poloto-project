@@ -10,6 +10,7 @@ fn main() {
     };
 
     let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
+    
     let plots = poloto::plots!(
         plot("σ=1.0").line().buffered(r.iter().map(gau(1.0, 0.))),
         plot("σ=0.5").line().buffered(r.iter().map(gau(0.5, 0.))),
