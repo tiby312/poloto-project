@@ -12,7 +12,6 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 
 ```rust
 use poloto::build::plot;
-use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
@@ -20,19 +19,14 @@ fn main() {
         use std::f64::consts::TAU;
         let s = sigma.powi(2);
         let k = (sigma * TAU).sqrt().recip();
-        move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
+        move |x: &f64| [*x, (-0.5 * (*x - mu).powi(2) / s).exp() * k]
     };
 
     let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
-
-    let it1 = r.iter().copied().zip_output(gau(1.0, 0.));
-    let it2 = r.iter().copied().zip_output(gau(0.5, 0.));
-    let it3 = r.iter().copied().zip_output(gau(0.3, 0.));
-
     let plots = poloto::plots!(
-        plot("σ=1.0").line().buffered(it1),
-        plot("σ=0.5").line().buffered(it2),
-        plot("σ=0.3").line().buffered(it3),
+        plot("σ=1.0").line().buffered(r.iter().map(gau(1.0, 0.))),
+        plot("σ=0.5").line().buffered(r.iter().map(gau(0.5, 0.))),
+        plot("σ=0.3").line().buffered(r.iter().map(gau(0.3, 0.))),
         poloto::build::origin()
     );
 
@@ -41,7 +35,6 @@ fn main() {
         .append_to(poloto::header().light_theme())
         .render_stdout();
 }
-
 ```
 ## Output
 
@@ -223,7 +216,6 @@ fn main() {
 ```rust
 use hypermelon::prelude::*;
 use poloto::build::plot;
-use poloto::prelude::*;
 fn main() {
     let theme = poloto::render::Theme::light();
 
@@ -268,13 +260,11 @@ fn main() {
     let data = poloto::plots!(
         plot("sin-10")
             .histogram()
-            .buffered(x.iter().copied().step_by(3).map(|x| (x, x.sin() - 10.))),
-        plot("cos")
-            .line()
-            .buffered(x.iter().copied().zip_output(f64::cos)),
+            .buffered(x.iter().step_by(3).map(|&x| [x, x.sin() - 10.])),
+        plot("cos").line().buffered(x.iter().map(|&x| [x, x.cos()])),
         plot("sin-5")
             .scatter()
-            .buffered(x.iter().copied().step_by(3).zip_output(|x| x.sin() - 5.))
+            .buffered(x.iter().step_by(3).map(|&x| [x, x.sin() - 5.]))
     );
 
     poloto::data(data)
