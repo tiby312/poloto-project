@@ -6,7 +6,7 @@ fn main() {
         use std::f64::consts::TAU;
         let s = sigma.powi(2);
         let k = (sigma * TAU).sqrt().recip();
-        move |x: &f64| [*x, (-0.5 * (*x - mu).powi(2) / s).exp() * k]
+        move |&x: &f64| [x, (-0.5 * (x - mu).powi(2) / s).exp() * k]
     };
 
     let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
