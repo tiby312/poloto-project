@@ -460,6 +460,8 @@ impl<D: Display> PointBuilder<D> {
         self.data(BufferedPlotIt(it))
     }
 
+
+    #[deprecated]
     pub fn parts<IX: PlotIt1D, IY: PlotIt1D>(
         self,
         x: IX,
