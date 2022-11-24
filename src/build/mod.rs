@@ -229,6 +229,34 @@ pub trait PlotIt1D {
     }
 }
 
+pub trait Iter2 {
+    fn cloned_1d(self) -> ClonedPlot1D<Self>
+    where
+        Self: Sized,
+    {
+        ClonedPlot1D(self)
+    }
+    fn buffered_1d(self) -> BufferedPlot1D<Self>
+    where
+        Self: Sized,
+    {
+        BufferedPlot1D(self)
+    }
+    fn cloned_p(self) -> ClonedPlotIt<Self>
+    where
+        Self: Sized,
+    {
+        ClonedPlotIt(self)
+    }
+    fn buffered(self) -> BufferedPlotIt<Self>
+    where
+        Self: Sized,
+    {
+        BufferedPlotIt(self)
+    }
+}
+impl<I: Iterator> Iter2 for I {}
+
 pub struct ClonedPlot1D<I>(pub I);
 impl<N: PlotNum, I: Iterator + Clone> PlotIt1D for ClonedPlot1D<I>
 where
