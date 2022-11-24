@@ -40,6 +40,11 @@ pub enum PlotMetaType {
     Text,
 }
 
+
+
+
+
+
 ///
 /// Iterator over all plots that have been assembled by the user.
 /// This trait is used by the poloto renderer to iterate over and render all the plots.
@@ -205,12 +210,121 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> 
     }
 }
 
+
+
+
+///
+/// Iterator over all plots that have been assembled by the user.
+/// This trait is used by the poloto renderer to iterate over and render all the plots.
+///
+pub trait PlotIt {
+    type X: PlotNum;
+    type Y: PlotNum;
+    type It:Iterator<Item=(Self::X,Self::Y)>;
+    fn unpack(self,area:&mut Area<Self::X,Self::Y>)->Self::It;
+}
+
+pub trait PlotIt1D{
+    type Item:PlotNum;
+    type It:Iterator<Item=Self::Item>;
+    fn unpack(self)->([Option<Self::Item>;2],Self::It);
+}
+
+pub struct ClonedPlot1D<I>(pub I);
+impl<N:PlotNum,I:Iterator+Clone> PlotIt1D for ClonedPlot1D<I> where I::Item:build::unwrapper::Unwrapper<Item=N>{
+    type Item=N;
+    type It=build::unwrapper::UnwrapperIter<I>;
+
+    fn unpack(self)->([Option<Self::Item>;2],Self::It){
+        let it=self.0;
+
+        todo!();
+        let area=[None;2];
+
+        (area,build::unwrapper::UnwrapperIter(it))
+    }
+}
+
+pub struct ClonedPlotIt<I>(pub I);
+
+impl<X:PlotNum,Y:PlotNum,I:Iterator+Clone> PlotIt for ClonedPlotIt<I>
+    where I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>{
+    type X=X;
+    type Y=Y;
+    type It=build::unwrapper::UnwrapperIter<I>;
+
+    fn unpack(self,area:&mut Area<Self::X,Self::Y>)->Self::It {
+        let it=self.0;
+        for k in it.clone() {
+            let (x, y) = k.unwrap();
+            area.grow(Some(&x), Some(&y));
+        }
+        build::unwrapper::UnwrapperIter(it)  
+    }
+}
+
+pub struct PlotItSOA<IX:PlotIt1D,IY:PlotIt1D>(pub IX,pub IY);
+
+impl<IX:PlotIt1D,IY:PlotIt1D> PlotIt for PlotItSOA<IX,IY>{
+    type X=IX::Item;
+    type Y=IY::Item;
+    type It=std::iter::Zip<IX::It,IY::It>;
+
+    fn unpack(self,area:&mut Area<Self::X,Self::Y>)->Self::It {
+
+        let (xarea,itx)=self.0.unpack();
+        let (yarea,ity)=self.1.unpack();
+
+        area.grow(xarea[0].as_ref(),None);
+        area.grow(xarea[1].as_ref(),None);
+        area.grow(None,yarea[0].as_ref());
+        area.grow(None,yarea[1].as_ref());
+
+        itx.zip(ity)         
+    }
+}
+
+pub struct BufferedPlotIt<I>(pub I);
+
+impl<X:PlotNum,Y:PlotNum,I:Iterator> PlotIt for BufferedPlotIt<I>
+    where I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>{
+    type X=X;
+    type Y=Y;
+    type It=std::vec::IntoIter<(X, Y)>;
+
+    fn unpack(self,area:&mut Area<Self::X,Self::Y>)->Self::It {
+        let it=self.0;
+        let mut vec = Vec::with_capacity(it.size_hint().0);
+        for j in it {
+            let (x, y) = j.unwrap();
+            area.grow(Some(&x), Some(&y));
+            vec.push((x, y));
+        }
+        vec.into_iter()
+    }
+}
+
+
 pub struct PointBuilder<D: Display> {
     label: D,
     typ: PlotMetaType,
 }
 
 impl<D: Display> PointBuilder<D> {
+
+    pub fn data<II:PlotIt>(self,it:II)->SinglePlot<II::X,II::Y,II::It,D>{
+        let mut area = Area::new();
+        let it=it.unpack(&mut area);
+        SinglePlot::new(
+            self.typ,
+            self.label,
+            it,
+            area,
+        )
+    }
+
+
+    #[deprecated]
     pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(
         self,
         it: I,
@@ -232,6 +346,8 @@ impl<D: Display> PointBuilder<D> {
         )
     }
 
+
+    #[deprecated]
     pub fn buffered<X: PlotNum, Y: PlotNum, I: Iterator>(
         self,
         it: I,
@@ -250,6 +366,7 @@ impl<D: Display> PointBuilder<D> {
         SinglePlot::new(self.typ, self.label, vec.into_iter(), area)
     }
 
+    #[deprecated]
     /// Struct of arrays version as opposed to array of structs
     pub fn buffered_soa<X: PlotNum, Y: PlotNum, IX, IY>(
         self,
@@ -282,6 +399,7 @@ impl<D: Display> PointBuilder<D> {
         SinglePlot::new(self.typ, self.label, it, area)
     }
 
+    #[deprecated]
     /// Struct of arrays version as opposed to array of structs
     pub fn cloned_soa<X: PlotNum, Y: PlotNum, IX, IY>(
         self,
