@@ -436,6 +436,7 @@ impl<D: Display> PointBuilder<D> {
         SinglePlot::new(self.typ, self.label, it, area)
     }
 
+    #[deprecated]
     pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(
         self,
         it: I,
@@ -447,6 +448,8 @@ impl<D: Display> PointBuilder<D> {
         self.data(ClonedPlotIt(it))
     }
 
+
+    #[deprecated]
     pub fn buffered<X: PlotNum, Y: PlotNum, I: Iterator>(
         self,
         it: I,

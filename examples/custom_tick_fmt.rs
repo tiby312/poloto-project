@@ -1,5 +1,5 @@
 use hypermelon::format_move;
-
+use poloto::build;
 fn main() {
     // hourly trend over one day.
     let trend = vec![
@@ -9,8 +9,8 @@ fn main() {
     let it = (0..).zip(trend.iter().copied());
 
     let plots = poloto::plots!(
-        poloto::build::plot("").histogram().cloned(it),
-        poloto::build::markers([24], [])
+        build::plot("").histogram().data(build::cloned(it)),
+        build::markers([24], [])
     );
 
     let data = poloto::data(plots);
