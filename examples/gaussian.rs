@@ -1,4 +1,4 @@
-use poloto::build::{plot, BufferedPlot1D, ClonedPlot1D, ClonedPlotIt, PlotItSOA};
+use poloto::build::{plot, BufferedPlot1D, ClonedPlot1D, ClonedPlotIt, PlotIt1D, Zip};
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
@@ -13,11 +13,7 @@ fn main() {
 
     let ii = r.iter().map(gau(1.0, 0.)).map(|x| x[1]);
 
-    let c1 = {
-        let c1 = ClonedPlot1D(r.iter());
-        let c2 = BufferedPlot1D(ii);
-        PlotItSOA(c1, c2)
-    };
+    let c1 = ClonedPlot1D(r.iter()).zip(BufferedPlot1D(ii));
 
     let c2 = ClonedPlotIt(r.iter().map(gau(0.5, 0.)));
     let c3 = ClonedPlotIt(r.iter().map(gau(0.3, 0.)));

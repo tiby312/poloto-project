@@ -220,6 +220,13 @@ pub trait PlotIt1D {
     type Item: PlotNum;
     type It: Iterator<Item = Self::Item>;
     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It);
+
+    fn zip<K: PlotIt1D>(self, other: K) -> Zip<Self, K>
+    where
+        Self: Sized,
+    {
+        Zip(self, other)
+    }
 }
 
 pub struct ClonedPlot1D<I>(pub I);
@@ -284,9 +291,9 @@ where
     }
 }
 
-pub struct PlotItSOA<IX: PlotIt1D, IY: PlotIt1D>(pub IX, pub IY);
+pub struct Zip<IX: PlotIt1D, IY: PlotIt1D>(IX, IY);
 
-impl<IX: PlotIt1D, IY: PlotIt1D> PlotIt for PlotItSOA<IX, IY> {
+impl<IX: PlotIt1D, IY: PlotIt1D> PlotIt for Zip<IX, IY> {
     type X = IX::Item;
     type Y = IY::Item;
     type It = std::iter::Zip<IX::It, IY::It>;
