@@ -1,5 +1,4 @@
 use poloto::build;
-use poloto::prelude::*;
 
 // PIPE me to a file!
 fn main() {
@@ -11,16 +10,17 @@ fn main() {
         move |&x: &f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
+    let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
 
-    let k1: Vec<_> = r.iter().map(gau(1.0, 0.)).collect();
-    let k2: Vec<_> = r.iter().map(gau(0.5, 0.)).collect();
-    let k3: Vec<_> = r.iter().map(gau(0.3, 0.)).collect();
+    let makep = |val: f64| {
+        let ys = xs.iter().map(gau(val, 0.));
+        build::zip(build::cloned(xs.iter()), build::buffered(ys))
+    };
 
     let plots = poloto::plots!(
-        r.iter().zip(k1.iter()).cloned_plot_soa().line("σ=1.0"),
-        r.iter().zip(k2.iter()).cloned_plot_soa().line("σ=0.5"),
-        r.iter().zip(k3.iter()).cloned_plot_soa().line("σ=0.3"),
+        build::plot("σ=1.0").line().data(makep(1.0)),
+        build::plot("σ=0.5").line().data(makep(0.5)),
+        build::plot("σ=0.3").line().data(makep(0.3)),
         build::origin()
     );
 
