@@ -1,4 +1,4 @@
-use poloto::build::{plot, ClonedPlotIt, ClonedPlot1D, PlotItSOA};
+use poloto::build::{plot, BufferedPlot1D, ClonedPlot1D, ClonedPlotIt, PlotItSOA};
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
@@ -10,12 +10,22 @@ fn main() {
     };
 
     let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
-    
-    let ii=r.iter().map(gau(1.0, 0.)).map(|x|x[1]);
+
+    let ii = r.iter().map(gau(1.0, 0.)).map(|x| x[1]);
+
+    let c1 = {
+        let c1 = ClonedPlot1D(r.iter());
+        let c2 = BufferedPlot1D(ii);
+        PlotItSOA(c1, c2)
+    };
+
+    let c2 = ClonedPlotIt(r.iter().map(gau(0.5, 0.)));
+    let c3 = ClonedPlotIt(r.iter().map(gau(0.3, 0.)));
+
     let plots = poloto::plots!(
-        plot("σ=1.0").line().data(PlotItSOA(ClonedPlot1D(r.iter()),ClonedPlot1D(ii))),
-        plot("σ=0.5").line().data(ClonedPlotIt(r.iter().map(gau(0.5, 0.)))),
-        plot("σ=0.3").line().data(ClonedPlotIt(r.iter().map(gau(0.3, 0.)))),
+        plot("σ=1.0").line().data(c1),
+        plot("σ=0.5").line().data(c2),
+        plot("σ=0.3").line().data(c3),
         poloto::build::origin()
     );
 
