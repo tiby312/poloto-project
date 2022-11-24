@@ -13,7 +13,6 @@ fn main() {
     let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
 
     let ii = r.iter().map(gau(1.0, 0.)).map(|x| x[1]).buffered_1d();
-
     let c1 = r.iter().cloned_1d().zip(ii);
 
     let c2 = r.iter().map(gau(0.5, 0.)).cloned_p();
