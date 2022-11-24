@@ -205,7 +205,6 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> 
     }
 }
 
-pub(crate) fn bars<P: PlotIt>(foo: P) {}
 ///
 /// Iterator over all plots that have been assembled by the user.
 /// This trait is used by the poloto renderer to iterate over and render all the plots.
@@ -216,68 +215,17 @@ pub trait PlotIt {
     type It: Iterator<Item = (Self::X, Self::Y)>;
     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It;
 
-    /// Create a line from plots using a SVG path element.
-    /// The path element belongs to the `.poloto[N]fill` css class.  
-    fn line<D: Display>(self, label: D) -> SinglePlot<Self::X, Self::Y, Self::It, D>
-    where
-        Self: Sized,
-    {
-        PointBuilder {
-            label: label,
-            typ: PlotMetaType::Plot(PlotType::Line),
-        }
-        .data(self)
-    }
-
-    // /// Create a scatter plot from plots, using a SVG path with lines with zero length.
-    // /// Each point can be sized using the stroke width.
-    // /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
-    // /// with the latter class overriding the former.
-    // pub fn scatter(self) -> PointBuilder<D> {
-    //     PointBuilder {
-    //         label: self.label,
-    //         typ: PlotMetaType::Plot(PlotType::Scatter),
-    //     }
-    // }
-    // /// Create a histogram from plots using SVG rect elements.
-    // /// Each bar's left side will line up with a point.
-    // /// Each rect element belongs to the `.poloto[N]fill` css class.
-    // pub fn histogram(self) -> PointBuilder<D> {
-    //     PointBuilder {
-    //         label: self.label,
-    //         typ: PlotMetaType::Plot(PlotType::Histo),
-    //     }
-    // }
-
-    // /// Create a line from plots that will be filled underneath using a SVG path element.
+    // /// Create a line from plots using a SVG path element.
     // /// The path element belongs to the `.poloto[N]fill` css class.
-    // pub fn line_fill(self) -> PointBuilder<D> {
+    // fn line<D: Display>(self, label: D) -> SinglePlot<Self::X, Self::Y, Self::It, D>
+    // where
+    //     Self: Sized,
+    // {
     //     PointBuilder {
-    //         label: self.label,
-    //         typ: PlotMetaType::Plot(PlotType::LineFill),
+    //         label: label,
+    //         typ: PlotMetaType::Plot(PlotType::Line),
     //     }
-    // }
-
-    // /// Create a line from plots that will be filled using a SVG path element.
-    // /// The first and last points will be connected and then filled in.
-    // /// The path element belongs to the `.poloto[N]fill` css class.
-    // pub fn line_fill_raw(self) -> PointBuilder<D> {
-    //     PointBuilder {
-    //         label: self.label,
-    //         typ: PlotMetaType::Plot(PlotType::LineFillRaw),
-    //     }
-    // }
-
-    // ///
-    // /// Write some text in the legend. This doesnt increment the plot number.
-    // ///
-    // pub fn text<X: PlotNum, Y: PlotNum>(self) -> SinglePlot<X, Y, std::iter::Empty<(X, Y)>, D> {
-    //     SinglePlot::new(
-    //         PlotMetaType::Text,
-    //         self.label,
-    //         std::iter::empty(),
-    //         Area::new(),
-    //     )
+    //     .data(self)
     // }
 }
 
@@ -300,42 +248,45 @@ pub fn buffered<I: Iterator>(it: I) -> BufferedPlotIt<I> {
 pub fn cloned<I: Iterator>(it: I) -> ClonedPlotIt<I> {
     ClonedPlotIt(it)
 }
-
-pub trait Iter2 {
-    // fn cloned_1d(self) -> ClonedPlot1D<Self>
-    // where
-    //     Self: Sized,
-    // {
-    //     ClonedPlot1D(self)
-    // }
-    // fn buffered_1d(self) -> BufferedPlot1D<Self>
-    // where
-    //     Self: Sized,
-    // {
-    //     BufferedPlot1D(self)
-    // }
-    fn cloned_plot(self) -> ClonedPlotIt<Self>
-    where
-        Self: Sized,
-    {
-        ClonedPlotIt(self)
-    }
-
-    fn cloned_plot_soa(self) -> ClonedPlotIt2<Self>
-    where
-        Self: Sized,
-    {
-        ClonedPlotIt2(self)
-    }
-
-    fn buffered_plot(self) -> BufferedPlotIt<Self>
-    where
-        Self: Sized,
-    {
-        BufferedPlotIt(self)
-    }
+pub fn cloned2<I: Iterator>(it: I) -> ClonedPlotIt2<I> {
+    ClonedPlotIt2(it)
 }
-impl<I: Iterator> Iter2 for I {}
+
+// pub trait Iter2 {
+//     // fn cloned_1d(self) -> ClonedPlot1D<Self>
+//     // where
+//     //     Self: Sized,
+//     // {
+//     //     ClonedPlot1D(self)
+//     // }
+//     // fn buffered_1d(self) -> BufferedPlot1D<Self>
+//     // where
+//     //     Self: Sized,
+//     // {
+//     //     BufferedPlot1D(self)
+//     // }
+//     fn cloned_plot(self) -> ClonedPlotIt<Self>
+//     where
+//         Self: Sized,
+//     {
+//         ClonedPlotIt(self)
+//     }
+
+//     fn cloned_plot_soa(self) -> ClonedPlotIt2<Self>
+//     where
+//         Self: Sized,
+//     {
+//         ClonedPlotIt2(self)
+//     }
+
+//     fn buffered_plot(self) -> BufferedPlotIt<Self>
+//     where
+//         Self: Sized,
+//     {
+//         BufferedPlotIt(self)
+//     }
+// }
+// impl<I: Iterator> Iter2 for I {}
 
 //pub struct BufferedPlot1D<I>(pub I);
 

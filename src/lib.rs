@@ -58,9 +58,6 @@ use hypermelon::prelude::*;
 pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::output_zip::OutputZip;
-    pub use super::build::Iter2;
-    pub use super::build::PlotIt;
-    pub use super::build::PlotIt1D;
     pub use super::plots;
 }
 
