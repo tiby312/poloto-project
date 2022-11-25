@@ -244,9 +244,6 @@ pub trait PlotIt {
 //     }
 // }
 
-pub fn buffered<I: Iterator>(it: I) -> BufferedPlotIt<I> {
-    BufferedPlotIt(it)
-}
 pub fn cloned<I: Iterator>(it: I) -> ClonedPlotIt<I> {
     ClonedPlotIt(it)
 }
@@ -468,9 +465,7 @@ where
     }
 }
 
-pub struct BufferedPlotIt<I>(pub I);
-
-impl<X: PlotNum, Y: PlotNum, I: Iterator> PlotIt for BufferedPlotIt<I>
+impl<X: PlotNum, Y: PlotNum, I: Iterator> PlotIt for I
 where
     I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
@@ -479,7 +474,7 @@ where
     type It = std::vec::IntoIter<(X, Y)>;
 
     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
-        let it = self.0;
+        let it = self;
 
         let vec: Vec<_> = it.map(|j| j.unwrap()).collect();
 
@@ -499,7 +494,7 @@ pub struct PointBuilder<D: Display> {
 }
 
 impl<D: Display> PointBuilder<D> {
-    fn data<II: PlotIt>(self, it: II) -> SinglePlot<II::X, II::Y, II::It, D> {
+    pub fn data<II: PlotIt>(self, it: II) -> SinglePlot<II::X, II::Y, II::It, D> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
         SinglePlot::new(self.typ, self.label, it, area)
@@ -523,7 +518,7 @@ impl<D: Display> PointBuilder<D> {
     where
         I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
     {
-        self.data(BufferedPlotIt(it))
+        self.data(it)
     }
 }
 
@@ -532,8 +527,7 @@ pub struct SinglePlotBuilder<D> {
 }
 
 impl<D: Display> SinglePlotBuilder<D> {
-    /// Create a line from plots using a SVG path element.
-    /// The path element belongs to the `.poloto[N]fill` css class.  
+    #[deprecated]
     pub fn line(self) -> PointBuilder<D> {
         PointBuilder {
             label: self.label,
@@ -541,11 +535,25 @@ impl<D: Display> SinglePlotBuilder<D> {
         }
     }
 
+    /// Create a line from plots using a SVG path element.
+    /// The path element belongs to the `.poloto[N]fill` css class.  
+    pub fn line2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Line), self.label, it, area)
+    }
+
     pub(crate) fn bars(self) -> PointBuilder<D> {
         PointBuilder {
             label: self.label,
             typ: PlotMetaType::Plot(PlotType::Bars),
         }
+    }
+
+    pub(crate) fn bars2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), self.label, it, area)
     }
 
     /// Create a scatter plot from plots, using a SVG path with lines with zero length.
@@ -558,6 +566,13 @@ impl<D: Display> SinglePlotBuilder<D> {
             typ: PlotMetaType::Plot(PlotType::Scatter),
         }
     }
+
+    pub fn scatter2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Scatter), self.label, it, area)
+    }
+
     /// Create a histogram from plots using SVG rect elements.
     /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
@@ -566,6 +581,12 @@ impl<D: Display> SinglePlotBuilder<D> {
             label: self.label,
             typ: PlotMetaType::Plot(PlotType::Histo),
         }
+    }
+
+    pub fn histogram2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Histo), self.label, it, area)
     }
 
     /// Create a line from plots that will be filled underneath using a SVG path element.
@@ -577,6 +598,12 @@ impl<D: Display> SinglePlotBuilder<D> {
         }
     }
 
+    pub fn line_fill2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::LineFill), self.label, it, area)
+    }
+
     /// Create a line from plots that will be filled using a SVG path element.
     /// The first and last points will be connected and then filled in.
     /// The path element belongs to the `.poloto[N]fill` css class.
@@ -585,6 +612,17 @@ impl<D: Display> SinglePlotBuilder<D> {
             label: self.label,
             typ: PlotMetaType::Plot(PlotType::LineFillRaw),
         }
+    }
+
+    pub fn line_fill_raw2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(
+            PlotMetaType::Plot(PlotType::LineFillRaw),
+            self.label,
+            it,
+            area,
+        )
     }
 
     ///

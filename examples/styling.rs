@@ -1,5 +1,5 @@
 use hypermelon::prelude::*;
-use poloto::build;
+use poloto::{build, prelude::OutputZip};
 fn main() {
     let theme = poloto::render::Theme::light();
 
@@ -42,19 +42,9 @@ fn main() {
     let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
 
     let data = poloto::plots!(
-        build::plot("sin-10")
-            .histogram()
-            .data(build::clonedbuffer(x.iter().step_by(3), |&x| Some(
-                x.sin() - 10.
-            ))),
-        build::plot("cos")
-            .line()
-            .data(build::clonedbuffer(x.iter(), |x| Some(x.cos()))),
-        build::plot("sin-5")
-            .scatter()
-            .data(build::clonedbuffer(x.iter().step_by(3), |x| Some(
-                x.sin() - 5.
-            )))
+        build::plot("sin-10").histogram2(x.iter().step_by(3).zip_output(|x| x.sin() - 10.)),
+        build::plot("cos").line2(x.iter().zip_output(|x| x.cos())),
+        build::plot("sin-5").scatter2(x.iter().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
     poloto::data(data)

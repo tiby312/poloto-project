@@ -32,7 +32,7 @@ fn main() {
     });
 
     let plots = poloto::plots!(
-        build::plot("").line().data(build::cloned(data.iter())),
+        build::plot("").line2(build::cloned(data.iter())),
         build::markers([], [0.0])
     );
 

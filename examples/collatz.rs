@@ -25,13 +25,10 @@ fn main() {
     let style =
         poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
-    let a = (1000..1006)
-        .map(|i| (i, collatz(i).collect::<Vec<_>>()))
-        .collect::<Vec<_>>();
-
-    let a = poloto::build::plots_dyn(a.iter().map(|(i, c)| {
+    let a = poloto::build::plots_dyn((1000..1006).map(|i| {
         let name = format_move!("c({})", i);
-        build::plot(name).line().cloned((0..).zip(c))
+        let i = (0..).zip(collatz(i));
+        build::plot(name).line2(i)
     }));
 
     let b = poloto::build::origin();
