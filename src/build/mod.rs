@@ -288,6 +288,52 @@ pub fn cloned2<I: Iterator>(it: I) -> ClonedPlotIt2<I> {
 // }
 // impl<I: Iterator> Iter2 for I {}
 
+
+
+
+pub struct BufferedPlot1dRef<'a,N>{
+    bound:&'a [Option<N>;2],
+    it:&'a [N]
+}
+
+impl<'a,N: PlotNum> PlotIt1D for BufferedPlot1dRef<'a,N>
+{
+    type Item = N;
+    type It = std::iter::Copied<std::slice::Iter<'a,N>>;
+
+    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+        (*self.bound, self.it.iter().copied())
+    }
+}
+
+pub struct BufferedPlot1D<N>{
+    bound:[Option<N>;2],
+    vec:Vec<N>
+}
+impl<N:PlotNum> BufferedPlot1D<N>{
+    pub fn new<I:Iterator>(it:I)->Self where I::Item:Unwrapper<Item=N>{
+        todo!()
+    }
+    pub fn iter(&self)->std::slice::Iter<N>{
+        self.vec.iter()
+    }
+    pub fn bound(&self)->BufferedPlot1dRef<N>{
+        todo!()
+    }
+}
+
+
+impl<N: PlotNum> PlotIt1D for BufferedPlot1D<N>
+{
+    type Item = N;
+    type It = std::vec::IntoIter<N>;
+
+    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+        (self.bound, self.vec.into_iter())
+    }
+}
+
+
 //pub struct BufferedPlot1D<I>(pub I);
 
 impl<N: PlotNum, I: Iterator> PlotIt1D for BufferedPlotIt<I>

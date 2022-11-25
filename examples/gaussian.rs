@@ -11,11 +11,11 @@ fn main() {
     };
 
     //TODO impl!!!
-    let xs = make1dBound(poloto::util::range_iter([-5.0, 5.0], 200));
+    let xs = build::BufferedPlot1D::new(poloto::util::range_iter([-5.0, 5.0], 200));
     
     let makep = |val: f64| {
         let ys = xs.iter().map(gau(val, 0.));
-        build::zip(xs.bounds(), build::buffered(ys))
+        build::zip(xs.bound(), build::buffered(ys))
     };
 
     let plots = poloto::plots!(
