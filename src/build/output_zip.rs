@@ -56,14 +56,14 @@ where
 {
     ///
     /// Provides shorthand for plotting the output of some functions.
-    /// Automatically clones, and maps x and y.
+    /// maps x and y.
     ///
     ///
     /// Regular:
     ///
     /// ```rust
     /// let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
-    /// let _ = poloto::build::plot("a").scatter().buffered(x.clone().map(|x|[x,x.cos()]));
+    /// let _ = poloto::build::plot("a").scatter(x.map(|x|[x,x.cos()]);
     /// ```
     ///
     /// Shortened:
@@ -71,7 +71,7 @@ where
     /// ```rust
     /// use poloto::prelude::OutputZip;
     /// let x = (0..30).map(|x| (x as f64 / 30.0) * 10.0);
-    /// let _ = poloto::build::plot("a").scatter().buffered(x.zip_output(|x|x.cos()));
+    /// let _ = poloto::build::plot("a").scatter(x.zip_output(|x|x.cos());
     /// ```
     fn zip_output<Y, F: Fn(Self::Item) -> Y>(self, func: F) -> OutputZipper<Self, F>
     where
