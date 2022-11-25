@@ -6,9 +6,10 @@ fn main() {
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let it = (0..).zip(trend.iter());
-
-    let plots = poloto::plots!(build::plot("").histogram2(it), build::markers([24], []));
+    let plots = poloto::plots!(
+        build::plot("").histogram2((0..).zip(trend)),
+        build::markers([24], [])
+    );
 
     let data = poloto::data(plots);
 

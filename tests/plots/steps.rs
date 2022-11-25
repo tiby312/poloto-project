@@ -1,6 +1,6 @@
-use hypermelon::format_move;
-
 use super::*;
+use hypermelon::format_move;
+use poloto::build;
 
 #[test]
 fn marathon() -> fmt::Result {
@@ -18,7 +18,7 @@ fn marathon() -> fmt::Result {
     // Have there be a tick every hour
 
     let p = plots!(
-        poloto::build::plot("hay").line().cloned(heart_rate.iter()),
+        poloto::build::plot("hay").line2(build::cloned(heart_rate.iter())),
         poloto::build::markers(None, Some(0))
     );
 
@@ -55,7 +55,7 @@ fn years() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::plot("foo").histogram().cloned(data.iter()),
+        poloto::build::plot("foo").histogram2(data),
         poloto::build::markers(None, Some(0))
     ));
 

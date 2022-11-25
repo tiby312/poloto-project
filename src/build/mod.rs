@@ -465,7 +465,7 @@ where
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, I: Iterator> PlotIt for I
+impl<X: PlotNum, Y: PlotNum, I: IntoIterator> PlotIt for I
 where
     I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
@@ -474,7 +474,7 @@ where
     type It = std::vec::IntoIter<(X, Y)>;
 
     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
-        let it = self;
+        let it = self.into_iter();
 
         let vec: Vec<_> = it.map(|j| j.unwrap()).collect();
 
@@ -553,6 +553,7 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Each point can be sized using the stroke width.
     /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
     /// with the latter class overriding the former.
+    #[deprecated]
     pub fn scatter(self) -> PointBuilder<D> {
         PointBuilder {
             label: self.label,
@@ -569,6 +570,7 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Create a histogram from plots using SVG rect elements.
     /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
+    #[deprecated]
     pub fn histogram(self) -> PointBuilder<D> {
         PointBuilder {
             label: self.label,
@@ -584,6 +586,7 @@ impl<D: Display> SinglePlotBuilder<D> {
 
     /// Create a line from plots that will be filled underneath using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.
+    #[deprecated]
     pub fn line_fill(self) -> PointBuilder<D> {
         PointBuilder {
             label: self.label,
@@ -600,6 +603,7 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Create a line from plots that will be filled using a SVG path element.
     /// The first and last points will be connected and then filled in.
     /// The path element belongs to the `.poloto[N]fill` css class.
+    #[deprecated]
     pub fn line_fill_raw(self) -> PointBuilder<D> {
         PointBuilder {
             label: self.label,
