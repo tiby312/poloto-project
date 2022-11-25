@@ -10,8 +10,10 @@ fn main() {
         move |&x: &f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    //TODO impl!!!
     let xs = build::BufferedPlot1D::new(poloto::util::range_iter([-5.0, 5.0], 200));
+    
+    //let xs = build::ClonedPlot1d::new(poloto::util::range_iter([-5.0, 5.0], 200));
+    
     
     let makep = |val: f64| {
         let ys = xs.iter().map(gau(val, 0.));

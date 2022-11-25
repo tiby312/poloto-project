@@ -3,6 +3,8 @@
 //!
 //!
 
+use self::unwrapper::UnwrapperIter;
+
 use super::*;
 
 pub mod bar;
@@ -289,6 +291,46 @@ pub fn cloned2<I: Iterator>(it: I) -> ClonedPlotIt2<I> {
 // impl<I: Iterator> Iter2 for I {}
 
 
+pub struct ClonedPlot1dRef<'a,N,I>{
+    it:&'a I,
+    bound:&'a [Option<N>;2]
+}
+
+impl<'a,N: PlotNum,I:Iterator+Clone> PlotIt1D for ClonedPlot1dRef<'a,N,I> where I::Item:Unwrapper<Item=N>
+{
+    type Item = N;
+    type It = UnwrapperIter<I>;
+
+    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+        (*self.bound, UnwrapperIter(self.it.clone()))
+    }
+}
+
+pub struct ClonedPlot1d<N,I>{
+    it:I,
+    bound:[Option<N>;2]
+}
+
+impl<N: PlotNum,I:Iterator+Clone> ClonedPlot1d<N,I> where I::Item:Unwrapper<Item=N>{
+    pub fn new(it:I)->Self{
+        todo!()
+    }
+    pub fn bound(&self)->ClonedPlot1dRef<N,I>{
+        todo!()
+    }
+    pub fn iter(&self)->I{
+        self.it.clone()
+    }
+}
+impl<N: PlotNum,I:Iterator> PlotIt1D for ClonedPlot1d<N,I> where I::Item:Unwrapper<Item=N>
+{
+    type Item = N;
+    type It = UnwrapperIter<I>;
+
+    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+        (self.bound, UnwrapperIter(self.it))
+    }
+}
 
 
 pub struct BufferedPlot1dRef<'a,N>{
