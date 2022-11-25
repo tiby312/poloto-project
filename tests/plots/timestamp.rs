@@ -118,7 +118,7 @@ fn seconds() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::plot("").line().cloned(data.iter()),
+        poloto::build::plot("").line(data),
         poloto::build::markers(None, Some(0))
     ));
 
