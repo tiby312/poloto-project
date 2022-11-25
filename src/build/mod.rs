@@ -448,7 +448,6 @@ impl<D: Display> PointBuilder<D> {
         self.data(ClonedPlotIt(it))
     }
 
-
     #[deprecated]
     pub fn buffered<X: PlotNum, Y: PlotNum, I: Iterator>(
         self,
@@ -459,7 +458,6 @@ impl<D: Display> PointBuilder<D> {
     {
         self.data(BufferedPlotIt(it))
     }
-
 
     #[deprecated]
     pub fn parts<IX: PlotIt1D, IY: PlotIt1D>(
