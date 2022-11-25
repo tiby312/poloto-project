@@ -1,5 +1,5 @@
 use hypermelon::prelude::*;
-use poloto::prelude::*;
+use poloto::build;
 
 // PIPE me to a file!
 fn main() {
@@ -27,13 +27,13 @@ fn main() {
 
     let a = poloto::build::plots_dyn((1000..1006).map(|i| {
         let name = format_move!("c({})", i);
-        let it = (0..).zip(collatz(i));
-        poloto::build::plot(name).line().buffered(it)
+        let i = (0..).zip(collatz(i));
+        build::plot(name).line(i)
     }));
 
     let b = poloto::build::origin();
 
-    poloto::data(plots!(a, b))
+    poloto::data(poloto::plots!(a, b))
         .map_opt(|_| opt)
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))

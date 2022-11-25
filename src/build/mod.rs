@@ -205,176 +205,390 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> 
     }
 }
 
-pub struct PointBuilder<D: Display> {
-    label: D,
-    typ: PlotMetaType,
+///
+/// Iterator over all plots that have been assembled by the user.
+/// This trait is used by the poloto renderer to iterate over and render all the plots.
+///
+pub trait PlotIt {
+    type X: PlotNum;
+    type Y: PlotNum;
+    type It: Iterator<Item = (Self::X, Self::Y)>;
+    fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It;
+
+    // /// Create a line from plots using a SVG path element.
+    // /// The path element belongs to the `.poloto[N]fill` css class.
+    // fn line<D: Display>(self, label: D) -> SinglePlot<Self::X, Self::Y, Self::It, D>
+    // where
+    //     Self: Sized,
+    // {
+    //     PointBuilder {
+    //         label: label,
+    //         typ: PlotMetaType::Plot(PlotType::Line),
+    //     }
+    //     .data(self)
+    // }
 }
 
-impl<D: Display> PointBuilder<D> {
-    pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(
-        self,
-        it: I,
-    ) -> SinglePlot<X, Y, build::unwrapper::UnwrapperIter<I>, D>
-    where
-        I: Clone,
-        I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
-    {
-        let mut area = Area::new();
+// pub trait PlotIt1D {
+//     type Item: PlotNum;
+//     type It: Iterator<Item = Self::Item>;
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It);
+
+//     fn zip<K: PlotIt1D>(self, other: K) -> Zip<Self, K>
+//     where
+//         Self: Sized,
+//     {
+//         Zip(self, other)
+//     }
+// }
+
+pub fn cloned<I: Iterator>(it: I) -> ClonedPlotIt<I> {
+    ClonedPlotIt(it)
+}
+
+// pub fn buffered_1d<N: PlotNum, I: Iterator>(it: I) -> BufferedPlot1D<N>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     BufferedPlot1D::new(it)
+// }
+// pub fn cloned_1d<N: PlotNum, I: Iterator + Clone>(it: I) -> ClonedPlot1d<N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     ClonedPlot1d::new(it)
+// }
+
+// pub struct ClonedPlot1dRef<'a, N, I> {
+//     it: &'a I,
+//     bound: &'a [Option<N>; 2],
+// }
+
+// impl<'a, N: PlotNum, I: Iterator + Clone> PlotIt1D for ClonedPlot1dRef<'a, N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     type Item = N;
+//     type It = UnwrapperIter<I>;
+
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (*self.bound, UnwrapperIter(self.it.clone()))
+//     }
+// }
+// pub struct ClonedPlot1d<N, I> {
+//     it: I,
+//     bound: [Option<N>; 2],
+// }
+
+// impl<N: PlotNum, I: Iterator + Clone> ClonedPlot1d<N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     pub fn new(it: I) -> Self {
+//         todo!()
+//     }
+//     pub fn bound(&self) -> ClonedPlot1dRef<N, I> {
+//         todo!()
+//     }
+//     pub fn iter(&self) -> I {
+//         self.it.clone()
+//     }
+// }
+// impl<N: PlotNum, I: Iterator> PlotIt1D for ClonedPlot1d<N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     type Item = N;
+//     type It = UnwrapperIter<I>;
+
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (self.bound, UnwrapperIter(self.it))
+//     }
+// }
+
+// pub struct BufferedPlot1dRef<'a, N> {
+//     bound: &'a [Option<N>; 2],
+//     it: &'a [N],
+// }
+
+// impl<'a, N: PlotNum> PlotIt1D for BufferedPlot1dRef<'a, N> {
+//     type Item = N;
+//     type It = std::iter::Copied<std::slice::Iter<'a, N>>;
+
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (*self.bound, self.it.iter().copied())
+//     }
+// }
+
+// pub struct BufferedPlot1D<N> {
+//     bound: [Option<N>; 2],
+//     vec: Vec<N>,
+// }
+// impl<N: PlotNum> BufferedPlot1D<N> {
+//     pub fn new<I: Iterator>(it: I) -> Self
+//     where
+//         I::Item: Unwrapper<Item = N>,
+//     {
+//         todo!()
+//     }
+//     pub fn iter(&self) -> std::slice::Iter<N> {
+//         self.vec.iter()
+//     }
+//     pub fn bound(&self) -> BufferedPlot1dRef<N> {
+//         todo!()
+//     }
+// }
+
+// impl<N: PlotNum> PlotIt1D for BufferedPlot1D<N> {
+//     type Item = N;
+//     type It = std::vec::IntoIter<N>;
+
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (self.bound, self.vec.into_iter())
+//     }
+// }
+
+#[derive(Copy, Clone)]
+pub struct ClonedPlotIt<I>(pub I);
+
+impl<X: PlotNum, Y: PlotNum, I: Iterator + Clone> PlotIt for ClonedPlotIt<I>
+where
+    I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+{
+    type X = X;
+    type Y = Y;
+    type It = build::unwrapper::UnwrapperIter<I>;
+
+    fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
+        let it = self.0;
         for k in it.clone() {
             let (x, y) = k.unwrap();
             area.grow(Some(&x), Some(&y));
         }
-        SinglePlot::new(
-            self.typ,
-            self.label,
-            build::unwrapper::UnwrapperIter(it),
-            area,
-        )
-    }
-
-    pub fn buffered<X: PlotNum, Y: PlotNum, I: Iterator>(
-        self,
-        it: I,
-    ) -> SinglePlot<X, Y, std::vec::IntoIter<(X, Y)>, D>
-    where
-        I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
-    {
-        let mut area = Area::new();
-
-        let mut vec = Vec::with_capacity(it.size_hint().0);
-        for j in it {
-            let (x, y) = j.unwrap();
-            area.grow(Some(&x), Some(&y));
-            vec.push((x, y));
-        }
-        SinglePlot::new(self.typ, self.label, vec.into_iter(), area)
-    }
-
-    /// Struct of arrays version as opposed to array of structs
-    pub fn buffered_soa<X: PlotNum, Y: PlotNum, IX, IY>(
-        self,
-        xiter: IX,
-        yiter: IY,
-    ) -> SinglePlot<X, Y, std::iter::Zip<std::vec::IntoIter<X>, std::vec::IntoIter<Y>>, D>
-    where
-        IX: Iterator,
-        IY: Iterator,
-        IX::Item: build::unwrapper::Unwrapper<Item = X>,
-        IY::Item: build::unwrapper::Unwrapper<Item = Y>,
-    {
-        let mut area = Area::new();
-
-        let mut xvec = Vec::with_capacity(xiter.size_hint().0);
-        for j in xiter {
-            let x = j.unwrap();
-            area.grow(Some(&x), None);
-            xvec.push(x);
-        }
-
-        let mut yvec = Vec::with_capacity(yiter.size_hint().0);
-        for j in yiter {
-            let y = j.unwrap();
-            area.grow(None, Some(&y));
-            yvec.push(y);
-        }
-
-        let it = xvec.into_iter().zip(yvec.into_iter());
-        SinglePlot::new(self.typ, self.label, it, area)
-    }
-
-    /// Struct of arrays version as opposed to array of structs
-    pub fn cloned_soa<X: PlotNum, Y: PlotNum, IX, IY>(
-        self,
-        xiter: IX,
-        yiter: IY,
-    ) -> SinglePlot<
-        X,
-        Y,
-        std::iter::Zip<build::unwrapper::UnwrapperIter<IX>, build::unwrapper::UnwrapperIter<IY>>,
-        D,
-    >
-    where
-        IX: Iterator + Clone,
-        IY: Iterator + Clone,
-        IX::Item: build::unwrapper::Unwrapper<Item = X>,
-        IY::Item: build::unwrapper::Unwrapper<Item = Y>,
-    {
-        let mut area = Area::new();
-
-        for j in xiter.clone() {
-            let x = j.unwrap();
-            area.grow(Some(&x), None);
-        }
-
-        for j in yiter.clone() {
-            let y = j.unwrap();
-            area.grow(None, Some(&y));
-        }
-
-        let x = build::unwrapper::UnwrapperIter(xiter);
-        let y = build::unwrapper::UnwrapperIter(yiter);
-        SinglePlot::new(self.typ, self.label, x.zip(y), area)
+        build::unwrapper::UnwrapperIter(it)
     }
 }
+
+// pub fn zip<IX: PlotIt1D, IY: PlotIt1D>(a: IX, b: IY) -> Zip<IX, IY> {
+//     Zip(a, b)
+// }
+// pub struct Zip<IX: PlotIt1D, IY: PlotIt1D>(IX, IY);
+
+// impl<IX: PlotIt1D, IY: PlotIt1D> PlotIt for Zip<IX, IY> {
+//     type X = IX::Item;
+//     type Y = IY::Item;
+//     type It = std::iter::Zip<IX::It, IY::It>;
+
+//     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
+//         let (xarea, itx) = self.0.unpack();
+//         let (yarea, ity) = self.1.unpack();
+
+//         area.grow(xarea[0].as_ref(), None);
+//         area.grow(xarea[1].as_ref(), None);
+//         area.grow(None, yarea[0].as_ref());
+//         area.grow(None, yarea[1].as_ref());
+
+//         itx.zip(ity)
+//     }
+// }
+
+// pub fn clonedbuffer<I: Iterator, X: PlotNum, Y: PlotNum, F: FnMut(&X) -> Option<Y>>(
+//     it: I,
+//     func: F,
+// ) -> ClonedBuffer<I, F>
+// where
+//     I::Item: Unwrapper<Item = X>,
+// {
+//     ClonedBuffer { it, func }
+// }
+
+// pub struct ClonedBuffer<I, F> {
+//     pub it: I,
+//     pub func: F,
+// }
+
+// impl<X: PlotNum, Y: PlotNum, I: Iterator + Clone, F: FnMut(&X) -> Option<Y>> PlotIt
+//     for ClonedBuffer<I, F>
+// where
+//     I::Item: build::unwrapper::Unwrapper<Item = X>,
+// {
+//     type X = X;
+//     type Y = Y;
+//     type It = std::iter::Zip<UnwrapperIter<I>, std::vec::IntoIter<Y>>;
+
+//     fn unpack(mut self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
+//         let it = self.it;
+
+//         let mut ys = Vec::new();
+//         for j in it.clone() {
+//             let j = j.unwrap();
+
+//             let Some(y)=(self.func)(&j) else{
+//                 break;
+//             };
+//             area.grow(Some(&j), Some(&y));
+
+//             ys.push(y)
+//         }
+
+//         UnwrapperIter(it).zip(ys.into_iter())
+//     }
+// }
+
+impl<X: PlotNum, Y: PlotNum, I: IntoIterator> PlotIt for I
+where
+    I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+{
+    type X = X;
+    type Y = Y;
+    type It = std::vec::IntoIter<(X, Y)>;
+
+    fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
+        let it = self.into_iter();
+
+        let vec: Vec<_> = it.map(|j| j.unwrap()).collect();
+
+        for (x, y) in vec.iter() {
+            area.grow(Some(x), Some(y));
+        }
+
+        vec.into_iter()
+    }
+}
+
+// pub struct PointBuilder<D: Display> {
+//     label: D,
+//     typ: PlotMetaType,
+// }
+
+// impl<D: Display> PointBuilder<D> {
+//     pub fn data<II: PlotIt>(self, it: II) -> SinglePlot<II::X, II::Y, II::It, D> {
+//         let mut area = Area::new();
+//         let it = it.unpack(&mut area);
+//         SinglePlot::new(self.typ, self.label, it, area)
+//     }
+
+//     pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(
+//         self,
+//         it: I,
+//     ) -> SinglePlot<X, Y, build::unwrapper::UnwrapperIter<I>, D>
+//     where
+//         I: Clone,
+//         I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+//     {
+//         self.data(ClonedPlotIt(it))
+//     }
+
+//     pub fn buffered<X: PlotNum, Y: PlotNum, I: Iterator>(
+//         self,
+//         it: I,
+//     ) -> SinglePlot<X, Y, std::vec::IntoIter<(X, Y)>, D>
+//     where
+//         I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+//     {
+//         self.data(it)
+//     }
+// }
 
 pub struct SinglePlotBuilder<D> {
     label: D,
 }
 
 impl<D: Display> SinglePlotBuilder<D> {
+    // #[deprecated]
+    // pub fn line(self) -> PointBuilder<D> {
+    //     PointBuilder {
+    //         label: self.label,
+    //         typ: PlotMetaType::Plot(PlotType::Line),
+    //     }
+    // }
+
     /// Create a line from plots using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.  
-    pub fn line(self) -> PointBuilder<D> {
-        PointBuilder {
-            label: self.label,
-            typ: PlotMetaType::Plot(PlotType::Line),
-        }
+    pub fn line<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Line), self.label, it, area)
     }
 
-    pub(crate) fn bars(self) -> PointBuilder<D> {
-        PointBuilder {
-            label: self.label,
-            typ: PlotMetaType::Plot(PlotType::Bars),
-        }
+    pub(crate) fn bars2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), self.label, it, area)
     }
+
+    // #[deprecated]
+    // pub fn scatter(self) -> PointBuilder<D> {
+    //     PointBuilder {
+    //         label: self.label,
+    //         typ: PlotMetaType::Plot(PlotType::Scatter),
+    //     }
+    // }
 
     /// Create a scatter plot from plots, using a SVG path with lines with zero length.
     /// Each point can be sized using the stroke width.
     /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
     /// with the latter class overriding the former.
-    pub fn scatter(self) -> PointBuilder<D> {
-        PointBuilder {
-            label: self.label,
-            typ: PlotMetaType::Plot(PlotType::Scatter),
-        }
+
+    pub fn scatter<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Scatter), self.label, it, area)
     }
+
+    // #[deprecated]
+    // pub fn histogram(self) -> PointBuilder<D> {
+    //     PointBuilder {
+    //         label: self.label,
+    //         typ: PlotMetaType::Plot(PlotType::Histo),
+    //     }
+    // }
     /// Create a histogram from plots using SVG rect elements.
     /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
-    pub fn histogram(self) -> PointBuilder<D> {
-        PointBuilder {
-            label: self.label,
-            typ: PlotMetaType::Plot(PlotType::Histo),
-        }
+
+    pub fn histogram<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::Histo), self.label, it, area)
     }
 
+    // #[deprecated]
+    // pub fn line_fill(self) -> PointBuilder<D> {
+    //     PointBuilder {
+    //         label: self.label,
+    //         typ: PlotMetaType::Plot(PlotType::LineFill),
+    //     }
+    // }
     /// Create a line from plots that will be filled underneath using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill(self) -> PointBuilder<D> {
-        PointBuilder {
-            label: self.label,
-            typ: PlotMetaType::Plot(PlotType::LineFill),
-        }
+
+    pub fn line_fill<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(PlotMetaType::Plot(PlotType::LineFill), self.label, it, area)
     }
 
+    // #[deprecated]
+    // pub fn line_fill_raw(self) -> PointBuilder<D> {
+    //     PointBuilder {
+    //         label: self.label,
+    //         typ: PlotMetaType::Plot(PlotType::LineFillRaw),
+    //     }
+    // }
     /// Create a line from plots that will be filled using a SVG path element.
     /// The first and last points will be connected and then filled in.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill_raw(self) -> PointBuilder<D> {
-        PointBuilder {
-            label: self.label,
-            typ: PlotMetaType::Plot(PlotType::LineFillRaw),
-        }
+
+    pub fn line_fill_raw<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+        let mut area = Area::new();
+        let it = it.unpack(&mut area);
+        SinglePlot::new(
+            PlotMetaType::Plot(PlotType::LineFillRaw),
+            self.label,
+            it,
+            area,
+        )
     }
 
     ///

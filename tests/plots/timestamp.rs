@@ -1,8 +1,8 @@
 use super::*;
 
 use chrono::TimeZone;
+use poloto::build;
 use poloto::num::timestamp::UnixTime;
-
 #[test]
 fn days() -> fmt::Result {
     let timezone = &chrono::Utc;
@@ -21,7 +21,7 @@ fn days() -> fmt::Result {
     ];
 
     let p = poloto::plots!(
-        poloto::build::plot("").line().cloned(data.iter()),
+        poloto::build::plot("").line(build::cloned(data.iter())),
         poloto::build::markers(None, Some(0))
     );
 
@@ -49,7 +49,7 @@ fn minutes_local_time() -> fmt::Result {
     ];
 
     let s = poloto::data(plots!(
-        poloto::build::plot("").line().cloned(data.iter()),
+        poloto::build::plot("").line(data),
         poloto::build::markers(None, Some(0))
     ));
 
@@ -83,7 +83,7 @@ fn months() -> fmt::Result {
     ];
 
     let plots = poloto::plots!(
-        poloto::build::plot("").line().cloned(data.iter()),
+        poloto::build::plot("").line(data),
         poloto::build::markers([], [0])
     );
 
@@ -118,7 +118,7 @@ fn seconds() -> fmt::Result {
     ];
 
     let data = poloto::data(plots!(
-        poloto::build::plot("").line().cloned(data.iter()),
+        poloto::build::plot("").line(data),
         poloto::build::markers(None, Some(0))
     ));
 

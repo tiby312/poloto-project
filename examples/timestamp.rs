@@ -1,5 +1,5 @@
+use poloto::build;
 use poloto::num::timestamp::UnixTime;
-
 fn main() {
     let timezone = &chrono::Utc;
     use chrono::TimeZone;
@@ -32,8 +32,8 @@ fn main() {
     });
 
     let plots = poloto::plots!(
-        poloto::build::plot("").line().cloned(data.iter()),
-        poloto::build::markers([], [0.0])
+        build::plot("").line(build::cloned(data.iter())),
+        build::markers([], [0.0])
     );
 
     poloto::data(plots)

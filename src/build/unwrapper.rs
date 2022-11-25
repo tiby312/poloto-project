@@ -31,8 +31,8 @@ impl<T: PlotNum> Unwrapper for &[T; 2] {
     }
 }
 
-impl<A: AsPlotnum> Unwrapper for &A {
-    type Item=A::Target;
+impl<A: AsPlotnum> Unwrapper for A {
+    type Item = A::Target;
     fn unwrap(self) -> A::Target {
         *self.as_plotnum()
     }

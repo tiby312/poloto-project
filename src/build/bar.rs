@@ -37,7 +37,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
 
     let vals_len = vals.len();
 
-    let bars = build::plot(name).bars().buffered(
+    let bars = build::plot(name).bars2(
         vals.into_iter()
             .enumerate()
             .map(|(i, x)| (x, i128::try_from(i).unwrap())),
