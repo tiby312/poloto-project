@@ -11,7 +11,8 @@ You can see it in action in this rust book [broccoli-book](https://tiby312.githu
 ## Gaussian Example
 
 ```rust
-use poloto::build::plot;
+use poloto::build;
+use poloto::prelude::*;
 // PIPE me to a file!
 fn main() {
     // See https://en.wikipedia.org/wiki/Gaussian_function
@@ -19,16 +20,16 @@ fn main() {
         use std::f64::consts::TAU;
         let s = sigma.powi(2);
         let k = (sigma * TAU).sqrt().recip();
-        move |&x: &f64| [x, (-0.5 * (x - mu).powi(2) / s).exp() * k]
+        move |&x: &f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let r: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
-    
+    let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
+
     let plots = poloto::plots!(
-        plot("σ=1.0").line().buffered(r.iter().map(gau(1.0, 0.))),
-        plot("σ=0.5").line().buffered(r.iter().map(gau(0.5, 0.))),
-        plot("σ=0.3").line().buffered(r.iter().map(gau(0.3, 0.))),
-        poloto::build::origin()
+        build::plot("σ=1.0").line(xs.iter().zip_output(gau(1.0, 0.0))),
+        build::plot("σ=0.5").line(xs.iter().zip_output(gau(0.5, 0.0))),
+        build::plot("σ=0.3").line(xs.iter().zip_output(gau(0.3, 0.0))),
+        build::origin()
     );
 
     poloto::data(plots)
@@ -36,6 +37,7 @@ fn main() {
         .append_to(poloto::header().light_theme())
         .render_stdout();
 }
+
 ```
 ## Output
 
@@ -47,7 +49,7 @@ fn main() {
 
 ```rust
 use hypermelon::prelude::*;
-use poloto::prelude::*;
+use poloto::build;
 
 // PIPE me to a file!
 fn main() {
@@ -75,13 +77,13 @@ fn main() {
 
     let a = poloto::build::plots_dyn((1000..1006).map(|i| {
         let name = format_move!("c({})", i);
-        let it = (0..).zip(collatz(i));
-        poloto::build::plot(name).line().buffered(it)
+        let i = (0..).zip(collatz(i));
+        build::plot(name).line(i)
     }));
 
     let b = poloto::build::origin();
 
-    poloto::data(plots!(a, b))
+    poloto::data(poloto::plots!(a, b))
         .map_opt(|_| opt)
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))
@@ -99,8 +101,8 @@ fn main() {
 ## Timestamp Example
 
 ```rust
+use poloto::build;
 use poloto::num::timestamp::UnixTime;
-
 fn main() {
     let timezone = &chrono::Utc;
     use chrono::TimeZone;
@@ -133,8 +135,8 @@ fn main() {
     });
 
     let plots = poloto::plots!(
-        poloto::build::plot("").line().cloned(data.iter()),
-        poloto::build::markers([], [0.0])
+        build::plot("").line(data),
+        build::markers([], [0.0])
     );
 
     poloto::data(plots)
@@ -158,17 +160,16 @@ fn main() {
 
 ```rust
 use hypermelon::format_move;
+use poloto::build;
 fn main() {
     // hourly trend over one day.
     let trend = vec![
         0, 0, 0, 0, 0, 3, 5, 5, 10, 20, 50, 60, 70, 50, 40, 34, 34, 20, 10, 20, 10, 4, 2, 0,
     ];
 
-    let it = (0..).zip(trend.iter().copied());
-
     let plots = poloto::plots!(
-        poloto::build::plot("").histogram().cloned(it),
-        poloto::build::markers([24], [])
+        build::plot("").histogram((0..).zip(trend)),
+        build::markers([24], [])
     );
 
     let data = poloto::data(plots);
@@ -216,7 +217,7 @@ fn main() {
 
 ```rust
 use hypermelon::prelude::*;
-use poloto::build::plot;
+use poloto::{build, prelude::OutputZip};
 fn main() {
     let theme = poloto::render::Theme::light();
 
@@ -259,13 +260,9 @@ fn main() {
     let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
 
     let data = poloto::plots!(
-        plot("sin-10")
-            .histogram()
-            .buffered(x.iter().step_by(3).map(|&x| [x, x.sin() - 10.])),
-        plot("cos").line().buffered(x.iter().map(|&x| [x, x.cos()])),
-        plot("sin-5")
-            .scatter()
-            .buffered(x.iter().step_by(3).map(|&x| [x, x.sin() - 5.]))
+        build::plot("sin-10").histogram(x.iter().step_by(3).zip_output(|x| x.sin() - 10.)),
+        build::plot("cos").line(x.iter().zip_output(|x| x.cos())),
+        build::plot("sin-5").scatter(x.iter().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
     poloto::data(data)
@@ -293,32 +290,19 @@ Poloto converts each plot into svg elements like circles. Because of this its no
 poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
 the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
 both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
-poloto forces the user to choose every time which method to use. Some scenarios:
-```rust,ignore
+by default, poloto will use a Vec backed buffer. However, you can configure it to clone the iterator instead.
 
-//BAD because the entire vec of data will be duplicated in memory!
-plot("").scatter().cloned(vec_of_data.into_iter());
-
-//GOOD because we are just cloning a iterator over references.
-plot("").scatter().cloned(vec_of_data.iter());
-
-//BAD because more memory is used than necessary. We can just iterate over
-//the existing vec twice returning references instead of collecting the plots into
-//another vec. 
-plot("").scatter().buffered(vec_of_data.into_iter());
-
-//BAD because expensive_calc() will be called 2000 times instead of just 1000 times.
-plot("").scatter().cloned((0..1000).zip_output(|x|x.expensive_calc()));
-
-//GOOD because expensive_calc() will be called only 1000 times.
-plot("").scatter().buffered((0..1000).zip_output(|x|x.expensive_calc()));
+```rust
+//Uses vec backed buffer
+let data=[[1.0,2.0],[2.0,3.0]];
+plot("").line(data)
 
 
-//GOOD because multiplying by 2 is fast operation that most likely
-//beats buffering all the plots.
-plot("").scatter().cloned((0..1000).zip_output(|x|x*2));
-
+//Cloned the iterator
+let it=(0..).zip(5..);
+plot("").line(poloto::build::cloned(it))
 ```
+
 
 
 ## Escape protection
