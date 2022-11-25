@@ -290,7 +290,7 @@ Poloto converts each plot into svg elements like circles. Because of this its no
 poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
 the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
 both. The second way is to accumulate the items from one iterator into a Vec<>, and then just iterate over that vec.
-by default, poloto will use a Vec backed buffer. However, you can configure it to clone the iterator instead.
+By default, poloto will use a Vec backed buffer. However, you can configure it to clone the iterator instead.
 
 ```rust
 //Uses vec backed buffer
@@ -303,6 +303,8 @@ let it=(0..).zip(5..);
 plot("").line(poloto::build::cloned(it))
 ```
 
+Using the cloned method has pros and cons. The user has more control and can reduce memory usage.
+However they might accidentally increase memory usage. 
 
 
 ## Escape protection
