@@ -543,13 +543,6 @@ impl<D: Display> SinglePlotBuilder<D> {
         SinglePlot::new(PlotMetaType::Plot(PlotType::Line), self.label, it, area)
     }
 
-    pub(crate) fn bars(self) -> PointBuilder<D> {
-        PointBuilder {
-            label: self.label,
-            typ: PlotMetaType::Plot(PlotType::Bars),
-        }
-    }
-
     pub(crate) fn bars2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
