@@ -27,9 +27,10 @@ fn main() {
 
     let a = poloto::build::plots_dyn((1000..1006).map(|i| {
         let name = format_move!("c({})", i);
-        let x = build::cloned(0..);
-        let y = build::buffered(collatz(i));
-        build::plot(name).line().data(build::zip(x, y))
+        let mut k = collatz(i);
+        build::plot(name)
+            .line()
+            .data(build::clonedbuffer(0.., |_| k.next()))
     }));
 
     let b = poloto::build::origin();

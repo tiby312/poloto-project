@@ -231,18 +231,18 @@ pub trait PlotIt {
     // }
 }
 
-pub trait PlotIt1D {
-    type Item: PlotNum;
-    type It: Iterator<Item = Self::Item>;
-    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It);
+// pub trait PlotIt1D {
+//     type Item: PlotNum;
+//     type It: Iterator<Item = Self::Item>;
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It);
 
-    fn zip<K: PlotIt1D>(self, other: K) -> Zip<Self, K>
-    where
-        Self: Sized,
-    {
-        Zip(self, other)
-    }
-}
+//     fn zip<K: PlotIt1D>(self, other: K) -> Zip<Self, K>
+//     where
+//         Self: Sized,
+//     {
+//         Zip(self, other)
+//     }
+// }
 
 pub fn buffered<I: Iterator>(it: I) -> BufferedPlotIt<I> {
     BufferedPlotIt(it)
@@ -254,169 +254,107 @@ pub fn cloned2<I: Iterator>(it: I) -> ClonedPlotIt2<I> {
     ClonedPlotIt2(it)
 }
 
-// pub trait Iter2 {
-//     // fn cloned_1d(self) -> ClonedPlot1D<Self>
-//     // where
-//     //     Self: Sized,
-//     // {
-//     //     ClonedPlot1D(self)
-//     // }
-//     // fn buffered_1d(self) -> BufferedPlot1D<Self>
-//     // where
-//     //     Self: Sized,
-//     // {
-//     //     BufferedPlot1D(self)
-//     // }
-//     fn cloned_plot(self) -> ClonedPlotIt<Self>
-//     where
-//         Self: Sized,
-//     {
-//         ClonedPlotIt(self)
-//     }
+// pub fn buffered_1d<N: PlotNum, I: Iterator>(it: I) -> BufferedPlot1D<N>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     BufferedPlot1D::new(it)
+// }
+// pub fn cloned_1d<N: PlotNum, I: Iterator + Clone>(it: I) -> ClonedPlot1d<N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     ClonedPlot1d::new(it)
+// }
 
-//     fn cloned_plot_soa(self) -> ClonedPlotIt2<Self>
-//     where
-//         Self: Sized,
-//     {
-//         ClonedPlotIt2(self)
-//     }
+// pub struct ClonedPlot1dRef<'a, N, I> {
+//     it: &'a I,
+//     bound: &'a [Option<N>; 2],
+// }
 
-//     fn buffered_plot(self) -> BufferedPlotIt<Self>
-//     where
-//         Self: Sized,
-//     {
-//         BufferedPlotIt(self)
+// impl<'a, N: PlotNum, I: Iterator + Clone> PlotIt1D for ClonedPlot1dRef<'a, N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     type Item = N;
+//     type It = UnwrapperIter<I>;
+
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (*self.bound, UnwrapperIter(self.it.clone()))
 //     }
 // }
-// impl<I: Iterator> Iter2 for I {}
+// pub struct ClonedPlot1d<N, I> {
+//     it: I,
+//     bound: [Option<N>; 2],
+// }
 
+// impl<N: PlotNum, I: Iterator + Clone> ClonedPlot1d<N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     pub fn new(it: I) -> Self {
+//         todo!()
+//     }
+//     pub fn bound(&self) -> ClonedPlot1dRef<N, I> {
+//         todo!()
+//     }
+//     pub fn iter(&self) -> I {
+//         self.it.clone()
+//     }
+// }
+// impl<N: PlotNum, I: Iterator> PlotIt1D for ClonedPlot1d<N, I>
+// where
+//     I::Item: Unwrapper<Item = N>,
+// {
+//     type Item = N;
+//     type It = UnwrapperIter<I>;
 
-pub struct ClonedPlot1dRef<'a,N,I>{
-    it:&'a I,
-    bound:&'a [Option<N>;2]
-}
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (self.bound, UnwrapperIter(self.it))
+//     }
+// }
 
-impl<'a,N: PlotNum,I:Iterator+Clone> PlotIt1D for ClonedPlot1dRef<'a,N,I> where I::Item:Unwrapper<Item=N>
-{
-    type Item = N;
-    type It = UnwrapperIter<I>;
+// pub struct BufferedPlot1dRef<'a, N> {
+//     bound: &'a [Option<N>; 2],
+//     it: &'a [N],
+// }
 
-    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
-        (*self.bound, UnwrapperIter(self.it.clone()))
-    }
-}
+// impl<'a, N: PlotNum> PlotIt1D for BufferedPlot1dRef<'a, N> {
+//     type Item = N;
+//     type It = std::iter::Copied<std::slice::Iter<'a, N>>;
 
-pub struct ClonedPlot1d<N,I>{
-    it:I,
-    bound:[Option<N>;2]
-}
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (*self.bound, self.it.iter().copied())
+//     }
+// }
 
-impl<N: PlotNum,I:Iterator+Clone> ClonedPlot1d<N,I> where I::Item:Unwrapper<Item=N>{
-    pub fn new(it:I)->Self{
-        todo!()
-    }
-    pub fn bound(&self)->ClonedPlot1dRef<N,I>{
-        todo!()
-    }
-    pub fn iter(&self)->I{
-        self.it.clone()
-    }
-}
-impl<N: PlotNum,I:Iterator> PlotIt1D for ClonedPlot1d<N,I> where I::Item:Unwrapper<Item=N>
-{
-    type Item = N;
-    type It = UnwrapperIter<I>;
+// pub struct BufferedPlot1D<N> {
+//     bound: [Option<N>; 2],
+//     vec: Vec<N>,
+// }
+// impl<N: PlotNum> BufferedPlot1D<N> {
+//     pub fn new<I: Iterator>(it: I) -> Self
+//     where
+//         I::Item: Unwrapper<Item = N>,
+//     {
+//         todo!()
+//     }
+//     pub fn iter(&self) -> std::slice::Iter<N> {
+//         self.vec.iter()
+//     }
+//     pub fn bound(&self) -> BufferedPlot1dRef<N> {
+//         todo!()
+//     }
+// }
 
-    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
-        (self.bound, UnwrapperIter(self.it))
-    }
-}
+// impl<N: PlotNum> PlotIt1D for BufferedPlot1D<N> {
+//     type Item = N;
+//     type It = std::vec::IntoIter<N>;
 
-
-pub struct BufferedPlot1dRef<'a,N>{
-    bound:&'a [Option<N>;2],
-    it:&'a [N]
-}
-
-impl<'a,N: PlotNum> PlotIt1D for BufferedPlot1dRef<'a,N>
-{
-    type Item = N;
-    type It = std::iter::Copied<std::slice::Iter<'a,N>>;
-
-    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
-        (*self.bound, self.it.iter().copied())
-    }
-}
-
-pub struct BufferedPlot1D<N>{
-    bound:[Option<N>;2],
-    vec:Vec<N>
-}
-impl<N:PlotNum> BufferedPlot1D<N>{
-    pub fn new<I:Iterator>(it:I)->Self where I::Item:Unwrapper<Item=N>{
-        todo!()
-    }
-    pub fn iter(&self)->std::slice::Iter<N>{
-        self.vec.iter()
-    }
-    pub fn bound(&self)->BufferedPlot1dRef<N>{
-        todo!()
-    }
-}
-
-
-impl<N: PlotNum> PlotIt1D for BufferedPlot1D<N>
-{
-    type Item = N;
-    type It = std::vec::IntoIter<N>;
-
-    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
-        (self.bound, self.vec.into_iter())
-    }
-}
-
-
-//pub struct BufferedPlot1D<I>(pub I);
-
-impl<N: PlotNum, I: Iterator> PlotIt1D for BufferedPlotIt<I>
-where
-    I::Item: Clone + build::unwrapper::Unwrapper<Item = N>,
-{
-    type Item = N;
-    type It = std::vec::IntoIter<N>;
-
-    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
-        let it = self.0;
-
-        todo!();
-        let area = [None; 2];
-        let mut vec = Vec::with_capacity(it.size_hint().0);
-        for j in it {
-            let x = j.unwrap();
-            //area.grow(Some(&x), Some(&y));
-            vec.push(x);
-        }
-
-        (area, vec.into_iter())
-    }
-}
-
-impl<N: PlotNum, I: Iterator + Clone> PlotIt1D for ClonedPlotIt<I>
-where
-    I::Item: build::unwrapper::Unwrapper<Item = N>,
-{
-    type Item = N;
-    type It = build::unwrapper::UnwrapperIter<I>;
-
-    fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
-        let it = self.0;
-
-        todo!();
-        let area = [None; 2];
-
-        (area, build::unwrapper::UnwrapperIter(it))
-    }
-}
+//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It) {
+//         (self.bound, self.vec.into_iter())
+//     }
+// }
 
 #[derive(Copy, Clone)]
 pub struct ClonedPlotIt<I>(pub I);
@@ -464,26 +402,69 @@ where
     }
 }
 
-pub fn zip<IX: PlotIt1D, IY: PlotIt1D>(a: IX, b: IY) -> Zip<IX, IY> {
-    Zip(a, b)
+// pub fn zip<IX: PlotIt1D, IY: PlotIt1D>(a: IX, b: IY) -> Zip<IX, IY> {
+//     Zip(a, b)
+// }
+// pub struct Zip<IX: PlotIt1D, IY: PlotIt1D>(IX, IY);
+
+// impl<IX: PlotIt1D, IY: PlotIt1D> PlotIt for Zip<IX, IY> {
+//     type X = IX::Item;
+//     type Y = IY::Item;
+//     type It = std::iter::Zip<IX::It, IY::It>;
+
+//     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
+//         let (xarea, itx) = self.0.unpack();
+//         let (yarea, ity) = self.1.unpack();
+
+//         area.grow(xarea[0].as_ref(), None);
+//         area.grow(xarea[1].as_ref(), None);
+//         area.grow(None, yarea[0].as_ref());
+//         area.grow(None, yarea[1].as_ref());
+
+//         itx.zip(ity)
+//     }
+// }
+
+pub fn clonedbuffer<I: Iterator, X: PlotNum, Y: PlotNum, F: FnMut(&X) -> Option<Y>>(
+    it: I,
+    func: F,
+) -> ClonedBuffer<I, F>
+where
+    I::Item: Unwrapper<Item = X>,
+{
+    ClonedBuffer { it, func }
 }
-pub struct Zip<IX: PlotIt1D, IY: PlotIt1D>(IX, IY);
 
-impl<IX: PlotIt1D, IY: PlotIt1D> PlotIt for Zip<IX, IY> {
-    type X = IX::Item;
-    type Y = IY::Item;
-    type It = std::iter::Zip<IX::It, IY::It>;
+pub struct ClonedBuffer<I, F> {
+    pub it: I,
+    pub func: F,
+}
 
-    fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
-        let (xarea, itx) = self.0.unpack();
-        let (yarea, ity) = self.1.unpack();
+impl<X: PlotNum, Y: PlotNum, I: Iterator + Clone, F: FnMut(&X) -> Option<Y>> PlotIt
+    for ClonedBuffer<I, F>
+where
+    I::Item: build::unwrapper::Unwrapper<Item = X>,
+{
+    type X = X;
+    type Y = Y;
+    type It = std::iter::Zip<UnwrapperIter<I>, std::vec::IntoIter<Y>>;
 
-        area.grow(xarea[0].as_ref(), None);
-        area.grow(xarea[1].as_ref(), None);
-        area.grow(None, yarea[0].as_ref());
-        area.grow(None, yarea[1].as_ref());
+    fn unpack(mut self, area: &mut Area<Self::X, Self::Y>) -> Self::It {
+        let it = self.it;
 
-        itx.zip(ity)
+        let mut ys = Vec::new();
+        for j in it.clone() {
+            let j = j.unwrap();
+
+            let Some(y)=(self.func)(&j) else{
+                break;
+            };
+            area.grow(Some(&j), Some(&y));
+
+            ys.push(y)
+        }
+
+        UnwrapperIter(it).zip(ys.into_iter())
     }
 }
 
@@ -545,15 +526,6 @@ impl<D: Display> PointBuilder<D> {
         I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
     {
         self.data(BufferedPlotIt(it))
-    }
-
-    #[deprecated]
-    pub fn parts<IX: PlotIt1D, IY: PlotIt1D>(
-        self,
-        x: IX,
-        y: IY,
-    ) -> SinglePlot<IX::Item, IY::Item, std::iter::Zip<IX::It, IY::It>, D> {
-        self.data(x.zip(y))
     }
 }
 

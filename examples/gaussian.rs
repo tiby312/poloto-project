@@ -10,15 +10,9 @@ fn main() {
         move |&x: &f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let xs = build::BufferedPlot1D::new(poloto::util::range_iter([-5.0, 5.0], 200));
-    
-    //let xs = build::ClonedPlot1d::new(poloto::util::range_iter([-5.0, 5.0], 200));
-    
-    
-    let makep = |val: f64| {
-        let ys = xs.iter().map(gau(val, 0.));
-        build::zip(xs.bound(), build::buffered(ys))
-    };
+    let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
+
+    let makep = |val: f64| build::clonedbuffer(xs.iter(), move |x| Some(gau(val, 0.)(x)));
 
     let plots = poloto::plots!(
         build::plot("σ=1.0").line().data(makep(1.0)),
