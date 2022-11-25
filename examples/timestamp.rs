@@ -31,10 +31,7 @@ fn main() {
         (UnixTime::from(d), x)
     });
 
-    let plots = poloto::plots!(
-        build::plot("").line(data),
-        build::markers([], [0.0])
-    );
+    let plots = poloto::plots!(build::plot("").line(data), build::markers([], [0.0]));
 
     poloto::data(plots)
         .build_and_label((

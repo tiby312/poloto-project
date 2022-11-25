@@ -205,44 +205,17 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> 
     }
 }
 
-///
-/// Iterator over all plots that have been assembled by the user.
-/// This trait is used by the poloto renderer to iterate over and render all the plots.
-///
 pub trait PlotIt {
     type X: PlotNum;
     type Y: PlotNum;
     type It: Iterator<Item = (Self::X, Self::Y)>;
     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It;
-
-    // /// Create a line from plots using a SVG path element.
-    // /// The path element belongs to the `.poloto[N]fill` css class.
-    // fn line<D: Display>(self, label: D) -> SinglePlot<Self::X, Self::Y, Self::It, D>
-    // where
-    //     Self: Sized,
-    // {
-    //     PointBuilder {
-    //         label: label,
-    //         typ: PlotMetaType::Plot(PlotType::Line),
-    //     }
-    //     .data(self)
-    // }
 }
 
-// pub trait PlotIt1D {
-//     type Item: PlotNum;
-//     type It: Iterator<Item = Self::Item>;
-//     fn unpack(self) -> ([Option<Self::Item>; 2], Self::It);
-
-//     fn zip<K: PlotIt1D>(self, other: K) -> Zip<Self, K>
-//     where
-//         Self: Sized,
-//     {
-//         Zip(self, other)
-//     }
-// }
-
-pub fn cloned<I: Iterator>(it: I) -> ClonedPlotIt<I> {
+pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(it: I) -> ClonedPlotIt<I>
+where
+    I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
+{
     ClonedPlotIt(it)
 }
 
