@@ -14,7 +14,7 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
         .collect();
 
     let p = poloto::plots!(
-        plot("tan(x)").line2(
+        plot("tan(x)").line(
             x.iter()
                 .copied()
                 .zip_output(f64::tan)
@@ -22,13 +22,13 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
                 .crop_below(-10.0)
                 .crop_left(2.0)
         ),
-        plot("2*cos(x)").line2(
+        plot("2*cos(x)").line(
             x.iter()
                 .copied()
                 .zip_output(|x| 2.0 * x.cos())
                 .crop_above(1.4)
         ),
-        plot("2*cos(x)").line2(build::cloned(
+        plot("2*cos(x)").line(build::cloned(
             x.iter()
                 .copied()
                 .zip_output(|x| 2.0 * x.cos())
@@ -50,7 +50,7 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
 
     let p = poloto::plots!(
         poloto::build::BoxedPlot::new(
-            plot("tan(x)").line2(
+            plot("tan(x)").line(
                 x.iter()
                     .copied()
                     .zip_output(f64::tan)
@@ -60,9 +60,9 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             )
         ),
         poloto::build::BoxedPlot::new(
-            plot("2*cos(x)").line2(x.iter().zip_output(|x| 2.0 * x.cos()).crop_above(1.4))
+            plot("2*cos(x)").line(x.iter().zip_output(|x| 2.0 * x.cos()).crop_above(1.4))
         ),
-        poloto::build::BoxedPlot::new(plot("2*cos(x").line2(build::cloned(
+        poloto::build::BoxedPlot::new(plot("2*cos(x").line(build::cloned(
             x.iter().zip_output(|x| 2.0 * x.cos()).crop_above(1.4)
         )))
     );

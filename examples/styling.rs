@@ -42,9 +42,9 @@ fn main() {
     let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
 
     let data = poloto::plots!(
-        build::plot("sin-10").histogram2(x.iter().step_by(3).zip_output(|x| x.sin() - 10.)),
-        build::plot("cos").line2(x.iter().zip_output(|x| x.cos())),
-        build::plot("sin-5").scatter2(x.iter().step_by(3).zip_output(|x| x.sin() - 5.))
+        build::plot("sin-10").histogram(x.iter().step_by(3).zip_output(|x| x.sin() - 10.)),
+        build::plot("cos").line(x.iter().zip_output(|x| x.cos())),
+        build::plot("sin-5").scatter(x.iter().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
     poloto::data(data)

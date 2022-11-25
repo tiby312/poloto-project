@@ -7,7 +7,7 @@ fn main() {
     ];
 
     let plots = poloto::plots!(
-        build::plot("").histogram2((0..).zip(trend.iter())),
+        build::plot("").histogram((0..).zip(trend.iter())),
         build::markers([24], [])
     );
 

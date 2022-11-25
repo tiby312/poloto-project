@@ -68,7 +68,7 @@ fn test_chart() -> std::fmt::Result {
 
         //TODO dont include style in every instance!
 
-        let p = poloto::data(poloto::build::plot("").scatter2(test)).build_and_label((
+        let p = poloto::data(poloto::build::plot("").scatter(test)).build_and_label((
             hypermelon::format_move!("float test {}", i),
             "x",
             "y",
@@ -84,7 +84,7 @@ fn test_chart() -> std::fmt::Result {
             // let style =
             //     poloto::Theme::light().append(".poloto_scatter{stroke-width:20}");
 
-            let p = poloto::data(poloto::build::plot("").scatter2(test)).build_and_label((
+            let p = poloto::data(poloto::build::plot("").scatter(test)).build_and_label((
                 hypermelon::format_move!("int test {}", i),
                 "x",
                 "y",

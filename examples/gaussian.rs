@@ -13,9 +13,9 @@ fn main() {
     let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
 
     let plots = poloto::plots!(
-        build::plot("σ=1.0").line2(xs.iter().zip_output(gau(1.0, 0.0))),
-        build::plot("σ=0.5").line2(xs.iter().zip_output(gau(0.5, 0.0))),
-        build::plot("σ=0.3").line2(xs.iter().zip_output(gau(0.3, 0.0))),
+        build::plot("σ=1.0").line(xs.iter().zip_output(gau(1.0, 0.0))),
+        build::plot("σ=0.5").line(xs.iter().zip_output(gau(0.5, 0.0))),
+        build::plot("σ=0.3").line(xs.iter().zip_output(gau(0.3, 0.0))),
         build::origin()
     );
 
