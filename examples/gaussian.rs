@@ -12,7 +12,10 @@ fn main() {
 
     let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
 
-    let makep = |val: f64| build::clonedbuffer(xs.iter(), move |x| Some(gau(val, 0.)(x)));
+    let makep = |val: f64| {
+        let func = gau(val, 0.);
+        build::clonedbuffer(xs.iter(), move |x| Some(func(x)))
+    };
 
     let plots = poloto::plots!(
         build::plot("σ=1.0").line().data(makep(1.0)),
