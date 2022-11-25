@@ -10,11 +10,12 @@ fn main() {
         move |&x: &f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
-
+    //TODO impl!!!
+    let xs = make1dBound(poloto::util::range_iter([-5.0, 5.0], 200));
+    
     let makep = |val: f64| {
         let ys = xs.iter().map(gau(val, 0.));
-        build::zip(build::cloned(xs.iter()), build::buffered(ys))
+        build::zip(xs.bounds(), build::buffered(ys))
     };
 
     let plots = poloto::plots!(
