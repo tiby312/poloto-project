@@ -9,7 +9,7 @@ fn main() {
     let it = (0..).zip(trend.iter().copied());
 
     let plots = poloto::plots!(
-        build::plot("").histogram().data(build::cloned(it)),
+        build::plot("").histogram().cloned(it),
         build::markers([24], [])
     );
 

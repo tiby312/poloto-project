@@ -50,7 +50,8 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
 
     let p = poloto::plots!(
         poloto::build::BoxedPlot::new(
-            plot("tan(x)").line().buffered(
+            plot("tan(x)").line().data(
+                build::clonedbuffer(x.iter(),|a|Some(a.tan()))
                 x.iter()
                     .copied()
                     .zip_output(f64::tan)

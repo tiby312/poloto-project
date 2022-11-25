@@ -12,15 +12,14 @@ fn main() {
 
     let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
 
-    let makep = |val: f64| {
-        let func = gau(val, 0.);
-        build::clonedbuffer(xs.iter(), move |x| Some(func(x)))
-    };
+    let y1: Vec<_> = xs.iter().map(gau(1.0, 0.0)).collect();
+    let y2: Vec<_> = xs.iter().map(gau(0.5, 0.0)).collect();
+    let y3: Vec<_> = xs.iter().map(gau(0.3, 0.0)).collect();
 
     let plots = poloto::plots!(
-        build::plot("σ=1.0").line().data(makep(1.0)),
-        build::plot("σ=0.5").line().data(makep(0.5)),
-        build::plot("σ=0.3").line().data(makep(0.3)),
+        build::plot("σ=1.0").line().cloned(xs.iter().zip(y1.iter())),
+        build::plot("σ=0.5").line().cloned(xs.iter().zip(y2.iter())),
+        build::plot("σ=0.3").line().cloned(xs.iter().zip(y3.iter())),
         build::origin()
     );
 

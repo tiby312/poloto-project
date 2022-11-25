@@ -499,13 +499,12 @@ pub struct PointBuilder<D: Display> {
 }
 
 impl<D: Display> PointBuilder<D> {
-    pub fn data<II: PlotIt>(self, it: II) -> SinglePlot<II::X, II::Y, II::It, D> {
+    fn data<II: PlotIt>(self, it: II) -> SinglePlot<II::X, II::Y, II::It, D> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
         SinglePlot::new(self.typ, self.label, it, area)
     }
 
-    #[deprecated]
     pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(
         self,
         it: I,
@@ -517,7 +516,6 @@ impl<D: Display> PointBuilder<D> {
         self.data(ClonedPlotIt(it))
     }
 
-    #[deprecated]
     pub fn buffered<X: PlotNum, Y: PlotNum, I: Iterator>(
         self,
         it: I,
