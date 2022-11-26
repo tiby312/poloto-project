@@ -205,6 +205,9 @@ impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> 
     }
 }
 
+///
+/// Return min max bounds as well as the points of one plot.
+/// 
 pub trait PlotIt {
     type X: PlotNum;
     type Y: PlotNum;
@@ -212,12 +215,19 @@ pub trait PlotIt {
     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It;
 }
 
+///
+/// A plot iterator that will be cloned to find the min max bounds.
+/// 
 pub fn cloned<X: PlotNum, Y: PlotNum, I: IntoIterator>(it: I) -> ClonedPlotIt<I::IntoIter>
 where
+    I::IntoIter:Clone,
     I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
     ClonedPlotIt(it.into_iter())
 }
+
+
+
 
 // pub fn buffered_1d<N: PlotNum, I: Iterator>(it: I) -> BufferedPlot1D<N>
 // where
@@ -322,7 +332,7 @@ where
 // }
 
 #[derive(Copy, Clone)]
-pub struct ClonedPlotIt<I>(pub I);
+pub struct ClonedPlotIt<I>(I);
 
 impl<X: PlotNum, Y: PlotNum, I: Iterator + Clone> PlotIt for ClonedPlotIt<I>
 where
