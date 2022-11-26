@@ -253,12 +253,12 @@ fn main() {
     // Style the ticks
     let theme = theme.append(".poloto_imgs.poloto_ticks{stroke:springgreen;}");
 
-    let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
+    let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
     let data = poloto::plots!(
-        build::plot("sin-10").histogram(x.iter().step_by(3).zip_output(|x| x.sin() - 10.)),
-        build::plot("cos").line(x.iter().zip_output(|x| x.cos())),
-        build::plot("sin-5").scatter(x.iter().step_by(3).zip_output(|x| x.sin() - 5.))
+        build::plot("sin-10").histogram(x.clone().step_by(3).zip_output(|x| x.sin() - 10.)),
+        build::plot("cos").line(x.clone().zip_output(|x| x.cos())),
+        build::plot("sin-5").scatter(x.clone().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
     poloto::data(data)
