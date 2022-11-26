@@ -182,7 +182,7 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
-#[deprecated]
+#[deprecated(note="You can now just pass the iterator directly.")]
 pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
     stuff: I,
 ) -> plot_iter_impl::PlotsDyn<F> {

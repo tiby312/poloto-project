@@ -320,7 +320,7 @@ fn no_plots_only_marker() -> fmt::Result {
     > = vec![];
 
     let data = poloto::data(poloto::plots!(
-        poloto::build::plots_dyn(v),
+        v,
         poloto::build::markers([], [5])
     ))
     .build_and_label((
@@ -391,7 +391,7 @@ fn test_single_and_chain_and_dyn_cloneable() {
 
     assert_eq!(s1, s2);
 
-    let l3 = poloto::build::plots_dyn(vec![plot("").scatter(build::cloned(data.iter()))]);
+    let l3 = vec![plot("").scatter(build::cloned(data.iter()))];
 
     let l = plots!(l, l3);
 
