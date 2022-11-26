@@ -20,15 +20,15 @@ fn main() {
         use std::f64::consts::TAU;
         let s = sigma.powi(2);
         let k = (sigma * TAU).sqrt().recip();
-        move |&x: &f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
+        move |x: f64| (-0.5 * (x - mu).powi(2) / s).exp() * k
     };
 
-    let xs: Vec<_> = poloto::util::range_iter([-5.0, 5.0], 200).collect();
+    let xs = poloto::util::range_iter([-5.0, 5.0], 200);
 
     let plots = poloto::plots!(
-        build::plot("σ=1.0").line(xs.iter().zip_output(gau(1.0, 0.0))),
-        build::plot("σ=0.5").line(xs.iter().zip_output(gau(0.5, 0.0))),
-        build::plot("σ=0.3").line(xs.iter().zip_output(gau(0.3, 0.0))),
+        build::plot("σ=1.0").line(xs.clone().zip_output(gau(1.0, 0.0))),
+        build::plot("σ=0.5").line(xs.clone().zip_output(gau(0.5, 0.0))),
+        build::plot("σ=0.3").line(xs.clone().zip_output(gau(0.3, 0.0))),
         build::origin()
     );
 
@@ -75,15 +75,11 @@ fn main() {
     let style =
         poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
-    let a = poloto::build::plots_dyn((1000..1006).map(|i| {
-        let name = format_move!("c({})", i);
-        let i = (0..).zip(collatz(i));
-        build::plot(name).line(i)
-    }));
+    let a = poloto::build::plots_dyn(
+        (1000..1006).map(|i| build::plot(format_move!("c({})", i)).line((0..).zip(collatz(i)))),
+    );
 
-    let b = poloto::build::origin();
-
-    poloto::data(poloto::plots!(a, b))
+    poloto::data(poloto::plots!(poloto::build::origin(), a))
         .map_opt(|_| opt)
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))
@@ -295,12 +291,12 @@ By default, poloto will use a Vec backed buffer. However, you can configure it t
 ```rust
 //Uses vec backed buffer
 let data=[[1.0,2.0],[2.0,3.0]];
-plot("").line(data)
+poloto::build::plot("").line(data);
 
 
 //Cloned the iterator
-let it=(0..).zip(5..);
-plot("").line(poloto::build::cloned(it))
+let it=(0..).take(10).zip(5..);
+poloto::build::plot("").line(poloto::build::cloned(it));
 ```
 
 Using the cloned method has pros and cons. The user has more control and can reduce memory usage.
@@ -366,7 +362,7 @@ In these cases, poloto will fall back to making the number relative to the first
 
 You can use [resvg](https://crates.io/crates/resvg). Install that, and then run a command similar to:
 
-```rust,ignore
+```ignore
 resvg -w 1200 target/assets/collatz.svg target/assets/collatz.png
 ```
 
