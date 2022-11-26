@@ -81,9 +81,9 @@ macro_rules! plots {
         {
             use $crate::build::PlotIteratorExt;
             use $crate::build::IntoPlotIterator;
-            let mut a=$a.create();
+            let mut a=$a.into_plot();
             $(
-                let a=a.chain($x.create());
+                let a=a.chain($x.into_plot());
             )*
             a
         }
@@ -102,7 +102,7 @@ pub fn data<
     plots: J,
 ) -> Stage1<P, X::DefaultTicks, Y::DefaultTicks> {
     render::Stage1::from_parts(
-        plots.create(),
+        plots.into_plot(),
         X::default_ticks(),
         Y::default_ticks(),
         render_opt(),

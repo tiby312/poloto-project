@@ -30,7 +30,7 @@ impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> IntoPlotIte
     for SinglePlot<X, Y, I, D>
 {
     type P = Self;
-    fn create(self) -> Self {
+    fn into_plot(self) -> Self {
         self
     }
 }
@@ -90,7 +90,7 @@ impl<A, B> Chain<A, B> {
 
 impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> IntoPlotIterator for Chain<A, B> {
     type P = Self;
-    fn create(self) -> Self {
+    fn into_plot(self) -> Self {
         self
     }
 }
@@ -149,14 +149,14 @@ impl<F> PlotsDyn<F> {
 
 impl<I: IntoIterator<Item = F>, F: PlotIterator> IntoPlotIterator for I {
     type P = PlotsDyn<F>;
-    fn create(self) -> Self::P {
+    fn into_plot(self) -> Self::P {
         plot_iter_impl::PlotsDyn::new(self.into_iter().collect())
     }
 }
 
 impl<F: PlotIterator> IntoPlotIterator for PlotsDyn<F> {
     type P = Self;
-    fn create(self) -> Self {
+    fn into_plot(self) -> Self {
         self
     }
 }
@@ -220,7 +220,7 @@ where
     YI::Item: PlotNum,
 {
     type P = Self;
-    fn create(self) -> Self {
+    fn into_plot(self) -> Self {
         self
     }
 }

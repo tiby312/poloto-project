@@ -42,7 +42,7 @@ pub enum PlotMetaType {
 
 pub trait IntoPlotIterator {
     type P: PlotIterator;
-    fn create(self) -> Self::P;
+    fn into_plot(self) -> Self::P;
 }
 
 // impl<P: PlotIterator> IntoPlotIterator for P {
@@ -182,7 +182,7 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
-#[deprecated(note="You can now just pass the iterator directly.")]
+#[deprecated(note = "You can now just pass the iterator directly.")]
 pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
     stuff: I,
 ) -> plot_iter_impl::PlotsDyn<F> {
@@ -201,7 +201,7 @@ impl<'a, X, Y> BoxedPlot<'a, X, Y> {
 
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> IntoPlotIterator for BoxedPlot<'a, X, Y> {
     type P = Self;
-    fn create(self) -> Self {
+    fn into_plot(self) -> Self {
         self
     }
 }
