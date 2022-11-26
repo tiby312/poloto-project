@@ -281,7 +281,7 @@ fn main() {
 
 Poloto converts each plot into svg elements like circles. Because of this its not really suitable for plots with many many plots. For those you might want to use a library to lets you plot directly to a png/jpg image instead. You can certainly rasterize the generated svg image, but generating and displaying the svg wont be all that efficient if there are a ton of plots.
 
-### `cloned()` vs `buffered()`
+### `cloned` vs `buffered` plot iterators
 
 poloto runs through plot iterators twice. Once to get the min/max bounds, and a second time to scale all
 the plots by those min/max bounds. There are two ways to do this. One is to just clone the iterator, and consume
@@ -316,19 +316,6 @@ See the graphs in this report: [broccoli_book](https://tiby312.github.io/broccol
 
 * `poloto[n]fill` - If the n'th plot requires fill. (e.g. linefill or histogram)
 * `poloto[n]stroke` - If the n'th plot requires stroke. (e.g. line or scatter)
-
-
-## Iterating plots twice
-
-In order to calculate the right size view to scale all the plots, poloto has to iterate over all the plot
-points twice. Once to find the min and max bounds, and once to scale all the points by the scale determined
-by the first iteration. 
-
-If you are using an iterator where each iteration is expensive, consider running the iterator just once,
-collecting the results in a Vec. Then pass that Vec to the plotting functions. 
-Beware of passing the buffer directly to the plotter! If you do this, you'll use a lot of memory since 
-the plotter will clone the whole buffer. Instead pass a reference to the buffer. See the second example below.
-
 
 ## Can I change the styling of the plots?
 
