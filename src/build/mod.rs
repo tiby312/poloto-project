@@ -586,6 +586,10 @@ impl<D: Display> SinglePlotBuilder<D> {
         )
     }
 }
+
+///
+/// Start creating one plot.
+/// 
 pub fn plot<D: Display>(label: D) -> SinglePlotBuilder<D> {
     SinglePlotBuilder { label }
 }
