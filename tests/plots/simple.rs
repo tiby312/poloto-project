@@ -174,11 +174,7 @@ fn custom_dim() -> fmt::Result {
         .fuse()
     };
 
-    let mut v = vec![];
-    for i in 1000..1006 {
-        let l = plot(format_move!("c({})", i)).line((0..).zip(collatz(i)));
-        v.push(l);
-    }
+    let v = (1000..1006).map(|i| plot(format_move!("c({})", i)).line((0..).zip(collatz(i))));
 
     let ddd = [2000.0, 1000.0];
 
@@ -189,12 +185,9 @@ fn custom_dim() -> fmt::Result {
         .with_tick_lines([true, true])
         .move_into();
 
-    let data = poloto::data(poloto::plots!(
-        poloto::build::markers([], [0]),
-        poloto::build::plots_dyn(v)
-    ))
-    .map_opt(|_| canvas)
-    .build_and_label(("collatz", "x", "y"));
+    let data = poloto::data(poloto::plots!(poloto::build::markers([], [0]), v))
+        .map_opt(|_| canvas)
+        .build_and_label(("collatz", "x", "y"));
 
     let w = util::create_test_file("custom_dim.svg");
 
@@ -303,7 +296,7 @@ fn no_plots() -> fmt::Result {
         >,
     > = vec![];
 
-    let data = poloto::data(poloto::build::plots_dyn(v)).build_and_label((
+    let data = poloto::data(v).build_and_label((
         "Some Trigonometry Plots 🥳",
         format_move!("This is the {} label", 'x'),
         "This is the y label",

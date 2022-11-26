@@ -40,6 +40,18 @@ pub enum PlotMetaType {
     Text,
 }
 
+pub trait IntoPlotIterator {
+    type P: PlotIterator;
+    fn create(self) -> Self::P;
+}
+
+// impl<P: PlotIterator> IntoPlotIterator for P {
+//     type P = P;
+//     fn create(self) -> Self::P {
+//         self
+//     }
+// }
+
 ///
 /// Iterator over all plots that have been assembled by the user.
 /// This trait is used by the poloto renderer to iterate over and render all the plots.
@@ -170,6 +182,7 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
+#[deprecated]
 pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
     stuff: I,
 ) -> plot_iter_impl::PlotsDyn<F> {
@@ -186,6 +199,12 @@ impl<'a, X, Y> BoxedPlot<'a, X, Y> {
     }
 }
 
+impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> IntoPlotIterator for BoxedPlot<'a, X, Y> {
+    type P = Self;
+    fn create(self) -> Self {
+        self
+    }
+}
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> {
     type X = X;
     type Y = Y;

@@ -80,9 +80,10 @@ macro_rules! plots {
     ( $a:expr,$( $x:expr ),* ) => {
         {
             use $crate::build::PlotIteratorExt;
-            let mut a=$a;
+            use $crate::build::IntoPlotIterator;
+            let mut a=$a.create();
             $(
-                let a=a.chain($x);
+                let a=a.chain($x.create());
             )*
             a
         }
@@ -96,10 +97,16 @@ pub fn data<
     X: PlotNum + HasDefaultTicks,
     Y: PlotNum + HasDefaultTicks,
     P: build::PlotIterator<X = X, Y = Y>,
+    J: build::IntoPlotIterator<P = P>,
 >(
-    plots: P,
+    plots: J,
 ) -> Stage1<P, X::DefaultTicks, Y::DefaultTicks> {
-    render::Stage1::from_parts(plots, X::default_ticks(), Y::default_ticks(), render_opt())
+    render::Stage1::from_parts(
+        plots.create(),
+        X::default_ticks(),
+        Y::default_ticks(),
+        render_opt(),
+    )
 }
 
 ///

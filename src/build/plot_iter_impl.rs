@@ -6,7 +6,7 @@ use super::marker::Area;
 /// Represents a single plot.
 ///
 #[derive(Clone)]
-pub struct SinglePlot<X, Y, I: Iterator<Item = (X, Y)>, D: Display> {
+pub struct SinglePlot<X, Y, I, D> {
     iter: I,
     area: Area<X, Y>,
     name: D,
@@ -23,6 +23,15 @@ impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> SinglePlot<X, Y, I, D> {
             typ,
             done: false,
         }
+    }
+}
+
+impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> IntoPlotIterator
+    for SinglePlot<X, Y, I, D>
+{
+    type P = Self;
+    fn create(self) -> Self {
+        self
     }
 }
 
@@ -79,6 +88,13 @@ impl<A, B> Chain<A, B> {
     }
 }
 
+impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> IntoPlotIterator for Chain<A, B> {
+    type P = Self;
+    fn create(self) -> Self {
+        self
+    }
+}
+
 impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> PlotIterator for Chain<A, B> {
     type X = A::X;
     type Y = A::Y;
@@ -130,6 +146,21 @@ impl<F> PlotsDyn<F> {
         }
     }
 }
+
+impl<I: IntoIterator<Item = F>, F: PlotIterator> IntoPlotIterator for I {
+    type P = PlotsDyn<F>;
+    fn create(self) -> Self::P {
+        plot_iter_impl::PlotsDyn::new(self.into_iter().collect())
+    }
+}
+
+impl<F: PlotIterator> IntoPlotIterator for PlotsDyn<F> {
+    type P = Self;
+    fn create(self) -> Self {
+        self
+    }
+}
+
 impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     type X = F::X;
     type Y = F::Y;
@@ -182,6 +213,18 @@ impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
         }
     }
 }
+
+impl<XI: Iterator, YI: Iterator> IntoPlotIterator for Marker<XI, YI>
+where
+    XI::Item: PlotNum,
+    YI::Item: PlotNum,
+{
+    type P = Self;
+    fn create(self) -> Self {
+        self
+    }
+}
+
 impl<XI: Iterator, YI: Iterator> PlotIterator for Marker<XI, YI>
 where
     XI::Item: PlotNum,
