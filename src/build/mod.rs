@@ -212,11 +212,11 @@ pub trait PlotIt {
     fn unpack(self, area: &mut Area<Self::X, Self::Y>) -> Self::It;
 }
 
-pub fn cloned<X: PlotNum, Y: PlotNum, I: Iterator>(it: I) -> ClonedPlotIt<I>
+pub fn cloned<X: PlotNum, Y: PlotNum, I: IntoIterator>(it: I) -> ClonedPlotIt<I::IntoIter>
 where
     I::Item: build::unwrapper::Unwrapper<Item = (X, Y)>,
 {
-    ClonedPlotIt(it)
+    ClonedPlotIt(it.into_iter())
 }
 
 // pub fn buffered_1d<N: PlotNum, I: Iterator>(it: I) -> BufferedPlot1D<N>
