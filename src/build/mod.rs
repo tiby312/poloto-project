@@ -56,16 +56,37 @@ pub trait Plot1{
     type X:PlotNum;
     type Y:PlotNum;
     type It:Iterator<Item=(Self::X,Self::Y)>;
-    fn handle(self,area:&mut Area<Self::X,Self::Y>,w:&mut dyn fmt::Write)->(PlotMetaType,Self::It);
+    fn area(&mut self,area:&mut Area<Self::X,Self::Y>);
+    fn handle(self,w:&mut dyn fmt::Write)->(PlotMetaType,Self::It);
 }
 pub trait Plot0{
     type X:PlotNum;
     type Y:PlotNum;
     type P:Plot1<X=Self::X,Y=Self::Y>;
     type It:Iterator<Item=Self::P>;
-    fn handle(&mut self,area:&mut Area<Self::X,Self::Y>)->Self::It;
+    fn area(&mut self,area:&mut Area<Self::X,Self::Y>);
+    fn handle(self)->Self::It;
 }
 
+pub struct Ounce<P>{
+    plot:P
+}
+impl<P:Plot1> Plot0 for Ounce<P>{
+    type X=P::X;
+
+    type Y=P::Y;
+
+    type P=P;
+
+    type It=std::iter::Once<P>;
+
+    fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
+        self.plot.area(area);
+    }
+    fn handle(self)->Self::It {
+        std::iter::once(self.plot)
+    }
+}
 
 
 pub enum PlotEither<A,B>{
@@ -91,14 +112,20 @@ impl<A:Plot1,B:Plot1<X=A::X,Y=A::Y>> Plot1 for PlotEither<A,B>{
     type X=A::X;
     type Y=A::Y;
     type It=It2<A::It,B::It>;
-    fn handle(self,area:&mut Area<Self::X,Self::Y>,w:&mut dyn fmt::Write)->(PlotMetaType,Self::It){
+    fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
+        match self{
+            PlotEither::First(a) => a.area(area),
+            PlotEither::Second(a) => a.area(area),
+        }
+    }
+    fn handle(self,w:&mut dyn fmt::Write)->(PlotMetaType,Self::It){
         match self{
             PlotEither::First(a) => {
-                let (t,i)=a.handle(area,w);
+                let (t,i)=a.handle(w);
                 (t,It2::First(i))
             },
             PlotEither::Second(b) => {
-                let (t,i)=b.handle(area,w);
+                let (t,i)=b.handle(w);
                 (t,It2::Second(i))
             }
         }
@@ -138,9 +165,13 @@ impl<A:Plot0,B:Plot0<X=A::X,Y=A::Y>> Plot0 for Chain1<A,B>{
 
     type It=ChainIt<A::It,B::It>;
 
-    fn handle(&mut self,area:&mut Area<Self::X,Self::Y>)->Self::It {
-        let first=self.first.handle(area);
-        let second=self.second.handle(area);
+    fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
+        self.first.area(area);
+        self.second.area(area);
+    }
+    fn handle(self)->Self::It {
+        let first=self.first.handle();
+        let second=self.second.handle();
         ChainIt{
             first,
             second
