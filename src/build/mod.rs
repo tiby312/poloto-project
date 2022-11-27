@@ -5,7 +5,7 @@
 
 use super::*;
 
-pub mod bar;
+//pub mod bar;
 pub mod crop;
 pub mod output_zip;
 pub mod unwrapper;
@@ -40,53 +40,61 @@ pub enum PlotMetaType {
 }
 
 pub trait IntoPlotIterator {
-    type P: PlotIterator;
-    fn into_plot(self) -> Self::P;
+    type X:PlotNum;
+    type Y:PlotNum;
+    type P: Iterator<Item=PlotTag<Self::X,Self::Y>>;
+    fn into_plot(self) -> PlotRes<Self::P,Self::X,Self::Y>;
 }
 
-impl<P: PlotIterator> IntoPlotIterator for P {
+impl<P: Iterator<Item=PlotTag<X,Y>>,X:PlotNum,Y:PlotNum> IntoPlotIterator for PlotRes<P,X,Y> {
+    type X=X;
+    type Y=Y;
     type P = P;
-    fn into_plot(self) -> Self::P {
+    fn into_plot(self) -> PlotRes<Self::P,Self::X,Self::Y> {
         self
     }
 }
 
 
 
-pub struct PlotRes<I:PlotIterator>{
-    area:Area<I::X,I::Y>,
+pub struct PlotRes<I:Iterator<Item=PlotTag<X,Y>>,X,Y>{
+    area:Area<X,Y>,
     it:I
 }
-impl<I:PlotIterator> PlotRes<I>{
-    pub fn chain<P:PlotIterator<X=I::X,Y=I::Y>>(self,other:P)->PlotRes<std::iter::Chain<I,P>>{
-        PlotRes { area: self.area.grow_area(&other.area), it: self.it.chain(other.it) }
+impl<I:Iterator<Item=PlotTag<X,Y>>,X:PlotNum,Y:PlotNum> PlotRes<I,X,Y>{
+    pub fn chain<P:Iterator<Item=PlotTag<X,Y>>>(self,other:PlotRes<P,X,Y>)->PlotRes<std::iter::Chain<I,P>,X,Y>{
+        let mut area=self.area;
+        self.area.grow_area(&other.area);
+        PlotRes { area , it: self.it.chain(other.it) }
     }
 
-    fn bounds(&self)->&Area<I::X,I::Y>{
+    fn bounds(&self)->&Area<X,Y>{
         &self.area
     }
 
 
-    pub(crate) fn iter(&mut self)->impl Iterator<Item=(I::X,I::Y)>{
-        self.it.take_while(|w|{
-            !matches!(w,PlotTag::Finish())
+    pub(crate) fn iter(&mut self)->impl Iterator<Item=PlotTag<X,Y>>+'_{
+        (&mut self.it).take_while(|w|{
+            match w{
+                PlotTag::Finish()=>false,
+                _=>true
+            }
         })
     }
 }
 
 
-pub trait PlotIterator:Iterator<Item=PlotTag<Self::X,Self::Y>>{
-    type X:PlotNum;
-    type Y:PlotNum;
-}
-impl<X,Y,I:Iterator<Item=PlotTag<X,Y>>> PlotIterator for I{
-    type X=X;
-    type Y=Y;
-}
+// pub trait PlotIterator:Iterator<Item=PlotTag<Self::X,Self::Y>>{
+//     type X:PlotNum;
+//     type Y:PlotNum;
+// }
+// impl<X:PlotNum,Y,I:Iterator<Item=PlotTag<X,Y>>> PlotIterator for I{
+//     type X=X;
+//     type Y=Y;
+// }
 
 
-
-enum PlotTag<X,Y>{
+pub enum PlotTag<X,Y>{
     Start{
         name:String,
         typ:PlotMetaType
@@ -106,7 +114,7 @@ enum PlotTag<X,Y>{
 /// Ensure that the origin point is within view.
 ///
 pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
-) -> PlotRes<std::iter::Empty<(X,Y)>> {
+) -> PlotRes<std::iter::Empty<PlotTag<X,Y>>,X,Y> {
     markers(Some(X::zero()), Some(Y::zero()))
 }
 
@@ -116,16 +124,16 @@ pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
 pub fn markers<XI: IntoIterator, YI: IntoIterator>(
     x: XI,
     y: YI,
-) -> PlotRes<std::iter::Empty<(XI::Item,YI::Item)>>
+) -> PlotRes<std::iter::Empty<PlotTag<XI::Item,YI::Item>>,XI::Item,YI::Item>
 where
     XI::Item: PlotNum,
     YI::Item: PlotNum,
 {
     let mut area= Area::new();
-    for a in &mut x {
+    for a in x {
         area.grow(Some(&a), None);
     }
-    for a in &mut y {
+    for a in y {
         area.grow(None, Some(&a));
     }
 
@@ -138,7 +146,7 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
-pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
+pub fn plots_dyn<X,Y,F: Iterator<Item=PlotTag<X,Y>>, I: IntoIterator<Item = F>>(
     stuff: I,
 ) -> plot_iter_impl::PlotsDyn<F> {
     plot_iter_impl::PlotsDyn::new(stuff.into_iter().collect::<Vec<_>>())
@@ -247,38 +255,38 @@ where
 
 
 
-pub struct SinglePlotBuilder<D> {
-    label: D,
+pub struct SinglePlotBuilder {
+    label: String,
 }
 
 
-pub struct PlotIterCreator<D:Display,I:Iterator>{
-    start:Option<(PlotMetaType,D)>,
+pub struct PlotIterCreator<I:Iterator>{
+    start:Option<(PlotMetaType,String)>,
     it:I
 }
-impl<D:Display,I:Iterator<Item=(X,Y)>,X,Y> PlotIterCreator<D,I>{
-    fn new(label:D,typ:PlotMetaType,it:I)->Self{
+impl<I:Iterator<Item=(X,Y)>,X,Y> PlotIterCreator<I>{
+    fn new(label:String,typ:PlotMetaType,it:I)->Self{
         Self { start: Some((typ,label)), it }
     }
 }
 
 
-impl<D:Display,I:Iterator<Item=(X,Y)>,X,Y> Iterator for PlotIterCreator<D,I>{
+impl<I:Iterator<Item=(X,Y)>,X,Y> Iterator for PlotIterCreator<I>{
     type Item=PlotTag<X,Y>;
-    fn next(&mut self)->PlotTag<X,Y>{
+    fn next(&mut self)->Option<PlotTag<X,Y>>{
         if let Some((typ,name))=self.start.take(){
             Some(
-                PlotRes::Start{
+                PlotTag::Start{
                     typ,
                     name
                 }
             )
         }else{
-            if let Some(point)=self.it.next(){
-                Some(point)
+            if let Some((x,y))=self.it.next(){
+                Some(PlotTag::Plot(x,y))
             }else{
                 Some(
-                    PlotRes::Finish()
+                    PlotTag::Finish()
                 )
             }
         }
@@ -286,11 +294,12 @@ impl<D:Display,I:Iterator<Item=(X,Y)>,X,Y> Iterator for PlotIterCreator<D,I>{
     }
 }
 
-impl<D: Display> SinglePlotBuilder<D> {
+impl SinglePlotBuilder {
     
-    fn gen<P: PlotIt>(self, typ:PlotMetaType,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
+    fn gen<P: PlotIt>(self, it: P,typ:PlotMetaType) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
+
 
         PlotRes{
             area,
@@ -300,12 +309,12 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Create a line from plots using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.  
     /// 
-    pub fn line<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
+    pub fn line<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
         self.gen(it,PlotMetaType::Plot(PlotType::Line))
     }
     
 
-    pub(crate) fn bars<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
+    pub(crate) fn bars<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
         self.gen(it,PlotMetaType::Plot(PlotType::Bars))
     }
     
@@ -313,21 +322,21 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Each point can be sized using the stroke width.
     /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
     /// with the latter class overriding the former.
-    pub fn scatter<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
+    pub fn scatter<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
         self.gen(it,PlotMetaType::Plot(PlotType::Scatter))
     }
     
     /// Create a histogram from plots using SVG rect elements.
     /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
-    pub fn histogram<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
+    pub fn histogram<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
         self.gen(it,PlotMetaType::Plot(PlotType::Histo))
     }
     
     
     /// Create a line from plots that will be filled underneath using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
+    pub fn line_fill<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
         self.gen(it,PlotMetaType::Plot(PlotType::LineFill))
     }
     
@@ -335,7 +344,7 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Create a line from plots that will be filled using a SVG path element.
     /// The first and last points will be connected and then filled in.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill_raw<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
+    pub fn line_fill_raw<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
         self.gen(it,PlotMetaType::Plot(PlotType::LineFillRaw))
     }
     
@@ -343,8 +352,8 @@ impl<D: Display> SinglePlotBuilder<D> {
     ///
     /// Write some text in the legend. This doesnt increment the plot number.
     ///
-    pub fn text<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<D,P::It>> {
-        self.gen(it,PlotMetaType::Text())
+    pub fn text<P: PlotIt>(self,it: P) -> PlotRes<PlotIterCreator<P::It>,P::X,P::Y> {
+        self.gen(it,PlotMetaType::Text)
     }
     
 }
@@ -352,6 +361,12 @@ impl<D: Display> SinglePlotBuilder<D> {
 ///
 /// Start creating one plot.
 ///
-pub fn plot<D: Display>(label: D) -> SinglePlotBuilder<D> {
+pub fn plot<D: Display>(label: D) -> SinglePlotBuilder {
+
+    //TODO provide falliable version
+    
+    let mut label=String::new();
+    use std::fmt::Write;
+    write!(&mut label,"{}",label).unwrap();
     SinglePlotBuilder { label }
 }

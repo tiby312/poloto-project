@@ -2,7 +2,7 @@ use super::*;
 
 use crate::build::*;
 
-pub(super) fn render_plot<P: build::PlotIterator>(
+pub(super) fn render_plot<P: build::IntoPlotIterator>(
     writer: &mut elem::ElemWrite,
     boundx: &ticks::DataBound<P::X>,
     boundy: &ticks::DataBound<P::Y>,

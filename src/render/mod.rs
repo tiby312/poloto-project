@@ -2,8 +2,9 @@
 //! Tools to render plots
 //!
 
+use crate::build::IntoPlotIterator;
+
 use super::*;
-use crate::build::PlotIterator;
 mod render_base;
 mod render_plot;
 
@@ -201,7 +202,7 @@ pub fn render_opt() -> RenderOptions {
 ///
 /// Link some plots with a way to render them.
 ///
-pub struct Stage1<P: PlotIterator, TX, TY> {
+pub struct Stage1<P: IntoPlotIterator, TX, TY> {
     opt: RenderOptions,
     tickx: TX,
     ticky: TY,
@@ -210,7 +211,7 @@ pub struct Stage1<P: PlotIterator, TX, TY> {
     boundy: DataBound<P::Y>,
 }
 
-impl<X, Y, P: build::PlotIterator<X = X, Y = Y>> Stage1<P, X::DefaultTicks, Y::DefaultTicks>
+impl<X, Y, P: build::IntoPlotIterator<X = X, Y = Y>> Stage1<P, X::DefaultTicks, Y::DefaultTicks>
 where
     X: HasDefaultTicks,
     Y: HasDefaultTicks,
@@ -225,7 +226,7 @@ where
     }
 }
 
-impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage1<P, TX, TY> {
+impl<P: build::IntoPlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage1<P, TX, TY> {
     pub fn from_parts(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Stage1<P, TX, TY> {
         let mut area = build::marker::Area::new();
         plots.area(&mut area);
@@ -317,7 +318,7 @@ impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage
     }
 }
 
-pub struct Stage2<P: PlotIterator, A, B> {
+pub struct Stage2<P: IntoPlotIterator, A, B> {
     opt: RenderOptionsResult,
     xticks: A,
     yticks: B,
@@ -326,7 +327,7 @@ pub struct Stage2<P: PlotIterator, A, B> {
     boundy: DataBound<P::Y>,
 }
 
-impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stage2<P, A, B> {
+impl<P: IntoPlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stage2<P, A, B> {
     pub fn label<Fmt: BaseFmt>(self, fmt: Fmt) -> Stage3<P, A, B, Fmt> {
         Stage3 {
             data: self,
@@ -380,14 +381,14 @@ impl<P: PlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stage2<P
     // }
 }
 
-pub struct Stage3<P: PlotIterator, A, B, BB> {
+pub struct Stage3<P: IntoPlotIterator, A, B, BB> {
     data: Stage2<P, A, B>,
     base: BB,
 }
 
 impl<P, A, B, BB> Stage3<P, A, B, BB>
 where
-    P: PlotIterator,
+    P: IntoPlotIterator,
     A: crate::ticks::TickDist<Num = P::X>,
     B: crate::ticks::TickDist<Num = P::Y>,
     BB: BaseFmt,
@@ -401,11 +402,11 @@ where
     }
 }
 
-impl<P: PlotIterator, A, B, BB> Locked for Stage3<P, A, B, BB> {}
+impl<P: IntoPlotIterator, A, B, BB> Locked for Stage3<P, A, B, BB> {}
 
 impl<P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
 where
-    P: PlotIterator,
+    P: IntoPlotIterator,
     A: crate::ticks::TickDist<Num = P::X>,
     B: crate::ticks::TickDist<Num = P::Y>,
     BB: BaseFmt,

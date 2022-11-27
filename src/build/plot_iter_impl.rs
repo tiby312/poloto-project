@@ -160,36 +160,35 @@ impl<F> PlotsDyn<F> {
 
 
 
+//TODO fix
+// impl<F: Iterator<Item=PlotTag<X,Y>>,X:PlotNum,Y:PlotNum> IntoPlotIterator for Vec<PlotRes<F,X,Y>> {
+//     type X=X;
+//     type Y=Y;
+//     type P = Box<dyn Iterator<Item=PlotTag<X,Y>>>;
+//     fn into_plot(self) -> PlotRes<Self::P,X,Y> {
+//         let mut area=Area::new();
+//         for a in self.iter(){
+//             area.grow_area(&a.area);
+//         }
 
-
-impl<F: PlotIterator> IntoPlotIterator for Vec<PlotRes<F>> {
-    type P = PlotRes<Box<dyn Iterator<Item=PlotTag<F::X,F::Y>>>>;
-    fn into_plot(self) -> Self::P {
-        let mut area=Area::new();
-        for a in self.iter(){
-            area.grow_area(&a.area);
-        }
-
-        self.into_iter().flat_map(|x|x.it)
+//         Box::new(self.into_iter().flat_map(|x|x.it))
         
 
-    }
-}
+//     }
+// }
+// impl<const K:usize,F: PlotIterator> IntoPlotIterator for [PlotRes<F>;K] {
+//     type P = PlotRes<Box<dyn Iterator<Item=PlotTag<F::X,F::Y>>>>;
+//     fn into_plot(self) -> Self::P {
+//         let mut area=Area::new();
+//         for a in self.iter(){
+//             area.grow_area(&a.area);
+//         }
 
-
-impl<const K:usize,F: PlotIterator> IntoPlotIterator for [PlotRes<F>;K] {
-    type P = PlotRes<Box<dyn Iterator<Item=PlotTag<F::X,F::Y>>>>;
-    fn into_plot(self) -> Self::P {
-        let mut area=Area::new();
-        for a in self.iter(){
-            area.grow_area(&a.area);
-        }
-
-        self.into_iter().flat_map(|x|x.it)
+//         self.into_iter().flat_map(|x|x.it)
         
 
-    }
-}
+//     }
+// }
 
 
 
