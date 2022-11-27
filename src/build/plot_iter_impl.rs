@@ -2,89 +2,89 @@ use super::*;
 
 use super::marker::Area;
 
-///
-/// Represents a single plot.
-///
-#[derive(Clone)]
-pub struct SinglePlot<X, Y, I, D> {
-    iter: I,
-    area: Area<X, Y>,
-    name: D,
-    typ: PlotMetaType,
-    done: bool,
-}
-impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> SinglePlot<X, Y, I, D> {
-    #[inline(always)]
-    pub(crate) fn new(typ: PlotMetaType, name: D, iter: I, area: Area<X, Y>) -> Self {
-        SinglePlot {
-            iter,
-            area,
-            name,
-            typ,
-            done: false,
-        }
-    }
-}
-
-// impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> IntoPlotIterator
-//     for SinglePlot<X, Y, I, D>
-// {
-//     type P = Self;
-//     fn into_plot(self) -> Self {
-//         self
+// ///
+// /// Represents a single plot.
+// ///
+// #[derive(Clone)]
+// pub struct SinglePlot<X, Y, I, D> {
+//     iter: I,
+//     area: Area<X, Y>,
+//     name: D,
+//     typ: PlotMetaType,
+//     done: bool,
+// }
+// impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> SinglePlot<X, Y, I, D> {
+//     #[inline(always)]
+//     pub(crate) fn new(typ: PlotMetaType, name: D, iter: I, area: Area<X, Y>) -> Self {
+//         SinglePlot {
+//             iter,
+//             area,
+//             name,
+//             typ,
+//             done: false,
+//         }
 //     }
 // }
 
-impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> SinglePlotIterator
-    for SinglePlot<X, Y, I, D>
-{
-    type X = X;
-    type Y = Y;
+// // impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> IntoPlotIterator
+// //     for SinglePlot<X, Y, I, D>
+// // {
+// //     type P = Self;
+// //     fn into_plot(self) -> Self {
+// //         self
+// //     }
+// // }
 
-    type It=I;
+// impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> SinglePlotIterator
+//     for SinglePlot<X, Y, I, D>
+// {
+//     type X = X;
+//     type Y = Y;
 
-    fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
-        area.grow_area(&self.area)
-    }
+//     type It=I;
 
-    fn handle(self,w:&mut dyn fmt::Write)->Result<(PlotMetaType,Self::It),fmt::Error> {
-        write!(w,"{}",self.name)?;
-        Ok((self.typ,self.iter))
-    }
+//     fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
+//         area.grow_area(&self.area)
+//     }
 
-    // fn increase_area(&mut self, area: &mut Area<X, Y>) {
-    //     area.grow_area(&self.area);
-    // }
-    // #[inline(always)]
-    // fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
-    //     if let Some(a) = self.iter.next() {
-    //         PlotResult::Some(a)
-    //     } else if !self.done {
-    //         self.done = true;
-    //         PlotResult::None
-    //     } else {
-    //         PlotResult::Finished
-    //     }
-    // }
+//     fn handle(self,w:&mut dyn fmt::Write)->Result<(PlotMetaType,Self::It),fmt::Error> {
+//         write!(w,"{}",self.name)?;
+//         Ok((self.typ,self.iter))
+//     }
 
-    // #[inline(always)]
-    // fn next_name(&mut self, writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
-    //     if !self.done {
-    //         Some(write!(writer, "{}", self.name))
-    //     } else {
-    //         None
-    //     }
-    // }
+//     // fn increase_area(&mut self, area: &mut Area<X, Y>) {
+//     //     area.grow_area(&self.area);
+//     // }
+//     // #[inline(always)]
+//     // fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
+//     //     if let Some(a) = self.iter.next() {
+//     //         PlotResult::Some(a)
+//     //     } else if !self.done {
+//     //         self.done = true;
+//     //         PlotResult::None
+//     //     } else {
+//     //         PlotResult::Finished
+//     //     }
+//     // }
 
-    // #[inline(always)]
-    // fn next_typ(&mut self) -> Option<PlotMetaType> {
-    //     if !self.done {
-    //         Some(self.typ)
-    //     } else {
-    //         None
-    //     }
-    // }
-}
+//     // #[inline(always)]
+//     // fn next_name(&mut self, writer: &mut dyn fmt::Write) -> Option<fmt::Result> {
+//     //     if !self.done {
+//     //         Some(write!(writer, "{}", self.name))
+//     //     } else {
+//     //         None
+//     //     }
+//     // }
+
+//     // #[inline(always)]
+//     // fn next_typ(&mut self) -> Option<PlotMetaType> {
+//     //     if !self.done {
+//     //         Some(self.typ)
+//     //     } else {
+//     //         None
+//     //     }
+//     // }
+// }
 
 // ///
 // /// Chain two plots together.
@@ -157,98 +157,120 @@ impl<F> PlotsDyn<F> {
     }
 }
 
-//TODO make it so you can pass single plot
-impl<F: SinglePlotIterator> IntoPlotIterator for Vec<F> {
-    type P = PlotsDyn<F>;
+
+
+
+
+
+impl<F: PlotIterator> IntoPlotIterator for Vec<PlotRes<F>> {
+    type P = PlotRes<Box<dyn Iterator<Item=PlotTag<F::X,F::Y>>>>;
     fn into_plot(self) -> Self::P {
-        plot_iter_impl::PlotsDyn::new(self)
+        let mut area=Area::new();
+        for a in self.iter(){
+            area.grow_area(&a.area);
+        }
+
+        self.into_iter().flat_map(|x|x.it)
+        
+
     }
 }
 
-impl<const K: usize, F: SinglePlotIterator> IntoPlotIterator for [F; K] {
-    type P = PlotsDyn<F>;
+
+impl<const K:usize,F: PlotIterator> IntoPlotIterator for [PlotRes<F>;K] {
+    type P = PlotRes<Box<dyn Iterator<Item=PlotTag<F::X,F::Y>>>>;
     fn into_plot(self) -> Self::P {
-        plot_iter_impl::PlotsDyn::new(self.into_iter().collect())
+        let mut area=Area::new();
+        for a in self.iter(){
+            area.grow_area(&a.area);
+        }
+
+        self.into_iter().flat_map(|x|x.it)
+        
+
     }
 }
 
-// impl<F: PlotIterator> IntoPlotIterator for PlotsDyn<F> {
-//     type P = Self;
-//     fn into_plot(self) -> Self {
-//         self
+
+
+// impl<const K: usize, F: PlotIterator> IntoPlotIterator for [PlotRes<F>; K] {
+//     type P = PlotsDyn<F>;
+//     fn into_plot(self) -> Self::P {
+//         plot_iter_impl::PlotsDyn::new(self.into_iter().collect())
 //     }
 // }
 
-impl<F: SinglePlotIterator> PlotIterator for PlotsDyn<F> {
-    type X = F::X;
-    type Y = F::Y;
 
-    type P=F;
+// impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
+//     type X = F::X;
+//     type Y = F::Y;
 
-    type It=std::vec::IntoIter<F>;
+//     // type P=F;
 
-    fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
-        for a in self.flop.iter_mut(){
-            a.area(area);
-        }
-    }
+//     // type It=std::vec::IntoIter<F>;
 
-    fn handle(self)->Self::It {
-        self.flop.into_iter()
-    }
-    // fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
-    //     for a in self.flop.iter_mut() {
-    //         a.increase_area(area);
-    //     }
-    // }
-    // #[inline(always)]
-    // fn next_typ(&mut self) -> Option<PlotMetaType> {
-    //     if self.counter >= self.flop.len() {
-    //         None
-    //     } else {
-    //         self.flop[self.counter].next_typ()
-    //     }
-    // }
+//     // fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
+//     //     for a in self.flop.iter_mut(){
+//     //         a.area(area);
+//     //     }
+//     // }
 
-    // #[inline(always)]
-    // fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
-    //     if self.counter >= self.flop.len() {
-    //         return PlotResult::Finished;
-    //     }
-    //     let a = self.flop[self.counter].next_plot_point();
-    //     if let PlotResult::None = a {
-    //         self.counter += 1;
-    //     }
-    //     a
-    // }
+//     // fn handle(self)->Self::It {
+//     //     self.flop.into_iter()
+//     // }
+//     // fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>) {
+//     //     for a in self.flop.iter_mut() {
+//     //         a.increase_area(area);
+//     //     }
+//     // }
+//     // #[inline(always)]
+//     // fn next_typ(&mut self) -> Option<PlotMetaType> {
+//     //     if self.counter >= self.flop.len() {
+//     //         None
+//     //     } else {
+//     //         self.flop[self.counter].next_typ()
+//     //     }
+//     // }
 
-    // #[inline(always)]
-    // fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
-    //     if self.counter >= self.flop.len() {
-    //         None
-    //     } else {
-    //         self.flop[self.counter].next_name(write)
-    //     }
-    // }
-}
+//     // #[inline(always)]
+//     // fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+//     //     if self.counter >= self.flop.len() {
+//     //         return PlotResult::Finished;
+//     //     }
+//     //     let a = self.flop[self.counter].next_plot_point();
+//     //     if let PlotResult::None = a {
+//     //         self.counter += 1;
+//     //     }
+//     //     a
+//     // }
 
-#[derive(Clone)]
-pub struct Marker<XI, YI> {
-    x: XI,
-    y: YI,
-}
+//     // #[inline(always)]
+//     // fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
+//     //     if self.counter >= self.flop.len() {
+//     //         None
+//     //     } else {
+//     //         self.flop[self.counter].next_name(write)
+//     //     }
+//     // }
+// }
 
-impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
-    pub fn new<XII: IntoIterator<IntoIter = XI>, YII: IntoIterator<IntoIter = YI>>(
-        x: XII,
-        y: YII,
-    ) -> Self {
-        Marker {
-            x: x.into_iter(),
-            y: y.into_iter(),
-        }
-    }
-}
+// #[derive(Clone)]
+// pub struct Marker<XI, YI> {
+//     x: XI,
+//     y: YI,
+// }
+
+// impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
+//     pub fn new<XII: IntoIterator<IntoIter = XI>, YII: IntoIterator<IntoIter = YI>>(
+//         x: XII,
+//         y: YII,
+//     ) -> Self {
+//         Marker {
+//             x: x.into_iter(),
+//             y: y.into_iter(),
+//         }
+//     }
+// }
 
 // impl<XI: Iterator, YI: Iterator> IntoPlotIterator for Marker<XI, YI>
 // where
@@ -261,47 +283,60 @@ impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
 //     }
 // }
 
-impl<XI: Iterator, YI: Iterator> SinglePlotIterator for Marker<XI, YI>
-where
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-{
-    type X = XI::Item;
-    type Y = YI::Item;
 
-    type It=std::iter::Empty<(XI::Item,YI::Item)>;
 
-    fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
-        for a in &mut self.x {
-            area.grow(Some(&a), None);
-        }
-        for a in &mut self.y {
-            area.grow(None, Some(&a));
-        }
-    }
 
-    fn handle(self,w:&mut dyn fmt::Write)->Result<(PlotMetaType,Self::It),fmt::Error> {
-        Ok((PlotMetaType::Marker,std::iter::empty()))
+
+// impl<XI: Iterator, YI: Iterator> Iterator for Marker<XI, YI>
+// where
+//     XI::Item: PlotNum,
+//     YI::Item: PlotNum{
+//         type Item=PlotTag<XI::Item,YI::Item>;
+//         fn next(&mut self)->
+
+// }
+
+// impl<XI: Iterator, YI: Iterator> PlotIterator for Marker<XI, YI>
+// where
+//     XI::Item: PlotNum,
+//     YI::Item: PlotNum,
+// {
+//     type X = XI::Item;
+//     type Y = YI::Item;
+
+//     // type It=std::iter::Empty<(XI::Item,YI::Item)>;
+
+//     // fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
+//     //     for a in &mut self.x {
+//     //         area.grow(Some(&a), None);
+//     //     }
+//     //     for a in &mut self.y {
+//     //         area.grow(None, Some(&a));
+//     //     }
+//     // }
+
+//     // fn handle(self,w:&mut dyn fmt::Write)->Result<(PlotMetaType,Self::It),fmt::Error> {
+//     //     Ok((PlotMetaType::Marker,std::iter::empty()))
         
-    }
-    // #[inline(always)]
-    // fn next_typ(&mut self) -> Option<PlotMetaType> {
-    //     None
-    // }
-    // #[inline(always)]
-    // fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
-    //     PlotResult::Finished
-    // }
-    // #[inline(always)]
-    // fn next_name(&mut self, _: &mut dyn fmt::Write) -> Option<fmt::Result> {
-    //     None
-    // }
-    // fn increase_area(&mut self, area: &mut Area<XI::Item, YI::Item>) {
-    //     for a in &mut self.x {
-    //         area.grow(Some(&a), None);
-    //     }
-    //     for a in &mut self.y {
-    //         area.grow(None, Some(&a));
-    //     }
-    // }
-}
+//     // }
+//     // #[inline(always)]
+//     // fn next_typ(&mut self) -> Option<PlotMetaType> {
+//     //     None
+//     // }
+//     // #[inline(always)]
+//     // fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)> {
+//     //     PlotResult::Finished
+//     // }
+//     // #[inline(always)]
+//     // fn next_name(&mut self, _: &mut dyn fmt::Write) -> Option<fmt::Result> {
+//     //     None
+//     // }
+//     // fn increase_area(&mut self, area: &mut Area<XI::Item, YI::Item>) {
+//     //     for a in &mut self.x {
+//     //         area.grow(Some(&a), None);
+//     //     }
+//     //     for a in &mut self.y {
+//     //         area.grow(None, Some(&a));
+//     //     }
+//     // }
+// }
