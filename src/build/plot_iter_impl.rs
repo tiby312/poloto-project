@@ -199,7 +199,11 @@ impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
 
     #[inline(always)]
     fn next_name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        self.flop[self.counter].next_name(write)
+        if self.counter >= self.flop.len() {
+            None
+        } else {
+            self.flop[self.counter].next_name(write)
+        }
     }
 }
 
