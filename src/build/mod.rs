@@ -185,7 +185,6 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
-#[deprecated(note = "instead pass a vec directly")]
 pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
     stuff: I,
 ) -> plot_iter_impl::PlotsDyn<F> {
