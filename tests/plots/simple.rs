@@ -185,9 +185,12 @@ fn custom_dim() -> fmt::Result {
         .with_tick_lines([true, true])
         .move_into();
 
-    let data = poloto::data(poloto::plots!(poloto::build::markers([], [0]), v))
-        .map_opt(|_| canvas)
-        .build_and_label(("collatz", "x", "y"));
+    let data = poloto::data(poloto::plots!(
+        poloto::build::markers([], [0]),
+        Vec::from_iter(v)
+    ))
+    .map_opt(|_| canvas)
+    .build_and_label(("collatz", "x", "y"));
 
     let w = util::create_test_file("custom_dim.svg");
 

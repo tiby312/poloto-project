@@ -26,14 +26,14 @@ impl<X, Y, I: Iterator<Item = (X, Y)>, D: Display> SinglePlot<X, Y, I, D> {
     }
 }
 
-impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> IntoPlotIterator
-    for SinglePlot<X, Y, I, D>
-{
-    type P = Self;
-    fn into_plot(self) -> Self {
-        self
-    }
-}
+// impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> IntoPlotIterator
+//     for SinglePlot<X, Y, I, D>
+// {
+//     type P = Self;
+//     fn into_plot(self) -> Self {
+//         self
+//     }
+// }
 
 impl<X: PlotNum, Y: PlotNum, I: Iterator<Item = (X, Y)>, D: Display> PlotIterator
     for SinglePlot<X, Y, I, D>
@@ -88,12 +88,12 @@ impl<A, B> Chain<A, B> {
     }
 }
 
-impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> IntoPlotIterator for Chain<A, B> {
-    type P = Self;
-    fn into_plot(self) -> Self {
-        self
-    }
-}
+// impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> IntoPlotIterator for Chain<A, B> {
+//     type P = Self;
+//     fn into_plot(self) -> Self {
+//         self
+//     }
+// }
 
 impl<A: PlotIterator, B: PlotIterator<X = A::X, Y = A::Y>> PlotIterator for Chain<A, B> {
     type X = A::X;
@@ -147,19 +147,26 @@ impl<F> PlotsDyn<F> {
     }
 }
 
-impl<I: IntoIterator<Item = F>, F: PlotIterator> IntoPlotIterator for I {
+impl<F: PlotIterator> IntoPlotIterator for Vec<F> {
+    type P = PlotsDyn<F>;
+    fn into_plot(self) -> Self::P {
+        plot_iter_impl::PlotsDyn::new(self)
+    }
+}
+
+impl<const K: usize, F: PlotIterator> IntoPlotIterator for [F; K] {
     type P = PlotsDyn<F>;
     fn into_plot(self) -> Self::P {
         plot_iter_impl::PlotsDyn::new(self.into_iter().collect())
     }
 }
 
-impl<F: PlotIterator> IntoPlotIterator for PlotsDyn<F> {
-    type P = Self;
-    fn into_plot(self) -> Self {
-        self
-    }
-}
+// impl<F: PlotIterator> IntoPlotIterator for PlotsDyn<F> {
+//     type P = Self;
+//     fn into_plot(self) -> Self {
+//         self
+//     }
+// }
 
 impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
     type X = F::X;
@@ -214,16 +221,16 @@ impl<XI: Iterator, YI: Iterator> Marker<XI, YI> {
     }
 }
 
-impl<XI: Iterator, YI: Iterator> IntoPlotIterator for Marker<XI, YI>
-where
-    XI::Item: PlotNum,
-    YI::Item: PlotNum,
-{
-    type P = Self;
-    fn into_plot(self) -> Self {
-        self
-    }
-}
+// impl<XI: Iterator, YI: Iterator> IntoPlotIterator for Marker<XI, YI>
+// where
+//     XI::Item: PlotNum,
+//     YI::Item: PlotNum,
+// {
+//     type P = Self;
+//     fn into_plot(self) -> Self {
+//         self
+//     }
+// }
 
 impl<XI: Iterator, YI: Iterator> PlotIterator for Marker<XI, YI>
 where

@@ -83,7 +83,7 @@ macro_rules! plots {
             use $crate::build::IntoPlotIterator;
             let mut a=$a.into_plot();
             $(
-                let a=a.chain($x.into_plot());
+                let a=a.chain($x);
             )*
             a
         }

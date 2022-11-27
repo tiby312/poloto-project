@@ -45,12 +45,12 @@ pub trait IntoPlotIterator {
     fn into_plot(self) -> Self::P;
 }
 
-// impl<P: PlotIterator> IntoPlotIterator for P {
-//     type P = P;
-//     fn create(self) -> Self::P {
-//         self
-//     }
-// }
+impl<P: PlotIterator> IntoPlotIterator for P {
+    type P = P;
+    fn into_plot(self) -> Self::P {
+        self
+    }
+}
 
 ///
 /// Iterator over all plots that have been assembled by the user.
@@ -80,11 +80,14 @@ pub trait PlotIteratorExt: PlotIterator {
     /// a.chain(b);
     /// ```
     ///
-    fn chain<B: PlotIterator<X = Self::X, Y = Self::Y>>(self, b: B) -> Chain<Self, B>
+    fn chain<P: IntoPlotIterator<P = B>, B: PlotIterator<X = Self::X, Y = Self::Y>>(
+        self,
+        b: P,
+    ) -> Chain<Self, B>
     where
         Self: Sized,
     {
-        Chain::new(self, b)
+        Chain::new(self, b.into_plot())
     }
 }
 impl<I: PlotIterator> PlotIteratorExt for I {}
@@ -182,7 +185,7 @@ where
 ///
 /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
 ///
-#[deprecated(note = "You can now just pass the iterator directly.")]
+#[deprecated(note = "instead pass a vec directly")]
 pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
     stuff: I,
 ) -> plot_iter_impl::PlotsDyn<F> {
@@ -199,12 +202,12 @@ impl<'a, X, Y> BoxedPlot<'a, X, Y> {
     }
 }
 
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> IntoPlotIterator for BoxedPlot<'a, X, Y> {
-    type P = Self;
-    fn into_plot(self) -> Self {
-        self
-    }
-}
+// impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> IntoPlotIterator for BoxedPlot<'a, X, Y> {
+//     type P = Self;
+//     fn into_plot(self) -> Self {
+//         self
+//     }
+// }
 impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> {
     type X = X;
     type Y = Y;
