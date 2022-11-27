@@ -74,7 +74,7 @@ fn main() {
 
     let a = (1000..1006).map(|i| build::plot(format_move!("c({})", i)).line((0..).zip(collatz(i))));
 
-    poloto::data(poloto::plots!(poloto::build::origin(), a))
+    poloto::data(poloto::plots!(poloto::build::origin(), Vec::from_iter(a)))
         .map_opt(|_| opt)
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))
