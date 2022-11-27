@@ -14,7 +14,7 @@ use marker::Area;
 pub mod marker;
 
 pub mod plot_iter_impl;
-use plot_iter_impl::{Chain, SinglePlot};
+use plot_iter_impl::{ SinglePlot};
 
 use unwrapper::Unwrapper;
 
@@ -38,6 +38,7 @@ pub enum PlotType {
 pub enum PlotMetaType {
     Plot(PlotType),
     Text,
+    Marker
 }
 
 pub trait IntoPlotIterator {
@@ -52,26 +53,36 @@ impl<P: PlotIterator> IntoPlotIterator for P {
     }
 }
 
-pub trait Plot1{
+pub trait SinglePlotIterator{
     type X:PlotNum;
     type Y:PlotNum;
     type It:Iterator<Item=(Self::X,Self::Y)>;
     fn area(&mut self,area:&mut Area<Self::X,Self::Y>);
-    fn handle(self,w:&mut dyn fmt::Write)->(PlotMetaType,Self::It);
+    fn handle(self,w:&mut dyn fmt::Write)->Result<(PlotMetaType,Self::It),fmt::Error>;
 }
-pub trait Plot0{
+
+
+pub trait PlotIterator{
     type X:PlotNum;
     type Y:PlotNum;
-    type P:Plot1<X=Self::X,Y=Self::Y>;
+    type P:SinglePlotIterator<X=Self::X,Y=Self::Y>;
     type It:Iterator<Item=Self::P>;
     fn area(&mut self,area:&mut Area<Self::X,Self::Y>);
     fn handle(self)->Self::It;
+
+    fn chain<P:PlotIterator<X=Self::X,Y=Self::Y>>(self,second:P)->Chain<Self,P> where Self:Sized{
+        Chain { first: self, second }
+    }
 }
 
-pub struct Ounce<P>{
-    plot:P
+pub struct Once<P>(P);
+
+impl<P> Once<P>{
+    pub fn new(a:P)->Self{
+        Self(a)
+    }
 }
-impl<P:Plot1> Plot0 for Ounce<P>{
+impl<P:SinglePlotIterator> PlotIterator for Once<P>{
     type X=P::X;
 
     type Y=P::Y;
@@ -81,10 +92,10 @@ impl<P:Plot1> Plot0 for Ounce<P>{
     type It=std::iter::Once<P>;
 
     fn area(&mut self,area:&mut Area<Self::X,Self::Y>) {
-        self.plot.area(area);
+        self.0.area(area);
     }
     fn handle(self)->Self::It {
-        std::iter::once(self.plot)
+        std::iter::once(self.0)
     }
 }
 
@@ -108,7 +119,7 @@ impl<A:Iterator,B:Iterator<Item=A::Item>> Iterator for It2<A,B>{
     }
 }
 
-impl<A:Plot1,B:Plot1<X=A::X,Y=A::Y>> Plot1 for PlotEither<A,B>{
+impl<A:SinglePlotIterator,B:SinglePlotIterator<X=A::X,Y=A::Y>> SinglePlotIterator for PlotEither<A,B>{
     type X=A::X;
     type Y=A::Y;
     type It=It2<A::It,B::It>;
@@ -118,17 +129,17 @@ impl<A:Plot1,B:Plot1<X=A::X,Y=A::Y>> Plot1 for PlotEither<A,B>{
             PlotEither::Second(a) => a.area(area),
         }
     }
-    fn handle(self,w:&mut dyn fmt::Write)->(PlotMetaType,Self::It){
-        match self{
+    fn handle(self,w:&mut dyn fmt::Write)->Result<(PlotMetaType,Self::It),fmt::Error>{
+        Ok(match self{
             PlotEither::First(a) => {
-                let (t,i)=a.handle(w);
+                let (t,i)=a.handle(w)?;
                 (t,It2::First(i))
             },
             PlotEither::Second(b) => {
-                let (t,i)=b.handle(w);
+                let (t,i)=b.handle(w)?;
                 (t,It2::Second(i))
             }
-        }
+        })
     }
 
 }
@@ -152,11 +163,11 @@ impl<A:Iterator,B:Iterator> Iterator for ChainIt<A,B>{
     }
 }
 
-pub struct Chain1<A,B>{
+pub struct Chain<A,B>{
     first:A,
     second:B
 }
-impl<A:Plot0,B:Plot0<X=A::X,Y=A::Y>> Plot0 for Chain1<A,B>{
+impl<A:PlotIterator,B:PlotIterator<X=A::X,Y=A::Y>> PlotIterator for Chain<A,B>{
     type X=A::X;
 
     type Y=A::Y;
@@ -184,119 +195,119 @@ impl<A:Plot0,B:Plot0<X=A::X,Y=A::Y>> Plot0 for Chain1<A,B>{
 
 
 
-///
-/// Iterator over all plots that have been assembled by the user.
-/// This trait is used by the poloto renderer to iterate over and render all the plots.
-///
-pub trait PlotIterator {
-    type X: PlotNum;
-    type Y: PlotNum;
-    fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>);
-    fn next_typ(&mut self) -> Option<PlotMetaType>;
-    fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)>;
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
-}
+// ///
+// /// Iterator over all plots that have been assembled by the user.
+// /// This trait is used by the poloto renderer to iterate over and render all the plots.
+// ///
+// pub trait PlotIterator {
+//     type X: PlotNum;
+//     type Y: PlotNum;
+//     fn increase_area(&mut self, area: &mut Area<Self::X, Self::Y>);
+//     fn next_typ(&mut self) -> Option<PlotMetaType>;
+//     fn next_plot_point(&mut self) -> PlotResult<(Self::X, Self::Y)>;
+//     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result>;
+// }
 
-///
-/// Allows the user to chain together PlotIterators.
-///
-pub trait PlotIteratorExt: PlotIterator {
-    /// Chain together PlotIterators.
-    ///
-    /// ```
-    /// use poloto::build::PlotIteratorExt;
-    /// let data1=[[5,2],[4,3]];
-    /// let data2=[[2,4],[2,2]];
-    /// let a=poloto::build::plot("test1").line(data1);
-    /// let b=poloto::build::plot("test2").scatter(data2);
-    /// a.chain(b);
-    /// ```
-    ///
-    fn chain<P: IntoPlotIterator<P = B>, B: PlotIterator<X = Self::X, Y = Self::Y>>(
-        self,
-        b: P,
-    ) -> Chain<Self, B>
-    where
-        Self: Sized,
-    {
-        Chain::new(self, b.into_plot())
-    }
-}
-impl<I: PlotIterator> PlotIteratorExt for I {}
+// ///
+// /// Allows the user to chain together PlotIterators.
+// ///
+// pub trait PlotIteratorExt: PlotIterator {
+//     /// Chain together PlotIterators.
+//     ///
+//     /// ```
+//     /// use poloto::build::PlotIteratorExt;
+//     /// let data1=[[5,2],[4,3]];
+//     /// let data2=[[2,4],[2,2]];
+//     /// let a=poloto::build::plot("test1").line(data1);
+//     /// let b=poloto::build::plot("test2").scatter(data2);
+//     /// a.chain(b);
+//     /// ```
+//     ///
+//     fn chain<P: IntoPlotIterator<P = B>, B: PlotIterator<X = Self::X, Y = Self::Y>>(
+//         self,
+//         b: P,
+//     ) -> Chain<Self, B>
+//     where
+//         Self: Sized,
+//     {
+//         Chain::new(self, b.into_plot())
+//     }
+// }
+// impl<I: PlotIterator> PlotIteratorExt for I {}
 
-pub(crate) struct RenderablePlotIter<'a, A> {
-    flop: &'a mut A,
-}
-impl<'a, A> RenderablePlotIter<'a, A> {
-    #[inline(always)]
-    pub fn new(flop: &'a mut A) -> Self {
-        RenderablePlotIter { flop }
-    }
-    #[inline(always)]
-    pub fn next_plot(&mut self) -> Option<SinglePlotAccessor<A>>
-    where
-        A: PlotIterator,
-    {
-        if let Some(typ) = self.flop.next_typ() {
-            Some(SinglePlotAccessor {
-                typ,
-                flop: self.flop,
-            })
-        } else {
-            None
-        }
-    }
-}
+// pub(crate) struct RenderablePlotIter<'a, A> {
+//     flop: &'a mut A,
+// }
+// impl<'a, A> RenderablePlotIter<'a, A> {
+//     #[inline(always)]
+//     pub fn new(flop: &'a mut A) -> Self {
+//         RenderablePlotIter { flop }
+//     }
+//     #[inline(always)]
+//     pub fn next_plot(&mut self) -> Option<SinglePlotAccessor<A>>
+//     where
+//         A: PlotIterator,
+//     {
+//         if let Some(typ) = self.flop.next_typ() {
+//             Some(SinglePlotAccessor {
+//                 typ,
+//                 flop: self.flop,
+//             })
+//         } else {
+//             None
+//         }
+//     }
+// }
 
-pub(crate) struct SinglePlotAccessor<'a, A> {
-    typ: PlotMetaType,
-    flop: &'a mut A,
-}
-impl<'b, A> SinglePlotAccessor<'b, A> {
-    #[inline(always)]
-    pub fn typ(&mut self) -> PlotMetaType {
-        self.typ
-    }
+// pub(crate) struct SinglePlotAccessor<'a, A> {
+//     typ: PlotMetaType,
+//     flop: &'a mut A,
+// }
+// impl<'b, A> SinglePlotAccessor<'b, A> {
+//     #[inline(always)]
+//     pub fn typ(&mut self) -> PlotMetaType {
+//         self.typ
+//     }
 
-    #[inline(always)]
-    pub fn name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result>
-    where
-        A: PlotIterator,
-    {
-        self.flop.next_name(write)
-    }
+//     #[inline(always)]
+//     pub fn name(&mut self, write: &mut dyn fmt::Write) -> Option<fmt::Result>
+//     where
+//         A: PlotIterator,
+//     {
+//         self.flop.next_name(write)
+//     }
 
-    #[inline(always)]
-    pub fn plots(&mut self) -> impl Iterator<Item = (A::X, A::Y)> + '_
-    where
-        A: PlotIterator,
-    {
-        //TODO borrow this tick in broccoli for iterating over all elements
-        let f: &mut _ = self.flop;
-        std::iter::from_fn(move || {
-            if let PlotResult::Some(a) = f.next_plot_point() {
-                Some(a)
-            } else {
-                None
-            }
-        })
-    }
-}
+//     #[inline(always)]
+//     pub fn plots(&mut self) -> impl Iterator<Item = (A::X, A::Y)> + '_
+//     where
+//         A: PlotIterator,
+//     {
+//         //TODO borrow this tick in broccoli for iterating over all elements
+//         let f: &mut _ = self.flop;
+//         std::iter::from_fn(move || {
+//             if let PlotResult::Some(a) = f.next_plot_point() {
+//                 Some(a)
+//             } else {
+//                 None
+//             }
+//         })
+//     }
+// }
 
-///
-/// Used to distinguish between one plot's points being rendered, vs all plot's points being rendered.
-///
-pub enum PlotResult<T> {
-    Some(T),
-    None,
-    Finished,
-}
+// ///
+// /// Used to distinguish between one plot's points being rendered, vs all plot's points being rendered.
+// ///
+// pub enum PlotResult<T> {
+//     Some(T),
+//     None,
+//     Finished,
+// }
 
 ///
 /// Ensure that the origin point is within view.
 ///
 pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
-) -> plot_iter_impl::Marker<std::option::IntoIter<X>, std::option::IntoIter<Y>> {
+) -> Once<plot_iter_impl::Marker<std::option::IntoIter<X>, std::option::IntoIter<Y>>> {
     markers(Some(X::zero()), Some(Y::zero()))
 }
 
@@ -306,12 +317,12 @@ pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
 pub fn markers<XI: IntoIterator, YI: IntoIterator>(
     x: XI,
     y: YI,
-) -> plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter>
+) -> Once<plot_iter_impl::Marker<XI::IntoIter, YI::IntoIter>>
 where
     XI::Item: PlotNum,
     YI::Item: PlotNum,
 {
-    plot_iter_impl::Marker::new(x, y)
+    Once::new(plot_iter_impl::Marker::new(x, y))
 }
 
 ///
@@ -323,40 +334,40 @@ pub fn plots_dyn<F: PlotIterator, I: IntoIterator<Item = F>>(
     plot_iter_impl::PlotsDyn::new(stuff.into_iter().collect::<Vec<_>>())
 }
 
-pub struct BoxedPlot<'a, X, Y> {
-    inner: Box<dyn PlotIterator<X = X, Y = Y> + 'a>,
-}
+// pub struct BoxedPlot<'a, X, Y> {
+//     inner: Box<dyn PlotIterator<X = X, Y = Y> + 'a>,
+// }
 
-impl<'a, X, Y> BoxedPlot<'a, X, Y> {
-    pub fn new<A: PlotIterator<X = X, Y = Y> + 'a>(a: A) -> BoxedPlot<'a, X, Y> {
-        BoxedPlot { inner: Box::new(a) }
-    }
-}
-
-// impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> IntoPlotIterator for BoxedPlot<'a, X, Y> {
-//     type P = Self;
-//     fn into_plot(self) -> Self {
-//         self
+// impl<'a, X, Y> BoxedPlot<'a, X, Y> {
+//     pub fn new<A: PlotIterator<X = X, Y = Y> + 'a>(a: A) -> BoxedPlot<'a, X, Y> {
+//         BoxedPlot { inner: Box::new(a) }
 //     }
 // }
-impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> {
-    type X = X;
-    type Y = Y;
-    fn increase_area(&mut self, area: &mut Area<X, Y>) {
-        self.inner.as_mut().increase_area(area);
-    }
-    fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
-        self.inner.as_mut().next_plot_point()
-    }
 
-    fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
-        self.inner.as_mut().next_name(w)
-    }
+// // impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> IntoPlotIterator for BoxedPlot<'a, X, Y> {
+// //     type P = Self;
+// //     fn into_plot(self) -> Self {
+// //         self
+// //     }
+// // }
+// impl<'a, X: PlotNum + 'a, Y: PlotNum + 'a> PlotIterator for BoxedPlot<'a, X, Y> {
+//     type X = X;
+//     type Y = Y;
+//     fn increase_area(&mut self, area: &mut Area<X, Y>) {
+//         self.inner.as_mut().increase_area(area);
+//     }
+//     fn next_plot_point(&mut self) -> PlotResult<(X, Y)> {
+//         self.inner.as_mut().next_plot_point()
+//     }
 
-    fn next_typ(&mut self) -> Option<PlotMetaType> {
-        self.inner.as_mut().next_typ()
-    }
-}
+//     fn next_name(&mut self, w: &mut dyn fmt::Write) -> Option<fmt::Result> {
+//         self.inner.as_mut().next_name(w)
+//     }
+
+//     fn next_typ(&mut self) -> Option<PlotMetaType> {
+//         self.inner.as_mut().next_typ()
+//     }
+// }
 
 ///
 /// Return min max bounds as well as the points of one plot.
@@ -638,16 +649,16 @@ impl<D: Display> SinglePlotBuilder<D> {
 
     /// Create a line from plots using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.  
-    pub fn line<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+    pub fn line<P: PlotIt>(self, it: P) -> Once<SinglePlot<P::X, P::Y, P::It, D>> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
-        SinglePlot::new(PlotMetaType::Plot(PlotType::Line), self.label, it, area)
+        Once::new(SinglePlot::new(PlotMetaType::Plot(PlotType::Line), self.label, it, area))
     }
 
-    pub(crate) fn bars2<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+    pub(crate) fn bars2<P: PlotIt>(self, it: P) -> Once<SinglePlot<P::X, P::Y, P::It, D>> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
-        SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), self.label, it, area)
+        Once::new(SinglePlot::new(PlotMetaType::Plot(PlotType::Bars), self.label, it, area))
     }
 
     // #[deprecated]
@@ -663,10 +674,10 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
     /// with the latter class overriding the former.
 
-    pub fn scatter<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+    pub fn scatter<P: PlotIt>(self, it: P) -> Once<SinglePlot<P::X, P::Y, P::It, D>> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
-        SinglePlot::new(PlotMetaType::Plot(PlotType::Scatter), self.label, it, area)
+        Once::new(SinglePlot::new(PlotMetaType::Plot(PlotType::Scatter), self.label, it, area))
     }
 
     // #[deprecated]
@@ -680,10 +691,10 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
 
-    pub fn histogram<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+    pub fn histogram<P: PlotIt>(self, it: P) -> Once<SinglePlot<P::X, P::Y, P::It, D>> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
-        SinglePlot::new(PlotMetaType::Plot(PlotType::Histo), self.label, it, area)
+        Once::new(SinglePlot::new(PlotMetaType::Plot(PlotType::Histo), self.label, it, area))
     }
 
     // #[deprecated]
@@ -696,10 +707,10 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// Create a line from plots that will be filled underneath using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.
 
-    pub fn line_fill<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+    pub fn line_fill<P: PlotIt>(self, it: P) -> Once<SinglePlot<P::X, P::Y, P::It, D>> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
-        SinglePlot::new(PlotMetaType::Plot(PlotType::LineFill), self.label, it, area)
+        Once::new(SinglePlot::new(PlotMetaType::Plot(PlotType::LineFill), self.label, it, area))
     }
 
     // #[deprecated]
@@ -713,27 +724,27 @@ impl<D: Display> SinglePlotBuilder<D> {
     /// The first and last points will be connected and then filled in.
     /// The path element belongs to the `.poloto[N]fill` css class.
 
-    pub fn line_fill_raw<P: PlotIt>(self, it: P) -> SinglePlot<P::X, P::Y, P::It, D> {
+    pub fn line_fill_raw<P: PlotIt>(self, it: P) -> Once<SinglePlot<P::X, P::Y, P::It, D>> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
-        SinglePlot::new(
+        Once::new(SinglePlot::new(
             PlotMetaType::Plot(PlotType::LineFillRaw),
             self.label,
             it,
             area,
-        )
+        ))
     }
 
     ///
     /// Write some text in the legend. This doesnt increment the plot number.
     ///
-    pub fn text<X: PlotNum, Y: PlotNum>(self) -> SinglePlot<X, Y, std::iter::Empty<(X, Y)>, D> {
-        SinglePlot::new(
+    pub fn text<X: PlotNum, Y: PlotNum>(self) -> Once<SinglePlot<X, Y, std::iter::Empty<(X, Y)>, D>> {
+        Once::new(SinglePlot::new(
             PlotMetaType::Text,
             self.label,
             std::iter::empty(),
             Area::new(),
-        )
+        ))
     }
 }
 

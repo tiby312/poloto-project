@@ -228,7 +228,7 @@ where
 impl<P: build::PlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage1<P, TX, TY> {
     pub fn from_parts(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Stage1<P, TX, TY> {
         let mut area = build::marker::Area::new();
-        plots.increase_area(&mut area);
+        plots.area(&mut area);
         let (boundx, boundy) = area.build();
 
         Stage1 {
@@ -421,7 +421,7 @@ where
             &self.data.boundx,
             &self.data.boundy,
             &self.data.opt,
-            &mut self.data.plots,
+            self.data.plots,
         )?;
 
         render::render_base::render_base(

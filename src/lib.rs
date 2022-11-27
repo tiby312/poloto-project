@@ -79,7 +79,7 @@ macro_rules! plots {
     };
     ( $a:expr,$( $x:expr ),* ) => {
         {
-            use $crate::build::PlotIteratorExt;
+            use $crate::build::PlotIterator;
             use $crate::build::IntoPlotIterator;
             let mut a=$a.into_plot();
             $(
