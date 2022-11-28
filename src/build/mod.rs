@@ -55,7 +55,7 @@ impl<P: Iterator<Item = PlotTag<L>>, L: Point> IntoPlotIterator for PlotRes<P, L
     }
 }
 
-pub struct Foop<'a, I> {
+pub(crate) struct Foop<'a, I> {
     it: &'a mut I,
 }
 impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Foop<'a, I> {
@@ -88,7 +88,7 @@ impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for Foop<'a, I> {
     }
 }
 
-//TODO use this!!!!
+
 pub trait Point {
     type X: PlotNum;
     type Y: PlotNum;
