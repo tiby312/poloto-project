@@ -382,14 +382,14 @@ fn test_single_and_chain_and_dyn_cloneable() {
 
     let l = plots!(l, l3);
 
-    //let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
+    let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
     let p2 = poloto::data(l).build_and_label(("title", "x", "y"));
 
-    //let mut s1 = String::new();
+    let mut s1 = String::new();
     let mut s2 = String::new();
 
-    //p1.headless().render_fmt_write(&mut s1).unwrap();
+    p1.headless().render_fmt_write(&mut s1).unwrap();
     p2.headless().render_fmt_write(&mut s2).unwrap();
 
-    //assert_eq!(s1, s2);
+    assert_eq!(s1, s2);
 }

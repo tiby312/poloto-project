@@ -1,3 +1,5 @@
+use std::iter::Flatten;
+
 use super::*;
 
 use super::marker::Area;
@@ -184,24 +186,42 @@ use super::marker::Area;
 
 // }
 
+#[derive(Clone)]
+pub struct MapPlotResIter<I>(I);
+
+impl<I: Iterator<Item = PlotRes<F, X, Y>>, F: FusedIterator<Item = PlotTag<X, Y>>, X, Y>
+    FusedIterator for MapPlotResIter<I>
+{
+}
+impl<I: Iterator<Item = PlotRes<F, X, Y>>, F: ExactSizeIterator<Item = PlotTag<X, Y>>, X, Y>
+    ExactSizeIterator for MapPlotResIter<I>
+{
+}
+
+impl<I: Iterator<Item = PlotRes<F, X, Y>>, F: Iterator<Item = PlotTag<X, Y>>, X, Y> Iterator
+    for MapPlotResIter<I>
+{
+    type Item = F;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|x| x.it)
+    }
+}
+
 impl<F: Iterator<Item = PlotTag<X, Y>> + 'static, X: PlotNum + 'static, Y: PlotNum + 'static>
     IntoPlotIterator for Vec<PlotRes<F, X, Y>>
 {
     type X = X;
     type Y = Y;
-    type P = Box<dyn Iterator<Item = PlotTag<X, Y>> + 'static>;
+    type P = Flatten<MapPlotResIter<std::vec::IntoIter<PlotRes<F, X, Y>>>>;
     fn into_plot(self) -> PlotRes<Self::P, X, Y> {
         let mut area = Area::new();
         for a in self.iter() {
             area.grow_area(&a.area);
         }
 
-        let j = self.into_iter().map(|x| x.it).flatten();
+        let it = MapPlotResIter(self.into_iter()).flatten();
 
-        PlotRes {
-            area,
-            it: Box::new(j),
-        }
+        PlotRes { area, it }
     }
 }
 
@@ -214,19 +234,16 @@ impl<
 {
     type X = X;
     type Y = Y;
-    type P = Box<dyn Iterator<Item = PlotTag<X, Y>> + 'static>;
+    type P = Flatten<MapPlotResIter<std::array::IntoIter<PlotRes<F, X, Y>, K>>>;
     fn into_plot(self) -> PlotRes<Self::P, X, Y> {
         let mut area = Area::new();
         for a in self.iter() {
             area.grow_area(&a.area);
         }
 
-        let j = self.into_iter().map(|x| x.it).flatten();
+        let it = MapPlotResIter(self.into_iter()).flatten();
 
-        PlotRes {
-            area,
-            it: Box::new(j),
-        }
+        PlotRes { area, it }
     }
 }
 

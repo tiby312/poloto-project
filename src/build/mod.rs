@@ -111,6 +111,7 @@ impl<I: Iterator<Item = PlotTag<X, Y>>, X: PlotNum, Y: PlotNum> PlotRes<I, X, Y>
         }
     }
 
+
     pub fn area(&self) -> &Area<X, Y> {
         &self.area
     }
@@ -150,9 +151,13 @@ pub enum PlotTag<X, Y> {
 /// Ensure that the origin point is within view.
 ///
 pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
-) -> PlotRes<std::iter::Empty<PlotTag<X, Y>>, X, Y> {
+) -> PlotRes<EmptyPlot<X, Y>, X, Y> {
     markers(Some(X::zero()), Some(Y::zero()))
 }
+
+
+type EmptyPlot<X,Y> =std::iter::Empty<PlotTag<X,Y>>;
+
 
 ///
 /// Ensure the list of marker values are within view.
@@ -160,7 +165,7 @@ pub fn origin<X: HasZero + PlotNum, Y: HasZero + PlotNum>(
 pub fn markers<XI: IntoIterator, YI: IntoIterator>(
     x: XI,
     y: YI,
-) -> PlotRes<std::iter::Empty<PlotTag<XI::Item, YI::Item>>, XI::Item, YI::Item>
+) -> PlotRes<EmptyPlot<XI::Item, YI::Item>, XI::Item, YI::Item>
 where
     XI::Item: PlotNum,
     YI::Item: PlotNum,
@@ -276,18 +281,16 @@ impl<I: Iterator<Item = (X, Y)> + FusedIterator, X, Y> Iterator for PlotIterCrea
     fn next(&mut self) -> Option<PlotTag<X, Y>> {
         if let Some((typ, name)) = self.start.take() {
             Some(PlotTag::Start { typ, name })
+        } else if let Some((x, y)) = self.it.next() {
+            Some(PlotTag::Plot(x, y))
+        } else if !self.posted_finish {
+            self.posted_finish = true;
+            Some(PlotTag::Finish())
         } else {
-            if let Some((x, y)) = self.it.next() {
-                Some(PlotTag::Plot(x, y))
-            } else {
-                if !self.posted_finish {
-                    self.posted_finish = true;
-                    Some(PlotTag::Finish())
-                } else {
-                    None
-                }
-            }
+            None
         }
+    
+    
     }
 }
 
