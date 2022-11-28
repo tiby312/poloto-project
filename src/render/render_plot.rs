@@ -51,11 +51,11 @@ pub(super) fn render_plot<
 
     let mut names = vec![];
 
-    let mut k = plots_all.into_plot();
+    let PlotRes{mut it,..} = plots_all.into_plot();
     //for (i,(it,name,typ)) in (oo).enumerate(){
     let mut counter = 0;
     loop {
-        let Some((it,name,typ))=k.next() else {
+        let Some((it,name,typ))=Foop::new(&mut it) else {
             break
         };
 

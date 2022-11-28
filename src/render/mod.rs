@@ -244,14 +244,14 @@ impl<
     ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
         //let mut area = build::marker::Area::new();
 
-        let plots = plots.into_plot();
+        let PlotRes{area,it} = plots.into_plot();
 
-        //plots.area(&mut area);
-        let (boundx, boundy) = plots.area().build();
+
+        let (boundx, boundy) = area.build();
 
         Stage1 {
             opt,
-            plots,
+            plots:PlotRes{it,area},
             ticky,
             tickx,
             boundx,

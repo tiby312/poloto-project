@@ -4,55 +4,50 @@ use super::*;
 
 use super::marker::Area;
 
-#[derive(Clone)]
-pub struct MapPlotResIter<I>(I);
 
-impl<I: Iterator<Item = PlotRes<F, L>>, F: FusedIterator<Item = PlotTag<L>>, L: Point> FusedIterator
-    for MapPlotResIter<I>
-{
-}
-impl<I: Iterator<Item = PlotRes<F, L>>, F: ExactSizeIterator<Item = PlotTag<L>>, L: Point>
-    ExactSizeIterator for MapPlotResIter<I>
-{
-}
 
-impl<I: Iterator<Item = PlotRes<F, L>>, F: Iterator<Item = PlotTag<L>>, L: Point> Iterator
-    for MapPlotResIter<I>
-{
-    type Item = F;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|x| x.it)
-    }
-}
-
-impl<F: Iterator<Item = PlotTag<L>>, L: Point> IntoPlotIterator for Vec<PlotRes<F, L>> {
+impl<P:IntoPlotIterator<L=L>, L: Point> IntoPlotIterator for Vec<P> {
     type L = L;
-    type P = Flatten<MapPlotResIter<std::vec::IntoIter<PlotRes<F, L>>>>;
-    fn into_plot(self) -> PlotRes<Self::P, L> {
+    type P = Flatten<std::vec::IntoIter<P::P>>;
+    fn into_plot(self) -> PlotRes<Self::P,Self::L>  {
+        
+        let (areas,its): (Vec<_>, Vec<_>)=self.into_iter().map(|x|{
+            let PlotRes{area,it}=x.into_plot();
+            (area,it)
+        }).unzip();
+
         let mut area = Area::new();
-        for a in self.iter() {
-            area.grow_area(&a.area);
+        for a in areas {
+            area.grow_area(&a);
         }
 
-        let it = MapPlotResIter(self.into_iter()).flatten();
+        let it = its.into_iter().flatten();
 
-        PlotRes { area, it }
+        PlotRes{area,it}
     }
 }
 
-impl<const K: usize, F: Iterator<Item = PlotTag<L>>, L: Point> IntoPlotIterator
-    for [PlotRes<F, L>; K]
-{
+
+
+impl<const K:usize,P:IntoPlotIterator<L=L>, L: Point> IntoPlotIterator for[P;K] {
     type L = L;
-    type P = Flatten<MapPlotResIter<std::array::IntoIter<PlotRes<F, L>, K>>>;
-    fn into_plot(self) -> PlotRes<Self::P, L> {
+    type P = Flatten<std::vec::IntoIter<P::P>>;
+    fn into_plot(self) -> PlotRes<Self::P,Self::L>  {
+        
+        let (areas,its): (Vec<_>, Vec<_>)=self.into_iter().map(|x|{
+            let PlotRes{area,it}=x.into_plot();
+            (area,it)
+        }).unzip();
+
         let mut area = Area::new();
-        for a in self.iter() {
-            area.grow_area(&a.area);
+        for a in areas {
+            area.grow_area(&a);
         }
 
-        let it = MapPlotResIter(self.into_iter()).flatten();
+        let it = its.into_iter().flatten();
 
-        PlotRes { area, it }
+        PlotRes{area,it}
     }
 }
+
+

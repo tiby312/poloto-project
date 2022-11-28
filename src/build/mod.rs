@@ -46,22 +46,58 @@ pub enum PlotMetaType {
 pub trait IntoPlotIterator {
     type L: Point;
     type P: Iterator<Item = PlotTag<Self::L>>;
-    fn into_plot(self) -> PlotRes<Self::P, Self::L>;
+    fn into_plot(self) -> PlotRes<Self::P,Self::L>;
+
+    fn chain<P: IntoPlotIterator<L = Self::L>>(
+        self,
+        other: P,
+    ) -> PlotRes<std::iter::Chain<Self::P, P::P>, Self::L> where Self:Sized {
+        let PlotRes{area:curr_area,it:p1}=self.into_plot();
+        let PlotRes{area:other_area,it:p} = other.into_plot();
+        let mut area = curr_area;
+        area.grow_area(&other_area);
+        PlotRes {
+            area,
+            it: p1.chain(p),
+        }
+    }
+
+    fn dyn_box<'a>(self) -> PlotRes<Box<dyn Iterator<Item = PlotTag<Self::L>> + 'a>, Self::L>
+    where
+        Self::P: 'a,
+        Self:Sized
+    {
+        let PlotRes{area,it}=self.into_plot();
+        PlotRes {
+            it: Box::new(it),
+            area,
+        }
+    }
+
+}
+
+
+#[derive(Copy, Clone)]
+pub struct PlotRes<I: Iterator<Item = PlotTag<L>>, L: Point> {
+    pub(crate) area: Area<L::X, L::Y>,
+    pub(crate) it: I,
 }
 
 impl<P: Iterator<Item = PlotTag<L>>, L: Point> IntoPlotIterator for PlotRes<P, L> {
     type L = L;
     type P = P;
-    fn into_plot(self) -> PlotRes<Self::P, Self::L> {
+    
+    fn into_plot(self) ->PlotRes<Self::P,Self::L>{
         self
     }
 }
+
 
 pub(crate) struct Foop<'a, I> {
     it: &'a mut I,
 }
 impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Foop<'a, I> {
-    fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
+    pub(crate) fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
         if let Some(o) = it.next() {
             match o {
                 PlotTag::Start { name, typ } => Some((Self { it }, name, typ)),
@@ -105,54 +141,7 @@ impl<X: PlotNum, Y: PlotNum> Point for (X, Y) {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct PlotRes<I: Iterator<Item = PlotTag<L>>, L: Point> {
-    area: Area<L::X, L::Y>,
-    it: I,
-}
-impl<I: Iterator<Item = PlotTag<L>>, L: Point> PlotRes<I, L> {
-    pub fn chain<P: IntoPlotIterator<L = L>>(
-        self,
-        other: P,
-    ) -> PlotRes<std::iter::Chain<I, P::P>, L> {
-        let other = other.into_plot();
-        let mut area = self.area;
-        area.grow_area(&other.area);
-        PlotRes {
-            area,
-            it: self.it.chain(other.it),
-        }
-    }
 
-    pub fn area(&self) -> &Area<L::X, L::Y> {
-        &self.area
-    }
-
-    pub fn dyn_box<'a>(self) -> PlotRes<Box<dyn Iterator<Item = PlotTag<L>> + 'a>, L>
-    where
-        I: 'a,
-    {
-        PlotRes {
-            it: Box::new(self.it),
-            area: self.area,
-        }
-    }
-
-    pub(crate) fn next(&mut self) -> Option<(Foop<I>, String, PlotMetaType)> {
-        Foop::new(&mut self.it)
-    }
-}
-
-// pub trait PlotTagTrait{
-//     type L:Point;
-//     fn get(self)->PlotTag<Self::L>;
-// }
-// impl<L:Point> PlotTagTrait for PlotTag<L>{
-//     type L=L;
-//     fn get(self)->PlotTag<Self::L>{
-//         self
-//     }
-// }
 
 #[derive(Clone)]
 pub enum PlotTag<L: Point> {
