@@ -46,24 +46,24 @@ pub(super) fn render_plot<P: build::IntoPlotIterator>(
 
     let mut names = vec![];
 
-    for (i,plot) in (plots_all.handle()).enumerate(){
-        let mut name = String::new();
-        let (typ,it)=plot.handle(&mut name)?;
+    let mut k = plots_all.into_plot();
+    //for (i,(it,name,typ)) in (oo).enumerate(){
+    let mut counter = 0;
+    loop {
+        let Some((it,name,typ))=k.next() else {
+            break
+        };
 
         let name_exists = !name.is_empty();
 
         if name_exists {
-            names.push((typ, name, i));
+            names.push((typ, name, counter));
         }
 
         let aa = minx.scale([minx, maxx], scalex);
         let bb = miny.scale([miny, maxy], scaley);
 
         match typ {
-            PlotMetaType::Marker=>{
-                assert_eq!(it.count(), 0);
-                // don't need to render any legend or plots
-            }
             PlotMetaType::Text => {
                 assert_eq!(it.count(), 0);
 
@@ -108,6 +108,7 @@ pub(super) fn render_plot<P: build::IntoPlotIterator>(
                 )?;
             }
         }
+        counter += 1;
     }
 
     if !names.is_empty() {
@@ -115,9 +116,6 @@ pub(super) fn render_plot<P: build::IntoPlotIterator>(
             //TODO redesign so that not all names need to be written to memory at once
             for (typ, name, i) in names.iter() {
                 match typ {
-                    PlotMetaType::Marker=>{
-                        // don't need to render any legend or plots
-                    }
                     PlotMetaType::Text => {
                         // don't need to render any legend or plots
                     }
@@ -157,7 +155,6 @@ pub(super) fn render_plot<P: build::IntoPlotIterator>(
                         PlotType::Bars => "poloto_bars",
                     },
                     PlotMetaType::Text => "",
-                    PlotMetaType::Marker =>break,
                 };
 
                 let text = hbuild::elem("text")

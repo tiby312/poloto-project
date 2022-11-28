@@ -142,40 +142,94 @@ use super::marker::Area;
 //     }
 // }
 
-///
-/// Allows a user to collect plots inside of a loop instead of chaining plots together.
-///
-#[derive(Clone)]
-pub struct PlotsDyn<F> {
-    flop: Vec<F>,
-}
-impl<F> PlotsDyn<F> {
-    pub fn new(vec: Vec<F>) -> Self {
-        PlotsDyn {
-            flop: vec,
+// ///
+// /// Allows a user to collect plots inside of a loop instead of chaining plots together.
+// ///
+// #[derive(Clone)]
+// pub struct PlotsDyn<F> {
+//     flop: Vec<F>,
+// }
+// impl<F> PlotsDyn<F> {
+//     pub fn new(vec: Vec<F>) -> Self {
+//         PlotsDyn {
+//             flop: vec,
+//         }
+//     }
+// }
+
+// pub struct MyIt<I,K>{
+//     it:I,
+//     curr:Option<K>
+// }
+// impl<I:Iterator<Item=PlotRes<K,X,Y>>,K:Iterator<Item=PlotTag<X,Y>>,X,Y> Iterator for MyIt<I,K>{
+//     type Item=PlotTag<X,Y>;
+
+//     fn next(&mut self) -> Option<Self::Item> {
+//         if let Some(curr)=self.curr.as_mut(){
+//             if let Some(a)=curr.next(){
+//                 Some(a)
+//             }else{
+//                 self.curr=self.it.next().map(|x|x.it);
+
+//                 if let Some(a)=self.curr{
+//                     a.next()
+//                 }else{
+//                     None
+//                 }
+//             }
+//         }else{
+//             None
+//         }
+//     }
+
+// }
+
+impl<F: Iterator<Item = PlotTag<X, Y>> + 'static, X: PlotNum + 'static, Y: PlotNum + 'static>
+    IntoPlotIterator for Vec<PlotRes<F, X, Y>>
+{
+    type X = X;
+    type Y = Y;
+    type P = Box<dyn Iterator<Item = PlotTag<X, Y>> + 'static>;
+    fn into_plot(self) -> PlotRes<Self::P, X, Y> {
+        let mut area = Area::new();
+        for a in self.iter() {
+            area.grow_area(&a.area);
+        }
+
+        let j = self.into_iter().map(|x| x.it).flatten();
+
+        PlotRes {
+            area,
+            it: Box::new(j),
         }
     }
 }
 
+impl<
+        const K: usize,
+        F: Iterator<Item = PlotTag<X, Y>> + 'static,
+        X: PlotNum + 'static,
+        Y: PlotNum + 'static,
+    > IntoPlotIterator for [PlotRes<F, X, Y>; K]
+{
+    type X = X;
+    type Y = Y;
+    type P = Box<dyn Iterator<Item = PlotTag<X, Y>> + 'static>;
+    fn into_plot(self) -> PlotRes<Self::P, X, Y> {
+        let mut area = Area::new();
+        for a in self.iter() {
+            area.grow_area(&a.area);
+        }
 
+        let j = self.into_iter().map(|x| x.it).flatten();
 
+        PlotRes {
+            area,
+            it: Box::new(j),
+        }
+    }
+}
 
-//TODO fix
-// impl<F: Iterator<Item=PlotTag<X,Y>>,X:PlotNum,Y:PlotNum> IntoPlotIterator for Vec<PlotRes<F,X,Y>> {
-//     type X=X;
-//     type Y=Y;
-//     type P = Box<dyn Iterator<Item=PlotTag<X,Y>>>;
-//     fn into_plot(self) -> PlotRes<Self::P,X,Y> {
-//         let mut area=Area::new();
-//         for a in self.iter(){
-//             area.grow_area(&a.area);
-//         }
-
-//         Box::new(self.into_iter().flat_map(|x|x.it))
-        
-
-//     }
-// }
 // impl<const K:usize,F: PlotIterator> IntoPlotIterator for [PlotRes<F>;K] {
 //     type P = PlotRes<Box<dyn Iterator<Item=PlotTag<F::X,F::Y>>>>;
 //     fn into_plot(self) -> Self::P {
@@ -185,12 +239,9 @@ impl<F> PlotsDyn<F> {
 //         }
 
 //         self.into_iter().flat_map(|x|x.it)
-        
 
 //     }
 // }
-
-
 
 // impl<const K: usize, F: PlotIterator> IntoPlotIterator for [PlotRes<F>; K] {
 //     type P = PlotsDyn<F>;
@@ -198,7 +249,6 @@ impl<F> PlotsDyn<F> {
 //         plot_iter_impl::PlotsDyn::new(self.into_iter().collect())
 //     }
 // }
-
 
 // impl<F: PlotIterator> PlotIterator for PlotsDyn<F> {
 //     type X = F::X;
@@ -282,10 +332,6 @@ impl<F> PlotsDyn<F> {
 //     }
 // }
 
-
-
-
-
 // impl<XI: Iterator, YI: Iterator> Iterator for Marker<XI, YI>
 // where
 //     XI::Item: PlotNum,
@@ -316,7 +362,7 @@ impl<F> PlotsDyn<F> {
 
 //     // fn handle(self,w:&mut dyn fmt::Write)->Result<(PlotMetaType,Self::It),fmt::Error> {
 //     //     Ok((PlotMetaType::Marker,std::iter::empty()))
-        
+
 //     // }
 //     // #[inline(always)]
 //     // fn next_typ(&mut self) -> Option<PlotMetaType> {

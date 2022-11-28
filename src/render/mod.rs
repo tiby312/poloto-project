@@ -2,7 +2,7 @@
 //! Tools to render plots
 //!
 
-use crate::build::IntoPlotIterator;
+use crate::build::{IntoPlotIterator, PlotRes};
 
 use super::*;
 mod render_base;
@@ -211,12 +211,13 @@ pub struct Stage1<P: IntoPlotIterator, TX, TY> {
     boundy: DataBound<P::Y>,
 }
 
-impl<X, Y, P: build::IntoPlotIterator<X = X, Y = Y>> Stage1<P, X::DefaultTicks, Y::DefaultTicks>
+impl<X: PlotNum, Y: PlotNum, P: build::IntoPlotIterator<X = X, Y = Y>>
+    Stage1<P, X::DefaultTicks, Y::DefaultTicks>
 where
     X: HasDefaultTicks,
     Y: HasDefaultTicks,
 {
-    pub fn new(plots: P) -> Self {
+    pub fn new(plots: P) -> Stage1<PlotRes<P::P, P::X, P::Y>, X::DefaultTicks, Y::DefaultTicks> {
         Self::from_parts(
             plots,
             P::X::default_ticks(),
@@ -227,10 +228,18 @@ where
 }
 
 impl<P: build::IntoPlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage1<P, TX, TY> {
-    pub fn from_parts(mut plots: P, tickx: TX, ticky: TY, opt: RenderOptions) -> Stage1<P, TX, TY> {
-        let mut area = build::marker::Area::new();
-        plots.area(&mut area);
-        let (boundx, boundy) = area.build();
+    pub fn from_parts(
+        plots: P,
+        tickx: TX,
+        ticky: TY,
+        opt: RenderOptions,
+    ) -> Stage1<PlotRes<P::P, P::X, P::Y>, TX, TY> {
+        //let mut area = build::marker::Area::new();
+
+        let plots = plots.into_plot();
+
+        //plots.area(&mut area);
+        let (boundx, boundy) = plots.area().build();
 
         Stage1 {
             opt,

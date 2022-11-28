@@ -49,8 +49,8 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
         .collect();
 
     let p = poloto::plots!(
-        poloto::build::BoxedPlot::new(
-            plot("tan(x)").line(
+        plot("tan(x)")
+            .line(
                 x.iter()
                     .copied()
                     .zip_output(f64::tan)
@@ -58,13 +58,15 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
                     .crop_below(-10.0)
                     .crop_left(2.0)
             )
-        ),
-        poloto::build::BoxedPlot::new(
-            plot("2*cos(x)").line(x.iter().zip_output(|x| 2.0 * x.cos()).crop_above(1.4))
-        ),
-        poloto::build::BoxedPlot::new(plot("2*cos(x").line(build::cloned(
-            x.iter().zip_output(|x| 2.0 * x.cos()).crop_above(1.4)
-        )))
+            .dyn_box(),
+        plot("2*cos(x)")
+            .line(x.iter().zip_output(|x| 2.0 * x.cos()).crop_above(1.4))
+            .dyn_box(),
+        plot("2*cos(x")
+            .line(build::cloned(
+                x.iter().zip_output(|x| 2.0 * x.cos()).crop_above(1.4)
+            ))
+            .dyn_box()
     );
 
     poloto::data(p)

@@ -24,7 +24,7 @@
 //! knows up front the min and max values of that axis. This is typically the case for
 //! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/custom_ticks.rs)
 
-use build::PlotTag;
+use build::PlotRes;
 use hypermelon::attr;
 use hypermelon::elem;
 
@@ -80,7 +80,6 @@ macro_rules! plots {
     };
     ( $a:expr,$( $x:expr ),* ) => {
         {
-            use $crate::build::PlotIterator;
             use $crate::build::IntoPlotIterator;
             let mut a=$a.into_plot();
             $(
@@ -97,16 +96,11 @@ macro_rules! plots {
 pub fn data<
     X: PlotNum + HasDefaultTicks,
     Y: PlotNum + HasDefaultTicks,
-    J: build::IntoPlotIterator,
+    J: build::IntoPlotIterator<X = X, Y = Y>,
 >(
     plots: J,
-) -> Stage1<J, X::DefaultTicks, Y::DefaultTicks> {
-    render::Stage1::from_parts(
-        plots.into_plot(),
-        X::default_ticks(),
-        Y::default_ticks(),
-        render_opt(),
-    )
+) -> Stage1<PlotRes<J::P, J::X, J::Y>, X::DefaultTicks, Y::DefaultTicks> {
+    render::Stage1::from_parts(plots, X::default_ticks(), Y::default_ticks(), render_opt())
 }
 
 ///
