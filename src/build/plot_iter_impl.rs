@@ -189,16 +189,16 @@ use super::marker::Area;
 #[derive(Clone)]
 pub struct MapPlotResIter<I>(I);
 
-impl<I: Iterator<Item = PlotRes<F, X, Y>>, F: FusedIterator<Item = PlotTag<X, Y>>, X, Y>
-    FusedIterator for MapPlotResIter<I>
+impl<I: Iterator<Item = PlotRes<F, L>>, F: FusedIterator<Item = PlotTag<L>>, L: Point> FusedIterator
+    for MapPlotResIter<I>
 {
 }
-impl<I: Iterator<Item = PlotRes<F, X, Y>>, F: ExactSizeIterator<Item = PlotTag<X, Y>>, X, Y>
+impl<I: Iterator<Item = PlotRes<F, L>>, F: ExactSizeIterator<Item = PlotTag<L>>, L: Point>
     ExactSizeIterator for MapPlotResIter<I>
 {
 }
 
-impl<I: Iterator<Item = PlotRes<F, X, Y>>, F: Iterator<Item = PlotTag<X, Y>>, X, Y> Iterator
+impl<I: Iterator<Item = PlotRes<F, L>>, F: Iterator<Item = PlotTag<L>>, L: Point> Iterator
     for MapPlotResIter<I>
 {
     type Item = F;
@@ -207,13 +207,10 @@ impl<I: Iterator<Item = PlotRes<F, X, Y>>, F: Iterator<Item = PlotTag<X, Y>>, X,
     }
 }
 
-impl<F: Iterator<Item = PlotTag<X, Y>> + 'static, X: PlotNum + 'static, Y: PlotNum + 'static>
-    IntoPlotIterator for Vec<PlotRes<F, X, Y>>
-{
-    type X = X;
-    type Y = Y;
-    type P = Flatten<MapPlotResIter<std::vec::IntoIter<PlotRes<F, X, Y>>>>;
-    fn into_plot(self) -> PlotRes<Self::P, X, Y> {
+impl<F: Iterator<Item = PlotTag<L>>, L: Point> IntoPlotIterator for Vec<PlotRes<F, L>> {
+    type L = L;
+    type P = Flatten<MapPlotResIter<std::vec::IntoIter<PlotRes<F, L>>>>;
+    fn into_plot(self) -> PlotRes<Self::P, L> {
         let mut area = Area::new();
         for a in self.iter() {
             area.grow_area(&a.area);
@@ -225,17 +222,12 @@ impl<F: Iterator<Item = PlotTag<X, Y>> + 'static, X: PlotNum + 'static, Y: PlotN
     }
 }
 
-impl<
-        const K: usize,
-        F: Iterator<Item = PlotTag<X, Y>> + 'static,
-        X: PlotNum + 'static,
-        Y: PlotNum + 'static,
-    > IntoPlotIterator for [PlotRes<F, X, Y>; K]
+impl<const K: usize, F: Iterator<Item = PlotTag<L>>, L: Point> IntoPlotIterator
+    for [PlotRes<F, L>; K]
 {
-    type X = X;
-    type Y = Y;
-    type P = Flatten<MapPlotResIter<std::array::IntoIter<PlotRes<F, X, Y>, K>>>;
-    fn into_plot(self) -> PlotRes<Self::P, X, Y> {
+    type L = L;
+    type P = Flatten<MapPlotResIter<std::array::IntoIter<PlotRes<F, L>, K>>>;
+    fn into_plot(self) -> PlotRes<Self::P, L> {
         let mut area = Area::new();
         for a in self.iter() {
             area.grow_area(&a.area);

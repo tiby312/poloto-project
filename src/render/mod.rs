@@ -2,7 +2,7 @@
 //! Tools to render plots
 //!
 
-use crate::build::{IntoPlotIterator, PlotRes};
+use crate::build::{IntoPlotIterator, PlotRes, Point};
 
 use super::*;
 mod render_base;
@@ -207,33 +207,41 @@ pub struct Stage1<P: IntoPlotIterator, TX, TY> {
     tickx: TX,
     ticky: TY,
     plots: P,
-    boundx: DataBound<P::X>,
-    boundy: DataBound<P::Y>,
+    boundx: DataBound<<P::L as Point>::X>,
+    boundy: DataBound<<P::L as Point>::Y>,
 }
 
-impl<X: PlotNum, Y: PlotNum, P: build::IntoPlotIterator<X = X, Y = Y>>
+impl<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, P: build::IntoPlotIterator<L = L>>
     Stage1<P, X::DefaultTicks, Y::DefaultTicks>
 where
     X: HasDefaultTicks,
     Y: HasDefaultTicks,
 {
-    pub fn new(plots: P) -> Stage1<PlotRes<P::P, P::X, P::Y>, X::DefaultTicks, Y::DefaultTicks> {
+    pub fn new(plots: P) -> Stage1<PlotRes<P::P, L>, X::DefaultTicks, Y::DefaultTicks> {
         Self::from_parts(
             plots,
-            P::X::default_ticks(),
-            P::Y::default_ticks(),
+            X::default_ticks(),
+            Y::default_ticks(),
             RenderOptions::new(),
         )
     }
 }
 
-impl<P: build::IntoPlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> Stage1<P, TX, TY> {
+impl<
+        X: PlotNum,
+        Y: PlotNum,
+        L: Point<X = X, Y = Y>,
+        P: build::IntoPlotIterator<L = L>,
+        TX: TickDistGen<X>,
+        TY: TickDistGen<Y>,
+    > Stage1<P, TX, TY>
+{
     pub fn from_parts(
         plots: P,
         tickx: TX,
         ticky: TY,
         opt: RenderOptions,
-    ) -> Stage1<PlotRes<P::P, P::X, P::Y>, TX, TY> {
+    ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
         //let mut area = build::marker::Area::new();
 
         let plots = plots.into_plot();
@@ -262,7 +270,7 @@ impl<P: build::IntoPlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> S
         }
     }
 
-    pub fn map_xticks<TTT: TickDistGen<P::X>, F: FnOnce(TX) -> TTT>(
+    pub fn map_xticks<TTT: TickDistGen<X>, F: FnOnce(TX) -> TTT>(
         self,
         func: F,
     ) -> Stage1<P, TTT, TY> {
@@ -277,7 +285,7 @@ impl<P: build::IntoPlotIterator, TX: TickDistGen<P::X>, TY: TickDistGen<P::Y>> S
         }
     }
 
-    pub fn map_yticks<TTT: TickDistGen<P::Y>, F: FnOnce(TY) -> TTT>(
+    pub fn map_yticks<TTT: TickDistGen<Y>, F: FnOnce(TY) -> TTT>(
         self,
         func: F,
     ) -> Stage1<P, TX, TTT> {
@@ -332,11 +340,19 @@ pub struct Stage2<P: IntoPlotIterator, A, B> {
     xticks: A,
     yticks: B,
     plots: P,
-    boundx: DataBound<P::X>,
-    boundy: DataBound<P::Y>,
+    boundx: DataBound<<P::L as Point>::X>,
+    boundy: DataBound<<P::L as Point>::Y>,
 }
 
-impl<P: IntoPlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stage2<P, A, B> {
+impl<
+        X: PlotNum,
+        Y: PlotNum,
+        L: Point<X = X, Y = Y>,
+        P: IntoPlotIterator<L = L>,
+        A: TickDist<Num = X>,
+        B: TickDist<Num = Y>,
+    > Stage2<P, A, B>
+{
     pub fn label<Fmt: BaseFmt>(self, fmt: Fmt) -> Stage3<P, A, B, Fmt> {
         Stage3 {
             data: self,
@@ -344,11 +360,11 @@ impl<P: IntoPlotIterator, A: TickDist<Num = P::X>, B: TickDist<Num = P::Y>> Stag
         }
     }
 
-    pub fn boundx(&self) -> &DataBound<P::X> {
+    pub fn boundx(&self) -> &DataBound<X> {
         &self.boundx
     }
 
-    pub fn boundy(&self) -> &DataBound<P::Y> {
+    pub fn boundy(&self) -> &DataBound<Y> {
         &self.boundy
     }
 
@@ -395,11 +411,11 @@ pub struct Stage3<P: IntoPlotIterator, A, B, BB> {
     base: BB,
 }
 
-impl<P, A, B, BB> Stage3<P, A, B, BB>
+impl<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, P, A, B, BB> Stage3<P, A, B, BB>
 where
-    P: IntoPlotIterator,
-    A: crate::ticks::TickDist<Num = P::X>,
-    B: crate::ticks::TickDist<Num = P::Y>,
+    P: IntoPlotIterator<L = L>,
+    A: crate::ticks::TickDist<Num = X>,
+    B: crate::ticks::TickDist<Num = Y>,
     BB: BaseFmt,
 {
     pub fn append_to<E: Elem>(self, elem: E) -> Stage4<elem::Append<E, Self>> {
@@ -413,11 +429,11 @@ where
 
 impl<P: IntoPlotIterator, A, B, BB> Locked for Stage3<P, A, B, BB> {}
 
-impl<P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
+impl<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
 where
-    P: IntoPlotIterator,
-    A: crate::ticks::TickDist<Num = P::X>,
-    B: crate::ticks::TickDist<Num = P::Y>,
+    P: IntoPlotIterator<L = L>,
+    A: crate::ticks::TickDist<Num = X>,
+    B: crate::ticks::TickDist<Num = Y>,
     BB: BaseFmt,
 {
     type Tail = ();

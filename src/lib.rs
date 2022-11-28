@@ -25,6 +25,7 @@
 //! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/custom_ticks.rs)
 
 use build::PlotRes;
+use build::Point;
 use hypermelon::attr;
 use hypermelon::elem;
 
@@ -93,13 +94,13 @@ macro_rules! plots {
 ///
 /// Start plotting!
 ///
-pub fn data<
-    X: PlotNum + HasDefaultTicks,
-    Y: PlotNum + HasDefaultTicks,
-    J: build::IntoPlotIterator<X = X, Y = Y>,
->(
+pub fn data<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, J: build::IntoPlotIterator<L = L>>(
     plots: J,
-) -> Stage1<PlotRes<J::P, J::X, J::Y>, X::DefaultTicks, Y::DefaultTicks> {
+) -> Stage1<PlotRes<J::P, L>, X::DefaultTicks, Y::DefaultTicks>
+where
+    X: HasDefaultTicks,
+    Y: HasDefaultTicks,
+{
     render::Stage1::from_parts(plots, X::default_ticks(), Y::default_ticks(), render_opt())
 }
 

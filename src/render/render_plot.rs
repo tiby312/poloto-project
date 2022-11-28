@@ -2,10 +2,15 @@ use super::*;
 
 use crate::build::*;
 
-pub(super) fn render_plot<P: build::IntoPlotIterator>(
+pub(super) fn render_plot<
+    X: PlotNum,
+    Y: PlotNum,
+    L: Point<X = X, Y = Y>,
+    P: build::IntoPlotIterator<L = L>,
+>(
     writer: &mut elem::ElemWrite,
-    boundx: &ticks::DataBound<P::X>,
-    boundy: &ticks::DataBound<P::Y>,
+    boundx: &ticks::DataBound<X>,
+    boundy: &ticks::DataBound<Y>,
     canvas: &RenderOptionsResult,
     plots_all: P,
 ) -> std::fmt::Result {
@@ -80,7 +85,8 @@ pub(super) fn render_plot<P: build::IntoPlotIterator>(
                     let maxx_ii = scalex;
                     let maxy_ii = scaley;
 
-                    it.map(move |(x, y)| {
+                    it.map(move |l| {
+                        let (x, y) = l.get();
                         [
                             basex_ii + x.scale(rangex_ii, maxx_ii),
                             basey_ii - y.scale(rangey_ii, maxy_ii),

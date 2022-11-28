@@ -18,7 +18,7 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
     name: K,
     data: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> Stage2<impl IntoPlotIterator<X = X, Y = i128>, impl TickDist<Num = X>, impl TickDist<Num = i128>>
+) -> Stage2<impl IntoPlotIterator<L = (X, i128)>, impl TickDist<Num = X>, impl TickDist<Num = i128>>
 {
     let (plots, ytick_fmt) = gen_bar(name, data, marker);
 
@@ -33,10 +33,7 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> (
-    impl IntoPlotIterator<X = X, Y = i128>,
-    impl TickDistGen<i128>,
-) {
+) -> (impl IntoPlotIterator<L = (X, i128)>, impl TickDistGen<i128>) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
     let vals_len = vals.len();
