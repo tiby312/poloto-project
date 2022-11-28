@@ -71,7 +71,7 @@ use render::*;
 mod simple;
 
 ///
-/// Macro to chain multiple plots together instead of calling [`chain`](build::PlotIteratorExt::chain) repeatedly.
+/// Macro to chain multiple plots together instead of calling chain repeatedly.
 ///
 #[macro_export]
 macro_rules! plots {
