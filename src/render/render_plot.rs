@@ -6,7 +6,7 @@ pub(super) fn render_plot<
     X: PlotNum,
     Y: PlotNum,
     L: Point<X = X, Y = Y>,
-    P: build::IntoPlotIterator<L = L>,
+    P: build::PlotIterator<L = L>,
 >(
     writer: &mut elem::ElemWrite,
     boundx: &ticks::DataBound<X>,
@@ -51,7 +51,7 @@ pub(super) fn render_plot<
 
     let mut names = vec![];
 
-    let PlotRes{mut it,..} = plots_all.into_plot();
+    let PlotRes { mut it, .. } = plots_all.into_plot();
     //for (i,(it,name,typ)) in (oo).enumerate(){
     let mut counter = 0;
     loop {

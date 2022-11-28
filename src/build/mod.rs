@@ -41,19 +41,26 @@ pub enum PlotMetaType {
     Text,
 }
 
-
-
-pub trait IntoPlotIterator {
+pub trait PlotIterator {
     type L: Point;
     type P: Iterator<Item = PlotTag<Self::L>>;
-    fn into_plot(self) -> PlotRes<Self::P,Self::L>;
+    fn into_plot(self) -> PlotRes<Self::P, Self::L>;
 
-    fn chain<P: IntoPlotIterator<L = Self::L>>(
+    fn chain<P: PlotIterator<L = Self::L>>(
         self,
         other: P,
-    ) -> PlotRes<std::iter::Chain<Self::P, P::P>, Self::L> where Self:Sized {
-        let PlotRes{area:curr_area,it:p1}=self.into_plot();
-        let PlotRes{area:other_area,it:p} = other.into_plot();
+    ) -> PlotRes<std::iter::Chain<Self::P, P::P>, Self::L>
+    where
+        Self: Sized,
+    {
+        let PlotRes {
+            area: curr_area,
+            it: p1,
+        } = self.into_plot();
+        let PlotRes {
+            area: other_area,
+            it: p,
+        } = other.into_plot();
         let mut area = curr_area;
         area.grow_area(&other_area);
         PlotRes {
@@ -65,17 +72,15 @@ pub trait IntoPlotIterator {
     fn dyn_box<'a>(self) -> PlotRes<Box<dyn Iterator<Item = PlotTag<Self::L>> + 'a>, Self::L>
     where
         Self::P: 'a,
-        Self:Sized
+        Self: Sized,
     {
-        let PlotRes{area,it}=self.into_plot();
+        let PlotRes { area, it } = self.into_plot();
         PlotRes {
             it: Box::new(it),
             area,
         }
     }
-
 }
-
 
 #[derive(Copy, Clone)]
 pub struct PlotRes<I: Iterator<Item = PlotTag<L>>, L: Point> {
@@ -83,15 +88,14 @@ pub struct PlotRes<I: Iterator<Item = PlotTag<L>>, L: Point> {
     pub(crate) it: I,
 }
 
-impl<P: Iterator<Item = PlotTag<L>>, L: Point> IntoPlotIterator for PlotRes<P, L> {
+impl<P: Iterator<Item = PlotTag<L>>, L: Point> PlotIterator for PlotRes<P, L> {
     type L = L;
     type P = P;
-    
-    fn into_plot(self) ->PlotRes<Self::P,Self::L>{
+
+    fn into_plot(self) -> PlotRes<Self::P, Self::L> {
         self
     }
 }
-
 
 pub(crate) struct Foop<'a, I> {
     it: &'a mut I,
@@ -126,7 +130,6 @@ impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for Foop<'a, I> {
     }
 }
 
-
 pub trait Point {
     type X: PlotNum;
     type Y: PlotNum;
@@ -140,8 +143,6 @@ impl<X: PlotNum, Y: PlotNum> Point for (X, Y) {
         (&self.0, &self.1)
     }
 }
-
-
 
 #[derive(Clone)]
 pub enum PlotTag<L: Point> {

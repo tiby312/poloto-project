@@ -60,6 +60,7 @@ use hypermelon::prelude::*;
 pub mod prelude {
     pub use super::build::crop::Croppable;
     pub use super::build::output_zip::OutputZip;
+    pub use super::build::PlotIterator;
     pub use super::plots;
 }
 
@@ -81,10 +82,16 @@ macro_rules! plots {
     };
     ( $a:expr,$( $x:expr ),* ) => {
         {
-            use $crate::build::IntoPlotIterator;
+
             let mut a=$a;
             $(
-                let a=a.chain($x);
+
+                let k=$x;
+                let a={
+                    use $crate::build::PlotIterator;
+                    a.chain(k)
+                };
+
             )*
             a
         }
@@ -94,7 +101,7 @@ macro_rules! plots {
 ///
 /// Start plotting!
 ///
-pub fn data<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, J: build::IntoPlotIterator<L = L>>(
+pub fn data<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, J: build::PlotIterator<L = L>>(
     plots: J,
 ) -> Stage1<PlotRes<J::P, L>, X::DefaultTicks, Y::DefaultTicks>
 where
