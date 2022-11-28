@@ -41,6 +41,8 @@ pub enum PlotMetaType {
     Text,
 }
 
+
+
 pub trait IntoPlotIterator {
     type L: Point;
     type P: Iterator<Item = PlotTag<Self::L>>;
@@ -141,13 +143,15 @@ impl<I: Iterator<Item = PlotTag<L>>, L: Point> PlotRes<I, L> {
     }
 }
 
-// pub trait PlotIterator:Iterator<Item=PlotTag<Self::X,Self::Y>>{
-//     type X:PlotNum;
-//     type Y:PlotNum;
+// pub trait PlotTagTrait{
+//     type L:Point;
+//     fn get(self)->PlotTag<Self::L>;
 // }
-// impl<X:PlotNum,Y,I:Iterator<Item=PlotTag<X,Y>>> PlotIterator for I{
-//     type X=X;
-//     type Y=Y;
+// impl<L:Point> PlotTagTrait for PlotTag<L>{
+//     type L=L;
+//     fn get(self)->PlotTag<Self::L>{
+//         self
+//     }
 // }
 
 #[derive(Clone)]
