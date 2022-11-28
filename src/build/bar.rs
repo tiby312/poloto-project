@@ -18,7 +18,8 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
     name: K,
     data: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> Stage2<impl PlotIterator<X = X, Y = i128>, impl TickDist<Num = X>, impl TickDist<Num = i128>> {
+) -> Stage2<impl IntoPlotIterator<X = X, Y = i128>, impl TickDist<Num = X>, impl TickDist<Num = i128>>
+{
     let (plots, ytick_fmt) = gen_bar(name, data, marker);
 
     let opt = crate::render::render_opt()
@@ -32,12 +33,15 @@ pub fn gen_bar<K: Display, D: Display, X: PlotNum>(
     name: K,
     vals: impl IntoIterator<Item = (X, D)>,
     marker: impl IntoIterator<Item = X>,
-) -> (impl PlotIterator<X = X, Y = i128>, impl TickDistGen<i128>) {
+) -> (
+    impl IntoPlotIterator<X = X, Y = i128>,
+    impl TickDistGen<i128>,
+) {
     let (vals, names): (Vec<_>, Vec<_>) = vals.into_iter().unzip();
 
     let vals_len = vals.len();
 
-    let bars = build::plot(name).bars2(
+    let bars = build::plot(name).bars(
         vals.into_iter()
             .enumerate()
             .map(|(i, x)| (x, i128::try_from(i).unwrap())),

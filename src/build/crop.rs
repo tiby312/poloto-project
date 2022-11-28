@@ -22,6 +22,11 @@ pub struct Crop<X, Y, I> {
     val: (X, Y),
     inner: I,
 }
+
+impl<X: DiscNum + PlotNum, Y: DiscNum + PlotNum, I: FusedIterator> FusedIterator for Crop<X, Y, I> where
+    I::Item: Unwrapper<Item = (X, Y)>
+{
+}
 impl<X: DiscNum + PlotNum, Y: DiscNum + PlotNum, I: Iterator> Iterator for Crop<X, Y, I>
 where
     I::Item: Unwrapper<Item = (X, Y)>,

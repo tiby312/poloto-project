@@ -2,12 +2,12 @@ use super::*;
 
 use crate::build::*;
 
-pub(super) fn render_plot<P: build::PlotIterator>(
+pub(super) fn render_plot<P: build::IntoPlotIterator>(
     writer: &mut elem::ElemWrite,
     boundx: &ticks::DataBound<P::X>,
     boundy: &ticks::DataBound<P::Y>,
     canvas: &RenderOptionsResult,
-    plots_all: &mut P,
+    plots_all: P,
 ) -> std::fmt::Result {
     let RenderOptionsResult {
         width,
@@ -42,26 +42,22 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 
     let mut color_iter2 = color_iter.clone();
 
-    let mut f = crate::build::RenderablePlotIter::new(plots_all);
+    //let mut f = crate::build::RenderablePlotIter::new(plots_all);
 
     let mut names = vec![];
 
-    for i in 0.. {
-        let mut ppp = if let Some(ppp) = f.next_plot() {
-            ppp
-        } else {
-            break;
+    let mut k = plots_all.into_plot();
+    //for (i,(it,name,typ)) in (oo).enumerate(){
+    let mut counter = 0;
+    loop {
+        let Some((it,name,typ))=k.next() else {
+            break
         };
-
-        let typ = ppp.typ();
-
-        let mut name = String::new();
-        ppp.name(&mut name).unwrap()?;
 
         let name_exists = !name.is_empty();
 
         if name_exists {
-            names.push((typ, name, i));
+            names.push((typ, name, counter));
         }
 
         let aa = minx.scale([minx, maxx], scalex);
@@ -69,7 +65,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
 
         match typ {
             PlotMetaType::Text => {
-                assert_eq!(ppp.plots().count(), 0);
+                assert_eq!(it.count(), 0);
 
                 // don't need to render any legend or plots
             }
@@ -84,7 +80,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
                     let maxx_ii = scalex;
                     let maxy_ii = scaley;
 
-                    ppp.plots().map(move |(x, y)| {
+                    it.map(move |(x, y)| {
                         [
                             basex_ii + x.scale(rangex_ii, maxx_ii),
                             basey_ii - y.scale(rangey_ii, maxy_ii),
@@ -112,6 +108,7 @@ pub(super) fn render_plot<P: build::PlotIterator>(
                 )?;
             }
         }
+        counter += 1;
     }
 
     if !names.is_empty() {
@@ -120,8 +117,6 @@ pub(super) fn render_plot<P: build::PlotIterator>(
             for (typ, name, i) in names.iter() {
                 match typ {
                     PlotMetaType::Text => {
-                        //assert_eq!(ppp.plots().count(), 0);
-
                         // don't need to render any legend or plots
                     }
                     &PlotMetaType::Plot(p_type) => {
