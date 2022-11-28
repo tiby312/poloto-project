@@ -139,6 +139,7 @@ impl<I: Iterator<Item = PlotTag<X, Y>>, X: PlotNum, Y: PlotNum> PlotRes<I, X, Y>
 //     type Y=Y;
 // }
 
+#[derive(Clone)]
 pub enum PlotTag<X, Y> {
     Start { name: String, typ: PlotMetaType },
     Plot(X, Y),
@@ -258,12 +259,14 @@ pub struct SinglePlotBuilder {
 pub struct PlotIterCreator<I: Iterator> {
     start: Option<(PlotMetaType, String)>,
     it: I,
+    posted_finish: bool,
 }
 impl<I: Iterator<Item = (X, Y)>, X, Y> PlotIterCreator<I> {
     fn new(label: String, typ: PlotMetaType, it: I) -> Self {
         Self {
             start: Some((typ, label)),
             it,
+            posted_finish: false,
         }
     }
 }
@@ -277,7 +280,12 @@ impl<I: Iterator<Item = (X, Y)> + FusedIterator, X, Y> Iterator for PlotIterCrea
             if let Some((x, y)) = self.it.next() {
                 Some(PlotTag::Plot(x, y))
             } else {
-                Some(PlotTag::Finish())
+                if !self.posted_finish {
+                    self.posted_finish = true;
+                    Some(PlotTag::Finish())
+                } else {
+                    None
+                }
             }
         }
     }
