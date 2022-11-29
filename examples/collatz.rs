@@ -25,7 +25,7 @@ fn main() {
     let style =
         poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
-    let a = (1000..1006).map(|i| build::plot(format_move!("c({})", i)).line((0..).zip(collatz(i))));
+    let a = (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
 
     poloto::data(poloto::plots!(poloto::build::origin(), a))
         .map_opt(|_| opt)
