@@ -85,9 +85,8 @@ pub(super) fn render_plot<
     let mut names = vec![];
 
     let PlotRes { mut it, .. } = plots_all.unpack();
-    //for (i,(it,name,typ)) in (oo).enumerate(){
-    let mut counter = 0;
-    loop {
+    
+    for i in 0.. {
         let Some((it,name,typ))=SinglePlotIterator::new(&mut it) else {
             break
         };
@@ -95,7 +94,7 @@ pub(super) fn render_plot<
         let name_exists = !name.is_empty();
 
         if name_exists {
-            names.push((typ, name, counter));
+            names.push((typ, name, i));
         }
 
         let aa = minx.scale([minx, maxx], scalex);
@@ -147,7 +146,6 @@ pub(super) fn render_plot<
                 )?;
             }
         }
-        counter += 1;
     }
 
     if !names.is_empty() {
