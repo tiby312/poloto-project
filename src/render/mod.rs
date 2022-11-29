@@ -242,8 +242,7 @@ impl<
         ticky: TY,
         opt: RenderOptions,
     ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
-        //let mut area = build::marker::Area::new();
-
+        
         let PlotRes { area, it } = plots.unpack();
 
         let (boundx, boundy) = area.build();
