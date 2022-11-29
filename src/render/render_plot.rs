@@ -2,6 +2,39 @@ use super::*;
 
 use crate::build::*;
 
+struct SinglePlotIterator<'a, I> {
+    it: &'a mut I,
+}
+impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
+    fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
+        if let Some(o) = it.next() {
+            match o {
+                PlotTag::Start { name, typ } => Some((Self { it }, name, typ)),
+                PlotTag::Plot(_) => panic!("expected start"),
+                PlotTag::Finish() => panic!("expected start"),
+            }
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for SinglePlotIterator<'a, I> {
+    type Item = L;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(o) = self.it.next() {
+            match o {
+                PlotTag::Start { .. } => panic!("did not expect start"),
+                PlotTag::Plot(a) => Some(a),
+                PlotTag::Finish() => None,
+            }
+        } else {
+            None
+        }
+    }
+}
+
 pub(super) fn render_plot<
     X: PlotNum,
     Y: PlotNum,
@@ -51,11 +84,11 @@ pub(super) fn render_plot<
 
     let mut names = vec![];
 
-    let PlotRes { mut it, .. } = plots_all.into_plot();
+    let PlotRes { mut it, .. } = plots_all.unpack();
     //for (i,(it,name,typ)) in (oo).enumerate(){
     let mut counter = 0;
     loop {
-        let Some((it,name,typ))=Foop::new(&mut it) else {
+        let Some((it,name,typ))=SinglePlotIterator::new(&mut it) else {
             break
         };
 

@@ -14,9 +14,9 @@ pub mod unwrapper;
 use marker::Area;
 
 pub mod marker;
+pub mod plotit;
 
-pub mod plot_iter_impl;
-
+use plotit::*;
 use unwrapper::Unwrapper;
 
 ///
@@ -44,7 +44,7 @@ pub enum PlotMetaType {
 pub trait PlotIterator {
     type L: Point;
     type P: Iterator<Item = PlotTag<Self::L>>;
-    fn into_plot(self) -> PlotRes<Self::P, Self::L>;
+    fn unpack(self) -> PlotRes<Self::P, Self::L>;
 
     fn chain<P: PlotIterator<L = Self::L>>(
         self,
@@ -56,11 +56,11 @@ pub trait PlotIterator {
         let PlotRes {
             area: curr_area,
             it: p1,
-        } = self.into_plot();
+        } = self.unpack();
         let PlotRes {
             area: other_area,
             it: p,
-        } = other.into_plot();
+        } = other.unpack();
         let mut area = curr_area;
         area.grow_area(&other_area);
         PlotRes {
@@ -69,18 +69,20 @@ pub trait PlotIterator {
         }
     }
 
-    fn dyn_box<'a>(self) -> PlotRes<Box<dyn Iterator<Item = PlotTag<Self::L>> + 'a>, Self::L>
+    fn dyn_box<'a>(self) -> PlotRes<DynIt<'a, Self::L>, Self::L>
     where
         Self::P: 'a,
         Self: Sized,
     {
-        let PlotRes { area, it } = self.into_plot();
+        let PlotRes { area, it } = self.unpack();
         PlotRes {
             it: Box::new(it),
             area,
         }
     }
 }
+
+type DynIt<'a, L> = Box<dyn Iterator<Item = PlotTag<L>> + 'a>;
 
 #[derive(Copy, Clone)]
 pub struct PlotRes<I: Iterator<Item = PlotTag<L>>, L: Point> {
@@ -92,41 +94,8 @@ impl<P: Iterator<Item = PlotTag<L>>, L: Point> PlotIterator for PlotRes<P, L> {
     type L = L;
     type P = P;
 
-    fn into_plot(self) -> PlotRes<Self::P, Self::L> {
+    fn unpack(self) -> PlotRes<Self::P, Self::L> {
         self
-    }
-}
-
-pub(crate) struct Foop<'a, I> {
-    it: &'a mut I,
-}
-impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Foop<'a, I> {
-    pub(crate) fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
-        if let Some(o) = it.next() {
-            match o {
-                PlotTag::Start { name, typ } => Some((Self { it }, name, typ)),
-                PlotTag::Plot(_) => panic!("expected start"),
-                PlotTag::Finish() => panic!("expected start"),
-            }
-        } else {
-            None
-        }
-    }
-}
-
-impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for Foop<'a, I> {
-    type Item = L;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(o) = self.it.next() {
-            match o {
-                PlotTag::Start { .. } => panic!("did not expect start"),
-                PlotTag::Plot(a) => Some(a),
-                PlotTag::Finish() => None,
-            }
-        } else {
-            None
-        }
     }
 }
 
@@ -154,7 +123,7 @@ pub enum PlotTag<L: Point> {
 ///
 /// Ensure that the origin point is within view.
 ///
-pub fn origin<L: Point>() -> PlotRes<EmptyPlot<L>, L>
+pub fn origin<L: Point>() -> PlotRes<std::iter::Empty<PlotTag<L>>, L>
 where
     L::X: HasZero,
     L::Y: HasZero,
@@ -162,15 +131,13 @@ where
     markers(Some(L::X::zero()), Some(L::Y::zero()))
 }
 
-type EmptyPlot<L> = std::iter::Empty<PlotTag<L>>;
-
 ///
 /// Ensure the list of marker values are within view.
 ///
 pub fn markers<XI: IntoIterator<Item = L::X>, YI: IntoIterator<Item = L::Y>, L: Point>(
     x: XI,
     y: YI,
-) -> PlotRes<EmptyPlot<L>, L> {
+) -> PlotRes<std::iter::Empty<PlotTag<L>>, L> {
     let mut area = Area::new();
     for a in x {
         area.grow(Some(&a), None);
@@ -185,75 +152,15 @@ pub fn markers<XI: IntoIterator<Item = L::X>, YI: IntoIterator<Item = L::Y>, L: 
     }
 }
 
-// ///
-// /// Create a [`PlotsDyn`](plot_iter_impl::PlotsDyn)
-// ///
-// pub fn plots_dyn<X,Y,F: Iterator<Item=PlotTag<X,Y>>, I: IntoIterator<Item = F>>(
-//     stuff: I,
-// ) -> plot_iter_impl::PlotsDyn<F> {
-//     plot_iter_impl::PlotsDyn::new(stuff.into_iter().collect::<Vec<_>>())
-// }
-
-///
-/// Return min max bounds as well as the points of one plot.
-///
-pub trait PlotIt {
-    type L: Point;
-    type It: Iterator<Item = Self::L> + FusedIterator;
-    fn unpack(self, area: &mut Area<<Self::L as Point>::X, <Self::L as Point>::Y>) -> Self::It;
-}
-
 ///
 /// A plot iterator that will be cloned to find the min max bounds.
 ///
 pub fn cloned<L: Point, I: IntoIterator>(it: I) -> ClonedPlotIt<I::IntoIter>
 where
-    I::IntoIter: Clone,
+    I::IntoIter: Clone + FusedIterator,
     I::Item: build::unwrapper::Unwrapper<Item = L>,
 {
-    ClonedPlotIt(it.into_iter())
-}
-
-#[derive(Copy, Clone)]
-pub struct ClonedPlotIt<I>(I);
-
-impl<L: Point, I: Iterator + FusedIterator + Clone> PlotIt for ClonedPlotIt<I>
-where
-    I::Item: build::unwrapper::Unwrapper<Item = L>,
-{
-    type L = L;
-    type It = build::unwrapper::UnwrapperIter<I>;
-
-    fn unpack(self, area: &mut Area<L::X, L::Y>) -> Self::It {
-        let it = self.0;
-        for k in it.clone() {
-            let l = k.unwrap();
-            let (x, y) = l.get();
-            area.grow(Some(x), Some(y));
-        }
-        build::unwrapper::UnwrapperIter(it)
-    }
-}
-
-impl<L: Point, I: IntoIterator> PlotIt for I
-where
-    I::Item: build::unwrapper::Unwrapper<Item = L>,
-{
-    type L = L;
-    type It = std::vec::IntoIter<L>;
-
-    fn unpack(self, area: &mut Area<L::X, L::Y>) -> Self::It {
-        let it = self.into_iter();
-
-        let vec: Vec<_> = it.map(|j| j.unwrap()).collect();
-
-        for l in vec.iter() {
-            let (x, y) = l.get();
-            area.grow(Some(x), Some(y));
-        }
-
-        vec.into_iter()
-    }
+    ClonedPlotIt::new(it.into_iter())
 }
 
 pub struct SinglePlotBuilder {
@@ -363,4 +270,27 @@ pub fn plot<D: Display>(name: D) -> SinglePlotBuilder {
     use std::fmt::Write;
     write!(&mut label, "{}", name).unwrap();
     SinglePlotBuilder { label }
+}
+
+impl<I: IntoIterator<Item = P>, P: PlotIterator<L = L>, L: Point> PlotIterator for I {
+    type L = L;
+    type P = std::iter::Flatten<std::vec::IntoIter<P::P>>;
+    fn unpack(self) -> PlotRes<Self::P, Self::L> {
+        let (areas, its): (Vec<_>, Vec<_>) = self
+            .into_iter()
+            .map(|x| {
+                let PlotRes { area, it } = x.unpack();
+                (area, it)
+            })
+            .unzip();
+
+        let mut area = Area::new();
+        for a in areas {
+            area.grow_area(&a);
+        }
+
+        let it = its.into_iter().flatten();
+
+        PlotRes { area, it }
+    }
 }
