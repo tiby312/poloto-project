@@ -161,7 +161,7 @@ pub fn markers<XI: IntoIterator<Item = L::X>, YI: IntoIterator<Item = L::Y>, L: 
 ///
 pub fn cloned<L: Point, I: IntoIterator>(it: I) -> ClonedPlotIt<I::IntoIter>
 where
-    I::IntoIter: Clone + FusedIterator,
+    I::IntoIter: Clone,
     I::Item: build::unwrapper::Unwrapper<Item = L>,
 {
     ClonedPlotIt::new(it.into_iter())
