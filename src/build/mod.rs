@@ -163,6 +163,42 @@ where
     ClonedPlotIt::new(it.into_iter())
 }
 
+
+
+// use std::iter::Map;
+// pub struct PlotIterCreator<I:Iterator> where I::Item:Point{
+//     it:std::iter::Chain<std::iter::Chain<std::iter::Once<build::PlotTag<I::Item>>, Map<I, fn(I::Item) -> build::PlotTag<I::Item>>>, std::iter::Once<build::PlotTag<I::Item>>>
+// }
+
+// impl<I: Iterator<Item = L>, L: Point> PlotIterCreator<I> {
+//     fn new(name: String, typ: PlotMetaType, it: I) -> Self {
+//         let start=std::iter::once(PlotTag::Start { name, typ});
+//         let mid:Map<I,fn(L)->PlotTag<L>>=it.map(PlotTag::Plot);
+//         let end = std::iter::once(PlotTag::Finish());
+    
+//         PlotIterCreator{
+//             it:start.chain(mid).chain(end)
+//         }
+//     }
+
+// }
+// impl<I: FusedIterator<Item=L>, L: Point> FusedIterator for PlotIterCreator<I> {
+// }
+
+// impl<I: Iterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
+//     type Item=PlotTag<L>;
+//     fn next(&mut self) -> Option<Self::Item> {
+//         self.it.next()
+//     }
+// }
+
+
+
+
+
+
+
+
 pub struct SinglePlotBuilder {
     label: String,
 }
