@@ -219,6 +219,7 @@ impl<I: Iterator<Item = L>, L: Point> PlotIterCreator<I> {
     }
 }
 
+impl<I: Iterator<Item = L> + FusedIterator, L: Point> FusedIterator for PlotIterCreator<I> {}
 impl<I: Iterator<Item = L> + FusedIterator, L: Point> Iterator for PlotIterCreator<I> {
     type Item = PlotTag<L>;
     fn next(&mut self) -> Option<PlotTag<L>> {
