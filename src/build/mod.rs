@@ -115,7 +115,11 @@ impl<X: PlotNum, Y: PlotNum> Point for (X, Y) {
 
 #[derive(Clone)]
 pub enum PlotTag<L: Point> {
-    Start { name: String, typ: PlotMetaType,size_hint:(usize,Option<usize>) },
+    Start {
+        name: String,
+        typ: PlotMetaType,
+        size_hint: (usize, Option<usize>),
+    },
     Plot(L),
     Finish(),
 }
@@ -163,8 +167,6 @@ where
     ClonedPlotIt::new(it.into_iter())
 }
 
-
-
 // use std::iter::Map;
 // pub struct PlotIterCreator<I:Iterator> where I::Item:Point{
 //     it:std::iter::Chain<std::iter::Chain<std::iter::Once<build::PlotTag<I::Item>>, Map<I, fn(I::Item) -> build::PlotTag<I::Item>>>, std::iter::Once<build::PlotTag<I::Item>>>
@@ -175,7 +177,7 @@ where
 //         let start=std::iter::once(PlotTag::Start { name, typ});
 //         let mid:Map<I,fn(L)->PlotTag<L>>=it.map(PlotTag::Plot);
 //         let end = std::iter::once(PlotTag::Finish());
-    
+
 //         PlotIterCreator{
 //             it:start.chain(mid).chain(end)
 //         }
@@ -192,24 +194,17 @@ where
 //     }
 // }
 
-
-
-
-
-
-
-
 pub struct SinglePlotBuilder {
     label: String,
 }
 
 #[derive(Clone)]
-pub struct PlotIterCreator<I: Iterator> {
+pub struct PlotIterCreator<I: FusedIterator> {
     start: Option<(PlotMetaType, String)>,
     it: I,
     posted_finish: bool,
 }
-impl<I: Iterator<Item = L>, L: Point> PlotIterCreator<I> {
+impl<I: FusedIterator<Item = L>, L: Point> PlotIterCreator<I> {
     fn new(label: String, typ: PlotMetaType, it: I) -> Self {
         Self {
             start: Some((typ, label)),
@@ -219,13 +214,20 @@ impl<I: Iterator<Item = L>, L: Point> PlotIterCreator<I> {
     }
 }
 
-impl<I: ExactSizeIterator<Item = L>, L: Point> ExactSizeIterator for PlotIterCreator<I> {}
+impl<I: ExactSizeIterator<Item = L> + FusedIterator, L: Point> ExactSizeIterator
+    for PlotIterCreator<I>
+{
+}
 impl<I: FusedIterator<Item = L>, L: Point> FusedIterator for PlotIterCreator<I> {}
-impl<I: Iterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
+impl<I: FusedIterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
     type Item = PlotTag<L>;
     fn next(&mut self) -> Option<PlotTag<L>> {
         if let Some((typ, name)) = self.start.take() {
-            Some(PlotTag::Start { typ, name,size_hint:self.size_hint() })
+            Some(PlotTag::Start {
+                typ,
+                name,
+                size_hint: self.size_hint(),
+            })
         } else if let Some(l) = self.it.next() {
             Some(PlotTag::Plot(l))
         } else if !self.posted_finish {
@@ -236,8 +238,8 @@ impl<I: Iterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
         }
     }
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let (a,b)=self.it.size_hint();
-        (a+2,b.map(|b|b+2))
+        let (a, b) = self.it.size_hint();
+        (a + 2, b.map(|b| b + 2))
     }
 }
 
