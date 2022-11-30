@@ -85,7 +85,7 @@ pub(super) fn render_plot<
     let mut names = vec![];
 
     let PlotRes { mut it, .. } = plots_all.unpack();
-    
+
     for i in 0.. {
         let Some((it,name,typ))=SinglePlotIterator::new(&mut it) else {
             break
@@ -109,7 +109,7 @@ pub(super) fn render_plot<
             PlotMetaType::Plot(p_type) => {
                 let colori = color_iter.next().unwrap();
 
-                let mut it = {
+                let it = {
                     let basex_ii = xaspect_offset + padding - aa;
                     let basey_ii = yaspect_offset + height - paddingy + bb;
                     let rangex_ii = [minx, maxx];
@@ -125,12 +125,6 @@ pub(super) fn render_plot<
                         ]
                     })
                 };
-
-                //
-                // Using `cargo bloat` determined that these lines reduces alot of code bloat.
-                // in debug builds.
-                //
-                let it: &mut dyn Iterator<Item = [f64; 2]> = &mut it;
 
                 let precision = canvas.precision;
                 render(

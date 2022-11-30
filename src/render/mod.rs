@@ -242,7 +242,6 @@ impl<
         ticky: TY,
         opt: RenderOptions,
     ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
-        
         let PlotRes { area, it } = plots.unpack();
 
         let (boundx, boundy) = area.build();
@@ -572,12 +571,6 @@ impl<A: Attr> Header<A> {
             attr: self.attr,
         }
     }
-
-    // pub fn to_string(self) -> (String, String) {
-    //     hypermelon::elem::BufferedElem::new(self)
-    //         .unwrap()
-    //         .into_parts()
-    // }
 
     pub fn light_theme(self) -> elem::Append<Self, Theme<'static>> {
         self.append(Theme::light())
