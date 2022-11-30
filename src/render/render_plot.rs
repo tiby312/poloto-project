@@ -1,15 +1,18 @@
+use std::iter::FusedIterator;
+
 use super::*;
 
 use crate::build::*;
 
 struct SinglePlotIterator<'a, I> {
     it: &'a mut I,
+    size_hint:(usize,Option<usize>)
 }
 impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
     fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
         if let Some(o) = it.next() {
             match o {
-                PlotTag::Start { name, typ } => Some((Self { it }, name, typ)),
+                PlotTag::Start { name, typ,size_hint } => Some((Self { it,size_hint }, name, typ)),
                 PlotTag::Plot(_) => panic!("expected start"),
                 PlotTag::Finish() => panic!("expected start"),
             }
@@ -19,6 +22,8 @@ impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
     }
 }
 
+impl<'a,I: ExactSizeIterator<Item = PlotTag<L>>, L: Point> ExactSizeIterator for SinglePlotIterator<'a,I> {}
+impl<'a,I: FusedIterator<Item = PlotTag<L>>, L: Point> FusedIterator for SinglePlotIterator<'a,I> {}
 impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for SinglePlotIterator<'a, I> {
     type Item = L;
 
@@ -32,6 +37,9 @@ impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for SinglePlotIterat
         } else {
             None
         }
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.size_hint
     }
 }
 
