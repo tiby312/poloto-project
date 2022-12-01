@@ -1,5 +1,3 @@
-use std::iter::Fuse;
-
 use super::*;
 
 ///
@@ -7,7 +5,7 @@ use super::*;
 ///
 pub trait PlotIt {
     type L: Point;
-    type It: FusedIterator<Item = Self::L>;
+    type It: Iterator<Item = Self::L>;
     fn unpack(self, area: &mut Area<<Self::L as Point>::X, <Self::L as Point>::Y>) -> Self::It;
 }
 
@@ -28,7 +26,7 @@ where
     I::Item: build::unwrapper::Unwrapper<Item = L>,
 {
     type L = L;
-    type It = Fuse<build::unwrapper::UnwrapperIter<I>>;
+    type It = build::unwrapper::UnwrapperIter<I>;
 
     fn unpack(self, area: &mut Area<L::X, L::Y>) -> Self::It {
         let it = self.0;
@@ -37,7 +35,7 @@ where
             let (x, y) = l.get();
             area.grow(Some(x), Some(y));
         }
-        build::unwrapper::UnwrapperIter(it).fuse()
+        build::unwrapper::UnwrapperIter(it)
     }
 }
 
@@ -49,7 +47,7 @@ where
     type It = std::vec::IntoIter<L>;
 
     fn unpack(self, area: &mut Area<L::X, L::Y>) -> Self::It {
-        let it = self.into_iter().fuse();
+        let it = self.into_iter();
 
         let vec: Vec<_> = it.map(|j| j.unwrap()).collect();
 

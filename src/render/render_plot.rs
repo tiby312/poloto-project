@@ -1,3 +1,5 @@
+use std::iter::FusedIterator;
+
 use super::*;
 
 use crate::build::*;
@@ -5,16 +7,25 @@ use crate::build::*;
 struct SinglePlotIterator<'a, I> {
     it: &'a mut I,
     size_hint: (usize, Option<usize>),
+    finished: bool,
 }
 impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
-    fn new(it: &'a mut I) -> Option<(std::iter::Fuse<Self>, String, PlotMetaType)> {
+    fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
         if let Some(o) = it.next() {
             match o {
                 PlotTag::Start {
                     name,
                     typ,
                     size_hint,
-                } => Some((Self { it, size_hint }.fuse(), name, typ)),
+                } => Some((
+                    Self {
+                        it,
+                        size_hint,
+                        finished: false,
+                    },
+                    name,
+                    typ,
+                )),
                 PlotTag::Plot(_) => panic!("expected start"),
                 PlotTag::Finish() => panic!("expected start"),
             }
@@ -28,16 +39,23 @@ impl<'a, I: ExactSizeIterator<Item = PlotTag<L>>, L: Point> ExactSizeIterator
     for SinglePlotIterator<'a, I>
 {
 }
+impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> FusedIterator for SinglePlotIterator<'a, I> {}
 impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for SinglePlotIterator<'a, I> {
     type Item = L;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.finished {
+            return None;
+        }
         let o = self.it.next().unwrap();
 
         match o {
             PlotTag::Start { .. } => panic!("did not expect start"),
             PlotTag::Plot(a) => Some(a),
-            PlotTag::Finish() => None,
+            PlotTag::Finish() => {
+                self.finished = true;
+                None
+            }
         }
     }
     fn size_hint(&self) -> (usize, Option<usize>) {

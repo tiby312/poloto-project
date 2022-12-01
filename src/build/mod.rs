@@ -3,7 +3,7 @@
 //!
 //!
 
-use std::iter::FusedIterator;
+use std::iter::{Fuse, FusedIterator};
 
 use super::*;
 
@@ -199,27 +199,24 @@ pub struct SinglePlotBuilder {
 }
 
 #[derive(Clone)]
-pub struct PlotIterCreator<I: FusedIterator> {
+pub struct PlotIterCreator<I> {
     start: Option<(PlotMetaType, String)>,
-    it: I,
+    it: Fuse<I>,
     posted_finish: bool,
 }
-impl<I: FusedIterator<Item = L>, L: Point> PlotIterCreator<I> {
+impl<I: Iterator<Item = L>, L: Point> PlotIterCreator<I> {
     fn new(label: String, typ: PlotMetaType, it: I) -> Self {
         Self {
             start: Some((typ, label)),
-            it,
+            it: it.fuse(),
             posted_finish: false,
         }
     }
 }
 
-impl<I: ExactSizeIterator<Item = L> + FusedIterator, L: Point> ExactSizeIterator
-    for PlotIterCreator<I>
-{
-}
-impl<I: FusedIterator<Item = L>, L: Point> FusedIterator for PlotIterCreator<I> {}
-impl<I: FusedIterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
+impl<I: ExactSizeIterator<Item = L>, L: Point> ExactSizeIterator for PlotIterCreator<I> {}
+impl<I: Iterator<Item = L>, L: Point> FusedIterator for PlotIterCreator<I> {}
+impl<I: Iterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
     type Item = PlotTag<L>;
     fn next(&mut self) -> Option<PlotTag<L>> {
         if let Some((typ, name)) = self.start.take() {
