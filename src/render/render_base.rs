@@ -157,18 +157,18 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let first_ticky = yticks.next().unwrap();
 
     let (distance_to_firstx, distancex_min_to_max) = {
-        let d1 = minx.scale([minx, maxx], scalex);
-        let d2 = first_tickx.scale([minx, maxx], scalex);
+        let d1 = minx.scale(&[minx, maxx], scalex);
+        let d2 = first_tickx.scale(&[minx, maxx], scalex);
         let distance_to_firstx = d2 - d1;
-        let distancex_min_to_max = maxx.scale([minx, maxx], scalex) - d1;
+        let distancex_min_to_max = maxx.scale(&[minx, maxx], scalex) - d1;
         (distance_to_firstx, distancex_min_to_max)
     };
 
     let (distance_to_firsty, distancey_min_to_max) = {
-        let d1 = miny.scale([miny, maxy], scaley);
-        let d2 = first_ticky.scale([miny, maxy], scaley);
+        let d1 = miny.scale(&[miny, maxy], scaley);
+        let d2 = first_ticky.scale(&[miny, maxy], scaley);
         let distance_to_firsty = d2 - d1;
-        let distancey_min_to_max = maxy.scale([miny, maxy], scaley) - d1;
+        let distancey_min_to_max = maxy.scale(&[miny, maxy], scaley) - d1;
         (distance_to_firsty, distancey_min_to_max)
     };
 
@@ -177,7 +177,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             .chain(yticks)
             .map(|val| {
                 let yy = height
-                    - (val.scale([miny, maxy], scaley) - miny.scale([miny, maxy], scaley))
+                    - (val.scale(&[miny, maxy], scaley) - miny.scale(&[miny, maxy], scaley))
                     - paddingy;
                 (val, yy)
             })
@@ -244,8 +244,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         let ticks: Vec<_> = std::iter::once(first_tickx)
             .chain(xticks)
             .map(|val| {
-                let xx =
-                    (val.scale([minx, maxx], scalex) - minx.scale([minx, maxx], scalex)) + padding;
+                let xx = (val.scale(&[minx, maxx], scalex) - minx.scale(&[minx, maxx], scalex))
+                    + padding;
                 (val, xx)
             })
             .collect();

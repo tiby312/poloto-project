@@ -125,8 +125,8 @@ pub(super) fn render_plot<
             names.push((typ, name, i));
         }
 
-        let aa = minx.scale([minx, maxx], scalex);
-        let bb = miny.scale([miny, maxy], scaley);
+        let aa = minx.scale(&[minx, maxx], scalex);
+        let bb = miny.scale(&[miny, maxy], scaley);
 
         match typ {
             PlotMetaType::Text => {
@@ -137,22 +137,20 @@ pub(super) fn render_plot<
             PlotMetaType::Plot(p_type) => {
                 let colori = color_iter.next().unwrap();
 
-                let it = {
-                    let basex_ii = xaspect_offset + padding - aa;
-                    let basey_ii = yaspect_offset + height - paddingy + bb;
-                    let rangex_ii = [minx, maxx];
-                    let rangey_ii = [miny, maxy];
-                    let maxx_ii = scalex;
-                    let maxy_ii = scaley;
+                let rangex_ii = &[minx, maxx];
+                let rangey_ii = &[miny, maxy];
+                let basex_ii = xaspect_offset + padding - aa;
+                let basey_ii = yaspect_offset + height - paddingy + bb;
+                let maxx_ii = scalex;
+                let maxy_ii = scaley;
 
-                    it.map(move |l| {
-                        let (x, y) = l.get();
-                        [
-                            basex_ii + x.scale(rangex_ii, maxx_ii),
-                            basey_ii - y.scale(rangey_ii, maxy_ii),
-                        ]
-                    })
-                };
+                let it = it.map(move |l| {
+                    let (x, y) = l.get();
+                    [
+                        basex_ii + x.scale(rangex_ii, maxx_ii),
+                        basey_ii - y.scale(rangey_ii, maxy_ii),
+                    ]
+                });
 
                 let precision = canvas.precision;
                 render(

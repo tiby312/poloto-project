@@ -69,7 +69,7 @@ impl TickDistGen<f64> for FloatTickFmt {
         canvas: &RenderOptionsBound,
         _: IndexRequester,
     ) -> Self::Res {
-        let range = [data.min, data.max];
+        let range = &[data.min, data.max];
         let ideal_num_steps = canvas.ideal_num_steps;
 
         let tick_layout = TickLayout::new(&[1, 2, 5], ideal_num_steps, range);
@@ -125,7 +125,7 @@ impl PlotNum for f64 {
         self.is_nan()
     }
     #[inline(always)]
-    fn scale(&self, range: [f64; 2], max: f64) -> f64 {
+    fn scale(&self, range: &[f64; 2], max: f64) -> f64 {
         let val = *self;
         let diff = range[1] - range[0];
         let scale = max / diff;
@@ -185,7 +185,7 @@ impl TickLayout {
         (display_relative, ticks)
     }
 
-    fn new(good_steps: &[u32], ideal_num_steps: u32, range_all: [f64; 2]) -> TickLayout {
+    fn new(good_steps: &[u32], ideal_num_steps: u32, range_all: &[f64; 2]) -> TickLayout {
         let ideal_num_steps = ideal_num_steps.max(2);
 
         let range = range_all[1] - range_all[0];

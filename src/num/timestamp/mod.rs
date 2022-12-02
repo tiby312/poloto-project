@@ -244,7 +244,7 @@ impl PlotNum for UnixTime {
     }
 
     #[inline(always)]
-    fn scale(&self, range: [UnixTime; 2], max: f64) -> f64 {
+    fn scale(&self, range: &[UnixTime; 2], max: f64) -> f64 {
         let val = *self;
         let [val1, val2] = range;
         let [val1, val2] = [val1.0, val2.0];

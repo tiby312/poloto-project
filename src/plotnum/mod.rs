@@ -29,7 +29,7 @@ pub trait PlotNum: PartialOrd + Copy + std::fmt::Debug {
     /// Is this a hole value to inject discontinuty?
     fn is_hole(&self) -> bool;
 
-    fn scale(&self, range: [Self; 2], max: f64) -> f64;
+    fn scale(&self, range: &[Self; 2], max: f64) -> f64;
 
     fn unit_range(offset: Option<Self>) -> [Self; 2];
 }
