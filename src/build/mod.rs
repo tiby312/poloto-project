@@ -80,6 +80,18 @@ where
     B: FusedIterator<Item = PlotTag<L, D2>>,
 {
     type Item = PlotTag<L, ChainDisplay<D1, D2>>;
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let (a,b)=self.a.size_hint();
+        let (c,d)=self.b.size_hint();
+
+        let k=match(b,d){
+            (Some(a),Some(b))=>Some(a+b),
+            (Some(a),_)=>Some(a),
+            (_,Some(b))=>Some(b),
+            (_,_)=>None
+        };
+        (a+c,k)
+    }
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(a) = self.a.next() {
             Some(match a {
