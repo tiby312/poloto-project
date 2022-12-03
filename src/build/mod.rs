@@ -185,15 +185,6 @@ pub enum PlotTag<L: Point,D:Display> {
     Finish(),
 }
 
-// pub struct NoName;
-
-// impl fmt::Display for NoName {
-//     // This trait requires `fmt` with this exact signature.
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         Ok(())
-//     }
-// }
-
 
 ///
 /// Ensure that the origin point is within view.
@@ -376,11 +367,6 @@ impl<D:Display> SinglePlotBuilder<D> {
 /// Start creating one plot.
 ///
 pub fn plot<D: Display>(label: D) -> SinglePlotBuilder<D> {
-    //TODO provide falliable version
-
-    // let mut label = String::new();
-    // use std::fmt::Write;
-    // write!(&mut label, "{}", name).unwrap();
     SinglePlotBuilder { label }
 }
 
