@@ -41,15 +41,71 @@ pub enum PlotMetaType {
     Text,
 }
 
+
+
+
+#[derive(Copy,Clone)]
+pub enum ChainDisplay<A,B>{
+    A(A),
+    B(B)
+}
+impl<A:Display,B:Display> fmt::Display for ChainDisplay<A,B> {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self{
+            ChainDisplay::A(a)=>write!(f,"{}",a),
+            ChainDisplay::B(b)=>write!(f,"{}",b)
+        }
+    }
+}
+
+
+#[derive(Copy,Clone)]
+pub struct MyChain<A,B>{
+    a:A,
+    b:B
+}
+
+impl<L:Point,D1:Display,D2:Display,A,B> Iterator for MyChain<A,B>
+    where A:Iterator<Item=PlotTag<L,D1>>,B:Iterator<Item=PlotTag<L,D2>>{
+    type Item=PlotTag<L,ChainDisplay<D1,D2>>;
+    fn next(&mut self) -> Option<Self::Item> {
+        
+        if let Some(a)=self.a.next(){
+            Some(match a{
+                PlotTag::Start { name, typ, size_hint } => 
+                    PlotTag::Start{name:ChainDisplay::A(name),typ,size_hint},
+                PlotTag::Plot(p) => PlotTag::Plot(p),
+                PlotTag::Finish() => PlotTag::Finish(),
+            })
+        }else{
+            if let Some(a)=self.b.next(){
+                Some(match a{
+                    PlotTag::Start { name, typ, size_hint } => 
+                        PlotTag::Start{name:ChainDisplay::B(name),typ,size_hint},
+                    PlotTag::Plot(p) => PlotTag::Plot(p),
+                    PlotTag::Finish() => PlotTag::Finish(),
+                })
+            }else{
+                None
+            }
+        }
+
+    
+    }
+}
+
+
 pub trait PlotIterator {
     type L: Point;
-    type P: Iterator<Item = PlotTag<Self::L>>;
+    type P: Iterator<Item = PlotTag<Self::L,Self::D>>;
+    type D:Display;
     fn unpack(self) -> PlotRes<Self::P, Self::L>;
 
     fn chain<P: PlotIterator<L = Self::L>>(
         self,
         other: P,
-    ) -> PlotRes<std::iter::Chain<Self::P, P::P>, Self::L>
+    ) -> PlotRes<MyChain<Self::P,P::P>, Self::L>
     where
         Self: Sized,
     {
@@ -65,11 +121,11 @@ pub trait PlotIterator {
         area.grow_area(&other_area);
         PlotRes {
             area,
-            it: p1.chain(p),
+            it: MyChain{a:p1,b:p},
         }
     }
 
-    fn dyn_box<'a>(self) -> PlotRes<DynIt<'a, Self::L>, Self::L>
+    fn dyn_box<'a>(self) -> PlotRes<DynIt<'a, Self::L,Self::D>, Self::L>
     where
         Self::P: 'a,
         Self: Sized,
@@ -82,17 +138,18 @@ pub trait PlotIterator {
     }
 }
 
-type DynIt<'a, L> = Box<dyn Iterator<Item = PlotTag<L>> + 'a>;
+type DynIt<'a, L,D> = Box<dyn Iterator<Item = PlotTag<L,D>> + 'a>;
 
 #[derive(Copy, Clone)]
-pub struct PlotRes<I: Iterator<Item = PlotTag<L>>, L: Point> {
+pub struct PlotRes<I: Iterator, L: Point> {
     pub(crate) area: Area<L::X, L::Y>,
     pub(crate) it: I,
 }
 
-impl<P: Iterator<Item = PlotTag<L>>, L: Point> PlotIterator for PlotRes<P, L> {
+impl<P: Iterator<Item = PlotTag<L,D>>, L: Point,D:Display> PlotIterator for PlotRes<P, L> {
     type L = L;
     type P = P;
+    type D=D;
 
     fn unpack(self) -> PlotRes<Self::P, Self::L> {
         self
@@ -114,9 +171,9 @@ impl<X: PlotNum, Y: PlotNum> Point for (X, Y) {
 }
 
 #[derive(Clone)]
-pub enum PlotTag<L: Point> {
+pub enum PlotTag<L: Point,D:Display> {
     Start {
-        name: String,
+        name: D,
         typ: PlotMetaType,
         size_hint: (usize, Option<usize>),
     },
@@ -124,10 +181,20 @@ pub enum PlotTag<L: Point> {
     Finish(),
 }
 
+// pub struct NoName;
+
+// impl fmt::Display for NoName {
+//     // This trait requires `fmt` with this exact signature.
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         Ok(())
+//     }
+// }
+
+
 ///
 /// Ensure that the origin point is within view.
 ///
-pub fn origin<L: Point>() -> PlotRes<std::iter::Empty<PlotTag<L>>, L>
+pub fn origin<L: Point>() -> PlotRes<std::iter::Empty<PlotTag<L,&'static str>>, L>
 where
     L::X: HasZero,
     L::Y: HasZero,
@@ -141,7 +208,7 @@ where
 pub fn markers<XI: IntoIterator<Item = L::X>, YI: IntoIterator<Item = L::Y>, L: Point>(
     x: XI,
     y: YI,
-) -> PlotRes<std::iter::Empty<PlotTag<L>>, L> {
+) -> PlotRes<std::iter::Empty<PlotTag<L,&'static str>>, L> {
     let mut area = Area::new();
     for a in x {
         area.grow(Some(&a), None);
@@ -194,18 +261,18 @@ where
 //     }
 // }
 
-pub struct SinglePlotBuilder {
-    label: String,
+pub struct SinglePlotBuilder<D> {
+    label: D,
 }
 
 #[derive(Clone)]
-pub struct PlotIterCreator<I> {
-    start: Option<(PlotMetaType, String)>,
+pub struct PlotIterCreator<I,D> {
+    start: Option<(PlotMetaType, D)>,
     it: Fuse<I>,
     posted_finish: bool,
 }
-impl<I: Iterator<Item = L>, L: Point> PlotIterCreator<I> {
-    fn new(label: String, typ: PlotMetaType, it: I) -> Self {
+impl<I: Iterator<Item = L>, L: Point,D:Display> PlotIterCreator<I,D> {
+    fn new(label: D, typ: PlotMetaType, it: I) -> Self {
         Self {
             start: Some((typ, label)),
             it: it.fuse(),
@@ -214,11 +281,11 @@ impl<I: Iterator<Item = L>, L: Point> PlotIterCreator<I> {
     }
 }
 
-impl<I: ExactSizeIterator<Item = L>, L: Point> ExactSizeIterator for PlotIterCreator<I> {}
-impl<I: Iterator<Item = L>, L: Point> FusedIterator for PlotIterCreator<I> {}
-impl<I: Iterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
-    type Item = PlotTag<L>;
-    fn next(&mut self) -> Option<PlotTag<L>> {
+impl<I: ExactSizeIterator<Item = L>, L: Point,D:Display> ExactSizeIterator for PlotIterCreator<I,D> {}
+impl<I: Iterator<Item = L>, L: Point,D:Display> FusedIterator for PlotIterCreator<I,D> {}
+impl<I: Iterator<Item = L>, L: Point,D:Display> Iterator for PlotIterCreator<I,D> {
+    type Item = PlotTag<L,D>;
+    fn next(&mut self) -> Option<PlotTag<L,D>> {
         if let Some((typ, name)) = self.start.take() {
             Some(PlotTag::Start {
                 typ,
@@ -240,8 +307,8 @@ impl<I: Iterator<Item = L>, L: Point> Iterator for PlotIterCreator<I> {
     }
 }
 
-impl SinglePlotBuilder {
-    fn gen<P: PlotIt>(self, it: P, typ: PlotMetaType) -> PlotRes<PlotIterCreator<P::It>, P::L> {
+impl<D:Display> SinglePlotBuilder<D> {
+    fn gen<P: PlotIt>(self, it: P, typ: PlotMetaType) -> PlotRes<PlotIterCreator<P::It,D>, P::L> {
         let mut area = Area::new();
         let it = it.unpack(&mut area);
 
@@ -253,11 +320,11 @@ impl SinglePlotBuilder {
     /// Create a line from plots using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.  
     ///
-    pub fn line<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It>, P::L> {
+    pub fn line<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It,D>, P::L> {
         self.gen(it, PlotMetaType::Plot(PlotType::Line))
     }
 
-    pub(crate) fn bars<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It>, P::L> {
+    pub(crate) fn bars<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It,D>, P::L> {
         self.gen(it, PlotMetaType::Plot(PlotType::Bars))
     }
 
@@ -265,34 +332,34 @@ impl SinglePlotBuilder {
     /// Each point can be sized using the stroke width.
     /// The path belongs to the CSS classes `poloto_scatter` and `.poloto[N]stroke` css class
     /// with the latter class overriding the former.
-    pub fn scatter<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It>, P::L> {
+    pub fn scatter<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It,D>, P::L> {
         self.gen(it, PlotMetaType::Plot(PlotType::Scatter))
     }
 
     /// Create a histogram from plots using SVG rect elements.
     /// Each bar's left side will line up with a point.
     /// Each rect element belongs to the `.poloto[N]fill` css class.
-    pub fn histogram<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It>, P::L> {
+    pub fn histogram<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It,D>, P::L> {
         self.gen(it, PlotMetaType::Plot(PlotType::Histo))
     }
 
     /// Create a line from plots that will be filled underneath using a SVG path element.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It>, P::L> {
+    pub fn line_fill<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It,D>, P::L> {
         self.gen(it, PlotMetaType::Plot(PlotType::LineFill))
     }
 
     /// Create a line from plots that will be filled using a SVG path element.
     /// The first and last points will be connected and then filled in.
     /// The path element belongs to the `.poloto[N]fill` css class.
-    pub fn line_fill_raw<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It>, P::L> {
+    pub fn line_fill_raw<P: PlotIt>(self, it: P) -> PlotRes<PlotIterCreator<P::It,D>, P::L> {
         self.gen(it, PlotMetaType::Plot(PlotType::LineFillRaw))
     }
 
     ///
     /// Write some text in the legend. This doesnt increment the plot number.
     ///
-    pub fn text<L: Point>(self) -> PlotRes<PlotIterCreator<std::iter::Empty<L>>, L> {
+    pub fn text<L: Point>(self) -> PlotRes<PlotIterCreator<std::iter::Empty<L>,D>, L> {
         let area = Area::new();
         PlotRes {
             area,
@@ -304,18 +371,21 @@ impl SinglePlotBuilder {
 ///
 /// Start creating one plot.
 ///
-pub fn plot<D: Display>(name: D) -> SinglePlotBuilder {
+pub fn plot<D: Display>(label: D) -> SinglePlotBuilder<D> {
     //TODO provide falliable version
 
-    let mut label = String::new();
-    use std::fmt::Write;
-    write!(&mut label, "{}", name).unwrap();
+    // let mut label = String::new();
+    // use std::fmt::Write;
+    // write!(&mut label, "{}", name).unwrap();
     SinglePlotBuilder { label }
 }
+
+
 
 impl<I: IntoIterator<Item = P>, P: PlotIterator<L = L>, L: Point> PlotIterator for I {
     type L = L;
     type P = std::iter::Flatten<std::vec::IntoIter<P::P>>;
+    type D=P::D;
     fn unpack(self) -> PlotRes<Self::P, Self::L> {
         let (areas, its): (Vec<_>, Vec<_>) = self
             .into_iter()
