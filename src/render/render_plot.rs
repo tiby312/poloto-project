@@ -9,8 +9,8 @@ struct SinglePlotIterator<'a, I> {
     size_hint: (usize, Option<usize>),
     finished: bool,
 }
-impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
-    fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
+impl<'a, I: Iterator<Item = PlotTag<L,D>>, L: Point,D:Display> SinglePlotIterator<'a, I> {
+    fn new(it: &'a mut I) -> Option<(Self, D, PlotMetaType)> {
         if let Some(o) = it.next() {
             match o {
                 PlotTag::Start {
@@ -35,12 +35,12 @@ impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
     }
 }
 
-impl<'a, I: ExactSizeIterator<Item = PlotTag<L>>, L: Point> ExactSizeIterator
+impl<'a, I: ExactSizeIterator<Item = PlotTag<L,D>>, L: Point,D:Display> ExactSizeIterator
     for SinglePlotIterator<'a, I>
 {
 }
-impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> FusedIterator for SinglePlotIterator<'a, I> {}
-impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> Iterator for SinglePlotIterator<'a, I> {
+impl<'a, I: Iterator<Item = PlotTag<L,D>>, L: Point,D:Display> FusedIterator for SinglePlotIterator<'a, I> {}
+impl<'a, I: Iterator<Item = PlotTag<L,D>>, L: Point,D:Display> Iterator for SinglePlotIterator<'a, I> {
     type Item = L;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -115,9 +115,13 @@ pub(super) fn render_plot<
     let PlotRes { mut it, .. } = plots_all.unpack();
 
     for i in 0.. {
-        let Some((it,name,typ))=SinglePlotIterator::new( &mut it) else {
+        let Some((it,label,typ))=SinglePlotIterator::new( &mut it) else {
             break
         };
+
+        let mut name=String::new();
+        use std::fmt::Write;
+        write!(&mut name,"{}",label)?;
 
         let name_exists = !name.is_empty();
 
