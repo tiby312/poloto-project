@@ -44,13 +44,15 @@ pub enum PlotMetaType {
 
 
 
+///
+/// Display label helper for chaining.
+/// 
 #[derive(Copy,Clone)]
 pub enum ChainDisplay<A,B>{
     A(A),
     B(B)
 }
 impl<A:Display,B:Display> fmt::Display for ChainDisplay<A,B> {
-    // This trait requires `fmt` with this exact signature.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self{
             ChainDisplay::A(a)=>write!(f,"{}",a),
@@ -59,14 +61,16 @@ impl<A:Display,B:Display> fmt::Display for ChainDisplay<A,B> {
     }
 }
 
-
+///
+/// Chain two iterators that produce plot tags.
+/// 
 #[derive(Copy,Clone)]
-pub struct MyChain<A,B>{
+pub struct ChainPlotTagIt<A,B>{
     a:A,
     b:B
 }
 
-impl<L:Point,D1:Display,D2:Display,A,B> Iterator for MyChain<A,B>
+impl<L:Point,D1:Display,D2:Display,A,B> Iterator for ChainPlotTagIt<A,B>
     where A:Iterator<Item=PlotTag<L,D1>>,B:Iterator<Item=PlotTag<L,D2>>{
     type Item=PlotTag<L,ChainDisplay<D1,D2>>;
     fn next(&mut self) -> Option<Self::Item> {
@@ -105,7 +109,7 @@ pub trait PlotIterator {
     fn chain<P: PlotIterator<L = Self::L>>(
         self,
         other: P,
-    ) -> PlotRes<MyChain<Self::P,P::P>, Self::L>
+    ) -> PlotRes<ChainPlotTagIt<Self::P,P::P>, Self::L>
     where
         Self: Sized,
     {
@@ -121,7 +125,7 @@ pub trait PlotIterator {
         area.grow_area(&other_area);
         PlotRes {
             area,
-            it: MyChain{a:p1,b:p},
+            it: ChainPlotTagIt{a:p1,b:p},
         }
     }
 
