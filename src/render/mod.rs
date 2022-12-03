@@ -217,7 +217,7 @@ where
     X: HasDefaultTicks,
     Y: HasDefaultTicks,
 {
-    pub fn new(plots: P) -> Stage1<PlotRes<P::P, L>, X::DefaultTicks, Y::DefaultTicks> {
+    pub fn new(plots: P) -> Stage1<PlotRes<P::P, L,P::F>, X::DefaultTicks, Y::DefaultTicks> {
         Self::from_parts(
             plots,
             X::default_ticks(),
@@ -241,14 +241,14 @@ impl<
         tickx: TX,
         ticky: TY,
         opt: RenderOptions,
-    ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
-        let PlotRes { area, it } = plots.unpack();
+    ) -> Stage1<PlotRes<P::P, L,P::F>, TX, TY> {
+        let PlotRes { area, it,fmt } = plots.unpack();
 
         let (boundx, boundy) = area.build();
 
         Stage1 {
             opt,
-            plots: PlotRes { it, area },
+            plots: PlotRes { it, area,fmt },
             ticky,
             tickx,
             boundx,

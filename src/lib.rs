@@ -103,7 +103,7 @@ macro_rules! plots {
 ///
 pub fn data<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, J: build::PlotIterator<L = L>>(
     plots: J,
-) -> Stage1<PlotRes<J::P, L>, X::DefaultTicks, Y::DefaultTicks>
+) -> Stage1<PlotRes<J::P, L,J::F>, X::DefaultTicks, Y::DefaultTicks>
 where
     X: HasDefaultTicks,
     Y: HasDefaultTicks,

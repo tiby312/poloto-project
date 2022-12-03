@@ -10,11 +10,10 @@ struct SinglePlotIterator<'a, I> {
     finished: bool,
 }
 impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
-    fn new(it: &'a mut I) -> Option<(Self, String, PlotMetaType)> {
+    fn new(it: &'a mut I) -> Option<(Self, PlotMetaType)> {
         if let Some(o) = it.next() {
             match o {
                 PlotTag::Start {
-                    name,
                     typ,
                     size_hint,
                 } => Some((
@@ -23,7 +22,7 @@ impl<'a, I: Iterator<Item = PlotTag<L>>, L: Point> SinglePlotIterator<'a, I> {
                         size_hint,
                         finished: false,
                     },
-                    name,
+                    
                     typ,
                 )),
                 PlotTag::Plot(_) => panic!("expected start"),
@@ -112,12 +111,15 @@ pub(super) fn render_plot<
 
     let mut names = vec![];
 
-    let PlotRes { mut it, .. } = plots_all.unpack();
+    let PlotRes { mut it,mut fmt, .. } = plots_all.unpack();
 
     for i in 0.. {
-        let Some((it,name,typ))=SinglePlotIterator::new( &mut it) else {
+        let Some((it,typ))=SinglePlotIterator::new( &mut it) else {
             break
         };
+
+        let mut name=String::new();
+        fmt.next(&mut name)?;
 
         let name_exists = !name.is_empty();
 

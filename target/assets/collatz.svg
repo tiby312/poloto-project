@@ -55,18 +55,8 @@
 	<g id="poloto_plot5" class="poloto_plot poloto_imgs poloto_line poloto5 poloto_stroke" fill="none" stroke="black">
 		<path d=" M 150.00 573.52 L 156.38 611.76 L 162.77 630.88 L 169.15 640.44 L 175.53 621.29 L 181.91 635.65 L 188.30 642.82 L 194.68 628.44 L 201.06 639.22 L 207.45 617.64 L 213.83 633.82 L 220.21 641.91 L 226.60 625.71 L 232.98 637.85 L 239.36 613.53 L 245.74 631.77 L 252.13 595.27 L 258.51 622.64 L 264.89 567.89 L 271.28 608.94 L 277.66 526.80 L 284.04 588.40 L 290.43 465.18 L 296.81 557.59 L 303.19 603.79 L 309.57 626.90 L 315.96 580.67 L 322.34 615.33 L 328.72 545.97 L 335.11 597.99 L 341.49 493.94 L 347.87 571.97 L 354.26 415.88 L 360.64 532.94 L 367.02 591.47 L 373.40 620.73 L 379.79 635.37 L 386.17 606.08 L 392.55 628.04 L 398.94 639.02 L 405.32 617.03 L 411.70 633.52 L 418.09 641.76 L 424.47 625.25 L 430.85 637.62 L 437.23 643.81 L 443.62 646.91 L 450.00 648.45 L 456.38 645.33 L 462.77 647.67 L 469.15 648.83 L 475.53 649.42 L 481.91 648.22 L 488.30 649.11 L 494.68 647.31 L 501.06 648.66 L 507.45 645.94 L 513.83 647.97 L 520.21 648.99 L 526.60 649.49 L 532.98 649.75 L 539.36 649.87 L 545.74 649.59 L 552.13 649.80 L 558.51 649.90 L 564.89 649.95 L 571.28 649.97"/>
 	</g>
-	<g class="poloto_legend poloto_imgs poloto_line poloto0 poloto_stroke"><line x1="1080" x2="1130" y1="81.25" y2="81.25"/></g>
-	<g class="poloto_legend poloto_imgs poloto_line poloto1 poloto_stroke"><line x1="1080" x2="1130" y1="131.25" y2="131.25"/></g>
-	<g class="poloto_legend poloto_imgs poloto_line poloto2 poloto_stroke"><line x1="1080" x2="1130" y1="181.25" y2="181.25"/></g>
-	<g class="poloto_legend poloto_imgs poloto_line poloto3 poloto_stroke"><line x1="1080" x2="1130" y1="231.25" y2="231.25"/></g>
-	<g class="poloto_legend poloto_imgs poloto_line poloto4 poloto_stroke"><line x1="1080" x2="1130" y1="281.25" y2="281.25"/></g>
-	<g class="poloto_legend poloto_imgs poloto_line poloto5 poloto_stroke"><line x1="1080" x2="1130" y1="331.25" y2="331.25"/></g>
-	<text class="poloto_legend poloto_text poloto_line poloto0" x="1075" y="100">c(1000)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto1" x="1075" y="150">c(1001)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto2" x="1075" y="200">c(1002)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto3" x="1075" y="250">c(1003)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto4" x="1075" y="300">c(1004)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto5" x="1075" y="350">c(1005)</text>
+	<g class="poloto_legend poloto_imgs poloto_line poloto0 poloto_stroke"><line x1="1080" x2="1130" y1="131.25" y2="131.25"/></g>
+	<text class="poloto_legend poloto_text poloto_line poloto1" x="1075" y="150">c(1000)</text>
 	<text class="poloto_text poloto_name poloto_title" x="600.00" y="37.50">collatz</text>
 	<text class="poloto_text poloto_name poloto_x" x="600.00" y="731.25">x</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="375.00" transform="rotate(-90,37.50,375.00)">y</text>
