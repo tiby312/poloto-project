@@ -117,6 +117,55 @@ where
     }
 }
 
+// pub fn chain<L:Point,A:PlotIterator<L=L>,B:PlotIterator<L=L>>(a:A,b:B)->PlotRes<impl Iterator<Item=PlotTag<L,ChainDisplay<A::D,B::D>>>,L>{
+//     let PlotRes {
+//         area: curr_area,
+//         it: p1,
+//     } = a.unpack();
+//     let PlotRes {
+//         area: other_area,
+//         it: p,
+//     } = b.unpack();
+//     let mut area = curr_area;
+//     area.grow_area(&other_area);
+
+//     let a=p1.map(|a|{
+//         match a {
+//             PlotTag::Start {
+//                 name,
+//                 typ,
+//                 size_hint,
+//             } => PlotTag::Start {
+//                 name: ChainDisplay::A(name),
+//                 typ,
+//                 size_hint,
+//             },
+//             PlotTag::Plot(p) => PlotTag::Plot(p),
+//             PlotTag::Finish() => PlotTag::Finish(),
+//         }
+//     });
+//     let b=p.map(|a|{
+//         match a {
+//             PlotTag::Start {
+//                 name,
+//                 typ,
+//                 size_hint,
+//             } => PlotTag::Start {
+//                 name: ChainDisplay::B(name),
+//                 typ,
+//                 size_hint,
+//             },
+//             PlotTag::Plot(p) => PlotTag::Plot(p),
+//             PlotTag::Finish() => PlotTag::Finish(),
+//         }
+//     });
+    
+//     PlotRes {
+//         area,
+//         it: a.chain(b),
+//     }
+// }
+
 pub trait PlotIterator {
     type L: Point;
     type P: Iterator<Item = PlotTag<Self::L, Self::D>>;
