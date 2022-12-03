@@ -292,7 +292,8 @@ fn trig() -> fmt::Result {
 
 #[test]
 fn no_plots() -> fmt::Result {
-    let v: Vec<PlotRes<std::iter::Empty<PlotTag<(i128, i128),&'static str>>, (i128, i128)>> = vec![];
+    let v: Vec<PlotRes<std::iter::Empty<PlotTag<(i128, i128), &'static str>>, (i128, i128)>> =
+        vec![];
 
     let data = poloto::data(v).build_and_label((
         "Some Trigonometry Plots 🥳",
@@ -308,7 +309,8 @@ fn no_plots() -> fmt::Result {
 
 #[test]
 fn no_plots_only_marker() -> fmt::Result {
-    let v: Vec<PlotRes<std::iter::Empty<PlotTag<(i128, i128),&'static str>>, (i128, i128)>> = vec![];
+    let v: Vec<PlotRes<std::iter::Empty<PlotTag<(i128, i128), &'static str>>, (i128, i128)>> =
+        vec![];
 
     let data = poloto::data(poloto::plots!(v, poloto::build::markers([], [5]))).build_and_label((
         "Some Trigonometry Plots 🥳",
