@@ -61,36 +61,36 @@ impl<A: Display, B: Display> fmt::Display for ChainDisplay<A, B> {
 ///
 /// Chain two iterators that produce plot tags.
 ///
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Chain<A, B> {
-    a: A,
-    b: B,
+    a: Fuse<A>,
+    b: Fuse<B>,
 }
 
 impl<L: Point, D1: Display, D2: Display, A, B> FusedIterator for Chain<A, B>
 where
-    A: FusedIterator<Item = PlotTag<L, D1>>,
-    B: FusedIterator<Item = PlotTag<L, D2>>,
+    A: Iterator<Item = PlotTag<L, D1>>,
+    B: Iterator<Item = PlotTag<L, D2>>,
 {
 }
 
 impl<L: Point, D1: Display, D2: Display, A, B> Iterator for Chain<A, B>
 where
-    A: FusedIterator<Item = PlotTag<L, D1>>,
-    B: FusedIterator<Item = PlotTag<L, D2>>,
+    A: Iterator<Item = PlotTag<L, D1>>,
+    B: Iterator<Item = PlotTag<L, D2>>,
 {
     type Item = PlotTag<L, ChainDisplay<D1, D2>>;
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let (a,b)=self.a.size_hint();
-        let (c,d)=self.b.size_hint();
+        let (a, b) = self.a.size_hint();
+        let (c, d) = self.b.size_hint();
 
-        let k=match(b,d){
-            (Some(a),Some(b))=>Some(a+b),
-            (Some(a),_)=>Some(a),
-            (_,Some(b))=>Some(b),
-            (_,_)=>None
+        let k = match (b, d) {
+            (Some(a), Some(b)) => Some(a + b),
+            (Some(a), _) => Some(a),
+            (_, Some(b)) => Some(b),
+            (_, _) => None,
         };
-        (a+c,k)
+        (a + c, k)
     }
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(a) = self.a.next() {
@@ -108,28 +108,22 @@ where
                 PlotTag::Finish() => PlotTag::Finish(),
             })
         } else {
-            if let Some(a) = self.b.next() {
-                Some(match a {
-                    PlotTag::Start {
-                        name,
-                        typ,
-                        size_hint,
-                    } => PlotTag::Start {
-                        name: ChainDisplay::B(name),
-                        typ,
-                        size_hint,
-                    },
-                    PlotTag::Plot(p) => PlotTag::Plot(p),
-                    PlotTag::Finish() => PlotTag::Finish(),
-                })
-            } else {
-                None
-            }
+            self.b.next().map(|a| match a {
+                PlotTag::Start {
+                    name,
+                    typ,
+                    size_hint,
+                } => PlotTag::Start {
+                    name: ChainDisplay::B(name),
+                    typ,
+                    size_hint,
+                },
+                PlotTag::Plot(p) => PlotTag::Plot(p),
+                PlotTag::Finish() => PlotTag::Finish(),
+            })
         }
     }
 }
-
-
 
 // pub fn chain<L:Point,A:PlotIterator<L=L>,B:PlotIterator<L=L>>(a:A,b:B)->PlotRes<impl Iterator<Item=PlotTag<L,ChainDisplay<A::D,B::D>>>,L>{
 //     let PlotRes {
@@ -173,7 +167,7 @@ where
 //             PlotTag::Finish() => PlotTag::Finish(),
 //         }
 //     });
-    
+
 //     PlotRes {
 //         area,
 //         it: a.chain(b),
@@ -186,10 +180,7 @@ pub trait PlotIterator {
     type D: Display;
     fn unpack(self) -> PlotRes<Self::P, Self::L>;
 
-    fn chain<P: PlotIterator<L = Self::L>>(
-        self,
-        other: P,
-    ) -> PlotRes<Chain<Fuse<Self::P>, Fuse<P::P>>, Self::L>
+    fn chain<P: PlotIterator<L = Self::L>>(self, other: P) -> PlotRes<Chain<Self::P, P::P>, Self::L>
     where
         Self: Sized,
     {
