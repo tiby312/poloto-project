@@ -62,19 +62,19 @@ impl<A: Display, B: Display> fmt::Display for ChainDisplay<A, B> {
 /// Chain two iterators that produce plot tags.
 ///
 #[derive(Copy, Clone)]
-pub struct ChainPlotTagIt<A, B> {
+pub struct Chain<A, B> {
     a: A,
     b: B,
 }
 
-impl<L: Point, D1: Display, D2: Display, A, B> FusedIterator for ChainPlotTagIt<A, B>
+impl<L: Point, D1: Display, D2: Display, A, B> FusedIterator for Chain<A, B>
 where
     A: FusedIterator<Item = PlotTag<L, D1>>,
     B: FusedIterator<Item = PlotTag<L, D2>>,
 {
 }
 
-impl<L: Point, D1: Display, D2: Display, A, B> Iterator for ChainPlotTagIt<A, B>
+impl<L: Point, D1: Display, D2: Display, A, B> Iterator for Chain<A, B>
 where
     A: FusedIterator<Item = PlotTag<L, D1>>,
     B: FusedIterator<Item = PlotTag<L, D2>>,
@@ -128,6 +128,8 @@ where
         }
     }
 }
+
+
 
 // pub fn chain<L:Point,A:PlotIterator<L=L>,B:PlotIterator<L=L>>(a:A,b:B)->PlotRes<impl Iterator<Item=PlotTag<L,ChainDisplay<A::D,B::D>>>,L>{
 //     let PlotRes {
@@ -187,7 +189,7 @@ pub trait PlotIterator {
     fn chain<P: PlotIterator<L = Self::L>>(
         self,
         other: P,
-    ) -> PlotRes<ChainPlotTagIt<Fuse<Self::P>, Fuse<P::P>>, Self::L>
+    ) -> PlotRes<Chain<Fuse<Self::P>, Fuse<P::P>>, Self::L>
     where
         Self: Sized,
     {
@@ -203,7 +205,7 @@ pub trait PlotIterator {
         area.grow_area(&other_area);
         PlotRes {
             area,
-            it: ChainPlotTagIt {
+            it: Chain {
                 a: p1.fuse(),
                 b: p.fuse(),
             },
