@@ -24,7 +24,7 @@ timestamp_full = ["chrono","chrono/std"]
 
 [dependencies]
 chrono = {version="0.4", optional = true, default-features = false}
-hypermelon={version="0.4"}
+hypermelon={version="0.5"}
 
 [lib]
 doctest = false

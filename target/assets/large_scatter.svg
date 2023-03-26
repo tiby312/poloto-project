@@ -1,6 +1,6 @@
 <svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
 	<style>
-.poloto{
+ .poloto{
   stroke-linecap:round;
   stroke-linejoin:round;
   font-family:Roboto,sans-serif;
@@ -34,7 +34,7 @@
 .poloto5.poloto_fill{fill:lime;}
 .poloto6.poloto_fill{fill:orange;}
 .poloto7.poloto_fill{fill:chocolate;}
-.poloto_scatter.poloto_plot{stroke-width:33;}
+ .poloto_scatter.poloto_plot{stroke-width:33;}
 	</style>
 	<circle r="1e5" class="poloto_background"/>
 	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_scatter poloto0 poloto_stroke">
@@ -45,8 +45,8 @@
 	</g>
 	<g class="poloto_legend poloto_imgs poloto_scatter poloto0 poloto_stroke"><line x1="685" x2="685" y1="81.25" y2="81.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto1 poloto_stroke"><line x1="680" x2="730" y1="131.25" y2="131.25"/></g>
-	<text class="poloto_legend poloto_text poloto_scatter poloto0" x="675" y="100">a</text>
-	<text class="poloto_legend poloto_text poloto_line poloto1" x="675" y="150">b</text>
+	<text class="poloto_legend poloto_text poloto_scatter poloto0" x="675" y="100"> a</text>
+	<text class="poloto_legend poloto_text poloto_line poloto1" x="675" y="150"> b</text>
 	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">cows per year</text>
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">year</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">cows</text>

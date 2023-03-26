@@ -1,6 +1,6 @@
 <svg class="poloto" width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
 	<style>
-.poloto{
+ .poloto{
   stroke-linecap:round;
   stroke-linejoin:round;
   font-family:Roboto,sans-serif;
@@ -51,7 +51,7 @@
 		<rect x="608.33" y="100.00" width="38.66666666667152" height="300"/>
 	</g>
 	<g class="poloto_legend poloto_imgs poloto_histo poloto0 poloto_fill"><rect x="680" y="76.25" width="50" height="7.5" rx="5" ry="5"/></g>
-	<text class="poloto_legend poloto_text poloto_histo poloto0" x="675" y="100">foo</text>
+	<text class="poloto_legend poloto_text poloto_histo poloto0" x="675" y="100"> foo</text>
 	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">title</text>
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">xname</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">yname</text>

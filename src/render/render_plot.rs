@@ -234,7 +234,7 @@ pub(super) fn render_plot<
                     ))
                     .inline();
 
-                w.render(text.append(name))?;
+                w.render(text.append(hbuild::raw(name)))?;
             }
             Ok(())
         });

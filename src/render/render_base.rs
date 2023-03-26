@@ -99,7 +99,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             ))
             .inline();
 
-        writer.render(text.append(ywher))?;
+        writer.render(text.append(hbuild::raw(ywher)))?;
     }
 
     let mut xwher = String::new();
@@ -114,7 +114,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             ))
             .inline();
 
-        writer.render(text.append(xwher))?;
+        writer.render(text.append(hbuild::raw(xwher)))?;
     }
 
     let xdash_size = xticksg.res.dash_size;
