@@ -85,39 +85,51 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         text.append(yname)
     };
 
-    let g = title.chain(xname).chain(yname);
+    let title_xname_yname = title.chain(xname).chain(yname);
 
-    writer.render(g)?;
+    //writer.render(g)?;
 
-    let mut ywher = String::new();
-    yticksg.fmt.write_where(&mut ywher)?;
+    let ywher={
+        let mut ywher = String::new();
+        yticksg.fmt.write_where(&mut ywher)?;
+    
+        if !ywher.is_empty() {
+            let text = hbuild::elem("text")
+                .with(attrs!(
+                    ("class", "poloto_text poloto_where poloto_y"),
+                    ("x", ffmt.disp(*padding)),
+                    ("y", ffmt.disp(paddingy * 0.7))
+                ))
+                .inline();
+    
+            text.append(hbuild::raw(ywher)).some()
+        }else{
+            None
+        }
+    };
+    
+    let xwher={
+        let mut xwher = String::new();
+        xticksg.fmt.write_where(&mut xwher)?;
+    
+        if !xwher.is_empty() {
+            let text = hbuild::elem("text")
+                .with(attrs!(
+                    ("class", "poloto_text poloto_where poloto_x"),
+                    ("x", ffmt.disp(width * 0.55)),
+                    ("y", ffmt.disp(paddingy * 0.7))
+                ))
+                .inline();
+    
+            text.append(hbuild::raw(xwher)).some()
+        }else{
+            None
+        }
+    };
 
-    if !ywher.is_empty() {
-        let text = hbuild::elem("text")
-            .with(attrs!(
-                ("class", "poloto_text poloto_where poloto_y"),
-                ("x", ffmt.disp(*padding)),
-                ("y", ffmt.disp(paddingy * 0.7))
-            ))
-            .inline();
+    writer.render(title_xname_yname.chain(ywher).chain(xwher))?;
 
-        writer.render(text.append(hbuild::raw(ywher)))?;
-    }
-
-    let mut xwher = String::new();
-    xticksg.fmt.write_where(&mut xwher)?;
-
-    if !xwher.is_empty() {
-        let text = hbuild::elem("text")
-            .with(attrs!(
-                ("class", "poloto_text poloto_where poloto_x"),
-                ("x", ffmt.disp(width * 0.55)),
-                ("y", ffmt.disp(paddingy * 0.7))
-            ))
-            .inline();
-
-        writer.render(text.append(hbuild::raw(xwher)))?;
-    }
+    
 
     let xdash_size = xticksg.res.dash_size;
     let ydash_size = yticksg.res.dash_size;
