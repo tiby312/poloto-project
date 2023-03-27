@@ -13,8 +13,8 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
     use crate::ticks::tick_fmt::TickFmt;
 
-    let mut xticksg = xticksg.unwrap();
-    let mut yticksg = yticksg.unwrap();
+    let xticksg = xticksg.unwrap();
+    let yticksg = yticksg.unwrap();
 
     let RenderOptionsResult {
         width,
@@ -38,7 +38,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
     let texty_padding = paddingy * 0.3;
     let textx_padding = padding * 0.1;
 
-    let g = hbuild::from_closure(|w| {
+    let title = {
         let text = hbuild::elem("text")
             .with(attrs!(
                 ("class", "poloto_text poloto_name poloto_title"),
@@ -48,9 +48,10 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             .inline();
 
         let title = hbuild::from_closure(|w| plot_fmt.write_title(&mut w.writer()));
-        let title = text.append(title);
-        w.render(title)?;
+        text.append(title)
+    };
 
+    let xname = {
         let text = hbuild::elem("text")
             .with(attrs!(
                 ("class", "poloto_text poloto_name poloto_x"),
@@ -60,9 +61,10 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             .inline();
 
         let xname = hbuild::from_closure(|w| plot_fmt.write_xname(&mut w.writer()));
-        let xname = text.append(xname);
-        w.render(xname)?;
+        text.append(xname)
+    };
 
+    let yname = {
         let text = hbuild::elem("text")
             .with(attrs!(
                 ("class", "poloto_text poloto_name poloto_y"),
@@ -80,10 +82,10 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             .inline();
 
         let yname = hbuild::from_closure(|w| plot_fmt.write_yname(&mut w.writer()));
-        let yname = text.append(yname);
-        w.render(yname)?;
-        Ok(())
-    });
+        text.append(yname)
+    };
+
+    let g = title.chain(xname).chain(yname);
 
     writer.render(g)?;
 

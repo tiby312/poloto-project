@@ -465,13 +465,13 @@ where
     B: Display,
     C: Display,
 {
-    fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+    fn write_title(&self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.0)
     }
-    fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+    fn write_xname(&self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.1)
     }
-    fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+    fn write_yname(&self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.2)
     }
 }
