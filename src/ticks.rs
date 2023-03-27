@@ -56,10 +56,10 @@ pub mod tick_fmt {
     pub struct DefaultTickFmt;
 
     impl<N: Display> TickFmt<N> for DefaultTickFmt {
-        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
             write!(a, "{}", val)
         }
-        fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        fn write_where(&self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
             Ok(())
         }
     }
@@ -68,8 +68,8 @@ pub mod tick_fmt {
     /// Formatter for a tick distribution
     ///
     pub trait TickFmt<Num> {
-        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &Num) -> std::fmt::Result;
-        fn write_where(&mut self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &Num) -> std::fmt::Result;
+        fn write_where(&self, _: &mut dyn std::fmt::Write) -> std::fmt::Result {
             Ok(())
         }
     }
@@ -81,12 +81,12 @@ pub mod tick_fmt {
 
     impl<N, D: TickFmt<N>, F, J: fmt::Display> TickFmt<N> for WithWhereFmt<D, F>
     where
-        F: FnMut() -> J,
+        F: Fn() -> J,
     {
-        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
             self.ticks.write_tick(a, val)
         }
-        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        fn write_where(&self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
             let j = (self.func)();
             write!(w, "{}", j)
         }
@@ -98,13 +98,13 @@ pub mod tick_fmt {
     }
     impl<N, D: TickFmt<N>, F, K: fmt::Display> TickFmt<N> for WithTickFmt<D, F>
     where
-        F: FnMut(&N) -> K,
+        F: Fn(&N) -> K,
     {
-        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
             let j = (self.func)(val);
             write!(a, "{}", j)
         }
-        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        fn write_where(&self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
             self.ticks.write_where(w)
         }
     }
@@ -115,16 +115,16 @@ pub mod tick_fmt {
     }
 
     impl<N, K: TickFmt<N>, E> TickFmt<N> for WithData<K, E> {
-        fn write_tick(&mut self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
+        fn write_tick(&self, a: &mut dyn std::fmt::Write, val: &N) -> std::fmt::Result {
             self.ticks.write_tick(a, val)
         }
-        fn write_where(&mut self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
+        fn write_where(&self, w: &mut dyn std::fmt::Write) -> std::fmt::Result {
             self.ticks.write_where(w)
         }
     }
 
     impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I, Fmt> {
-        pub fn with_tick_fmt<F: FnMut(&X) -> J, J: fmt::Display>(
+        pub fn with_tick_fmt<F: Fn(&X) -> J, J: fmt::Display>(
             self,
             func: F,
         ) -> TickDistribution<I, WithTickFmt<Fmt, F>> {
@@ -138,7 +138,7 @@ pub mod tick_fmt {
             }
         }
 
-        pub fn with_where_fmt<F: FnMut() -> J, J: fmt::Display>(
+        pub fn with_where_fmt<F: Fn() -> J, J: fmt::Display>(
             self,
             func: F,
         ) -> TickDistribution<I, WithWhereFmt<Fmt, F>> {
