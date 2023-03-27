@@ -288,40 +288,34 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         let tick_short_lines = {
             let g = hbuild::elem("g").with(attrs!(("class", "poloto_imgs poloto_ticks poloto_x")));
 
-            let j = hbuild::from_closure(|w| {
-                for (_, xx) in ticks.iter() {
-                    w.render(hbuild::single("line").with(attrs!(
-                        ("x1", ffmt.disp(xaspect_offset + xx)),
-                        ("x2", ffmt.disp(xaspect_offset + xx)),
-                        ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
-                        ("y2", ffmt.disp(yaspect_offset + height - paddingy * 0.95))
-                    )))?;
-                }
-                Ok(())
-            });
+            let j = hbuild::from_iter(ticks.iter().map(|(_, xx)| {
+                hbuild::single("line").with(attrs!(
+                    ("x1", ffmt.disp(xaspect_offset + xx)),
+                    ("x2", ffmt.disp(xaspect_offset + xx)),
+                    ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
+                    ("y2", ffmt.disp(yaspect_offset + height - paddingy * 0.95))
+                ))
+            }));
+
             g.append(j)
         };
 
         let tick_long_lines = {
             if canvas.xtick_lines {
                 let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_x")));
-                let j = hbuild::from_closure(|w| {
-                    //Draw interva`l x text
-                    for (_, xx) in ticks.iter() {
-                        w.render(hbuild::single("line").with(attrs!(
-                            ("x1", ffmt.disp(xaspect_offset + xx)),
-                            ("x2", ffmt.disp(xaspect_offset + xx)),
-                            ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
-                            (
-                                "y2",
-                                ffmt.disp(
-                                    yaspect_offset + height - paddingy - distancey_min_to_max
-                                ),
-                            )
-                        )))?;
-                    }
-                    Ok(())
-                });
+
+                let j = hbuild::from_iter(ticks.iter().map(|(_, xx)| {
+                    hbuild::single("line").with(attrs!(
+                        ("x1", ffmt.disp(xaspect_offset + xx)),
+                        ("x2", ffmt.disp(xaspect_offset + xx)),
+                        ("y1", ffmt.disp(yaspect_offset + height - paddingy)),
+                        (
+                            "y2",
+                            ffmt.disp(yaspect_offset + height - paddingy - distancey_min_to_max),
+                        )
+                    ))
+                }));
+
                 g.append(j).some()
             } else {
                 None
