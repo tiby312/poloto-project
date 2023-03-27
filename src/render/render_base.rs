@@ -201,37 +201,32 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
 
         let g = hbuild::elem("g").with(attrs!(("class", "poloto_imgs poloto_ticks poloto_y"),));
 
-        let j = hbuild::from_closure(|w| {
-            for (_, yy) in ticks.iter() {
-                w.render(hbuild::single("line").with(attrs!(
-                    ("x1", ffmt.disp(xaspect_offset + padding)),
-                    ("x2", ffmt.disp(xaspect_offset + padding * 0.96)),
-                    ("y1", ffmt.disp(yaspect_offset + yy)),
-                    ("y2", ffmt.disp(yaspect_offset + yy))
-                )))?;
-            }
-            Ok(())
-        });
+        let j = hbuild::from_iter(ticks.iter().map(|(_, yy)| {
+            hbuild::single("line").with(attrs!(
+                ("x1", ffmt.disp(xaspect_offset + padding)),
+                ("x2", ffmt.disp(xaspect_offset + padding * 0.96)),
+                ("y1", ffmt.disp(yaspect_offset + yy)),
+                ("y2", ffmt.disp(yaspect_offset + yy))
+            ))
+        }));
 
         writer.render(g.append(j))?;
 
         if canvas.ytick_lines {
             let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_y")));
-            let j = hbuild::from_closure(|w| {
-                //Draw interval y text
-                for (_, yy) in ticks.iter() {
-                    w.render(hbuild::single("line").with(attrs!(
-                        ("x1", ffmt.disp(xaspect_offset + padding)),
-                        (
-                            "x2",
-                            ffmt.disp(padding + xaspect_offset + distancex_min_to_max)
-                        ),
-                        ("y1", ffmt.disp(yaspect_offset + yy)),
-                        ("y2", ffmt.disp(yaspect_offset + yy))
-                    )))?;
-                }
-                Ok(())
-            });
+
+            let j = hbuild::from_iter(ticks.iter().map(|(_, yy)| {
+                hbuild::single("line").with(attrs!(
+                    ("x1", ffmt.disp(xaspect_offset + padding)),
+                    (
+                        "x2",
+                        ffmt.disp(padding + xaspect_offset + distancex_min_to_max)
+                    ),
+                    ("y1", ffmt.disp(yaspect_offset + yy)),
+                    ("y2", ffmt.disp(yaspect_offset + yy))
+                ))
+            }));
+
             writer.render(g.append(j))?;
         }
     }
