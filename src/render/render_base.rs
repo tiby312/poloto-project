@@ -330,32 +330,20 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         tick_text.chain(tick_short_lines).chain(tick_long_lines)
     };
 
-    writer.render(
-        title_xname_yname
-            .chain(ywher)
-            .chain(xwher)
-            .chain(ytick_elems)
-            .chain(xtick_elems),
-    )?;
+    use attr::PathCommand::*;
 
-    let xclosure = hbuild::attr_from_closure(|w| {
-        if let Some(xdash_size) = xdash_size {
-            w.render((
+    let xline = hbuild::single("path").with(attrs!(
+        ("class", "poloto_imgs poloto_ticks poloto_x"),
+        xdash_size.map(|xdash_size| {
+            (
                 "style",
                 format_move!(
                     "stroke-dasharray:{};stroke-dashoffset:{};",
                     xdash_size / 2.0,
                     -distance_to_firstx
                 ),
-            ))?;
-        }
-        Ok(())
-    });
-
-    use attr::PathCommand::*;
-    writer.render(hbuild::single("path").with(attrs!(
-        ("class", "poloto_imgs poloto_ticks poloto_x"),
-        xclosure,
+            )
+        }),
         hbuild::path([
             M(
                 ffmt.disp(padding + xaspect_offset),
@@ -366,24 +354,20 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 ffmt.disp(height - paddingy + yaspect_offset),
             )
         ])
-    )))?;
+    ));
 
-    let yclosure = hbuild::attr_from_closure(|w| {
-        if let Some(ydash_size) = ydash_size {
-            w.render((
+    let yline = hbuild::single("path").with(attrs!(
+        ("class", "poloto_imgs poloto_ticks poloto_y"),
+        ydash_size.map(|ydash_size| {
+            (
                 "style",
                 format_move!(
                     "stroke-dasharray:{};stroke-dashoffset:{};",
                     ydash_size / 2.0,
                     -distance_to_firsty
                 ),
-            ))?;
-        }
-        Ok(())
-    });
-    writer.render(hbuild::single("path").with(attrs!(
-        ("class", "poloto_imgs poloto_ticks poloto_y"),
-        yclosure,
+            )
+        }),
         hbuild::path([
             M(
                 ffmt.disp(xaspect_offset + padding),
@@ -394,7 +378,17 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
                 ffmt.disp(yaspect_offset + height - paddingy - distancey_min_to_max),
             )
         ])
-    )))?;
+    ));
+
+    writer.render(
+        title_xname_yname
+            .chain(ywher)
+            .chain(xwher)
+            .chain(ytick_elems)
+            .chain(xtick_elems)
+            .chain(xline)
+            .chain(yline),
+    )?;
 
     Ok(())
 }
