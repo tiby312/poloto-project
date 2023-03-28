@@ -287,7 +287,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                     ("y2", legendy1)
                 )));
 
-                writer.render(g.inline())?;
+                writer.render(g.inline())
             }
             PlotType::Scatter => {
                 let g = hbuild::elem("g").with((
@@ -304,7 +304,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                     ("y2", legendy1)
                 )));
 
-                writer.render(g.inline())?;
+                writer.render(g.inline())
             }
             PlotType::Histo => {
                 let g = hbuild::elem("g").with((
@@ -324,7 +324,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                     ("ry", padding / 30.0)
                 )));
 
-                writer.render(g.inline())?;
+                writer.render(g.inline())
             }
             PlotType::LineFill => {
                 let g = hbuild::elem("g").with((
@@ -344,7 +344,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                     ("ry", padding / 30.0)
                 )));
 
-                writer.render(g.inline())?;
+                writer.render(g.inline())
             }
 
             PlotType::LineFillRaw => {
@@ -365,7 +365,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                     ("ry", padding / 30.0)
                 )));
 
-                writer.render(g.inline())?;
+                writer.render(g.inline())
             }
 
             PlotType::Bars => {
@@ -384,11 +384,9 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                     ("rx", padding / 30.0),
                     ("ry", padding / 30.0)
                 )));
-                writer.render(g.inline())?;
+                writer.render(g.inline())
             }
         }
-
-        Ok(())
     })
 }
 
