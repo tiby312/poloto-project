@@ -263,24 +263,21 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         let tick_text = {
             let g =
                 hbuild::elem("text").with(attrs!(("class", "poloto_text poloto_ticks poloto_x")));
-            let j = hbuild::from_closure(|w| {
-                for (val, xx) in ticks.iter() {
-                    let text = hbuild::elem("tspan")
-                        .with(attrs!(
-                            ("x", ffmt.disp(xaspect_offset + xx)),
-                            (
-                                "y",
-                                ffmt.disp(yaspect_offset + height - paddingy + texty_padding)
-                            )
-                        ))
-                        .inline();
 
-                    let xtick =
-                        hbuild::from_closure(|w| xticksg.fmt.write_tick(&mut w.writer(), val));
-                    w.render(text.append(xtick))?;
-                }
-                Ok(())
-            });
+            let j = hbuild::from_iter(ticks.iter().map(|(val, xx)| {
+                let text = hbuild::elem("tspan")
+                    .with(attrs!(
+                        ("x", ffmt.disp(xaspect_offset + xx)),
+                        (
+                            "y",
+                            ffmt.disp(yaspect_offset + height - paddingy + texty_padding)
+                        )
+                    ))
+                    .inline();
+
+                let xtick = hbuild::from_closure(|w| xticksg.fmt.write_tick(&mut w.writer(), val));
+                text.append(xtick)
+            }));
 
             g.append(j)
         };
