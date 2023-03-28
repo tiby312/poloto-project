@@ -371,6 +371,7 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
         ])
     ));
 
+    //TODO replace with a element chaining macro?
     writer.render(
         title_xname_yname
             .chain(ywher)
