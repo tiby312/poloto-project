@@ -117,12 +117,12 @@ pub(super) fn render_plot<
 
     let mut names = vec![];
 
-    let PlotRes { mut it, .. } = plots_all.unpack();
-    let mut testy = Some(it);
-    for i in (0..) {
-        let Some((mut it,label,typ))=SinglePlotIterator::new( testy.take().unwrap()) else {
-            break
-        };
+    let PlotRes {
+        mut it, num_plots, ..
+    } = plots_all.unpack();
+    //let mut testy = Some(it);
+    for i in (0..num_plots) {
+        let (mut it, label, typ) = SinglePlotIterator::new(&mut it).unwrap();
 
         let mut name = String::new();
         use std::fmt::Write;
@@ -175,7 +175,6 @@ pub(super) fn render_plot<
                 )?;
             }
         }
-        testy = Some(it.it);
     }
 
     let j = if !names.is_empty() {

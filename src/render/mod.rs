@@ -242,13 +242,21 @@ impl<
         ticky: TY,
         opt: RenderOptions,
     ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
-        let PlotRes { area, it } = plots.unpack();
+        let PlotRes {
+            area,
+            it,
+            num_plots,
+        } = plots.unpack();
 
         let (boundx, boundy) = area.build();
 
         Stage1 {
             opt,
-            plots: PlotRes { it, area },
+            plots: PlotRes {
+                it,
+                area,
+                num_plots,
+            },
             ticky,
             tickx,
             boundx,
