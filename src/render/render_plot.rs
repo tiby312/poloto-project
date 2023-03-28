@@ -4,13 +4,13 @@ use super::*;
 
 use crate::build::*;
 
-struct SinglePlotIterator<'a, I> {
-    it: &'a mut I,
+struct SinglePlotIterator<I> {
+    it: I,
     size_hint: (usize, Option<usize>),
     finished: bool,
 }
-impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> SinglePlotIterator<'a, I> {
-    fn new(it: &'a mut I) -> Option<(Self, D, PlotMetaType)> {
+impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> SinglePlotIterator<I> {
+    fn new(mut it: I) -> Option<(Self, D, PlotMetaType)> {
         if let Some(o) = it.next() {
             match o {
                 PlotTag::Start {
@@ -36,15 +36,15 @@ impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> SinglePlotIter
 }
 
 impl<'a, I: ExactSizeIterator<Item = PlotTag<L, D>>, L: Point, D: Display> ExactSizeIterator
-    for SinglePlotIterator<'a, I>
+    for SinglePlotIterator<I>
 {
 }
 impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> FusedIterator
-    for SinglePlotIterator<'a, I>
+    for SinglePlotIterator<I>
 {
 }
 impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> Iterator
-    for SinglePlotIterator<'a, I>
+    for SinglePlotIterator<I>
 {
     type Item = L;
 
@@ -118,9 +118,9 @@ pub(super) fn render_plot<
     let mut names = vec![];
 
     let PlotRes { mut it, .. } = plots_all.unpack();
-
+    let mut testy = Some(it);
     for i in (0..) {
-        let Some((it,label,typ))=SinglePlotIterator::new( &mut it) else {
+        let Some((mut it,label,typ))=SinglePlotIterator::new( testy.take().unwrap()) else {
             break
         };
 
@@ -139,7 +139,7 @@ pub(super) fn render_plot<
 
         match typ {
             PlotMetaType::Text => {
-                assert_eq!(it.count(), 0);
+                assert_eq!((&mut it).count(), 0);
 
                 // don't need to render any legend or plots
             }
@@ -153,7 +153,7 @@ pub(super) fn render_plot<
                 let maxx_ii = scalex;
                 let maxy_ii = scaley;
 
-                let it = it.map(move |l| {
+                let it = (&mut it).map(move |l| {
                     let (x, y) = l.get();
                     [
                         basex_ii + x.scale(rangex_ii, maxx_ii),
@@ -175,6 +175,7 @@ pub(super) fn render_plot<
                 )?;
             }
         }
+        testy = Some(it.it);
     }
 
     let j = if !names.is_empty() {
