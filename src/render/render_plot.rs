@@ -177,68 +177,66 @@ pub(super) fn render_plot<
         }
     }
 
-    if !names.is_empty() {
-        let j = hbuild::from_closure(|w| {
-            //TODO redesign so that not all names need to be written to memory at once
-            for (typ, name, i) in names.iter() {
-                match typ {
-                    PlotMetaType::Text => {
-                        // don't need to render any legend or plots
-                    }
-                    &PlotMetaType::Plot(p_type) => {
-                        let colori = color_iter2.next().unwrap();
-                        let legendy1 =
-                            paddingy - yaspect_offset - padding / 8.0 + (*i as f64) * spacing;
+    let j = if !names.is_empty() {
+        let aa = hbuild::from_iter(names.iter().map(|(typ, name, i)| {
+            match typ {
+                PlotMetaType::Text => {
+                    // don't need to render any legend or plots
+                    None
+                }
+                &PlotMetaType::Plot(p_type) => {
+                    let colori = color_iter2.next().unwrap();
+                    let legendy1 =
+                        paddingy - yaspect_offset - padding / 8.0 + (*i as f64) * spacing;
 
-                        if !name.is_empty() {
-                            w.render(render_label(PlotRenderInfo2 {
-                                canvas,
-                                p_type,
-                                colori,
-                                legendy1,
-                            }))?;
-                        }
+                    if !name.is_empty() {
+                        render_label(PlotRenderInfo2 {
+                            canvas,
+                            p_type,
+                            colori,
+                            legendy1,
+                        })
+                        .some()
+                    } else {
+                        None
                     }
                 }
             }
-            Ok(())
-        });
+        }));
 
-        writer.render(j)?;
+        let bb = hbuild::from_iter(names.iter().map(|(typ, name, i)| {
+            let class = match typ {
+                PlotMetaType::Plot(e) => match e {
+                    PlotType::Scatter => "poloto_scatter",
+                    PlotType::Line => "poloto_line",
+                    PlotType::Histo => "poloto_histo",
+                    PlotType::LineFill => "poloto_linefill",
+                    PlotType::LineFillRaw => "poloto_linefillraw",
+                    PlotType::Bars => "poloto_bars",
+                },
+                PlotMetaType::Text => "",
+            };
 
-        let j = hbuild::from_closure(|w| {
-            for (typ, name, i) in names.into_iter() {
-                let class = match typ {
-                    PlotMetaType::Plot(e) => match e {
-                        PlotType::Scatter => "poloto_scatter",
-                        PlotType::Line => "poloto_line",
-                        PlotType::Histo => "poloto_histo",
-                        PlotType::LineFill => "poloto_linefill",
-                        PlotType::LineFillRaw => "poloto_linefillraw",
-                        PlotType::Bars => "poloto_bars",
-                    },
-                    PlotMetaType::Text => "",
-                };
+            let text = hbuild::elem("text")
+                .with(attrs!(
+                    (
+                        "class",
+                        format_move!("poloto_legend poloto_text {} poloto{}", class, i)
+                    ),
+                    ("x", width - padding / 1.2),
+                    ("y", paddingy - yaspect_offset + (*i as f64) * spacing)
+                ))
+                .inline();
 
-                let text = hbuild::elem("text")
-                    .with(attrs!(
-                        (
-                            "class",
-                            format_move!("poloto_legend poloto_text {} poloto{}", class, i)
-                        ),
-                        ("x", width - padding / 1.2),
-                        ("y", paddingy - yaspect_offset + (i as f64) * spacing)
-                    ))
-                    .inline();
+            text.append(hbuild::raw(name))
+        }));
 
-                w.render(text.append(hbuild::raw(name)))?;
-            }
-            Ok(())
-        });
+        aa.chain(bb).some()
+    } else {
+        None
+    };
 
-        writer.render(j)?;
-    }
-    Ok(())
+    writer.render(j)
 }
 
 struct PlotRenderInfo2<'a> {
@@ -269,123 +267,121 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
         padding, legendx1, ..
     } = *canvas;
 
-    hbuild::from_closure(move |writer| {
-        match p_type {
-            PlotType::Line => {
-                let g = hbuild::elem("g").with((
-                    "class",
-                    format_move!(
-                        "poloto_legend poloto_imgs poloto_line poloto{} poloto_stroke",
-                        colori
-                    ),
-                ));
+    hbuild::from_closure(move |writer| match p_type {
+        PlotType::Line => {
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!(
+                    "poloto_legend poloto_imgs poloto_line poloto{} poloto_stroke",
+                    colori
+                ),
+            ));
 
-                let g = g.append(hbuild::single("line").with(attrs!(
-                    ("x1", legendx1),
-                    ("x2", legendx1 + padding / 3.0),
-                    ("y1", legendy1),
-                    ("y2", legendy1)
-                )));
+            let g = g.append(hbuild::single("line").with(attrs!(
+                ("x1", legendx1),
+                ("x2", legendx1 + padding / 3.0),
+                ("y1", legendy1),
+                ("y2", legendy1)
+            )));
 
-                writer.render(g.inline())
-            }
-            PlotType::Scatter => {
-                let g = hbuild::elem("g").with((
-                    "class",
-                    format_move!(
-                        "poloto_legend poloto_imgs poloto_scatter poloto{} poloto_stroke",
-                        colori,
-                    ),
-                ));
-                let g = g.append(hbuild::single("line").with(attrs!(
-                    ("x1", legendx1 + padding / 30.0),
-                    ("x2", legendx1 + padding / 30.0),
-                    ("y1", legendy1),
-                    ("y2", legendy1)
-                )));
+            writer.render(g.inline())
+        }
+        PlotType::Scatter => {
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!(
+                    "poloto_legend poloto_imgs poloto_scatter poloto{} poloto_stroke",
+                    colori,
+                ),
+            ));
+            let g = g.append(hbuild::single("line").with(attrs!(
+                ("x1", legendx1 + padding / 30.0),
+                ("x2", legendx1 + padding / 30.0),
+                ("y1", legendy1),
+                ("y2", legendy1)
+            )));
 
-                writer.render(g.inline())
-            }
-            PlotType::Histo => {
-                let g = hbuild::elem("g").with((
-                    "class",
-                    format_move!(
-                        "poloto_legend poloto_imgs poloto_histo poloto{} poloto_fill",
-                        colori,
-                    ),
-                ));
+            writer.render(g.inline())
+        }
+        PlotType::Histo => {
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!(
+                    "poloto_legend poloto_imgs poloto_histo poloto{} poloto_fill",
+                    colori,
+                ),
+            ));
 
-                let g = g.append(hbuild::single("rect").with(attrs!(
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )));
+            let g = g.append(hbuild::single("rect").with(attrs!(
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )));
 
-                writer.render(g.inline())
-            }
-            PlotType::LineFill => {
-                let g = hbuild::elem("g").with((
-                    "class",
-                    format_move!(
-                        "poloto_legend poloto_imgs poloto_linefill poloto{} poloto_fill",
-                        colori,
-                    ),
-                ));
+            writer.render(g.inline())
+        }
+        PlotType::LineFill => {
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!(
+                    "poloto_legend poloto_imgs poloto_linefill poloto{} poloto_fill",
+                    colori,
+                ),
+            ));
 
-                let g = g.append(hbuild::single("rect").with(attrs!(
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )));
+            let g = g.append(hbuild::single("rect").with(attrs!(
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )));
 
-                writer.render(g.inline())
-            }
+            writer.render(g.inline())
+        }
 
-            PlotType::LineFillRaw => {
-                let g = hbuild::elem("g").with((
-                    "class",
-                    format_move!(
-                        "poloto_legend poloto_imgs poloto_linefillraw poloto{} poloto_fill",
-                        colori,
-                    ),
-                ));
+        PlotType::LineFillRaw => {
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!(
+                    "poloto_legend poloto_imgs poloto_linefillraw poloto{} poloto_fill",
+                    colori,
+                ),
+            ));
 
-                let g = g.append(hbuild::single("rect").with(attrs!(
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )));
+            let g = g.append(hbuild::single("rect").with(attrs!(
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )));
 
-                writer.render(g.inline())
-            }
+            writer.render(g.inline())
+        }
 
-            PlotType::Bars => {
-                let g = hbuild::elem("g").with((
-                    "class",
-                    format_move!(
-                        "poloto_legend poloto_imgs poloto_bars poloto{} poloto_fill",
-                        colori
-                    ),
-                ));
-                let g = g.append(hbuild::single("rect").with(attrs!(
-                    ("x", legendx1),
-                    ("y", legendy1 - padding / 30.0),
-                    ("width", padding / 3.0),
-                    ("height", padding / 20.0),
-                    ("rx", padding / 30.0),
-                    ("ry", padding / 30.0)
-                )));
-                writer.render(g.inline())
-            }
+        PlotType::Bars => {
+            let g = hbuild::elem("g").with((
+                "class",
+                format_move!(
+                    "poloto_legend poloto_imgs poloto_bars poloto{} poloto_fill",
+                    colori
+                ),
+            ));
+            let g = g.append(hbuild::single("rect").with(attrs!(
+                ("x", legendx1),
+                ("y", legendy1 - padding / 30.0),
+                ("width", padding / 3.0),
+                ("height", padding / 20.0),
+                ("rx", padding / 30.0),
+                ("ry", padding / 30.0)
+            )));
+            writer.render(g.inline())
         }
     })
 }
