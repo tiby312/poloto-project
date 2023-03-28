@@ -119,7 +119,7 @@ pub(super) fn render_plot<
 
     let PlotRes { mut it, .. } = plots_all.unpack();
 
-    for i in 0.. {
+    for i in (0..) {
         let Some((it,label,typ))=SinglePlotIterator::new( &mut it) else {
             break
         };

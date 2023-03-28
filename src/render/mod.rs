@@ -447,15 +447,16 @@ where
             self.data.plots,
         )?;
 
-        render::render_base::render_base(
-            writer,
+        let base = render::render_base::render_base(
             self.data.xticks,
             self.data.yticks,
             &self.data.boundx,
             &self.data.boundy,
             &mut self.base,
             &self.data.opt,
-        )
+        );
+
+        writer.render(base)
     }
 }
 
