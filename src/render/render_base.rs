@@ -379,7 +379,5 @@ pub(super) fn render_base<X: PlotNum, Y: PlotNum>(
             .chain(xtick_elems)
             .chain(xline)
             .chain(yline),
-    )?;
-
-    Ok(())
+    )
 }
