@@ -126,7 +126,7 @@ pub(super) fn render_plot<
 
         let mut name = String::new();
         use std::fmt::Write;
-        write!(&mut name, "{}", label)?;
+        write!(&mut name, "{}", label).unwrap();
 
         let name_exists = !name.is_empty();
 
@@ -153,7 +153,7 @@ pub(super) fn render_plot<
                 let maxx_ii = scalex;
                 let maxy_ii = scaley;
 
-                let it = (&mut it).map(move |l| {
+                let it = it.map(move |l| {
                     let (x, y) = l.get();
                     [
                         basex_ii + x.scale(rangex_ii, maxx_ii),
@@ -162,7 +162,7 @@ pub(super) fn render_plot<
                 });
 
                 let precision = canvas.precision;
-                let v = render(
+                let k = render(
                     it,
                     PlotRenderInfo {
                         canvas,
@@ -172,14 +172,69 @@ pub(super) fn render_plot<
                         bar_width: canvas.bar_width,
                     },
                 );
-
-                writer.render(v)?;
+                writer.render(k)?;
             }
         }
     }
-    
-    assert!(SinglePlotIterator::new(&mut it).is_none());
 
+    for i in 0..num_plots {
+        // let (mut it, label, typ) = SinglePlotIterator::new(&mut it).unwrap();
+
+        // let mut name = String::new();
+        // use std::fmt::Write;
+        // write!(&mut name, "{}", label)?;
+
+        // let name_exists = !name.is_empty();
+
+        // if name_exists {
+        //     names.push((typ, name, i));
+        // }
+
+        // let aa = minx.scale(&[minx, maxx], scalex);
+        // let bb = miny.scale(&[miny, maxy], scaley);
+
+        // match typ {
+        //     PlotMetaType::Text => {
+        //         assert_eq!((&mut it).count(), 0);
+
+        //         // don't need to render any legend or plots
+        //     }
+        //     PlotMetaType::Plot(p_type) => {
+        //         let colori = color_iter.next().unwrap();
+
+        //         let rangex_ii = &[minx, maxx];
+        //         let rangey_ii = &[miny, maxy];
+        //         let basex_ii = xaspect_offset + padding - aa;
+        //         let basey_ii = yaspect_offset + height - paddingy + bb;
+        //         let maxx_ii = scalex;
+        //         let maxy_ii = scaley;
+
+        //         let it = (&mut it).map(move |l| {
+        //             let (x, y) = l.get();
+        //             [
+        //                 basex_ii + x.scale(rangex_ii, maxx_ii),
+        //                 basey_ii - y.scale(rangey_ii, maxy_ii),
+        //             ]
+        //         });
+
+        //         let precision = canvas.precision;
+        //         let v = render(
+        //             it,
+        //             PlotRenderInfo {
+        //                 canvas,
+        //                 p_type,
+        //                 colori,
+        //                 precision,
+        //                 bar_width: canvas.bar_width,
+        //             },
+        //         );
+
+        //         writer.render(v)?;
+        //     }
+        // }
+    }
+
+    assert!(SinglePlotIterator::new(&mut it).is_none());
 
     let j = if !names.is_empty() {
         let aa = hbuild::from_iter(names.iter().map(|(typ, name, i)| {
