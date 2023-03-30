@@ -8,7 +8,7 @@ struct BarTickFmt<D> {
 }
 
 impl<D: Display> crate::ticks::tick_fmt::TickFmt<i128> for BarTickFmt<D> {
-    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &i128) -> fmt::Result {
+    fn write_tick(&self, writer: &mut dyn std::fmt::Write, val: &i128) -> fmt::Result {
         let j = &self.ticks[usize::try_from(*val).unwrap()];
         write!(writer, "{}", j)
     }

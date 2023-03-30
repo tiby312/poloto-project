@@ -1,6 +1,6 @@
 use super::*;
 
-use chrono::TimeZone;
+use chrono::{NaiveDate, TimeZone};
 use poloto::build;
 use poloto::num::timestamp::UnixTime;
 #[test]
@@ -8,16 +8,55 @@ fn days() -> fmt::Result {
     let timezone = &chrono::Utc;
 
     let data: &[(UnixTime, _)] = &[
-        (timezone.ymd(2020, 1, 30).into(), 3144000),
-        (timezone.ymd(2020, 1, 31).into(), 3518000),
-        (timezone.ymd(2020, 2, 01).into(), 3835000),
         (
-            timezone.ymd(2020, 2, 01).and_hms(12, 59, 59).into(),
+            timezone
+                .with_ymd_and_hms(2020, 1, 30, 0, 0, 0)
+                .unwrap()
+                .into(),
+            3144000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 1, 31, 0, 0, 0)
+                .unwrap()
+                .into(),
+            3518000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 2, 01, 0, 0, 0)
+                .unwrap()
+                .into(),
+            3835000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 2, 01, 12, 59, 59)
+                .unwrap()
+                .into(),
             2133000,
         ),
-        (timezone.ymd(2020, 2, 02).into(), 4133000),
-        (timezone.ymd(2020, 2, 03).into(), 4413000),
-        (timezone.ymd(2020, 2, 04).into(), 4682000),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 2, 02, 0, 0, 0)
+                .unwrap()
+                .into(),
+            4133000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 2, 03, 0, 0, 0)
+                .unwrap()
+                .into(),
+            4413000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 2, 04, 0, 0, 0)
+                .unwrap()
+                .into(),
+            4682000,
+        ),
     ];
 
     let p = poloto::plots!(
@@ -34,18 +73,54 @@ fn days() -> fmt::Result {
 
 #[test]
 fn minutes_local_time() -> fmt::Result {
-    let time_zone = &chrono::FixedOffset::east(-3600 * 5);
+    let time_zone = &chrono::FixedOffset::east_opt(-3600 * 5).unwrap();
 
-    let day1 = time_zone.ymd(2020, 1, 30);
-    let day2 = time_zone.ymd(2020, 1, 31);
+    let day1 = NaiveDate::from_ymd_opt(2020, 1, 30).unwrap();
+    let day2 = NaiveDate::from_ymd_opt(2020, 1, 31).unwrap();
+
     use chrono::TimeZone;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data: &[(UnixTime, _)] = &[
-        (day1.and_hms(23, 30, 59).into(), 3144000),
-        (day2.and_hms(01, 02, 00).into(), 3518000),
-        (day2.and_hms(01, 05, 01).into(), 3835000),
-        (day2.and_hms(01, 30, 59).into(), 2133000),
-        (day2.and_hms(01, 50, 01).into(), 4133000),
+        (
+            time_zone
+                .from_local_datetime(&day1.and_hms_opt(23, 30, 59).unwrap())
+                .latest()
+                .unwrap()
+                .into(),
+            3144000,
+        ),
+        (
+            time_zone
+                .from_local_datetime(&day2.and_hms_opt(01, 02, 00).unwrap())
+                .latest()
+                .unwrap()
+                .into(),
+            3518000,
+        ),
+        (
+            time_zone
+                .from_local_datetime(&day2.and_hms_opt(01, 05, 01).unwrap())
+                .latest()
+                .unwrap()
+                .into(),
+            3835000,
+        ),
+        (
+            time_zone
+                .from_local_datetime(&day2.and_hms_opt(01, 30, 59).unwrap())
+                .latest()
+                .unwrap()
+                .into(),
+            2133000,
+        ),
+        (
+            time_zone
+                .from_local_datetime(&day2.and_hms_opt(01, 50, 01).unwrap())
+                .latest()
+                .unwrap()
+                .into(),
+            4133000,
+        ),
     ];
 
     let s = poloto::data(plots!(
@@ -69,17 +144,62 @@ fn months() -> fmt::Result {
     use chrono::TimeZone;
     //Source https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia
     let data: &[(UnixTime, _)] = &[
-        (timezone.ymd(2020, 08, 01).into(), 8144000),
-        (timezone.ymd(2020, 09, 30).into(), 3144000),
-        (timezone.ymd(2020, 10, 04).into(), 3518000),
-        (timezone.ymd(2020, 11, 01).into(), 3835000),
         (
-            timezone.ymd(2020, 11, 01).and_hms(12, 59, 59).into(),
+            timezone
+                .with_ymd_and_hms(2020, 08, 01, 0, 0, 0)
+                .unwrap()
+                .into(),
+            8144000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 09, 30, 0, 0, 0)
+                .unwrap()
+                .into(),
+            3144000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 10, 04, 0, 0, 0)
+                .unwrap()
+                .into(),
+            3518000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 11, 01, 0, 0, 0)
+                .unwrap()
+                .into(),
+            3835000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2020, 11, 01, 12, 59, 59)
+                .unwrap()
+                .into(),
             2133000,
         ),
-        (timezone.ymd(2021, 01, 02).into(), 4133000),
-        (timezone.ymd(2021, 02, 03).into(), 4413000),
-        (timezone.ymd(2021, 03, 04).into(), 4682000),
+        (
+            timezone
+                .with_ymd_and_hms(2021, 01, 02, 0, 0, 0)
+                .unwrap()
+                .into(),
+            4133000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2021, 02, 03, 0, 0, 0)
+                .unwrap()
+                .into(),
+            4413000,
+        ),
+        (
+            timezone
+                .with_ymd_and_hms(2021, 03, 04, 0, 0, 0)
+                .unwrap()
+                .into(),
+            4682000,
+        ),
     ];
 
     let plots = poloto::plots!(
@@ -107,15 +227,26 @@ fn seconds() -> fmt::Result {
     use chrono::TimeZone;
     let timezone = &chrono::Utc;
 
-    let date = timezone.ymd(2020, 1, 30);
+    let date = NaiveDate::from_ymd_opt(2020, 1, 30).unwrap();
 
-    let data: &[(UnixTime, _)] = &[
-        (date.and_hms(1, 1, 59).into(), 3144000),
-        (date.and_hms(1, 2, 00).into(), 3518000),
-        (date.and_hms(1, 2, 30).into(), 3835000),
-        (date.and_hms(1, 2, 40).into(), 2133000),
-        (date.and_hms(1, 3, 00).into(), 4133000),
+    let data = [
+        (1, 1, 59, 3144000),
+        (1, 2, 00, 3518000),
+        (1, 2, 30, 3835000),
+        (1, 2, 40, 2133000),
+        (1, 3, 00, 4133000),
     ];
+
+    let data: &[(UnixTime, _)] = &data.map(|(a, b, c, d)| {
+        (
+            timezone
+                .from_local_datetime(&date.and_hms_opt(a, b, c).unwrap())
+                .latest()
+                .unwrap()
+                .into(),
+            d,
+        )
+    });
 
     let data = poloto::data(plots!(
         poloto::build::plot("").line(data),

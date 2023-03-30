@@ -26,7 +26,7 @@ impl FloatFmt {
     }
 }
 impl crate::ticks::tick_fmt::TickFmt<f64> for FloatFmt {
-    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &f64) -> std::fmt::Result {
+    fn write_tick(&self, writer: &mut dyn std::fmt::Write, val: &f64) -> std::fmt::Result {
         let val = if let Some(offset) = self.offset {
             let val = val - offset;
             match self.axis {
@@ -44,7 +44,7 @@ impl crate::ticks::tick_fmt::TickFmt<f64> for FloatFmt {
 
         util::write_interval_float(writer, val, Some(self.step))
     }
-    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
+    fn write_where(&self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
         if let Some(offset) = self.offset {
             match self.axis {
                 Axis::X => {

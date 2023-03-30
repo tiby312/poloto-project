@@ -187,10 +187,12 @@ pub trait PlotIterator {
         let PlotRes {
             area: curr_area,
             it: p1,
+            num_plots: n1,
         } = self.unpack();
         let PlotRes {
             area: other_area,
             it: p,
+            num_plots: n2,
         } = other.unpack();
         let mut area = curr_area;
         area.grow_area(&other_area);
@@ -200,6 +202,7 @@ pub trait PlotIterator {
                 a: p1.fuse(),
                 b: p.fuse(),
             },
+            num_plots: n1 + n2,
         }
     }
 
@@ -208,10 +211,15 @@ pub trait PlotIterator {
         Self::P: 'a,
         Self: Sized,
     {
-        let PlotRes { area, it } = self.unpack();
+        let PlotRes {
+            area,
+            it,
+            num_plots,
+        } = self.unpack();
         PlotRes {
             it: Box::new(it),
             area,
+            num_plots,
         }
     }
 }
@@ -221,6 +229,7 @@ type DynIt<'a, L, D> = Box<dyn Iterator<Item = PlotTag<L, D>> + 'a>;
 #[derive(Copy, Clone)]
 pub struct PlotRes<I: Iterator, L: Point> {
     pub(crate) area: Area<L::X, L::Y>,
+    pub(crate) num_plots: usize,
     pub(crate) it: I,
 }
 
@@ -288,6 +297,7 @@ pub fn markers<XI: IntoIterator<Item = L::X>, YI: IntoIterator<Item = L::Y>, L: 
     PlotRes {
         area,
         it: std::iter::empty(),
+        num_plots: 0,
     }
 }
 
@@ -386,6 +396,7 @@ impl<D: Display> SinglePlotBuilder<D> {
         PlotRes {
             area,
             it: PlotIterCreator::new(self.label, typ, it),
+            num_plots: 1,
         }
     }
     /// Create a line from plots using a SVG path element.
@@ -435,6 +446,7 @@ impl<D: Display> SinglePlotBuilder<D> {
         PlotRes {
             area,
             it: PlotIterCreator::new(self.label, PlotMetaType::Text, std::iter::empty()),
+            num_plots: 1,
         }
     }
 }
@@ -451,10 +463,16 @@ impl<I: IntoIterator<Item = P>, P: PlotIterator<L = L>, L: Point> PlotIterator f
     type P = std::iter::Flatten<std::vec::IntoIter<P::P>>;
     type D = P::D;
     fn unpack(self) -> PlotRes<Self::P, Self::L> {
+        let mut total = 0;
         let (areas, its): (Vec<_>, Vec<_>) = self
             .into_iter()
             .map(|x| {
-                let PlotRes { area, it } = x.unpack();
+                let PlotRes {
+                    area,
+                    it,
+                    num_plots,
+                } = x.unpack();
+                total += num_plots;
                 (area, it)
             })
             .unzip();
@@ -466,6 +484,10 @@ impl<I: IntoIterator<Item = P>, P: PlotIterator<L = L>, L: Point> PlotIterator f
 
         let it = its.into_iter().flatten();
 
-        PlotRes { area, it }
+        PlotRes {
+            area,
+            it,
+            num_plots: total,
+        }
     }
 }

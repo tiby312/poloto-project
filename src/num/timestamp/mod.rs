@@ -59,8 +59,7 @@ pub struct UnixTimeFmt<T: TimeZone + Display> {
     step: StepUnit,
     timezone: T,
     start: UnixTime,
-    footnote: Option<char>,
-    index: usize,
+    footnote: char,
 }
 impl<T: TimeZone + Display> UnixTimeFmt<T> {
     pub fn step(&self) -> &StepUnit {
@@ -78,29 +77,22 @@ where
     T: chrono::TimeZone + Display,
     T::Offset: Display,
 {
-    fn write_tick(&mut self, writer: &mut dyn std::fmt::Write, val: &UnixTime) -> std::fmt::Result {
-        if let Some(footnote) = self.footnote.take() {
+    fn write_tick(&self, writer: &mut dyn std::fmt::Write, val: &UnixTime) -> std::fmt::Result {
+        if *val == self.start {
             write!(
                 writer,
                 "{}{}",
                 val.dynamic_format(&self.timezone, &self.step),
-                footnote
+                self.footnote
             )
         } else {
             write!(writer, "{}", val.dynamic_format(&self.timezone, &self.step))
         }
     }
 
-    fn write_where(&mut self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        let footnote = match self.index {
-            0 => '¹',
-            1 => '²',
-            _ => unreachable!("There is a maximum of only two axis!"),
-        };
-
+    fn write_where(&self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
         let val = self.start.datetime(&self.timezone);
-        write!(writer, "{}{} in {}", footnote, val, self.step,)?;
-        self.footnote = Some(footnote);
+        write!(writer, "{}{} in {}", self.footnote, val, self.step,)?;
         Ok(())
     }
 }
@@ -153,15 +145,20 @@ where
 
         let index = req.request();
 
+        let footnote = match index {
+            0 => '¹',
+            1 => '²',
+            _ => unreachable!("There is a maximum of only two axis!"),
+        };
+
         TickDistribution {
             res: TickRes { dash_size: None },
             iter: ticks,
             fmt: UnixTimeFmt {
                 timezone: self.timezone,
                 step: ret.unit_data,
-                footnote: None,
+                footnote,
                 start,
-                index,
             },
         }
     }

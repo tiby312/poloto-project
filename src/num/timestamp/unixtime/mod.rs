@@ -29,12 +29,6 @@ impl<X: chrono::TimeZone> From<chrono::DateTime<X>> for UnixTime {
     }
 }
 
-impl<X: chrono::TimeZone> From<chrono::Date<X>> for UnixTime {
-    fn from(a: chrono::Date<X>) -> UnixTime {
-        UnixTime(a.and_hms(0, 0, 0).timestamp())
-    }
-}
-
 impl From<UnixTime> for chrono::DateTime<chrono::Utc> {
     fn from(a: UnixTime) -> Self {
         a.datetime(&chrono::Utc)
@@ -152,7 +146,7 @@ impl UnixTime {
     /// Convert to a `chrono::DateTime` object.
     ///
     pub fn datetime<T: TimeZone>(&self, timezone: &T) -> DateTime<T> {
-        timezone.timestamp(self.0, 0)
+        timezone.timestamp_opt(self.0, 0).unwrap()
     }
 
     ///
@@ -188,7 +182,7 @@ impl UnixTime {
 }
 impl std::fmt::Display for UnixTime {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        let datetime = chrono::Utc.timestamp(self.0, 0);
+        let datetime = chrono::Utc.timestamp_opt(self.0, 0).unwrap();
 
         // Print the newly formatted date and time
         write!(f, "{}", datetime)
@@ -274,8 +268,9 @@ impl<T: TimeZone> UnixTimeGenerator for UnixDayGenerator<T> {
 
         let base = this
             .timezone()
-            .ymd(this.year(), this.month(), 1)
-            .and_hms(0, 0, 0);
+            .with_ymd_and_hms(this.year(), this.month(), 1, 0, 0, 0)
+            .latest()
+            .unwrap();
 
         let d = chrono::Duration::days(dd);
         let base = base + d;
@@ -305,7 +300,12 @@ impl<T: TimeZone> UnixTimeGenerator for UnixHourGenerator<T> {
 
         let hh = round_up_to_nearest_multiple(hh, step_value);
 
-        let base = this.date().and_hms(0, 0, 0);
+        let k = this.date_naive();
+        let base = this
+            .timezone()
+            .with_ymd_and_hms(k.year(), k.month(), k.day(), 0, 0, 0)
+            .latest()
+            .unwrap();
 
         let dur = chrono::Duration::hours(hh);
 
@@ -336,7 +336,13 @@ impl<T: TimeZone> UnixTimeGenerator for UnixMinuteGenerator<T> {
 
         let mm = round_up_to_nearest_multiple(mm, step_value);
 
-        let base = this.date().and_hms(this.hour(), 0, 0);
+        let tz = this.timezone();
+
+        let k = this;
+        let base = tz
+            .with_ymd_and_hms(k.year(), k.month(), k.day(), k.hour(), 0, 0)
+            .latest()
+            .unwrap();
 
         let dur = chrono::Duration::minutes(mm);
         let base = base + dur;
@@ -362,7 +368,13 @@ impl<T: TimeZone> UnixTimeGenerator for UnixSecondGenerator<T> {
 
         let ss = round_up_to_nearest_multiple(ss, step_value);
 
-        let base = this.date().and_hms(this.hour(), this.minute(), 0);
+        let tz = this.timezone();
+
+        let k = this;
+        let base = tz
+            .with_ymd_and_hms(k.year(), k.month(), k.day(), k.hour(), k.minute(), 0)
+            .latest()
+            .unwrap();
 
         let dur = chrono::Duration::seconds(ss);
         let base = base + dur;
@@ -384,7 +396,10 @@ pub(crate) struct UnixYears<T: TimeZone> {
 impl<T: TimeZone> Iterator for UnixYears<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let y = self.timezone.yo(self.counter, 1).and_hms(0, 0, 0);
+        let k = NaiveDate::from_ymd_opt(self.counter, 1, 1).expect(&format!("{}", self.counter));
+        let k = k.and_hms_opt(0, 0, 0).unwrap();
+
+        let y = self.timezone.from_local_datetime(&k).latest().unwrap();
         self.counter += self.step_value;
         Some(UnixTime(y.timestamp()))
     }
@@ -444,8 +459,9 @@ impl<T: TimeZone> Iterator for UnixMonths<T> {
     fn next(&mut self) -> Option<Self::Item> {
         let y = self
             .timezone
-            .ymd(self.counter.year(), self.counter.month() + 1, 1)
-            .and_hms(0, 0, 0);
+            .with_ymd_and_hms(self.counter.year(), self.counter.month() + 1, 1, 0, 0, 0)
+            .latest()
+            .unwrap();
 
         self.counter.step(self.step_value);
 

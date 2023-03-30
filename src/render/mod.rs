@@ -242,13 +242,21 @@ impl<
         ticky: TY,
         opt: RenderOptions,
     ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
-        let PlotRes { area, it } = plots.unpack();
+        let PlotRes {
+            area,
+            it,
+            num_plots,
+        } = plots.unpack();
 
         let (boundx, boundy) = area.build();
 
         Stage1 {
             opt,
-            plots: PlotRes { it, area },
+            plots: PlotRes {
+                it,
+                area,
+                num_plots,
+            },
             ticky,
             tickx,
             boundx,
@@ -447,15 +455,16 @@ where
             self.data.plots,
         )?;
 
-        render::render_base::render_base(
-            writer,
+        let base = render::render_base::render_base(
             self.data.xticks,
             self.data.yticks,
             &self.data.boundx,
             &self.data.boundy,
             &mut self.base,
             &self.data.opt,
-        )
+        );
+
+        writer.render(base)
     }
 }
 
@@ -465,13 +474,13 @@ where
     B: Display,
     C: Display,
 {
-    fn write_title(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+    fn write_title(&self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.0)
     }
-    fn write_xname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+    fn write_xname(&self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.1)
     }
-    fn write_yname(&mut self, writer: &mut dyn fmt::Write) -> fmt::Result {
+    fn write_yname(&self, writer: &mut dyn fmt::Write) -> fmt::Result {
         write!(writer, "{}", self.2)
     }
 }

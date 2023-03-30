@@ -2,15 +2,23 @@ use super::*;
 
 #[test]
 fn leap_second() {
-    let dt1 = Utc.ymd(2015, 6, 30).and_hms_milli(23, 59, 59, 1_000);
+    let d = NaiveDate::from_ymd_opt(2015, 6, 30)
+        .unwrap()
+        .and_hms_milli_opt(23, 59, 59, 1_000)
+        .unwrap();
+    let dt1 = Utc.from_local_datetime(&d).single().unwrap();
+
     let t1 = dt1.timestamp() + (dt1.timestamp_subsec_millis() as i64) / 1000;
-    let dt2 = Utc.ymd(2015, 7, 1).and_hms_milli(0, 0, 0, 0);
+    let dt2 = Utc.with_ymd_and_hms(2015, 7, 1, 0, 0, 0).unwrap();
     let t2 = dt2.timestamp();
 
     assert_eq!(t1, t2);
 
-    let dt1: UnixTime = Utc.ymd(2015, 6, 30).and_hms_milli(23, 59, 59, 1_000).into();
-    let dt2: UnixTime = Utc.ymd(2015, 7, 1).and_hms_milli(0, 0, 0, 0).into();
+    let dt1: UnixTime = Utc
+        .with_ymd_and_hms(2015, 6, 30, 23, 59, 59)
+        .unwrap()
+        .into();
+    let dt2: UnixTime = Utc.with_ymd_and_hms(2015, 7, 1, 0, 0, 0).unwrap().into();
 
     //When a UnixTime is created from a DateTime, it ignores subsecond millis, which is where the leap second
     //information is stored in chrono DateTime.
@@ -21,16 +29,16 @@ fn leap_second() {
 fn test_leap_day() {
     // 2024 2 29 is a leap day.
 
-    let vt = &chrono::FixedOffset::east(3600 * -5);
+    let vt = &chrono::FixedOffset::east_opt(3600 * -5).unwrap();
 
     let t = UnixMonthGenerator {
-        date: vt.ymd(2023, 12, 1).and_hms(0, 0, 0),
+        date: vt.with_ymd_and_hms(2023, 12, 1, 0, 0, 0).unwrap(),
     }
     .generate(2)
     .nth(10)
     .unwrap();
 
-    let exp = vt.ymd(2025, 09, 01).into();
+    let exp = vt.with_ymd_and_hms(2025, 09, 01, 0, 0, 0).unwrap().into();
 
     assert_eq!(t, exp);
 }
