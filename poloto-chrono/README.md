@@ -57,6 +57,6 @@ fn main() {
 
 ## Output
 
-<img src="./target/assets/timestamp.svg" alt="demo">
+<img src="../target/assets/timestamp.svg" alt="demo">
 
 
