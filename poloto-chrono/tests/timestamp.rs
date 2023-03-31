@@ -256,6 +256,7 @@ fn seconds() -> fmt::Result {
         poloto::ticks::from_closure(|data, canvas, opt| {
             let k = poloto::ticks::gen_ticks(g, data, canvas, opt);
             let step = *k.fmt.step();
+
             poloto::ticks::from_iter(k.iter)
                 .with_tick_fmt(|&v| format_move!("{}", v.datetime(timezone).format("%H:%M:%S")))
                 .with_data(step)

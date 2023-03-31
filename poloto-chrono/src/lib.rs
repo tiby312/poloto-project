@@ -80,6 +80,9 @@ pub struct UnixTimeFmt<T: TimeZone + Display> {
     footnote: char,
 }
 impl<T: TimeZone + Display> UnixTimeFmt<T> {
+    pub fn footnote(&self) -> char {
+        self.footnote
+    }
     pub fn step(&self) -> &StepUnit {
         &self.step
     }
@@ -115,10 +118,9 @@ where
             writer,
             "{}{} in {} in TZ:{}",
             self.footnote, f, self.step, &self.timezone
-        )?;
+        )
         //let val = self.start.datetime(&self.timezone);
         //write!(writer, "{}{} in {}", self.footnote, val, self.step,)?;
-        Ok(())
     }
 }
 
