@@ -120,14 +120,16 @@ fn main() {
     ];
 
     let data = data.map(|(x, y)| {
-        let d = timezone.from_utc_date(&chrono::NaiveDate::parse_from_str(y, "%d %B %Y").unwrap());
+        let d = timezone.from_utc_datetime(
+            &chrono::NaiveDate::parse_from_str(y, "%d %B %Y")
+                .unwrap()
+                .and_hms_opt(0, 0, 0)
+                .unwrap(),
+        );
         (UnixTime::from(d), x)
     });
 
-    let plots = poloto::plots!(
-        build::plot("").line(data),
-        build::markers([], [0.0])
-    );
+    let plots = poloto::plots!(build::plot("").line(data), build::markers([], [0.0]));
 
     poloto::data(plots)
         .build_and_label((
