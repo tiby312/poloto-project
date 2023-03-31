@@ -177,7 +177,7 @@ pub(super) fn render_plot<
 
     assert!(SinglePlotIterator::new(&mut it).is_none());
 
-    let j = if !names.is_empty() {
+    let j = (!names.is_empty()).then(|| {
         let aa = hbuild::from_iter(names.iter().map(|(typ, name, i)| {
             match typ {
                 PlotMetaType::Text => {
@@ -189,17 +189,14 @@ pub(super) fn render_plot<
                     let legendy1 =
                         paddingy - yaspect_offset - padding / 8.0 + (*i as f64) * spacing;
 
-                    if !name.is_empty() {
+                    (!name.is_empty()).then(|| {
                         render_label(PlotRenderInfo2 {
                             canvas,
                             p_type,
                             colori,
                             legendy1,
                         })
-                        .some()
-                    } else {
-                        None
-                    }
+                    })
                 }
             }
         }));
@@ -231,10 +228,8 @@ pub(super) fn render_plot<
             text.append(hbuild::raw(name))
         }));
 
-        aa.chain(bb).some()
-    } else {
-        None
-    };
+        aa.chain(bb)
+    });
 
     writer.render(j)
 }

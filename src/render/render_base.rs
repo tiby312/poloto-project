@@ -93,7 +93,7 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
             let mut ywher = String::new();
             yticksg.fmt.write_where(&mut ywher)?;
 
-            if !ywher.is_empty() {
+            (!ywher.is_empty()).then(|| {
                 let text = hbuild::elem("text")
                     .with(attrs!(
                         ("class", "poloto_text poloto_where poloto_y"),
@@ -102,17 +102,15 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
                     ))
                     .inline();
 
-                text.append(hbuild::raw(ywher)).some()
-            } else {
-                None
-            }
+                text.append(hbuild::raw(ywher))
+            })
         };
 
         let xwher = {
             let mut xwher = String::new();
             xticksg.fmt.write_where(&mut xwher)?;
 
-            if !xwher.is_empty() {
+            (!xwher.is_empty()).then(|| {
                 let text = hbuild::elem("text")
                     .with(attrs!(
                         ("class", "poloto_text poloto_where poloto_x"),
@@ -121,10 +119,8 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
                     ))
                     .inline();
 
-                text.append(hbuild::raw(xwher)).some()
-            } else {
-                None
-            }
+                text.append(hbuild::raw(xwher))
+            })
         };
 
         let xdash_size = xticksg.res.dash_size;
@@ -228,7 +224,7 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
             };
 
             let tick_long_lines = {
-                if canvas.ytick_lines {
+                canvas.ytick_lines.then(|| {
                     let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_y")));
 
                     let j = hbuild::from_iter(ticks.iter().map(|(_, yy)| {
@@ -243,10 +239,8 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
                         ))
                     }));
 
-                    g.append(j).some()
-                } else {
-                    None
-                }
+                    g.append(j)
+                })
             };
 
             tick_text.chain(tick_short_lines).chain(tick_long_lines)
@@ -302,7 +296,7 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
             };
 
             let tick_long_lines = {
-                if canvas.xtick_lines {
+                canvas.xtick_lines.then(|| {
                     let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_x")));
 
                     let j = hbuild::from_iter(ticks.iter().map(|(_, xx)| {
@@ -319,10 +313,8 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
                         ))
                     }));
 
-                    g.append(j).some()
-                } else {
-                    None
-                }
+                    g.append(j)
+                })
             };
             tick_text.chain(tick_short_lines).chain(tick_long_lines)
         };
