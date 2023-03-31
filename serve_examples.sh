@@ -15,6 +15,9 @@ cargo run --release --example timestamp > target/assets/timestamp.svg
 
 cargo test --release
 
+resvg -w 1200 target/assets/collatz.svg target/assets/collatz.png
+
+
 
 cargo bloat  --test plots
 cd target/assets
