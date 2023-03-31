@@ -8,6 +8,8 @@ Poloto graphs can be stylized using css either directly in the SVG, or from insi
 
 You can see it in action in this rust book [broccoli-book](https://tiby312.github.io/broccoli_report/)
 
+See also poloto-chrono on [github](https://github.com/tiby312/poloto-project/poloto-chrono) and [crates.io](https://crates.io/crates/poloto-chrono). Allows for plotting unix time stamps.
+
 ## Gaussian Example
 
 ```rust
