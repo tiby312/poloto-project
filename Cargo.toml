@@ -1,35 +1,4 @@
-[package]
-name = "poloto"
-version = "17.2.1"
-authors = ["Ken <kenakioreed@gmail.com>"]
-edition = "2021"
-license = "MIT"
-repository = "https://github.com/tiby312/poloto"
-description = "Simple 2D plotting library that outputs SVG and can be styled using CSS"
-keywords = ["svg", "css","plot","chart","plotting"]
-readme = "README.md"
-include = ["src/**/*", "LICENSE-MIT", "README.md"]
 
 
 [workspace]
-members = [ "poloto_bench"]
-
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[features]
-default = ["timestamp"]
-timestamp = ["chrono"]
-timestamp_full = ["chrono","chrono/std"]
-
-[dependencies]
-chrono = {version="0.4", optional = true, default-features = false}
-hypermelon={version="0.5"}
-
-[lib]
-doctest = false
-
-[package.metadata.docs.rs]
-# This sets the default target to `x86_64-unknown-linux-gnu`
-# and only builds that target
-targets = ["x86_64-unknown-linux-gnu"]
+members = [ "poloto","poloto-chrono","poloto-bench"]

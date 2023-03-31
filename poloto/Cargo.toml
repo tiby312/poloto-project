@@ -1,0 +1,27 @@
+[package]
+name = "poloto"
+version = "17.2.1"
+authors = ["Ken <kenakioreed@gmail.com>"]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/tiby312/poloto-project"
+description = "Simple 2D plotting library that outputs SVG and can be styled using CSS"
+keywords = ["svg", "css","plot","chart","plotting"]
+readme = "../README.md"
+include = ["src/**/*", "LICENSE-MIT", "README.md"]
+
+
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hypermelon={version="0.5"}
+
+[lib]
+doctest = false
+
+[package.metadata.docs.rs]
+# This sets the default target to `x86_64-unknown-linux-gnu`
+# and only builds that target
+targets = ["x86_64-unknown-linux-gnu"]
