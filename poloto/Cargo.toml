@@ -1,6 +1,6 @@
 [package]
 name = "poloto"
-version = "17.2.1"
+version = "18.0.0"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -8,7 +8,7 @@ repository = "https://github.com/tiby312/poloto-project"
 description = "Simple 2D plotting library that outputs SVG and can be styled using CSS"
 keywords = ["svg", "css","plot","chart","plotting"]
 readme = "../README.md"
-include = ["src/**/*", "LICENSE-MIT", "README.md"]
+include = ["src/**/*", "LICENSE-MIT", "../README.md"]
 
 
 
