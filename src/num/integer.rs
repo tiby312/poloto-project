@@ -199,7 +199,7 @@ impl TickLayout {
         let rough_step = range as f64 / (ideal_num_steps - 1) as f64;
 
         //TODO replace with integer log
-        let step_power = 10.0f64.powf((rough_step as f64).log10().floor()).ceil() as i128;
+        let step_power = 10.0f64.powf(rough_step.log10().floor()).ceil() as i128;
 
         let cc = good_steps.iter().map(|&normalized_step| {
             assert!(normalized_step > 0);

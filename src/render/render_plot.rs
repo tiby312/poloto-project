@@ -9,7 +9,7 @@ struct SinglePlotIterator<I> {
     size_hint: (usize, Option<usize>),
     finished: bool,
 }
-impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> SinglePlotIterator<I> {
+impl<I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> SinglePlotIterator<I> {
     fn new(mut it: I) -> Option<(Self, D, PlotMetaType)> {
         if let Some(o) = it.next() {
             match o {
@@ -35,17 +35,15 @@ impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> SinglePlotIter
     }
 }
 
-impl<'a, I: ExactSizeIterator<Item = PlotTag<L, D>>, L: Point, D: Display> ExactSizeIterator
+impl<I: ExactSizeIterator<Item = PlotTag<L, D>>, L: Point, D: Display> ExactSizeIterator
     for SinglePlotIterator<I>
 {
 }
-impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> FusedIterator
+impl<I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> FusedIterator
     for SinglePlotIterator<I>
 {
 }
-impl<'a, I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> Iterator
-    for SinglePlotIterator<I>
-{
+impl<I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> Iterator for SinglePlotIterator<I> {
     type Item = L;
 
     fn next(&mut self) -> Option<Self::Item> {

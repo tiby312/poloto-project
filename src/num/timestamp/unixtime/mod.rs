@@ -396,7 +396,7 @@ pub(crate) struct UnixYears<T: TimeZone> {
 impl<T: TimeZone> Iterator for UnixYears<T> {
     type Item = UnixTime;
     fn next(&mut self) -> Option<Self::Item> {
-        let k = NaiveDate::from_ymd_opt(self.counter, 1, 1).expect(&format!("{}", self.counter));
+        let k = NaiveDate::from_ymd_opt(self.counter, 1, 1).unwrap();
         let k = k.and_hms_opt(0, 0, 0).unwrap();
 
         let y = self.timezone.from_local_datetime(&k).latest().unwrap();
