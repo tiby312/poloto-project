@@ -7,8 +7,6 @@
 //!
 //!  
 
-
-
 #[cfg(doctest)]
 mod test_readme {
     macro_rules! external_doc_test {
@@ -20,8 +18,6 @@ mod test_readme {
 
     external_doc_test!(include_str!("../README.md"));
 }
-
-
 
 mod tick_finder;
 mod unixtime;
@@ -113,8 +109,15 @@ where
     }
 
     fn write_where(&self, writer: &mut dyn std::fmt::Write) -> std::fmt::Result {
-        let val = self.start.datetime(&self.timezone);
-        write!(writer, "{}{} in {}", self.footnote, val, self.step,)?;
+        let f = self.start.dynamic_where_format(&self.timezone, &self.step);
+
+        write!(
+            writer,
+            "{}{} in {} in TZ:{}",
+            self.footnote, f, self.step, &self.timezone
+        )?;
+        //let val = self.start.datetime(&self.timezone);
+        //write!(writer, "{}{} in {}", self.footnote, val, self.step,)?;
         Ok(())
     }
 }

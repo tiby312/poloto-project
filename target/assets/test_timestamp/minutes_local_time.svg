@@ -42,7 +42,7 @@
 	<text class="poloto_text poloto_name poloto_title" x="400.00" y="37.50">Number of Wikipedia Articles</text>
 	<text class="poloto_text poloto_name poloto_x" x="400.00" y="481.25">time</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="250.00" transform="rotate(-90,37.50,250.00)">Number of Articles</text>
-	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00"> ¹2020-01-31 00:00:00 -05:00 in Minutes</text>
+	<text class="poloto_text poloto_where poloto_x" x="440.00" y="70.00"> ¹2020 Jan 31 00:00 in Minutes in TZ:-05:00</text>
 	<text class="poloto_text poloto_ticks poloto_y">
 		<tspan x="135.00" y="400.00">0</tspan>
 		<tspan x="135.00" y="327.41">1e6</tspan>
