@@ -92,7 +92,7 @@ impl RenderFrameBuilder {
         self.clone()
     }
 
-    pub fn build(&mut self) -> RenderFrame {
+    pub fn build(&self) -> RenderFrame {
         let (width, height) = if let Some([x, y]) = self.dim {
             (x, y)
         } else {
