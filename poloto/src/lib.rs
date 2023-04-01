@@ -7,7 +7,7 @@
 //! Check out the [github examples](https://github.com/tiby312/poloto/tree/master/examples).
 //! The latest graph outputs of the examples can be found in the [assets](https://github.com/tiby312/poloto/tree/master/target/assets) folder.
 //!
-//! Poloto provides by default 3 impls of [`HasDefaultTicks`] for the following types:
+//! Poloto provides by default 2 impls of [`HasDefaultTicks`] for the following types:
 //!
 //! * [`i128`] - decimal/scientific notation ticks.
 //! * [`f64`] - decimal/scientific notation ticks.
@@ -21,7 +21,7 @@
 //! Alternatively you can use the [`ticks::from_iter`] function that just takes an iterator of ticks and returns a [`TickDistGen`].
 //! This puts more responsibility on the user to pass a decent distribution of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for
-//! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto/blob/master/examples/custom_ticks.rs)
+//! at least one of the axis, typically the x axis. [See step example](https://github.com/tiby312/poloto-project/blob/master/poloto/examples/custom_ticks.rs)
 
 use build::PlotRes;
 use build::Point;
