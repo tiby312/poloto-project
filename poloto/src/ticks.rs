@@ -14,10 +14,10 @@ pub struct DataBound<X> {
 }
 
 ///
-/// Tick relevant information of [`RenderOptions`]
+/// Tick relevant information of [`RenderFrame`]
 ///
 #[derive(Debug, Clone)]
-pub struct RenderOptionsBound {
+pub struct RenderFrameBound {
     pub ideal_num_steps: u32,
     pub ideal_dash_size: f64,
     pub max: f64,
@@ -187,7 +187,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistribution<I,
 pub fn from_closure<N: PlotNum, It, F>(func: F) -> GenTickDistClosure<F>
 where
     It: TickDist<Num = N>,
-    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> It,
+    F: FnOnce(&DataBound<N>, &RenderFrameBound, IndexRequester) -> It,
 {
     GenTickDistClosure { func }
 }
@@ -198,14 +198,14 @@ pub struct GenTickDistClosure<F> {
 
 impl<N: PlotNum, Res: TickDist<Num = N>, F> TickDistGen<N> for GenTickDistClosure<F>
 where
-    F: FnOnce(&DataBound<N>, &RenderOptionsBound, IndexRequester) -> Res,
+    F: FnOnce(&DataBound<N>, &RenderFrameBound, IndexRequester) -> Res,
     N: PlotNum,
 {
     type Res = Res;
     fn generate(
         self,
         data: &ticks::DataBound<N>,
-        canvas: &RenderOptionsBound,
+        canvas: &RenderFrameBound,
         req: IndexRequester,
     ) -> Res {
         (self.func)(data, canvas, req)
@@ -224,7 +224,7 @@ pub trait TickDistGen<N> {
     fn generate(
         self,
         data: &ticks::DataBound<N>,
-        canvas: &RenderOptionsBound,
+        canvas: &RenderFrameBound,
         req: IndexRequester,
     ) -> Self::Res;
 }
@@ -232,7 +232,7 @@ pub trait TickDistGen<N> {
 pub fn gen_ticks<N: PlotNum, G: TickDistGen<N>>(
     gen: G,
     data: &ticks::DataBound<N>,
-    opt: &RenderOptionsBound,
+    opt: &RenderFrameBound,
     req: IndexRequester,
 ) -> G::Res {
     gen.generate(data, opt, req)
@@ -278,7 +278,7 @@ impl<X: PlotNum, I: IntoIterator<Item = X>, Fmt: TickFmt<X>> TickDistGen<X>
     for TickDistribution<I, Fmt>
 {
     type Res = Self;
-    fn generate(self, _: &ticks::DataBound<X>, _: &RenderOptionsBound, _: IndexRequester) -> Self {
+    fn generate(self, _: &ticks::DataBound<X>, _: &RenderFrameBound, _: IndexRequester) -> Self {
         self
     }
 }

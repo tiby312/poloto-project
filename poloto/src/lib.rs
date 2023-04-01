@@ -11,14 +11,13 @@
 //!
 //! * [`i128`] - decimal/scientific notation ticks.
 //! * [`f64`] - decimal/scientific notation ticks.
-//! * [`UnixTime`](num::timestamp::UnixTime) - date/time
 //!
 //! The above types have the advantage of automatically selecting reasonable
 //! tick intervals. The user can change the formatting of the ticks while still using
 //! the ticks that were selected.
 //!
 //! However, sometimes you may want more control on the ticks, or want to use a type
-//! other than [`i128`]/[`f64`]/[`UnixTime`](num::timestamp::UnixTime). One way would be to write your own function that returns a [`TickDistGen`].
+//! other than [`i128`]/[`f64`]. One way would be to write your own function that returns a [`TickDistGen`].
 //! Alternatively you can use the [`ticks::from_iter`] function that just takes an iterator of ticks and returns a [`TickDistGen`].
 //! This puts more responsibility on the user to pass a decent distribution of ticks. This should only really be used when the user
 //! knows up front the min and max values of that axis. This is typically the case for

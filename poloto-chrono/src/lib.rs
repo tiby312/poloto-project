@@ -133,7 +133,7 @@ where
     fn generate(
         self,
         data: &ticks::DataBound<UnixTime>,
-        canvas: &RenderOptionsBound,
+        canvas: &RenderFrameBound,
         req: IndexRequester,
     ) -> Self::Res {
         let range = [data.min, data.max];

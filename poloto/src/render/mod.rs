@@ -144,13 +144,13 @@ impl RenderFrameBuilder {
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
         RenderFrame {
-            boundx: ticks::RenderOptionsBound {
+            boundx: ticks::RenderFrameBound {
                 ideal_num_steps: ideal_num_xsteps,
                 ideal_dash_size,
                 max: scalex,
                 axis: Axis::X,
             },
-            boundy: ticks::RenderOptionsBound {
+            boundy: ticks::RenderFrameBound {
                 ideal_num_steps: ideal_num_ysteps,
                 ideal_dash_size,
                 max: scaley,
@@ -179,8 +179,8 @@ impl RenderFrameBuilder {
 ///
 #[derive(Clone)]
 pub struct RenderFrame {
-    boundx: ticks::RenderOptionsBound,
-    boundy: ticks::RenderOptionsBound,
+    boundx: ticks::RenderFrameBound,
+    boundy: ticks::RenderFrameBound,
     width: f64,
     height: f64,
     padding: f64,

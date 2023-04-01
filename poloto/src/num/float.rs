@@ -66,7 +66,7 @@ impl TickDistGen<f64> for FloatTickFmt {
     fn generate(
         self,
         data: &ticks::DataBound<f64>,
-        canvas: &RenderOptionsBound,
+        canvas: &RenderFrameBound,
         _: IndexRequester,
     ) -> Self::Res {
         let range = &[data.min, data.max];

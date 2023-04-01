@@ -65,7 +65,7 @@ impl TickDistGen<i128> for IntegerTickFmt {
     fn generate(
         self,
         data: &ticks::DataBound<i128>,
-        canvas: &RenderOptionsBound,
+        canvas: &RenderFrameBound,
         _: IndexRequester,
     ) -> Self::Res {
         let range = &[data.min, data.max];
