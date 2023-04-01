@@ -32,7 +32,8 @@ fn main() {
         build::plot("σ=0.3").line(xs.clone().map(gau(0.3, 0.0)))
     );
 
-    poloto::data(poloto::plots!(build::origin(), plots))
+    poloto::frame_build()
+        .data(poloto::plots!(build::origin(), plots))
         .build_and_label(("gaussian", "x", "y"))
         .append_to(poloto::header().light_theme())
         .render_stdout();
@@ -66,18 +67,16 @@ fn main() {
 
     let svg = poloto::header().with_viewbox_width(1200.0);
 
-    let opt = poloto::render::render_opt()
-        .with_tick_lines([true, true])
-        .with_viewbox(svg.get_viewbox())
-        .move_into();
-
     let style =
         poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
 
     let a = (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
 
-    poloto::data(poloto::plots!(poloto::build::origin(), a))
-        .map_opt(|_| opt)
+    poloto::frame()
+        .with_tick_lines([true, true])
+        .with_viewbox(svg.get_viewbox())
+        .build()
+        .data(poloto::plots!(poloto::build::origin(), a))
         .build_and_label(("collatz", "x", "y"))
         .append_to(svg.append(style))
         .render_stdout();
@@ -107,7 +106,7 @@ fn main() {
         build::markers([24], [])
     );
 
-    let data = poloto::data(plots);
+    let data = poloto::frame_build().data(plots);
 
     let ticks =
         poloto::ticks::from_iter((0..).step_by(6)).with_tick_fmt(|&v| format_move!("{} hr", v));
@@ -200,7 +199,8 @@ fn main() {
         build::plot("sin-5").scatter(x.clone().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
-    poloto::data(data)
+    poloto::frame_build()
+        .data(data)
         .build_and_label((
             "Demo: you can change the style of the svg file itself!",
             "x axis",

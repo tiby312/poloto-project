@@ -8,11 +8,9 @@ fn custom_colors_html() -> fmt::Result {
     let l1 = plot("cos").line(x.iter().copied().zip_output(|x| x.cos()));
     let l2 = plot("sin-10").histogram(x.iter().copied().step_by(3).map(|x| [x, x.sin() - 10.]));
 
-    let s = poloto::data(poloto::plots!(l1, l2)).build_and_label((
-        "Demo: you can use CSS patterns if you embed SVG!",
-        "x",
-        "y",
-    ));
+    let s = poloto::frame_build()
+        .data(poloto::plots!(l1, l2))
+        .build_and_label(("Demo: you can use CSS patterns if you embed SVG!", "x", "y"));
 
     let graph = s.headless().render_string().unwrap();
 
@@ -130,7 +128,8 @@ body {
         plot("sin").scatter(x.iter().copied().step_by(3).zip_output(|x| x.sin()))
     );
 
-    let s = poloto::data(s)
+    let s = poloto::frame_build()
+        .data(s)
         .build_and_label(("Demo: Hovering and shadows", "x", "y"))
         .append_to(poloto::header().light_theme());
 

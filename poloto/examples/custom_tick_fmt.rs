@@ -11,7 +11,7 @@ fn main() {
         build::markers([24], [])
     );
 
-    let data = poloto::data(plots);
+    let data = poloto::frame_build().data(plots);
 
     let data = data.map_xticks(|orig| {
         poloto::ticks::from_closure(|a, b, c| {

@@ -17,7 +17,8 @@ fn main() {
         build::plot("σ=0.3").line(xs.clone().map(gau(0.3, 0.0)))
     );
 
-    poloto::data(poloto::plots!(build::origin(), plots))
+    poloto::frame_build()
+        .data(poloto::plots!(build::origin(), plots))
         .build_and_label(("gaussian", "x", "y"))
         .append_to(poloto::header().light_theme())
         .render_stdout();

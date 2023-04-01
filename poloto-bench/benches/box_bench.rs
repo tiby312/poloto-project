@@ -36,7 +36,8 @@ fn trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
         ))
     );
 
-    poloto::data(p)
+    poloto::frame_build()
+        .data(p)
         .build_and_label(("trig", "x", "y"))
         .append_to(poloto::header().light_theme())
         .render_fmt_write(writer)
@@ -69,7 +70,8 @@ fn boxed_trig(writer: impl std::fmt::Write, steps: usize) -> std::fmt::Result {
             .dyn_box()
     );
 
-    poloto::data(p)
+    poloto::frame_build()
+        .data(p)
         .build_and_label(("box trig", "x", "y"))
         .append_to(poloto::header().light_theme())
         .render_fmt_write(writer)

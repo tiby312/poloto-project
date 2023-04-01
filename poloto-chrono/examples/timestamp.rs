@@ -38,7 +38,8 @@ fn main() {
 
     let plots = poloto::plots!(build::plot("").line(data), build::markers([], [0.0]));
 
-    poloto::data(plots)
+    poloto::frame_build()
+        .data(plots)
         .build_and_label((
             "Long Jump world record progression",
             "Date",

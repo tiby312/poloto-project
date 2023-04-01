@@ -19,7 +19,7 @@ fn heart() -> fmt::Result {
 
     let range = (0..100).map(|x| x as f64 / 100.0).map(|x| x * 6.0 - 3.0);
 
-    let canvas = poloto::render::render_opt().preserve_aspect().move_into();
+    let canvas = poloto::frame().preserve_aspect().build();
 
     let plots = poloto::plots!(
         plot("").line_fill_raw(range.map(heart)),
@@ -28,8 +28,8 @@ fn heart() -> fmt::Result {
 
     let w = util::create_test_file("heart.svg");
 
-    poloto::data(plots)
-        .map_opt(|_| canvas)
+    canvas
+        .data(plots)
         .build_and_label(("Heart Graph", "x", "y"))
         .append_to(poloto::header().dark_theme())
         .render_fmt_write(w)
@@ -44,7 +44,9 @@ fn large_scatter() -> fmt::Result {
         plot("b").line(x.iter().copied().zip_output(f64::sin))
     );
 
-    let data = poloto::data(plots).build_and_label(("cows per year", "year", "cows"));
+    let data = poloto::frame_build()
+        .data(plots)
+        .build_and_label(("cows per year", "year", "cows"));
 
     let header =
         Header::new().append(Theme::dark().append(".poloto_scatter.poloto_plot{stroke-width:33;}"));
@@ -65,7 +67,7 @@ fn line_fill_fmt() -> fmt::Result {
             .crop_left(2.0),
     );
 
-    let data = poloto::data(s).build_map(|data| {
+    let data = poloto::frame_build().data(s).build_map(|data| {
         let boundx = *data.boundx();
         data.label((
             format_move!("from {} to {}", boundx.min, boundx.max),
@@ -117,7 +119,9 @@ fn long_label() -> fmt::Result {
         .line((0..).zip(collatz(1002)))
     );
 
-    let data = poloto::data(plots).build_and_label(("collatz", "x", "y"));
+    let data = poloto::frame_build()
+        .data(plots)
+        .build_and_label(("collatz", "x", "y"));
 
     let a = [1200.0, 500.0];
     let header = Header::new()
@@ -134,7 +138,8 @@ fn long_label() -> fmt::Result {
 fn magnitude() -> fmt::Result {
     let data = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let d = poloto::data(plot("").scatter(data))
+    let d = poloto::frame_build()
+        .data(plot("").scatter(data))
         .build_and_label(("cows per year", "year", "cow"))
         .append_to(poloto::header().light_theme());
 
@@ -147,11 +152,9 @@ fn magnitude() -> fmt::Result {
 fn base_color() -> fmt::Result {
     let points = [[0.000001, 0.000001], [0.000001000000001, 0.000001000000001]];
 
-    let d = poloto::data(plot("").line(build::cloned(points.iter()))).build_and_label((
-        "cows per year",
-        "year",
-        "cow",
-    ));
+    let d = poloto::frame_build()
+        .data(plot("").line(build::cloned(points.iter())))
+        .build_and_label(("cows per year", "year", "cow"));
 
     let header = Header::new().append(Theme::dark().append(
         ".poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}",
@@ -182,17 +185,17 @@ fn custom_dim() -> fmt::Result {
 
     let header = Header::new().with_dim(ddd).with_viewbox(ddd);
 
-    let canvas = poloto::render::render_opt()
+    let canvas = poloto::frame()
         .with_viewbox(header.get_viewbox())
         .with_tick_lines([true, true])
-        .move_into();
+        .build();
 
-    let data = poloto::data(poloto::plots!(
-        poloto::build::markers([], [0]),
-        Vec::from_iter(v)
-    ))
-    .map_opt(|_| canvas)
-    .build_and_label(("collatz", "x", "y"));
+    let data = canvas
+        .data(poloto::plots!(
+            poloto::build::markers([], [0]),
+            Vec::from_iter(v)
+        ))
+        .build_and_label(("collatz", "x", "y"));
 
     let w = util::create_test_file("custom_dim.svg");
 
@@ -212,7 +215,8 @@ fn dark() -> fmt::Result {
     );
 
     let w = util::create_test_file("dark.svg");
-    poloto::data(data)
+    poloto::frame_build()
+        .data(data)
         .build_and_label(("cos per year", "year", "cows"))
         .append_to(poloto::header().dark_theme())
         .render_fmt_write(w)
@@ -227,7 +231,7 @@ fn custom_style() -> fmt::Result {
         plot("sin-10").histogram(x.iter().copied().step_by(3).zip_output(|x| x.sin() - 10.))
     );
 
-    let data = poloto::data(data).build_and_label((
+    let data = poloto::frame_build().data(data).build_and_label((
         "Demo: you can change the style of the svg file itself!",
         "x",
         "y",
@@ -262,27 +266,28 @@ fn custom_style() -> fmt::Result {
 fn trig() -> fmt::Result {
     let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
 
-    let data = poloto::data(poloto::plots!(
-        plot("tan(x)").line(
-            x.iter()
-                .copied()
-                .zip_output(f64::tan)
-                .crop_above(10.0)
-                .crop_below(-10.0)
-                .crop_left(2.0)
-        ),
-        plot("2*cos(x)").line(
-            x.iter()
-                .copied()
-                .zip_output(|x| 2.0 * x.cos())
-                .crop_above(1.4)
-        )
-    ))
-    .build_and_label((
-        "Some Trigonometry Plots 🥳",
-        format_move!("This is the {} label", 'x'),
-        "This is the y label",
-    ));
+    let data = poloto::frame_build()
+        .data(poloto::plots!(
+            plot("tan(x)").line(
+                x.iter()
+                    .copied()
+                    .zip_output(f64::tan)
+                    .crop_above(10.0)
+                    .crop_below(-10.0)
+                    .crop_left(2.0)
+            ),
+            plot("2*cos(x)").line(
+                x.iter()
+                    .copied()
+                    .zip_output(|x| 2.0 * x.cos())
+                    .crop_above(1.4)
+            )
+        ))
+        .build_and_label((
+            "Some Trigonometry Plots 🥳",
+            format_move!("This is the {} label", 'x'),
+            "This is the y label",
+        ));
 
     let w = util::create_test_file("trig.svg");
 
@@ -295,7 +300,7 @@ fn no_plots() -> fmt::Result {
     let v: Vec<PlotRes<std::iter::Empty<PlotTag<(i128, i128), &'static str>>, (i128, i128)>> =
         vec![];
 
-    let data = poloto::data(v).build_and_label((
+    let data = poloto::frame_build().data(v).build_and_label((
         "Some Trigonometry Plots 🥳",
         format_move!("This is the {} label", 'x'),
         "This is the y label",
@@ -312,11 +317,13 @@ fn no_plots_only_marker() -> fmt::Result {
     let v: Vec<PlotRes<std::iter::Empty<PlotTag<(i128, i128), &'static str>>, (i128, i128)>> =
         vec![];
 
-    let data = poloto::data(poloto::plots!(v, poloto::build::markers([], [5]))).build_and_label((
-        "Some Trigonometry Plots 🥳",
-        format_move!("This is the {} label", 'x'),
-        "This is the y label",
-    ));
+    let data = poloto::frame_build()
+        .data(poloto::plots!(v, poloto::build::markers([], [5])))
+        .build_and_label((
+            "Some Trigonometry Plots 🥳",
+            format_move!("This is the {} label", 'x'),
+            "This is the y label",
+        ));
 
     let w = util::create_test_file("no_plots_only_makrer.svg");
     data.append_to(poloto::header().light_theme())
@@ -325,15 +332,16 @@ fn no_plots_only_marker() -> fmt::Result {
 
 #[test]
 fn one_empty_plot() -> fmt::Result {
-    let p = poloto::data(poloto::plots!(
-        plot("hay").scatter(build::cloned(std::iter::empty::<(i128, i128)>())),
-        poloto::build::markers([], [5])
-    ))
-    .build_and_label((
-        "Some Trigonometry Plots 🥳",
-        format_move!("This is the {} label", 'x'),
-        "This is the y label",
-    ));
+    let p = poloto::frame_build()
+        .data(poloto::plots!(
+            plot("hay").scatter(build::cloned(std::iter::empty::<(i128, i128)>())),
+            poloto::build::markers([], [5])
+        ))
+        .build_and_label((
+            "Some Trigonometry Plots 🥳",
+            format_move!("This is the {} label", 'x'),
+            "This is the y label",
+        ));
 
     let w = util::create_test_file("one_empty_plot.svg");
 
@@ -349,8 +357,12 @@ fn test_cloned_cloneable() {
     let l2 = plot("").scatter(data);
     let l = plots!(l1, l2);
 
-    let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
-    let p2 = poloto::data(l).build_and_label(("title", "x", "y"));
+    let p1 = poloto::frame_build()
+        .data(l.clone())
+        .build_and_label(("title", "x", "y"));
+    let p2 = poloto::frame_build()
+        .data(l)
+        .build_and_label(("title", "x", "y"));
 
     let mut s1 = String::new();
     let mut s2 = String::new();
@@ -369,8 +381,12 @@ fn test_single_and_chain_and_dyn_cloneable() {
     let l2 = plot("").scatter(build::cloned(data.iter()));
     let l = plots!(l1, l2);
 
-    let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
-    let p2 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
+    let p1 = poloto::frame_build()
+        .data(l.clone())
+        .build_and_label(("title", "x", "y"));
+    let p2 = poloto::frame_build()
+        .data(l.clone())
+        .build_and_label(("title", "x", "y"));
 
     let mut s1 = String::new();
     let mut s2 = String::new();
@@ -384,8 +400,12 @@ fn test_single_and_chain_and_dyn_cloneable() {
 
     let l = plots!(l, l3);
 
-    let p1 = poloto::data(l.clone()).build_and_label(("title", "x", "y"));
-    let p2 = poloto::data(l).build_and_label(("title", "x", "y"));
+    let p1 = poloto::frame_build()
+        .data(l.clone())
+        .build_and_label(("title", "x", "y"));
+    let p2 = poloto::frame_build()
+        .data(l)
+        .build_and_label(("title", "x", "y"));
 
     let mut s1 = String::new();
     let mut s2 = String::new();

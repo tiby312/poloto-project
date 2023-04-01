@@ -65,7 +65,8 @@ fn days() -> fmt::Result {
     );
 
     let w = create_test_file("days.svg");
-    poloto::data(p)
+    poloto::frame_build()
+        .data(p)
         .build_and_label(("Number of Wikipedia Articles", "Day", "Number of Articles"))
         .append_to(poloto::header().light_theme())
         .render_fmt_write(w)
@@ -123,7 +124,7 @@ fn minutes_local_time() -> fmt::Result {
         ),
     ];
 
-    let s = poloto::data(plots!(
+    let s = poloto::frame_build().data(plots!(
         poloto::build::plot("").line(data),
         poloto::build::markers(None, Some(0))
     ));
@@ -209,7 +210,8 @@ fn months() -> fmt::Result {
 
     let w = create_test_file("months.svg");
 
-    poloto::data(plots)
+    poloto::frame_build()
+        .data(plots)
         .build_and_label((
             "Number of Wikipedia Articles",
             "duration",
@@ -247,7 +249,7 @@ fn seconds() -> fmt::Result {
         )
     });
 
-    let data = poloto::data(plots!(
+    let data = poloto::frame_build().data(plots!(
         poloto::build::plot("").line(data),
         poloto::build::markers(None, Some(0))
     ));

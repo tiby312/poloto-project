@@ -98,9 +98,18 @@ macro_rules! plots {
     };
 }
 
+pub fn frame_build() -> RenderFrame {
+    frame().build()
+}
+
+pub fn frame() -> RenderFrameBuilder {
+    RenderFrameBuilder::default()
+}
+
 ///
 /// Start plotting!
 ///
+#[deprecated(note = "Use poloto::frame().data()")]
 pub fn data<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, J: build::PlotIterator<L = L>>(
     plots: J,
 ) -> Stage1<PlotRes<J::P, L>, X::DefaultTicks, Y::DefaultTicks>
@@ -108,7 +117,7 @@ where
     X: HasDefaultTicks,
     Y: HasDefaultTicks,
 {
-    render::Stage1::from_parts(plots, X::default_ticks(), Y::default_ticks(), render_opt())
+    render::Stage1::from_parts(plots, X::default_ticks(), Y::default_ticks(), frame_build())
 }
 
 ///

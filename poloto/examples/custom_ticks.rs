@@ -11,7 +11,7 @@ fn main() {
         build::markers([24], [])
     );
 
-    let data = poloto::data(plots);
+    let data = poloto::frame_build().data(plots);
 
     let ticks =
         poloto::ticks::from_iter((0..).step_by(6)).with_tick_fmt(|&v| format_move!("{} hr", v));

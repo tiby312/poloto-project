@@ -21,9 +21,7 @@ pub fn gen_simple<K: Display, D: Display, X: PlotNum + HasDefaultTicks>(
 ) -> Stage2<impl PlotIterator<L = (X, i128)>, impl TickDist<Num = X>, impl TickDist<Num = i128>> {
     let (plots, ytick_fmt) = gen_bar(name, data, marker);
 
-    let opt = crate::render::render_opt()
-        .with_tick_lines([true, false])
-        .move_into();
+    let opt = crate::frame().with_tick_lines([true, false]).build();
 
     crate::render::Stage1::from_parts(plots, X::default_ticks(), ytick_fmt, opt).build()
 }

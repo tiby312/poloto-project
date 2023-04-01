@@ -75,10 +75,10 @@ pub(super) fn render_plot<
     writer: &mut elem::ElemWrite,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
-    canvas: &RenderOptionsResult,
+    canvas: &RenderFrame,
     plots_all: P,
 ) -> std::fmt::Result {
-    let RenderOptionsResult {
+    let RenderFrame {
         width,
         height,
         padding,
@@ -235,14 +235,14 @@ pub(super) fn render_plot<
 }
 
 struct PlotRenderInfo2<'a> {
-    canvas: &'a RenderOptionsResult,
+    canvas: &'a RenderFrame,
     p_type: PlotType,
     colori: usize,
     legendy1: f64,
 }
 
 struct PlotRenderInfo<'a> {
-    canvas: &'a RenderOptionsResult,
+    canvas: &'a RenderFrame,
     p_type: PlotType,
     colori: usize,
     precision: usize,
@@ -258,7 +258,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
         ..
     } = info;
 
-    let RenderOptionsResult {
+    let RenderFrame {
         padding, legendx1, ..
     } = *canvas;
 
@@ -398,7 +398,7 @@ fn render(
         ..
     } = info;
 
-    let RenderOptionsResult {
+    let RenderFrame {
         height,
         padding,
         paddingy,

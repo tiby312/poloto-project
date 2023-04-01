@@ -6,7 +6,7 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
     boundx: &'a ticks::DataBound<X>,
     boundy: &'a ticks::DataBound<Y>,
     plot_fmt: &'a mut dyn BaseFmt,
-    canvas: &'a RenderOptionsResult,
+    canvas: &'a RenderFrame,
 ) -> impl hypermelon::elem::Elem + hypermelon::elem::Locked + 'a {
     hbuild::from_closure(move |writer| {
         let ffmt = FloatFmt::new(canvas.precision);
@@ -16,7 +16,7 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
         let xticksg = xticksg.unwrap();
         let yticksg = yticksg.unwrap();
 
-        let RenderOptionsResult {
+        let RenderFrame {
             width,
             height,
             padding,

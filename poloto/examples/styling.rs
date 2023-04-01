@@ -47,7 +47,8 @@ fn main() {
         build::plot("sin-5").scatter(x.clone().step_by(3).zip_output(|x| x.sin() - 5.))
     );
 
-    poloto::data(data)
+    poloto::frame_build()
+        .data(data)
         .build_and_label((
             "Demo: you can change the style of the svg file itself!",
             "x axis",

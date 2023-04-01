@@ -26,7 +26,7 @@ fn marathon() -> fmt::Result {
         poloto::ticks::TickDistribution::new(std::iter::successors(Some(0), |w| Some(w + hr)))
             .with_tick_fmt(|&v| format_move!("{} hr", v / hr));
 
-    let data = poloto::data(p).map_xticks(|_| xticks);
+    let data = poloto::frame_build().data(p).map_xticks(|_| xticks);
 
     let w = util::create_test_file("marathon.svg");
 
@@ -54,7 +54,7 @@ fn years() -> fmt::Result {
         (2022, 0), //To complete our histogram, we manually specify when 2021 ends.
     ];
 
-    let data = poloto::data(plots!(
+    let data = poloto::frame_build().data(plots!(
         poloto::build::plot("foo").histogram(data),
         poloto::build::markers(None, Some(0))
     ));

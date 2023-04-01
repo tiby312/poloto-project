@@ -12,7 +12,7 @@ mod render_plot;
 /// Specify options for the svg plots
 ///
 #[derive(Clone)]
-pub struct RenderOptions {
+pub struct RenderFrameBuilder {
     num_css_classes: Option<usize>,
     preserve_aspect: bool,
     dim: Option<[f64; 2]>,
@@ -22,9 +22,9 @@ pub struct RenderOptions {
     bar_width: f64,
 }
 
-impl Default for RenderOptions {
+impl Default for RenderFrameBuilder {
     fn default() -> Self {
-        RenderOptions {
+        RenderFrameBuilder {
             num_css_classes: Some(8),
             preserve_aspect: false,
             dim: None,
@@ -36,7 +36,7 @@ impl Default for RenderOptions {
     }
 }
 
-impl RenderOptions {
+impl RenderFrameBuilder {
     pub fn new() -> Self {
         Self::default()
     }
@@ -87,11 +87,12 @@ impl RenderOptions {
         self
     }
 
+    #[deprecated]
     pub fn move_into(&mut self) -> Self {
         self.clone()
     }
 
-    fn compute(&mut self) -> RenderOptionsResult {
+    pub fn build(&mut self) -> RenderFrame {
         let (width, height) = if let Some([x, y]) = self.dim {
             (x, y)
         } else {
@@ -142,7 +143,7 @@ impl RenderOptions {
         let spacing = padding / 3.0;
         let legendx1 = width - padding / 1.2 + padding / 30.0;
 
-        RenderOptionsResult {
+        RenderFrame {
             boundx: ticks::RenderOptionsBound {
                 ideal_num_steps: ideal_num_xsteps,
                 ideal_dash_size,
@@ -177,7 +178,7 @@ impl RenderOptions {
 /// Contains graphical information for a svg graph.
 ///
 #[derive(Clone)]
-struct RenderOptionsResult {
+pub struct RenderFrame {
     boundx: ticks::RenderOptionsBound,
     boundy: ticks::RenderOptionsBound,
     width: f64,
@@ -195,15 +196,30 @@ struct RenderOptionsResult {
     bar_width: f64,
 }
 
-pub fn render_opt() -> RenderOptions {
-    RenderOptions::default()
+impl RenderFrame {
+    pub fn data<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, J: build::PlotIterator<L = L>>(
+        self,
+        plots: J,
+    ) -> Stage1<PlotRes<J::P, L>, X::DefaultTicks, Y::DefaultTicks>
+    where
+        X: HasDefaultTicks,
+        Y: HasDefaultTicks,
+    {
+        render::Stage1::from_parts(plots, X::default_ticks(), Y::default_ticks(), self)
+    }
+}
+
+#[deprecated]
+pub fn render_opt() -> RenderFrameBuilder {
+    RenderFrameBuilder::default()
 }
 
 ///
 /// Link some plots with a way to render them.
 ///
 pub struct Stage1<P: PlotIterator, TX, TY> {
-    opt: RenderOptions,
+    //TODO make this a reference eventually
+    opt: RenderFrame,
     tickx: TX,
     ticky: TY,
     plots: P,
@@ -222,7 +238,7 @@ where
             plots,
             X::default_ticks(),
             Y::default_ticks(),
-            RenderOptions::new(),
+            RenderFrameBuilder::new().build(),
         )
     }
 }
@@ -240,7 +256,7 @@ impl<
         plots: P,
         tickx: TX,
         ticky: TY,
-        opt: RenderOptions,
+        opt: RenderFrame,
     ) -> Stage1<PlotRes<P::P, L>, TX, TY> {
         let PlotRes {
             area,
@@ -264,7 +280,8 @@ impl<
         }
     }
 
-    pub fn map_opt<F: FnOnce(RenderOptions) -> RenderOptions>(self, func: F) -> Self {
+    #[deprecated]
+    pub fn map_opt<F: FnOnce(RenderFrame) -> RenderFrame>(self, func: F) -> Self {
         Stage1 {
             opt: func(self.opt),
             tickx: self.tickx,
@@ -274,7 +291,6 @@ impl<
             boundy: self.boundy,
         }
     }
-
     pub fn map_xticks<TTT: TickDistGen<X>, F: FnOnce(TX) -> TTT>(
         self,
         func: F,
@@ -312,8 +328,8 @@ impl<
 
     pub fn build(self) -> Stage2<P, TX::Res, TY::Res> {
         let mut index_counter = 0;
-        let mut data = self;
-        let opt = data.opt.compute();
+        let data = self;
+        let opt = data.opt;
 
         let xticks = data.tickx.generate(
             &data.boundx,
@@ -341,7 +357,7 @@ impl<
 }
 
 pub struct Stage2<P: PlotIterator, A, B> {
-    opt: RenderOptionsResult,
+    opt: RenderFrame,
     xticks: A,
     yticks: B,
     plots: P,
