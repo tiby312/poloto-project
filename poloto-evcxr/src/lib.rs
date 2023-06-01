@@ -7,7 +7,7 @@ pub fn evcxr_display<R:Elem+Locked>(elem:R){
     let a=wrap_img_tag(elem);
     let mut s = String::new();
     hypermelon::render(a, &mut s).unwrap();
-    println!("EVCXR_BEGIN_CONTENT text/html\n{}EVCXR_END_CONTENT", s);
+    println!("EVCXR_BEGIN_CONTENT image/svg+xml\n{}EVCXR_END_CONTENT", s);
 }
 
 
