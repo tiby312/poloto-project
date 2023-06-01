@@ -1,4 +1,4 @@
 
 
 [workspace]
-members = [ "poloto","poloto-chrono","poloto-bench"]
+members = [ "poloto","poloto-chrono","poloto-bench","poloto-evcxr"]
