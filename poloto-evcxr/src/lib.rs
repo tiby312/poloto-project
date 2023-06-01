@@ -3,6 +3,12 @@ use hypermelon::{elem::Locked, prelude::Elem};
 
 
 
+pub fn evcxr_display_svg<R:Elem+Locked>(elem:R){
+    let mut s=String::new();
+    hypermelon::render(elem,&mut s).unwrap();
+    println!("EVCXR_BEGIN_CONTENT image/svg+xml\n{}\nEVCXR_END_CONTENT", s);
+}
+
 pub fn evcxr_display<R:Elem+Locked>(elem:R){
     // let mut s=String::new();
     // hypermelon::render(elem,&mut s).unwrap();
