@@ -1,6 +1,20 @@
 use hypermelon::{elem::Locked, prelude::Elem};
 
 
+pub mod prelude{
+    pub use super::RenderEvcxr;
+}
+
+
+pub trait RenderEvcxr{
+    fn render_evcxr(self);
+}
+
+impl<R:Elem+Locked> RenderEvcxr for poloto::render::Stage4<R>{
+    fn render_evcxr(self) {
+        evcxr_display_svg(self)
+    }
+}
 
 
 ///

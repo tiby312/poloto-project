@@ -1,14 +1,14 @@
 use poloto::build;
+use poloto_evcxr::prelude::*;
 // PIPE me to a file!
 fn main() {
     let data = vec![[0, 0], [1, 2], [2, 3]];
 
     let a = build::plot("label").line(data);
 
-    let v=poloto::frame_build()
+    poloto::frame_build()
         .data(a)
         .build_and_label(("hello world", "x", "y"))
-        .append_to(poloto::header().light_theme());
-
-    poloto_evcxr::evcxr_display_svg(v);
+        .append_to(poloto::header().light_theme())
+        .render_evcxr();
 }
