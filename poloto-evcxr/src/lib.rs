@@ -28,10 +28,13 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
         .build();
     let inlined = inliner.inline(&s).unwrap();
 
+
+    let inlined=inlined.replace("\"", "'");
+
+
     let k = inlined.strip_prefix("<html><head></head><body>").unwrap();
     let k = k.strip_suffix("</body></html>").unwrap();
 
-    // let inlined = css_inline::inline(&s).unwrap();
     println!(
         "EVCXR_BEGIN_CONTENT image/svg+xml\n{}\nEVCXR_END_CONTENT",
         k
