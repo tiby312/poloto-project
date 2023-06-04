@@ -22,7 +22,9 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
     let mut s = String::new();
     hypermelon::render(elem.inline(), &mut s).unwrap();
 
-    
+    //inline css part as well.
+    let s=s.replace("\n","");
+
 
     // use base64::Engine;
     // let s=format!("data:image/svg+xml;base64,{}",base64::engine::general_purpose::STANDARD.encode(&s));
