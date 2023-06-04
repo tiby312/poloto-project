@@ -2,5 +2,11 @@
 
 See the example.ipynb
 
-The github viewer unfortunately doesnt not support custom css for embeded svgs in a ipynb file. So this crate will inline the css.
+The github viewer doesn't allow custom css. 
+
+Recommend using 
+https://jsvine.github.io/nbpreview/
+to view.
+
+Or nbviewer.
 
