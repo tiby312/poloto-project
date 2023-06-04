@@ -22,22 +22,22 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
     let mut s = String::new();
     hypermelon::render(elem.inline(), &mut s).unwrap();
 
-    let inliner = css_inline::CSSInliner::options()
-        .inline_style_tags(true)
-        .remove_style_tags(true)
-        .build();
-    let inlined = inliner.inline(&s).unwrap();
+    // let inliner = css_inline::CSSInliner::options()
+    //     .inline_style_tags(true)
+    //     .remove_style_tags(true)
+    //     .build();
+    // let inlined = inliner.inline(&s).unwrap();
 
 
-    //let inlined=inlined.replace("\"", "'");
+    // //let inlined=inlined.replace("\"", "'");
 
 
-    let k = inlined.strip_prefix("<html><head></head><body>").unwrap();
-    let k = k.strip_suffix("</body></html>").unwrap();
+    // let k = inlined.strip_prefix("<html><head></head><body>").unwrap();
+    // let k = k.strip_suffix("</body></html>").unwrap();
 
     println!(
         "EVCXR_BEGIN_CONTENT image/svg+xml\n{}\nEVCXR_END_CONTENT",
-        k
+        s
     );
 }
 
