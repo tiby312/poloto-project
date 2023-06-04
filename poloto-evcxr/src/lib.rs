@@ -29,7 +29,7 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
     let inlined = inliner.inline(&s).unwrap();
 
 
-    let inlined=inlined.replace("\"", "'");
+    //let inlined=inlined.replace("\"", "'");
 
 
     let k = inlined.strip_prefix("<html><head></head><body>").unwrap();
