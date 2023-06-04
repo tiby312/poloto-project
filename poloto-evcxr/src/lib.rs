@@ -33,7 +33,7 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
 
     // let inlined = css_inline::inline(&s).unwrap();
     println!(
-        "EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT",
+        "EVCXR_BEGIN_CONTENT image/svg+xml\n{}\nEVCXR_END_CONTENT",
         k
     );
 }
