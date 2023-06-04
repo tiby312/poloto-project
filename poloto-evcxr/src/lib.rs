@@ -23,7 +23,7 @@ impl<R:Elem+Locked> RenderEvcxr for poloto::render::Stage4<R>{
 /// 
 pub fn evcxr_display_svg<R:Elem+Locked>(elem:R){
     let mut s=String::new();
-    hypermelon::render(elem,&mut s).unwrap();
+    hypermelon::render(elem.inline(),&mut s).unwrap();
 
     let inliner = css_inline::CSSInliner::options()
         .inline_style_tags(true)
