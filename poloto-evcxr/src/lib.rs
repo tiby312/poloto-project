@@ -1,29 +1,26 @@
 use hypermelon::{elem::Locked, prelude::Elem};
 
-
-pub mod prelude{
+pub mod prelude {
     pub use super::RenderEvcxr;
 }
 
-
-pub trait RenderEvcxr{
+pub trait RenderEvcxr {
     fn render_evcxr(self);
 }
 
-impl<R:Elem+Locked> RenderEvcxr for poloto::render::Stage4<R>{
+impl<R: Elem + Locked> RenderEvcxr for poloto::render::Stage4<R> {
     fn render_evcxr(self) {
         evcxr_display_svg(self)
     }
 }
 
-
 ///
 /// the css is inlined so that github viewer will work
 /// image/svg+xml cell with plain text
-/// 
-pub fn evcxr_display_svg<R:Elem+Locked>(elem:R){
-    let mut s=String::new();
-    hypermelon::render(elem.inline(),&mut s).unwrap();
+///
+pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
+    let mut s = String::new();
+    hypermelon::render(elem.inline(), &mut s).unwrap();
 
     let inliner = css_inline::CSSInliner::options()
         .inline_style_tags(true)
@@ -31,26 +28,25 @@ pub fn evcxr_display_svg<R:Elem+Locked>(elem:R){
         .build();
     let inlined = inliner.inline(&s).unwrap();
 
-    let k=inlined.strip_prefix("<html><head></head><body>").unwrap();
-    let k=k.strip_suffix("</body></html>").unwrap();
+    let k = inlined.strip_prefix("<html><head></head><body>").unwrap();
+    let k = k.strip_suffix("</body></html>").unwrap();
 
-
-
-   // let inlined = css_inline::inline(&s).unwrap();
-    println!("EVCXR_BEGIN_CONTENT image/svg+xml\n{}\nEVCXR_END_CONTENT", k);
+    // let inlined = css_inline::inline(&s).unwrap();
+    println!(
+        "EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT",
+        k
+    );
 }
-
 
 // ///
 // /// html cell with image/svg+xml mime with base64 encoding
-// /// 
+// ///
 // pub fn evcxr_display<R:Elem+Locked>(elem:R){
 //     let a=encode(elem);
 //     let mut s = String::new();
 //     hypermelon::render(a, &mut s).unwrap();
 //     println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", s);
 // }
-
 
 // pub fn encode<R:Elem+Locked>(a:R)->impl Elem+Locked{
 //     let mut s=String::new();
