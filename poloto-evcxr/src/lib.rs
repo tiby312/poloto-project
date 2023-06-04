@@ -22,25 +22,21 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
     let mut s = String::new();
     hypermelon::render(elem.inline(), &mut s).unwrap();
 
-    // let inliner = css_inline::CSSInliner::options()
-    //     .inline_style_tags(true)
-    //     .remove_style_tags(true)
-    //     .build();
-    // let inlined = inliner.inline(&s).unwrap();
+    
+
+    // use base64::Engine;
+    // let s=format!("data:image/svg+xml;base64,{}",base64::engine::general_purpose::STANDARD.encode(&s));
+    // let r=hypermelon::build::single("img").with(("src",s));
+    // let mut s=String::new();
+    // hypermelon::render(r,&mut s).unwrap();
 
 
-    // //let inlined=inlined.replace("\"", "'");
+    // let s=format!("data:image/svg+xml;ascii,{}",s);
+    // let r=hypermelon::build::single("img").with(("src",s));
+    // let mut s=String::new();
+    // hypermelon::render(r,&mut s).unwrap();
 
-    use base64::Engine;
-    let s=format!("data:image/svg+xml;base64,{}",base64::engine::general_purpose::STANDARD.encode(&s));
-    let r=hypermelon::build::single("img").with(("src",s));
-    let mut s=String::new();
-    hypermelon::render(r,&mut s).unwrap();
-
-
-    // let k = inlined.strip_prefix("<html><head></head><body>").unwrap();
-    // let k = k.strip_suffix("</body></html>").unwrap();
-
+    
     println!(
         "EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT",
         s
