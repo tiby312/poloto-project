@@ -1,12 +1,5 @@
 
+plot data in a ipynb file using poloto
 
-See the example.ipynb
-
-The github viewer doesn't allow custom css. 
-
-Recommend using 
-https://jsvine.github.io/nbpreview/
-to view.
-
-Or nbviewer.
-
+See the example:
+https://github.com/tiby312/poloto-project/blob/master/poloto-evcxr/example.ipynb
