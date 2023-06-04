@@ -459,9 +459,11 @@ where
 {
     type Tail = ();
     fn render_head(mut self, writer: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        writer.render(
-            hbuild::single("circle").with(attrs!(("r", "1e5"), ("class", "poloto_background"))),
-        )?;
+        writer.render(hbuild::single("circle").with(attrs!(
+            ("r", "1e5"),
+            ("class", "poloto_background"),
+            ("fill", "white")
+        )))?;
 
         render::render_plot::render_plot(
             writer,

@@ -35,7 +35,7 @@
 .poloto6.poloto_fill{fill:orange;}
 .poloto7.poloto_fill{fill:chocolate;}
 	</style>
-	<circle r="1e5" class="poloto_background"/>
+	<circle r="1e5" class="poloto_background" fill="white"/>
 	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_histo poloto0 poloto_fill">
 		<rect x="150.00" y="400.00" width="17.833333333333343" height="0"/>
 		<rect x="170.83" y="400.00" width="17.833333333333314" height="0"/>
@@ -70,7 +70,7 @@
 		<tspan x="135.00" y="228.57">40</tspan>
 		<tspan x="135.00" y="142.86">60</tspan>
 	</text>
-	<g class="poloto_imgs poloto_ticks poloto_y">
+	<g class="poloto_imgs poloto_ticks poloto_y" stroke="black">
 		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
 		<line x1="150.00" x2="144.00" y1="314.29" y2="314.29"/>
 		<line x1="150.00" x2="144.00" y1="228.57" y2="228.57"/>
@@ -83,13 +83,13 @@
 		<tspan x="462.50" y="430.00">15 hr</tspan>
 		<tspan x="566.67" y="430.00">20 hr</tspan>
 	</text>
-	<g class="poloto_imgs poloto_ticks poloto_x">
+	<g class="poloto_imgs poloto_ticks poloto_x" stroke="black">
 		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
 		<line x1="254.17" x2="254.17" y1="400.00" y2="405.00"/>
 		<line x1="358.33" x2="358.33" y1="400.00" y2="405.00"/>
 		<line x1="462.50" x2="462.50" y1="400.00" y2="405.00"/>
 		<line x1="566.67" x2="566.67" y1="400.00" y2="405.00"/>
 	</g>
-	<path class="poloto_imgs poloto_ticks poloto_x" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:10.714285714285714;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_x" stroke="black" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_y" stroke="black" style="stroke-dasharray:10.714285714285714;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

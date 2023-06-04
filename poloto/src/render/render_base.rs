@@ -209,8 +209,10 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
             };
 
             let tick_short_lines = {
-                let g =
-                    hbuild::elem("g").with(attrs!(("class", "poloto_imgs poloto_ticks poloto_y"),));
+                let g = hbuild::elem("g").with(attrs!(
+                    ("class", "poloto_imgs poloto_ticks poloto_y"),
+                    ("stroke", "black")
+                ));
 
                 let j = hbuild::from_iter(ticks.iter().map(|(_, yy)| {
                     hbuild::single("line").with(attrs!(
@@ -225,7 +227,10 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
 
             let tick_long_lines = {
                 canvas.ytick_lines.then(|| {
-                    let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_y")));
+                    let g = hbuild::elem("g").with(attrs!(
+                        ("class", "poloto_grid poloto_y"),
+                        ("stroke", "black")
+                    ));
 
                     let j = hbuild::from_iter(ticks.iter().map(|(_, yy)| {
                         hbuild::single("line").with(attrs!(
@@ -280,8 +285,10 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
             };
 
             let tick_short_lines = {
-                let g =
-                    hbuild::elem("g").with(attrs!(("class", "poloto_imgs poloto_ticks poloto_x")));
+                let g = hbuild::elem("g").with(attrs!(
+                    ("class", "poloto_imgs poloto_ticks poloto_x"),
+                    ("stroke", "black")
+                ));
 
                 let j = hbuild::from_iter(ticks.iter().map(|(_, xx)| {
                     hbuild::single("line").with(attrs!(
@@ -297,7 +304,10 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
 
             let tick_long_lines = {
                 canvas.xtick_lines.then(|| {
-                    let g = hbuild::elem("g").with(attrs!(("class", "poloto_grid poloto_x")));
+                    let g = hbuild::elem("g").with(attrs!(
+                        ("class", "poloto_grid poloto_x"),
+                        ("stroke", "black")
+                    ));
 
                     let j = hbuild::from_iter(ticks.iter().map(|(_, xx)| {
                         hbuild::single("line").with(attrs!(
@@ -323,6 +333,7 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
 
         let xline = hbuild::single("path").with(attrs!(
             ("class", "poloto_imgs poloto_ticks poloto_x"),
+            ("stroke", "black"),
             xdash_size.map(|xdash_size| {
                 (
                     "style",
@@ -347,6 +358,7 @@ pub(super) fn render_base<'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
 
         let yline = hbuild::single("path").with(attrs!(
             ("class", "poloto_imgs poloto_ticks poloto_y"),
+            ("stroke", "black"),
             ydash_size.map(|ydash_size| {
                 (
                     "style",

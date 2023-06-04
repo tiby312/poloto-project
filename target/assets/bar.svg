@@ -35,7 +35,7 @@
 .poloto6.poloto_fill{fill:orange;}
 .poloto7.poloto_fill{fill:chocolate;}
 	</style>
-	<circle r="1e5" class="poloto_background"/>
+	<circle r="1e5" class="poloto_background" fill="white"/>
 	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_histo poloto0 poloto_fill">
 		<rect x="150.00" y="330.00" width="188.67924528301887" height="20"/>
 		<rect x="150.00" y="270.00" width="132.07547169811323" height="20"/>
@@ -51,7 +51,7 @@
 		<tspan x="135.00" y="220.00">pizza</tspan>
 		<tspan x="135.00" y="160.00">avocado</tspan>
 	</text>
-	<g class="poloto_imgs poloto_ticks poloto_y">
+	<g class="poloto_imgs poloto_ticks poloto_y" stroke="black">
 		<line x1="150.00" x2="144.00" y1="340.00" y2="340.00"/>
 		<line x1="150.00" x2="144.00" y1="280.00" y2="280.00"/>
 		<line x1="150.00" x2="144.00" y1="220.00" y2="220.00"/>
@@ -65,7 +65,7 @@
 		<tspan x="527.36" y="430.00">40</tspan>
 		<tspan x="621.70" y="430.00">50</tspan>
 	</text>
-	<g class="poloto_imgs poloto_ticks poloto_x">
+	<g class="poloto_imgs poloto_ticks poloto_x" stroke="black">
 		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
 		<line x1="244.34" x2="244.34" y1="400.00" y2="405.00"/>
 		<line x1="338.68" x2="338.68" y1="400.00" y2="405.00"/>
@@ -73,7 +73,7 @@
 		<line x1="527.36" x2="527.36" y1="400.00" y2="405.00"/>
 		<line x1="621.70" x2="621.70" y1="400.00" y2="405.00"/>
 	</g>
-	<g class="poloto_grid poloto_x">
+	<g class="poloto_grid poloto_x" stroke="black">
 		<line x1="150.00" x2="150.00" y1="400.00" y2="100.00"/>
 		<line x1="244.34" x2="244.34" y1="400.00" y2="100.00"/>
 		<line x1="338.68" x2="338.68" y1="400.00" y2="100.00"/>
@@ -81,6 +81,6 @@
 		<line x1="527.36" x2="527.36" y1="400.00" y2="100.00"/>
 		<line x1="621.70" x2="621.70" y1="400.00" y2="100.00"/>
 	</g>
-	<path class="poloto_imgs poloto_ticks poloto_x" style="stroke-dasharray:9.433962264150944;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path class="poloto_imgs poloto_ticks poloto_y" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_x" stroke="black" style="stroke-dasharray:9.433962264150944;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_y" stroke="black" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

@@ -36,7 +36,7 @@
 .poloto7.poloto_fill{fill:chocolate;}
  .poloto_axis_lines{stroke:green}.poloto_tick_labels{fill:red}.poloto_labels{fill:blue}
 	</style>
-	<circle r="1e5" class="poloto_background"/>
+	<circle r="1e5" class="poloto_background" fill="white"/>
 	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_line poloto0 poloto_stroke" fill="none" stroke="black">
 		<path d=" M 150.00 400.00 L 650.00 100.00"/>
 	</g>
@@ -53,7 +53,7 @@
 		<tspan x="135.00" y="160.00">k+8e-16</tspan>
 		<tspan x="135.00" y="100.00">k+1e-15</tspan>
 	</text>
-	<g class="poloto_imgs poloto_ticks poloto_y">
+	<g class="poloto_imgs poloto_ticks poloto_y" stroke="black">
 		<line x1="150.00" x2="144.00" y1="400.00" y2="400.00"/>
 		<line x1="150.00" x2="144.00" y1="340.00" y2="340.00"/>
 		<line x1="150.00" x2="144.00" y1="280.00" y2="280.00"/>
@@ -69,7 +69,7 @@
 		<tspan x="550.00" y="430.00">j+8e-16</tspan>
 		<tspan x="650.00" y="430.00">j+1e-15</tspan>
 	</text>
-	<g class="poloto_imgs poloto_ticks poloto_x">
+	<g class="poloto_imgs poloto_ticks poloto_x" stroke="black">
 		<line x1="150.00" x2="150.00" y1="400.00" y2="405.00"/>
 		<line x1="250.00" x2="250.00" y1="400.00" y2="405.00"/>
 		<line x1="350.00" x2="350.00" y1="400.00" y2="405.00"/>
@@ -77,6 +77,6 @@
 		<line x1="550.00" x2="550.00" y1="400.00" y2="405.00"/>
 		<line x1="650.00" x2="650.00" y1="400.00" y2="405.00"/>
 	</g>
-	<path class="poloto_imgs poloto_ticks poloto_x" style="stroke-dasharray:12.499998631167497;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
-	<path class="poloto_imgs poloto_ticks poloto_y" style="stroke-dasharray:7.499999178700499;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_x" stroke="black" style="stroke-dasharray:12.499998631167497;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 650.00 400.00"/>
+	<path class="poloto_imgs poloto_ticks poloto_y" stroke="black" style="stroke-dasharray:7.499999178700499;stroke-dashoffset:-0;" d=" M 150.00 400.00 L 150.00 100.00"/>
 </svg>

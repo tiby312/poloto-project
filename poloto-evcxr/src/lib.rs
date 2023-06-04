@@ -23,8 +23,7 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
     hypermelon::render(elem.inline(), &mut s).unwrap();
 
     //inline css part as well.
-    let s=s.replace("\n","");
-
+    let s = s.replace("\n", "");
 
     // use base64::Engine;
     // let s=format!("data:image/svg+xml;base64,{}",base64::engine::general_purpose::STANDARD.encode(&s));
@@ -32,17 +31,12 @@ pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
     // let mut s=String::new();
     // hypermelon::render(r,&mut s).unwrap();
 
-
     // let s=format!("data:image/svg+xml;ascii,{}",s);
     // let r=hypermelon::build::single("img").with(("src",s));
     // let mut s=String::new();
     // hypermelon::render(r,&mut s).unwrap();
 
-    
-    println!(
-        "EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT",
-        s
-    );
+    println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", s);
 }
 
 // ///
