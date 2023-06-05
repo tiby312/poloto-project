@@ -19,9 +19,9 @@ impl<R: Elem + Locked> RenderEvcxr for poloto::render::Stage4<R> {
     }
 }
 
-pub fn evcxr_display_img<R: Elem + Locked>(elem: R) {
+pub fn evcxr_display_img<R: Elem>(elem: R) {
     let mut s = String::new();
-    hypermelon::render(elem.inline(), &mut s).unwrap();
+    hypermelon::render_escapable(elem.inline(), &mut s).unwrap();
 
     //inline css part as well.
     let s = s.replace("\n", "");
@@ -39,9 +39,9 @@ pub fn evcxr_display_img<R: Elem + Locked>(elem: R) {
 /// the css is inlined so that github viewer will work
 /// image/svg+xml cell with plain text
 ///
-pub fn evcxr_display_svg<R: Elem + Locked>(elem: R) {
+pub fn evcxr_display_svg<R: Elem>(elem: R) {
     let mut s = String::new();
-    hypermelon::render(elem.inline(), &mut s).unwrap();
+    hypermelon::render_escapable(elem.inline(), &mut s).unwrap();
 
     //inline css part as well.
     let s = s.replace("\n", "");
