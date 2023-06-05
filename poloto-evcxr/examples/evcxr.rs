@@ -10,5 +10,5 @@ fn main() {
         .data(a)
         .build_and_label(("hello world", "x", "y"))
         .append_to(poloto::header().light_theme())
-        .render_evcxr();
+        .render_evcxr_img();
 }

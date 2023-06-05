@@ -1,6 +1,6 @@
 [package]
 name = "poloto-evcxr"
-version = "0.1.16"
+version = "0.1.17"
 edition = "2021"
 authors = ["Ken <kenakioreed@gmail.com>"]
 license = "MIT"
@@ -14,5 +14,6 @@ include = ["src/**/*", "../LICENSE-MIT", "README.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+base64 = "0.21.2"
 hypermelon = "0.5.5"
 poloto = { version = "18.0.6", path = "../poloto" }

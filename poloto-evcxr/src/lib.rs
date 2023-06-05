@@ -6,11 +6,27 @@ pub mod prelude {
 
 pub trait RenderEvcxr {
     fn render_evcxr(self);
+    fn render_evcxr_img(self);
+    
 }
 
 impl<R: Elem + Locked> RenderEvcxr for poloto::render::Stage4<R> {
     fn render_evcxr(self) {
         evcxr_display_svg(self)
+    }
+    fn render_evcxr_img(self) {
+        let mut s = String::new();
+        hypermelon::render(self.inline(), &mut s).unwrap();
+
+        //inline css part as well.
+        let s = s.replace("\n", "");
+
+        use base64::Engine;
+        let s=format!("data:image/svg+xml;base64,{}",base64::engine::general_purpose::STANDARD.encode(&s));
+        let r=hypermelon::build::single("img").with(("src",s));
+        let mut s=String::new();
+        hypermelon::render(r,&mut s).unwrap();
+        println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", s);
     }
 }
 
