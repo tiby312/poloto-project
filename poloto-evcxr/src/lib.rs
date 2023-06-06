@@ -45,6 +45,11 @@ pub fn encode_svg_as_img<R:Elem+Locked>(elem:R)-> impl Elem+Locked{
 // }
 
 
+pub fn evcxr_disp<D:std::fmt::Display>(s:D){
+    println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", s);
+}
+
+
 pub fn evcxr_display_img<R: Elem>(elem: R) {
     let mut s = String::new();
     hypermelon::render_escapable(elem.inline(), &mut s).unwrap();
@@ -57,7 +62,7 @@ pub fn evcxr_display_img<R: Elem>(elem: R) {
     let r=hypermelon::build::single("img").with(("src",s));
     let mut s=String::new();
     hypermelon::render(r,&mut s).unwrap();
-    println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", s);
+    evcxr_disp(s);
 
 }
 
@@ -82,8 +87,7 @@ pub fn evcxr_display_svg<R: Elem>(elem: R) {
     // let r=hypermelon::build::single("img").with(("src",s));
     // let mut s=String::new();
     // hypermelon::render(r,&mut s).unwrap();
-
-    println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", s);
+    evcxr_disp(s);
 }
 
 // ///
