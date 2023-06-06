@@ -1,12 +1,7 @@
-use hypermelon::{elem::Elem, format_move};
-use poloto::build::PlotRes;
-use poloto::build::PlotTag;
 
 use super::*;
 use poloto::build;
 use poloto::build::plot;
-use poloto::render::Header;
-use poloto::render::Theme;
 
 #[test]
 fn test_cloned_cloneable() {
