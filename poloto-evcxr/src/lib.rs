@@ -19,6 +19,32 @@ impl<R: Elem + Locked> RenderEvcxr for poloto::render::Stage4<R> {
     }
 }
 
+
+pub fn encode_svg_as_img<R:Elem+Locked>(elem:R)-> impl Elem+Locked{
+    let mut s = String::new();
+    hypermelon::render(elem.inline(), &mut s).unwrap();
+
+    //inline css part as well.
+    let s = s.replace("\n", "");
+
+    use base64::Engine;
+    let s=format!("data:image/svg+xml;base64,{}",base64::engine::general_purpose::STANDARD.encode(&s));
+    hypermelon::build::single("img").with(("src",s))
+}
+
+// pub fn encode_svg_as_img_escapable<R:Elem>(elem:R)-> impl Elem{
+//     let mut s = String::new();
+//     hypermelon::render_escapable(elem.inline(), &mut s).unwrap();
+
+//     //inline css part as well.
+//     let s = s.replace("\n", "");
+
+//     use base64::Engine;
+//     let s=format!("data:image/svg+xml;base64,{}",base64::engine::general_purpose::STANDARD.encode(&s));
+//     hypermelon::build::single("img").with(("src",s))
+// }
+
+
 pub fn evcxr_display_img<R: Elem>(elem: R) {
     let mut s = String::new();
     hypermelon::render_escapable(elem.inline(), &mut s).unwrap();
