@@ -45,10 +45,15 @@ pub fn encode_svg_as_img<R:Elem+Locked>(elem:R)-> impl Elem+Locked{
 // }
 
 
+pub fn evcxr_disp_elem<E:Elem+Locked>(elem:E){
+    let mut s=String::new();
+    hypermelon::render(elem,&mut s).unwrap();
+    evcxr_disp(s);
+}
+
 pub fn evcxr_disp<D:std::fmt::Display>(s:D){
     println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", s);
 }
-
 
 pub fn evcxr_display_img<R: Elem>(elem: R) {
     let mut s = String::new();
