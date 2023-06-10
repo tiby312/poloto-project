@@ -247,6 +247,7 @@ However they might accidentally increase memory usage.
 Here are more examples that are presented in a jupyter notebook using evcxr.
 https://nbviewer.org/github/tiby312/poloto-project/blob/master/poloto-evcxr/float_int_test.ipynb
 https://nbviewer.org/github/tiby312/poloto-project/blob/master/poloto-evcxr/test_simple.ipynb
+
 The source of the notebooks can be found here:
 https://github.com/tiby312/poloto-project/tree/master/poloto-evcxr
 
