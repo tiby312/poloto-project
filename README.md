@@ -242,6 +242,15 @@ Using the cloned method has pros and cons. The user has more control and can red
 However they might accidentally increase memory usage. 
 
 
+## More examples
+
+Here are more examples that are presented in a jupyter notebook using evcxr.
+https://nbviewer.org/github/tiby312/poloto-project/blob/master/poloto-evcxr/float_int_test.ipynb
+https://nbviewer.org/github/tiby312/poloto-project/blob/master/poloto-evcxr/test_simple.ipynb
+The source of the notebooks can be found here:
+https://github.com/tiby312/poloto-project/tree/master/poloto-evcxr
+
+
 ## Escape protection
 
 If a user tried to inject html through the title/xname/yname/tick format/ or plot names, the html escapes
