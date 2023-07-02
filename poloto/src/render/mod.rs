@@ -448,24 +448,25 @@ where
     }
 }
 
-impl<P: PlotIterator, A, B, BB> Locked for Stage3<P, A, B, BB> {}
-
-impl<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, P, A, B, BB> elem::Elem for Stage3<P, A, B, BB>
+use hypermelon::stack::*;
+impl<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, P, A, B, BB> ElemOuter for Stage3<P, A, B, BB>
 where
     P: PlotIterator<L = L>,
     A: crate::ticks::TickDist<Num = X>,
     B: crate::ticks::TickDist<Num = Y>,
     BB: BaseFmt,
 {
-    type Tail = ();
-    fn render_head(mut self, writer: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        writer.render(hbuild::single("circle").with(attrs!(
+    fn render<'a>(
+        mut self,
+        mut writer: ElemStack<'a, Sentinel>,
+    ) -> Result<ElemStack<'a, Sentinel>, fmt::Error> {
+        writer.put(hbuild::single("circle").with(attrs!(
             ("r", "1e5"),
             ("class", "poloto_background"),
             ("fill", "white")
         )))?;
 
-        render::render_plot::render_plot(
+        let writer = render::render_plot::render_plot(
             writer,
             &self.data.boundx,
             &self.data.boundy,
@@ -473,16 +474,15 @@ where
             self.data.plots,
         )?;
 
-        let base = render::render_base::render_base(
+        render::render_base::render_base(
+            writer,
             self.data.xticks,
             self.data.yticks,
             &self.data.boundx,
             &self.data.boundy,
             &mut self.base,
             &self.data.opt,
-        );
-
-        writer.render(base)
+        )
     }
 }
 
@@ -529,7 +529,7 @@ impl<R> Locked for Stage4<R> {}
 impl<R: Elem> Elem for Stage4<R> {
     type Tail = R::Tail;
 
-    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+    fn render_head(self, w: elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         self.0.render_head(w)
     }
 }
@@ -610,7 +610,7 @@ impl<A: Attr> Header<A> {
 impl<A> Locked for Header<A> {}
 impl<A: Attr> Elem for Header<A> {
     type Tail = hypermelon::elem::ElementTail<&'static str>;
-    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+    fn render_head(self, w: elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let elem = hypermelon::build::elem("svg").with(attrs!(
             ("class", "poloto"),
             ("width", self.dim[0]),
@@ -726,7 +726,7 @@ impl Theme<'static> {
 impl<'a> Locked for Theme<'a> {}
 impl<'a> Elem for Theme<'a> {
     type Tail = hypermelon::elem::ElementTail<&'static str>;
-    fn render_head(self, w: &mut elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
+    fn render_head(self, w: elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let k = hypermelon::build::elem("style");
         let k = k.append(self.styles);
         k.render_head(w)

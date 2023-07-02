@@ -67,17 +67,18 @@ impl<I: Iterator<Item = PlotTag<L, D>>, L: Point, D: Display> Iterator for Singl
 }
 
 pub(super) fn render_plot<
+    'a,
     X: PlotNum,
     Y: PlotNum,
     L: Point<X = X, Y = Y>,
     P: build::PlotIterator<L = L>,
 >(
-    writer: &mut elem::ElemWrite,
+    mut writer: ElemStack<'a, Sentinel>,
     boundx: &ticks::DataBound<X>,
     boundy: &ticks::DataBound<Y>,
     canvas: &RenderFrame,
     plots_all: P,
-) -> std::fmt::Result {
+) -> Result<ElemStack<'a, Sentinel>, fmt::Error> {
     let RenderFrame {
         width,
         height,
@@ -110,8 +111,6 @@ pub(super) fn render_plot<
     };
 
     let mut color_iter2 = color_iter.clone();
-
-    //let mut f = crate::build::RenderablePlotIter::new(plots_all);
 
     let mut names = vec![];
 
@@ -160,7 +159,8 @@ pub(super) fn render_plot<
                 });
 
                 let precision = canvas.precision;
-                let k = render(
+                render(
+                    &mut writer,
                     it,
                     PlotRenderInfo {
                         canvas,
@@ -169,37 +169,38 @@ pub(super) fn render_plot<
                         precision,
                         bar_width: canvas.bar_width,
                     },
-                );
-                writer.render(k)?;
+                )?;
             }
         }
     }
 
     assert!(SinglePlotIterator::new(&mut it).is_none());
 
-    let j = (!names.is_empty()).then(|| {
-        let aa = hbuild::from_iter(names.iter().map(|(typ, name, i)| {
+    if !names.is_empty() {
+        for (typ, name, i) in names.iter() {
             match typ {
                 PlotMetaType::Text => {
                     // don't need to render any legend or plots
-                    None
                 }
                 &PlotMetaType::Plot(p_type) => {
                     let colori = color_iter2.next().unwrap();
                     let legendy1 =
                         paddingy - yaspect_offset - padding / 8.0 + (*i as f64) * spacing;
 
-                    (!name.is_empty()).then(|| {
-                        render_label(PlotRenderInfo2 {
-                            canvas,
-                            p_type,
-                            colori,
-                            legendy1,
-                        })
-                    })
+                    if !name.is_empty() {
+                        render_label(
+                            &mut writer,
+                            PlotRenderInfo2 {
+                                canvas,
+                                p_type,
+                                colori,
+                                legendy1,
+                            },
+                        )?;
+                    }
                 }
             }
-        }));
+        }
 
         let bb = hbuild::from_iter(names.iter().map(|(typ, name, i)| {
             let class = match typ {
@@ -228,10 +229,9 @@ pub(super) fn render_plot<
             text.append(hbuild::raw(name))
         }));
 
-        aa.chain(bb)
-    });
-
-    writer.render(j)
+        writer.put(bb)?;
+    }
+    Ok(writer)
 }
 
 struct PlotRenderInfo2<'a> {
@@ -249,7 +249,7 @@ struct PlotRenderInfo<'a> {
     bar_width: f64,
 }
 
-fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermelon::elem::Locked {
+fn render_label<T>(writer: &mut ElemStack<T>, info: PlotRenderInfo2) -> fmt::Result {
     let PlotRenderInfo2 {
         canvas,
         p_type,
@@ -262,7 +262,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
         padding, legendx1, ..
     } = *canvas;
 
-    let vals = match p_type {
+    match p_type {
         PlotType::Line => {
             let g = hbuild::elem("g").with((
                 "class",
@@ -278,8 +278,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                 ("y1", legendy1),
                 ("y2", legendy1)
             )));
-
-            (g.inline().some(), None, None, None, None, None)
+            writer.put(g.inline())?;
         }
         PlotType::Scatter => {
             let g = hbuild::elem("g").with((
@@ -296,7 +295,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                 ("y2", legendy1)
             )));
 
-            (None, g.inline().some(), None, None, None, None)
+            writer.put(g.inline())?;
         }
         PlotType::Histo => {
             let g = hbuild::elem("g").with((
@@ -316,7 +315,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                 ("ry", padding / 30.0)
             )));
 
-            (None, None, g.inline().some(), None, None, None)
+            writer.put(g.inline())?;
         }
         PlotType::LineFill => {
             let g = hbuild::elem("g").with((
@@ -336,7 +335,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                 ("ry", padding / 30.0)
             )));
 
-            (None, None, None, g.inline().some(), None, None)
+            writer.put(g.inline())?;
         }
 
         PlotType::LineFillRaw => {
@@ -357,7 +356,7 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                 ("ry", padding / 30.0)
             )));
 
-            (None, None, None, None, g.inline().some(), None)
+            writer.put(g.inline())?;
         }
 
         PlotType::Bars => {
@@ -377,18 +376,18 @@ fn render_label(info: PlotRenderInfo2) -> impl hypermelon::elem::Elem + hypermel
                 ("ry", padding / 30.0)
             )));
 
-            (None, None, None, None, None, g.inline().some())
+            writer.put(g.inline())?;
         }
     };
 
-    let (a, b, c, d, e, f) = vals;
-    a.chain(b).chain(c).chain(d).chain(e).chain(f)
+    Ok(())
 }
 
-fn render(
+fn render<T>(
+    writer: &mut ElemStack<T>,
     it: impl Iterator<Item = [f64; 2]>,
     info: PlotRenderInfo,
-) -> impl hypermelon::elem::Elem + hypermelon::elem::Locked {
+) -> fmt::Result {
     let PlotRenderInfo {
         canvas,
         p_type,
@@ -407,7 +406,7 @@ fn render(
 
     let ffmt = FloatFmt::new(precision);
 
-    let vals = match p_type {
+    match p_type {
         PlotType::Line => {
             let g = hbuild::elem("g").with(attrs!(
                 ("id", format_move!("poloto_plot{}", colori)),
@@ -423,8 +422,7 @@ fn render(
             ));
 
             let j = hbuild::single("path").with(attrs!(Line::new(it, ffmt)));
-
-            (g.append(j).some(), None, None, None, None, None)
+            writer.put(g.append(j))?;
         }
         PlotType::Scatter => {
             let g = hbuild::elem("g").with(attrs!(
@@ -448,7 +446,7 @@ fn render(
                 Ok(())
             })));
 
-            (None, g.append(j).some(), None, None, None, None)
+            writer.put(g.append(j))?;
         }
         PlotType::Histo => {
             let g = hbuild::elem("g").with(attrs!(
@@ -462,11 +460,11 @@ fn render(
                 )
             ));
 
-            let h = hbuild::from_closure(move |w| {
+            let h = hbuild::from_stack(move |mut w| {
                 let mut last = None;
                 for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
                     if let Some((lx, ly)) = last {
-                        w.render(hbuild::single("rect").with(attrs!(
+                        w.put(hbuild::single("rect").with(attrs!(
                             ("x", ffmt.disp(lx)),
                             ("y", ffmt.disp(ly)),
                             ("width", (padding * 0.02).max((x - lx) - (padding * 0.02))),
@@ -475,10 +473,9 @@ fn render(
                     }
                     last = Some((x, y))
                 }
-                Ok(())
+                Ok(w)
             });
-
-            (None, None, g.append(h).some(), None, None, None)
+            writer.put(g.append(h))?;
         }
         PlotType::LineFill => {
             let g = hbuild::elem("g").with(attrs!(
@@ -498,8 +495,7 @@ fn render(
                 height - paddingy,
                 true
             )));
-
-            (None, None, None, g.append(j).some(), None, None)
+            writer.put(g.append(j))?;
         }
         PlotType::LineFillRaw => {
             let g = hbuild::elem("g").with(attrs!(
@@ -519,7 +515,7 @@ fn render(
                 false
             )));
 
-            (None, None, None, None, g.append(j).some(), None)
+            writer.put(g.append(j))?;
         }
         PlotType::Bars => {
             let g = hbuild::elem("g").with(attrs!(
@@ -533,24 +529,21 @@ fn render(
                 )
             ));
 
-            let h = hbuild::from_closure(move |w| {
+            let h = hbuild::from_stack(move |mut w| {
                 for [x, y] in it.filter(|&[x, y]| x.is_finite() && y.is_finite()) {
-                    w.render(hbuild::single("rect").with(attrs!(
+                    w.put(hbuild::single("rect").with(attrs!(
                         ("x", ffmt.disp(padding)),
                         ("y", ffmt.disp(y - bar_width / 2.0)),
                         ("width", x - padding),
                         ("height", bar_width)
                     )))?;
                 }
-                Ok(())
+                Ok(w)
             });
-
-            (None, None, None, None, None, g.append(h).some())
+            writer.put(g.append(h))?;
         }
     };
-
-    let (a, b, c, d, e, f) = vals;
-    a.chain(b).chain(c).chain(d).chain(e).chain(f)
+    Ok(())
 }
 
 struct LineFill<I> {
