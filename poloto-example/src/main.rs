@@ -1,51 +1,54 @@
 use hypermelon::elem::Elem;
+use hypermelon::elem::Locked;
 use hypermelon::stack::ElemStack;
 use hypermelon::stack::Sentinel;
 use poloto::build;
-use std::fmt::Display;
+use poloto::build::plot;
+use poloto::prelude::*;
+use poloto::render::Theme;
+use std::fmt;
 pub struct Doc<'a> {
-    stack:ElemStack<'a,Sentinel>,
+    stack: ElemStack<'a, Sentinel>,
     file: &'static str,
 }
 
-pub struct Adder<'a,'b> {
-    doc:&'a mut Doc<'b>,
+pub struct Adder<'a, 'b> {
+    doc: &'a mut Doc<'b>,
     line: u32,
 }
-impl<'a,'b> Adder<'a,'b> {
-    fn add<K: Display>(self, (program, source): (impl FnOnce() -> K, &str)) {
+impl<'a, 'b> Adder<'a, 'b> {
+    fn add<K: Elem + Locked>(self, (program, source): (impl FnOnce() -> K, &str)) -> fmt::Result {
         let file = self.doc.file;
         let line = self.line;
-        println!("file={}:{}", file, line);
-        println!("source:\n{}", source);
         let ret = program();
-        println!("return:{}", ret);
+        let k1 =
+            hbuild::elem("text").append(hbuild::raw(format_move!("{}:{}", file, line)).inline());
+        let k2 = hbuild::elem("span")
+            .with(("style", "white-space: pre-wrap"))
+            .append(hbuild::raw(source));
+        self.doc.stack.put(k1)?;
+        self.doc.stack.put(k2)?;
+
+        self.doc.stack.put(ret)?;
+        Ok(())
     }
 }
 
 impl<'a> Doc<'a> {
-    fn new(stack:ElemStack<'a,Sentinel>,file: &'static str) -> Doc<'a> {
-        Doc { stack,file }
+    fn new(stack: ElemStack<'a, Sentinel>, file: &'static str) -> Doc<'a> {
+        Doc { stack, file }
     }
-    fn add<'b>(&'b mut self, line: u32) -> Adder<'b,'a> {
-        Adder {
-            doc: self,
-            line,
-        }
+    fn add<'b>(&'b mut self, line: u32) -> Adder<'b, 'a> {
+        Adder { doc: self, line }
     }
 }
 
-
-use hypermelon::prelude::*;
 use hypermelon::build as hbuild;
+use hypermelon::prelude::*;
 
-
-fn main() {
-
-    hbuild::from_stack(|w|{
-
-        let mut document = Doc::new(w,file!());
-
+fn main() -> fmt::Result {
+    let k = hbuild::from_stack(|w| {
+        let mut document = Doc::new(w, file!());
 
         document.add(line!()).add(shower::source!(|| {
             let collatz = |mut a: i128| {
@@ -59,14 +62,15 @@ fn main() {
                 })
                 .fuse()
             };
-    
+
             let svg = poloto::header().with_viewbox_width(1200.0);
-    
+
             let style = poloto::render::Theme::dark()
                 .append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
-    
-            let a = (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
-    
+
+            let a =
+                (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
+
             poloto::frame()
                 .with_tick_lines([true, true])
                 .with_viewbox(svg.get_viewbox())
@@ -74,12 +78,53 @@ fn main() {
                 .data(poloto::plots!(poloto::build::origin(), a))
                 .build_and_label(("collatz", "x", "y"))
                 .append_to(svg.append(style))
-                .render_string()
-                .unwrap()
-        }));
+        }))?;
 
+        document.add(line!()).add(shower::source!(|| {
+            let x: Vec<_> = (0..30).map(|x| (x as f64 / 30.0) * 10.0).collect();
+
+            let plots = poloto::plots!(
+                plot("a").scatter(x.iter().copied().zip_output(f64::cos)),
+                plot("b").line(x.iter().copied().zip_output(f64::sin))
+            );
+
+            let data = poloto::frame_build().data(plots).build_and_label((
+                "cows per year",
+                "year",
+                "cows",
+            ));
+
+            let header = poloto::header()
+                .append(Theme::dark().append(".poloto_scatter.poloto_plot{stroke-width:33;}"));
+
+            data.append_to(header)
+        }))?;
+
+        document.add(line!()).add(shower::source!(|| {
+            let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
+
+            let s = plot("tan(x)").line_fill(
+                x.zip_output(f64::tan)
+                    .crop_above(10.0)
+                    .crop_below(0.0)
+                    .crop_left(2.0),
+            );
+
+            let data = poloto::frame_build().data(s).build_map(|data| {
+                let boundx = *data.boundx();
+                data.label((
+                    format_move!("from {} to {}", boundx.min, boundx.max),
+                    format_move!("This is the {} label", 'x'),
+                    "This is the y label",
+                ))
+            });
+
+            let data = data.append_to(poloto::header().light_theme());
+
+            data
+        }))?;
         Ok(document.stack)
     });
 
-
+    hypermelon::render(k, hypermelon::stdout_fmt())
 }
