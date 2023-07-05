@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 hypermelon = "0.6"
 poloto = { version = "19.0", path = "../poloto" }
+pulldown-cmark = "0.9.3"
 shower = "0.1.0"

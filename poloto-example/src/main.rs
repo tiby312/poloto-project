@@ -1,6 +1,7 @@
 use hypermelon::elem::Elem;
 use hypermelon::elem::Locked;
 use hypermelon::stack::ElemStack;
+use hypermelon::stack::ElemStackEscapable;
 use hypermelon::stack::Sentinel;
 use poloto::build;
 use poloto::build::plot;
@@ -8,7 +9,7 @@ use poloto::prelude::*;
 use poloto::render::Theme;
 use std::fmt;
 pub struct Doc<'a> {
-    stack: ElemStack<'a, Sentinel>,
+    stack: ElemStackEscapable<'a, Sentinel>,
     file: &'static str,
 }
 
@@ -23,9 +24,15 @@ impl<'a, 'b> Adder<'a, 'b> {
         let ret = program();
         let k1 =
             hbuild::elem("text").append(hbuild::raw(format_move!("{}:{}", file, line)).inline());
-        let k2 = hbuild::elem("span")
-            .with(("style", "white-space: pre-wrap"))
-            .append(hbuild::raw(source));
+
+        let ss = format!("```\n{}\n```", source);
+        let parser = pulldown_cmark::Parser::new(&ss);
+        let mut s = String::new();
+        pulldown_cmark::html::push_html(&mut s, parser);
+
+        let k2 = hbuild::elem("text")
+            .with(("class", "markdown-body"))
+            .append(hbuild::raw_escapable(s));
         self.doc.stack.put(k1)?;
         self.doc.stack.put(k2)?;
 
@@ -35,7 +42,7 @@ impl<'a, 'b> Adder<'a, 'b> {
 }
 
 impl<'a> Doc<'a> {
-    fn new(stack: ElemStack<'a, Sentinel>, file: &'static str) -> Doc<'a> {
+    fn new(stack: ElemStackEscapable<'a, Sentinel>, file: &'static str) -> Doc<'a> {
         Doc { stack, file }
     }
     fn add<'b>(&'b mut self, line: u32) -> Adder<'b, 'a> {
@@ -47,7 +54,7 @@ use hypermelon::build as hbuild;
 use hypermelon::prelude::*;
 
 fn main() -> fmt::Result {
-    let k = hbuild::from_stack(|w| {
+    let k = hbuild::from_stack_escpable(|w| {
         let mut document = Doc::new(w, file!());
 
         document.add(line!()).add(shower::source!(|| {
@@ -126,5 +133,10 @@ fn main() -> fmt::Result {
         Ok(document.stack)
     });
 
-    hypermelon::render(k, hypermelon::stdout_fmt())
+    let head = hbuild::elem("head");
+    let style = hbuild::elem("style").append(include_str!("markdown.css"));
+
+    let html = hbuild::elem("html").with(("style", "background: black;"));
+    let html = html.append(head.append(style).chain(hbuild::elem("body").append(k)));
+    hypermelon::render_escapable(html, hypermelon::stdout_fmt())
 }
