@@ -7,6 +7,10 @@ use poloto::build;
 use poloto::build::plot;
 use poloto::prelude::*;
 use poloto::render::Theme;
+use syntect::highlighting::ThemeSet;
+use syntect::html::highlighted_html_for_file;
+use syntect::html::highlighted_html_for_string;
+use syntect::parsing::SyntaxSet;
 use std::fmt;
 pub struct Doc<'a> {
     stack: ElemStackEscapable<'a, Sentinel>,
@@ -25,14 +29,24 @@ impl<'a, 'b> Adder<'a, 'b> {
         let k1 =
             hbuild::elem("text").append(hbuild::raw(format_move!("{}:{}", file, line)).inline());
 
-        let ss = format!("```\n{}\n```", source);
-        let parser = pulldown_cmark::Parser::new(&ss);
-        let mut s = String::new();
-        pulldown_cmark::html::push_html(&mut s, parser);
 
+        // let ss = format!("```\n{}\n```", source);
+        // let parser = pulldown_cmark::Parser::new(&ss);
+        // let mut s = String::new();
+        // pulldown_cmark::html::push_html(&mut s, parser);
+
+
+        let ss = SyntaxSet::load_defaults_newlines();
+        let ts = ThemeSet::load_defaults();
+        let theme = &ts.themes["base16-ocean.dark"];
+        let a=&ss.find_syntax_by_name("Rust").unwrap();
+
+        let html = highlighted_html_for_string(&source,&ss,a,theme).unwrap();
+
+        
         let k2 = hbuild::elem("text")
             .with(("class", "markdown-body"))
-            .append(hbuild::raw_escapable(s));
+            .append(hbuild::raw_escapable(html));
         self.doc.stack.put(k1)?;
         self.doc.stack.put(k2)?;
 
@@ -139,4 +153,6 @@ fn main() -> fmt::Result {
     let html = hbuild::elem("html").with(("style", "background: black;"));
     let html = html.append(head.append(style).chain(hbuild::elem("body").append(k)));
     hypermelon::render_escapable(html, hypermelon::stdout_fmt())
+
+    //https://docs.rs/syntect/latest/syntect/html/index.html
 }

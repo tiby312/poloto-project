@@ -10,3 +10,4 @@ hypermelon = "0.6"
 poloto = { version = "19.0", path = "../poloto" }
 pulldown-cmark = "0.9.3"
 shower = "0.1.0"
+syntect = "5.0.0"
