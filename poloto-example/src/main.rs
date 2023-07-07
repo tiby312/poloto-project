@@ -7,11 +7,13 @@ use poloto::build;
 use poloto::build::plot;
 use poloto::prelude::*;
 use poloto::render::Theme;
+use shower::source;
 use std::fmt;
 use syntect::highlighting::ThemeSet;
 use syntect::html::highlighted_html_for_file;
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
+
 pub struct Doc<'a> {
     stack: ElemStackEscapable<'a, Sentinel>,
     file: &'static str,
@@ -68,7 +70,7 @@ fn main() -> fmt::Result {
     let k = hbuild::from_stack_escpable(|w| {
         let mut document = Doc::new(w, file!());
 
-        document.add(line!()).add(shower::source!(|| {
+        document.add(line!()).add(source!(|| {
             let collatz = |mut a: i128| {
                 std::iter::from_fn(move || {
                     if a == 1 {
@@ -98,7 +100,7 @@ fn main() -> fmt::Result {
                 .append_to(svg.append(style))
         }))?;
 
-        document.add(line!()).add(shower::source!(|| {
+        document.add(line!()).add(source!(|| {
             let x: Vec<_> = (0..30).map(|x| (x as f64 / 30.0) * 10.0).collect();
 
             let plots = poloto::plots!(
@@ -118,7 +120,7 @@ fn main() -> fmt::Result {
             data.append_to(header)
         }))?;
 
-        document.add(line!()).add(shower::source!(|| {
+        document.add(line!()).add(source!(|| {
             let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
             let s = plot("tan(x)").line_fill(

@@ -3,11 +3,11 @@
 	</head>
 	<body>
 		<text>
-			 poloto-example/src/main.rs:74
+			 poloto-example/src/main.rs:73
 		</text>
 		<text class="markdown-body">
  <pre style="background-color:#2b303b;">
-<span style="color:#c0c5ce;">shower::source!(|| {
+<span style="color:#c0c5ce;">source!(|| {
 </span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let </span><span style="color:#8fa1b3;">collatz </span><span style="color:#c0c5ce;">= |</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">a</span><span style="color:#c0c5ce;">: i128| {
 </span><span style="color:#c0c5ce;">        std::iter::from_fn(</span><span style="color:#b48ead;">move </span><span style="color:#c0c5ce;">|| {
 </span><span style="color:#c0c5ce;">            </span><span style="color:#b48ead;">if</span><span style="color:#c0c5ce;"> a == </span><span style="color:#d08770;">1 </span><span style="color:#c0c5ce;">{
@@ -183,11 +183,11 @@
 			<path class="poloto_imgs poloto_ticks poloto_y" stroke="black" style="stroke-dasharray:12.679822943563261;stroke-dashoffset:-0;" d=" M 150.00 650.00 L 150.00 100.00"/>
 		</svg>
 		<text>
-			 poloto-example/src/main.rs:104
+			 poloto-example/src/main.rs:103
 		</text>
 		<text class="markdown-body">
  <pre style="background-color:#2b303b;">
-<span style="color:#c0c5ce;">shower::source!(|| {
+<span style="color:#c0c5ce;">source!(|| {
 </span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> x: Vec&lt;_&gt; = (</span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">..</span><span style="color:#d08770;">30</span><span style="color:#c0c5ce;">).</span><span style="color:#96b5b4;">map</span><span style="color:#c0c5ce;">(|</span><span style="color:#bf616a;">x</span><span style="color:#c0c5ce;">| (x as </span><span style="color:#b48ead;">f64 </span><span style="color:#c0c5ce;">/ </span><span style="color:#d08770;">30.0</span><span style="color:#c0c5ce;">) * </span><span style="color:#d08770;">10.0</span><span style="color:#c0c5ce;">).</span><span style="color:#96b5b4;">collect</span><span style="color:#c0c5ce;">();
 </span><span style="color:#c0c5ce;">
 </span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> plots = poloto::plots!(
@@ -290,11 +290,11 @@
 			<path class="poloto_imgs poloto_ticks poloto_y" stroke="black" style="stroke-dasharray:7.503921109825187;stroke-dashoffset:-74.8823667052444;" d=" M 150.00 400.00 L 150.00 100.00"/>
 		</svg>
 		<text>
-			 poloto-example/src/main.rs:124
+			 poloto-example/src/main.rs:123
 		</text>
 		<text class="markdown-body">
  <pre style="background-color:#2b303b;">
-<span style="color:#c0c5ce;">shower::source!(|| {
+<span style="color:#c0c5ce;">source!(|| {
 </span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> x = (</span><span style="color:#d08770;">0</span><span style="color:#c0c5ce;">..</span><span style="color:#d08770;">500</span><span style="color:#c0c5ce;">).</span><span style="color:#96b5b4;">map</span><span style="color:#c0c5ce;">(|</span><span style="color:#bf616a;">x</span><span style="color:#c0c5ce;">| (x as </span><span style="color:#b48ead;">f64 </span><span style="color:#c0c5ce;">/ </span><span style="color:#d08770;">500.0</span><span style="color:#c0c5ce;">) * </span><span style="color:#d08770;">10.0</span><span style="color:#c0c5ce;">);
 </span><span style="color:#c0c5ce;">
 </span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> s = </span><span style="color:#96b5b4;">plot</span><span style="color:#c0c5ce;">(&quot;</span><span style="color:#a3be8c;">tan(x)</span><span style="color:#c0c5ce;">&quot;).</span><span style="color:#96b5b4;">line_fill</span><span style="color:#c0c5ce;">(
