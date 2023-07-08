@@ -50,11 +50,7 @@ fn doop(source: &str) -> impl Elem {
                             _ => "#000000",
                         };
 
-                        let k = hbuild::elem("span")
-                            .with(("style", format_move!("color:{}", color)))
-                            .drop_tail_escapable();
-                        let ee = hbuild::raw("").append(k).inline();
-                        let _ = stack.render_head_escapable(ee)?;
+                        write!(stack.writer_escapable(),"<span style=\"color:{}\">",color)?;
                     }
                     // Handle a text token (print out the contents)
                     Token::Text(txt) => stack.writer_escapable().write_str(txt)?,
