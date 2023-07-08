@@ -1,6 +1,5 @@
 use hypermelon::elem::Elem;
 use hypermelon::elem::Locked;
-use hypermelon::stack::ElemStack;
 use hypermelon::stack::ElemStackEscapable;
 use hypermelon::stack::Sentinel;
 use poloto::build;
@@ -50,20 +49,18 @@ fn doop(source: &str) -> impl Elem {
                             _ => "#000000",
                         };
 
-                        write!(stack.writer_escapable(),"<span style=\"color:{}\">",color)?;
+                        write!(stack.writer_escapable(), "<span style=\"color:{}\">", color)?;
                     }
                     // Handle a text token (print out the contents)
                     Token::Text(txt) => stack.writer_escapable().write_str(txt)?,
                     // Handle an end token (reset foreground colour)
                     Token::End(_) => {
                         stack.writer_escapable().write_str("</span>")?;
-  
                     }
                 }
             }
 
             stack.writer_escapable().write_str("\n")?;
-
         }
 
         Ok(stack)
@@ -99,14 +96,13 @@ impl<'a, 'b> Adder<'a, 'b> {
         // let theme = &ts.themes["base16-ocean.dark"];
         // let a = &ss.find_syntax_by_name("Rust").unwrap();
         // let html = highlighted_html_for_string(&source, &ss, a, theme).unwrap();
-        let source=format!("<<<{}>>>",source);
         let s = doop(&source);
 
         let k2 = hbuild::elem("text")
-            .with(("style","text-indent: 0px;"))
+            .with(("style", "text-indent: 0px;"))
             //.with(("class", "markdown-body"))
             .append(s);
-        //self.doc.stack.put(hbuild::elem("div").append(k1))?;
+        self.doc.stack.put(hbuild::elem("div").append(k1))?;
         self.doc.stack.put(hbuild::elem("div").append(k2))?;
 
         self.doc.stack.put(ret)?;
