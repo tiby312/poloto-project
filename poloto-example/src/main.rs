@@ -9,23 +9,20 @@ use poloto::prelude::*;
 use poloto::render::Theme;
 use shower::source;
 use std::fmt;
-use syntect::highlighting::ThemeSet;
-use syntect::html::highlighted_html_for_file;
-use syntect::html::highlighted_html_for_string;
-use syntect::parsing::SyntaxSet;
+// use syntect::highlighting::ThemeSet;
+// use syntect::html::highlighted_html_for_file;
+// use syntect::html::highlighted_html_for_string;
+// use syntect::parsing::SyntaxSet;
 
 use fmt::Write;
 fn doop(source: &str) -> impl Elem {
     use synoptic::languages::rust;
     use synoptic::tokens::Token;
-    //use termion::color;
 
     let k = rust();
 
     // Run highlighter
     let result = k.run(source);
-
-    //<div style="background: #181818; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">
 
     let div = hbuild::elem("div").with(("style", "overflow:auto;width:auto;padding:.2em .6em;"));
     let pre = hbuild::elem("pre").with(("style", "margin:0;line-height:125%"));
@@ -33,11 +30,6 @@ fn doop(source: &str) -> impl Elem {
     let code = hypermelon::build::from_stack_escapable(move |mut stack| {
         // For each row
         for (c, row) in result.iter().enumerate() {
-            // Print line number (with padding)
-            //print!("{: >3} |", c + 1);
-            // For each token within each row
-            //let mut left=None;
-
             for tok in row {
                 // Handle the tokens
                 match tok {
@@ -63,30 +55,25 @@ fn doop(source: &str) -> impl Elem {
                             .drop_tail_escapable();
                         let ee = hbuild::raw("").append(k).inline();
                         let _ = stack.render_head_escapable(ee)?;
-
-                        // left=Some(l);
                     }
                     // Handle a text token (print out the contents)
                     Token::Text(txt) => stack.writer_escapable().write_str(txt)?,
                     // Handle an end token (reset foreground colour)
                     Token::End(_) => {
                         stack.writer_escapable().write_str("</span>")?;
-                        // if let Some(k)=left.take(){
-                        //     stack.render_tail_escapable(k)?
-                        // }
+  
                     }
                 }
             }
 
             stack.writer_escapable().write_str("\n")?;
-            //// Prevent text being cut off without a newline
-            //println!();
+
         }
 
         Ok(stack)
     });
 
-    div.append(pre.append(code))
+    div.append(pre.append(code).inline())
 }
 
 pub struct Doc<'a> {
@@ -116,13 +103,15 @@ impl<'a, 'b> Adder<'a, 'b> {
         // let theme = &ts.themes["base16-ocean.dark"];
         // let a = &ss.find_syntax_by_name("Rust").unwrap();
         // let html = highlighted_html_for_string(&source, &ss, a, theme).unwrap();
-        let s = doop(source);
+        let source=format!("<<<{}>>>",source);
+        let s = doop(&source);
 
         let k2 = hbuild::elem("text")
+            .with(("style","text-indent: 0px;"))
             //.with(("class", "markdown-body"))
             .append(s);
-        self.doc.stack.put(k1)?;
-        self.doc.stack.put(k2)?;
+        //self.doc.stack.put(hbuild::elem("div").append(k1))?;
+        self.doc.stack.put(hbuild::elem("div").append(k2))?;
 
         self.doc.stack.put(ret)?;
         Ok(())
