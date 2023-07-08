@@ -69,7 +69,7 @@ fn doop(source: &str) -> impl Elem {
         Ok(stack)
     });
 
-    div.append(pre.append(code).inline())
+    div.append(pre.append(code).inline()).with_tab("")
 }
 
 pub struct Doc<'a> {
