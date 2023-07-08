@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-hypermelon = "0.6"
+hypermelon = "0.6.1"
 poloto = { version = "19.0", path = "../poloto" }
 pulldown-cmark = "0.9.3"
 shower = "0.1.0"
+synoptic = "1.2.0"
 syntect = "5.0.0"

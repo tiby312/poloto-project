@@ -14,6 +14,81 @@ use syntect::html::highlighted_html_for_file;
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
 
+use fmt::Write;
+fn doop(source: &str) -> impl Elem {
+    use synoptic::languages::rust;
+    use synoptic::tokens::Token;
+    //use termion::color;
+
+    let k = rust();
+
+    // Run highlighter
+    let result = k.run(source);
+
+    //<div style="background: #181818; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">
+
+    let div = hbuild::elem("div").with(("style", "overflow:auto;width:auto;padding:.2em .6em;"));
+    let pre = hbuild::elem("pre").with(("style", "margin:0;line-height:125%"));
+
+    let code = hypermelon::build::from_stack_escapable(move |mut stack| {
+        // For each row
+        for (c, row) in result.iter().enumerate() {
+            // Print line number (with padding)
+            //print!("{: >3} |", c + 1);
+            // For each token within each row
+            //let mut left=None;
+
+            for tok in row {
+                // Handle the tokens
+                match tok {
+                    // Handle the start token (start foreground colour)
+                    Token::Start(kind) => {
+                        let mut w = stack.writer_escapable();
+
+                        let color = match kind.as_str() {
+                            "keyword" => "#ba8baf",
+                            "struct" => "#f7ca88",
+                            "boolean" | "number" | "global" => "#dc9656",
+                            "operator" => "#d8d8d8",
+                            "comment" | "reference" => "#585858",
+                            "string" | "character" => "#a1b56c",
+                            "function" | "macro" => "#7cafc2",
+                            "regex" | "symbol" => "#86c1b9",
+                            "namespace" => "#f78c6c",
+                            _ => "#000000",
+                        };
+
+                        let k = hbuild::elem("span")
+                            .with(("style", format_move!("color:{}", color)))
+                            .drop_tail_escapable();
+                        let ee = hbuild::raw("").append(k).inline();
+                        let _ = stack.render_head_escapable(ee)?;
+
+                        // left=Some(l);
+                    }
+                    // Handle a text token (print out the contents)
+                    Token::Text(txt) => stack.writer_escapable().write_str(txt)?,
+                    // Handle an end token (reset foreground colour)
+                    Token::End(_) => {
+                        stack.writer_escapable().write_str("</span>")?;
+                        // if let Some(k)=left.take(){
+                        //     stack.render_tail_escapable(k)?
+                        // }
+                    }
+                }
+            }
+
+            stack.writer_escapable().write_str("\n")?;
+            //// Prevent text being cut off without a newline
+            //println!();
+        }
+
+        Ok(stack)
+    });
+
+    div.append(pre.append(code))
+}
+
 pub struct Doc<'a> {
     stack: ElemStackEscapable<'a, Sentinel>,
     file: &'static str,
@@ -36,16 +111,16 @@ impl<'a, 'b> Adder<'a, 'b> {
         // let mut s = String::new();
         // pulldown_cmark::html::push_html(&mut s, parser);
 
-        let ss = SyntaxSet::load_defaults_newlines();
-        let ts = ThemeSet::load_defaults();
-        let theme = &ts.themes["base16-ocean.dark"];
-        let a = &ss.find_syntax_by_name("Rust").unwrap();
-
-        let html = highlighted_html_for_string(&source, &ss, a, theme).unwrap();
+        // let ss = SyntaxSet::load_defaults_newlines();
+        // let ts = ThemeSet::load_defaults();
+        // let theme = &ts.themes["base16-ocean.dark"];
+        // let a = &ss.find_syntax_by_name("Rust").unwrap();
+        // let html = highlighted_html_for_string(&source, &ss, a, theme).unwrap();
+        let s = doop(source);
 
         let k2 = hbuild::elem("text")
-            .with(("class", "markdown-body"))
-            .append(hbuild::raw_escapable(html));
+            //.with(("class", "markdown-body"))
+            .append(s);
         self.doc.stack.put(k1)?;
         self.doc.stack.put(k2)?;
 
@@ -67,7 +142,7 @@ use hypermelon::build as hbuild;
 use hypermelon::prelude::*;
 
 fn main() -> fmt::Result {
-    let k = hbuild::from_stack_escpable(|w| {
+    let k = hbuild::from_stack_escapable(|w| {
         let mut document = Doc::new(w, file!());
 
         document.add(line!()).add(source!(|| {
@@ -149,7 +224,7 @@ fn main() -> fmt::Result {
     let head = hbuild::elem("head");
     //let style = hbuild::elem("style").append(include_str!("markdown.css"));
 
-    let html = hbuild::elem("html").with(("style", "background: #2b303b;"));
+    let html = hbuild::elem("html"); //.with(("style", "background: #2b303b;"));
     let html = html.append(head.chain(hbuild::elem("body").append(k)));
     hypermelon::render_escapable(html, hypermelon::stdout_fmt())
 
