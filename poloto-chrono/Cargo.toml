@@ -1,6 +1,6 @@
 [package]
 name = "poloto-chrono"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 authors = ["Ken <kenakioreed@gmail.com>"]
 license = "MIT"
@@ -15,6 +15,6 @@ include = ["src/**/*", "../LICENSE-MIT", "README.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-poloto={path="../poloto",version="19.0"}
+poloto={path="../poloto",version="19.1"}
 chrono="0.4"
 tagu={version="0.1"}

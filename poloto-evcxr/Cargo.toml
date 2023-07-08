@@ -1,6 +1,6 @@
 [package]
 name = "poloto-evcxr"
-version = "0.1.22"
+version = "0.2.0"
 edition = "2021"
 authors = ["Ken <kenakioreed@gmail.com>"]
 license = "MIT"
@@ -16,4 +16,4 @@ include = ["src/**/*", "../LICENSE-MIT", "README.md"]
 [dependencies]
 base64 = "0.21.2"
 tagu = "0.1"
-poloto = { version = "19.0", path = "../poloto" }
+poloto = { version = "19.1", path = "../poloto" }
