@@ -1,7 +1,7 @@
-// pub fn light() -> hypermelon::Append<Header, Theme<'static>> {
+// pub fn light() -> tagu::Append<Header, Theme<'static>> {
 //     Header::new().append(Theme::light())
 // }
-// pub fn dark() -> hypermelon::Append<Header, Theme<'static>> {
+// pub fn dark() -> tagu::Append<Header, Theme<'static>> {
 //     Header::new().append(Theme::dark())
 // }
 

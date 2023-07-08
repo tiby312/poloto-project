@@ -48,7 +48,7 @@ fn main() {
 ## Collatz Example
 
 ```rust
-use hypermelon::prelude::*;
+use tagu::prelude::*;
 use poloto::build;
 
 // PIPE me to a file!
@@ -93,7 +93,7 @@ fn main() {
 ## Custom Ticks Example
 
 ```rust
-use hypermelon::format_move;
+use tagu::format_move;
 use poloto::build;
 fn main() {
     // hourly trend over one day.
@@ -150,7 +150,7 @@ fn main() {
 ## Styling example
 
 ```rust
-use hypermelon::prelude::*;
+use tagu::prelude::*;
 use poloto::{build, prelude::OutputZip};
 fn main() {
     let theme = poloto::render::Theme::light();
@@ -255,7 +255,7 @@ https://github.com/tiby312/poloto-project/tree/master/poloto-evcxr
 ## Escape protection
 
 If a user tried to inject html through the title/xname/yname/tick format/ or plot names, the html escapes
-will get turned into their encoded values. This protection is provided by the `hypermelon` dependency crate.
+will get turned into their encoded values. This protection is provided by the `tagu` dependency crate.
 
 ## CSS Usage Example
 

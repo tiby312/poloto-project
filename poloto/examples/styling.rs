@@ -1,4 +1,4 @@
-use hypermelon::prelude::*;
+use tagu::prelude::*;
 use poloto::{build, prelude::OutputZip};
 fn main() {
     let theme = poloto::render::Theme::light();

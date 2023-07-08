@@ -1,7 +1,7 @@
-use hypermelon::elem::Elem;
-use hypermelon::elem::Locked;
-use hypermelon::stack::ElemStackEscapable;
-use hypermelon::stack::Sentinel;
+use tagu::elem::Elem;
+use tagu::elem::Locked;
+use tagu::stack::ElemStackEscapable;
+use tagu::stack::Sentinel;
 use poloto::build;
 use poloto::build::plot;
 use poloto::prelude::*;
@@ -22,7 +22,7 @@ fn doop(source: &str) -> impl Elem {
     let div = hbuild::elem("div").with(("style", "overflow:auto;width:auto;padding:.2em .6em;"));
     let pre = hbuild::elem("pre").with(("style", "margin:0;line-height:125%"));
 
-    let code = hypermelon::build::from_stack_escapable(move |mut stack| {
+    let code = tagu::build::from_stack_escapable(move |mut stack| {
         // For each row
         for (c, row) in result.iter().enumerate() {
             for tok in row {
@@ -108,8 +108,8 @@ impl<'a> Doc<'a> {
     }
 }
 
-use hypermelon::build as hbuild;
-use hypermelon::prelude::*;
+use tagu::build as hbuild;
+use tagu::prelude::*;
 
 fn main() -> fmt::Result {
     let k = hbuild::from_stack_escapable(|w| {
@@ -196,7 +196,7 @@ fn main() -> fmt::Result {
 
     let html = hbuild::elem("html"); //.with(("style", "background: #2b303b;"));
     let html = html.append(head.chain(hbuild::elem("body").append(k)));
-    hypermelon::render_escapable(html, hypermelon::stdout_fmt())
+    tagu::render_escapable(html, tagu::stdout_fmt())
 
     //https://docs.rs/syntect/latest/syntect/html/index.html
 }

@@ -223,7 +223,7 @@ fn months() -> fmt::Result {
 
 #[test]
 fn seconds() -> fmt::Result {
-    use hypermelon::format_move;
+    use tagu::format_move;
 
     use chrono::TimeZone;
     let timezone = &chrono::Utc;
@@ -270,7 +270,7 @@ fn seconds() -> fmt::Result {
         let j = data.xticks().fmt.data;
         data.label((
             "Number of Wikipedia Articles",
-            hypermelon::format_move!(
+            tagu::format_move!(
                 "{} to {} with {}",
                 bounds.min.datetime(timezone).format("%H:%M:%S"),
                 bounds.max.datetime(timezone).format("%H:%M:%S"),
@@ -286,9 +286,9 @@ fn seconds() -> fmt::Result {
         .render_fmt_write(w)
 }
 
-pub fn create_test_file(filename: &str) -> hypermelon::tools::Adaptor<std::fs::File> {
+pub fn create_test_file(filename: &str) -> tagu::tools::Adaptor<std::fs::File> {
     std::fs::create_dir_all("../target/assets/test_timestamp").unwrap();
     let file =
         std::fs::File::create(format!("../target/assets/test_timestamp/{}", filename)).unwrap();
-    hypermelon::tools::upgrade_write(file)
+    tagu::tools::upgrade_write(file)
 }

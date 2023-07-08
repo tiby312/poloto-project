@@ -25,8 +25,8 @@
 
 use build::PlotRes;
 use build::Point;
-use hypermelon::attr;
-use hypermelon::elem;
+use tagu::attr;
+use tagu::elem;
 
 #[cfg(doctest)]
 mod test_readme {
@@ -50,8 +50,8 @@ pub mod util;
 use plotnum::*;
 pub mod num;
 
-use hypermelon::build as hbuild;
-use hypermelon::prelude::*;
+use tagu::build as hbuild;
+use tagu::prelude::*;
 
 ///
 /// The poloto prelude.

@@ -1,4 +1,4 @@
-use hypermelon::format_move;
+use tagu::format_move;
 use poloto::build;
 fn main() {
     // hourly trend over one day.

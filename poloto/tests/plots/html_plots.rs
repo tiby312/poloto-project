@@ -1,6 +1,7 @@
 use super::*;
 
 use poloto::build::plot;
+use tagu::prelude::Elem;
 #[test]
 fn custom_colors_html() -> fmt::Result {
     let x: Vec<_> = (0..50).map(|x| (x as f64 / 50.0) * 10.0).collect();
@@ -16,7 +17,7 @@ fn custom_colors_html() -> fmt::Result {
 
     let mut w = util::create_test_file("custom_colors.html");
 
-    let b = hypermelon::elem::BufferedElem::new(poloto::header(), hypermelon::render::NoFmt)?;
+    let b = tagu::elem::BufferedElem::new(poloto::header().inline(), tagu::render::PrettyFmt::new())?;
 
     let light = poloto::render::Theme::light().get_str().replace('\n', "");
     let dark = poloto::render::Theme::dark().get_str().replace('\n', "");

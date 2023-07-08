@@ -16,7 +16,7 @@ include = ["src/**/*", "LICENSE-MIT", "../README.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-hypermelon={version="0.6"}
+tagu={version="0.1"}
 
 [lib]
 doctest = false

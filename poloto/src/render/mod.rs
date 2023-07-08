@@ -448,7 +448,7 @@ where
     }
 }
 
-use hypermelon::stack::*;
+use tagu::stack::*;
 impl<X: PlotNum, Y: PlotNum, L: Point<X = X, Y = Y>, P, A, B, BB> ElemOuter for Stage3<P, A, B, BB>
 where
     P: PlotIterator<L = L>,
@@ -506,20 +506,20 @@ where
 pub struct Stage4<R>(R);
 impl<R: Elem + Locked> Stage4<R> {
     pub fn render_stdout(self) {
-        hypermelon::render(self.0, hypermelon::stdout_fmt()).unwrap()
+        tagu::render(self.0, tagu::stdout_fmt()).unwrap()
     }
 
     pub fn render_fmt_write<T: fmt::Write>(self, w: T) -> fmt::Result {
-        hypermelon::render(self.0, w)
+        tagu::render(self.0, w)
     }
 
     pub fn render_io_write<T: std::io::Write>(self, w: T) -> std::fmt::Result {
-        hypermelon::render(self.0, hypermelon::tools::upgrade_write(w))
+        tagu::render(self.0, tagu::tools::upgrade_write(w))
     }
 
     pub fn render_string(self) -> Result<String, fmt::Error> {
         let mut s = String::new();
-        hypermelon::render(self.0, &mut s)?;
+        tagu::render(self.0, &mut s)?;
         Ok(s)
     }
 }
@@ -549,7 +549,7 @@ impl Default for Header<()> {
     }
 }
 
-use hypermelon::{attr::Attr, elem::Locked};
+use tagu::{attr::Attr, elem::Locked};
 impl Header<()> {
     pub fn new() -> Self {
         let a = [800.0, 500.0];
@@ -609,9 +609,9 @@ impl<A: Attr> Header<A> {
 
 impl<A> Locked for Header<A> {}
 impl<A: Attr> Elem for Header<A> {
-    type Tail = hypermelon::elem::ElementTail<&'static str>;
+    type Tail = tagu::elem::ElementTail<&'static str>;
     fn render_head(self, w: elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        let elem = hypermelon::build::elem("svg").with(attrs!(
+        let elem = tagu::build::elem("svg").with(attrs!(
             ("class", "poloto"),
             ("width", self.dim[0]),
             ("height", self.dim[1]),
@@ -725,9 +725,9 @@ impl Theme<'static> {
 
 impl<'a> Locked for Theme<'a> {}
 impl<'a> Elem for Theme<'a> {
-    type Tail = hypermelon::elem::ElementTail<&'static str>;
+    type Tail = tagu::elem::ElementTail<&'static str>;
     fn render_head(self, w: elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
-        let k = hypermelon::build::elem("style");
+        let k = tagu::build::elem("style");
         let k = k.append(self.styles);
         k.render_head(w)
     }

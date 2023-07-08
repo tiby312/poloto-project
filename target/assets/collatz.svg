@@ -1,6 +1,6 @@
 <svg class="poloto" width="800" height="500" viewBox="0 0 1200 750" xmlns="http://www.w3.org/2000/svg">
 	<style>
- .poloto{
+.poloto{
   stroke-linecap:round;
   stroke-linejoin:round;
   font-family:Roboto,sans-serif;
@@ -34,7 +34,7 @@
 .poloto5.poloto_fill{fill:lime;}
 .poloto6.poloto_fill{fill:orange;}
 .poloto7.poloto_fill{fill:chocolate;}
- .poloto_line{stroke-dasharray:2;stroke-width:2;}
+.poloto_line{stroke-dasharray:2;stroke-width:2;}
 	</style>
 	<circle r="1e5" class="poloto_background" fill="white"/>
 	<g id="poloto_plot0" class="poloto_plot poloto_imgs poloto_line poloto0 poloto_stroke" fill="none" stroke="black">
@@ -61,12 +61,12 @@
 	<g class="poloto_legend poloto_imgs poloto_line poloto3 poloto_stroke"><line x1="1080" x2="1130" y1="231.25" y2="231.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto4 poloto_stroke"><line x1="1080" x2="1130" y1="281.25" y2="281.25"/></g>
 	<g class="poloto_legend poloto_imgs poloto_line poloto5 poloto_stroke"><line x1="1080" x2="1130" y1="331.25" y2="331.25"/></g>
-	<text class="poloto_legend poloto_text poloto_line poloto0" x="1075" y="100"> c(1000)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto1" x="1075" y="150"> c(1001)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto2" x="1075" y="200"> c(1002)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto3" x="1075" y="250"> c(1003)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto4" x="1075" y="300"> c(1004)</text>
-	<text class="poloto_legend poloto_text poloto_line poloto5" x="1075" y="350"> c(1005)</text>
+	<text class="poloto_legend poloto_text poloto_line poloto0" x="1075" y="100">c(1000)</text>
+	<text class="poloto_legend poloto_text poloto_line poloto1" x="1075" y="150">c(1001)</text>
+	<text class="poloto_legend poloto_text poloto_line poloto2" x="1075" y="200">c(1002)</text>
+	<text class="poloto_legend poloto_text poloto_line poloto3" x="1075" y="250">c(1003)</text>
+	<text class="poloto_legend poloto_text poloto_line poloto4" x="1075" y="300">c(1004)</text>
+	<text class="poloto_legend poloto_text poloto_line poloto5" x="1075" y="350">c(1005)</text>
 	<text class="poloto_text poloto_name poloto_title" x="600.00" y="37.50">collatz</text>
 	<text class="poloto_text poloto_name poloto_x" x="600.00" y="731.25">x</text>
 	<text class="poloto_text poloto_name poloto_y" x="37.50" y="375.00" transform="rotate(-90,37.50,375.00)">y</text>

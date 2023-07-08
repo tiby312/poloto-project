@@ -17,4 +17,4 @@ include = ["src/**/*", "../LICENSE-MIT", "README.md"]
 [dependencies]
 poloto={path="../poloto",version="19.0"}
 chrono="0.4"
-hypermelon={version="0.6"}
+tagu={version="0.1"}

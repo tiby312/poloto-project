@@ -1,4 +1,4 @@
-use hypermelon::prelude::*;
+use tagu::prelude::*;
 use poloto::build;
 
 // PIPE me to a file!
