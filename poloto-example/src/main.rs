@@ -8,10 +8,6 @@ use poloto::prelude::*;
 use poloto::render::Theme;
 use shower::source;
 use std::fmt;
-// use syntect::highlighting::ThemeSet;
-// use syntect::html::highlighted_html_for_file;
-// use syntect::html::highlighted_html_for_string;
-// use syntect::parsing::SyntaxSet;
 
 use fmt::Write;
 fn doop(source: &str) -> impl Elem {
@@ -83,19 +79,12 @@ impl<'a, 'b> Adder<'a, 'b> {
         let file = self.doc.file;
         let line = self.line;
         let ret = program();
-        let k1 =
-            hbuild::elem("text").append(hbuild::raw(format_move!("{}:{}", file, line)).inline());
 
-        // let ss = format!("```\n{}\n```", source);
-        // let parser = pulldown_cmark::Parser::new(&ss);
-        // let mut s = String::new();
-        // pulldown_cmark::html::push_html(&mut s, parser);
-
-        // let ss = SyntaxSet::load_defaults_newlines();
-        // let ts = ThemeSet::load_defaults();
-        // let theme = &ts.themes["base16-ocean.dark"];
-        // let a = &ss.find_syntax_by_name("Rust").unwrap();
-        // let html = highlighted_html_for_string(&source, &ss, a, theme).unwrap();
+        let div = hbuild::elem("div").with(("style", "overflow:auto;width:auto;padding:.2em .6em;"));
+        let pre = hbuild::elem("pre").with(("style", "margin:0;line-height:125%"));
+        let line=hbuild::raw(format_move!("{}:{}", file, line)).inline();
+        let k1=div.append(pre.append(line)).with_tab("");
+        
         let s = doop(&source);
 
         let k2 = hbuild::elem("text")
