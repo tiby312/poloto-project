@@ -24,14 +24,13 @@ fn doop(source: &str) -> impl Elem {
 
     let code = tagu::build::from_stack_escapable(move |mut stack| {
         // For each row
-        for (c, row) in result.iter().enumerate() {
+        for (_, row) in result.iter().enumerate() {
             for tok in row {
                 // Handle the tokens
                 match tok {
                     // Handle the start token (start foreground colour)
                     Token::Start(kind) => {
-                        let mut w = stack.writer_escapable();
-
+                        
                         let color = match kind.as_str() {
                             "keyword" => "#ba8baf",
                             "struct" => "#f7ca88",

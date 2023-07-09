@@ -5,7 +5,7 @@
 		<div>
 <div style="overflow:auto;width:auto;padding:.2em .6em;">
 <pre style="margin:0;line-height:125%">
-poloto-example/src/main.rs:118
+poloto-example/src/main.rs:117
 </pre>
 </div>
 		</div>
@@ -14,7 +14,7 @@ poloto-example/src/main.rs:118
 <div style="overflow:auto;width:auto;padding:.2em .6em;">
 <pre style="margin:0;line-height:125%"><span style="color:#7cafc2">source!</span>(|| {
     <span style="color:#ba8baf">let</span> collatz <span style="color:#d8d8d8">=</span> |<span style="color:#ba8baf">mut</span> a: <span style="color:#ba8baf">i128</span>| {
-        <span style="color:#f78c6c">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">from_fn</span>(<span style="color:#ba8baf">move</span> || {
+        <span style="color:#ba8baf">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">from_fn</span>(<span style="color:#ba8baf">move</span> || {
             <span style="color:#ba8baf">if</span> a <span style="color:#d8d8d8">==</span> <span style="color:#dc9656">1</span> {
                 <span style="color:#ba8baf">None</span>
             } <span style="color:#ba8baf">else</span> {
@@ -28,7 +28,7 @@ poloto-example/src/main.rs:118
     <span style="color:#ba8baf">let</span> svg <span style="color:#d8d8d8">=</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">header</span>().<span style="color:#7cafc2">with_viewbox_width</span>(<span style="color:#dc9656">1200.0</span>);
 
     <span style="color:#ba8baf">let</span> style <span style="color:#d8d8d8">=</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#f78c6c">render</span>::<span style="color:#f7ca88">Theme</span>::<span style="color:#7cafc2">dark</span>()
-        .<span style="color:#7cafc2">append</span>(<span style="color:#a1b56c">".poloto_line{stroke-dasharray:2;stroke-width:2;}"</span>);
+        .<span style="color:#7cafc2">append</span>(<span style="color:#f78c6c">tagu</span>::<span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">raw</span>(<span style="color:#a1b56c">".poloto_line{stroke-dasharray:2;stroke-width:2;}"</span>));
 
     <span style="color:#ba8baf">let</span> a <span style="color:#d8d8d8">=</span>
         (<span style="color:#dc9656">1000</span>..<span style="color:#dc9656">1006</span>).<span style="color:#7cafc2">map</span>(|i| <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#7cafc2">format!</span>(<span style="color:#a1b56c">"c({})"</span>, i)).<span style="color:#7cafc2">line</span>((<span style="color:#dc9656">0</span>..).<span style="color:#7cafc2">zip</span>(<span style="color:#7cafc2">collatz</span>(i))));
@@ -192,7 +192,7 @@ poloto-example/src/main.rs:118
 		<div>
 <div style="overflow:auto;width:auto;padding:.2em .6em;">
 <pre style="margin:0;line-height:125%">
-poloto-example/src/main.rs:148
+poloto-example/src/main.rs:147
 </pre>
 </div>
 		</div>
@@ -214,7 +214,7 @@ poloto-example/src/main.rs:148
     ));
 
     <span style="color:#ba8baf">let</span> header <span style="color:#d8d8d8">=</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">header</span>()
-        .<span style="color:#7cafc2">append</span>(<span style="color:#f7ca88">Theme</span>::<span style="color:#7cafc2">dark</span>().<span style="color:#7cafc2">append</span>(<span style="color:#a1b56c">".poloto_scatter.poloto_plot{stroke-width:33;}"</span>));
+        .<span style="color:#7cafc2">append</span>(<span style="color:#f7ca88">Theme</span>::<span style="color:#7cafc2">dark</span>().<span style="color:#7cafc2">append</span>(<span style="color:#f78c6c">tagu</span>::<span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">raw</span>(<span style="color:#a1b56c">".poloto_scatter.poloto_plot{stroke-width:33;}"</span>)));
 
     data.<span style="color:#7cafc2">append_to</span>(header)
 })
@@ -306,7 +306,7 @@ poloto-example/src/main.rs:148
 		<div>
 <div style="overflow:auto;width:auto;padding:.2em .6em;">
 <pre style="margin:0;line-height:125%">
-poloto-example/src/main.rs:168
+poloto-example/src/main.rs:167
 </pre>
 </div>
 		</div>
