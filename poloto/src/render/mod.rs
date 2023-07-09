@@ -728,7 +728,7 @@ impl<'a> Elem for Theme<'a> {
     type Tail = tagu::elem::ElementTail<&'static str>;
     fn render_head(self, w: elem::ElemWrite) -> Result<Self::Tail, fmt::Error> {
         let k = tagu::build::elem("style");
-        let k = k.append(self.styles);
+        let k = k.append(tagu::build::raw(self.styles));
         k.render_head(w)
     }
 }

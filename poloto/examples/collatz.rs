@@ -18,7 +18,7 @@ fn main() {
     let svg = poloto::header().with_viewbox_width(1200.0);
 
     let style =
-        poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
+        poloto::render::Theme::dark().append(tagu::build::raw(".poloto_line{stroke-dasharray:2;stroke-width:2;}"));
 
     let a = (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
 

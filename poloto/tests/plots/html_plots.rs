@@ -17,7 +17,7 @@ fn custom_colors_html() -> fmt::Result {
 
     let mut w = util::create_test_file("custom_colors.html");
 
-    let b = tagu::elem::BufferedElem::new(poloto::header().inline(), tagu::render::PrettyFmt::new())?;
+    let b = tagu::elem::BufferedElem::new(poloto::header().inline())?;
 
     let light = poloto::render::Theme::light().get_str().replace('\n', "");
     let dark = poloto::render::Theme::dark().get_str().replace('\n', "");

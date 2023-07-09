@@ -131,7 +131,7 @@ fn main() -> fmt::Result {
             let svg = poloto::header().with_viewbox_width(1200.0);
 
             let style = poloto::render::Theme::dark()
-                .append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
+                .append(tagu::build::raw(".poloto_line{stroke-dasharray:2;stroke-width:2;}"));
 
             let a =
                 (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
@@ -160,7 +160,7 @@ fn main() -> fmt::Result {
             ));
 
             let header = poloto::header()
-                .append(Theme::dark().append(".poloto_scatter.poloto_plot{stroke-width:33;}"));
+                .append(Theme::dark().append(tagu::build::raw(".poloto_scatter.poloto_plot{stroke-width:33;}")));
 
             data.append_to(header)
         }))?;
