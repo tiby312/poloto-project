@@ -1,5 +1,5 @@
-use tagu::format_move;
 use poloto::build;
+use tagu::format_move;
 fn main() {
     // hourly trend over one day.
     let trend = vec![

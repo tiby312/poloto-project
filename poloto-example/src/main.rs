@@ -1,13 +1,13 @@
-use tagu::elem::Elem;
-use tagu::elem::Locked;
-use tagu::stack::ElemStackEscapable;
-use tagu::stack::Sentinel;
 use poloto::build;
 use poloto::build::plot;
 use poloto::prelude::*;
 use poloto::render::Theme;
 use shower::source;
 use std::fmt;
+use tagu::elem::Elem;
+use tagu::elem::Locked;
+use tagu::stack::ElemStackEscapable;
+use tagu::stack::Sentinel;
 
 use fmt::Write;
 fn rust_to_html(source: &str) -> impl Elem {
@@ -30,7 +30,6 @@ fn rust_to_html(source: &str) -> impl Elem {
                 match tok {
                     // Handle the start token (start foreground colour)
                     Token::Start(kind) => {
-                        
                         let color = match kind.as_str() {
                             "keyword" => "#ba8baf",
                             "struct" => "#f7ca88",
@@ -79,18 +78,18 @@ impl<'a, 'b> Adder<'a, 'b> {
         let line = self.line;
         let ret = program();
 
-        let div = hbuild::elem("div").with(("style", "overflow:auto;width:auto;padding:.2em .6em;"));
+        let div =
+            hbuild::elem("div").with(("style", "overflow:auto;width:auto;padding:.2em .6em;"));
         let pre = hbuild::elem("pre").with(("style", "margin:0;line-height:125%"));
-        let line=hbuild::raw(format_move!("{}:{}", file, line)).inline();
-        let k1=div.append(pre.append(line)).with_tab("");
-        
+        let line = hbuild::raw(format_move!("{}:{}", file, line)).inline();
+        let k1 = div.append(pre.append(line)).with_tab("");
+
         let s = rust_to_html(&source);
 
         let k2 = hbuild::elem("text")
             .with(("style", "text-indent: 0px;"))
             .append(s);
 
-        
         self.doc.stack.put(hbuild::elem("div").append(k1))?;
         self.doc.stack.put(hbuild::elem("div").append(k2))?;
 
@@ -130,8 +129,9 @@ fn main() -> fmt::Result {
 
             let svg = poloto::header().with_viewbox_width(1200.0);
 
-            let style = poloto::render::Theme::dark()
-                .append(tagu::build::raw(".poloto_line{stroke-dasharray:2;stroke-width:2;}"));
+            let style = poloto::render::Theme::dark().append(tagu::build::raw(
+                ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
+            ));
 
             let a =
                 (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
@@ -159,8 +159,9 @@ fn main() -> fmt::Result {
                 "cows",
             ));
 
-            let header = poloto::header()
-                .append(Theme::dark().append(tagu::build::raw(".poloto_scatter.poloto_plot{stroke-width:33;}")));
+            let header = poloto::header().append(Theme::dark().append(tagu::build::raw(
+                ".poloto_scatter.poloto_plot{stroke-width:33;}",
+            )));
 
             data.append_to(header)
         }))?;

@@ -48,8 +48,8 @@ fn main() {
 ## Collatz Example
 
 ```rust
-use tagu::prelude::*;
 use poloto::build;
+use tagu::prelude::*;
 
 // PIPE me to a file!
 fn main() {
@@ -67,8 +67,9 @@ fn main() {
 
     let svg = poloto::header().with_viewbox_width(1200.0);
 
-    let style =
-        poloto::render::Theme::dark().append(".poloto_line{stroke-dasharray:2;stroke-width:2;}");
+    let style = poloto::render::Theme::dark().append(tagu::build::raw(
+        ".poloto_line{stroke-dasharray:2;stroke-width:2;}",
+    ));
 
     let a = (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
 
@@ -150,46 +151,57 @@ fn main() {
 ## Styling example
 
 ```rust
-use tagu::prelude::*;
 use poloto::{build, prelude::OutputZip};
+use tagu::prelude::*;
 fn main() {
     let theme = poloto::render::Theme::light();
 
     // Style the first plot and its legend image if it is a histogram.
-    let theme =
-        theme.append(".poloto0.poloto_histo.poloto_imgs{fill:red;stroke:black;stroke-width:2px}");
+    let theme = theme.append(tagu::build::raw(
+        ".poloto0.poloto_histo.poloto_imgs{fill:red;stroke:black;stroke-width:2px}",
+    ));
 
     // Some attributes have to accessed directly , so use >* to select the rects directly.
-    let theme = theme.append(".poloto0.poloto_histo.poloto_imgs>*{rx:20px;ry:20px}");
+    let theme = theme.append(tagu::build::raw(
+        ".poloto0.poloto_histo.poloto_imgs>*{rx:20px;ry:20px}",
+    ));
 
     // Style the text of the first legend
-    let theme = theme.append(".poloto0.poloto_legend.poloto_text{fill:blue;}");
+    let theme = theme.append(tagu::build::raw(
+        ".poloto0.poloto_legend.poloto_text{fill:blue;}",
+    ));
 
     // Style all line plots but not legend img.
-    let theme = theme.append(".poloto_line.poloto_imgs.poloto_plot{stroke:purple;stroke-width:20px;stroke-dasharray:40px}");
+    let theme = theme.append(tagu::build::raw(".poloto_line.poloto_imgs.poloto_plot{stroke:purple;stroke-width:20px;stroke-dasharray:40px}"));
 
     // Style all line plot legend imgs.
-    let theme = theme.append(".poloto_line.poloto_imgs.poloto_legend{stroke:purple;stroke-width:10px;stroke-dasharray:10px}");
+    let theme = theme.append(tagu::build::raw(".poloto_line.poloto_imgs.poloto_legend{stroke:purple;stroke-width:10px;stroke-dasharray:10px}"));
 
     // Style the scatter plots but not legend img
-    let theme = theme.append(".poloto_scatter.poloto_plot{fill:purple;stroke-width:20px;}");
+    let theme = theme.append(tagu::build::raw(
+        ".poloto_scatter.poloto_plot{fill:purple;stroke-width:20px;}",
+    ));
 
     // Style the scatter plots but not legend img
-    let theme = theme.append(".poloto_scatter.poloto_plot{fill:purple;stroke-width:20px;}");
+    let theme = theme.append(tagu::build::raw(
+        ".poloto_scatter.poloto_plot{fill:purple;stroke-width:20px;}",
+    ));
 
     // Style the xaxis name
-    let theme = theme.append(
+    let theme = theme.append(tagu::build::raw(
         ".poloto_name.poloto_x{fill:orange;stroke-width:20px;font-size:30px;font-style: italic;}",
-    );
+    ));
 
     // Style the background
-    let theme = theme.append(".poloto_background{fill:darkslategray;}");
+    let theme = theme.append(tagu::build::raw(".poloto_background{fill:darkslategray;}"));
 
     // Style the text
-    let theme = theme.append(".poloto_text{fill: peru;}");
+    let theme = theme.append(tagu::build::raw(".poloto_text{fill: peru;}"));
 
     // Style the ticks
-    let theme = theme.append(".poloto_imgs.poloto_ticks{stroke:springgreen;}");
+    let theme = theme.append(tagu::build::raw(
+        ".poloto_imgs.poloto_ticks{stroke:springgreen;}",
+    ));
 
     let x = (0..50).map(|x| (x as f64 / 50.0) * 10.0);
 
@@ -209,7 +221,6 @@ fn main() {
         .append_to(poloto::header().append(theme))
         .render_stdout();
 }
-
 ```
 
 ## Output
