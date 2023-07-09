@@ -10,7 +10,7 @@ use shower::source;
 use std::fmt;
 
 use fmt::Write;
-fn doop(source: &str) -> impl Elem {
+fn rust_to_html(source: &str) -> impl Elem {
     use synoptic::languages::rust;
     use synoptic::tokens::Token;
 
@@ -84,12 +84,13 @@ impl<'a, 'b> Adder<'a, 'b> {
         let line=hbuild::raw(format_move!("{}:{}", file, line)).inline();
         let k1=div.append(pre.append(line)).with_tab("");
         
-        let s = doop(&source);
+        let s = rust_to_html(&source);
 
         let k2 = hbuild::elem("text")
             .with(("style", "text-indent: 0px;"))
-            //.with(("class", "markdown-body"))
             .append(s);
+
+        
         self.doc.stack.put(hbuild::elem("div").append(k1))?;
         self.doc.stack.put(hbuild::elem("div").append(k2))?;
 
