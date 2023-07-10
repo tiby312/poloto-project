@@ -20,7 +20,7 @@ use support::Doc;
 
 fn main() -> fmt::Result {
     let k = hbuild::from_stack_escapable(|w| {
-        let mut document = Doc::new(w, file!());
+        let mut document = Doc::new(w, file!())?;
 
         document.add(line!()).add(source!(|| {
             let collatz = |mut a: i128| {

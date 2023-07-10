@@ -93,7 +93,7 @@ impl<'a, 'b> Adder<'a, 'b> {
             .append(s);
 
         let div =
-            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;max-width:800px;width:100%;padding:10px;background:black;border-radius:15px"));
+            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;min-width:400px;max-width:800px;padding:10px;background:black;border-radius:15px"));
 
         let all = div.append(line).append(k2).append(ret);
 
@@ -103,8 +103,19 @@ impl<'a, 'b> Adder<'a, 'b> {
 }
 
 impl<'a> Doc<'a> {
-    pub fn new(stack: ElemStackEscapable<'a, Sentinel>, file: &'static str) -> Doc<'a> {
-        Doc { stack, file }
+    pub fn new(mut stack: ElemStackEscapable<'a, Sentinel>, file: &'static str) -> Result<Doc<'a>,fmt::Error> {
+
+        stack.put(
+            hbuild::single("meta")
+                .with(attrs!(
+                    ("name", "viewport"),
+                    ("content", "width=device-width, initial-scale=1.0")
+                ))
+                .with_ending(""),
+        )?;
+
+
+        Ok(Doc { stack, file })
     }
     pub fn add<'b>(&'b mut self, line: u32) -> Adder<'b, 'a> {
         Adder { doc: self, line }
