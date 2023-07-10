@@ -1,5 +1,4 @@
 use tagu::elem::Elem;
-use tagu::elem::Locked;
 use tagu::stack::ElemStackEscapable;
 use tagu::stack::Sentinel;
 
@@ -83,7 +82,10 @@ impl<'a, 'b> Adder<'a, 'b> {
         let file = self.doc.file;
         let line = self.line;
 
-        let ret = encode_string_as_img(program()?);
+        let ret = tagu::build::single("img").with(attrs!(
+            ("style", "width:100%;object-fit:contain;"),
+            ("src", string_to_img_src(program()?))
+        ));
 
         let ret = hbuild::elem("div")
             .with(("style", ("width:100%;")))
@@ -96,6 +98,10 @@ impl<'a, 'b> Adder<'a, 'b> {
                 .with(("style", "padding:5px;color:white;margin:0;line-height:125%"));
             pre.append(line).with_tab("")
         };
+
+        let line = hbuild::elem("div")
+            .with(("style", "text-align:center"))
+            .append(line);
 
         let s = rust_to_html(&source);
 
@@ -137,22 +143,15 @@ impl<'a> Doc<'a> {
     }
 }
 
-fn encode_string_as_img(s: String) -> impl Elem + Locked {
-    //let mut s = String::new();
-    //tagu::render(elem.inline(), &mut s).unwrap();
-
+fn string_to_img_src(s: String) -> String {
     //inline css part as well.
     let s = s.replace("\n", "");
 
     use base64::Engine;
-    let s = format!(
+    format!(
         "data:image/svg+xml;base64,{}",
         base64::engine::general_purpose::STANDARD.encode(&s)
-    );
-    tagu::build::single("img").with(attrs!(
-        ("style", "width:100%;object-fit:contain;"),
-        ("src", s)
-    ))
+    )
 }
 
 pub fn finish(k: impl Elem) {
