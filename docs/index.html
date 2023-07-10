@@ -1,7 +1,7 @@
 <html style="background: #2b303b;">
 	<head>
 	</head>
-	<body>
+	<body style="margin:0px;padding:0px;">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<div style="margin-bottom:50px;margin-left: auto;margin-right: auto;min-width:400px;max-width:800px;padding-top:15px;background:black;">
 <pre style="padding:5px;color:white;margin:0;line-height:125%">
@@ -10,7 +10,7 @@ poloto-example/src/main.rs:25
 			<text style="text-indent: 0px;">
 <pre style="color:white;width:100%;overflow:scroll;margin:0;line-height:125%"><span style="color:#7cafc2">source!</span>(|| {
     <span style="color:#ba8baf">let</span> collatz <span style="color:#d8d8d8">=</span> |<span style="color:#ba8baf">mut</span> a: <span style="color:#ba8baf">i128</span>| {
-        <span style="color:#ba8baf">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">from_fn</span>(<span style="color:#ba8baf">move</span> || {
+        <span style="color:#f78c6c">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">from_fn</span>(<span style="color:#ba8baf">move</span> || {
             <span style="color:#ba8baf">if</span> a <span style="color:#d8d8d8">==</span> <span style="color:#dc9656">1</span> {
                 <span style="color:#ba8baf">None</span>
             } <span style="color:#ba8baf">else</span> {
@@ -85,7 +85,7 @@ poloto-example/src/main.rs:78
     <span style="color:#ba8baf">let</span> x <span style="color:#d8d8d8">=</span> (<span style="color:#dc9656">0</span>..<span style="color:#dc9656">500</span>).<span style="color:#7cafc2">map</span>(|x| (x <span style="color:#ba8baf">as</span> <span style="color:#ba8baf">f64</span> <span style="color:#d8d8d8">/</span> <span style="color:#dc9656">500.0</span>) <span style="color:#d8d8d8">*</span> <span style="color:#dc9656">10.0</span>);
 
     <span style="color:#ba8baf">let</span> s <span style="color:#d8d8d8">=</span> <span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"tan(x)"</span>).<span style="color:#7cafc2">line_fill</span>(
-        x.<span style="color:#7cafc2">zip_output</span>(<span style="color:#ba8baf">f64</span>::tan)
+        x.<span style="color:#7cafc2">zip_output</span>(<span style="color:#f78c6c">f64</span>::tan)
             .<span style="color:#7cafc2">crop_above</span>(<span style="color:#dc9656">10.0</span>)
             .<span style="color:#7cafc2">crop_below</span>(<span style="color:#dc9656">0.0</span>)
             .<span style="color:#7cafc2">crop_left</span>(<span style="color:#dc9656">2.0</span>),

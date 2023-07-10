@@ -105,7 +105,7 @@ fn main() -> fmt::Result {
     //let style = hbuild::elem("style").append(include_str!("markdown.css"));
 
     let html = hbuild::elem("html").with(("style", "background: #2b303b;"));
-    let html = html.append(head.chain(hbuild::elem("body").append(k)));
+    let html = html.append(head.chain(hbuild::elem("body").with(("style","margin:0px;padding:0px;")).append(k)));
     tagu::render_escapable(html, tagu::stdout_fmt())
 
     //https://docs.rs/syntect/latest/syntect/html/index.html
