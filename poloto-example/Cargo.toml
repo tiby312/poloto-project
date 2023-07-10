@@ -11,5 +11,5 @@ poloto = { version = "19.0", path = "../poloto" }
 pulldown-cmark = "0.9.3"
 shower = "0.1.0"
 synoptic = "1.2.0"
-poloto-evcxr = { version = "0.2.0", path = "../poloto-evcxr" }
+base64 = "0.21.2"
 

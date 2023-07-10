@@ -1,3 +1,5 @@
+use tagu::elem::Locked;
+
 use super::*;
 
 fn rust_to_html(source: &str) -> impl Elem {
@@ -73,16 +75,16 @@ impl<'a, 'b> Adder<'a, 'b> {
         let file = self.doc.file;
         let line = self.line;
 
-        let ret = poloto_evcxr::encode_string_as_img(program()?);
+        let ret = encode_string_as_img(program()?);
 
         let ret = hbuild::elem("div")
-            .with(("style", ("overflow:scroll")))
+            .with(("style", ("width:100%;")))
             .append(ret);
 
         let line = hbuild::raw(format_move!("{}:{}", file, line)).inline();
 
         let line = {
-            let pre = hbuild::elem("pre").with(("style", "color:white;margin:0;line-height:125%"));
+            let pre = hbuild::elem("pre").with(("style", "padding:5px;color:white;margin:0;line-height:125%"));
             pre.append(line).with_tab("")
         };
 
@@ -93,7 +95,7 @@ impl<'a, 'b> Adder<'a, 'b> {
             .append(s);
 
         let div =
-            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;min-width:400px;max-width:800px;padding-top:15px;padding-bottom:15px;background:black;border-radius:15px"));
+            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;min-width:400px;max-width:800px;padding-top:15px;background:black;"));
 
         let all = div.append(line).append(k2).append(ret);
 
@@ -123,4 +125,22 @@ impl<'a> Doc<'a> {
     pub fn into_stack(self)->ElemStackEscapable<'a,Sentinel>{
         self.stack
     }
+}
+
+
+
+
+pub fn encode_string_as_img(mut s: String) -> impl Elem + Locked {
+    //let mut s = String::new();
+    //tagu::render(elem.inline(), &mut s).unwrap();
+
+    //inline css part as well.
+    let s = s.replace("\n", "");
+
+    use base64::Engine;
+    let s = format!(
+        "data:image/svg+xml;base64,{}",
+        base64::engine::general_purpose::STANDARD.encode(&s)
+    );
+    tagu::build::single("img").with(attrs!(("style","width:100%;object-fit:contain;"),("src", s)))
 }
