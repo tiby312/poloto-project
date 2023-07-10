@@ -1,28 +1,15 @@
-use poloto::build;
-use poloto::build::plot;
-use poloto::prelude::*;
-use poloto::render::Theme;
+mod support;
+
 use shower::source;
 use std::fmt;
-use tagu::elem::Elem;
-use tagu::stack::ElemStackEscapable;
-use tagu::stack::Sentinel;
 
-use fmt::Write;
-
-use tagu::build as hbuild;
-use tagu::prelude::*;
-
-mod support;
-use support::Doc;
-
-
-
-fn main() -> fmt::Result {
-    let k = hbuild::from_stack_escapable(|w| {
-        let mut document = Doc::new(w, file!())?;
+fn main() {
+    let k = tagu::build::from_stack_escapable(|w| {
+        let mut document = support::Doc::new(w, file!())?;
 
         document.add(line!()).add(source!(|| {
+            use poloto::build;
+            use tagu::prelude::*;
             let collatz = |mut a: i128| {
                 std::iter::from_fn(move || {
                     if a == 1 {
@@ -55,6 +42,11 @@ fn main() -> fmt::Result {
         }))?;
 
         document.add(line!()).add(source!(|| {
+            use poloto::build::plot;
+            use poloto::prelude::*;
+            use poloto::render::Theme;
+            use tagu::prelude::*;
+
             let x: Vec<_> = (0..30).map(|x| (x as f64 / 30.0) * 10.0).collect();
 
             let plots = poloto::plots!(
@@ -76,6 +68,9 @@ fn main() -> fmt::Result {
         }))?;
 
         document.add(line!()).add(source!(|| {
+            use poloto::build::plot;
+            use poloto::prelude::*;
+            use tagu::prelude::*;
             let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
             let s = plot("tan(x)").line_fill(
@@ -101,12 +96,7 @@ fn main() -> fmt::Result {
         Ok(document.into_stack())
     });
 
-    let head = hbuild::elem("head");
-    //let style = hbuild::elem("style").append(include_str!("markdown.css"));
-
-    let html = hbuild::elem("html").with(("style", "background: #2b303b;"));
-    let html = html.append(head.chain(hbuild::elem("body").with(("style","margin:0px;padding:0px;")).append(k)));
-    tagu::render_escapable(html, tagu::stdout_fmt())
+    support::finish(k);
 
     //https://docs.rs/syntect/latest/syntect/html/index.html
 }

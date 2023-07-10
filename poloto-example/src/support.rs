@@ -1,4 +1,12 @@
+use tagu::elem::Elem;
 use tagu::elem::Locked;
+use tagu::stack::ElemStackEscapable;
+use tagu::stack::Sentinel;
+
+use fmt::Write;
+
+use tagu::build as hbuild;
+use tagu::prelude::*;
 
 use super::*;
 
@@ -84,7 +92,8 @@ impl<'a, 'b> Adder<'a, 'b> {
         let line = hbuild::raw(format_move!("{}:{}", file, line)).inline();
 
         let line = {
-            let pre = hbuild::elem("pre").with(("style", "padding:5px;color:white;margin:0;line-height:125%"));
+            let pre = hbuild::elem("pre")
+                .with(("style", "padding:5px;color:white;margin:0;line-height:125%"));
             pre.append(line).with_tab("")
         };
 
@@ -105,8 +114,10 @@ impl<'a, 'b> Adder<'a, 'b> {
 }
 
 impl<'a> Doc<'a> {
-    pub fn new(mut stack: ElemStackEscapable<'a, Sentinel>, file: &'static str) -> Result<Doc<'a>,fmt::Error> {
-
+    pub fn new(
+        mut stack: ElemStackEscapable<'a, Sentinel>,
+        file: &'static str,
+    ) -> Result<Doc<'a>, fmt::Error> {
         stack.put(
             hbuild::single("meta")
                 .with(attrs!(
@@ -116,21 +127,17 @@ impl<'a> Doc<'a> {
                 .with_ending(""),
         )?;
 
-
         Ok(Doc { stack, file })
     }
     pub fn add<'b>(&'b mut self, line: u32) -> Adder<'b, 'a> {
         Adder { doc: self, line }
     }
-    pub fn into_stack(self)->ElemStackEscapable<'a,Sentinel>{
+    pub fn into_stack(self) -> ElemStackEscapable<'a, Sentinel> {
         self.stack
     }
 }
 
-
-
-
-pub fn encode_string_as_img(mut s: String) -> impl Elem + Locked {
+fn encode_string_as_img(s: String) -> impl Elem + Locked {
     //let mut s = String::new();
     //tagu::render(elem.inline(), &mut s).unwrap();
 
@@ -142,5 +149,23 @@ pub fn encode_string_as_img(mut s: String) -> impl Elem + Locked {
         "data:image/svg+xml;base64,{}",
         base64::engine::general_purpose::STANDARD.encode(&s)
     );
-    tagu::build::single("img").with(attrs!(("style","width:100%;object-fit:contain;"),("src", s)))
+    tagu::build::single("img").with(attrs!(
+        ("style", "width:100%;object-fit:contain;"),
+        ("src", s)
+    ))
+}
+
+pub fn finish(k: impl Elem) {
+    let head = tagu::build::elem("head");
+    //let style = hbuild::elem("style").append(include_str!("markdown.css"));
+
+    let html = tagu::build::elem("html").with(("style", "background: #2b303b;"));
+    let html = html.append(
+        head.chain(
+            hbuild::elem("body")
+                .with(("style", "margin:0px;padding:0px;"))
+                .append(k),
+        ),
+    );
+    tagu::render_escapable(html, tagu::stdout_fmt()).unwrap();
 }
