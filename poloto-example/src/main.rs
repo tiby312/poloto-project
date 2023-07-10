@@ -40,7 +40,7 @@ fn rust_to_html(source: &str) -> impl Elem {
                             "function" | "macro" => "#7cafc2",
                             "regex" | "symbol" => "#86c1b9",
                             "namespace" => "#f78c6c",
-                            _ => "#000000",
+                            _ => "#ffffff",
                         };
 
                         write!(stack.writer_escapable(), "<span style=\"color:{}\">", color)?;
@@ -78,6 +78,8 @@ impl<'a, 'b> Adder<'a, 'b> {
         let line = self.line;
         let ret = program();
 
+        let ret=hbuild::elem("div").with(("style",("overflow:scroll"))).append(ret);
+
         let line = hbuild::raw(format_move!("{}:{}", file, line)).inline();
         
         let line={
@@ -93,7 +95,7 @@ impl<'a, 'b> Adder<'a, 'b> {
 
 
         let div =
-            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;max-width:800px;width:100%;padding:10px;background:lightgrey;border-radius:15px"));
+            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;max-width:800px;width:100%;padding:10px;background:white;border-radius:15px"));
 
         let all=div.append(line).append(k2).append(ret);
 
@@ -199,7 +201,7 @@ fn main() -> fmt::Result {
     let head = hbuild::elem("head");
     //let style = hbuild::elem("style").append(include_str!("markdown.css"));
 
-    let html = hbuild::elem("html"); //.with(("style", "background: #2b303b;"));
+    let html = hbuild::elem("html").with(("style", "background: #2b303b;"));
     let html = html.append(head.chain(hbuild::elem("body").append(k)));
     tagu::render_escapable(html, tagu::stdout_fmt())
 
