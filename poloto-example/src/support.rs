@@ -93,7 +93,7 @@ impl<'a, 'b> Adder<'a, 'b> {
             .append(s);
 
         let div =
-            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;min-width:400px;max-width:800px;padding:10px;background:black;border-radius:15px"));
+            hbuild::elem("div").with(("style", "margin-bottom:50px;margin-left: auto;margin-right: auto;min-width:400px;max-width:800px;padding-top:15px;padding-bottom:15px;background:black;border-radius:15px"));
 
         let all = div.append(line).append(k2).append(ret);
 
