@@ -68,6 +68,7 @@ fn rust_to_html(source: &str) -> impl Elem {
 pub struct Doc<'a> {
     stack: ElemStackEscapable<'a, Sentinel>,
     file: &'static str,
+    counter: usize,
 }
 
 pub struct Adder<'a, 'b> {
@@ -81,7 +82,7 @@ impl<'a, 'b> Adder<'a, 'b> {
     ) -> fmt::Result {
         let file = self.doc.file;
         let line = self.line;
-
+        let counter = self.doc.counter;
         let ret = tagu::build::single("img").with(attrs!(
             ("style", "width:100%;object-fit:contain;"),
             ("src", string_to_img_src(program()?))
@@ -91,7 +92,7 @@ impl<'a, 'b> Adder<'a, 'b> {
             .with(("style", ("width:100%;")))
             .append(ret);
 
-        let line = hbuild::raw(format_move!("{}:{}", file, line)).inline();
+        let line = hbuild::raw(format_move!("Ex {} - {}:{}", counter, file, line)).inline();
 
         let line = {
             let pre = hbuild::elem("pre")
@@ -115,6 +116,7 @@ impl<'a, 'b> Adder<'a, 'b> {
         let all = div.append(line).append(k2).append(ret);
 
         self.doc.stack.put(all)?;
+        self.doc.counter += 1;
         Ok(())
     }
 }
@@ -133,7 +135,11 @@ impl<'a> Doc<'a> {
                 .with_ending(""),
         )?;
 
-        Ok(Doc { stack, file })
+        Ok(Doc {
+            stack,
+            file,
+            counter: 1,
+        })
     }
     pub fn add<'b>(&'b mut self, line: u32) -> Adder<'b, 'a> {
         Adder { doc: self, line }
