@@ -52,7 +52,7 @@ Ex 2 - poloto-example/src/tests.rs:36
     <span style="color:#ba8baf">let</span> x <span style="color:#d8d8d8">=</span> (<span style="color:#dc9656">0</span>..<span style="color:#dc9656">500</span>).<span style="color:#7cafc2">map</span>(|x| (x <span style="color:#ba8baf">as</span> <span style="color:#ba8baf">f64</span> <span style="color:#d8d8d8">/</span> <span style="color:#dc9656">500.0</span>) <span style="color:#d8d8d8">*</span> <span style="color:#dc9656">10.0</span>);
 
     <span style="color:#ba8baf">let</span> s <span style="color:#d8d8d8">=</span> <span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"tan(x)"</span>).<span style="color:#7cafc2">line_fill</span>(
-        x.<span style="color:#7cafc2">zip_output</span>(<span style="color:#f78c6c">f64</span>::tan)
+        x.<span style="color:#7cafc2">zip_output</span>(<span style="color:#ba8baf">f64</span>::tan)
             .<span style="color:#7cafc2">crop_above</span>(<span style="color:#dc9656">10.0</span>)
             .<span style="color:#7cafc2">crop_below</span>(<span style="color:#dc9656">0.0</span>)
             .<span style="color:#7cafc2">crop_left</span>(<span style="color:#dc9656">2.0</span>),
@@ -127,7 +127,7 @@ Ex 4 - poloto-example/src/tests.rs:90
     <span style="color:#ba8baf">use</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#f78c6c">build</span>::plot;
     <span style="color:#ba8baf">use</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#f78c6c">render</span>::Theme;
     <span style="color:#ba8baf">let</span> collatz <span style="color:#d8d8d8">=</span> |<span style="color:#ba8baf">mut</span> a: <span style="color:#ba8baf">i128</span>| {
-        <span style="color:#f78c6c">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">from_fn</span>(<span style="color:#ba8baf">move</span> || {
+        <span style="color:#ba8baf">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">from_fn</span>(<span style="color:#ba8baf">move</span> || {
             <span style="color:#ba8baf">if</span> a <span style="color:#d8d8d8">==</span> <span style="color:#dc9656">1</span> {
                 <span style="color:#ba8baf">None</span>
             } <span style="color:#ba8baf">else</span> {
@@ -247,7 +247,7 @@ Ex 7 - poloto-example/src/tests.rs:169
                 <span style="color:#ba8baf">None</span>
             } <span style="color:#ba8baf">else</span> {
                 a <span style="color:#d8d8d8">=</span> <span style="color:#ba8baf">if</span> a % <span style="color:#dc9656">2</span> <span style="color:#d8d8d8">==</span> <span style="color:#dc9656">0</span> { a <span style="color:#d8d8d8">/</span> <span style="color:#dc9656">2</span> } <span style="color:#ba8baf">else</span> { <span style="color:#dc9656">3</span> <span style="color:#d8d8d8">*</span> a <span style="color:#d8d8d8">+</span> <span style="color:#dc9656">1</span> };
-                <span style="color:#ba8baf">Some</span>(a)
+                <span style="color:#f7ca88">Some</span>(a)
             }
         })
         .<span style="color:#7cafc2">fuse</span>()
@@ -268,7 +268,7 @@ Ex 7 - poloto-example/src/tests.rs:169
     <span style="color:#ba8baf">let</span> data <span style="color:#d8d8d8">=</span> canvas
         .<span style="color:#7cafc2">data</span>(<span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">plots!</span>(
             <span style="color:#f78c6c">poloto</span>::<span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">markers</span>([], [<span style="color:#dc9656">0</span>]),
-            <span style="color:#ba8baf">Vec</span>::<span style="color:#7cafc2">from_iter</span>(v)
+            <span style="color:#f7ca88">Vec</span>::<span style="color:#7cafc2">from_iter</span>(v)
         ))
         .<span style="color:#7cafc2">build_and_label</span>((<span style="color:#a1b56c">"collatz"</span>, <span style="color:#a1b56c">"x"</span>, <span style="color:#a1b56c">"y"</span>));
 
@@ -297,8 +297,8 @@ Ex 8 - poloto-example/src/tests.rs:210
     <span style="color:#ba8baf">let</span> x: <span style="color:#ba8baf">Vec</span><span style="color:#d8d8d8"><</span>_<span style="color:#d8d8d8">></span> <span style="color:#d8d8d8">=</span> (<span style="color:#dc9656">0</span>..<span style="color:#dc9656">500</span>).<span style="color:#7cafc2">map</span>(|x| (x <span style="color:#ba8baf">as</span> <span style="color:#ba8baf">f64</span> <span style="color:#d8d8d8">/</span> <span style="color:#dc9656">500.0</span>) <span style="color:#d8d8d8">*</span> <span style="color:#dc9656">10.0</span>).<span style="color:#7cafc2">collect</span>();
 
     <span style="color:#ba8baf">let</span> data <span style="color:#d8d8d8">=</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">plots!</span>(
-        <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#7cafc2">format_move!</span>(<span style="color:#a1b56c">"test {}"</span>, <span style="color:#dc9656">1</span>)).<span style="color:#7cafc2">line</span>(x.<span style="color:#7cafc2">iter</span>().<span style="color:#7cafc2">copied</span>().<span style="color:#7cafc2">zip_output</span>(<span style="color:#f78c6c">f64</span>::cos)),
-        <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#7cafc2">format_move!</span>(<span style="color:#a1b56c">"test {}"</span>, <span style="color:#dc9656">2</span>)).<span style="color:#7cafc2">line</span>(x.<span style="color:#7cafc2">iter</span>().<span style="color:#7cafc2">copied</span>().<span style="color:#7cafc2">zip_output</span>(<span style="color:#f78c6c">f64</span>::sin))
+        <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#7cafc2">format_move!</span>(<span style="color:#a1b56c">"test {}"</span>, <span style="color:#dc9656">1</span>)).<span style="color:#7cafc2">line</span>(x.<span style="color:#7cafc2">iter</span>().<span style="color:#7cafc2">copied</span>().<span style="color:#7cafc2">zip_output</span>(<span style="color:#ba8baf">f64</span>::cos)),
+        <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#7cafc2">format_move!</span>(<span style="color:#a1b56c">"test {}"</span>, <span style="color:#dc9656">2</span>)).<span style="color:#7cafc2">line</span>(x.<span style="color:#7cafc2">iter</span>().<span style="color:#7cafc2">copied</span>().<span style="color:#7cafc2">zip_output</span>(<span style="color:#ba8baf">f64</span>::sin))
     );
 
     <span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">frame_build</span>()
@@ -327,7 +327,7 @@ Ex 9 - poloto-example/src/tests.rs:227
     <span style="color:#ba8baf">let</span> x: <span style="color:#ba8baf">Vec</span><span style="color:#d8d8d8"><</span>_<span style="color:#d8d8d8">></span> <span style="color:#d8d8d8">=</span> (<span style="color:#dc9656">0</span>..<span style="color:#dc9656">50</span>).<span style="color:#7cafc2">map</span>(|x| (x <span style="color:#ba8baf">as</span> <span style="color:#ba8baf">f64</span> <span style="color:#d8d8d8">/</span> <span style="color:#dc9656">50.0</span>) <span style="color:#d8d8d8">*</span> <span style="color:#dc9656">10.0</span>).<span style="color:#7cafc2">collect</span>();
 
     <span style="color:#ba8baf">let</span> data <span style="color:#d8d8d8">=</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">plots!</span>(
-        <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"cos"</span>).<span style="color:#7cafc2">line</span>(x.<span style="color:#7cafc2">iter</span>().<span style="color:#7cafc2">copied</span>().<span style="color:#7cafc2">zip_output</span>(<span style="color:#f78c6c">f64</span>::cos)),
+        <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"cos"</span>).<span style="color:#7cafc2">line</span>(x.<span style="color:#7cafc2">iter</span>().<span style="color:#7cafc2">copied</span>().<span style="color:#7cafc2">zip_output</span>(<span style="color:#ba8baf">f64</span>::cos)),
         <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"sin-10"</span>)
             .<span style="color:#7cafc2">histogram</span>(x.<span style="color:#7cafc2">iter</span>().<span style="color:#7cafc2">copied</span>().<span style="color:#7cafc2">step_by</span>(<span style="color:#dc9656">3</span>).<span style="color:#7cafc2">zip_output</span>(|x| x.<span style="color:#7cafc2">sin</span>() <span style="color:#d8d8d8">-</span> <span style="color:#dc9656">10</span>.))
     );
@@ -384,7 +384,7 @@ Ex 10 - poloto-example/src/tests.rs:269
             <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"tan(x)"</span>).<span style="color:#7cafc2">line</span>(
                 x.<span style="color:#7cafc2">iter</span>()
                     .<span style="color:#7cafc2">copied</span>()
-                    .<span style="color:#7cafc2">zip_output</span>(<span style="color:#ba8baf">f64</span>::tan)
+                    .<span style="color:#7cafc2">zip_output</span>(<span style="color:#f78c6c">f64</span>::tan)
                     .<span style="color:#7cafc2">crop_above</span>(<span style="color:#dc9656">10.0</span>)
                     .<span style="color:#7cafc2">crop_below</span>(<span style="color:#d8d8d8">-</span><span style="color:#dc9656">10.0</span>)
                     .<span style="color:#7cafc2">crop_left</span>(<span style="color:#dc9656">2.0</span>)
@@ -481,7 +481,7 @@ Ex 13 - poloto-example/src/tests.rs:336
     <span style="color:#ba8baf">use</span> <span style="color:#f78c6c">poloto</span>::build;
     <span style="color:#ba8baf">let</span> p <span style="color:#d8d8d8">=</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">frame_build</span>()
         .<span style="color:#7cafc2">data</span>(<span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">plots!</span>(
-            <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"hay"</span>).<span style="color:#7cafc2">scatter</span>(<span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">cloned</span>(<span style="color:#ba8baf">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#f78c6c">empty</span>::<span style="color:#d8d8d8"><</span>(<span style="color:#ba8baf">i128</span>, <span style="color:#ba8baf">i128</span>)<span style="color:#d8d8d8">></span>())),
+            <span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">plot</span>(<span style="color:#a1b56c">"hay"</span>).<span style="color:#7cafc2">scatter</span>(<span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">cloned</span>(<span style="color:#f78c6c">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#f78c6c">empty</span>::<span style="color:#d8d8d8"><</span>(<span style="color:#ba8baf">i128</span>, <span style="color:#ba8baf">i128</span>)<span style="color:#d8d8d8">></span>())),
             <span style="color:#f78c6c">poloto</span>::<span style="color:#f78c6c">build</span>::<span style="color:#7cafc2">markers</span>([], [<span style="color:#dc9656">5</span>])
         ))
         .<span style="color:#7cafc2">build_and_label</span>((
@@ -570,7 +570,7 @@ Ex 15 - poloto-example/src/tests.rs:383
     );
 
     <span style="color:#ba8baf">let</span> xticks <span style="color:#d8d8d8">=</span>
-        <span style="color:#f78c6c">poloto</span>::<span style="color:#f78c6c">ticks</span>::<span style="color:#f7ca88">TickDistribution</span>::<span style="color:#7cafc2">new</span>(<span style="color:#ba8baf">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">successors</span>(<span style="color:#ba8baf">Some</span>(<span style="color:#dc9656">0</span>), |w| <span style="color:#ba8baf">Some</span>(w <span style="color:#d8d8d8">+</span> hr)))
+        <span style="color:#f78c6c">poloto</span>::<span style="color:#f78c6c">ticks</span>::<span style="color:#f7ca88">TickDistribution</span>::<span style="color:#7cafc2">new</span>(<span style="color:#f78c6c">std</span>::<span style="color:#f78c6c">iter</span>::<span style="color:#7cafc2">successors</span>(<span style="color:#ba8baf">Some</span>(<span style="color:#dc9656">0</span>), |w| <span style="color:#ba8baf">Some</span>(w <span style="color:#d8d8d8">+</span> hr)))
             .<span style="color:#7cafc2">with_tick_fmt</span>(|<span style="color:#585858">&</span>v| <span style="color:#7cafc2">format_move!</span>(<span style="color:#a1b56c">"{} hr"</span>, v <span style="color:#d8d8d8">/</span> hr));
 
     <span style="color:#ba8baf">let</span> data <span style="color:#d8d8d8">=</span> <span style="color:#f78c6c">poloto</span>::<span style="color:#7cafc2">frame_build</span>().<span style="color:#7cafc2">data</span>(p).<span style="color:#7cafc2">map_xticks</span>(|_| xticks);
