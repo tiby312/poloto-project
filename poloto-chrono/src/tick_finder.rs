@@ -25,15 +25,13 @@ macro_rules! make_consider {
 }
 */
 
-#[derive(Debug)]
 pub struct Candidate {
     pub ticks: Vec<UnixTime>,
     pub unit_data: StepUnit,
     //pub dash_nums: &'a [i64],
-    pub chosen_tick: i64,
+    pub _chosen_tick: i64,
 }
 
-#[derive(Debug)]
 pub struct BestTickFinder {
     ideal_num_steps: u32,
     end: UnixTime,
@@ -50,7 +48,7 @@ impl BestTickFinder {
             best: Candidate {
                 ticks: Vec::new(),
                 unit_data: StepUnit::YR,
-                chosen_tick: 0,
+                _chosen_tick: 0,
             },
         }
     }
@@ -119,7 +117,7 @@ impl BestTickFinder {
                 self.consider_set(Candidate {
                     ticks,
                     unit_data,
-                    chosen_tick: a,
+                    _chosen_tick: a,
                 });
             } else {
                 // Since we are hansling smaller and smaller step sizes,

@@ -1,4 +1,3 @@
-mod examples;
 mod support;
 mod tests;
 use shower::source;

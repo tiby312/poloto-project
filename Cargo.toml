@@ -2,5 +2,4 @@
 
 [workspace]
 members = [ "poloto","poloto-chrono","poloto-bench","poloto-evcxr","poloto-example"]
-
-
+resolver = "2"
