@@ -223,8 +223,7 @@ fn months() -> fmt::Result {
 
 #[test]
 fn seconds() -> fmt::Result {
-    use tagu::format_move;
-
+    
     use chrono::TimeZone;
     let timezone = &chrono::Utc;
 
@@ -260,7 +259,7 @@ fn seconds() -> fmt::Result {
             let step = *k.fmt.step();
 
             poloto::ticks::from_iter(k.iter)
-                .with_tick_fmt(|&v| format_move!("{}", v.datetime(timezone).format("%H:%M:%S")))
+                .with_tick_fmt(|&v| format!("{}", v.datetime(timezone).format("%H:%M:%S")))
                 .with_data(step)
         })
     });
@@ -270,7 +269,7 @@ fn seconds() -> fmt::Result {
         let j = data.xticks().fmt.data;
         data.label((
             "Number of Wikipedia Articles",
-            tagu::format_move!(
+            format!(
                 "{} to {} with {}",
                 bounds.min.datetime(timezone).format("%H:%M:%S"),
                 bounds.max.datetime(timezone).format("%H:%M:%S"),
