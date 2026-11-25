@@ -15,5 +15,5 @@ include = ["src/**/*", "../LICENSE-MIT", "README.md"]
 
 [dependencies]
 base64 = "0.21.2"
-tagu = "0.1"
+tagu = "0.2"
 poloto = { version = "19.1", path = "../poloto" }

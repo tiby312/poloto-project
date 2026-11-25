@@ -72,7 +72,7 @@ pub(super) fn render_base<'b, 'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
                 ("y", ffmt.disp(height / 2.0)),
                 (
                     "transform",
-                    format_move!(
+                    format!(
                         "rotate(-90,{},{})",
                         ffmt.disp(padding / 4.0),
                         ffmt.disp(height / 2.0)
@@ -337,7 +337,7 @@ pub(super) fn render_base<'b, 'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
         xdash_size.map(|xdash_size| {
             (
                 "style",
-                format_move!(
+                format!(
                     "stroke-dasharray:{};stroke-dashoffset:{};",
                     xdash_size / 2.0,
                     -distance_to_firstx
@@ -362,7 +362,7 @@ pub(super) fn render_base<'b, 'a, X: PlotNum + 'a, Y: PlotNum + 'a>(
         ydash_size.map(|ydash_size| {
             (
                 "style",
-                format_move!(
+                format!(
                     "stroke-dasharray:{};stroke-dashoffset:{};",
                     ydash_size / 2.0,
                     -distance_to_firsty

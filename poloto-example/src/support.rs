@@ -92,7 +92,7 @@ impl<'a, 'b> Adder<'a, 'b> {
             .with(("style", ("width:100%;")))
             .append(ret);
 
-        let line = hbuild::raw(format_move!("Ex {} - {}:{}", counter, file, line)).inline();
+        let line = hbuild::raw(format!("Ex {} - {}:{}", counter, file, line)).inline();
 
         let line = {
             let pre = hbuild::elem("pre")

@@ -617,7 +617,7 @@ impl<A: Attr> Elem for Header<A> {
             ("height", self.dim[1]),
             (
                 "viewBox",
-                format_move!("{} {} {} {}", 0, 0, self.viewbox[0], self.viewbox[1])
+                format!("{} {} {} {}", 0, 0, self.viewbox[0], self.viewbox[1])
             ),
             ("xmlns", "http://www.w3.org/2000/svg"),
             self.attr

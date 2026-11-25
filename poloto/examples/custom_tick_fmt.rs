@@ -1,5 +1,4 @@
 use poloto::build;
-use tagu::format_move;
 fn main() {
     // hourly trend over one day.
     let trend = vec![
@@ -16,7 +15,7 @@ fn main() {
     let data = data.map_xticks(|orig| {
         poloto::ticks::from_closure(|a, b, c| {
             let orig = poloto::ticks::gen_ticks(orig, a, b, c);
-            poloto::ticks::from_iter(orig.iter).with_tick_fmt(|&v| format_move!("{} hr", v))
+            poloto::ticks::from_iter(orig.iter).with_tick_fmt(|&v| format!("{} hr", v))
         })
     });
 

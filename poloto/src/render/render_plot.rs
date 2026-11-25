@@ -219,7 +219,7 @@ pub(super) fn render_plot<
                 .with(attrs!(
                     (
                         "class",
-                        format_move!("poloto_legend poloto_text {} poloto{}", class, i)
+                        format!("poloto_legend poloto_text {} poloto{}", class, i)
                     ),
                     ("x", width - padding / 1.2),
                     ("y", paddingy - yaspect_offset + (*i as f64) * spacing)
@@ -266,7 +266,7 @@ fn render_label<T>(writer: &mut ElemStack<T>, info: PlotRenderInfo2) -> fmt::Res
         PlotType::Line => {
             let g = hbuild::elem("g").with((
                 "class",
-                format_move!(
+                format!(
                     "poloto_legend poloto_imgs poloto_line poloto{} poloto_stroke",
                     colori
                 ),
@@ -283,7 +283,7 @@ fn render_label<T>(writer: &mut ElemStack<T>, info: PlotRenderInfo2) -> fmt::Res
         PlotType::Scatter => {
             let g = hbuild::elem("g").with((
                 "class",
-                format_move!(
+                format!(
                     "poloto_legend poloto_imgs poloto_scatter poloto{} poloto_stroke",
                     colori,
                 ),
@@ -300,7 +300,7 @@ fn render_label<T>(writer: &mut ElemStack<T>, info: PlotRenderInfo2) -> fmt::Res
         PlotType::Histo => {
             let g = hbuild::elem("g").with((
                 "class",
-                format_move!(
+                format!(
                     "poloto_legend poloto_imgs poloto_histo poloto{} poloto_fill",
                     colori,
                 ),
@@ -320,7 +320,7 @@ fn render_label<T>(writer: &mut ElemStack<T>, info: PlotRenderInfo2) -> fmt::Res
         PlotType::LineFill => {
             let g = hbuild::elem("g").with((
                 "class",
-                format_move!(
+                format!(
                     "poloto_legend poloto_imgs poloto_linefill poloto{} poloto_fill",
                     colori,
                 ),
@@ -341,7 +341,7 @@ fn render_label<T>(writer: &mut ElemStack<T>, info: PlotRenderInfo2) -> fmt::Res
         PlotType::LineFillRaw => {
             let g = hbuild::elem("g").with((
                 "class",
-                format_move!(
+                format!(
                     "poloto_legend poloto_imgs poloto_linefillraw poloto{} poloto_fill",
                     colori,
                 ),
@@ -362,7 +362,7 @@ fn render_label<T>(writer: &mut ElemStack<T>, info: PlotRenderInfo2) -> fmt::Res
         PlotType::Bars => {
             let g = hbuild::elem("g").with((
                 "class",
-                format_move!(
+                format!(
                     "poloto_legend poloto_imgs poloto_bars poloto{} poloto_fill",
                     colori
                 ),
@@ -409,10 +409,10 @@ fn render<T>(
     match p_type {
         PlotType::Line => {
             let g = hbuild::elem("g").with(attrs!(
-                ("id", format_move!("poloto_plot{}", colori)),
+                ("id", format!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!(
+                    format!(
                         "poloto_plot poloto_imgs poloto_line poloto{} poloto_stroke",
                         colori
                     )
@@ -426,10 +426,10 @@ fn render<T>(
         }
         PlotType::Scatter => {
             let g = hbuild::elem("g").with(attrs!(
-                ("id", format_move!("poloto_plot{}", colori)),
+                ("id", format!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!(
+                    format!(
                         "poloto_plot poloto_imgs poloto_scatter poloto{} poloto_stroke",
                         colori
                     ),
@@ -450,10 +450,10 @@ fn render<T>(
         }
         PlotType::Histo => {
             let g = hbuild::elem("g").with(attrs!(
-                ("id", format_move!("poloto_plot{}", colori)),
+                ("id", format!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!(
+                    format!(
                         "poloto_plot poloto_imgs poloto_histo poloto{} poloto_fill",
                         colori
                     ),
@@ -479,10 +479,10 @@ fn render<T>(
         }
         PlotType::LineFill => {
             let g = hbuild::elem("g").with(attrs!(
-                ("id", format_move!("poloto_plot{}", colori)),
+                ("id", format!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!(
+                    format!(
                         "poloto_plot poloto_imgs poloto_linefill poloto{} poloto_fill",
                         colori
                     ),
@@ -499,10 +499,10 @@ fn render<T>(
         }
         PlotType::LineFillRaw => {
             let g = hbuild::elem("g").with(attrs!(
-                ("id", format_move!("poloto_plot{}", colori)),
+                ("id", format!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!(
+                    format!(
                         "poloto_plot poloto_imgs poloto_linefill poloto{} poloto_fill",
                         colori
                     ),
@@ -519,10 +519,10 @@ fn render<T>(
         }
         PlotType::Bars => {
             let g = hbuild::elem("g").with(attrs!(
-                ("id", format_move!("poloto_plot{}", colori)),
+                ("id", format!("poloto_plot{}", colori)),
                 (
                     "class",
-                    format_move!(
+                    format!(
                         "poloto_plot poloto_imgs poloto_histo poloto{} poloto_fill",
                         colori
                     ),

@@ -48,8 +48,8 @@ pub fn foo(
         let data = poloto::frame_build().data(s).build_map(|data| {
             let boundx = *data.boundx();
             data.label((
-                format_move!("from {} to {}", boundx.min, boundx.max),
-                format_move!("This is the {} label", 'x'),
+                format!("from {} to {}", boundx.min, boundx.max),
+                format!("This is the {} label", 'x'),
                 "This is the y label",
             ))
         });
@@ -63,7 +63,6 @@ pub fn foo(
     document.add(line!()).add(source!(|| {
         use poloto::build::plot;
         use poloto::prelude::*;
-        use tagu::prelude::*;
         let x = (0..500).map(|x| (x as f64 / 500.0) * 10.0);
 
         let s = plot("tan(x)").line_fill(
@@ -76,8 +75,8 @@ pub fn foo(
         let data = poloto::frame_build().data(s).build_map(|data| {
             let boundx = *data.boundx();
             data.label((
-                format_move!("from {} to {}", boundx.min, boundx.max),
-                format_move!("This is the {} label", 'x'),
+                format!("from {} to {}", boundx.min, boundx.max),
+                format!("This is the {} label", 'x'),
                 "This is the y label",
             ))
         });
@@ -104,19 +103,19 @@ pub fn foo(
 
         let plots = poloto::plots!(
             plot("Some notes here").text(),
-            plot(format_move!(
+            plot(format!(
                 "c({}) The quick brown fox jumps over the lazy dog",
                 1000
             ))
             .line((0..).zip(collatz(1000))),
-            plot(format_move!(
+            plot(format!(
                 "c({}) The quick brown fox jumps over the lazy dog",
                 1001
             ))
             .line((0..).zip(collatz(1001))),
             poloto::build::markers([], [0]),
             plot(" 🍆 Here is a note using the text() function.🍎",).text(),
-            plot(format_move!(
+            plot(format!(
                 "c({}) The quick brown fox jumps over the lazy dog",
                 1002
             ))
@@ -182,7 +181,7 @@ pub fn foo(
         };
 
         let v =
-            (1000..1006).map(|i| build::plot(format_move!("c({})", i)).line((0..).zip(collatz(i))));
+            (1000..1006).map(|i| build::plot(format!("c({})", i)).line((0..).zip(collatz(i))));
 
         let ddd = [2000.0, 1000.0];
 
@@ -213,8 +212,8 @@ pub fn foo(
         let x: Vec<_> = (0..500).map(|x| (x as f64 / 500.0) * 10.0).collect();
 
         let data = poloto::plots!(
-            build::plot(format_move!("test {}", 1)).line(x.iter().copied().zip_output(f64::cos)),
-            build::plot(format_move!("test {}", 2)).line(x.iter().copied().zip_output(f64::sin))
+            build::plot(format!("test {}", 1)).line(x.iter().copied().zip_output(f64::cos)),
+            build::plot(format!("test {}", 2)).line(x.iter().copied().zip_output(f64::sin))
         );
 
         poloto::frame_build()
@@ -290,7 +289,7 @@ pub fn foo(
             ))
             .build_and_label((
                 "Some Trigonometry Plots 🥳",
-                format_move!("This is the {} label", 'x'),
+                format!("This is the {} label", 'x'),
                 "This is the y label",
             ));
 
@@ -306,7 +305,7 @@ pub fn foo(
 
         let data = poloto::frame_build().data(v).build_and_label((
             "Some Trigonometry Plots 🥳",
-            format_move!("This is the {} label", 'x'),
+            format!("This is the {} label", 'x'),
             "This is the y label",
         ));
 
@@ -325,7 +324,7 @@ pub fn foo(
             .data(poloto::plots!(v, poloto::build::markers([], [5])))
             .build_and_label((
                 "Some Trigonometry Plots 🥳",
-                format_move!("This is the {} label", 'x'),
+                format!("This is the {} label", 'x'),
                 "This is the y label",
             ));
 
@@ -342,7 +341,7 @@ pub fn foo(
             ))
             .build_and_label((
                 "Some Trigonometry Plots 🥳",
-                format_move!("This is the {} label", 'x'),
+                format!("This is the {} label", 'x'),
                 "This is the y label",
             ));
 
@@ -403,7 +402,7 @@ pub fn foo(
 
         let xticks =
             poloto::ticks::TickDistribution::new(std::iter::successors(Some(0), |w| Some(w + hr)))
-                .with_tick_fmt(|&v| format_move!("{} hr", v / hr));
+                .with_tick_fmt(|&v| format!("{} hr", v / hr));
 
         let data = poloto::frame_build().data(p).map_xticks(|_| xticks);
 
